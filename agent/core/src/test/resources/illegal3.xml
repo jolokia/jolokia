@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<restrict>
+  <allow>
+    <mbean>
+      <name>java.lang:*</name>
+      <attribute>HeapMemoryUsage</attribute>
+      <attribute mode="read">NonHeapMemoryUsage</attribute>
+      <operation>g*</operation>
+      <bla>invalid tag</bla>
+    </mbean>
+  </allow>
+</restrict>

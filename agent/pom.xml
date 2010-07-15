@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-parent</artifactId>
+    <version>0.80-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+    
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.jolokia</groupId>
+  <artifactId>jolokia-agent-parent</artifactId>
+  <version>0.80-SNAPSHOT</version>
+  <name>jolokia-agent-parent</name>
+  <description>jolokia agent parent pom</description>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>core</module>
+    <module>war</module>
+    <module>jsr160</module>
+    <module>mule</module>
+    <module>osgi</module>
+    <module>osgi-bundle</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>jdk6</id>
+      <activation>
+        <jdk>1.6</jdk>
+      </activation>
+      <modules>
+        <module>jvm-jdk6</module>
+      </modules>
+    </profile>
+  </profiles>
+</project>

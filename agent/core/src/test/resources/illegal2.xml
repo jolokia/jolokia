@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<restrict>
+  <allow>
+    <mbean>
+      <attribute>HeapMemoryUsage</attribute>
+      <attribute mode="read">NonHeapMemoryUsage</attribute>
+    </mbean>
+  </allow>
+</restrict>

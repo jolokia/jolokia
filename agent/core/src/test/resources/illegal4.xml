@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<restrict>
+  <allow>
+    <mbean>
+      <name>java.lang:type=Bla</name>
+      <name>java.lang:type=Blub</name>
+       <attribute>x</attribute>
+    </mbean>
+  </allow>
+</restrict>

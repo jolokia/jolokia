@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<restrict>
+  <commands></commands>
+  <allow>
+    <mbean>
+      <name>java.lang:*</name>
+      <attribute>HeapMemoryUsage</attribute>
+    </mbean>
+    <mbean>
+      <name>jolokia:type=Config,*</name>
+      <attribute>Debug</attribute>
+    </mbean>
+  </allow>
+</restrict>

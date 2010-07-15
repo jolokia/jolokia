@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<restrict>
+
+  <commands></commands>
+
+  <allow>
+    <mbean>
+      <name>java.lang:*</name>
+      <attribute>HeapMemoryUsage</attribute>
+      <attribute mode="read">NonHeapMemoryUsage</attribute>
+      <operation>g*</operation>
+    </mbean>
+    <mbean>
+      <name>jolokia:type=Config,*</name>
+      <attribute>*e*u*</attribute>
+    </mbean>
+  </allow>
+</restrict>

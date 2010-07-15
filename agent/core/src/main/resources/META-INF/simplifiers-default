@@ -1,0 +1,5 @@
+org.jolokia.converter.json.simplifier.ClassSimplifier
+org.jolokia.converter.json.simplifier.FileSimplifier
+org.jolokia.converter.json.simplifier.DomElementSimplifier
+org.jolokia.converter.json.simplifier.UrlSimplifier
+org.jolokia.converter.json.simplifier.ObjectNameSimplifier
