@@ -1,0 +1,8 @@
+Jolokia Java Client library
+
+----
+  J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
+  J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage","used");
+  J4pReadResponse resp = j4pClient.execute(req);
+  System.out.println(resp.getValue());
+----

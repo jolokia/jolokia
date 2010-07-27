@@ -1,0 +1,13 @@
+Agents
+
+  Several agents are available for providing Jolokia
+  services. Depending on the setup, the one or other might be more
+  suitable for deployment.
+
+* WAR Agent
+
+* OSGi Agent
+
+* JVM Agent
+
+* Mule Agent

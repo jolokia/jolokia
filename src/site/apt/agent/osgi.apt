@@ -1,0 +1,24 @@
+OSGi Agent
+
+ For using an agent within an OSGi container, Jolokia comes with
+ agents packaged OSGi bundles. It comes in two flavours:
+
+ * The standard bundle which has an OSGi dependency on an HttpService
+   as specified by the OSGi group. An good implementation of an
+   HttpService can be found on. This bundle follows the OSGi
+   philosophy as it contains its own functionality.
+
+ * A all-in-one bundle with no external dependencies except the core
+   OSGi bundle. It includes an embedded Jetty server and is suitable
+   for situations where ease of deployment is more important than
+   modularity. 
+
+ []
+ 
+  Note, that some OSGi container (like Spring dm Server) comes with a
+  so called <Web extender> which allows for deployment of stanard
+  Webarchives (war). For such container, there is a choice between the
+  OSGi bundle and the WAR agent, where the later is probably easier to
+  deploy since there is already an HTTP Service running in such
+  container, which are not necessarily exports an OSGi HTTP service
+  required by the standard bundle.

@@ -1,0 +1,29 @@
+
+Jolokia 0.80
+
+ * Complete tarball including documentation and source
+
+ * The agents
+
+   * WAR-Agent 
+
+
+ * Maven dependency
+
+-------------
+ <dependency>
+   <groupId>org.jolokia</groupId>
+   <artifactId>jolokia-client-java</artifactId>
+   <version>0.80-SNAPSHOT</version>
+ </dependency>
+
+ <repositories>
+   <repository>
+     <id>labs.consol.de</id>
+     <name>ConSol* Labs Repository</name>
+     <url>http://labs.consol.de/maven/repository</url>
+   </repository>
+ </repositories>
+----------------
+
+Older versions

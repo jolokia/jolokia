@@ -1,0 +1,36 @@
+JVM Agent
+
+  Jolokia has also a native Java JVM agent. The only dependency is on
+  Sun's JDK 6, which contains a lightweight HTTP Server used for
+  exporting the j4p data. This is the most generic agent which can
+  instrument <any> Java application using a JDK6. It is suitable for
+  situations where the other agents don't fit.
+
+  For using this agent, the following argument to the Java
+  application to instrument has to be given:
+
+-----
+  -javaagent:/path/to/jolokia-jvm-jdk6-<version>-agent.jar
+-----
+
+  By default, the agent will listen on port 8778, but this can be configured
+  as well as other aspects like authentication:
+
+  * Provide options on the commandline as key-value pairs:
+
+----
+  -javaagent:agent.jar=port=7777,host=localhost
+----
+
+  * Via a properties file
+
+----
+  -javaagent:agent.jar=config=/path/to/config.properties
+----
+
+  * Via packaging a jolokia-agent.properties top level in the agent.jar
+
+  []
+
+  Options are used in the given precedence, the former overwritting
+  the later values.
