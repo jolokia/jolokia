@@ -2,18 +2,22 @@
 <project name="Jolokia">
   <publishDate position="bottom"/>
   <version position="bottom"/>
+
+  <skin> 
+    <groupId>org.jolokia</groupId> 
+    <artifactId>jolokia-site-skin</artifactId>
+    <version>0.80-SNAPSHOT</version>
+  </skin>  
   
   <bannerLeft>
     <name>Jolokia</name>
+    <src>images/header.png</src>
     <href>http://www.jolokia.org</href>
   </bannerLeft>
   
-  <bannerRight>
-    <name>JMX on Capsaicin</name>
-  </bannerRight>
-  
   <body>
     <links>
+      <item name="Home" href="index.html"/>
       <item name="Download" href="download.html"/>
       <item name="Documentation" href="documentation.html"/>
       <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>

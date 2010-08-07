@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="actions">
+  <title>Test actions</title>
+
+  <para>This chapter gives a brief description to all test actions that a tester can incorporate into the test case. 
+  Besides sending and receiving messages the tester may access these actions in order to build a more complex test scenario
+  that fits the desired use case.</para>
+
+  &actions-database;
+  &actions-sleep;
+  &actions-java;
+  &actions-timeout;
+  &actions-echo;
+  &actions-measure-time;
+  &actions-create-variables;
+  &actions-trace;
+  &actions-groovy;
+  &actions-fail;
+  &actions-input;
+  &actions-load;
+  &actions-purge;
+  &actions-generic-action;
+  
+</chapter>

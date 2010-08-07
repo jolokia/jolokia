@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="testcase">
+  <title>Test case</title>
+
+  <para>Now let us start writing test cases! The following guide will introduce all possible actions inside a test case 
+  and explain how to connect to other systems by sending and receiving messages over various transports.</para>
+  
+  <para>Citrus specifies test cases through simple XML files. The whole test case description will take place in one single
+  XML file. This chapter will introduce the custom XML schema language that defines a test cases.</para>
+
+  <section id="testcase-defining">
+    <title>Defining a test case</title>
+
+    <para>Clearly spoken a test case is nothing but a simple Spring XML configuration file. 
+    So using the Spring XML configuration syntax you are able to write fully compatible test cases for the Citrus framework.</para>
+    
+    <programlisting>
+  &lt;beans
+      xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+      xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.5.xsd&quot;&gt;
+      
+      &lt;bean name=&quot;myFirstTest&quot; 
+               class=&quot;com.consol.citrus.model.TestCase&quot;&gt;
+          &lt;property name=&quot;actions&quot;&gt;
+              <lineannotation>&lt;!-- actions of this test go here --&gt;</lineannotation>
+          &lt;/property&gt;
+      &lt;/bean&gt;
+  &lt;/beans&gt;
+    </programlisting>
+    
+    <para>Citrus can execute these test case as normal test cases - no problem, but this XML usual 
+    syntax is not the best way to describe a test case in Citrus, especially when test scenarios get more 
+    complex and the test cases grow in size. Therefore Citrus provides a custom XML schema definition for 
+    writing test cases.</para>
+    
+    <para>The custom XML schema aims to reach the convenience of Domain specific languages (DSL). Let us have a look 
+    at the Citrus test describing DSL by introducing a first very simple test case definition:</para>
+    
+    <programlisting>
+  &lt;spring:beans
+      xmlns=&quot;http://www.citrusframework.org/schema/testcase&quot;
+      xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+      xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot;
+      xsi:schemaLocation=&quot;
+      http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+      http://www.citrusframework.org/schema/testcase 
+      http://www.citrusframework.org/schema/testcase/citrus-testcase.xsd&quot;&gt;
+      
+      &lt;testcase name=&quot;myFirstTest&quot;&gt;
+          &lt;description&gt;
+              First example showing the basic test case definition elements!
+          &lt;/description&gt;
+          &lt;variables&gt;
+              &lt;variable name=&quot;text&quot; 
+                           value=&quot;Hello Test Framework&quot;/&gt;
+          &lt;/variables&gt;
+          &lt;actions&gt;
+              &lt;echo&gt;
+                  &lt;message&gt;${test}&lt;/message&gt;
+              &lt;/echo&gt;
+          &lt;/actions&gt;
+      &lt;/testcase&gt;
+  &lt;/spring:beans&gt;
+    </programlisting>
+    
+    <para>We do need the <literal>&lt;spring:beans&gt;</literal> root element as the XML file is read by the Spring IoC Container. 
+    Inside this root element the Citrus specific namespace definitions take place. In the following we use the customized XML schema 
+    language in Citrus to describe the test case.</para>
+    
+    <para>The test case itself gets a mandatory name that must be unique throughout all test cases in a project. You will receive errors
+    when using duplicate test names. The name must not contain any whitespaces but does support special characters like '-', '.', '_'. 
+    The &lt;testcase&gt; element holds several child elements. These basic test elements are described in the following sections.</para>
+    
+    <section id="testcase-description">
+        <title>Description</title>
+        
+        <para>The test case description points out the purpose and gives a short introduction to the intended use case scenario that 
+        will be tested. The user should get a first impression what the test case is all about. You can use free text in order to describe the test. 
+        But be aware of the XML validation rules of well formed XML (e.g. special character escaping, use of CDATA sections)</para>
+    </section>
+    
+    <section id="testcase-variables">
+        <title>Variables</title>
+        
+        <programlisting>
+  &lt;variables&gt;
+      &lt;variable name=&quot;text&quot; value=&quot;Hello Test Framework&quot;/&gt;
+      &lt;variable name=&quot;customerId&quot; value=&quot;123456789&quot;/&gt;
+  &lt;/variables&gt;
+        </programlisting>
+        
+        <para>The test variables are valid for the whole test case. You can reference them several times using a variables expression 
+        <literal>"${variable-name}"</literal>. It is good practice to provide all important entities as test variables. This
+        makes the test easier to maintain and more flexible. All essential entities are present right at the beginning of the test, which
+        may also give the opportunity to easily create test variants by simply changing the variable values.</para>
+        
+        <para>The name of the variable is arbitrary. Feel free to specify any name you can think of. Of course you need to be careful with
+        special characters and reserved XML entities like '&amp;', '&lt;', '&gt;'. If you are familiar with Java or any other programming 
+        language simply think of the naming rules there and you will be fine with working on Citrus variables too. The value of a variable 
+        can be any character sequence. But again be aware of special XML characters like "&lt;" that need to be escaped ("&amp;lt;") when 
+        used in variable values.</para>
+        
+        <para>The advantage of variables is obvious. Once declared the variables can be referenced many times in
+        the test. This makes it very easy to vary different test cases by adjusting the variables for different means (e.g. use different 
+        error codes in test cases).</para>
+    </section>
+    
+    <section id="testcase-actions">
+        <title>Actions</title>
+        
+        <para>A test case defines a sequence of actions that will take place during the test. The
+        actions are executed sequentially as they are defined in the test case definition.</para>
+        
+        <programlisting>
+  &lt;actions&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+  &lt;/actions&gt;
+        </programlisting>
+        
+        <para>All actions have individual names and properties that define 
+        the action behavior. Citrus offers a wide range of test actions from scratch, but you are also able to write your own 
+        test actions in Java or Groovy and execute them during a test. <xref linkend="actions"/> gives you a brief description of all available 
+        actions that can be part of a test case execution.</para>
+        
+        <para>The actions are combined in free sequence to each other so that the tester is able to declare a special action chain inside the test.
+        These actions can be sending or receiving messages, delaying the test, validating the database and so on. Step by step the test proceeds 
+        the action chain. Usually the tester tries to fit the designed use case scenario with the action chain.</para>
+    </section>
+    
+    <section id="testcase-finally">
+        <title>Cleanup</title>
+        
+        <para>The finally element also contains a list of test actions. These actions will be executed at the very
+        end of the test case even if errors did occur during the execution before. This is the right place to tidy up things that were previously 
+        created by the test like cleaning up the database for instance. The finally section is described in more detail in <xref linkend="finally"/></para>
+  
+        <programlisting>      
+  &lt;finally&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+      &lt;action&gt;[...]&lt;/action&gt;
+  &lt;/finally&gt;
+        </programlisting>
+    </section>
+  </section>
+  
+  <section id="testcase-metainfo">
+    <title>Meta information</title>
+
+    <para>The user can provide some basic information about the test case. The meta-info element at the very beginning of the test case 
+    holds information like the author of the test or the creation date. In detail the meta information is specified like this:</para>
+    
+    <programlisting>
+  &lt;testcase name=&quot;metaInfoTest&quot;&gt;
+      &lt;meta-info&gt;
+          &lt;author&gt;Christoph Deppisch&lt;/author&gt;
+          &lt;creationdate&gt;2008-01-11&lt;/creationdate&gt;
+          &lt;status&gt;FINAL&lt;/status&gt;
+          &lt;last-updated-by&gt;Christoph Deppisch&lt;/last-updated-by&gt;
+          &lt;last-updated-on&gt;2008-01-11T10:00:00&lt;/last-updated-on&gt;
+      &lt;/meta-info&gt;
+      &lt;description&gt;
+          ...
+      &lt;/description&gt;
+      &lt;actions&gt;
+          ...
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>The status allows following values: DRAFT, READY_FOR_REVIEW, DISABLED, FINAL.
+    The meta-data information to a test is quite important to give the reader a first information about
+    the test. It is also possible to generate test documentation using this meta-data information. The built-in Citrus 
+    documentation generates HTML or Excel documents that list all tests with their metadata information and description.</para>
+    
+    <note>
+        <para>Tests in status DISABLED will not be executed during a test suite run. So someone can just start adding
+        planned test cases that are not finished yet in status DRAFT. In case a test is not runnable yet because not finished entirely
+        someone may disable a test temporarily to avoid causing failures during a test run. Using these different status one can 
+        easily set up test plans and review the progress of test coverage by comparing the amount of test in status DRAFT to those in FINAL state.</para>
+    </note>
+    
+  </section>
+  
+</chapter>

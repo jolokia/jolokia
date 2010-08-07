@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="debug-messages">
+    <title>Debugging received messages</title>
+
+    <para>Citrus will receive a lot of messages during a test run. The user may want to persist these messages to the 
+    filesystem for further investigations.</para>
+    
+    <para>Citrus offers an easy way to debug all received messages to the file system. You need to enable a specific aspect in the
+    Citrus Spring configuration.</para>
+    
+    <programlisting>
+  &lt;bean class=&quot;com.consol.citrus.aop.StoreMessageInterceptorAspect&quot;/&gt;
+    </programlisting>
+    
+    <para>Just add this bean to the Spring configuration and Citrus will debug received messages to the file system by generating files
+    containing the message header and message body content.</para>
+    
+    <para>For example:</para>
+    <para><literal>logs/debug/messages/message1.header</literal></para>
+    <para><literal>logs/debug/messages/message1.body</literal></para>
+    <para><literal>logs/debug/messages/message2.header</literal></para>
+    <para><literal>logs/debug/messages/message2.body</literal></para>
+    
+    <para>The framework uses a simple counter that is increased whenever a message is written to the file system. Citrus separates 
+    message header and message body into extra files with respective extension (".header" and ".body"). By default the debug directory is 
+    <literal>logs/debug/messages/</literal> relative to the project root directory. But you can set your own debug directory in the 
+    configuration.</para>
+    
+    <programlisting>
+  &lt;bean class=&quot;com.consol.citrus.aop.StoreMessageInterceptorAspect&quot;&gt;
+          &lt;property name=&quot;debugDirectory&quot; 
+                       value=&quot;debugging/messages&quot;/&gt;
+  &lt;/bean&gt;
+    </programlisting>
+    
+    <note>
+        <para>As the file counter is always reset to 0 after a test run the message files may be overwritten. So you eventually need to 
+        save the generated message debug files before running another group of test cases.</para>
+    </note>
+</chapter>

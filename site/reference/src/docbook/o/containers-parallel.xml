@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="containers-parallel">
+    <title>Parallel</title>
+
+    <para>Parallel containers execute the embedded test actions concurrent to each other. Every
+    action in this container will be executed in a separate Java Thread. Following example should
+    clarify the usage:</para>
+    
+    <programlisting>
+  &lt;testcase name=&quot;parallelTest&quot;&gt;
+      &lt;actions&gt;
+          &lt;parallel&gt;
+              &lt;sleep/&gt;
+              
+              &lt;sequential&gt;
+                  &lt;sleep/&gt;
+                  &lt;echo&gt;
+                      &lt;message&gt;1&lt;/message&gt;
+                  &lt;/echo&gt;
+              &lt;/sequential&gt;
+              
+              &lt;echo&gt;
+                  &lt;message&gt;2&lt;/message&gt;
+              &lt;/echo&gt;
+              
+              &lt;echo&gt;
+                  &lt;message&gt;3&lt;/message&gt;
+              &lt;/echo&gt;
+              
+              &lt;iterate condition=&quot;i lt= 5&quot; 
+                          index=&quot;i&quot;&gt;
+                  &lt;echo&gt;
+                      &lt;message&gt;10&lt;/message&gt;
+                  &lt;/echo&gt;
+              &lt;/iterate&gt;
+          &lt;/parallel&gt;
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>So the normal test action processing would be to execute one action after another. As the first 
+    action is a sleep of five seconds, the whole test processing would stop and wait for 5 seconds. Things 
+    are different inside the parallel container. Here the descending test actions will not wait but execute
+    at the same time.
+    </para>
+    
+    <note>
+      <para>Note that containers can easily wrap other containers. The example shows a simple combination of
+      sequential and parallel containers that will archive a complex execution logic. Actions inside the sequential
+      container will execute one after another. But actions in parallel will be executed at the same time.</para>
+    </note>
+    
+</section>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-create-variables">
+    <title>Create variables</title>
+
+    <para>As you know variables usually are defined at the beginning of the test case (<xref linkend="testcase-variables"/>). 
+    It might also be helpful to reset existing variables as well as to define new variables during the test. The 
+    action &lt;create-variables&gt; is able to declare new variables or overwrite existing ones.</para>
+    
+    <programlisting>
+  &lt;testcase name=&quot;createVariablesTest&quot;&gt;
+      &lt;variables&gt;
+          &lt;variable name=&quot;myVariable&quot; value=&quot;12345&quot;/&gt;
+          &lt;variable name=&quot;id&quot; value=&quot;54321&quot;/&gt;
+      &lt;/variables&gt;
+      &lt;actions&gt;
+          &lt;echo&gt;
+              &lt;message&gt;Current variable value: ${myVariable} &lt;/message&gt;
+          &lt;/echo&gt;
+          
+          &lt;create-variables&gt;
+              &lt;variable name=&quot;myVariable&quot; value=&quot;${id}&quot;/&gt;
+              &lt;variable name=&quot;newVariable&quot; value=&quot;'this is a test'&quot;/&gt;
+          &lt;/create-variables&gt;
+          
+          &lt;echo&gt;
+              &lt;message&gt;Current variable value: ${myVariable} &lt;/message&gt;
+          &lt;/echo&gt;
+      
+          &lt;echo&gt;
+              &lt;message&gt;
+                New variable 'newVariable' has the value: ${newVariable}
+              &lt;/message&gt;
+          &lt;/echo&gt;
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>The new variables are valid for the rest of the test. Actions reference them as usual through a variable expression.</para>
+    
+</section>

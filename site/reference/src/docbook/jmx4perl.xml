@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="tibco">
+    <title>TIBCO support</title>
+    
+    <para>The Citrus framework was designed to also connect to several TIBCO software components. The outcome is a group of
+    special test actions that enable the tester to connect to the TIBCO components and execute operations towards TIBCO.</para>
+    
+    <section id="tibco-hawk">
+        <title>Connecting with TIBCO Hawk</title>
+    
+        <para>TIBCO uses the enterprise monitoring tool Hawk to manage and supervise all TIBCO applications. Citrus can access Hawk
+        to affect the TIBCO service instances. You can start or stop BusinessWorks process archives and process starters for instance.</para>
+        
+        <tip>
+            <para>Use TIBCO Hawk in order to prepare the TIBCO environment according
+            to the test that will be executed (unit or integration tests).</para>
+        </tip>
+        
+        <para>The next example shows how the Hawk agent can be used in the test suite setup.</para>
+        
+        <programlisting>
+  &lt;bean parent=&quot;tibcoHawkAgent&quot;&gt;
+      &lt;property name=&quot;methodName&quot; 
+                   value=&quot;ResumeProcessStarter&quot;/&gt;
+      &lt;property name=&quot;methodParameters&quot;&gt;
+          &lt;list&gt;
+              &lt;bean class=&quot;COM.TIBCO.hawk.talon.DataElement&quot;&gt;
+                  &lt;constructor-arg value=&quot;ProcessDefinition&quot;/&gt;
+                  &lt;constructor-arg    
+                      value=&quot;Test/UnitTest/BusinessServiceTester.process&quot;/&gt;
+              &lt;/bean&gt;
+          &lt;/list&gt;
+      &lt;/property&gt;
+  &lt;/bean&gt;
+        </programlisting>
+        
+        <para>The example shows a method call to a Hawk agent. The method is declared through the methodName
+        property. In the above example the Hawk agent will resume a particular process starter. The
+        methodParameters property will cause the process starter to resume.</para>
+        
+        <para>In general the HawkAgent has the following properties:</para>
+        
+        <itemizedlist>
+            <listitem>
+                <para>microAgent -&gt; <literal>COM.TIBCO.ADAPTER.bwengine.&lt;hawk.domain&gt;.&lt;hawk.service.instance&gt;.&lt;hawk.process.archive&gt;</literal></para>
+            </listitem>
+            <listitem>
+                <para>hawkDomain</para>
+            </listitem>
+            <listitem>
+                <para>rvService (e.g. 57500)</para>
+            </listitem>
+            <listitem>
+                <para>rvNetwork</para>
+            </listitem>
+            <listitem>
+                <para>rvDaemon (e.g. tcp:57500)</para>
+            </listitem>
+        </itemizedlist>
+        
+        <para>The microAgentID consists of the Hawk domain, the service instance and the process archive. With the
+        right setting of the domain the service and the daemon you can now use all methods offered by the
+        specific MicroAgent.</para>
+    </section>
+    
+    <section id="tibco-collaborator">
+        <title>Connecting with TIBCO Collaborator Workflow Server</title>
+        
+        <para>Similar to the Hawk agent it is useful to start and stop certain workflow jobs in the TIBCO Collaborator
+        Workflow Server, especially for clean up reasons. Left over workflows from previous test runs will then get
+        terminated correctly.</para>
+        
+        <para>The test framework offers a special action implementation, in order to clean up all available workflow jobs on
+        the Workflow Collaborator Server.</para>
+        
+        <para>The bean looks like follows:</para>
+        
+        <programlisting>
+  &lt;bean id=&quot;cleanIcJobs&quot;
+      class=&quot;com.consol.citrus.actions.CleanIcJobsBean&quot;&gt;
+      &lt;property name=&quot;userName&quot; value=&quot;${ic.username}&quot;/&gt;
+      &lt;property name=&quot;password&quot; value=&quot;${ic.password}&quot;/&gt;
+      &lt;property name=&quot;serverName&quot; value=&quot;${ic.servername}&quot;/&gt;
+      &lt;property name=&quot;service&quot; value=&quot;${ic.tibrv.service}&quot;/&gt;
+      &lt;property name=&quot;network&quot; value=&quot;${ic.tibrv.network}&quot;/&gt;
+      &lt;property name=&quot;daemon&quot; value=&quot;${ic.tibrv.daemon}&quot;/&gt;
+      &lt;property name=&quot;queueCount&quot; value=&quot;${ic.tibrv.queue.count}&quot;/&gt;
+      &lt;property name=&quot;serverDiscoveryTimeout&quot; 
+                   value=&quot;${ic.tibrv.server.discovery.timeout}&quot;/&gt;
+  &lt;/bean&gt;
+        </programlisting>
+        
+        <para>The properties of that bean do all refer to the connection credentials of the Workflow InConcert Server instance.</para>
+    </section>
+</chapter>

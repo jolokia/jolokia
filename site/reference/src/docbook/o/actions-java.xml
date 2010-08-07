@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-java">
+    <title>Java</title>
+
+    <para>The test framework is written in Java and runs inside a Java virtual machine. The functionality of calling other 
+    Java objects and methods in this same Java VM through Java Reflection is self-evident. 
+    With this action you can call any Java API available at runtime through the specified Java classpath.</para>
+    
+    <para>The action syntax looks like follows:</para>
+    
+    <programlisting>
+  &lt;java class=&quot;com.consol.citrus.test.util.InvocationDummy&quot;&gt;
+      &lt;constructor&gt;
+          &lt;argument type=&quot;&quot;&gt;Test Invocation&lt;/argument&gt;
+      &lt;/constructor&gt;
+      &lt;method name=&quot;invoke&quot;&gt;
+          &lt;argument type=&quot;String[]&quot;&gt;1,2&lt;/argument&gt;
+      &lt;/method&gt;
+  &lt;/java&gt;
+  
+  &lt;java class=&quot;com.consol.citrus.test.util.InvocationDummy&quot;&gt;
+      &lt;constructor&gt;
+          &lt;argument type=&quot;&quot;&gt;Test Invocation&lt;/argument&gt;
+      &lt;/constructor&gt;
+      &lt;method name=&quot;invoke&quot;&gt;
+          &lt;argument type=&quot;int&quot;&gt;4&lt;/argument&gt;
+          &lt;argument type=&quot;String&quot;&gt;Test Invocation&lt;/argument&gt;
+          &lt;argument type=&quot;boolean&quot;&gt;true&lt;/argument&gt;
+      &lt;/method&gt;
+  &lt;/java&gt;
+      
+  &lt;java class=&quot;com.consol.citrus.test.util.InvocationDummy&quot;&gt;
+      &lt;method name=&quot;main&quot;&gt;
+          &lt;argument type=&quot;String[]&quot;&gt;4,Test,true &lt;/argument&gt;
+      &lt;/method&gt;
+  &lt;/java&gt;
+    </programlisting>
+    
+    <para>The Java class is specified by fully qualified class name. Constructor arguments are added using the &lt;constructor&gt; 
+    element with a list of &lt;argument&gt; child elements. The type of the argument is defined within the respective 
+    attribute &quot;type&quot;. By default the type would be String.</para>
+    
+    <para>The invoked method on the Java object is simply referenced by its name. Method arguments do not bring anything new 
+    after knowing the constructor argument definition, do they?.</para>
+    
+    <para>Method arguments support data type conversion too, even string arrays (useful when
+    calling CLIs). In the third action in the example code you can see that colon separated strings are automatically 
+    converted to string arrays.</para>
+    
+    <para>Simple data types are defined by their name (int, boolean, float etc.). Be sure that the invoked method
+    and class constructor fit your arguments and vice versa, otherwise you will cause errors at runtime.</para>
+</section>

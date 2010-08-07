@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="reporting">
+    <title>Reporting and test results</title>
+  
+    <para>The framework generates different reports and results after a test run for you. These report and result pages will
+    help you to get an overview of the test cases that were executed and which one were failing.</para>
+  
+    <section id="reporting-logging">
+        <title>Console logging</title>
+    
+        <para>During the test run the framework will provide a huge amount of information that is printed out to
+        the console. This includes current test progress, validation results and error information. This
+        enables the user to quickly supervise the test run progress. Failures in tests will be printed to the
+        console just the time the error occurred. The detailed stack trace information and the detailed
+        error messages are helpful to get the idea what went wrong.</para>
+
+        <para>As the console output might be limited to a defined buffer limit, the user may not be able to
+        follow the output to the very beginning of the test run. Therefore the framework additionally
+        prints all information to a log file according to the logging configuration.</para>
+    
+        <para>The logging mechanism uses the SLF4J logging framework. SLF4J is independent of logging framework implementations on the 
+        market. So in case you use Log4J logging framework the specified log file path as well as logging levels can be freely configured 
+        in the respective log4j.xml file in your project. At the end of a test run the combined test results get printed to both console 
+        and log file. The overall test results look like following example:</para>
+        
+        <programlisting>
+            <literal>
+  TEST RESULTS citrus-default-testsuite
+  
+    [...]
+    HelloService_Ok_1             : successfull
+    HelloService_Ok_2             : successfull
+    EchoService_Ok_1              : successfull
+    EchoService_Ok_2              : successfull
+    EchoService_TempError_1       : successfull
+    EchoService_AutomacticRetry_1 : successfull
+    [...]
+    
+    Found 175 test cases to execute
+    Skipped 0 test cases (0.0%)
+    Executed 175 test cases
+    Tests failed:         0 (0.0%)
+    Tests successfully: 175 (100.0%)
+            </literal>
+        </programlisting>
+        
+        <para>Failed tests will be marked as failed in the result list. The framework will give a short description
+        of the error cause while the detailed stack trace information can be found in the log messages
+        that were made during the test run.</para>
+        
+        <programlisting>
+  <literal>HelloService_Ok_3 : failed - Exception is Action timed out</literal>
+        </programlisting>
+    </section>
+    
+    <section id="reporting-junit">
+        <title>JUnit reports</title>
+    
+        <para>As tests are executed as TestNG test cases, the framework will also generate JUnit compliant XML and HTML 
+        reports. JUnit test reports are very popular and find support in many build management and development tools. 
+        In general the Citrus test reports give you an overall picture of all tests and tell you which of them were failing.</para>
+        
+        <para>Build management tools like Hudson, Bamboo or CruiseControl can easily import and display the generated JUnit 
+        XML results. Please have a look at the TestNG and JUnit documentation for more information about this topic as well 
+        as the build management tools (Hudson, Bamboo, CruiseControl, etc.) to find out how to integrate the tests results.</para>
+    </section>
+    
+</chapter>

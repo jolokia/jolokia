@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-timeout">
+    <title>Expect timeouts on a destination</title>
+
+    <para>In some cases it might be necessary to validate that a message is <emphasis>not</emphasis> present on a destination. 
+    This means that this action expects a timeout when receiving a message from an endpoint destination. For instance the tester 
+    intends to ensure that no message is sent to a certain destination in a time period. In that case the timeout would 
+    not be a test aborting error but the expected behavior. And in contrast to the normal behavior when a message is received 
+    in the time period the test will fail with error.</para>
+    
+    <para>In order to validate such a timeout situation the action &lt;expectTimout&gt; shall help. The usage
+    is very simple as the following example shows:</para>
+    
+    <programlisting>
+  &lt;testcase name=&quot;receiveJMSimeoutTest&quot;&gt;
+      &lt;actions&gt;
+          &lt;expect-timeout message-receiver=&quot;myMessageReceiver&quot; 
+                             wait=&quot;500&quot;/&gt;
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>The action offers two attributes:</para>
+    
+    <itemizedlist mark="opencircle">
+        <listitem>
+            <para><emphasis>message-receiver</emphasis>: Reference to a message receiver that will try to receive messages.</para>
+        </listitem>
+        <listitem>
+            <para><emphasis>wait</emphasis>: Time period to wait for messages to arrive</para>
+        </listitem>
+    </itemizedlist>
+    
+    <para>TODO: describe receive selected!</para>
+
+</section>

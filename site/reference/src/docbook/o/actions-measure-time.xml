@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-measure-time">
+    <title>Time measurement</title>
+
+    <para>Time measurement during a test can be very helpful. The &lt;trace-time&gt; action creates and monitors 
+    multiple timelines. The action offers the attribute &quot;id&quot; to identify a time line. The tester can of course 
+    use more than one time line with different ids simultaneously.</para> 
+    
+    <para>Read the next example and you will understand the mix of different time lines:</para>
+    
+    <programlisting>
+  &lt;testcase name=&quot;timeWatcherTest_new&quot;&gt;
+      &lt;actions&gt;
+          &lt;trace-time/&gt;
+          
+          &lt;trace-time id=&quot;time_line_id&quot;/&gt;
+          
+          &lt;sleep time=&quot;3.5&quot;/&gt;
+          
+          &lt;trace-time id=&quot; time_line_id &quot;/&gt;
+          
+          &lt;sleep time=&quot;5.0&quot;/&gt;
+          
+          &lt;trace-time/&gt;
+          
+          &lt;trace-time id=&quot; time_line_id &quot;/&gt;
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>The test output looks like follows:</para>
+    
+    <programlisting>
+  Starting TimeWatcher:
+  Starting TimeWatcher: time_line_id
+  TimeWatcher time_line_id after 3.5 seconds
+  TimeWatcher after 8.5 seconds
+  TimeWatcher time_line_id after 8.5 seconds
+    </programlisting>
+    
+    <note>In case no time line id is specified the framework will measure the time for a default time line.</note>
+    
+    <para>To print out the current elapsed time for a time line you simply have to place the &lt;trace-time&gt; action into
+    the action chain again and again, using the respective time line identifier. The elapsed time will be printed out to the console every time.</para>
+</section>

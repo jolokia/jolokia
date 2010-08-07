@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-database">
+    <title>Connecting to the database</title>
+  
+    <para>In many cases it is necessary to access the database during a test. This enables a tester to also validate 
+    the persistent data in a database. It might also be helpful to prepare the database with some test data before running a test. 
+    You can do this using the two database actions that are descirbed in the following sections.</para>
+    
+    <section id="actions-database-update">
+      <title>Updating the database</title>
+  
+      <para>The &lt;sql&gt; action simply executes a group of SQL statements in order to change data in a database.
+      Typically the action is used to prepare the database at the beginning of a test or to clean up the
+      database at the end of a test. You can specify SQL statements like INSERT, UPDATE,
+      DELETE, CREATE TABLE, ALTER TABLE and many more.</para>
+      
+      <para>On the one hand you can specify the statements as inline SQL or stored in an external
+      SQL resource file as shown in the next two examples.</para>
+      
+      <programlisting>
+  &lt;actions&gt;
+      &lt;sql datasource=&quot;someDataSource&quot;&gt;
+          &lt;statement&gt;DELETE FROM CUSTOMERS&lt;/statement&gt;
+          &lt;statement&gt;DELETE FROM ORDERS&lt;/statement&gt;
+      &lt;/sql&gt;
+      
+      &lt;sql datasource=&quot;myDataSource&quot;&gt;
+          &lt;resource file=&quot;file:tests/unit/resources/script.sql&quot;/&gt;
+      &lt;/sql&gt;
+  &lt;/actions&gt;
+      </programlisting>
+      
+      <para>The first action uses inline SQL statements defined directly inside the test case. The next action uses an external 
+      SQL resource file instead. The file resource can hold several SQL statements separated by new lines. All statements inside 
+      the file are executed sequentially by the framework.</para>
+      
+      <important>
+        <para>You have to pay attention to some rules when dealing with external SQL resources.</para>
+        <itemizedlist mark="opencircle">
+          <listitem>
+              <para>Each statement should begin in a new line</para>
+          </listitem>
+          <listitem>
+              <para>It is not allowed to define statements with word wrapping</para>
+          </listitem>
+          <listitem>
+              <para>Comments begin with two dashes &quot;--&quot;</para>
+          </listitem>
+        </itemizedlist>
+      </important>
+      
+      <note>
+        <para>The external file is referenced either as file system resource or class path resource,
+        by using the &quot;file:&quot; or &quot;classpath:&quot; prefix.</para>
+      </note>
+      
+      <para>Both examples use the &quot;datasource&quot; attribute. This value defines the database data source to be used. The connection to
+      a data source is mandatory, because the test case does not know about user credentials or database names. The 'datasource' attribute 
+      references predefined data sources that are located in a separate Spring configuration file.</para>
+    </section>
+    
+    <section id="actions-database-query">
+      <title>Verifying data from the database</title>
+      
+      <para>The &lt;sql&gt; action is specially designed to execute SQL queries (SELECT * FROM). So the test is able to get data from a database. 
+      The query results are validated against expected data as shown in the next example.</para>
+      
+      <programlisting>
+  &lt;sql datasource=&quot;testDataSource&quot;&gt;
+      &lt;statement&gt;select NAME from CUSTOMERS where ID='${customerId}'&lt;/statement&gt;
+      &lt;statement&gt;select count(*) from ERRORS&lt;/statement&gt;
+      &lt;statement&gt;select ID from ORDERS where DESC LIKE 'Def%'&lt;/statement&gt;
+      &lt;statement&gt;select DESCRIPTION from ORDERS where ID='${id}'&lt;/statement&gt;
+      
+      &lt;validate column=&quot;ID&quot; value=&quot;1&quot;/&gt;
+      &lt;validate column=&quot;NAME&quot; value=&quot;Deppisch&quot;/&gt;
+      &lt;validate column=&quot;COUNT(*)&quot; value=&quot;${rowsCount}&quot;/&gt;
+      &lt;validate column=&quot;DESCRIPTION&quot; value=&quot;null&quot;/&gt;
+  &lt;/sql&gt;
+      </programlisting>
+      
+      <para>The action &lt;sql&gt; offers a wide range of validating functionality for database result sets. First
+      of all you have to select the data via SQL statements. Here again you have the choice to use inline SQL
+      statements or external file resource pattern.</para>
+      
+      <para>The result sets are validated through &lt;validate&gt; elements. It is possible to do a detailed check on
+      every selected column of the result set. Simply refer to the selected column name in order to validate its
+      value. The usage of test variables is supported as well as database expressions like count(), avg(), min(),
+      max().</para>
+      
+      <para>You simply define the &lt;validate&gt; entry with the column name as the &quot;column&quot; attribute and any expected
+      value expression as expected &quot;value&quot;. The framework then will check the column to fit the expected value and raise 
+      validation errors in case of mismatch.</para>
+      
+      <para>Looking at the first SELECT statement in the example you will see that test variables are supported in the 
+      SQL statements. The framework will replace the variable with its respective value before sending it to the database.</para>
+      
+      <para>In the validation section variables can be used too. Look at the third validation entry, where the variable
+      &quot;${rowsCount}&quot; is used. The last validation in this example shows, that <literal>NULL</literal> values are 
+      also supported as expected values.</para>
+      
+      <para>If a single validation happens to fail, the whole action will fail with respective validation errors.</para>
+      
+      <note>
+        <para>When validating database query result sets Citrus can only handle single </para>
+      </note>
+    </section>
+</section>

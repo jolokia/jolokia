@@ -1,0 +1,322 @@
+
+body {
+  background: #FFFFFF
+    url(../images/bg.png)
+    repeat-x left top;
+  background-repeat: repeat-x;
+  font-family: Verdana, Arial, Helvetica, Geneva, sans-serif;
+  color: #2A2828;
+  font-size: 12px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0px;
+}
+
+/* Main layout  */
+div.header {
+  background: #FFFFFF url(../images/header.png) left top;
+  height: 130px;
+}
+
+div.top_bar {
+  background: #FFFFFF url(../images/top_bar_bg.png) left top;
+  height: 35px;
+}
+
+/* Top-Bar */
+div.top_left {
+  background: url(../images/top_sep.png) no-repeat right top;
+  float: left;
+  padding: 5px 0px;
+  margin-top: 2px;
+  width: 20px;
+  height: 20px;
+}
+
+div.top_link {
+}
+
+div.top_sep {
+  background: url(../images/top_sep.png) no-repeat right top;
+  margin-top: 2px;
+  float: left;
+  width: 2px;
+  padding: 0px;
+  height: 32px;
+}
+
+div.top_link a:hover, 
+div.top_link a:active {
+  background: url(../images/top_hover.png) repeat-x right top;
+  margin-top: 2px;
+  color: #BBBABA;
+  font-size: 13;
+  font-weight: normal;
+}
+
+div.top_link a:visited,
+div.top_link a:link {
+  color: #BBBABA;
+  font-size: 13;
+  font-weight: normal;
+}
+
+div.top_link a {
+  display: block;
+  float: left;
+  margin-top: 2px;
+  padding: 7px 15px 0px 15px;
+  height: 32px;
+}
+
+/* Main-Box (Navi + Content) */
+div.main_box {  
+  background: #c1c1c1 url(../images/main_left.png) repeat-y left top;  
+}
+
+div.main_top {
+  background: url(../images/main_top.png) no-repeat left top;
+  height: 94px;
+}
+
+div.main_bottom {
+  background: url(../images/main_bottom.png) no-repeat left bottom;
+  height: 17px;
+}
+
+
+div.main_content {
+  position: relative;
+  background: url(../images/main_right.png) repeat-y right top;  
+  margin-top: -70px;
+}
+
+/* Content box (right)  */
+div.content_box {  
+  width: 642px;
+}
+
+div.content_top {
+  background: url(../images/content_top.png) no-repeat left top;
+  height: 4px;
+}
+
+div.content_bottom {
+  background: url(../images/content_bottom.png) no-repeat left bottom;
+  height: 4px;
+}
+
+div.content_content {
+  position: relative;
+  margin-left: 1px;
+  background: #ffffff repeat-y right top;  
+}
+
+/* Navigation boxes (left) */
+.navibox {
+  width: 240px;
+  padding-left: 20px;
+  background: url(../images/navi_box_bottom.png) no-repeat bottom right;
+  margin-bottom: 4px;
+}
+
+.navihead {
+  background: url(../images/navi_box_head.png) no-repeat top right;
+}
+
+.navihead h5 {
+    color: #494949;
+    padding-bottom: 2px;
+    padding-left: 15px;
+    padding-top: 2px;
+    margin-bottom: 0px;
+    font-size: 13px;
+}
+
+.naviitems ul {
+    list-style: none;
+    margin-bottom: 0px;
+    padding-bottom: 8px;
+    padding-top: 5px;
+}
+
+.naviitems li {
+    color: #8e8e8e;
+    margin-left: 20px;
+}
+
+.naviitems li a:visited, .naviitems li a:link {
+    color: #656565;
+    display: block;
+    font-weight: normal;
+}
+
+.naviitems li a:active, .naviitems li a:hover, .naviitems li strong {
+    color: #c20000;
+    background: url(../images/navi_link_hover.png) no-repeat left top;  ;
+    display: block;
+    width: 208px;
+    margin-left: -2px;
+    padding-left: 2px;
+    font-weight: normal;
+}
+
+.copyright_footer {
+    float: right;
+    color: #3e3e3e;
+    font-size: 9px;
+    margin-right: 15px;
+}
+
+.content_content {
+    padding: 10px;
+    line-height: 150%;
+}
+
+/* ========================================================================================================  */
+/* Common text attributes */
+
+ul {
+    list-style: square;
+    margin-left: 5px;
+}
+
+p {
+    margin-left: 10px;
+}
+code {
+  font-size: 12px;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:link {
+  color:#D10000;
+  font-weight: bold;
+}
+a:visited {
+  color:#DA0019;
+  font-weight: bold;
+}
+a:active, a:hover {
+  background: #E9E9E9;
+  font-weight: bold;
+}
+
+#legend li.externalLink {
+  background: url(../images/external.png) left top no-repeat;
+  padding-left: 18px;
+}
+
+a.externalLink, a.externalLink:link, a.externalLink:visited, a.externalLink:active, a.externalLink:hover {
+  background: url(../images/external.png) right center no-repeat;
+  padding-right: 18px;
+}
+
+#legend li.newWindow {
+  background: url(../images/newwindow.png) left top no-repeat;
+  padding-left: 18px;
+}
+
+a.newWindow, a.newWindow:link, a.newWindow:visited, a.newWindow:active, a.newWindow:hover {
+  background: url(../images/newwindow.png) right center no-repeat;
+  padding-right: 18px;
+}
+
+h2 {
+    background: url(../images/h2_bg.png) no-repeat right top;
+    display: block;
+    font-size: 17px;
+    color: #333333;
+    padding-top: 5px;
+    padding-left: 20px;
+    margin-left: -11px;
+    height: 32px;
+    color: #636363;
+    width: 615px;
+    font-weight: normal;
+}
+
+h3 {
+  padding: 4px 4px 4px 24px;
+  color: #666;
+  background-color: #ccc;
+  font-weight: bold;
+  font-size: 14px;
+  background-image: url(../images/h3.jpg);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+}
+
+#breadcrumbs {
+  height: 6px;
+  padding: 5px 10px 14px 205px;
+}
+
+* html #breadcrumbs {
+  padding-bottom: 8px;
+}
+
+.source {
+  border: 1px solid #999;
+  overflow:auto
+}
+
+dt {
+  padding: 4px 4px 4px 24px;
+  color: #333333;
+  background-color: #ccc;
+  font-weight: bold;
+  font-size: 14px;
+  background-image: url(../images/h3.jpg);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+}
+.subsectionTitle {
+  font-size: 13px;
+  font-weight: bold;
+  color: #666;
+
+}
+
+table {
+  font-size: 10px;
+}
+.xright a:link, .xright a:visited, .xright a:active {
+  color: #666;
+}
+.xright a:hover {
+  color: #003300;
+}
+#breadcrumbs .xleft a:link, #breadcrumbs .xleft a:visited, #breadcrumbs .xleft a:active, #breadcrumbs .xleft a:hover {
+  color: #FF9622;
+  font-weight: bold;
+}
+#banner {
+  height: 235px;
+}
+
+.subsection {
+  margin-left: 3px;
+  color: #333333;
+}
+.subsection p {
+  font-size: 12px;
+}
+.errormark, .warningmark, .donemark, .infomark {
+  background: url(../images/icon_error_sml.gif) no-repeat;
+}
+
+.warningmark {
+  background-image: url(../images/icon_warning_sml.gif);
+}
+
+.donemark {
+  background-image: url(../images/icon_success_sml.gif);
+}
+
+.infomark {
+  background-image: url(../images/icon_info_sml.gif);
+}

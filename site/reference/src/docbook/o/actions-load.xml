@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-load">
+    <title>Load</title>
+
+    <para>You are able to load properties from external property files and store them as test variables. The action will
+    require a file resource either from class path or file system in order to read the property values.</para>
+    
+    <para>Let us look at an example to get an idea about this action:</para>
+    
+    <para>Content of load.properties:</para>
+    <programlisting>
+  username=Mickey Mouse
+  greeting.text=Hello Test Framework
+    </programlisting>
+    
+    <programlisting>
+  &lt;testcase name=&quot;loadPropertiesTest&quot;&gt;
+      &lt;actions&gt;
+          &lt;load&gt;
+              &lt;properties file=&quot;file:tests/resources/load.properties&quot;/&gt;
+          &lt;/load&gt;
+          
+          &lt;trace-variables/&gt;
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>Output:</para>
+    <programlisting>
+  Current value of variable username = Mickey Mouse
+  Current value of variable greeting.text = Hello Test Framework
+    </programlisting>
+    
+    <para>The action will load all available properties in the file load.properties and store them to the test case
+    as local variables.</para>
+    
+    <important>
+        <para>Existing variables are overwritten!</para>
+    </important>
+</section>

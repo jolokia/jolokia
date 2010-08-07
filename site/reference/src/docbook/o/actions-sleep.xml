@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section id="actions-sleep">
+    <title>Sleep</title>
+
+    <para>This action shows how to make the test framework sleep for a given amount of time. The attribute 'time' defines 
+    the amount of time to wait in seconds. As shown in the next example decimal values are supported too. When no waiting time is
+    specified the default time of 5.0 seconds applies.</para>
+    
+    <programlisting>
+  &lt;testcase name=&quot;sleepTest&quot;&gt;
+      &lt;actions&gt;
+          &lt;sleep time=&quot;3.5&quot;/&gt;
+          
+          &lt;sleep/&gt;
+      &lt;/actions&gt;
+  &lt;/testcase&gt;
+    </programlisting>
+    
+    <para>When should somebody use this action? To us this action was always very useful in case the test needed to wait until 
+    an application had done some work. For example in some cases the application took some time to write some data into the database.
+    We waited then a small amount of time in order to avoid unnessesary test failures, because the test framework simply validated 
+    the database too early. Or as another example the test may wait a given time until retry mechanisms are triggered in the tested
+    application and then proceed with the test actions.</para>
+</section>
