@@ -480,12 +480,12 @@
         <div class="grid_24 alpha main_top"></div>
         <div class="grid_24 alpha main_content">
           <!-- Navigation -->
-          <div class="grid_6 alpha">
+          <div class="grid_5 alpha">
             #mainMenu( $decoration.body.menus )
           </div>
           <!-- Main Box -->
-          <div class="grid_16 prefix_1 omega">
-            <div class="content_box">            
+          <div class="grid_18 omega">
+            <div class="content_box">
               <div class="content_top"></div>
               <div class="content_content">
                 $bodyContent

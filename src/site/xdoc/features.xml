@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Features</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <!-- The body of the document contains a number of sections -->
+    <div class="feature">
+      <div class="feature_box">
+        Bulk-Requests
+      </div>
+      <div class="feature_box">
+        Security
+      </div>
+      <div class="clear"></div>
+      <div class="feature_box">
+        Simple 
+      </div>
+      <div class="feature_box">
+        Typeless
+      </div>
+      <div class="clear"></div>
+      <div class="feature_box">
+        Proxy-Mode
+      </div>
+      <div class="feature_box">
+        Fast
+      </div>
+      <div class="clear"></div>
+      <div class="feature_box">
+        Firwall friendly
+      </div>
+      <div class="feature_box">
+        Fast
+      </div>
+    </div>
+  </body>
+    
+</document>
+

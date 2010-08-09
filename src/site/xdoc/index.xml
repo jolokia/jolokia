@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Overview</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <!-- The body of the document contains a number of sections -->
+    <div class="teaser">
+      <strong>Jolokia</strong> is a toolkit for remote JMX communication.<br/>
+      <div class="subtitle">It is an agent based solution which uses HTTP and JSON as protocol.</div>
+    </div>
+    <ul>
+      <li>Starting points</li>
+      <li>(Download box rechts oben)</li>
+    </ul>
+    <section  name="Overview">
+      <p>
+        This site is organized in several sections
+      </p>
+      <ul>
+        <li>          
+          <a href="documentation.html">Documentation</a> including a <a href="tutorial.html">tutorial</a>, a
+          <a href="reference.html">reference manual</a> and the JSON
+          <a href="protocol.html">protocol specification</a>.
+        </li>
+        <li>
+          <a href="agent.html">Agents</a> for various platforms.
+        </li>
+        <li>
+          <a href="clients.html">Clients</a> including bindings for
+          <a href="clients/java.html">Java</a> and <a href="clients/perl.html">Perl</a>.
+        </li>
+        <li>
+          <a href="modules.html">Module</a> project documentation in Maven style.
+        </li>
+      </ul>
+    </section>
+    <section name="News">
+      <ul>
+        <li>
+          Jolokia 0.80 as been released. Get it from the
+          <a href="download.html">Download</a> page.
+        </li>
+      </ul>
+    </section>
+  </body>
+
+</document>
+
