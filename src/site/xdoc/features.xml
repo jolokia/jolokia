@@ -10,36 +10,81 @@
 
   <body>
     <!-- The body of the document contains a number of sections -->
-    <div class="feature">
-      <div class="feature_box">
-        Bulk-Requests
+    <div class="feature grid_18 alpha">
+      <div class="grid_7 prefix_1 alpha">
+        <div class="feature_box">
+          <h2>Bulk-Requests</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing
+            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
+            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
+            venenatis, tellus pede rhoncus purus, non ultrices tortor
+            felis ac purus. Maecenas adipiscing. Ut id
+            turpis. Vestibulum posuere convallis est. Aliquam vel odio
+            ac ligula ultricies pharetra. 
+          </p>
+        </div>
+        <div class="feature_box">
+          <h2>Security</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing
+            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
+            sed, turpis. In a libero. . 
+          </p>
+        </div>
+        <div class="feature_box">
+          <h2>Simple</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing
+            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
+            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
+            venenatis, tellus pede rhoncus purus, non ultrices tortor
+            felis ac purus. Maecenas adipiscing. 
+          </p>
+        </div>
       </div>
-      <div class="feature_box">
-        Security
-      </div>
-      <div class="clear"></div>
-      <div class="feature_box">
-        Simple 
-      </div>
-      <div class="feature_box">
-        Typeless
-      </div>
-      <div class="clear"></div>
-      <div class="feature_box">
-        Proxy-Mode
-      </div>
-      <div class="feature_box">
-        Fast
-      </div>
-      <div class="clear"></div>
-      <div class="feature_box">
-        Firwall friendly
-      </div>
-      <div class="feature_box">
-        Fast
+      <div class="grid_7 prefix_1 omega">
+        <div class="feature_box">
+          <h2>Proxy-Mode</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing
+            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
+            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
+            venenatis, tellus pede rhoncus purus, non ultrices tortor
+            felis ac purus. . 
+          </p>
+        </div>
+        <div class="feature_box">
+          <h2>Fast</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing
+            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
+            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
+            venenatis, tellus pede rhoncus purus, non ultrices tortor
+            felis ac purus. Maecenas adipiscing. Ut id
+            turpis. Vestibulum posuere convallis est. Aliquam vel odio
+            ac ligula ultricies pharetra. 
+          </p>
+        </div>
+        <div class="feature_box">
+          <h2>Firewall friendly</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Lorem ipsum dolor sit amet, consectetuer adipiscing
+            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
+            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
+            venenatis, tellus pede rhoncus purus, non ultrices tortor
+            felis ac purus. Maecenas adipiscing. Ut id
+            turpis. Vestibulum posuere convallis est. 
+          </p>
+        </div>
       </div>
     </div>
-  </body>
-    
+  </body>    
 </document>
 

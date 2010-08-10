@@ -61,6 +61,10 @@ Request
 
 * GET Requests
 
+  GET requests are simple in usage, can be tested from within the
+  browser, but lack some advanced features only available for POST
+  requests.
+
 ** read
 
   Mode used for reading an JMX attributes. The operation specific

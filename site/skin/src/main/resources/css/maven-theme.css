@@ -109,8 +109,10 @@ div.content_bottom {
 }
 
 div.content_content {
-  background: #ffffff;
-  position: relative;
+    margin: 0px;
+    padding: 0px;
+    background: #ffffff;
+    position: relative;
 }
 
 /* Navigation boxes (left) */
@@ -167,13 +169,11 @@ div.content_content {
     float: right;
     color: #8e8e8e;
     font-size: 9px;
-    margin-right: 15px;
-    margin-bottom: -5px;
+    margin: 3px 25px -5px 0px;
 }
 
 .content_content {
-    padding: 10px;
-    line-height: 150%;
+    line-height: 170%;
 }
 
 div.teaser {
@@ -182,11 +182,10 @@ div.teaser {
     color: #e7d3cb;
     font-size: 20px;
     padding: 10px 30px;
-    margin-top: -10px; 
+    margin-left: 2px;
+    margin-top: -1px; 
     line-height: 150%;
     height: 82px;
-    margin-left: -8px;
-    margin-top: -11px;
 }
 
 div.teaser strong {
@@ -198,13 +197,41 @@ div.teaser .subtitle {
     font-size: 14px;
 }
 
-div.feature_box {
-    float: left; 
-    margin: 10px auto;
-    border: solid;
-    width: 300px;
+div.feature {
+    padding-left: 10px;
 }
 
+div.feature_box {
+    border: solid 1px #888;
+    background: #ccc;
+    width: 280px;
+    margin: 30px 30px 30px 0px;
+    min-height: 200px;
+}
+
+div.feature_icon {
+    float: right;
+    height: 100px;
+    width: 100px;
+    border: 1px solid #888;
+    margin: 10px;
+    background: #d4729f;
+}
+
+.feature_box h2 {
+    background: #c60000;
+    text-align: center;
+    color: #e6c0d8;
+    width: 276px;
+    height: 24px;
+    padding-top: 3px;
+    padding-left: 0px;
+    margin: 2px;
+}
+
+.feature_box p {
+    margin: 10px;
+}
 /* ========================================================================================================  */
 /* Common text attributes */
 
@@ -214,7 +241,9 @@ ul {
 }
 
 p {
-    margin-left: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
+    text-align: justify;
 }
 code {
   font-size: 12px;
@@ -261,25 +290,35 @@ h2 {
     background: url(../images/h2_bg.png) no-repeat left top;
     display: block;
     font-size: 17px;
-    color: #333333;
     padding-top: 5px;
-    padding-left: 20px;
-    margin-left: -14px;
+    padding-left: 15px;
+    margin-left: -4px;
     height: 32px;
-    color: #636363;
+    color: #555;
     width: 710px;
     font-weight: normal;
 }
 
 h3 {
-  padding: 4px 4px 4px 24px;
-  color: #666;
-  background-color: #ccc;
-  font-weight: bold;
-  font-size: 14px;
-  background-image: url(../images/h3.jpg);
-  background-repeat: no-repeat;
-  background-position: left bottom;
+  padding: 4px 4px 4px 4px;
+  color: #555;
+  font-weight: normal;
+  font-size: 17px;
+  display: block;
+  border-bottom: #555 1px solid;
+}
+
+h4 {
+  padding: 4px 4px 4px 4px;
+  color: #c20000;
+  font-weight: normal;
+  font-size: 17px;
+}
+
+h5 {
+  padding: 4px 4px 4px 4px;
+  font-size: 15px;
+  color: #555;
 }
 
 #breadcrumbs {

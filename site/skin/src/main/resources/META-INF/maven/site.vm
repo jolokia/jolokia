@@ -485,12 +485,12 @@
           </div>
           <!-- Main Box -->
           <div class="grid_18 omega">
-            <div class="content_box">
-              <div class="content_top"></div>
-              <div class="content_content">
+            <div class="content_box grid_18 alpha">
+              <div class="content_top grid_18 alpha"></div>
+              <div class="content_content grid_18">
                 $bodyContent
               </div>
-              <div class="content_bottom"></div>
+              <div class="content_bottom grid_18 omega"></div>
             </div>
           </div>
           <div class="grid_24 alpha">
