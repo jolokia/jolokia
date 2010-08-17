@@ -1,8 +1,13 @@
 package org.jolokia.converter;
 
 import java.lang.reflect.Array;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /*
  * jmx4perl - WAR Agent for exporting JMX via JSON
@@ -54,6 +59,10 @@ public class StringToObjectConverter {
         EXTRACTOR_MAP.put("boolean",new BooleanExtractor());
         EXTRACTOR_MAP.put("char",new CharExtractor());
         EXTRACTOR_MAP.put(String.class.getName(),new StringExtractor());
+
+        JSONExtractor jsonExtractor = new JSONExtractor();
+        EXTRACTOR_MAP.put(JSONObject.class.getName(), jsonExtractor);
+        EXTRACTOR_MAP.put(JSONArray.class.getName(), jsonExtractor);
 
         TYPE_SIGNATURE_MAP.put("Z",boolean.class);
         TYPE_SIGNATURE_MAP.put("B",byte.class);
@@ -162,5 +171,15 @@ public class StringToObjectConverter {
     }
     private static class ShortExtractor implements Extractor {
         public Object extract(String pValue) { return Short.parseShort(pValue); }
+    }
+
+    private static class JSONExtractor implements Extractor {
+        public Object extract(String pValue) {
+            try {
+                return new JSONParser().parse(pValue);
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
+            }
+        }
     }
 }

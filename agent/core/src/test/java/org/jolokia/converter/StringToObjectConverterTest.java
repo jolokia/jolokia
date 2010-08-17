@@ -1,5 +1,7 @@
 package org.jolokia.converter;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -82,6 +84,23 @@ public class StringToObjectConverterTest {
 
         obj = converter.convertFromString("java.lang.String","10");
         assertEquals("String conversion","10",obj);
+    }
+
+    @Test
+    public void jsonConversion() {
+        JSONObject json = new JSONObject();
+        json.put("name","roland");
+        json.put("kind","jolokia");
+
+        Object object = converter.convertFromString(JSONObject.class.getName(),json.toString());
+        assertEquals(json,object);
+
+        JSONArray array = new JSONArray();
+        array.add("roland");
+        array.add("jolokia");
+
+        object = converter.convertFromString(JSONArray.class.getName(),array.toString());
+        assertEquals(array,object);
     }
 
     @Test
