@@ -33,7 +33,79 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/dist-bin.xml</descriptor>
+            <descriptor>src/main/assembly/dist-source.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>com.agilejava.docbkx</groupId>
+        <artifactId>docbkx-maven-plugin</artifactId>
+        <version>2.0.6</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-html</goal>
+              <goal>generate-pdf</goal>
+            </goals>
+            <phase>pre-site</phase>
+          </execution>
+        </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.docbook</groupId>
+              <artifactId>docbook-xml</artifactId>
+              <version>4.4</version>
+              <scope>runtime</scope>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <includes>index.xml</includes>
+            <xincludeSupported>true</xincludeSupported>
+            <foCustomization>src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
+            <htmlStylesheet>css/stylesheet.css</htmlStylesheet>
+            <!-- produce single-page html output -->
+            <chunkedOutput>false</chunkedOutput>
+            <!-- produce multi-page html output
+                 <htmlCustomization>${project.basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization> -->
+            <entities>
+              <entity>
+                <name>version</name>
+                <value>${pom.version}</value>
+              </entity>
+            </entities>
+            <postProcess>
+              <copy todir="${project.basedir}/target/site/reference">
+                <fileset dir="${project.basedir}/target/docbkx">
+                  <include name="**/*.html" />
+                  <include name="**/*.pdf" />
+                </fileset>
+              </copy>
+              <copy todir="${project.basedir}/target/site/reference/html">
+                <fileset dir="${project.basedir}/src/docbkx/resources">
+                  <include name="**/*.css" />
+                  <include name="**/*.png" />
+                  <include name="**/*.gif" />
+                  <include name="**/*.jpg" />
+                </fileset>
+              </copy>
+              <move file="${project.basedir}/target/site/reference/pdf/index.pdf"
+                    tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf"
+                    failonerror="false" />
+            </postProcess>
+          </configuration>
+      </plugin>
+
     </plugins>
+
+
+
 
     <!-- plugin versions -->
     <pluginManagement>
@@ -87,11 +159,6 @@
         <plugin>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>1.3</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.3</version>
         </plugin>
 
       </plugins>
@@ -201,7 +268,7 @@
         </plugins>
       </build>
     </profile>
-
+    
     <profile>
       <id>maven-3</id>
       <activation>

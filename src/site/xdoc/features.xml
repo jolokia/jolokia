@@ -16,33 +16,41 @@
           <h2>Bulk-Requests</h2>
           <div class="feature_icon"></div>
           <p>
-            Lorem ipsum dolor sit amet, consectetuer adipiscing
-            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
-            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
-            venenatis, tellus pede rhoncus purus, non ultrices tortor
-            felis ac purus. Maecenas adipiscing. Ut id
-            turpis. Vestibulum posuere convallis est. Aliquam vel odio
-            ac ligula ultricies pharetra. 
+            In contrast to JSR-160 remoting, Jolokia can process many
+            JMX requests with a single roundtrip. A single HTTP POST
+            request puts those requests in its JSON payload
+            which gets dispatched on the agent side. These bulk
+            requests can increase performance drastically for
+            monitoring solutions. The Nagios plugin
+            <code>check_jmx4perl</code> uses bulk requests for its
+            multi check feature. <a href="">More ...</a>
           </p>
         </div>
         <div class="feature_box">
           <h2>Security</h2>
           <div class="feature_icon"></div>
           <p>
-            Lorem ipsum dolor sit amet, consectetuer adipiscing
-            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
-            sed, turpis. In a libero. . 
+            In addition to standard HTTP security (SSL,
+            HTTP-Authentication) Jolokia supports a custom policy with
+            fine grained restrictions based on multiple properties
+            like the client's IP address or subnet, the MBean names
+            and their attributes and operations. The policy is defined
+            in an XML format with support for allow/deny sections and
+            wildcards. <a href="">More ...</a>
           </p>
         </div>
         <div class="feature_box">
           <h2>Simple</h2>
           <div class="feature_icon"></div>
           <p>
-            Lorem ipsum dolor sit amet, consectetuer adipiscing
-            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
-            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
-            venenatis, tellus pede rhoncus purus, non ultrices tortor
-            felis ac purus. Maecenas adipiscing. 
+            It's simple. Jolokia can be used with a simple Web
+            browser since it supports both, GET and POST requests. A
+            custom, simple, REST-like URL encoding enables simple
+            access from any client platform. The <a href="">Java</a>
+            and <a href="">Perl</a> client libraries' API is designed
+            for a simple usage, using a request-response
+            paradigma. They are not harder to use as any other HTTP
+            library. <a href="">More ...</a>
           </p>
         </div>
       </div>
@@ -51,36 +59,50 @@
           <h2>Proxy-Mode</h2>
           <div class="feature_icon"></div>
           <p>
-            Lorem ipsum dolor sit amet, consectetuer adipiscing
-            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
-            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
-            venenatis, tellus pede rhoncus purus, non ultrices tortor
-            felis ac purus. . 
+            Jolokia can operate in an agentless mode
+            where the only requirement on the target platform is the
+            standard JSR-160 export of its MBeanServer. A proxy
+            listens on the front side for Jolokia requests via
+            JSON/HTTP and propagates these to the target server
+            through remote JSR-160 JMX calls. Bulk requests gets
+            dispatched into multiple JSR-160 requests on the proxy
+            transparently. <a href="">More ...</a>
           </p>
         </div>
         <div class="feature_box">
           <h2>Fast</h2>
           <div class="feature_icon"></div>
           <p>
-            Lorem ipsum dolor sit amet, consectetuer adipiscing
-            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
-            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
-            venenatis, tellus pede rhoncus purus, non ultrices tortor
-            felis ac purus. Maecenas adipiscing. Ut id
-            turpis. Vestibulum posuere convallis est. Aliquam vel odio
-            ac ligula ultricies pharetra. 
+            Jolokia uses the super fast JSON serialization library <a
+            href="">json-simple</a> for parsing requests and creating
+            responses. Due to its typeless nature, it's faster than
+            Java object serialization used in JSR-160 communication.
+            The JSON payload is in general much smaller than its
+            correspondent serialized Java object representation. Bulk
+            request (which are not available for JSR-160 remoting) can
+            boost performance even further. <a href="">More ...</a>
           </p>
         </div>
         <div class="feature_box">
           <h2>Firewall friendly</h2>
           <div class="feature_icon"></div>
           <p>
-            Lorem ipsum dolor sit amet, consectetuer adipiscing
-            elit. Duis sapien nisl, suscipit quis, suscipit id, mollis
-            sed, turpis. In a libero. Nunc blandit, sapien at aliquet
-            venenatis, tellus pede rhoncus purus, non ultrices tortor
-            felis ac purus. Maecenas adipiscing. Ut id
-            turpis. Vestibulum posuere convallis est. 
+            The usage of HTTP as transport protocol makes Jolokia a
+            perfect choice for firewall setups. It can seemless
+            operate over multiple HTTP-Proxy hops. <a href="">More ...</a>
+          </p>
+        </div>
+        <div class="feature_box">
+          <h2>Polyglot</h2>
+          <div class="feature_icon"></div>
+          <p>
+            Thanks to choosing the widely adopted
+            standards HTTP and JSON, Jolokia is able to bridge
+            effortless the Java centric technology JMX to non-Java
+            platforms. <a href="">Java</a> and <a href="">Perl</a>
+            client libraries are already available, other laguage
+            bindings are in the pipeline (e.g. Javascript). <a
+            href="">More ...</a>
           </p>
         </div>
       </div>

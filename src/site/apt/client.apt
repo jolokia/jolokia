@@ -1,13 +1,16 @@
+Client Libraries
 
-* Beschreibung, was eine client lib ist
-* Vorstellung der client libraries (Tabelle)
-  oder Paragraphen mit Bildern.
-* Java
-  - Typeless
-  - Bulk-Requests
+  <Explain: what are client libraries ?>
+
+* Java 
+
+  * Typeless
+  * Bulk Requests
+
 * Perl
-  - jmx4perl
-  - Nagios-Plugin
-  - Link
-  - j4psh
-  - Library
+
+  * jmx4perl
+  * Nagios-Plugin
+  * Link
+  * j4psh
+  * Library

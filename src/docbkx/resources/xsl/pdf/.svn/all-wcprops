@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/spring-integration/!svn/ver/3186/trunk/src/docbkx/resources/xsl/pdf
+END
+fopdf.xsl
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/spring-integration/!svn/ver/3186/trunk/src/docbkx/resources/xsl/pdf/fopdf.xsl
+END
+titlepage.xml
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/spring-integration/!svn/ver/3186/trunk/src/docbkx/resources/xsl/pdf/titlepage.xml
+END

@@ -1,5 +1,8 @@
+Distributions
 
-Jolokia 0.80
+* Jolokia 0.80
+
+ * Binary distribution containing the agents and client jar only
 
  * Complete tarball including documentation and source
 

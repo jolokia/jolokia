@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding="iso-8859-1" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+<!ENTITY introduction       SYSTEM "introduction.xml">
+<!ENTITY architecture       SYSTEM "architecture.xml">
+<!ENTITY agents             SYSTEM "agents.xml">
+<!ENTITY security           SYSTEM "security.xml">
+<!ENTITY proxy              SYSTEM "proxy.xml">
+<!ENTITY protocol           SYSTEM "protocol.xml">
+<!ENTITY clients            SYSTEM "clients.xml">
+<!ENTITY sample             SYSTEM "sample.xml">
+<!ENTITY jmx4perl           SYSTEM "jmx4perl.xml">
+]>
+<book>
+  <bookinfo>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/citrus_logo.png" format="PNG" />
+      </imageobject>
+    </mediaobject>
+    <title>Jolokia - Reference Documentation</title>
+    <releaseinfo>0.80-SNAPSHOT</releaseinfo>
+    <authorgroup>
+      <author>
+        <firstname>Roland</firstname>
+        <surname>Huß</surname>
+      </author>
+    </authorgroup>
+    <copyright>
+      <year>2010</year>
+      <holder>Roland Huß</holder>
+    </copyright>
+  </bookinfo>
+  <toc/>
+
+  &introduction;
+  &architecture;
+  &agents;
+  &security;
+  &proxy;
+  &protocol;
+  &clients;
+
+  <appendix id="appendix">
+    <title>Appendix</title>
+    &sample;
+    &jmx4perl;
+  </appendix>
+</book>

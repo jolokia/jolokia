@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="architecture">
+  <title>Architecture</title>
+  
+  <section id="agent-mode">
+    <title>Agent mode</title>
+  </section>
+    
+  <section id="proxy-mode">
+    <title>Proxy Mode</title>
+
+  </section>
+    
+</chapter>

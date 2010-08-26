@@ -20,7 +20,6 @@
 
   <modules>
     <module>skin</module>
-    <module>reference</module>
   </modules>
 
 </project>

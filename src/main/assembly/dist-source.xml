@@ -1,0 +1,16 @@
+<assembly>
+  <id>source</id>
+  <formats>
+    <format>tar.gz</format>
+    <format>zip</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>${project.basedir}</directory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <excludes>
+        <exclude>${project.build.directory}/**</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+</assembly>

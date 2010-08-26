@@ -11,44 +11,50 @@
   <body>
     <!-- The body of the document contains a number of sections -->
     <div class="teaser">
-      <strong>Jolokia</strong> is a toolkit for remote JMX communication.<br/>
-      <div class="subtitle">It is an agent based solution which uses HTTP and JSON as protocol.</div>
+      <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br/>
+      <div class="subtitle">It is fast, simple, polyglot and adds unique features. It's JMX on Capsaicin.</div>
     </div>
-    <ul>
-      <li>Starting points</li>
-      <li>(Download box rechts oben)</li>
-    </ul>
-    <section  name="Overview">
-      <p>
-        This site is organized in several sections
-      </p>
+    <p>
+      Jolokia is an agent based approach to remote JMX where an
+      archive is deployed on the target platform. Various agents are
+      available for different platforms covering all important
+      setups. Jolokia can be operated in an agentless mode, too, where
+      a proxy translates between the Jolokia JSON protocol and
+      standarized JSR-160 JMX remote calls.
+    </p>
+    <section name="Starting points">
       <ul>
+        <li>
+          Hot <a href="features.html">Features</a> which makes Jolokia
+          unique among JMX remoting solutions.
+        </li>
         <li>          
-          <a href="documentation.html">Documentation</a> including a <a href="tutorial.html">tutorial</a>, a
-          <a href="reference.html">reference manual</a> and the JSON
-          <a href="protocol.html">protocol specification</a>.
+          The <a href="documentation.html">Documentation</a> includes
+          a <a href="tutorial.html">tutorial</a>, a <a
+          href="reference.html">reference manual</a> and the JSON <a
+          href="protocol.html">protocol specification</a>.
         </li>
         <li>
-          <a href="agent.html">Agents</a> for various platforms.
+          <a href="agent.html">Agents</a> are available for many
+          platforms (JEE, OSGi, Mule, JDK6 JVM).          
         </li>
         <li>
-          <a href="clients.html">Clients</a> including bindings for
-          <a href="clients/java.html">Java</a> and <a href="clients/perl.html">Perl</a>.
-        </li>
-        <li>
-          <a href="modules.html">Module</a> project documentation in Maven style.
+          <a href="client.html">Client libraries</a> include language
+          bindings for <a href="clients/java.html">Java</a> and <a
+          href="clients/perl.html">Perl</a>. 
         </li>
       </ul>
     </section>
     <section name="News">
-      <ul>
-        <li>
-          Jolokia 0.80 as been released. Get it from the
-          <a href="download.html">Download</a> page.
-        </li>
-      </ul>
-    </section>
-  </body>
+      <subsection name="Version 0.80 released">
+        Jolokia 0.80 is the initial release. It is the direct the
+        successor of agent part from Jmx4Perl 0.71 with no
+        additional features. Get it from the
+        <a href="download.html">Download</a> page and read the
+        announcement in our blog.
+      </subsection>
+  </section>
+</body>
 
 </document>
 

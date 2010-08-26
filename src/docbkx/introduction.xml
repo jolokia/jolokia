@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="introduction">
+  <title>Introduction</title>
+  <para>
+    JMX (Java Management Extensions) is the standard management solution in the
+    Java world. Since JDK 1.5 it is available in every Java Virtual Machine and
+    especially JEE application servers use this technology intensively for exposing
+    managable entities.
+  </para>
+  <para>
+    I love JMX. It is a well crafted specification, created in times
+    where other concepts like EJBs failed spectacularly. Even more
+    than ten years after its incubation it is still the one-and-only
+    when it comes to management in the Java world. What I like
+    especially are the various levels of sophistications for
+    implementing MBeans, starting with dead simple `Standard MBeans` and
+    ending in universal Open MBeans (to verify).
+  </para>
+  <para>
+    Some of advanced concepts didn't really hit the public and are now
+    probably obsolete. Add-on standards like JSR-77 didn't received
+    the adoption level they deserved. And then there is JSR-160, JMX
+    remoting. 
+
+  </para>  
+
+</chapter>
