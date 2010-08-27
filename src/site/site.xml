@@ -17,25 +17,25 @@
   
   <body>
     <links>
-      <item name="Home" href="index.html"/>
-      <item name="Download" href="download.html"/>
-      <item name="Features" href="features.html"/>
-      <item name="Documentation" href="documentation.html"/>
+      <item name="Home" href="./index.html"/>
+      <item name="Download" href="./download.html"/>
+      <item name="Features" href="./features.html"/>
+      <item name="Documentation" href="./documentation.html"/>
       <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
-      <item name="About" href="about.html"/>
+      <item name="About" href="./about.html"/>
     </links>
 
     <menu name="Jolokia">
-      <item name="Download" href="download.html"/>
-      <item name="Features" href="features.html"/>
-      <item name="Resources" href="resources.html"/>
-      <item name="License" href="license.html"/>
+      <item name="Download" href="./download.html"/>
+      <item name="Features" href="./features.html"/>
+      <item name="Resources" href="./resources.html"/>
+      <item name="License" href="./license.html"/>
     </menu>
     <menu name="Documentation">
-      <item name="Overview" href="documentation.html"/>
-      <item name="Tutorial" href="tutorial.html"/>
-      <item name="Reference Manual" href="reference.html"/>
-      <item name="Protocol Specification" href="protocol.html"/>
+      <item name="Overview" href="./documentation.html"/>
+      <item name="Tutorial" href="./tutorial.html"/>
+      <item name="Reference Manual" href="./reference.html"/>
+      <item name="Protocol Specification" href="./protocol.html"/>
     </menu>
     <menu name="Agents">
       <item name="Overview" href="agent.html"/>
