@@ -4,7 +4,7 @@
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-parent</artifactId>
+    <artifactId>jolokia</artifactId>
     <version>0.80-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
