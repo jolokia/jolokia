@@ -52,7 +52,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         JMXConnector connector = getConnector(pJmxReq);
         try {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
-            if (handler.handleAllServersAtOnce()) {
+            if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
                 return handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),pJmxReq);
             } else {

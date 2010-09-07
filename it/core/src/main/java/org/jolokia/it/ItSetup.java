@@ -49,9 +49,9 @@ public class ItSetup {
             "/--/",
             "with%3acolon",
             "//server/client",
-            "service%3ajmx%3armi%3a///jndi/rmi%3a//bhut%3a9999/jmxrmi"
+            "service%3ajmx%3armi%3a///jndi/rmi%3a//bhut%3a9999/jmxrmi",
+            "\"jdbc/testDB\""
 //            "äöüßÄÖÜ"
-
     };
     private List<String> strangeNames = new ArrayList<String>();
 
@@ -62,6 +62,7 @@ public class ItSetup {
               "namewithstrange=\"chars\"",
               "namewithstrange:\"chars\"",
               ",,,",
+              ",,/,,",
               "===",
               "***",
               "\"\"\"",

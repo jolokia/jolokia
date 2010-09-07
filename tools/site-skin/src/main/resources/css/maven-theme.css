@@ -3,7 +3,6 @@ body {
   background: #FFFFFF
     url(../images/bg.png)
     repeat-x left top;
-  background-repeat: repeat-x;
   font-family: Verdana, Arial, Helvetica, Geneva, sans-serif;
   color: #2A2828;
   font-size: 12px;
@@ -188,7 +187,7 @@ div.teaser {
     height: 68px;
 }
 
-div.teaser strong {
+div.teaser b, div.teaser strong {
     color: #4a0501;
     font-weight: bold;
 }
@@ -209,6 +208,10 @@ div.feature_box {
     min-height: 200px;
 }
 
+div.feature_box div.section {
+    padding: 1px;
+}
+
 div.feature_icon {
     float: right;
     height: 100px;
@@ -219,14 +222,13 @@ div.feature_icon {
 }
 
 .feature_box h2 {
-    background: #c60000;
+    background: url(../images/bg_ft_box.png) repeat-x left top;
     text-align: center;
-    color: #e6c0d8;
-    width: 276px;
+    color: #fff;
+    width: 100%;
     height: 24px;
-    padding-top: 3px;
-    padding-left: 0px;
-    margin: 2px;
+    padding: 1px 0 0 0;
+    margin: 0px;
 }
 
 .feature_box p {
@@ -330,7 +332,7 @@ h5 {
   padding-bottom: 8px;
 }
 
-.source {
+pre {
   border: 1px solid #999;
   background: #f5f5f5;
   margin: 1.5em 25px;

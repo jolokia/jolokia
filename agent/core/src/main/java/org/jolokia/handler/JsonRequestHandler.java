@@ -56,12 +56,13 @@ public abstract class JsonRequestHandler {
      * to query each server on your own. By default, dispatching of the servers
      * are done for you
      *
+     * @param pRequest request to decide on whether to handle all request at once
      * @return whether you want to have
      * {@link #doHandleRequest(javax.management.MBeanServerConnection, org.jolokia.JmxRequest)}
      * (<code>false</code>) or
      * {@link #doHandleRequest(java.util.Set, org.jolokia.JmxRequest)} (<code>true</code>) called.
      */
-    public boolean handleAllServersAtOnce() {
+    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
         return false;
     }
 
@@ -116,7 +117,7 @@ public abstract class JsonRequestHandler {
     /**
      * Override this if you want to have all servers at once for processing the request
      * (like need for merging info as for a <code>list</code> command). This method
-     * is only called when {@link #handleAllServersAtOnce()} returns <code>true</code>
+     * is only called when {@link #handleAllServersAtOnce(JmxRequest)} returns <code>true</code>
      *
      * @param servers all MBeans servers detected
      * @param request request to process
@@ -128,6 +129,14 @@ public abstract class JsonRequestHandler {
         return doHandleRequest(servers,request);
     }
 
+    /**
+     * Default implementation fo handling a request for multiple servers at once. A subclass, which returns,
+     * <code>true</code> on {@link #handleAllServersAtOnce(JmxRequest)}, needs to override this method.
+     *
+     * @param servers all MBean servers found in this JVM
+     * @param request the original request
+     * @return the result of the the request.
+     */
     public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxRequest request)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         return null;

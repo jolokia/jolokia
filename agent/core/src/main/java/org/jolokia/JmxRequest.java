@@ -72,7 +72,7 @@ public class JmxRequest {
     private String objectNameS;
     private ObjectName objectName;
     private List<String> attributeNames;
-    private boolean singleAttribute = true;
+    private boolean multiAttributeMode = false;
     private String value;
     private List<String> extraArgs;
     private String operation;
@@ -138,21 +138,6 @@ public class JmxRequest {
 
     public ObjectName getObjectName() {
         return objectName;
-    }
-
-    public String getAttributeName() {
-        if (attributeNames == null) {
-            return null;
-        }
-        if (!isSingleAttribute()) {
-            throw new IllegalStateException("Request contains more than one attribute (attrs = " +
-                    "" + attributeNames + "). Use getAttributeNames() instead.");
-        }
-        return attributeNames.get(0);
-    }
-
-    public List<String> getAttributeNames() {
-        return attributeNames;
     }
 
     public List<String> getExtraArgs() {
@@ -237,27 +222,61 @@ public class JmxRequest {
         }
     }
 
+    public String getAttributeName() {
+       if (attributeNames == null) {
+           return null;
+       }
+        if (isMultiAttributeMode()) {
+            throw new IllegalStateException("Request contains more than one attribute (attrs = " +
+                    "" + attributeNames + "). Use getAttributeNames() instead.");
+        }
+        return attributeNames.get(0);
+    }
+
+    public List<String> getAttributeNames() {
+        return attributeNames;
+    }
+
+    /**
+     * Set a single attribute name
+     *
+     * @param pName name of the attribute to set
+     */
     void setAttributeName(String pName) {
-        if (attributeNames != null) {
-            attributeNames.clear();
-        } else {
-            attributeNames = new ArrayList<String>(1);
-        }
-        attributeNames.add(pName);
-        singleAttribute = true;
+        attributeNames = Arrays.asList(pName);
+        multiAttributeMode = false;
     }
 
+    /**
+     * Set null, one or more attribtue names
+     *
+     * @param pAttributeNames attribute names to set. If this list is <code>null</code> a 'null' attribute name
+     *        is set (which denotes *all* attributes of a certain MBean). If this list contains a single element,
+     *        this is the same as calling {@link #setAttributeName(String)} with this single element.
+     */
     void setAttributeNames(List<String> pAttributeNames) {
-        attributeNames = pAttributeNames;
-        if (attributeNames != null && pAttributeNames.size() > 1) {
-            singleAttribute = false;
+        if (pAttributeNames == null || (pAttributeNames.size() == 1 && pAttributeNames.get(0) == null)) {
+            setAttributeName(null);
         } else {
-            singleAttribute = true;
+            attributeNames = new ArrayList<String>(pAttributeNames);
+            multiAttributeMode = true;
         }
     }
 
-    public boolean isSingleAttribute() {
-        return singleAttribute;
+    /**
+     * Whether this is a multi-attribute request, i.e. whether it contains one ore more attributes to fetch
+     * @return true if this is a multi attribute request, false otherwise.
+     */
+    public boolean isMultiAttributeMode() {
+        return multiAttributeMode;
+    }
+
+    /**
+     * Whether this request has no attribute names associated  (which normall means, that all attributes should be fetched).
+     * @return true if no attribute name is stored.
+     */
+    public boolean hasAttribute() {
+        return isMultiAttributeMode() || getAttributeName() != null;
     }
 
     void setValue(String pValue) {
@@ -436,15 +455,17 @@ public class JmxRequest {
 
     private void initAttribute(Object pAttrval) {
         if (pAttrval != null) {
-            attributeNames = new ArrayList<String>();
             if (pAttrval instanceof String) {
-                attributeNames.add((String) pAttrval);
-                singleAttribute = true;
+                attributeNames = Arrays.asList((String) pAttrval);
+                multiAttributeMode = false;
             } else if (pAttrval instanceof Collection) {
-                for (Object val : (Collection) pAttrval) {
-                    attributeNames.add((String) val);
+                Collection<String> attributes = (Collection<String>) pAttrval;
+                if (attributes.size() == 1 && attributes.iterator().next() == null) {
+                    attributeNames = Arrays.asList((String) null);
+                } else {
+                    attributeNames = new ArrayList<String>(attributes);
+                    multiAttributeMode = true;
                 }
-                singleAttribute = false;
             }
         }
     }

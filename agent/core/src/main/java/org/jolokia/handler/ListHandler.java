@@ -62,7 +62,7 @@ public class ListHandler extends JsonRequestHandler {
     }
 
     @Override
-    public boolean handleAllServersAtOnce() {
+    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
         return true;
     }
 

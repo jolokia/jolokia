@@ -59,7 +59,7 @@ public class HistoryKey implements Serializable {
             path = null;
         } else {
             type = "attribute";
-            secondary = pJmxReq.getAttributeName();
+            secondary = pJmxReq.isMultiAttributeMode() ? pJmxReq.getAttributeNames().get(0) : pJmxReq.getAttributeName();
             if (pJmxReq.getType() == JmxRequest.Type.READ && secondary == null) {
                 secondary = "(all)";
             }

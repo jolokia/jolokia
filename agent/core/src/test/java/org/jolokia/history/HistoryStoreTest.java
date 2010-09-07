@@ -124,8 +124,10 @@ public class HistoryStoreTest {
                         .attributes("attr")
                         .build();
         store.configure(new HistoryKey(req),5);
-        JSONArray res = updateNTimesAsList(req,4,"42");
-        assertEquals("4 history entries",3,res.size());
+        Map value = new HashMap();
+        value.put("attr","42");
+        JSONObject res = updateNTimesAsMap(req,4,value);
+        assertEquals("4 history entries",3,((List) res.get("attr")).size());
     }
 
     @Test

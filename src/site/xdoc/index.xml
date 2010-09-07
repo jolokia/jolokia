@@ -9,7 +9,6 @@
   </properties>
 
   <body>
-    <!-- The body of the document contains a number of sections -->
     <div class="teaser">
       <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br/>
       <div class="subtitle">It is fast, simple, polyglot and adds unique features. It's JMX on Capsaicin.</div>

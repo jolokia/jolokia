@@ -85,7 +85,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      */
     public Object dispatchRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
-        if (pRequestHandler.handleAllServersAtOnce()) {
+        if (pRequestHandler.handleAllServersAtOnce(pJmxReq)) {
             try {
                 return pRequestHandler.handleRequest(mBeanServerConnections,pJmxReq);
             } catch (IOException e) {

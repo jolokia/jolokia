@@ -28,7 +28,7 @@ import javax.management.ObjectName;
  */
 
 /**
- * A restrictor which simply allows everything. Used, when no restrict-access.xml is
+ * A restrictor which simply allows everything. Used, when no jolokia-access.xml is
  * present.
  *
  * @author roland

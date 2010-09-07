@@ -9,13 +9,11 @@ import org.testng.annotations.*;
 import javax.management.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import static org.easymock.classextension.EasyMock.*;
 import static org.jolokia.JmxRequest.Type.READ;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -65,7 +63,7 @@ public class ReadHandlerTest {
         }
         replay(connection);
 
-        Map res = (Map) handler.handleRequest(connection,request);
+        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
         verify(connection);
         for (int i=0;i<attrs.length;i++) {
             assertEquals(vals[i],res.get(attrs[i]));
@@ -85,7 +83,7 @@ public class ReadHandlerTest {
         expect(connection.getAttribute(testBeanName,"attr1")).andReturn("val1");
         replay(connection);
 
-        Map res = (Map) handler.handleRequest(connection,request);
+        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
         verify(connection);
         assertEquals("val0",res.get("attr0"));
         assertEquals("val1",res.get("attr1"));
@@ -103,7 +101,7 @@ public class ReadHandlerTest {
         expect(connection.queryNames(patternMBean,null)).andReturn(new HashSet());
         replay(connection);
         try {
-            handler.handleRequest(connection,request);
+            handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
             fail("Exception should be thrown");
         } catch (InstanceNotFoundException exp) {}
     }
@@ -123,7 +121,7 @@ public class ReadHandlerTest {
         expect(connection.getAttribute(beans[0],"mem1")).andReturn("memval1");
 
         replay(connection);
-        Map res = (Map) handler.handleRequest(connection, request);
+        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
         verify(connection);
         assertEquals(1,res.size());
         assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
@@ -138,7 +136,7 @@ public class ReadHandlerTest {
                         build(),
                 new JmxRequestBuilder(READ, patternMBean).
                         // A single null element is enough to denote "all"
-                        attributes(Arrays.asList("bla",null)).
+                        attributes(Arrays.asList((String) null)).
                         build()
         };
 
@@ -157,7 +155,7 @@ public class ReadHandlerTest {
             expect(connection.getAttribute(beans[1],"common")).andReturn("commonVal1");
             replay(connection);
 
-            Map res = (Map) handler.handleRequest(connection, request);
+            Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
 
             assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
             assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
@@ -188,7 +186,7 @@ public class ReadHandlerTest {
         expect(connection.getAttribute(beans[1],"gc0")).andReturn("gcval0");
         replay(connection);
 
-        Map res = (Map) handler.handleRequest(connection, request);
+        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
 
         // Only a single entry fetched
         assertEquals(res.size(),1);
@@ -211,7 +209,7 @@ public class ReadHandlerTest {
         MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
         replay(connection);
         try {
-            handler.handleRequest(connection, request);
+            handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
         } catch (IllegalArgumentException exp) {
             // expected
         }
@@ -234,7 +232,7 @@ public class ReadHandlerTest {
         expect(connection.getAttribute(beans[1],"gc3")).andReturn("gcval3");
 
         replay(connection);
-        Map res = (Map) handler.handleRequest(connection, request);
+        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
         verify(connection);
         assertEquals(2,res.size());
         assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
@@ -257,7 +255,7 @@ public class ReadHandlerTest {
         replay(connection);
 
         try {
-            Map res = (Map) handler.handleRequest(connection, request);
+            Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
             fail("Request should fail since attribute name doesn't match any MBean's attribute");
         } catch (IllegalArgumentException exp) {
             // Expect this since no MBean matches the given attribute
@@ -280,7 +278,7 @@ public class ReadHandlerTest {
         expect(connection.getAttribute(beans[1],"common")).andReturn("com2");
 
         replay(connection);
-        Map res = (Map) handler.handleRequest(connection, request);
+        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
         verify(connection);
         assertEquals(2,res.size());
         assertEquals("com1",((Map) res.get("java.lang:type=Memory")).get("common"));
@@ -301,6 +299,27 @@ public class ReadHandlerTest {
         return connection;
     }
 
+    // ==============================================================================================================
+    @Test
+    public void handleAllServersAtOnceTest() throws MalformedObjectNameException {
+        JmxRequest request = new JmxRequestBuilder(READ, testBeanName).
+                attribute("attr").
+                build();
+        assertFalse(handler.handleAllServersAtOnce(request));
+        request = new JmxRequestBuilder(READ, testBeanName).
+                attributes(Arrays.asList("attr1","attr2")).
+                build();
+        assertTrue(handler.handleAllServersAtOnce(request));
+        request = new JmxRequestBuilder(READ, testBeanName).
+                attributes((List) null).
+                build();
+        assertTrue(handler.handleAllServersAtOnce(request));
+        request = new JmxRequestBuilder(READ, "java.lang:*").
+                attribute("attr").
+                build();
+        assertTrue(handler.handleAllServersAtOnce(request));
+    }
+
 
     // ==============================================================================================================
 
@@ -316,7 +335,7 @@ public class ReadHandlerTest {
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         replay(restrictor,connection);
         try {
-            handler.handleRequest(connection,request);
+            handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
             fail("Restrictor should forbid access");
         } catch (SecurityException exp) {}
         verify(restrictor,connection);

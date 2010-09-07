@@ -213,7 +213,7 @@ public class HistoryStore implements Serializable {
             if (history.size() > 0) {
                 pJson.put(KEY_HISTORY,history);
             }
-        } else if (!pJmxReq.isSingleAttribute() || pJmxReq.getAttributeName() == null) {
+        } else if (pJmxReq.isMultiAttributeMode() || !pJmxReq.hasAttribute()) {
             // Multiple attributes, but a single bean.
             // Value has the following structure:
             // attribute_key -> attribute_value
