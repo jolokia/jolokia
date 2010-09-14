@@ -11,6 +11,8 @@
   <name>jolokia-core</name>
   <description>jar file containing servlet and helper classes</description>
 
+  <url>http://www.jolokia.org/jolokia-agent-parent/jolokia-core/</url>
+
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>

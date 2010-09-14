@@ -15,6 +15,7 @@
   <version>0.80-SNAPSHOT</version>
   <name>jolokia-agent-parent</name>
   <description>jolokia agent parent pom</description>
+  <url>http://www.jolokia.org/jolokia-agent-parent/</url>
 
   <packaging>pom</packaging>
 

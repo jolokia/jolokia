@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>The Jolokia Story</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+  
+  <body>
+    <section name="The Story">
+      <p style="text-align: left;">
+        <img src="images/jolokia_home.png" style="float: right; margin: 0 0 10px 20px;"/>
+        All started up early 2009 when my colleague Gerhard Lausser,
+        our local Nagios guru and complained heavily about how f*cking
+        hard it is to monitor JEE server with <a
+        href="http://www.nagios.org">Nagios</a>. As you might know,
+        Nagios uses a pletoria of plugins for doing the hard
+        monitoring stuff. These are running locally on a central
+        Nagios host contacting the watched systems mostly remotely
+        with various techniques. For Java applications, <a
+        href="http://java.sun.com/javase/technologies/core/mntr-mgmt/javamanagement/">JMX</a>
+        is of course the the proper joice which provides with
+        <a href="http://jcp.org/en/jsr/detail?id=160">JSR-160</a> connectors remote access to the local 
+        MBeans. At this, indeed several JMX Nagios plugins were
+        already present. However, they all suffer from the same
+        problem: JSR-160 connectors are highly Java centric where its
+        default protocol RMI uses serialized Java objects as
+        payload. So, each plugin (which runs in an external process
+        when called by Nagios) needs to start up a Java Virtual
+        Machine. This has to be done for every check, and since there
+        are usual hundreds of checks every five minutes this becomes
+        easily a performance and memory bottleneck. Additionally, you
+        need a Java installation on the Nagios host, which for many
+        admins poses a, let's say 'cultural' problem.
+      </p>
+      <p>
+        As a Java programmer I love JMX. It is one of the oldest Java
+        specification, which was carefully crafted from the very
+        beginning (especially the core API). Other Java APIs had to
+        take a longer tour until they become widely accepted by the
+        masses as not being painful (think at EJB). However, I'm not
+        really happy with JSR-160's focus on Java based remote
+        protocols. There has been some efforts to make these more
+        friendly to the outside world (e.g. a <a
+        href="https://ws-jmx-connector.dev.java.net/">JSR-160
+        WebService connector</a>), but it seems there is not much
+        momentum anymore behind these. And frankly, I don't want to
+        use WebServices for monitoring, either.
+      </p>
+      <p>
+        That was the birth of <a href="http://www.jmx4perl.org">jmx4perl</a> in May
+        2009. Coming from a strong perl background (being a SGI system
+        administrator at my university in my former life), my initial goal
+        was to use pure Perl for accessing remote JMX informations without
+        the need of a local Java integration.  In turned out, that an agent
+        based approach was the most simplest way. The first agent, a JEE
+        webapplication, which on the frontside translates HTTP requests with
+        a REST payload to local JMX calls (and vice versa for the response),
+        was really lightweight. It knows how to read and set attributes and
+        how to execute operations. It had a list mode for looking up all
+        registered MBeans. And it was
+        <a href="http://labs.consol.de/maven/repository/org/jmx4perl/j4p-agent/0.16/j4p-agent-0.16.war">38kb</a> in size.
+      </p>
+      <p>
+        The jmx4perl agent is now ~ 150kb 'large' with many more
+        features (search, bulk requests, security, ....) but I name it
+        still lighweight ;-). The perl part consists now of powerful
+        Nagios plugin <a
+        href="http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl">check_jmx4perl</a>,
+        a command line tool <a
+        href="http://search.cpan.org/~roland/jmx4perl/scripts/jmx4perl">jmx4perl</a>,
+        a Perl library <a
+        href="http://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm">JMX::Jmx4Perl</a>
+        and a readline based (with context sensitive tab completion on
+        MBean names) JMX shell <a
+        href="http://search.cpan.org/~roland/jmx4perl/scripts/j4psh">j4psh</a>.
+      </p>
+      <p>
+        From the feedback I got, it seems that the Nagios world is happy
+        now. But since I think that this agent based approach provides also a
+        good alternative to JSR-160 connectors for other platforms, it is
+        time to move on and split the Java and Perl part of jmx4perl into two
+        separate products. The amount of programmers which love both, Java
+        and Perl, is negligible anyway ;-). The Perl part (which is
+        approximately the same as the Java part in size) remains jmx4perl,
+        the agent part now became ... Jolokia.
+      </p>
+    </section>
+    <section name="Why it is named Jolokia ?">
+      <p>
+        Jolokia is the world most hottest chili as it has been measured by
+        the .... (ref). I'm a chili head and grow chilis since 2006. I love
+        chilis as much as JMX. That's the main reason.
+        
+        The other is, that a chili is a good metaphore for a hot, new
+        approach for JMX remoting. Especially when it is the hottest chili
+        around ;-)
+      </p>
+    </section>
+    <section name="Thanks">
+      <ul>
+        <li>Gerhard</li>
+        <li>Sorin</li>
+      </ul>
+    </section>
+  </body>
+</document>

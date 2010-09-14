@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Jolokia Java Client library</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Jolokia Java Client library">
+      <pre class="prettyprint lang-java">
+  J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
+  J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
+                                          "HeapMemoryUsage","used");
+  J4pReadResponse resp = j4pClient.execute(req);
+  System.out.println(resp.getValue());
+      </pre>
+    </section>
+  </body>
+</document>

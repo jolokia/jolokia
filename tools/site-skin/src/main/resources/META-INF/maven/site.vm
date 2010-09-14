@@ -432,6 +432,11 @@
     </a>
   #end
 #end
+## 
+## Sets a content-class, but only if the file doesn't end with '-nb.html'
+#macro(contentBackground $class $file)
+#if(!$file.endsWith("-nb.html"))$class#end
+#end
 ##
 <html xmlns="http://www.w3.org/1999/xhtml"#if ( $locale ) xml:lang="$locale.language" lang="$locale.language"#end>
   <head>
@@ -445,6 +450,10 @@
       @import url("$relativePath/css/maven-theme.css");
       @import url("$relativePath/css/site.css");
     </style>
+#if ( $alignedFileName.contains("-hl") )
+    <link href="$relativePath/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="$relativePath/js/prettify/prettify.js"></script>
+#end
     <link rel="stylesheet" href="$relativePath/css/print.css"
     type="text/css" media="print" />
     <link rel="icon" type="image/png" href="$relativePath/images/favicon.png" />
@@ -461,7 +470,11 @@
     <meta http-equiv="Content-Language" content="$locale.language" />
 #end
   </head>
+#if ( $alignedFileName.contains("-hl") )
+  <body class="composite" onload="prettyPrint()">
+#else 
   <body class="composite">
+#end
     <div class="container_24">
 
       <!-- Header -->
@@ -488,11 +501,11 @@
           <!-- Main Box -->
           <div class="grid_18 omega">
             <div class="content_box grid_18 alpha">
-              <div class="content_top grid_18 alpha"></div>
-              <div class="content_content grid_18">
+              <div class="#contentBackground('content_top_bg' $alignedFileName) content_top grid_18 alpha"></div>
+              <div class="#contentBackground('content_content_bg' $alignedFileName) content_content grid_18">
                 $bodyContent
               </div>
-              <div class="content_bottom grid_18 omega"></div>
+              <div class="#contentBackground('content_bottom_bg' $alignedFileName) content_bottom grid_18 omega"></div>
             </div>
           </div>
           <div class="grid_24 alpha">
