@@ -426,6 +426,10 @@ table.bodyTable {
   width: 652px;
 }
 
+li table.bodyTable {
+  width: 500px;
+}
+
 .bodyTable td, .bodyTable th {
   max-width: 470px;
 }

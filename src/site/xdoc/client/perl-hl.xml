@@ -25,7 +25,7 @@
       <p>
         Jmx4perl requests looks like
       </p>
-        <pre class="prettyprint lang-perl">
+      <pre class="prettyprint lang-perl">
    use strict;
    use JMX::Jmx4Perl;
    use JMX::Jmx4Perl::Alias;   # Import MBean aliases 

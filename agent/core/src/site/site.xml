@@ -39,8 +39,8 @@
       <item name="Mule" href="../../agent/mule.html"/>
     </menu>
     <menu name="Clients" href="../../client.html">
-      <item name="Java" href="../../client/java.html"/>
-      <item name="Perl" href="../../client/perl.html"/>
+      <item name="Java" href="../../client/java-hl.html"/>
+      <item name="Perl" href="../../client/perl-hl.html"/>
     </menu>
     <menu name="Modules">
       <item name="Core" href="index.html"/>
