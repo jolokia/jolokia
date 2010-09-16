@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Dowloads</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Jolokia 0.80-SNAPSHOT">
+      <p>
+        There is no official release yet. In the meantime, the
+        snapshot release <strong>${currentStableVersion}</strong> can be
+        downloaded in two variants: As a binary release including the
+        agents and the client library as binaries and the reference
+        manual as PDF and HTML. The source release contains the
+        complete source mirroring the source repository on 
+        <a href="http://github.com/rhuss/jolokia">GitHub</a>.
+      </p>
+      <p>
+        <ul>
+          <li><strong>jolokia-${currentStableVersion}-bin</strong> (<a
+          href="dist/snapshot/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
+          | <a
+          href="dist/snapshot/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
+          <li><strong>jolokia-${currentStableVersion}-source</strong> (<a
+          href="dist/snapshot/${currentStableVersion}-source.tar.gz">tar.gz</a>
+          | <a
+          href="dist/snapshot/${currentStableVersion}-source.zip">zip</a>)</li>
+        </ul>
+      </p>
+      <p>
+        The agents and the client library can be downloaded directly
+        from our maven repository, too:        
+      </p>
+      <table>
+        <tbody>
+          <tr>
+            <th>Artifact</th>
+            <th>Download</th>
+          </tr>
+          <tr>
+            <td>WAR-Agent</td>
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-0.80-20100915.115110-1.war">jolokia-war-0.80-20100915.115110-1.war</a></td>            
+          </tr>
+          <tr>
+            <td>Osgi-Agent</td>
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-0.80-20100915.115110-1.jar">jolokia-osgi-0.80-20100915.115110-1.jar</a></td>            
+          </tr>
+          <tr>
+            <td>Osgi-Agent (full bundle)</td>
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi-bundle/0.80-SNAPSHOT/jolokia-osgi-bundle-0.80-20100915.115110-1.jar">jolokia-osgi-bundle-0.80-20100915.115110-1.jar</a></td>            
+          </tr>
+          <tr>
+            <td>Mule-Agent</td>
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-mule/0.80-SNAPSHOT/jolokia-mule-0.80-20100915.115110-1-agent.jar">jolokia-mule-0.80-20100915.115110-1-agent.jar</a></td>            
+          </tr>
+          <tr>
+            <td>JVM-Agent</td>
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-jvm-jdk6/0.80-SNAPSHOT/jolokia-jvm-jdk6-0.80-20100915.115110-1-agent.jar">jolokia-jvm-jdk6-0.80-20100915.115110-1-agent.jar</a></td>            
+          </tr>
+          <tr>
+            <td>Java Client Library</td>
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-client-java/0.80-SNAPSHOT/jolokia-client-java-0.80-20100915.115110-1.jar">jolokia-client-java-0.80-20100915.115110-1.jar</a></td>            
+          </tr>
+        </tbody>
+      </table>
+
+      <subsection name="Maven">
+        <p>
+          The main agent functionality is encapsulated in a core jar,
+          which can be easily used in own projects. Also, the Java
+          client library can be used as a Maven dependency. The dependencies are
+        </p>
+        <pre class="prettyprint"><![CDATA[
+ <dependency>
+   <groupId>org.jolokia</groupId>
+   <artifactId>jolokia-core</artifactId>
+   <version>${currentStableVersion}</version>
+ </dependency>]]></pre>
+        <p>and</p>
+        <pre class="prettyprint"><![CDATA[
+ <dependency>
+   <groupId>org.jolokia</groupId>
+   <artifactId>jolokia-client-java</artifactId>
+   <version>${currentStableVersion}</version>
+ </dependency>]]></pre>
+        <p>
+          For automatic dependency resolution, please add the
+          following repository to your <code>pom.xml</code> to get the offcially released
+          versions:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+ <repository>
+   <id>labs-consol-release</id>
+   <name>ConSol* Labs Repository (Releases)</name>
+   <url>http://labs.consol.de/maven/repository</url>
+   <snapshots>
+     <enabled>false</enabled>
+   </snapshots>
+   <releases>
+     <enabled>true</enabled>
+   </releases>
+ </repository>]]></pre>
+        <p>
+          Snapshots are deployed regularly and can be accessed via this repository:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+ <repository>
+   <id>labs-consol-snapshot</id>
+   <name>ConSol* Labs Repository (Snapshots)</name>
+   <url>http://labs.consol.de/maven/snaspshots-repository</url>
+   <snapshots>
+     <enabled>true</enabled>
+   </snapshots>
+   <releases>
+     <enabled>false</enabled>
+   </releases>
+ </repository>]]></pre>
+      </subsection>
+
+    </section>
+  </body>
+</document>

@@ -18,15 +18,15 @@
   <body>
     <links>
       <item name="Home" href="http://www.jolokia.org/index.html"/>
-      <item name="Download" href="http://www.jolokia.org/download.html"/>
-      <item name="Features" href="/features.html"/>
+      <item name="Download" href="http://www.jolokia.org/download-hl.html"/>
+      <item name="Features" href="/features-nb.html"/>
       <item name="Documentation" href="/documentation.html"/>
       <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
       <item name="About" href="/about.html"/>
     </links>
 
     <menu name="Jolokia">
-      <item name="Download" href="/download.html"/>
+      <item name="Download" href="/download-hl.html"/>
       <item name="Features" href="/features-nb.html"/>
       <item name="Resources" href="/resources.html"/>
       <item name="License" href="/license.html"/>
@@ -34,7 +34,7 @@
     <menu name="Documentation">
       <item name="Overview" href="/documentation.html"/>
       <item name="Tutorial" href="/tutorial.html"/>
-      <item name="Reference Manual" href="/reference/html/reference.html"/>
+      <item name="Reference Manual" href="/reference/html/index.html"/>
       <item name="Protocol Specification" href="/protocol.html"/>
     </menu>
     <menu name="Agents">

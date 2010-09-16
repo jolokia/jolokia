@@ -44,6 +44,7 @@
           </descriptors>
         </configuration>
       </plugin>
+      
 
       <plugin>
         <groupId>com.agilejava.docbkx</groupId>
@@ -167,6 +168,12 @@
           <version>2.0.1</version>
         </plugin>
 
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.1.1</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
@@ -189,7 +196,6 @@
         <reportSets>
           <reportSet>
             <reports>
-              <report>dependencies</report>
               <report>dependency-convergence</report>
               <report>dependency-management</report>
               <report>project-team</report>
@@ -213,6 +219,7 @@
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.4</version>
+        <scope>provided</scope>
       </dependency>
       
       <dependency>
@@ -254,6 +261,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <currentStableVersion>0.80-SNAPSHOT</currentStableVersion>
+    <currentSnapshotVersion>0.80-SNAPSHOT</currentSnapshotVersion>
   </properties>
 
   <developers>
@@ -267,7 +276,32 @@
       </roles>
     </developer>
   </developers>
-
+  
+  <repositories>
+    <repository>
+      <id>labs-consol-release</id>
+      <name>ConSol* Labs Repository (Releases)</name>
+      <url>http://labs.consol.de/maven/repository</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>labs-consol-snapshot</id>
+      <name>ConSol* Labs Repository (Snapshots)</name>
+      <url>http://labs.consol.de/maven/snaspshots-repository</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
+  
   <pluginRepositories>
     <pluginRepository>
       <id>com.springsource.repository.bundles.milestone</id>
@@ -300,7 +334,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.1.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>

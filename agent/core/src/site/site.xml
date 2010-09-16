@@ -20,7 +20,7 @@
     </links>
 
     <menu name="Jolokia">
-      <item name="Download" href="../../download.html"/>
+      <item name="Download" href="../../download-hl.html"/>
       <item name="Features" href="../../features-nb.html"/>
       <item name="Resources" href="../../resources.html"/>
       <item name="License" href="../../license.html"/>
@@ -28,7 +28,7 @@
     <menu name="Documentation">
       <item name="Overview" href="../../documentation.html"/>
       <item name="Tutorial" href="../../tutorial.html"/>
-      <item name="Reference Manual" href="../../reference.html"/>
+      <item name="Reference Manual" href="../../reference/html/index.html"/>
       <item name="Protocol Specification" href="../../protocol.html"/>
     </menu>
     <menu name="Agents">
@@ -43,7 +43,7 @@
       <item name="Perl" href="../../client/perl-hl.html"/>
     </menu>
     <menu name="Modules">
-      <item name="Core" href="index.html"/>
+      <item name="Core" href="../jolokia-core/index.html"/>
       <item name="JSR-160 Proxy" href="../jolokia-jsr160/index.html"/>
       <item name="War" href="../jolokia-war/index.html"/>
       <item name="Mule" href="../jolokia-mule/index.html"/>

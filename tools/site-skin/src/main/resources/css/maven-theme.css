@@ -169,7 +169,7 @@ div.content_content_bg {
 }
 
 .naviitems li a:active, .naviitems li a:hover, .naviitems li strong {
-    color: #c20000;
+    color: #a20000;
     background: url(../images/navi_link_hover.png) no-repeat left top;  ;
     display: block;
     width: 158px;
@@ -272,11 +272,11 @@ a {
 }
 
 a:link {
-  color:#c20000;
+  color:#a20000;
 }
 
 a:visited {
-  color:#c20000;
+  color:#a20000;
 }
 
 a:active, a:hover {
@@ -290,7 +290,11 @@ a:active, a:hover {
 
 a.externalLink, a.externalLink:link, a.externalLink:visited, a.externalLink:active, a.externalLink:hover {
   background: url(../images/external.png) right center no-repeat;
-  padding-right: 18px;
+  padding-right: 15px;
+}
+
+a.externalLink:hover {
+  background: #E9E9E9 url(../images/external.png) right center no-repeat;
 }
 
 #legend li.newWindow {
