@@ -1,7 +1,7 @@
 Jolokia
 =======
 
-<img src="http://github.com/rhuss/jolokia/raw/master/src/site/resources/images/jolokia_logo.png" style="float: right;">
+<span style="float: right;"><img src="http://github.com/rhuss/jolokia/raw/master/src/site/resources/images/jolokia_logo.png" style="float: right;"></span>
 
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
 nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
