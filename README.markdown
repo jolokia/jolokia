@@ -29,14 +29,14 @@ The agent approach as several advantages:
 * __Polyglot__
 
   No Java installation is required on the client
-  side. E.g. [Jmx4Perl][4] provides a rich Perl library and Perl based
-  tools for accessing the agents.
+  side. E.g. [Jmx4Perl][4] provides a rich Perl client library and
+  Perl based tools for accessing the agents.
 
 * __Simple Setup__
 
   The Setup is done by a simple agent deployment. In contrast,
   exporting JMX via JSR-160 can be remarkable complicated (see these
-  blog posts for setting up [Weblogic][5] and [JBoss][6] for native
+  blog posts for setting up [Weblogic][6] and [JBoss][7] for native
   remote JMX exposure setup)
 
 Additionally, the agents provide extra features not available with
