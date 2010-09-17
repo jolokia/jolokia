@@ -16,11 +16,11 @@
           <section name="Bulk-Requests">
             <div class="feature_icon"></div>
             <p>
-              In contrast to JSR-160 remoting, Jolokia can process many
-              JMX requests with a single roundtrip. A single HTTP POST
-              request puts those requests in its JSON payload
+              In contrast to JSR-160 remoting, Jolokia can process
+              many JMX requests with a single roundtrip. A single HTTP
+              POST request puts those requests in its JSON payload
               which gets dispatched on the agent side. These bulk
-              requests can increase performance drastically for
+              requests can increase performance especially for
               monitoring solutions. The Nagios plugin
               <code>check_jmx4perl</code> uses bulk requests for its
               multi check feature. <a href="">More ...</a>
