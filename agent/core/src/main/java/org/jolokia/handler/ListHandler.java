@@ -35,6 +35,15 @@ import java.util.*;
  * Handler for obtaining a list of all available MBeans and its attributes
  * and operations.
  *
+ * TODO: Optimize when a path is already given so that only the relevant information
+ * is looked up (and the path) removed. Currently, all data is looked up and is truncated
+ * afterwards after this handler has been finished. Also, if the path is used here directly,
+ * no issue should be the order of attributes. Think also to use the MBean name directly as
+ * first level and not domain as the first level and the attribute list as second level. This way,
+ * the output of a search command could be used directly to obtain the meta information for a single
+ * bean directly (however, fetching all meta info for a whole domain is not possible anymore this way but
+ * could be approached with a bulk-list request)
+ *
  * @author roland
  * @since Jun 12, 2009
  */

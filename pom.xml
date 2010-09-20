@@ -292,7 +292,7 @@
     <repository>
       <id>labs-consol-snapshot</id>
       <name>ConSol* Labs Repository (Snapshots)</name>
-      <url>http://labs.consol.de/maven/snaspshots-repository</url>
+      <url>http://labs.consol.de/maven/snapshots-repository</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
