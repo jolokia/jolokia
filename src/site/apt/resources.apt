@@ -30,17 +30,17 @@ Communications
 
 * Blog
 
-  I occassionally (1-2 posts per month) blog on
+  I occassionally blog on
   {{{http://labs.consol.de}http://labs.consol.de}} about various
-  topics. There are interesting use cases how to setup JSR-160
-  connectors for {{{http://labs.consol.de/...}JBoss}} and
-  {{{http://labs.consol.de/...}Weblogic}}, what is the best way for
-  configuring {{{http://....}Nagios with check_jmx4perl}} but also
+  topics (1-2 posts per month). There are interesting use cases how
+  to setup JSR-160 connectors for {{{http://labs.consol.de/...}JBoss}}
+  and {{{http://labs.consol.de/...}Weblogic}}, what is the best way
+  for configuring {{{http://....}Nagios with check_jmx4perl}} but also
   about things like {{{http://....}Java Mail mysteries}}. If you are
   interested in Jolokia only stuff, subscribe to this
   {{{http://labs.consol.de/rss/jolokia}Jolokia RSS feed}}. Otherwise,
   the {{{http://labs.consol.de/...}RSS Feed}} you get them all (and
-  from my co-authors as well). 
+  from my co-authors as well).
 
 * Mail
 

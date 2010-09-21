@@ -1,13 +1,102 @@
 Agents
 
-  Several agents are available for providing Jolokia
-  services. Depending on the setup, the one or other might be more
-  suitable for deployment.
+  Various agents are available for providing Jolokia
+  services in different environments.
 
 * WAR Agent
 
+  The WAR agent <<<jolokia.war>>> deploys as a regular web archive
+  (WAR) in a JEE server. Deployment is simple (often only a copy in a
+  certain directory) and the agent can be tuned like a normal web
+  application. Setting it up the agent servlet for secure
+  communication is a well known business (but specific to every
+  application server) and the same as for any other web archive. The
+  runtime behaviour like connection pooling or dedicated HTTP
+  connector can be tuned very easily (for Tomcat, see this
+  {{{http://labs.consol.de/...}example}} for setting up an extra HTTP
+  connector for this agent)
+
+  Also, this is the agent for the {{{...} proxy mode}} where it is
+  deployed in a simple, dedicated application server like Tomcat or
+  Jetty.
+
+  The WAR agent has been tested to work on
+
+  * JBoss 4.2.3 GA, 5.1.0 GA & 6.0.0 M3
+
+  * Oracle WebLogic 9.2 MP3 & 10.0.2.0
+
+  * Glassfish 2.1.1 and v3
+
+  * IBM Websphere 6.1 & 7.0
+
+  * Apache Tomcat 5.5.28 & 6.0.26
+
+  * Jetty 5.1.15 & 6.1.22 & 7.0.1 (with JMX enabled) & 8.0.0.M0
+
+  * Resin 3.1.9
+
+  * Jonas 4.10.7 (with Jetty 5.1.10 and Tomcat 5.5.28) and 5.1.1
+
+  * Apache Geronimo 2.2 (Jetty 7 and Tomcat 6)
+
+  * Spring dm Server 2.0.0.RELEASE
+
+  []
+
+  This is the most widely used agent. Read more about the
+  {{{agent/war.html}WAR agent}} and its installation.
+
 * OSGi Agent
+
+  For an {{{http://www.osgi.org}OSGi}} environment a agent packaged as
+  an OSGi bundle is provide. The bundle comes in two flavors: The
+  minimal bundle <<<jolokia-osgi.jar>>>, including only the
+  agent itself (and an {{{http://}json-simple}} embedded), which
+  requires an already installed {{{http://}OSGi HTTP service}} like
+  the {{{http://}Pax-Web HTTP-Service}}. A second version
+  <<<jolokia-osgi-bundle.jar>>> is all-in-one bundle, including the
+  Pax Web HTTP-Service. This bundle is useful for quick installations,
+  where no HTTp-Service is already existent. However, for best fitting
+  the OSGi philosophy, the usage of the minimal bundle is
+  recommended. 
+
+  The OSGi agent has been tested with the following containers:
+
+  * Felix 2.0.4 & 3.0.1
+
+  * Equinox 3.5.2 & 3.6.0
 
 * JVM Agent
 
+  Since Java 5 it is possible to start so called <JVM agents> in
+  advance before starting a Java application. This technique is used
+  e.g. by profiler tools for installing global classloaders for
+  instrumenting loaded classes. Additionally, Sun's Java 6 JVM comes
+  with a simple embedded HTTP-Server which is used e.g. for exposing
+  web services with the default JAXWS implementation coming with Java
+  6.
+
+  This Jolokia agent uses the agent API and the <<<HTTPServer>>> to
+  allow instrumenting <any> Java application running with a Sun Java 6
+  VM, not only application servers.
+
+  The JVM Agent has been tested with:
+
+  * Hadoop 0.20.2
+
+  * ActiveMQ 5.3.1
+
+  * Terracotta 3.2.1
+
+  [] 
+
+  Please note, that the embedded HTTP-Server is not the fastest one,
+  but for simple monitoring use cases it should be performant enough.
+
 * Mule Agent
+
+  The {{{http://}Mule Standalone ESB}} offers a dedicated JMX agent
+  interface, into which this agents plugs in seemlessly. 
+
+  This agent has been tested for Mule 2 and Mule 3.

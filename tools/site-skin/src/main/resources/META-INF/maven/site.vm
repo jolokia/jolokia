@@ -450,10 +450,8 @@
       @import url("$relativePath/css/maven-theme.css");
       @import url("$relativePath/css/site.css");
     </style>
-#if ( $alignedFileName.contains("-hl") )
     <link href="$relativePath/css/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="$relativePath/js/prettify/prettify.js"></script>
-#end
     <link rel="stylesheet" href="$relativePath/css/print.css"
     type="text/css" media="print" />
     <link rel="icon" type="image/png" href="$relativePath/images/favicon.png" />
@@ -470,11 +468,7 @@
     <meta http-equiv="Content-Language" content="$locale.language" />
 #end
   </head>
-#if ( $alignedFileName.contains("-hl") )
   <body class="composite" onload="prettyPrint()">
-#else 
-  <body class="composite">
-#end
     <div class="container_24">
 
       <!-- Header -->

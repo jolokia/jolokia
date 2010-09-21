@@ -151,6 +151,7 @@ div.content_content_bg {
     margin-bottom: 0px;
     padding-bottom: 8px;
     padding-top: 5px;
+    margin-left: 5px;
 }
 
 .naviitems li {
@@ -216,7 +217,7 @@ div.feature {
 div.feature_box {
     background: url(../images/feature_box_bottom.png) no-repeat bottom right;
     width: 271px;
-    margin: 30px 30px 30px 0px;
+    margin: 0px 30px 30px 0px;
     padding-left: 1px;
     min-height: 200px;
 }
@@ -258,6 +259,17 @@ ul {
     margin-left: 5px;
 }
 
+.section ul {
+    margin-left: 25px;
+    margin-right: 25px;
+    text-align: justify;
+    margin-bottom: 5px;
+}
+
+.section ul li {
+    margin-bottom: 2px;
+    margin-top: 3px;
+}
 p {
     margin: 10px 25px;
     text-align: justify;

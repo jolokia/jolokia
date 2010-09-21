@@ -18,15 +18,16 @@
   <body>
     <links>
       <item name="Home" href="http://www.jolokia.org/index.html"/>
-      <item name="Download" href="http://www.jolokia.org/download-hl.html"/>
+      <item name="Download" href="http://www.jolokia.org/download.html"/>
       <item name="Features" href="/features-nb.html"/>
       <item name="Documentation" href="/documentation.html"/>
       <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
+      <item name="Forum" href="/forum.html"/>
       <item name="About" href="/about.html"/>
     </links>
 
     <menu name="Jolokia">
-      <item name="Download" href="/download-hl.html"/>
+      <item name="Download" href="/download.html"/>
       <item name="Features" href="/features-nb.html"/>
       <item name="Resources" href="/resources.html"/>
       <item name="License" href="/license.html"/>
@@ -45,8 +46,8 @@
       <item name="Mule" href="agent/mule.html"/>
     </menu>
     <menu name="Clients" href="client.html">
-      <item name="Java" href="client/java-hl.html"/>
-      <item name="Perl" href="client/perl-hl.html"/>
+      <item name="Java" href="client/java.html"/>
+      <item name="Perl" href="client/perl.html"/>
     </menu>
     <menu name="Modules">
       <item name="Core" href="jolokia-agent-parent/jolokia-core/index.html"/>
