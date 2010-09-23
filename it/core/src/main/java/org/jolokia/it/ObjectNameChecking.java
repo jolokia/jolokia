@@ -1,3 +1,5 @@
+package org.jolokia.it;
+
 /*
  *  Copyright 2009-2010 Roland Huss
  *
@@ -14,8 +16,6 @@
  *  limitations under the License.
  */
 
-
-package org.jolokia.it;
 
 /**
  * We need to use MBeanRegisration because Websphere wont let us set our name

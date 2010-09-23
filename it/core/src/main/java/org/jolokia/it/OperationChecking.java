@@ -38,6 +38,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
         }
     }
 
+    public void throwCheckedException() throws Exception {
+        throw new Exception("Inner exception");
+    }
+
     public boolean nullArgumentCheck(String arg1,Object arg2) {
         return arg1 == null && arg2 == null;
     }

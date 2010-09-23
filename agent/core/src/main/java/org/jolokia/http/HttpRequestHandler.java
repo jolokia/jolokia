@@ -137,7 +137,7 @@ public class HttpRequestHandler {
     /**
      * Utilit method for handling single runtime exceptions and errors.
      *
-     * @param exp exception to handle
+     * @param pThrowable exception to handle
      * @return its JSON representation
      */
     public JSONObject handleThrowable(Throwable pThrowable) {
@@ -170,8 +170,9 @@ public class HttpRequestHandler {
      */
     public JSONObject getErrorJSON(int pErrorCode, Throwable pExp) {
         JSONObject jsonObject = new JSONObject();
+        Throwable unwrapped = unwrapException(pExp);
         jsonObject.put("status",pErrorCode);
-        jsonObject.put("error",pExp.toString());
+         jsonObject.put("error",getExceptionMessage(unwrapped));
         StringWriter writer = new StringWriter();
         pExp.printStackTrace(new PrintWriter(writer));
         jsonObject.put("stacktrace",writer.toString());
@@ -228,4 +229,20 @@ public class HttpRequestHandler {
             throw new IllegalStateException("Internal: Not a JSONObject but a " + pJson.getClass() + " " + pJson);
         }
     }
+
+    // Extract class and exception message for an error message
+    private String getExceptionMessage(Throwable pException) {
+        String message = pException.getLocalizedMessage();
+        return pException.getClass().getName() + (message != null ? " : " + message : "");
+    }
+
+    // Unwrap an exception to get to the 'real' exception
+    // stripping any boilerplate exceptions
+    private Throwable unwrapException(Throwable pExp) {
+        if (pExp instanceof MBeanException) {
+            return ((MBeanException) pExp).getTargetException();
+        }
+        return pExp;
+    }
+
 }

@@ -26,6 +26,8 @@ public interface OperationCheckingMBean {
 
     int fetchNumber(String arg);
 
+    public void throwCheckedException() throws Exception;
+
     int overloadedMethod(String arg);
 
     int overloadedMethod(String arg,int arg2);

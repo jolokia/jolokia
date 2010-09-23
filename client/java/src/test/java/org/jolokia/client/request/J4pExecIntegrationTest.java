@@ -48,12 +48,25 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void failedOperation() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"fetchNumber","bla");
         try {
-            J4pExecResponse resp = j4pClient.execute(request);
+            j4pClient.execute(request);
             fail();
         } catch (J4pRemoteException exp) {
             assertEquals(400,exp.getStatus());
             assertTrue(exp.getMessage().contains("IllegalArgumentException"));
             assertTrue(exp.getRemoteStackTrace().contains("IllegalArgumentException"));
+        }
+    }
+
+    @Test
+    public void checkedException() throws MalformedObjectNameException, J4pException {
+        J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"throwCheckedException");
+        try {
+            j4pClient.execute(request);
+            fail();
+        } catch (J4pRemoteException exp) {
+            assertEquals(500,exp.getStatus());
+            assertTrue(exp.getMessage().contains("Inner exception"));
+            assertTrue(exp.getRemoteStackTrace().contains("MBeanException"));
         }
     }
 
