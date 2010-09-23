@@ -1,3 +1,9 @@
+            -----------
+               Agents
+            -----------
+            Roland Huss
+            -----------
+
 Agents
 
   Various agents are available for providing Jolokia
@@ -13,10 +19,10 @@ Agents
   application server) and the same as for any other web archive. The
   runtime behaviour like connection pooling or dedicated HTTP
   connector can be tuned very easily (for Tomcat, see this
-  {{{http://labs.consol.de/...}example}} for setting up an extra HTTP
-  connector for this agent)
+  {{{http://labs.consol.de/blog/nagios/putting-jmx4perl-on-the-fast-lane-for-tomcat/}example}}
+  for setting up an extra HTTP connector for this agent)
 
-  Also, this is the agent for the {{{...} proxy mode}} where it is
+  Also, this is the agent for the {{{./features/proxy.html} proxy mode}} where it is
   deployed in a simple, dedicated application server like Tomcat or
   Jetty.
 
@@ -45,16 +51,16 @@ Agents
   []
 
   This is the most widely used agent. Read more about the
-  {{{agent/war.html}WAR agent}} and its installation.
+  {{{./agent/war.html}WAR agent}} and its installation.
 
 * OSGi Agent
 
   For an {{{http://www.osgi.org}OSGi}} environment a agent packaged as
   an OSGi bundle is provide. The bundle comes in two flavors: The
   minimal bundle <<<jolokia-osgi.jar>>>, including only the
-  agent itself (and an {{{http://}json-simple}} embedded), which
-  requires an already installed {{{http://}OSGi HTTP service}} like
-  the {{{http://}Pax-Web HTTP-Service}}. A second version
+  agent itself (and an {{{http://code.google.com/p/json-simple/}json-simple}} embedded), which
+  requires an already installed {{{http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html}OSGi HTTP service}} like
+  the {{{http://http://wiki.ops4j.org/display/paxweb/Pax+Web}Pax-Web HTTP-Service}}. A second version
   <<<jolokia-osgi-bundle.jar>>> is all-in-one bundle, including the
   Pax Web HTTP-Service. This bundle is useful for quick installations,
   where no HTTp-Service is already existent. However, for best fitting
@@ -66,6 +72,8 @@ Agents
   * Felix 2.0.4 & 3.0.1
 
   * Equinox 3.5.2 & 3.6.0
+
+  []
 
   Details 
 
@@ -98,7 +106,7 @@ Agents
 
 * Mule Agent
 
-  The {{{http://}Mule Standalone ESB}} offers a dedicated JMX agent
+  The {{{http://http://www.mulesoft.org}Mule Standalone ESB}} offers a dedicated JMX agent
   interface, into which this agents plugs in seemlessly. 
 
   This agent has been tested for Mule 2 and Mule 3.

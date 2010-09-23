@@ -7,7 +7,7 @@ Source
   code must be licensable under {{{license.html}Apache License}},
   Version 2.
 
-  Jolokia source can be found at .., the clone URL is `http://`
+  Jolokia source can be found at .., the clone URL is `git@github.com:rhuss/jolokia.git`
 
   Visit Jolokia and then ... fork it !
 
@@ -22,9 +22,9 @@ Communications
 
 * Forum
 
-  A {{{forum.html}forum}} (kindly provided by
+  A {{{./forum.html}forum}} (kindly provided by
   {{{http://www.nabble.com}Nabble}}) for Jolokia related discussions
-  can be found {{{forum.html}here}}. Don't hesitate to put it under
+  can be found {{{./forum.html}here}}. Don't hesitate to put it under
   fire with your questions and suggestions.
 
 * Jabber
