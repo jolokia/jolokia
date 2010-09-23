@@ -235,6 +235,15 @@ div.feature_icon {
     background: #dedede;
 }
 
+div.feature_icon_large {
+    float: right;
+    height: 200px;
+    width: 200px;
+    border: 1px solid #888;
+    margin: 10px;
+    background: #dedede;
+}
+
 .feature_box h2 {
     background: url(../images/feature_box_head.png) #fff no-repeat top right;
     text-align: center;

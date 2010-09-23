@@ -21,15 +21,16 @@
       <item name="Download" href="http://www.jolokia.org/download.html"/>
       <item name="Features" href="/features-nb.html"/>
       <item name="Documentation" href="/documentation.html"/>
-      <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
+      <item name="Support" href="/support.html"/>
       <item name="Forum" href="/forum.html"/>
+      <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
       <item name="About" href="/about.html"/>
     </links>
 
     <menu name="Jolokia">
       <item name="Download" href="/download.html"/>
       <item name="Features" href="/features-nb.html"/>
-      <item name="Resources" href="/resources.html"/>
+      <item name="Support" href="/support.html"/>
       <item name="License" href="/license.html"/>
     </menu>
     <menu name="Documentation">

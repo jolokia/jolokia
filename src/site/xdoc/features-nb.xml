@@ -24,12 +24,12 @@
               monitoring use cases where many different JMX parameters
               are observed. The Nagios plugin
               <code>check_jmx4perl</code> uses bulk requests for its
-              multi check feature. <a href="">More ...</a>
+              multi check feature. <a href="features/bulk-requests.html">More ...</a>
             </p>
           </section>
         </div>
         <div class="feature_box">
-          <section name="Security">
+          <section name="Secure">
             <div class="feature_icon"></div>
             <p>
               In addition to standard HTTP security Jolokia supports a
@@ -38,7 +38,7 @@
               subnet, the MBean names and their attributes and
               operations. The policy is defined in an XML format with
               support for allow/deny sections and wildcards. <a
-              href="">More ...</a>
+              href="features/security.html">More ...</a>
             </p>
           </section>
         </div>
@@ -53,14 +53,14 @@
                 and <a href="">Perl</a> client libraries' API is designed
                 for a simple usage, using a request-response
                 paradigma. They are not harder to use as any other HTTP
-                library. <a href="">More ...</a>
+                library. <a href="features/simple.html">More ...</a>
               </p>
             </section>
           </div>
       </div>
       <div class="grid_7 prefix_1 omega">
         <div class="feature_box">
-          <section name="Proxy-Mode">
+          <section name="JMX Proxy">
             <div class="feature_icon"></div>
             <p>
               Jolokia can operate in an agentless mode
@@ -70,7 +70,7 @@
               JSON/HTTP and propagates these to the target server
               through remote JSR-160 JMX calls. Bulk requests get
               dispatched into multiple JSR-160 requests on the proxy
-              transparently. <a href="">More ...</a>
+              transparently. <a href="features/proxy.html">More ...</a>
             </p>
           </section>
         </div>
@@ -85,7 +85,7 @@
               The JSON payload is in general much smaller than its
               correspondent serialized Java object representation. Bulk
               request (which are not available for JSR-160 remoting) can
-              boost performance even further. <a href="">More ...</a>
+              boost performance even further. <a href="features/fast.html">More ...</a>
             </p>
           </section>
         </div>
@@ -95,7 +95,7 @@
             <p>
               The usage of HTTP as transport protocol makes Jolokia a
               perfect choice for firewall setups. It can seemless
-              operate over multiple HTTP-Proxy hops. <a href="">More ...</a>
+              operate over multiple HTTP-Proxy hops. <a href="features/firewall.html">More ...</a>
             </p>
           </section>
         </div>
@@ -109,7 +109,7 @@
               platforms. <a href="">Java</a> and <a href="">Perl</a>
               client libraries are already available, other laguage
               bindings are in the pipeline (e.g. Javascript). <a
-              href="">More ...</a>
+              href="features/polyglot.html">More ...</a>
             </p>
           </section>
         </div>

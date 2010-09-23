@@ -15,7 +15,7 @@
   <bookinfo>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="images/citrus_logo.png" format="PNG" />
+        <imagedata fileref="images/jolokia_logo.png" format="PNG" />
       </imageobject>
     </mediaobject>
     <title>Jolokia - Reference Documentation</title>

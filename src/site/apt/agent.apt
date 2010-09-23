@@ -67,6 +67,8 @@ Agents
 
   * Equinox 3.5.2 & 3.6.0
 
+  Details 
+
 * JVM Agent
 
   Since Java 5 it is possible to start so called <JVM agents> in
