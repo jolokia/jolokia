@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Jolokia">
+  <publishDate position="bottom"/>
+  <version position="bottom"/>
+
+  <skin> 
+    <groupId>org.jolokia</groupId> 
+    <artifactId>jolokia-site-skin</artifactId>
+    <version>0.80-SNAPSHOT</version>
+  </skin>  
+  
+  <bannerLeft>
+    <name>Jolokia</name>
+    <src>images/header.png</src>
+    <href>http://www.jolokia.org</href>
+  </bannerLeft>
+  
+  <body>
+    <links>
+    </links>
+
+    <menu name="Jolokia">
+      <item name="Download" href="../../download.html"/>
+      <item name="Features" href="../../features-nb.html"/>
+      <item name="Resources" href="../../resources.html"/>
+      <item name="License" href="../../license.html"/>
+    </menu>
+    <menu name="Documentation">
+      <item name="Overview" href="../../documentation.html"/>
+      <item name="Tutorial" href="../../tutorial.html"/>
+      <item name="Reference Manual" href="../../reference/html/index.html"/>
+      <item name="Protocol Specification" href="../../protocol.html"/>
+    </menu>
+    <menu name="Agents">
+      <item name="Overview" href="../../agent.html"/>
+      <item name="Web Archive (war)" href="../../agent/war.html"/>
+      <item name="Osgi" href="../../agent/osgi.html"/>
+      <item name="JVM" href="../../agent/jvm.html"/>
+      <item name="Mule" href="../../agent/mule.html"/>
+    </menu>
+    <menu name="Clients" href="../../client.html">
+      <item name="Java" href="../../client/java-hl.html"/>
+      <item name="Perl" href="../../client/perl-hl.html"/>
+    </menu>
+    <menu name="Modules">
+      <item name="Core" href="../jolokia-core/index.html"/>
+      <item name="JSR-160 Proxy" href="../jolokia-jsr160/index.html"/>
+      <item name="War" href="../jolokia-war/index.html"/>
+      <item name="Mule" href="../jolokia-mule/index.html"/>
+      <item name="Osgi" href="../jolokia-osgi/index.html"/>
+      <item name="Osgi-Bundle" href="../jolokia-osgi-bundle/index.html"/>
+      <item name="JVM Agent" href="../jolokia-jvm-jdk6/index.html"/>
+      <item name="Client" href="../../jolokia-client-parent/jolokia-client-java/index.html"/>
+      <item name="Integration Tests" href="../../jolokia-it-parent/jolokia-it-core/index.html"/>
+    </menu>
+    <menu ref="reports"/>
+  </body>  
+</project>

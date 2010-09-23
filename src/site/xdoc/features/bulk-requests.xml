@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Bulk Requests</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Bulk Requests">
+      <div class="feature_icon_large"></div>
+      
+      <subsection name="Next">
+        <ul>
+          <li>
+            Learn more about Jolokia's <a href="proxy.html">Proxy Mode</a> and agentless operation.
+          </li>
+          <li>
+            See why jolokia is the <a href="polyglot.html">perfect choice</a> for non-Java environments 
+            to access Java servers via JMX.
+          </li>
+          <li>
+            Go Back to the <a href="../features-nb.html">Features Overview</a>.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>    
+</document>
+

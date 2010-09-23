@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>JMX Proxy</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="JMX Proxy">
+
+      <subsection name="Next">
+        <ul>
+          <li>
+            See why how Jolokia can <a href="security.html">secure</a> JMX access in a very fine granular way.
+          </li>
+          <li>
+            Learn something about <a href="bulk-requests.html">bulk JMX requests</a>.
+          </li>
+          <li>
+            Go Back to the <a href="../features-nb.html">Features Overview</a>.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>    
+</document>
+

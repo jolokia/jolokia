@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Simple</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Simple">
+
+      <subsection name="Next">
+        <ul>
+          <li>
+            See why Jolokia plays nicely with your <a href="firewall.html">firewall</a>.
+          </li>
+          <li>
+            Jolokia is really <a href="fast.html">fast</a>. See why.
+          </li>
+          <li>
+            Go Back to the <a href="../features-nb.html">Features Overview</a>.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>    
+</document>
+
