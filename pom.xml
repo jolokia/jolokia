@@ -110,7 +110,6 @@
         <configuration>
           <includes>
             <include>**/*.java</include>
-            <include>**/pom.xml</include>
           </includes>
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
