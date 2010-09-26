@@ -14,7 +14,7 @@
       <subsection name="Next">
         <ul>
           <li>
-            Learn something about <a href="bulk-requests.html">bulk JMX requests</a>.
+            Read an introduction and <a href="overview.html">overview</a> for Jolokia.
           </li>
           <li>
             See why Jolokia plays nicely with your <a href="firewall.html">firewall</a>.

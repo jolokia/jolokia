@@ -462,3 +462,9 @@ li table.bodyTable {
 .bodyTable th {
   text-align: left;
 }
+
+/* ========================== */
+
+.str { 
+    color: #061;
+}

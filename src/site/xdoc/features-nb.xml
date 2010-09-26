@@ -13,18 +13,20 @@
     <div class="feature grid_18 alpha">
       <div class="grid_7 prefix_1 alpha">
         <div class="feature_box">
-          <section name="Bulk-Requests">
-            <div class="feature_icon"></div>
+          <section name="Overview">
+            <div style="float: right; margin: 10px;">
+              <img src="images/features/overview.png" alt="Jolokia"/>
+            </div>
             <p>
-              Jolokia can process many JMX requests within a single
-              network roundtrip. A HTTP POST request can encapsulate
-              multiple Jolokia requests in its JSON payload which gets
-              dispatched on the agent side. These bulk requests can
-              increase performance drastically especially for
-              monitoring use cases where many different JMX parameters
-              are observed. The Nagios plugin
-              <code>check_jmx4perl</code> uses bulk requests for its
-              multi check feature. <a href="features/bulk-requests.html">More ...</a>
+              Jolokia is an agent based approach for remote JMX
+              access. It is an alternative to standard JSR 160
+              connectors. The communication between client and agent
+              goes over HTTP (GET and POST), where the request and
+              response payload is represented in JSON. Another way to
+              see Jolokia is as a transparent bridge to the JMX world,
+              talking to clients via a REST-like protocol on the
+              frontside and to a JMX MBeanServer on the backside. <a
+              href="features/overview.html">More ...</a>
             </p>
           </section>
         </div>
@@ -59,6 +61,22 @@
           </div>
       </div>
       <div class="grid_7 prefix_1 omega">
+        <div class="feature_box">
+          <section name="Bulk-Requests">
+            <div class="feature_icon"></div>
+            <p>
+              Jolokia can process many JMX requests within a single
+              network roundtrip. A HTTP POST request can encapsulate
+              multiple Jolokia requests in its JSON payload which gets
+              dispatched on the agent side. These bulk requests can
+              increase performance drastically especially for
+              monitoring use cases where many different JMX parameters
+              are observed. The Nagios plugin
+              <code>check_jmx4perl</code> uses bulk requests for its
+              multi check feature. <a href="features/bulk-requests.html">More ...</a>
+            </p>
+          </section>
+        </div>
         <div class="feature_box">
           <section name="JMX Proxy">
             <div class="feature_icon"></div>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Overview</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Overview">
+      <div style="float: right; margin: 20px 20px 20px 30px;">
+        <img src="../images/features/overview_large.png"/>
+      </div>
+      <p>
+        Jolokia is an agent based approach for remote JMX access. It
+        is an alternative to standard <a
+        href="http://jcp.org/en/jsr/detail?id=160">JSR 160</a> 
+        connectors. The communication between client and agent goes
+        over HTTP (either GET or POST), where the request and response
+        payload is represented in JSON.
+      </p>
+      <p>
+        This approach has some advantages: 
+      </p>
+      <ul>
+        <li>
+          With help of the agent Jolokia is able to provide services
+          which go beyond the functionality of JSR-160 connectors:
+          <ul>
+            <li>
+              <a href="bulk-requests.html">Bulk requests</a> which
+               allow for multiple JMX calls within a single request
+            </li>
+            <li>
+              Fine grained <a href="security.html">security</a> with
+              access restriction on MBean operation and attribute
+              level. 
+            </li>
+            <li>
+              Merging of multiple <code>MBeanServer</code> into one
+              virtual view, so there's no need to know in advance
+              which MBean is registered on which
+              <code>MBeanServer</code>. With JSR-160 the target
+              <code>MBeanServer</code> has to be known in advance.
+            </li>
+            <li>
+              History mode for storing previous fetched values in a
+              cache on the server side, along with a time stamp. This
+              is especially useful to calculate the change of JMX
+              attributes without need of a client storage.
+            </li>
+            <li>
+              No Java is required on the client side due to the
+              platform neutral nature of HTTP and JSON. 
+            </li>
+            <li> 
+              JSON serialization allows for deep access into returned
+              objects without having custom type definitions installed
+              on the client side.
+            </li>
+          </ul>
+        </li>
+        <li>
+          Since HTTP uses a single predefined port, this setup plays nicely with
+          <a href="firewall.html">firewall</a> configuration. The
+          JSR-160 default connector in contrast is not that smart
+          since RMI uses a random port for its communication by
+          default. 
+        </li>
+        <li>
+          As paradox as it might sound, setting up an agent is often
+          <a href="simple.html">easier</a> than setting up the
+          configuration for JSR-160 JMX export, especially when it
+          comes to security. Typically, for JSR-160 export startup
+          files and configuration of the application server has to be
+          adapted. The standard agent gets deployed as a regular
+          web-application, which is a well known procedure.
+        </li>
+      </ul>
+      <p>
+        Jolokia's overall architecture is shown in the next
+        diagram. As it can be seen, the agent translates between JSON
+        over HTTP and calls to local MBeans, including a JSON
+        serialization of the return values.
+      </p>
+      <div align="center">
+        <img src="../images/jolokia_architecture.png"/>
+      </div>
+      <subsection name="Example">
+        <p>
+          In order to get a feeling how the Jolokia protocol looks like,
+          here is an example of a simple Jolokia request and
+          response. Assuming that an <a
+          href="../agent.html">agent</a> is installed, the following
+          HTTP <code>GET</code>
+          request reads the memory statistics of the instrumented JVM:
+        </p>
+        
+      </subsection>
+      <subsection name="Next">
+        <ul>
+          <li>
+            Learn something about <a href="bulk-requests.html">bulk JMX requests</a>.
+          </li>
+          <li>
+            See why jolokia is the <a href="polyglot.html">perfect choice</a> for non-Java environments 
+            to access Java servers via JMX.
+          </li>
+          <li>
+            Go Back to the <a href="../features-nb.html">Features Overview</a>.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>    
+</document>
+

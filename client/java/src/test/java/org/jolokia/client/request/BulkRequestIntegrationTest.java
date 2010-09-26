@@ -16,8 +16,7 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 

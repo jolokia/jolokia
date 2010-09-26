@@ -11,17 +11,12 @@
   <packaging>pom</packaging>
 
   <url>http://www.jolokia.org</url>
+  
   <modules>
     <module>agent</module>
     <module>it</module>
     <module>client</module>
   </modules>
-
-  <ciManagement>
-    <system>hudson</system>
-    <url>http://labs.consol.de/hudson/job/jolokia</url>
-  </ciManagement>
-
 
   <build>
     <plugins>
@@ -117,6 +112,9 @@
 
     </plugins>
 
+    
+    <!-- ===========================================================  -->
+    
     <!-- plugin versions -->
     <pluginManagement>
       <plugins>
@@ -224,7 +222,45 @@
     </plugins>
   </reporting>
 
-
+  <!-- ===========================================================  -->
+  <issueManagement>
+    <system>GitHub</system>
+    <url>http://github.com/rhuss/jolokia/issues</url>
+  </issueManagement>
+  
+  <scm>
+    <connection>scm:git:git://github.com/rhuss/jolokia.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:rhuss/jolokia.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>http://github.com/rhuss/jolokia</url>
+  </scm>
+  
+  <ciManagement>
+    <system>hudson</system>
+    <url>http://labs.consol.de/hudson/job/jolokia</url>
+  </ciManagement>
+    
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Roland Huss</name>
+      <id>roland</id>
+      <email>roland@jolokia.org</email>
+      <organization>ConSol</organization>
+      <roles>
+        <role>Developer, Architect</role>
+      </roles>
+    </developer>
+  </developers>
+   
   <!-- Overall version management -->
   <dependencyManagement>
     <dependencies>
@@ -279,17 +315,6 @@
     <currentSnapshotVersion>0.80-SNAPSHOT</currentSnapshotVersion>
   </properties>
 
-  <developers>
-    <developer>
-      <name>Roland Huss</name>
-      <id>roland</id>
-      <email>roland@jolokia.org</email>
-      <organization>ConSol</organization>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
   
   <repositories>
     <repository>

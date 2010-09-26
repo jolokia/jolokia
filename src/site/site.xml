@@ -22,7 +22,6 @@
       <item name="Features" href="/features-nb.html"/>
       <item name="Documentation" href="/documentation.html"/>
       <item name="Support" href="/support.html"/>
-      <item name="Forum" href="/forum.html"/>
       <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
       <item name="About" href="/about.html"/>
     </links>
@@ -31,6 +30,7 @@
       <item name="Download" href="/download.html"/>
       <item name="Features" href="/features-nb.html"/>
       <item name="Support" href="/support.html"/>
+      <item name="Forum" href="/forum.html"/>
       <item name="License" href="/license.html"/>
     </menu>
     <menu name="Documentation">

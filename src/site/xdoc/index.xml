@@ -24,13 +24,13 @@
     <section name="Starting points">
       <ul>
         <li>
-          Hot <a href="features.html">Features</a> which makes Jolokia
-          unique among JMX remoting solutions.
+          Overview of <a href="features-nb.html">Features</a> which
+          make Jolokia unique for JMX remoting.
         </li>
         <li>          
           The <a href="documentation.html">Documentation</a> includes
           a <a href="tutorial.html">tutorial</a>, a <a
-          href="reference.html">reference manual</a> and the JSON <a
+          href="reference/html/index.html">reference manual</a> and the JSON <a
           href="protocol.html">protocol specification</a>.
         </li>
         <li>
