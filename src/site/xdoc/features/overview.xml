@@ -95,9 +95,41 @@
           response. Assuming that an <a
           href="../agent.html">agent</a> is installed, the following
           HTTP <code>GET</code>
-          request reads the memory statistics of the instrumented JVM:
+          request reads the used heap memory statistics of the instrumented JVM:
         </p>
-        
+        <pre class="prettyprint">
+ http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</pre>
+        <p>
+          <code>http://localhost:8080/jolokia</code> is the base URL
+          under which the agent is reachable.
+          The same request can be done by POSTing the following body
+          to the URL above:
+        </p>
+        <pre class="prettyprint">
+  {
+    "mbean":"java.lang:type=Memory",
+    "attribute":"HeapMemoryUsage",
+    "type":"READ"
+  }</pre>
+         <p>
+           In both cases, the response contains an JSON object:
+         </p>
+        <pre class="prettyprint">
+  {
+    "timestamp":1285531108,
+    "status":200,
+    "request": {
+                 "mbean":"java.lang:type=Memory",
+                 "attribute":"HeapMemoryUsage",
+                 "type":"read"
+               }, 
+     "value": {
+                "max":"129957888",
+                "committed":"85000192",
+                "init":"0",
+                "used":"7713440"
+              }
+  }</pre>
       </subsection>
       <subsection name="Next">
         <ul>
