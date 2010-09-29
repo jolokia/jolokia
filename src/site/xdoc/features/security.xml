@@ -10,7 +10,9 @@
 
   <body>
     <section name="Secure">
-
+      - policy file
+      - restrictions can be put on ....
+      - securing like a web app (requires some repackaging for the war file)
       <subsection name="Next">
         <ul>
           <li>

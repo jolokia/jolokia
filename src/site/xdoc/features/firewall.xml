@@ -11,6 +11,12 @@
   <body>
     <section name="Firewall friendly">
 
+      - multiple proxy hops are possible
+      - HTTP communication
+      - Single port
+      - Difficult for JSR-160 with RMI (reference)
+      - Reference to WS, but old. 
+
       <subsection name="Next">
         <ul>
           <li>

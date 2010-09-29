@@ -10,7 +10,52 @@
 
   <body>
     <section name="Polyglot">
+      <p>
+        The next examples demonstrates the usage of Jolokia with
+        various different clients.  The samples check for memory and
+        performs some action if the used heap memory exceeds a certain
+        threshold. No error handling was included in order to focus on
+        the Jolokia logic.
+      </p>
+      <subsection name="Bash">
+        <p>
+          Jolokia can be contatcted withot any client library directly
+          from a Bash script. This example checks, that the Memory used doesn't
+          exceeds 90% of the available memory, and if so, restarts the
+          Tomcat server (without any error handling, though):
+        </p>
+        <pre class="prettyprint"><![CDATA[
+#!/bin/bash
+base_url="http://localhost:8080/jolokia"
+memory_url="${base_url}/read/java.lang:type=Memory/HeapMemoryUsage"
+used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":"\([0-9]*\)".*$/\1/'`
+max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":"\([0-9]*\)".*$/\1/'`
+usage=$((${used}*100/${max}))
+if [ $usage -gt 90 ]; then 
+  /etc/init.d/tomcat restart
+  sleep 120
+fi]]></pre>
+      </subsection>
+      <subsection name="Perl">
+        <p>
+          Using the <a href="http://www.jmx4perl.org">jmx4perl</a>
+          client library, this can be done even simpler in Perl (and in
+          this case with a single HTTP request):
+        </p>
+        <pre class="prettyprint"><![CDATA[
+#!/usr/bin/perl
+use JMX::Jmx4Perl;
+use strict;
+my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia");
+my $memory = $jmx->get_attribute("java.lang:type=Memory","HeapMemoryUsage");
+if ($memory->{"used"} / $memory->{"max"} > 0.9) {
+    system("/etc/init.d/tomcat restart");
+    sleep(120);
+}]]></pre>
+      </subsection>
+      <subsection name="Java">
 
+      </subsection>
       <subsection name="Next">
         <ul>
           <li>

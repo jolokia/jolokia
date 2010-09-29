@@ -10,7 +10,11 @@
 
   <body>
     <section name="Fast">
-
+      
+      - Fast startup for non-java clients
+      - Bulk requests
+      - Small payload and protocol overhead
+     
       <subsection name="Next">
         <ul>
           <li>

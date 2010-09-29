@@ -7,10 +7,96 @@
     <title>JMX Proxy</title>
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
-
   <body>
     <section name="JMX Proxy">
-
+      <p>
+        There are situations, where a deployment of an Jolokia agent
+        on the target platform is not possible. This might be for
+        political reasons or an already established JSR-160 export on
+        the instrumented servers. In these environments, Jolokia can
+        operate as a <strong>JMX Proxy</strong>. In this setup, the
+        agent is deployed on a dedicated proxy JEE server (or other
+        supported agent platform). The proxy bridges between Jolokia
+        JSON request and responses to remote JSR-160 calls to the
+        target server. The following diagrams gives an illustration of
+        this setup.
+      </p>
+      <div align="center">
+        <img src="../images/jolokia_proxy.png"/>
+      </div>
+      <p>
+        A Jolokia proxy is universal and agnostic to the target server
+        as it gets its information for the target via an incoming
+        request (the same as for an HTTP proxy). Due to this required
+        extended information, only Jolokia POST requests can be used
+        for proxying since there is currently no way to encapsulate
+        the target information within a GET Url. The base Jolokia URL
+        for the request is that of the proxy server, whereas the
+        target parameters are included in the request. In the next
+        example, a proxied Jolokia request queries the number of
+        active threads for a server <code>jboss-as</code> via a proxy
+        <code>tomcat-proxy</code>, which has an agent deployed under
+        the context <code>jolokia</code>. The agent URL then is
+        something like
+      </p>
+      <pre>
+http://jolokia-proxy:8080/jolokia</pre>
+      <p>and the POST payload of the request is</p>
+      <pre class="prettyprint">
+  {
+    "type":"READ"
+    "mbean":"java.lang:type=Threading",
+    "attribute":"ThreadCount",
+    "target": { 
+                "url":"service:jmx:rmi:///jndi/rmi://jboss-as:8686/jmxrmi",
+                "password":"admin",
+                "user":"s!cr!t"
+              },
+  }
+</pre>
+      <p>
+        The target is part of the request and can contain
+        authentication information as well (with params
+        <code>user</code> and <code>password</code>)
+      </p>
+      <subsection name="Limitations">
+        <p>
+          Operating Jolokia as a JMX proxy has some limitations
+          compared to a native agent deployment:
+        </p>
+        <ul>
+          <li>
+            <a href="bulk-requests.html">Bulk requests</a> are
+            possible but not as efficient as for direct operation. The
+            reason is, that JSR-160 remoting doesn't know about bulk
+            requests, so that a Jolokia bulk request arriving at the
+            proxy gets dispatched into multiple JSR-160 requests for the
+            target. The JSR-160 remote connection has to be
+            established only once, though.             
+          </li>
+          <li>
+            The JMX target URL addresses the MBeanServer directly, so
+            MBeanServer merging as it happens for direct operation is
+            not available. Also, certain workarounds for bugs in the
+            server's JMX implementation are not available. (e.g. see
+            this <a href="">blog post</a> for a JBoss bug when
+            accession MBeans in the PlatformMBeanServer)
+          </li>
+          <li>
+            When no-standard Java types are returned by JMX operations
+            or attribute read call, these types must be available on
+            the proxy, too. Using the Jolokia agent directly, complex
+            data types are serialized deeply into a JSON
+            representation automatically. 
+          </li>
+          <li>
+            For each Jolokia request, a new JMX connection (likely
+            using RMI) is created which is an exensive operation. A
+            future version of Jolokia will tackle this by providing
+            some sort of optional connection pooling.
+          </li>
+        </ul>
+      </subsection>
       <subsection name="Next">
         <ul>
           <li>

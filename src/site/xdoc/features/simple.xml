@@ -10,7 +10,75 @@
 
   <body>
     <section name="Simple">
-
+      <p>
+        For Jolokia to work, an agent must be deployed, the one way or
+        the other. But this is a common business:
+      </p>
+      <ul>
+        <li>
+          The <a href="../agent/war.html">WAR Agent</a> gets deployed as any other
+          JEE web application. Often this is as simpe as a simple
+          copy of the agent war-artifact into a certain directory
+          (like for Tomcat). Or it gets deployed via an administrative
+          user interface (web GUI or command line tool). In any case,
+          the procedure should be familar to any Java developer or
+          administrator dealing with JEE applications.
+        </li>
+        <li>
+          The <a href="../agent/osgi.html">OSGi Agent</a> gets deployed as any other
+          OSGi bundle, which is also a well known procedure (although
+          specific to each OSGi container). For the pure bundle, there
+          is a requirement for an OSGi HttpService implementation
+          deployed in the OSGi container, but there is also a
+          all-in-one bundle which embedds all dependencies in a single
+          bundle. The pure bundle is the prefered agent, though, since
+          it fits the OSGi philosophy better.
+        </li>
+        <li>
+          The <a href="../agent/mule.html">Mule Agent</a> is a Mule JMX-Agent, whose
+          installation is described in detail in the Mule documentation.
+        </li>
+        <li>
+          The <a href="../agent/jvm.html">JVM JDK 6 Agent</a> requires for its setup
+          some extra command line parameter for the JVM, but this
+          shouldn't be a big deal either.
+        </li>
+      </ul>
+      <p>
+        On the other hand, setting up JSR-160 connectors are not
+        that easy as it might appear. There are various kind of
+        issues like problems when using different JDK versions on
+        client and server side or exposing the
+        <code>PlatformMBeanServer</code>. On our blog, detailed analysis for
+        JSR-160 setup for <a
+        href="http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic/">Weblogic</a>
+        and <a 
+          href="http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx/">JBoss</a> has been posted.
+      </p>
+      <p>
+        Once the agent has been installed, using Jolokia on the client
+        side is easy. Since the protocol relies on a standard protocol (HTTP)
+        and format (JSON), it is easy for non-Java systems to access
+        MBeans. It can be even accessed from within the browser with a
+        simple URL. Although this is still a bit cryptic, it is a good
+        test to check the installation of Jolokia.
+      </p>
+      <p>
+        Assuming that the agent is reachable under
+        <code>http://localhost:8080/jolokia</code>, memory usage can
+        be checked with the browser:
+      </p>
+      <div align="center">
+        <img src="../images/jolokia_browser.png"/>
+      </div>
+      <p>
+        The actual value is contained in the returned JSON
+        representation under the key <code>value</code>. In this
+        example, a so called <em>path</em> (i.e. <code>used</code>)
+        is appended to the URL which allows for deep access in more
+        complex Java types (<code>CompositeData</code> in this
+        case). 
+      </p>
       <subsection name="Next">
         <ul>
           <li>

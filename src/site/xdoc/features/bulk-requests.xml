@@ -88,7 +88,7 @@
                 "committed":"85000192",
                 "init":"0",
                 "used":"3660720" }
-     }]]]></pre>      
+     }]]></pre>      
         <p>
           Another example how bulk requests can be used is the <a
           href="http://www.nagios.org/">Nagios</a> 

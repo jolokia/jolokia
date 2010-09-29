@@ -31,53 +31,6 @@
           </section>
         </div>
         <div class="feature_box">
-          <section name="Secure">
-            <div class="feature_icon"></div>
-            <p>
-              In addition to standard HTTP security Jolokia supports a
-              custom policy with fine grained restrictions based on
-              multiple properties like the client's IP address or
-              subnet, the MBean names and their attributes and
-              operations. The policy is defined in an XML format with
-              support for allow/deny sections and wildcards. <a
-              href="features/security.html">More ...</a>
-            </p>
-          </section>
-        </div>
-          <div class="feature_box">
-            <section name="Simple">
-              <div class="feature_icon"></div>
-              <p>
-                It's simple. Jolokia can be used with a simple Web
-                browser since it supports both, GET and POST requests. A
-                custom, simple, REST-like URL encoding enables simple
-                access from any client platform. The <a href="">Java</a>
-                and <a href="">Perl</a> client libraries' API is designed
-                for a simple usage, using a request-response
-                paradigma. They are not harder to use as any other HTTP
-                library. <a href="features/simple.html">More ...</a>
-              </p>
-            </section>
-          </div>
-      </div>
-      <div class="grid_7 prefix_1 omega">
-        <div class="feature_box">
-          <section name="Bulk-Requests">
-            <div class="feature_icon"></div>
-            <p>
-              Jolokia can process many JMX requests within a single
-              network roundtrip. A HTTP POST request can encapsulate
-              multiple Jolokia requests in its JSON payload which gets
-              dispatched on the agent side. These bulk requests can
-              increase performance drastically especially for
-              monitoring use cases where many different JMX parameters
-              are observed. The Nagios plugin
-              <code>check_jmx4perl</code> uses bulk requests for its
-              multi check feature. <a href="features/bulk-requests.html">More ...</a>
-            </p>
-          </section>
-        </div>
-        <div class="feature_box">
           <section name="JMX Proxy">
             <div class="feature_icon"></div>
             <p>
@@ -114,6 +67,53 @@
               The usage of HTTP as transport protocol makes Jolokia a
               perfect choice for firewall setups. It can seemless
               operate over multiple HTTP-Proxy hops. <a href="features/firewall.html">More ...</a>
+            </p>
+          </section>
+        </div>
+      </div>
+      <div class="grid_7 prefix_1 omega">
+        <div class="feature_box">
+          <section name="Bulk-Requests">
+            <div class="feature_icon"></div>
+            <p>
+              Jolokia can process many JMX requests within a single
+              network roundtrip. A HTTP POST request can encapsulate
+              multiple Jolokia requests in its JSON payload which gets
+              dispatched on the agent side. These bulk requests can
+              increase performance drastically especially for
+              monitoring use cases where many different JMX parameters
+              are observed. The Nagios plugin
+              <code>check_jmx4perl</code> uses bulk requests for its
+              multi check feature. <a href="features/bulk-requests.html">More ...</a>
+            </p>
+          </section>
+        </div>
+        <div class="feature_box">
+          <section name="Secure">
+            <div class="feature_icon"></div>
+            <p>
+              In addition to standard HTTP security Jolokia supports a
+              custom policy with fine grained restrictions based on
+              multiple properties like the client's IP address or
+              subnet, the MBean names and their attributes and
+              operations. The policy is defined in an XML format with
+              support for allow/deny sections and wildcards. <a
+              href="features/security.html">More ...</a>
+            </p>
+          </section>
+        </div>
+        <div class="feature_box">
+          <section name="Simple">
+            <div class="feature_icon"></div>
+            <p>
+              It's simple. Jolokia can be used with a simple Web
+              browser since it supports both, GET and POST requests. A
+              custom, simple, REST-like URL encoding enables simple
+              access from any client platform. The <a href="">Java</a>
+              and <a href="">Perl</a> client libraries' API is designed
+              for a simple usage, using a request-response
+              paradigma. They are not harder to use as any other HTTP
+              library. <a href="features/simple.html">More ...</a>
             </p>
           </section>
         </div>
