@@ -10,11 +10,45 @@
 
   <body>
     <section name="Fast">
-      
-      - Fast startup for non-java clients
-      - Bulk requests
-      - Small payload and protocol overhead
-     
+      <p>
+        <em>Before praising Jolokia to be the fasted remote JMX
+        solution on the world,
+        it has to be confessed, that we don't have any hard benchmarks
+        yet. But this is something on the top of our todo list.</em> 
+      </p>
+      <p>
+        Jolokia is especially a very fast JMX remote accessing
+        solution for non-Java environments since for a client there is
+        no need to start a JVM which needs some time to
+        startup. E.g. most of the Nagios JMX plugins out there,
+        require a local JVM installation and the plugins, which are
+        implemented in Java, queries the MBeans via JSR-160 and prints
+        out the results to standard output for a single check, opening
+        a new connection for each request. For large Nagios
+        installation which monitors hundreds of server for several
+        parameters this poses a performance problem. With Jolokia, it
+        has been confirmed that it scales up very well in a Nagios
+        environment with 500 servers monitoring about 10 parameters on
+        each server.
+      </p>
+      <p>
+        Especially <a href="bulk-requests.html">bulk requests</a> can
+        speed up monitoring considerably. This unique feature, which
+        is not available for JSR-160 connectors, allows for quering
+        many parameters with a single server turnaround. 
+      </p>
+      <p>
+        Jolokia uses the <a href="">super fast</a> JSON serialization
+        library <a href="">json-simple</a>. Along with the fact that
+        JSON itself is a very compact data format with small overhead
+        compared to RMI, this adds to the good performance experience.
+      </p>
+      <p>
+        In summary, all these facts indicate that the Jolokia is
+        faster than standard JSR-160 connectors with communication of
+        RMI. A benchmark is pending to put these statements on a solid
+        ground. 
+      </p>
       <subsection name="Next">
         <ul>
           <li>

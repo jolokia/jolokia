@@ -39,8 +39,8 @@
         </li>
         <li>
           <a href="client.html">Client libraries</a> include language
-          bindings for <a href="clients/java.html">Java</a> and <a
-          href="clients/perl.html">Perl</a>. 
+          bindings for <a href="client/java.html">Java</a> and <a
+          href="client/perl.html">Perl</a>. 
         </li>
       </ul>
     </section>

@@ -56,7 +56,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
         }
     }
-
+        
     @Test
     public void multipleAttributes() throws MalformedObjectNameException, J4pException {
         J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes");

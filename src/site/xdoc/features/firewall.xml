@@ -10,13 +10,38 @@
 
   <body>
     <section name="Firewall friendly">
-
-      - multiple proxy hops are possible
-      - HTTP communication
-      - Single port
-      - Difficult for JSR-160 with RMI (reference)
-      - Reference to WS, but old. 
-
+      <p>
+        Since Jolokia uses HTTP (or HTTPS) for its transport protocol,
+        it plays nicely with even complex firewall setups. For the
+        client within a firewall it is easy to access Jolokia agents
+        outside over an HTTP proxy, even over multiple hops. Also
+        since HTTP is such a widely adopted protocol, it is much
+        better accepted than RMI, which mostly specific to the Java
+        world (or CORBA world if using IIOP). Hence chances are much
+        higher to get an agreement with the firewall policies in
+        place. 
+      </p>
+      <p>
+        Since HTTP use a single, fixed port it is easy to let Jolokia
+        communicate through an SSH tunnel, too. This is not easy with
+        the standard JSR-160 protocol RMI, which uses random
+        ports. There are solutions to fix the port, but they are
+        horrible <a href="">horrible</a> complicated.
+      </p>
+      <p>
+        With Jolokia's <a href="proxy.html">proxy mode</a> there are
+        even more options to let the Java servers without any agent
+        within the firewall to be reached from the outside over HTTP. 
+      </p>
+      <p>
+        There has been efforts to put JSR-160 on a different protocol
+        stack, but they are either not a standard solution, requiring
+        a special client setup (like <a href="">MX4J</a>) or seemed to
+        have been dropped (<a href="">WS connector</a> which uses SOAP
+        had its last pre-release in October 2008). Up to now, the only
+        solution which allows for a smooth, firewall friendly setup is
+        a JMX Bridge (or Proxy), like Jolokia.
+      </p>
       <subsection name="Next">
         <ul>
           <li>

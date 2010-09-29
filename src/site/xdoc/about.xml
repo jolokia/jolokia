@@ -13,7 +13,7 @@
       <p style="text-align: left;">
         <img src="images/jolokia_home.png" style="float: right; margin: 0 0 10px 20px;"/>
         All started up early 2009 when my colleague Gerhard Lausser,
-        our local Nagios guru and complained heavily about how f*cking
+        our local Nagios guru and complained heavily about how damned
         hard it is to monitor JEE server with <a
         href="http://www.nagios.org">Nagios</a>. As you might know,
         Nagios uses a pletoria of plugins for doing the hard

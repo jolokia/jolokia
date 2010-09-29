@@ -54,7 +54,55 @@ if ($memory->{"used"} / $memory->{"max"} > 0.9) {
 }]]></pre>
       </subsection>
       <subsection name="Java">
+        <p>
+          The Jolokia agents can be accessed from Java as well. The
+          biggest different to JSR-160 client interfaces is, that
+          Jolokia has a typeless approach. The disadvantage is of
+          course, that the type of the exposed
+          attribute or operation return value has to be known, but the
+          big advantage is, that no Java type information for custom
+          types (== custom Java classes) is required on the client
+          side. 
+        </p>
+        <p>
+          The example above implemented in Java looks like:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+import org.jolokia.client.*;
+import org.jolokia.client.request.*;
+import java.util.Map;
 
+public class JolokiaSample {
+    
+    public static void main(String[] args) throws Exception {
+        J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
+        J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
+                                                "HeapMemoryUsage");
+        J4pReadResponse resp = j4pClient.execute(req);
+        Map<String,String> vals = resp.getValue();
+        int used = Integer.parseInt(vals.get("used"));
+        int max = Integer.parseInt(vals.get("max"));
+        int usage = (int) (used * 100 / max);
+        if (usage > 1) {
+            System.out.println("Memory usage exceeds 90% (used: " + used + 
+                               " / max: " + max + " = " + usage + "%)");
+        }
+    }
+}]]></pre>
+      </subsection>
+      <subsection name="Roadmap">
+        <p>
+          In fact, serving non-java environments is one of the most
+          outstanding strength of Jolokia. The focus is on the future
+          evolution of Jolokia is to provide more client libraries. Top
+          on the list are Javascript (guess why ;-) and Scala. If you
+          like to add a client library in your favourite language, go
+          ahead, we would be happy to include it. Currently, the
+          tendency is to keep JVM based languages (+ Javascript) under
+          the Jolokia umbrella, but support for others (like <a
+          href="http://www.jmx4perl.org">jmx4perl</a>) hosted elsewhere
+          is in our focus as well. But well, let's see ;-).
+        </p>
       </subsection>
       <subsection name="Next">
         <ul>

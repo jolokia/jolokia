@@ -18,14 +18,14 @@
               <img src="images/features/overview.png" alt="Jolokia"/>
             </div>
             <p>
-              Jolokia is an agent based approach for remote JMX
-              access. It is an alternative to standard JSR 160
-              connectors. The communication between client and agent
-              goes over HTTP (GET and POST), where the request and
-              response payload is represented in JSON. Another way to
-              see Jolokia is as a transparent bridge to the JMX world,
-              talking to clients via a REST-like protocol on the
-              frontside and to a JMX MBeanServer on the backside. <a
+              Jolokia is an HTTP/JSON bridge for remote JMX access. It
+              is an alternative to standard JSR 160 connectors using
+              an agent based approach. The client communicates with
+              the agent over HTTP (GET or POST) with the request and
+              response payload represented in JSON. It transparently
+              bridges to the JMX world, talking to with a REST-like
+              protocol on the frontside to clients and to a JMX
+              MBeanServer on the backside. <a
               href="features/overview.html">More ...</a>
             </p>
           </section>
@@ -82,7 +82,7 @@
               dispatched on the agent side. These bulk requests can
               increase performance drastically especially for
               monitoring use cases where many different JMX parameters
-              are observed. The Nagios plugin
+              are observed at once. The Nagios plugin
               <code>check_jmx4perl</code> uses bulk requests for its
               multi check feature. <a href="features/bulk-requests.html">More ...</a>
             </p>
