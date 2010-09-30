@@ -21,7 +21,7 @@
         target server. The following diagrams gives an illustration of
         this setup.
       </p>
-      <div align="center">
+      <div align="center" style="margin: 20px 0px;">
         <img src="../images/jolokia_proxy.png"/>
       </div>
       <p>
