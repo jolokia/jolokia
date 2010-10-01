@@ -19,13 +19,13 @@
             </div>
             <p>
               Jolokia is an HTTP/JSON bridge for remote JMX access. It
-              is an alternative to standard JSR 160 connectors using
+              is an alternative to standard JSR 160 connectors, using
               an agent based approach. The client communicates with
               the agent over HTTP (GET or POST) with the request and
               response payload represented in JSON. It transparently
-              bridges to the JMX world, talking to with a REST-like
-              protocol on the frontside to clients and to a JMX
-              MBeanServer on the backside. <a
+              bridges to the JMX world, talking to clients on the
+	      frontend via a REST-like protocol and to a JMX
+              MBeanServer on the backend. <a
               href="features/overview.html">More ...</a>
             </p>
           </section>
@@ -49,14 +49,16 @@
           <section name="Fast">
             <div class="feature_icon"></div>
             <p>
-              Jolokia uses the super fast JSON serialization library <a
-              href="">json-simple</a> for parsing requests and creating
-              responses. Due to its typeless nature, it's faster than
-              Java object serialization used in JSR-160 communication.
-              The JSON payload is in general much smaller than its
-              correspondent serialized Java object representation. Bulk
-              request (which are not available for JSR-160 remoting) can
-              boost performance even further. <a href="features/fast.html">More ...</a>
+              Jolokia uses the super fast JSON serialization
+              library <a href="http://code.google.com/p/json-simple/">json-simple</a>
+              for parsing requests and creating responses. Due to its
+              typeless nature, it's faster than Java object
+              serialization used in JSR-160 communication.  The JSON
+              payload is in general much smaller than its
+              correspondent serialized Java object
+              representation. Bulk request (which are not available
+              for JSR-160 remoting) can boost performance even
+              further. <a href="features/fast.html">More ...</a>
             </p>
           </section>
         </div>
@@ -65,7 +67,7 @@
             <div class="feature_icon"></div>
             <p>
               The usage of HTTP as transport protocol makes Jolokia a
-              perfect choice for firewall setups. It can seemless
+              perfect choice for firewall setups. It can seemlessly
               operate over multiple HTTP-Proxy hops. <a href="features/firewall.html">More ...</a>
             </p>
           </section>
@@ -121,13 +123,13 @@
           <section name="Polyglot">
             <div class="feature_icon"></div>
             <p>
-              Thanks to choosing the widely adopted
-              standards HTTP and JSON, Jolokia is able to bridge
-              effortless the Java centric technology JMX to non-Java
-              platforms. <a href="">Java</a> and <a href="">Perl</a>
-              client libraries are already available, other laguage
-              bindings are in the pipeline (e.g. Javascript). <a
-              href="features/polyglot.html">More ...</a>
+              Thanks to the widely adopted standards HTTP and JSON,
+              Jolokia is able to effortlessly bridge the Java centric
+              technology JMX to non-Java platforms. <a href="">Java</a>
+	      and <a href="">Perl</a> client libraries are already available,
+	      other laguage bindings are in the pipeline
+              (e.g. Javascript). <a href="features/polyglot.html">More
+              ...</a>
             </p>
           </section>
         </div>
