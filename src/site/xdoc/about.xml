@@ -69,7 +69,7 @@
         lighweight ;-). The perl part consists now of a powerful
         Nagios plugin called <a
         href="http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl">check_jmx4perl</a>,
-        a command line tool valled <a
+        a command line tool called <a
         href="http://search.cpan.org/~roland/jmx4perl/scripts/jmx4perl">jmx4perl</a>,
         a Perl library named <a
         href="http://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm">JMX::Jmx4Perl</a>
