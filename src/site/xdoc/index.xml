@@ -9,7 +9,7 @@
   <body>
     <div class="teaser">
       <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br/>
-      <div class="subtitle">It is fast, simple, polyglot and adds unique features. It's JMX on Capsaicin.</div>
+      <div class="subtitle">It is fast, simple, polyglot and adds unique features. It's JMX on <a href="http://en.wikipedia.org/wiki/Capsaicin">Capsaicin</a>.</div>
     </div>
     <p>
       Jolokia is an agent based approach to remote JMX where an
@@ -45,7 +45,7 @@
     <section name="News">
       <subsection name="Version 0.80 released">
         Jolokia 0.80 is the initial release. It is the direct the
-        successor of agent part from Jmx4Perl 0.71 with no
+        successor of the agent part from Jmx4Perl 0.71 with no
         additional features. Get it from the
         <a href="download.html">Download</a> page and read the
         announcement in our blog.
