@@ -22,7 +22,7 @@
         this setup.
       </p>
       <div align="center" style="margin: 20px 0px;">
-        <img src="../images/jolokia_proxy.png"/>
+        <img src="../images/jolokia_proxy.png" alt="Proxy Mode"/>
       </div>
       <p>
         A Jolokia proxy is universal and agnostic to the target server

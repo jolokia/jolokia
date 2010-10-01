@@ -69,7 +69,7 @@
         be checked with the browser:
       </p>
       <div align="center">
-        <img src="../images/jolokia_browser.png"/>
+        <img src="../images/jolokia_browser.png" alt="Browser Snapshot"/>
       </div>
       <p>
         The actual value is contained in the returned JSON

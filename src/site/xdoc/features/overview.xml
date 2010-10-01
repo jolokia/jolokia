@@ -11,7 +11,7 @@
   <body>
     <section name="Overview">
       <div style="float: right; margin: 20px 20px 20px 30px;">
-        <img src="../images/features/overview_large.png"/>
+        <img src="../images/features/overview_large.png" alt="Overview"/>
       </div>
       <p>
         Jolokia is an agent based approach for remote JMX access. It
@@ -42,7 +42,7 @@
         values.
       </p>
       <div align="center" style="margin: 20px 0px;">
-        <img src="../images/jolokia_architecture.png"/>
+        <img src="../images/jolokia_architecture.png" alt="Architecture"/>
       </div>
       <p>
         This approach has some advantages: 

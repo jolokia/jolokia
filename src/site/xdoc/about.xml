@@ -11,7 +11,7 @@
   <body>
     <section name="The Story">
       <p style="text-align: left;">
-        <img src="images/jolokia_home.png" style="float: right; margin: 0 0 10px 20px;"/>
+        <img src="images/jolokia_home.png" style="float: right; margin: 0 0 10px 20px;" alt="Jolokia, homegrown"/>
         All started up early 2009 when my colleague Gerhard Lausser,
         our local Nagios guru and complained heavily about how damned
         hard it is to monitor JEE server with <a
