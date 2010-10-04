@@ -4,7 +4,35 @@
 
 License
 
- Jolokia is released under the {{{http://www.apache.org/licenses/LICENSE-2.0}Apache License}}, Version 2.0
+ Jolokia is released under the {{{http://www.apache.org/licenses/LICENSE-2.0}Apache License}}, Version 2.0. 
+ The license is appended below.
+
+* www.jolokia.org
+ 
+ The content found on www.jolokia.org (i.e. icons, pictures and
+ styling) is not (yet) Apache licensed, the licensing is still to be
+ decided. Of course, you can use the icons for promotional purpose,
+ but please don't reuse it for something different than Jolokia.
+
+* Notice
+
+ Jolokia use some 3rd party software, which is delivered as part of
+ the agents. These are
+
+ * {{{http://code.google.com/p/json-simple/}json-simple}} released
+  under the Apache License 2.0 as well.
+
+ * The OSGi bundle includes the
+   {{{http://wiki.ops4j.org/display/paxweb/Download}Pax Web - Jetty Bundle}} which both have their own licensing.
+
+ * This web-site uses the {{{http://960.gs/}960 Grid System}} for its
+   layout. This is released under the GPL and MIT license.
+
+ * Syntax Highlighting is done with help of
+   {{{http://code.google.com/p/google-code-prettify/}google-code-prettify}},
+   Apache licensed, too.
+
+* Apache License
 
 --------------------
 
@@ -211,10 +239,3 @@ License
    limitations under the License.
 --------------------
 
-Notice
-   
-  Jolokia depends on some third party libraries, which come with their
-  own licenses: 
-
-  * {{{http://code.google.com/p/json-simple/}json-simple}} released
-    under the Apache License 2.0 as well.

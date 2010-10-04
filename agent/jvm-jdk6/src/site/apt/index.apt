@@ -1,3 +1,4 @@
-Jolokia Core
+Jolokia JVM-Agent
 
-  Core library containing the main functionality for every agent.
+  JVM agent which uses the Java JVM agent API and the HTTP-Server
+  embedded in Sun JDK-6.

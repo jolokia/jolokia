@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Support</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Support">
+      <p>
+        There a multiple channels from where support for Jolokia can be
+        obtained. Bugs are tracked via <a
+        href="http://github.com/rhuss/jolokia/issues">GitHub</a>,
+        questions should be preferably posed in the Jolokia <a
+        href="./forum.html">Forum</a>.  Thanks to <a
+        href="http://www.consol.com">ConSol*</a> we are able to provide.
+        proffesional support in various ways for Jolokia, too.
+      </p>
+      <p>
+        On the other hand, the are ways for supporting the development
+        of Jolokia, too. You can contribute code and bug-fixes via <a
+        href="http://github.com/rhuss/jolokia">GitHub</a> (prefered) or 
+        by monetary support (donation via pledgie or flattring
+        Jolokia). 
+      </p>
+      <subsection name="Bug tracking">
+        <p>
+          Jolokia uses GitHub's <a
+          href="http://github.com/rhuss/jolokia/issues">bug tracker</a>
+          for managing bugs and feature request. 
+        </p>
+      </subsection>
+      <subsection name="Forum">
+        <p>
+          A <a href="./forum.html">forum</a> (kindly provided by <a
+          href="http://www.nabble.com">Nabble</a>) for Jolokia related
+          discussions can be found <a href="./forum.html">here</a>. Don't
+          hesitate to put it under fire with your questions and
+          suggestions.
+        </p>
+      </subsection>
+      <subsection name="Blog">
+        <p>
+          We occassionally blog on
+          <a href="http://labs.consol.de">http://labs.consol.de</a> about various
+          topics (1-2 posts per month). There are interesting use cases how to
+          setup JSR-160 connectors for <a
+          href="http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx/">JBoss</a> 
+          and <a
+          href="http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic/">Weblogic</a>,
+          what is the best way 
+          for configuring <a
+          href="http://labs.consol.de/blog/nagios/check_jmx4perl-new-nagios-configuration-style/">Nagios
+          with check_jmx4perl</a> but also 
+          about things like <a
+          href="http://labs.consol.de/blog/java/java-mail/removing-attachments-with-javamail">Java
+          Mail mysteries</a>. If you are 
+          interested in Jolokia stuff only, subscribe to the Jolokia 
+          <a href="http://labs.consol.de/tags/jolokia/feed/rss/">RSS feed</a>. Otherwise,
+          with this <a href="http://labs.consol.de/feed/rss/">RSS Feed</a> you get them all
+          (and from my co-workers as well).
+        </p>
+      </subsection>
+      <subsection name="Commercial Support">
+        <p>
+          Thanks to my employer <a href="http://www.consol.de">ConSol*</a>, we
+          are able to offer you professional support and consulting. I.e. we
+          do (and already have done for jmx4perl with quite some success):
+        </p>
+        <ul>
+          <li>
+            Support with certain service level agreements, up to 7x24
+            support. 
+          </li>
+          <li>
+            Workshops for evaluating how to best integrate Jolokia (and 
+            <a href="http://www.jmx4perl.org">jmx4perl</a>) in you server
+            landscape. We are especially expert for large scale integration in
+            large Nagios and OP5 setups, not only for monitoring JMX MBeans
+            but for Nagios in general (see here and here for some work my
+            collegues have done).
+          </li>
+          <li>
+            Consulting and custom programming, e.g. an agent manager for mass
+            deployment of the agents to hundreds of servers.
+          </li>
+      </ul>
+      <p>
+        Please contact me (either per mail at roland@jolokia.org or via our
+        <a href="http://www.consol.de/">contact form</a>) if you are interested
+        in a concrete offering or for a reference.
+      </p>
+      <p>
+        So, that was it for the plug ;-)
+      </p>
+      </subsection>
+      <subsection name="Source">
+        <p>
+          Jolokia uses <a href="http://www.github.com">GitHub</a> as source
+          repository. Send me pull requests for enhancing Jolokia featurewise
+          or fixing some bugs. They will be considered all and potentially
+          integrated after reviewinv. Please note, that all the contributed
+          code must be licensable under <a href="license.html">Apache License</a>,
+          Version 2.
+        </p>
+        <p>
+          Jolokia source can be found <a
+          href="http://github.com/rhuss/jolokia">online</a>, the clone
+          URL is 
+          <code>git@github.com:rhuss/jolokia.git</code> 
+      </p>
+      <p>
+        Visit Jolokia and then ... <a href="http://github.com/rhuss/jolokia/fork">fork it</a> !
+      </p>
+      </subsection>
+      <subsection name="Your Support for Jolokia">
+        <p>
+          Jolokia is free software, released under the business friendly
+          Apache License. That's mostly because I believe that open
+          source software is the real driving force behind software
+          innovation and I highly appreciate the fine pieces of open
+          source software engineering I had the luck to use in our daily
+          work. I love this.
+        </p>
+        <p>
+          You should probably stop reading here at this
+          point ;-)
+        </p>
+        <p>
+          Nevertheless, there's a way for financially supporting this
+          project. I have been asked for this possibility. Donations
+          will help keeping up the movtivation of further enhancements
+          of Jolokia (and to honor the past development which took some
+          efforts). The motivation is high anyway, though.
+        </p>
+        <p>
+          There are two way: Either via a direct donation with <a href="http://pledgie.com/">Pledgie</a>
+          or via <a href="http://www.flattr.com">Flattr</a>, which is
+          a real new revolutionary way of
+          give-and-take and much fun, too. Enough said, here are the buttons:
+        </p>
+        <div align="center">
+          <div style="float:right; margin: 30px 150px 50px 100px;">
+            <a href='http://www.pledgie.com/campaigns/13618'
+               style="background: none; padding: 0"><img
+            alt='Click here to lend your support to: jolokia and make a donation at www.pledgie.com !'
+            src='http://www.pledgie.com/campaigns/13618.png?skin_name=chrome'
+            border='0' /></a>
+          </div>
+          <div style="float:right; margin-right: 150px;">
+            
+          </div>        
+          <span style="clear: both;"></span>
+        </div>
+      </subsection>
+    </section>
+  </body>
+</document>

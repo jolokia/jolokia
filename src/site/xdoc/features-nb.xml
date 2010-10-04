@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://maven.apache.org/XDOC/2.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+<document>
   <properties>
     <title>Features</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -50,7 +47,7 @@
             <div class="feature_icon"></div>
             <p>
               Jolokia uses the super fast JSON serialization
-              library <a href="http://code.google.com/p/json-simple/">json-simple</a>
+              library <a style="background: none; padding: 0" href="http://code.google.com/p/json-simple/">json-simple</a>
               for parsing requests and creating responses. Due to its
               typeless nature, it's faster than Java object
               serialization used in JSR-160 communication.  The JSON

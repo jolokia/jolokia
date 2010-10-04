@@ -102,6 +102,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>rat-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
         <configuration>
           <includes>
             <include>**/*.java</include>
@@ -228,7 +229,9 @@
           </reportSet>
         </reportSets>
       </plugin>
+
     </plugins>
+    
   </reporting>
 
   <!-- ===========================================================  -->
@@ -322,6 +325,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <currentStableVersion>0.80-SNAPSHOT</currentStableVersion>
     <currentSnapshotVersion>0.80-SNAPSHOT</currentSnapshotVersion>
+    <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
   </properties>
 
   

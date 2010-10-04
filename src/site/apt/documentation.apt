@@ -1,19 +1,24 @@
-Tutorial
+Documentation
 
- The {{{tutorial.html}Tutorial}} provides a quick start to Jolokia. It
+* Tutorial
+
+ The {{{./tutorial.html}Tutorial}} provides a quick start to Jolokia. It
  demonstrates how to deploy a WAR-agent, how to check the installation
  via a Web browser and demonstrates the client usage with a small
  sample Java application.
 
-Reference Manual
+* Reference Manual
   
- The {{{reference.html}reference manual}} contains a comprehensive
+ The {{{./reference/html/index.html}reference manual}} contains a comprehensive
  documentation to Jolokia, its agents and client bindings.
 
-Protocol
+ <The reference manual is still starting, so don't expect to much
+ from it. It is work in progress.>
+
+* Protocol
 
  Jolokia communicates via HTTP, where the request can be either a
  simple GET request or a POST request with a JSON payload. In both
  cases, the response is encoded in JSON representation. The format of
  Jolokia requests and responses is defined in the
- {{{protocol.html}protocol specification}}
+ {{{./protocol.html}protocol specification}} 

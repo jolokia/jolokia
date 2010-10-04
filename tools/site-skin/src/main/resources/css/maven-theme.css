@@ -201,6 +201,24 @@ div.teaser {
     height: 68px;
 }
 
+.teaser .subtitle a.externalLink {
+    background: none;
+    color: #e7d3cb;
+    font-size: 14px;    
+}
+
+.teaser a.externalLink:visited,.teaser a.externalLink:link {
+    background: none;
+    padding: 0;
+    color: #e7d3cb;
+}
+
+.teaser a.externalLink:hover,.teaser a.externalLink:active  {
+    background: none;
+    padding: 0;
+    color: #4a0501;
+}
+
 div.teaser b, div.teaser strong {
     color: #4a0501;
     font-weight: bold;

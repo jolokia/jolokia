@@ -19,18 +19,16 @@
         complete source mirroring the source repository on 
         <a href="http://github.com/rhuss/jolokia">GitHub</a>.
       </p>
-      <p>
-        <ul>
-          <li><strong>jolokia-${currentStableVersion}-bin</strong> (<a
-          href="dist/snapshot/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
-          | <a
-          href="dist/snapshot/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
-          <li><strong>jolokia-${currentStableVersion}-source</strong> (<a
-          href="dist/snapshot/${currentStableVersion}-source.tar.gz">tar.gz</a>
-          | <a
-          href="dist/snapshot/${currentStableVersion}-source.zip">zip</a>)</li>
-        </ul>
-      </p>
+      <ul>
+        <li><strong>jolokia-${currentStableVersion}-bin</strong> (<a
+        href="dist/snapshot/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
+        | <a
+        href="dist/snapshot/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
+        <li><strong>jolokia-${currentStableVersion}-source</strong> (<a
+        href="dist/snapshot/${currentStableVersion}-source.tar.gz">tar.gz</a>
+        | <a
+        href="dist/snapshot/${currentStableVersion}-source.zip">zip</a>)</li>
+      </ul>
       <p>
         The agents and the client library can be downloaded directly
         from our maven repository, too:        

@@ -9,17 +9,18 @@
   <body>
     <div class="teaser">
       <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br/>
-      <div class="subtitle">It is fast, simple, polyglot and adds unique features. It's JMX on <a href="http://en.wikipedia.org/wiki/Capsaicin">Capsaicin</a>.</div>
+      <div class="subtitle">It is fast, simple, polyglot and adds unique features. 
+      It's JMX on <a href="http://en.wikipedia.org/wiki/Capsaicin">Capsaicin</a>.</div>
     </div>
     <p>
-      Jolokia is an agent based approach to remote JMX where an
-      archive is deployed on the target platform. Various agents are
-      available for different platforms covering all important
-      setups. Jolokia can be operated in an agentless mode, too, where
-      a proxy translates between the Jolokia JSON protocol and
-      standarized JSR-160 JMX remote calls.
+      Jolokia is a JMX-HTTP bridge giving an alternative to JSR-160
+      connectors.  It is an agent based approach with support for many
+      platforms. In addition to basic JMX operations it enhances JMX
+      remoting with unique features like bulk requests or fine grained
+      security policies. Have a look yourself at these <a
+      href="features-nb.html">features</a>.
     </p>
-    <section name="Starting points">
+    <subsection name="Starting points">
       <ul>
         <li>
           Overview of <a href="features-nb.html">Features</a> which
@@ -41,15 +42,43 @@
           href="client/perl.html">Perl</a>. 
         </li>
       </ul>
-    </section>
+    </subsection>
     <section name="News">
+      <subsection name="Alpha version of www.jolokia.org deployed">
+        <p>
+          Well, it's really more work than expected, but setting up a
+          proper web site and making a release is really, really much
+          work. I wanted to have it ready right now, but its not yet
+          finished (e.g. I'm still waiting on some
+          icons). Nevertheless, it's still more than a skeleton, so I
+          push it out <strong>now</strong> (without big announcement
+          yet). Of course, final touches will hapen until november as
+          well as a <em>regular</em> (== non-snapshot) release.
+        </p>
+        <p>
+          <em>Release soon, release often</em>. That's what they told
+          me. 
+        </p>
+      </subsection>
+      <subsection name="Jolokia 0.80-SNAPSHOT">
+        <p>
+          The current snapshot release 0.80-SNAPSHOT which you can
+          find on the <a href="./download.html">Download</a> page and
+          on out maven repository is identical to the agent part of <a
+          href="http://search.cpan.org/~roland/jmx4perl-0.72/">jmx4perl
+          0.72</a> feature- and codewise. So it 
+          <strong>is</strong> quite usable ;-).
+        </p>
+      </subsection>
+        <!-- 
       <subsection name="Version 0.80 released">
         Jolokia 0.80 is the initial release. It is the direct the
-        successor of the agent part from Jmx4Perl 0.71 with no
+        successor of the agent part from Jmx4Perl 0.72 with no
         additional features. Get it from the
         <a href="download.html">Download</a> page and read the
         announcement in our blog.
       </subsection>
+        -->
   </section>
 </body>
 
