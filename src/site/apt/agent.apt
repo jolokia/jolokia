@@ -66,15 +66,15 @@ Agents
 
 * OSGi Agent
 
-  For an {{{http://www.osgi.org}OSGi}} environment a agent packaged as
-  an OSGi bundle is provide. The bundle comes in two flavors: The
+  For an {{{http://www.osgi.org}OSGi}} environment an agent packaged as
+  an OSGi bundle is provided. The bundle comes in two flavors: The
   minimal bundle <<<jolokia-osgi.jar>>>, including only the
   agent itself (and an {{{http://code.google.com/p/json-simple/}json-simple}} embedded), which
   requires an already installed {{{http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html}OSGi HTTP service}} like
   the {{{http://wiki.ops4j.org/display/paxweb/Pax+Web}Pax-Web HTTP-Service}}. A second version
-  <<<jolokia-osgi-bundle.jar>>> is all-in-one bundle, including the
+  <<<jolokia-osgi-bundle.jar>>> is an all-in-one bundle, including the
   Pax Web HTTP-Service. This bundle is useful for quick installations,
-  where no HTTp-Service is already existent. However, for best fitting
+  where no HTTP-Service is already existent. However, for best fitting
   the OSGi philosophy, the usage of the minimal bundle is
   recommended. 
 
@@ -112,7 +112,7 @@ Agents
 
   [] 
 
-  Please note, that the embedded HTTP-Server is not the fastest one,
+  Please note that the embedded HTTP-Server is not the fastest one,
   but for simple monitoring use cases it should be performant enough.
 
 * Mule Agent
