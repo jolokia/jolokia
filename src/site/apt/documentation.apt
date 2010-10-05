@@ -13,8 +13,8 @@ Documentation
  documentation to Jolokia, its agents and client bindings. There exists
  also a {{{./reference/pdf/index.html}PDF version}}.
 
- <The reference manual is still starting, so don't expect to much
- from it. It is work in progress.>
+ <The reference manual is still young, so don't expect too much
+ from it. It is a work in progress.>
 
 * Protocol
 

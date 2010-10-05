@@ -1,18 +1,18 @@
  Jolokia uses JSON over HTTP for its communication. This document
  specifies the format of the JSON requests and responses exchanged
- between an Jolokia agent and a client.
+ between an Jolokia agent and its clients. The communication is based
+ on HTTP as the transport protocol and hence follows a request-response
+ paradigm. 
 
- This document defines the protocol format for exchanging informations
- between the Jolokia agents and the clients. The communication is
- based on HTTP as the transport protocol and hence follows a
- request-response paradigmn. 
-
- Requests can be send in two ways: Either as a HTTP GET request in
+ Requests can be sent in two ways: Either as a HTTP GET request, in
  which case the request parameters are encoded in the URL. Or as a
  POST request where the request is extracted from a JSON payload.
  The former is suitable for simple request (and for testing the agent
  via a browser) whereas POST requests are more appropriate for complex
- requests. E.g. bulk requests are only possible with POST.
+ requests. E.g. bulk requests are only possible with POST. (Keep in mind
+ that many web servers log the requested path of every request, including
+ parameters passed to a GET request, so posting messages over GET
+ often bloats server logs.)
 
  The response returned by the agent uses JSON for the data
  representation. 
@@ -23,7 +23,7 @@ Version
 
 Request
 
-  Jolokia knows about two different style for handling a request which
+  Jolokia knows about two different styles for handling requests, which
   are distinguished by the HTTP method used, GET or POST.
 
   For GET requests it uses restful style, which essentially is a
@@ -41,7 +41,7 @@ Request
   deployment setup. Normally, the last part of this URL is the name of
   the deployed agent, which by default is based on the
   filename (e.g. <<<jolokia.war>>>).  <\<mode of operation\>> specifies
-  one of the supported operations after which operation specific
+  one of the supported operations after which operation-specific
   parameters follow.
 
   In addition to the command provided as a path, the agent knows about
@@ -53,7 +53,7 @@ Request
   operations available for a simple GET request, POST requests can
   contain additional parameters, e.g. for specifying a
   proxy. Additionally, with POST request you can submit multiple JMX
-  request at a time realizing bulk operation and minimizing turnaround
+  request at a time to process bulk operations and minimizing turnaround
   times.
 
   The supported operations are described now in the following
@@ -63,7 +63,10 @@ Request
 
   GET requests are simple in usage, can be tested from within the
   browser, but lack some advanced features only available for POST
-  requests.
+  requests. The encoded parameters are normally logged in the
+  access log of the web server, so sending anything but the most
+  trivial requests this way may put an unnecessary burden on the web
+  server (as well as making the logs more difficult to sort through).
 
 ** read
 
@@ -149,5 +152,5 @@ Request
 
 ....
 
-  <The rest of the protocal specification has still to be transformed
+  <The rest of the protocol specification has still to be transformed
   from the jmx4perl source. Please stay tuned> 
