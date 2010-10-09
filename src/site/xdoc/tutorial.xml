@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Tutorial</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="5 Minute Quickstart">
+      <p>
+        In this tutorial, it will be demonstrated how easily a WAR agent
+        can be installed on a fresh Tomcat, how to verify the
+        installation and how to access the client.      
+      </p>
+      <subsection name="Preparation">
+        <p>
+          In order to start on a green field, we are installing a
+          fresh Tomcat in which the agent-war is going to be
+          installed. Download Tomcat 6 from its <a
+          href="http://tomcat.apache.org/download-60.cgi">site</a> and
+          extract it:
+        </p>
+        <pre><![CDATA[
+$ tar zxvf apache-tomcat-6.*.tar.gz 
+$ cd apache-tomcat-6.*
+$ TC=`pwd`]]></pre>
+        <p>
+          Download the Jolokia WAR-agent and copy it into Tomcat's
+          webapp directory:
+        </p>
+        <pre><![CDATA[
+$ cd $TC/webapps
+$ wget \ 
+ http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/0.80/jolokia-war-0.80.war
+$ mv jolokia-war-0.80.war jolokia.war]]></pre>
+      </subsection>
+      <subsection name="Startup and Verification">
+        <p>
+          Now the container can be started with:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+$ $TC/bin/catalina.sh start]]></pre>
+        <p>
+          In order to verify the installation, point your browser to 
+        </p>
+        <pre>http://localhost:8080/jolokia/version</pre>
+        <p>
+          which should show up something like
+        </p>
+        <div align="center">
+          <img style="margin: 10px 0px 20px 0px;" src="images/jolokia_browser_version.png" alt="Show up version"/>
+        </div>        
+      </subsection>
+      <subsection name="A simple Java Client">
+        <p>
+          Let's try out the client side of Jolokia. This example will
+          print out the memory usage of your tomcat:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+import org.jolokia.client.*;
+import org.jolokia.client.request.*;
+import java.util.Map;
+
+public class JolokiaDemo {
+    
+    public static void main(String[] args) throws Exception {
+        J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
+        J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
+                                                "HeapMemoryUsage");
+        J4pReadResponse resp = j4pClient.execute(req);
+        Map<String,String> vals = resp.getValue();
+        int used = Integer.parseInt(vals.get("used"));
+        int max = Integer.parseInt(vals.get("max"));
+        int usage = (int) (used * 100 / max);
+        System.out.println("Memory usage: used: " + used + 
+                           " / max: " + max + " = " + usage + "%");
+    }
+}]]></pre>
+        <p>
+          Save this code-snippet under
+          <code>JolokiaDemo.java</code>. Then download 
+        </p>
+        <ul>
+          <li>
+            <a
+                href="http://labs.consol.de/maven/repository/org/jolokia/\
+jolokia-client-java/0.80/jolokia-client-java-0.80.jar">jolokia-client-java.0.80.jar</a>
+          </li>
+          <li>
+            <a
+                href="http://mirrors.ibiblio.org/pub/mirrors/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar">
+            json-simple</a>
+          </li>
+          <li>
+            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpclient/4.0.3/httpclient-4.0.3.jar">httpclient-4.0.3.jar</a>
+          </li>
+          <li>
+            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpcore/4.0.1/httpcore-4.0.1.jar">httpcore-4.0.1.jar</a>
+          </li>
+          <li>
+            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar">commons-logging-1.1.1.jar</a>
+          </li>
+        </ul>
+        <p>
+          and put it into the same directory as this demo
+          class. Finally, compile the demo and let it run:
+        </p>
+        <pre class="prettyprin lang-bash"><![CDATA[
+$ export CLASSPATH=json_simple-1.1.jar:jolokia-client-java-0.80.jar:\
+httpcore-4.0.1.jar:httpclient-4.0.3.jar:commons-logging-1.1.1.jar:.
+]]>
+$ javac JolokiaDemo.java
+$ java JolokiaDemo
+Memory usage: used: 9526648 / max: 129957888 = 7%
+</pre>
+        <p>
+          If you are using Maven, please don't worry about the
+          dependencies which just have been downloaded manually for the
+          sake of demonstration. Jolokia's Java client library comes
+          with a well defined dependency set, so Maven will do the
+          magic. (In fact, the client library only depends on
+          jsons-simple and http-components directly)
+        </p>
+        <p>
+          Now compile it and let it run:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+$ CLASSPATH=json_simple-1.1.jar:jolokia-client-java.0.80.jar
+$ javac JolokiaDemo.java
+$ java Jolokia
+]]></pre>
+
+      </subsection>
+      <subsection name="Install Jmx4Perl">
+        <p>
+          The five minutes are probably over now, but I highly
+          recommend to install <a
+          href="http://www.jmx4perl.org">jmx4perl</a> right
+          now. Beside providing a Perl language binding for Jolokia,
+          there are quite some command line tools included which are
+          useful on their own.
+        </p>
+        <ul>
+          <li>
+            <strong>jmx4perl</strong> is a command for explore the
+            JMX space by providing arguments on the command line.
+          </li>
+          <li>
+            <strong>j4psh</strong> is a readline based, colored,
+            interactive shell with context sensitive command
+            completetion on MBean names and attributes/operations. It
+            is a perfect tool for interactively exploring MBeans and
+            their values.
+          </li>
+          <li>
+            <strong>check_jmx4perl</strong> is a feature reach Nagios
+            plugin for connecting the Jolokia agent with Nagios
+          </li>
+        </ul>
+        <p>
+          <code>jmx4perl</code> (and its dependencies) can be easily
+          installed with <code>cpan</code> if you have Perl installed:
+        </p>
+        <pre><![CDATA[
+$ perl -MCPAN -e shell
+Terminal does not support AddHistory.
+
+cpan shell -- CPAN exploration and modules installation (v1.9205)
+ReadLine support available (maybe install Bundle::CPAN or Bundle::CPANxxl?)
+
+cpan[1]> install JMX::Jmx4Perl
+...
+...]]></pre>
+        <p>
+         You will be asked for quite some dependencies, please install
+         them all. 
+        </p>
+        <p>
+          When jmx4perl is installed, try out jmx4perl:
+        </p>
+        <pre><![CDATA[
+$ jmx4perl http://localhost:8080/jolokia list
+....
+$ jmx4perl http://localhost:8080/jolokia read java.lang:type=Memory HeapMemoryUsage
+$ jmx4perl --help
+$ man jmx4perl]]></pre>
+        <p>
+          Next, I recommend to install <code>j4psh</code>. It is is
+          already installed with the previous install, however, some
+          prerequisites are still missing. So please fire up again
+          <code>cpan</code> and install the following modules:
+        </p>
+        <pre><![CDATA[
+$ perl -MCPAN -e shell
+...
+cpan[1]> install Term::ShellUI
+....
+cpan[2]> install Term::Size
+....
+cpan[3]> install Config::General
+....
+cpan[4]> install Term::Clui
+...]]></pre>
+        <p>
+          For getting the best readline experience, it is recommended
+          to also install <code>Term::ReadLine::Gnu</code>, but this
+          is optional. Now, fire up j4psh and let the fun begin:
+        </p>
+        <div align="center">
+          <img src="images/j4psh_screenshot.png"/>
+        </div>
+        <p>
+          Don't forget to try out TAB triggered command and argument completion !
+        </p>
+      </subsection>
+      <subsection name="Summary">
+        <p>
+          That's all for now, I hope you enjoyed the first contact
+          with Jolokia. This tutorial demonstrated, that setting up
+          Jolokia is really easy, other servlet container works more
+          or less the same for deployment. Also, there are already
+          quite some powerful language bindings and tools for
+          connecting to the Jolokia agent. There are a lot more in the
+          pipeline, though.  Please stand by.
+        </p>
+      </subsection>
+    </section>
+  </body>
+</document>
