@@ -13,11 +13,6 @@
 ]>
 <book>
   <bookinfo>
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/jolokia_logo.png" format="PNG" />
-      </imageobject>
-    </mediaobject>
     <title>Jolokia - Reference Documentation</title>
     <releaseinfo>0.80-SNAPSHOT</releaseinfo>
     <authorgroup>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- 
-    This is the XSL HTML configuration file for the Citrus  Reference Documentation.
+    This is the XSL HTML configuration file for the Jolokia  Reference Documentation.
 -->
 <!DOCTYPE xsl:stylesheet [
 ]>
@@ -10,10 +10,9 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version="1.0"
                 exclude-result-prefixes="#default xslthl">
-                
-    <xsl:import href="../lib/docbook-xsl/html/chunk.xsl"/>
-    <xsl:import href="../lib/docbook-xsl/html/highlight.xsl"/>
-
+  
+  <xsl:import href="urn:docbkx:stylesheet" />              
+  
 <!--###################################################
                      HTML Settings
     ################################################### -->   
@@ -85,7 +84,7 @@
     
     <xsl:template name="book.titlepage.separator">
         <hr/>
-        <img src="images/citrus_logo.png" style="width:25%;float:right;"/>
+        <img src="images/jolokia_logo.png" style="float:right;"/>
     </xsl:template>
     
     <xsl:template match="author" mode="titlepage.mode">

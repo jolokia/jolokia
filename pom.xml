@@ -68,9 +68,9 @@
             <foCustomization>src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
             <htmlStylesheet>css/stylesheet.css</htmlStylesheet>
             <!-- produce single-page html output -->
-            <chunkedOutput>false</chunkedOutput>
-            <!-- produce multi-page html output
-                 <htmlCustomization>${project.basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization> -->
+            <chunkedOutput>true</chunkedOutput>
+            <highlightSource>1</highlightSource>
+            <htmlCustomization>src/docbkx/styles/reference-html-chunk.xsl</htmlCustomization>
             <entities>
               <entity>
                 <name>version</name>
@@ -200,7 +200,6 @@
     </pluginManagement>
 
     <extensions>
-      <!-- Enabling the use of FTP -->
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-external</artifactId>
