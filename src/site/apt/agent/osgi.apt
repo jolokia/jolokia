@@ -16,7 +16,7 @@ OSGi Agent
  []
  
   Note, that some OSGi container (like Spring dm Server) comes with a
-  so called <Web extender> which allows for deployment of stanard
+  so called <Web extender> which allows for deployment of standard
   Webarchives (war). For such container, there is a choice between the
   OSGi bundle and the WAR agent, where the later is probably easier to
   deploy since there is already an HTTP Service running in such

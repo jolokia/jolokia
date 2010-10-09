@@ -46,9 +46,14 @@
         protocols. There has been some efforts to make these more
         friendly to the outside world (e.g. a <a
         href="https://ws-jmx-connector.dev.java.net/">JSR-160
-        WebService connector</a>), but it seems there is not much
-        momentum anymore behind these. And frankly, I don't want to
-        use WebServices for monitoring, either.
+        WebService connector</a> as defined in JSR-262), but it seems
+        there is not much momentum anymore behind these. In fact, the
+        last update on <a
+        href="http://jcp.org/en/jsr/detail?id=262">JSR-262</a> was in
+        May 2008 at it is marked as "inactive". And frankly, I don't
+        want to use WebServices for monitoring, either (although <a
+        href="http://dmtf.org/standards/wsman">WS-Mangament</a> is an
+        interesting approach).
       </p>
       <p>
         That was the birth of <a href="http://www.jmx4perl.org">jmx4perl</a> in May

@@ -10,7 +10,9 @@
 
   <body>
     <section name="Bulk Requests">
-      <div class="feature_icon_large"></div>
+      <div class="feature_icon_large">
+        <img src="../images/features/bulk_requests_large.png" alt="Bulk-Requests"/>
+      </div>
       <p>
         In order to monitor Java application servers, a multitude of
         parameters can be observed. Memory and thread consumption,

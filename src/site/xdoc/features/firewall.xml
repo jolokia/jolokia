@@ -10,6 +10,9 @@
 
   <body>
     <section name="Firewall friendly">
+      <div class="feature_icon_large">
+        <img src="../images/features/firewall_large.png" alt="Firewall"/>
+      </div>
       <p>
         Since Jolokia uses HTTP (or HTTPS) for its transport protocol,
         it plays nicely with even complex firewall setups. For the

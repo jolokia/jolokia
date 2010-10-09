@@ -10,6 +10,9 @@
 
   <body>
     <section name="Fast">
+      <div class="feature_icon_large">
+        <img src="../images/features/fast_large.png" alt="Fast"/>
+      </div>
       <p>
         <em>Before praising Jolokia to be the fasted remote JMX
         solution on the world,

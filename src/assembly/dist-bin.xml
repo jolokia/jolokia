@@ -70,4 +70,11 @@
       </binaries>
     </moduleSet>
   </moduleSets>
+  <fileSets>
+    <fileSet>
+      <includes>
+        <include>src/assembly/README</include>
+      </includes>
+    </fileSet>
+  </fileSets>
 </assembly>

@@ -10,6 +10,9 @@
 
   <body>
     <section name="Secure">
+      <div class="feature_icon_large">
+        <img src="../images/features/secure_large.png" alt="Security"/>
+      </div>
       <p>
         Security in Jolokia is provided on two levels: The transport
         channel (HTTP) is secured the standard way as it is defined in

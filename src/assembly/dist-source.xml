@@ -10,6 +10,14 @@
       <useDefaultExcludes>true</useDefaultExcludes>
       <excludes>
         <exclude>**/target/**</exclude>
+        <exclude>**/*.xcf</exclude>
+        <exclude>**/*.psd</exclude>
+        <exclude>design.txt</exclude>
+        <exclude>HOWTO_RELEASE</exclude>
+        <exclude>TODO</exclude>
+        <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iws</exclude>
+        <exclude>*.pl</exclude>
         <exclude>.gitignore</exclude>
       </excludes>
     </fileSet>

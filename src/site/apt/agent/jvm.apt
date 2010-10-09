@@ -2,7 +2,7 @@ JVM Agent
 
   Jolokia has also a native Java JVM agent. The only dependency is on
   Sun's JDK 6, which contains a lightweight HTTP Server used for
-  exporting the j4p data. This is the most generic agent which can
+  exporting the jolokia protocol. This is the most generic agent which can
   instrument <any> Java application using a JDK6. It is suitable for
   situations where the other agents don't fit.
 
@@ -32,5 +32,5 @@ JVM Agent
 
   []
 
-  Options are used in the given precedence, the former overwritting
+  Options are used in the given precedence, the former overwriting
   the later values.

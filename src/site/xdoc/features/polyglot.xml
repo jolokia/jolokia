@@ -10,6 +10,9 @@
 
   <body>
     <section name="Polyglot">
+      <div class="feature_icon_large">
+        <img src="../images/features/polyglot_large.png" alt="Polyglot"/>
+      </div>
       <p>
         The next examples demonstrates the usage of Jolokia with
         various different clients.  The samples check for memory and

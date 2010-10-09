@@ -56,7 +56,7 @@ abstract public class AbstractJ4pIntegrationTest {
             jettyServer.start();
             j4pUrl = J4P_DEFAULT_URL;
             // Start the integration MBeans
-            itSetup.start();
+            itSetup.start();            
         } else {
             j4pUrl = testUrl;
         }

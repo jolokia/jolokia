@@ -9,6 +9,9 @@
   </properties>
   <body>
     <section name="JMX Proxy">
+      <div class="feature_icon_large">
+        <img src="../images/features/proxy_large.png" alt="JMX Proxy"/>
+      </div>
       <p>
         There are situations, where a deployment of an Jolokia agent
         on the target platform is not possible. This might be for

@@ -10,6 +10,9 @@
 
   <body>
     <section name="Simple">
+      <div class="feature_icon_large">
+        <img src="../images/features/simple_large.png" alt="Simple"/>
+      </div>
       <p>
         For Jolokia to work, an agent must be deployed, the one way or
         the other. But this is a common business:

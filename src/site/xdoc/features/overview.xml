@@ -10,7 +10,7 @@
 
   <body>
     <section name="Overview">
-      <div style="float: right; margin: 20px 20px 20px 30px;">
+      <div class="feature_icon_large">
         <img src="../images/features/overview_large.png" alt="Overview"/>
       </div>
       <p>

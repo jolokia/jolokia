@@ -31,7 +31,7 @@ Agents
   runtime behaviour like connection pooling or dedicated HTTP
   connector can be tuned very easily (for Tomcat, see this
   {{{http://labs.consol.de/blog/nagios/putting-jmx4perl-on-the-fast-lane-for-tomcat/}example}}
-  for setting up an extra HTTP connector for this agent)
+  for setting up an extra HTTP connector for this agent).
 
   Also, this is the agent for the {{{./features/proxy.html} proxy mode}} where it is
   deployed in a simple, dedicated application server like Tomcat or
@@ -86,17 +86,14 @@ Agents
 
   []
 
-  Details 
-
 * JVM Agent
 
   Since Java 5 it is possible to start so called <JVM agents> in
   advance before starting a Java application. This technique is used
-  e.g. by profiler tools for installing global classloaders for
-  instrumenting loaded classes. Additionally, Sun's Java 6 JVM comes
-  with a simple embedded HTTP-Server which is used e.g. for exposing
-  web services with the default JAXWS implementation coming with Java
-  6.
+  e.g. by profiling tools for installing global classloaders in order
+  to instrument classes. Additionally, Sun's Java 6 JVM comes with a
+  simple embedded HTTP-Server which is used e.g. for exposing web
+  services with the default JAXWS implementation coming with Java 6.
 
   This Jolokia agent uses the agent API and the <<<HTTPServer>>> to
   allow instrumenting <any> Java application running with a Sun Java 6

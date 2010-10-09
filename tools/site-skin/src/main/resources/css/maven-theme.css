@@ -246,21 +246,14 @@ div.feature_box div.section {
 
 div.feature_icon {
     float: right;
-    height: 100px;
-    width: 100px;
-    border: 1px solid #888;
     margin: 10px;
-    background: #dedede;
 }
 
 div.feature_icon_large {
-    float: right;
-    height: 200px;
-    width: 200px;
-    border: 1px solid #888;
-    margin: 10px;
-    background: #dedede;
+    float: right; 
+    margin: 0px 20px 20px 30px;
 }
+
 
 .feature_box h2 {
     background: url(../images/feature_box_head.png) #fff no-repeat top right;
