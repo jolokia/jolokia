@@ -65,7 +65,7 @@
           <configuration>
             <includes>index.xml</includes>
             <xincludeSupported>true</xincludeSupported>
-            <foCustomization>src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
+            <foCustomization>src/docbkx/styles/reference-pdf.xsl</foCustomization>
             <htmlStylesheet>css/stylesheet.css</htmlStylesheet>
             <!-- produce single-page html output -->
             <chunkedOutput>true</chunkedOutput>

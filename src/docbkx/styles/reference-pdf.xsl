@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- 
-    This is the XSL FO (PDF) stylesheet for the Citrus reference documentation.
+    This is the XSL FO (PDF) stylesheet for the Jolokia reference documentation.
 -->
 
 <!DOCTYPE xsl:stylesheet [
@@ -14,8 +14,7 @@
                 version="1.0"
                 exclude-result-prefixes="#default xslthl">
                 
-    <xsl:import href="../lib/docbook-xsl/fo/docbook.xsl"/>
-    <xsl:import href="../lib/docbook-xsl/fo/highlight.xsl"/>
+  <xsl:import href="urn:docbkx:stylesheet" />              
 
 <!--###################################################
                    Custom Title Page
@@ -103,7 +102,7 @@
         <xsl:param name="gentext-key" select="''" />
         <xsl:variable name="Version">
             <xsl:if test="//releaseinfo">
-                <xsl:text>Citrus Framework (</xsl:text><xsl:value-of select="//releaseinfo" /><xsl:text>)</xsl:text>
+                <xsl:text>Jolokia (</xsl:text><xsl:value-of select="//releaseinfo" /><xsl:text>)</xsl:text>
             </xsl:if>
         </xsl:variable>
         <xsl:choose>
