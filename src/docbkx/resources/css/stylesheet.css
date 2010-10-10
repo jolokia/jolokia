@@ -4,6 +4,11 @@ body {
    text-align: justify;
    margin-right: 8em;
    margin-left: 8em;
+   padding: 40px;
+   width: 800px;
+   margin: 0px auto;
+   line-height: 1.3em;
+   border: 1px solid #DDD;
 }
 
 a,
@@ -14,7 +19,7 @@ a[accesskey^="p"] {
     font-family: Verdana, Arial, helvetica, sans-serif;
     font-size: 12px;
     color: #003399;
-}
+ }
 
 a:active {
     color: #003399;

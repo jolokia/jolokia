@@ -12,7 +12,7 @@
         <div class="feature_box">
           <section name="Overview">
             <div class="feature_icon">
-              <img src="images/features/overview.png" alt="Jolokia"/>
+              <a style="background: none;" href="features/overview.html"><img src="images/features/overview.png" alt="Jolokia"/></a>
             </div>
             <p>
               Jolokia is an HTTP/JSON bridge for remote JMX access. It
@@ -30,7 +30,7 @@
         <div class="feature_box">
           <section name="JMX Proxy">
             <div class="feature_icon">
-              <img src="images/features/proxy.png" alt="Proxy"/>
+              <a style="background: none;" href="features/proxy.html"><img src="images/features/proxy.png" alt="Proxy"/></a>
             </div>
             <p>
               Jolokia can operate in an agentless mode
@@ -47,7 +47,7 @@
         <div class="feature_box">
           <section name="Fast">
             <div class="feature_icon">
-              <img src="images/features/fast.png" alt="Fast"/>
+              <a style="background: none;" href="features/fast.html"><img src="images/features/fast.png" alt="Fast"/></a>
             </div>
             <p>
               Jolokia uses the super fast JSON serialization
@@ -66,7 +66,7 @@
         <div class="feature_box">
           <section name="Firewall friendly">
             <div class="feature_icon">
-              <img src="images/features/firewall.png" alt="Firewall"/>
+              <a style="background: none;" href="features/firewall.html"><img src="images/features/firewall.png" alt="Firewall"/></a>
             </div>
             <p>
               The usage of HTTP as transport protocol makes Jolokia a
@@ -80,7 +80,7 @@
         <div class="feature_box">
           <section name="Bulk-Requests">
             <div class="feature_icon">
-              <img src="images/features/bulk_requests.png" alt="Bulk Requests"/>
+              <a style="background: none;" href="features/bulk-requests.html"><img src="images/features/bulk_requests.png" alt="Bulk Requests"/></a>
             </div>
             <p>
               Jolokia can process many JMX requests within a single
@@ -98,7 +98,7 @@
         <div class="feature_box">
           <section name="Secure">
             <div class="feature_icon">
-              <img src="images/features/secure.png" alt="Secure"/>
+              <a style="background: none;" href="features/security.html"><img src="images/features/secure.png" alt="Secure"/></a>
             </div>
             <p>
               In addition to standard HTTP security Jolokia supports a
@@ -114,7 +114,7 @@
         <div class="feature_box">
           <section name="Simple">
             <div class="feature_icon">
-              <img src="images/features/simple.png" alt="Simple"/>
+              <a style="background: none;" href="features/simple.html"><img src="images/features/simple.png" alt="Simple"/></a>
             </div>
             <p>
               It's simple. Jolokia can be used with a simple Web
@@ -131,7 +131,7 @@
         <div class="feature_box">
           <section name="Polyglot">
             <div class="feature_icon">
-              <img src="images/features/polyglot.png" alt="Polyglot"/>
+              <a style="background: none;" href="features/polyglot.html"><img src="images/features/polyglot.png" alt="Polyglot"/></a>
             </div>
             <p>
               Thanks to the widely adopted standards HTTP and JSON,

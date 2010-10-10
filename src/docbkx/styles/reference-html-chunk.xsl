@@ -105,23 +105,4 @@
         </div>
     </xsl:template>
 
-<!--###################################################
-                       Highlighting
-    ################################################### -->
-    
-    <xsl:param name="highlight.source">1</xsl:param>
-    <xsl:param name="highlight.default.language">xml</xsl:param>
-    
-    <xsl:template match="xslthl:tag" mode="xslthl">
-        <span class="hl-tag"><xsl:apply-templates mode="xslthl"/></span>
-    </xsl:template>
-    
-    <xsl:template match='xslthl:attribute' mode="xslthl">
-      <span class="hl-attribute"><xsl:apply-templates mode="xslthl"/></span>
-    </xsl:template>
-    
-    <xsl:template match='xslthl:value' mode="xslthl">
-      <span class="hl-value"><xsl:apply-templates mode="xslthl"/></span>
-    </xsl:template>
-      
 </xsl:stylesheet>
