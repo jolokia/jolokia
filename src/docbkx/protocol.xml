@@ -29,14 +29,6 @@
       POST requests are used.
     </para>
     <para>
-      The protocol definition is versioned. It contains of a major and
-      minor version. Changes in the minor version are backward
-      compatibel to other protocol with the same major version. Major
-      version changes incorporate possibly backwards incompatible
-      changes which are described in <xref linkend="versions"/>. This
-      document describes the Jolokia protocol version <emphasis role="bold">4.0</emphasis>
-    </para>
-    <para>
       The rest of this chapter is divided into two parts: First, the
       general structure of requests and response are explained after
       which the representation of Jolokia supported operations 
@@ -45,8 +37,20 @@
       linkend="list"/>, <xref linkend="list"/>)
     </para>
     <section id="request-response">
-      <title>Request and Response</title>
-      
+      <title>Requests and Responses</title>
+      <para>
+        Jolokia knows about two different styles for handling
+        requests, which are distinguished by the HTTP method used, GET
+        or POST. Regardless what method is used, the agent doesn't
+        keep any state on the server side (except of course that
+        MBeans might obviously be stateful). So in this aspect, the
+        communication can be considered RESTlike
+        <footnote id="rest-comment">
+          <para>This document will avoid the term REST as much as
+          possible in order to avoid provocating any dogmatic
+          resentments.</para> 
+        </footnote>.
+      </para>
       <section id="get-request">
         <title>GET requests</title>
         <para>
@@ -57,7 +61,7 @@
           pathinfo, each part is separated by a slash
           (<literal>/</literal>).  In general, the request URL looks
           like
-          <synopsis><![CDATA[<base-url>/<operation>/<arg1>/<arg2>/..../]]></synopsis>
+          <synopsis><![CDATA[<base-url>/<type>/<arg1>/<arg2>/..../]]></synopsis>
           The <literal>&lt;base-url&gt;</literal> specifies the URL
           under which the Jolakia agent is accessible in general. It
           typically looks like
@@ -66,26 +70,298 @@
           of this URL is the name of the deployed agent, which by
           default is based on the agent's filename
           (e.g. <filename>jolokia.war</filename>).
-          <literal>&lt;operation&gt;</literal> specifies one of the
+          <literal>&lt;type&gt;</literal> specifies one of the
           supported Jolokia operations (described in the next
           section), followed by one or more operation-specific
           parameters separated by slashes.
+        </para>
+        <para>
+          For example, the following URL executes a
+          <constant>read</constant> operation on the MBean
+          <literal>java.lang:type=Memory</literal> for reading the
+          attribute <literal>HeapMemoryUsage</literal> (see <xref
+          linkend="read"/>). It is assumed, that the agent is
+          reachable under the base URL
+          <uri>http://localhost:8080/jolokia</uri>: 
+          <informalexample>
+            <literallayout class="monospaced">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</literallayout>
+          </informalexample>
+        </para>
+        <sidebar>
+            You might wonder, why simple URI encoding isn't enough for
+            escaping slashes. The reason is rather simple:
+            JBoss/Tomcat has a strange behaviour to return an HTTP
+            response <literal>HTTP/1.x 400 Invalid URI:
+            noSlash</literal> for any URL which contains an escaped
+            slash in the path info
+            (i.e. <literal>%2F</literal>). The reason behind this
+            behaviour is <ulink url="">security</ulink> related,
+            slashes gets decoded on the agent side bevor the agent
+            parses the request. Other appservers might exhibit a
+            similar behaviour. 
+        </sidebar>
+        <para>
+          If one of the request parts contain a slash
+          (<literal>/</literal>) (e.g. as part of you bean's name) it
+          needs to be escaped. A single slash (<literal>/</literal>)
+          is escaped by the combination <literal>/-/</literal>, two
+          subsequent slashes (<literal>//</literal>) are to be escaped
+          with <literal>/--/</literal> and so on. For example, to
+          request the atrribute <literal>State</literal> on the MBean
+          named <literal>jboss.jmx:alias=jmx/rmi/RMIAdaptor</literal>,
+          an access URL like this has to be constructed:
+        </para>        
+        <informalexample>
+          <literallayout class="monospaced">.../read/jboss.jmx:alias=jmx/-/rmi/-/RMIAdaptor/State</literallayout>
+        </informalexample>
+        <para>
+          Client libraries like <ulink
+          url="http://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</ulink>
+          does this sort of escaping transparently. If the part
+          (e.g. MBean's name) <emphasis>ends</emphasis> in a slash you
+          need to use a <literal>+</literal> instead of a minus, so
+          the j4p agent can combine parts properly. For example to
+          encode a MBean name like
+          <literal>test:strangeName=/bla//</literal>, this should be
+          encoded like
+          <informalexample>
+            <literallayout class="monospaced">.../test:strangeName=/-/bla/-+/attribute</literallayout>
+          </informalexample>
+          The corresponding perl code
+          for creating escaping a single parht looks like
+        </para>
+        <programlisting language="perl"><![CDATA[
+$input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
+$input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
+        <para>
+          Said all this, this sort of strange escaping can be
+          avoided alltogether, if a slightly different variant for a
+          request is used (which doesn't look that REST-stylish,
+          though). Instead of providing the information as path-info
+          a query parameter <literal>p</literal> can be used
+          instead. This should be URL encoded, though. For the
+          example above, the alternative is
+          <informalexample>
+            <literallayout class="monospaced">http:localhost:8080/jolokia?p=/read/test:strangeName=%2Fbla%2F%2F/attribute</literallayout>
+          </informalexample>
+        </para>
+        <para>
+          Luckily, the POST request variant doesn't need this sort
+          of escaping. It is described in the next section.
         </para>
       </section>
 
       <section id="post-request">
         <title>POST requests</title>
+        <para>
+          POST requests are the most powerful way for communicating
+          with the Jolokia agent. There are no escaping issues and it
+          allows for features which are not available with GET
+          requests. POST requests uses a fixed URL (except for <xref
+          linkend="operational-parameters"/>) and put their payload
+          within the HTTP request's body. This payload is represented
+          in JSON, a data serialization format coming from JavaScript
+          world.
+        </para>
+        <para>
+          The JSON format for a single request is a JSON object, which
+          is essentially a map with key (or
+          <emphasis>attributes</emphasis>) and values. All requests
+          have a common mandatory attribute, <emphasis
+          role="bold">type</emphasis>, which specifies the kind of JMX
+          operation to perform. The other attributes are either operation
+          specific as described in <xref
+          linkend="jolokia-operations"/> or are <emphasis>operational
+          parameters</emphasis> which influence the overall behaviour
+          and can be mixed in to any request. See <xref
+          linkend="operational-parameters"/> for details.
+        </para>
+        <para>
+          A sample read request in JSON format looks like in the
+          following example. It has a <constant>type</constant>
+          <emphasis role="bold">read</emphasis>
+          (case doesn't matter) and the three attributes
+          <constant>mbean</constant>, <constant>attribute</constant>
+          and <constant>path</constant> which are specific to a read
+          request. 
+        </para>
+        <programlisting><![CDATA[
+  {
+    "type" : "read"
+    "mbean" : "java.lang:type=Memory",
+    "attribute" : "HeapMemoryUsage",
+    "path" : "used",
+  },
+ ]]]></programlisting>
+        <para>
+          Each request JSON object results in a single JSON response
+          object contained in the HTTP answer's body. Multiple
+          requests can be send in a single HTTP request by putting
+          individual Jolokia request into an JSON array:
+        </para>
+        <programlisting><![CDATA[
+ [
+  {
+    "type" : "read"
+    "attribute" : "HeapMemoryUsage",
+    "mbean" : "java.lang:type=Memory",
+    "path" : "used",
+  },
+  { 
+    "type" : "search"
+    "mbean" : "*:type=Memory,*",
+  }
+ ]]]></programlisting>
+        <para>
+          This request will result in a JSON array containing multiple
+          JSON responses within the HTTP response. They are returned
+          in same order as the requests in the initial bulk request.
+        </para>
       </section>
       
       <section id="responses">
         <title>Responses</title>
+        <para>
+          Responses are always encoded in JSON, regardless whether the
+          requst was a GET or POST request.  In general, two kinds of
+          responses can be classified: In the normal case, a HTTP
+          Response with response code 200 is returned, containing the
+          result of the operation as a JSON payload. In case of an
+          error, a 4xx or 5xx code will be returned and the JSON
+          payload contains details about the error
+          occured. 
+        </para>
+        <para>
+          In the non-error case a JSON response looks mostly the same
+          for each request type except for the
+          <constant>value</constant> attribute which is request type
+          specific. The error case is described in <xref
+          linkend="error-handling"/>.
+        </para>
+        <para>
+          The format of a single Jolokia response is
+        </para>
+        <programlisting><![CDATA[
+ {
+   "value": .... ,
+   "status" : 200,
+   "timestamp" : 1244839118,
+   "request": {
+               "type": ...,
+               ....
+              },
+   "history":[
+               {"value": ... ,
+                "timestamp" : 1244839045
+               }, ....
+             ]
+ }]]></programlisting>
+        <para>
+          For successful requests, the <constant>status</constant> is
+          always <literal>200</literal>. The
+          <constant>timestamp</constant> contains the epoch
+          time<footnote>Seconds since 1.1.1970</footnote> when the
+          request has been handled. The request leading to this
+          response can be found under the attribute
+          <constant>request</constant>. Finally and optionally, if
+          history tracking is switched on (see <xref
+          linkend="history"/>), an entry with key
+          <constant>history</constant> contains a list of historical
+          values along with their timestamps. History tracking is only
+          available for certain type of requests
+          (<constant>read</constant>, <constant>write</constant> and
+          <constant>exec</constant>). The <constant>value</constant>
+          is specific for the type of request, it can be a single
+          scalar value or a monster JSON structure.
+        </para>
+        <para>
+          If an error occurs, the <constant>status</constant> will be
+          a number different from <literal>200</literal>. An error
+          response looks like
+        </para>
+        <programlisting><![CDATA[
+  {
+    "status":400,
+    "error":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'",
+    "stacktrace":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'\n
+                  \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
+                  \tat org.cpan.jmx4perl.JmxRequest.<init>(Unknown Source) ...."
+  }]]></programlisting>
+        <sidebar>
+          <para>
+            When it comes to status codes it is important to
+            distinguis status codes as they included in Jolokia JSON
+            response objects and the HTTP status code of the (outer)
+            HTTP response. There can be many Jolokia status codes, one
+            for each request contained in the single HTTP request. The
+            HTTP status code merely reflect the status of agent itself
+            (i.e. whether it could perform the operation), whereas the
+            Jolokia response status reflects the result of the
+            operation (e.g. whether the performed operation throws an
+            exception). So it is not uncommon to have an HTTP status
+            code of 200, but the contained JSON response(s) indicate
+            some errors.
+          </para>
+        </sidebar>
+        <para>
+          I.e. the <constant>status</constant> has a code in the range
+          <literal>400 .. 499</literal> or <literal>500 .. 599</literal>
+          as it is specified for HTTP return codes. The
+          <constant>error</constant> member contains an error
+          description. This is typically the message of an exception
+          occured on the agent side<footnote>If the server exception
+          is a subtype of <class>MBeanException</class>, the wrapped
+          exception's message is used.</footnote>.
+          The <constant>stacktrace</constant> contains a Java stacktrace
+          occured on the server side (if any stacktrace is available).
+        </para>
+        <para>
+          For each type of operation, the format of the
+          <constant>value</constant> entry is explained in
+          <xref linkend="jolokia-operations"/>
+        </para>
       </section>
-
-      <section id="error-handling">
-        <title>Error handling</title>
+      
+      <section id="pathes">
+        <title>Pathes</title>
+        <para>
+          Before we come to the Jolokia operation the general conecpt
+          of <emphasis>inner pathes</emphasis> requires some
+          explanation. 
+        </para>
+        <para>
+          An <emphasis>inner path</emphasis> points to a certain
+          substructure (plain value, array, hash) within a a complex
+          JSON value. Think of it as something like "XPath lite". This
+          is best explained by an example:
+        </para>
+        <para>
+          The attribute <literal>HeapMemoryUsage</literal> of the MBean 
+          <literal>java.lang:type=Memory</literal> can be
+          requested with the URL 
+          <literal>http://localhost:8080/j4p/read/java.lang:type=Memory/HeapMemoryUsage</literal>
+          which returns a complex JSON structure like
+          <programlisting language="json">
+ {
+   "committed" : 18292736,
+   "used" : 15348352,
+   "max" : 532742144,
+   "init" : 0
+ }</programlisting>
+        </para>
+        <para>
+          In order to get to the value for used heap memory you should
+          specify an inner path <literal>used</literal>, so that the
+          request
+          <literal>http://localhost:8080/j4p/read/java.lang:type=Memory/HeapMemoryUsage/used</literal>
+          results in a response of <literal>15348352</literal>.  If
+          the attribute contains arrays at some level, use a numeric
+          index (0 based) as part of the inner path if you want to
+          traverse into this array.
+        </para>        
       </section>
     </section>
-
+    
     <section id="jolokia-operations">
       <title>Jolokia operations</title>
 
@@ -96,44 +372,62 @@
       &protocol_list;
       &protocol_version;
     </section>
-
+        
     <section id="operational-parameters">
       <title>Operational parameters</title>
     </section>
     
     <section id="history">
-      <title>Storing historical values</title>
+      <title>Tracking historical values</title>
+      <para>
+        The Jolokia agents are able to keep requested values in memory
+        along with a timestamp. If history tracking is switched on,
+        then the agent will put the list of historical values specific
+        for this request into the response. History tracking is
+        toggled by an MBean operation on a Jolokia owned MBean (see
+        <xref linkend="mbeans"/>). This has to be done individually on each
+        attribute or JMX operation to be tracked.
+      </para>
+      <para>
+        The MBean <literal>jolokia:type=Config</literal> provides the
+        following two operations:
+        <variablelist>
+          <varlistentry>
+            <term><emphasis role="bold">setHistoryEntriesForOperation</emphasis></term>
+            <listitem>              
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><emphasis role="bold">setHistoryEntriesForAttribute</emphasis></term>
+            <listitem>              
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
     </section>
 
     <section id="versions">
       <title>Protocol versions</title>
+      <para>
+        The protocol definition is versioned. It contains of a major
+        and minor version. Changes in the minor version are backward
+        compatibel to other protocol with the same major
+        version. Major version changes incorporate possibly backwards
+        incompatible changes. This document describes the Jolokia
+        protocol version <emphasis role="bold">4.0</emphasis>
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><emphasis role="bold">4.0</emphasis> (17.10.2010)</term>
+          <listitem>
+            <para>This is the initial for Jolokia. Version below 4 are
+            implemented by jmx4perl</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </section>
     <!-- =======================================================================  -->
     <section id="request">
-      <title>Request</title>
-      <para>
-        Jolokia knows about two different styles for handling requests, which
-        are distinguished by the HTTP method used, GET or POST.
-      </para>
-      <para>
-        For GET requests it uses restful style, which essentially is a
-        single URL which encodes all requests parameters. For this to
-        work, the URL is divided into parts separated by
-        <literal>/</literal>. In general, the request URL looks like
-        <synopsis><![CDATA[
- <base-url>/<mode of operation>/<operation specific parameter>/..../]]></synopsis>
-      </para>
-      <para>
-        The <literal>&lt;base-url&gt;</literal> specifies the URL
-        under which the Jolakia agent is accessible in general. It
-        typically looks like <uri>http://localhost:8080/jolokia</uri>,
-        but depends obviously on your deployment setup. Normally, the
-        last part of this URL is the name of the deployed agent, which
-        by default is based on the filename
-        (e.g. <filename>jolokia.war</filename>).  <literal>&lt;mode of
-        operation&gt;</literal> specifies one of the supported
-        operations after which operation-specific parameters follow.
-      </para>
       <para>
         In addition to the command provided as a path, the agent knows about
         some query parameters which influence the value returned. These are
@@ -389,41 +683,6 @@ SystemProperties
             </varlistentry>
           </variablelist>
         </section>
-        <section id="get-escaping">
-          <title>Escaping</title>
-          <para>
-            If you are forced to use a slash (<literal>/</literal>) as part of your request (e.g. as part
-            of you bean's name) you need to escape it. A single slash (<literal>/</literal>) is escaped by
-            the combination <literal>/-/</literal>, two subsequent slashes (<literal>//</literal>) are to be escaped with
-            <literal>/--/</literal> and so on. For example, to request the atrribute <literal>State</literal> on the MBean
-            named <literal>jboss.jmx:alias=jmx/rmi/RMIAdaptor</literal>, you should an URL like
-            <informalexample>
-              <literallayout class="monospaced">.../read/jboss.jmx:alias=jmx/-/rmi/-/RMIAdaptor/State</literallayout>
-            </informalexample>
-          </para>
-          <para>
-            Client libraries like <ulink
-            url="http://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</ulink> does this sort of
-            escaping transparently. If the part (e.g. MBean's name)
-            <emphasis>ends</emphasis> in a slash you need to use a
-            <literal>+</literal> instead of a minus, so the j4p agent
-            can combine parts properly. The corresponding perl code
-            for creating such a format looks like
-          </para>
-          <programlisting language="perl"><![CDATA[
-$input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
-$input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
-          <para>
-            You might wonder, why simple URI encoding isn't enough for
-            escaping slashes. The reason is rather simple:
-            JBoss/Tomcat has a nasty bug, which returns an HTTP
-            response <literal>HTTP/1.x 400 Invalid URI:
-            noSlash</literal> for any URL which contains an escaped
-            slash in the path info
-            (i.e. <literal>%2F</literal>). Other appservers might
-            croak as well, though not test. Try it yourself!
-          </para>
-        </section>
       </section>
       <section id="post-requests">
         <title>POST Requests</title>
@@ -438,11 +697,11 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
     "attribute":"HeapMemoryUsage",
     "mbean":"java.lang:type=Memory",
     "path":"used",
-    "type":"READ"
+    "type":"read"
   },
   { 
     "mbean":"*:type=Memory,*",
-    "type":"SEARCH"
+    "type":"search"
   }
  ]]]></programlisting>
         <para>
@@ -480,7 +739,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
             <varlistentry>
               <term><literal>attribute</literal></term>
               <listitem>
-                If type is <literal>READ</literal> or
+                If type is <literal>read</literal> or
                 <literal>WRITE</literal> this specifies the requested
                 attribute
               </listitem>

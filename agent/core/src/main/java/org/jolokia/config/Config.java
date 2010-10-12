@@ -7,7 +7,6 @@ import javax.management.*;
 import org.jolokia.history.HistoryKey;
 import org.jolokia.history.HistoryStore;
 
-
 /*
  *  Copyright 2009-2010 Roland Huss
  *
