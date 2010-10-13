@@ -46,6 +46,8 @@
         <version>2.1</version>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
+          <releaseProfiles>dist-labs</releaseProfiles>
+          <goals>deploy assembly:assembly</goals>
         </configuration>
       </plugin>
       
