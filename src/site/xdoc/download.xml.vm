@@ -9,25 +9,24 @@
   </properties>
 
   <body>
-    <section name="Jolokia 0.80-SNAPSHOT">
+    <section name="Jolokia ${currentStableVersion}">
       <p>
-        There is no official release yet. In the meantime, the
-        snapshot release <strong>${currentStableVersion}</strong> can be
+        This is the first official release of Jolokia. It can be
         downloaded in two variants: As a binary release including the
-        agents and the client library as binaries and the reference
-        manual as PDF and HTML. The source release contains the
-        complete source mirroring the source repository on 
-        <a href="http://github.com/rhuss/jolokia">GitHub</a>.
+        agents and the client libraries and the reference manual (PDF
+        and HTML). The source release contains the complete source
+        tree mirroring the repository on <a
+        href="http://github.com/rhuss/jolokia">GitHub</a>.
       </p>
       <ul>
         <li><strong>jolokia-${currentStableVersion}-bin</strong> (<a
-        href="dist/snapshot/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
+        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
         | <a
-        href="dist/snapshot/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
+        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
         <li><strong>jolokia-${currentStableVersion}-source</strong> (<a
-        href="dist/snapshot/${currentStableVersion}-source.tar.gz">tar.gz</a>
+        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-source.tar.gz">tar.gz</a>
         | <a
-        href="dist/snapshot/${currentStableVersion}-source.zip">zip</a>)</li>
+        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-source.zip">zip</a>)</li>
       </ul>
       <p>
         The agents and the client library can be downloaded directly
@@ -41,27 +40,27 @@
           </tr>
           <tr>
             <td>WAR-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-0.80-20100915.115110-1.war">jolokia-war-0.80-20100915.115110-1.war</a></td>            
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>            
           </tr>
           <tr>
             <td>Osgi-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-0.80-20100915.115110-1.jar">jolokia-osgi-0.80-20100915.115110-1.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>            
           </tr>
           <tr>
             <td>Osgi-Agent (full bundle)</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi-bundle/0.80-SNAPSHOT/jolokia-osgi-bundle-0.80-20100915.115110-1.jar">jolokia-osgi-bundle-0.80-20100915.115110-1.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>            
           </tr>
           <tr>
             <td>Mule-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-mule/0.80-SNAPSHOT/jolokia-mule-0.80-20100915.115110-1-agent.jar">jolokia-mule-0.80-20100915.115110-1-agent.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>            
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-jvm-jdk6/0.80-SNAPSHOT/jolokia-jvm-jdk6-0.80-20100915.115110-1-agent.jar">jolokia-jvm-jdk6-0.80-20100915.115110-1-agent.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-jvm-jdk6/${currentStableVersion}/jolokia-jvm-jdk6-${currentStableVersion}-agent.jar">jolokia-jvm-jdk6-${currentStableVersion}-agent.jar</a></td>            
           </tr>
           <tr>
             <td>Java Client Library</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-client-java/0.80-SNAPSHOT/jolokia-client-java-0.80-20100915.115110-1.jar">jolokia-client-java-0.80-20100915.115110-1.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>            
           </tr>
         </tbody>
       </table>

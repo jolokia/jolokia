@@ -93,12 +93,11 @@
             JBoss/Tomcat has a strange behaviour to return an HTTP
             response <literal>HTTP/1.x 400 Invalid URI:
             noSlash</literal> for any URL which contains an escaped
-            slash in the path info
-            (i.e. <literal>%2F</literal>). The reason behind this
-            behaviour is <ulink url="">security</ulink> related,
-            slashes gets decoded on the agent side bevor the agent
-            parses the request. Other appservers might exhibit a
-            similar behaviour. 
+            slash in the path info (i.e. <literal>%2F</literal>). The
+            reason behind this behaviour is security related, slashes
+            gets decoded on the agent side bevore the agent-servlet
+            gets the request. Other appservers might exhibit a similar
+            behaviour.
         </sidebar>
         <para>
           If one of the request parts contain a slash

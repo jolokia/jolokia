@@ -72,9 +72,31 @@
   </moduleSets>
   <fileSets>
     <fileSet>
+      <directory>src/assembly</directory>
       <includes>
-        <include>src/assembly/README</include>
+        <include>README</include>
       </includes>
+      <outputDirectory></outputDirectory>
+    </fileSet>
+    <fileSet>
+      <includes>
+        <include>LICENSE</include>
+        <include>NOTICE</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>target/site/reference/pdf</directory>
+      <includes>
+        <include>*.pdf</include>
+      </includes>
+      <outputDirectory>reference/pdf</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>target/site/reference/html</directory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+      <outputDirectory>reference/html</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
