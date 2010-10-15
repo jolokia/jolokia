@@ -1,4 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-      <section id="search">
-        <title>Searching MBeans (search)</title>
-      </section>
+<section id="search">
+  <title>Searching MBeans (search)</title>
+  <para>
+    With the Jolokia search operation the agent can be queried for
+    MBeans with a given pattern.  Searching will be performed on every
+    <classname>MBeanServer</classname> found by the agent.
+  </para>
+  <section id="get-search">
+    <title>GET search request</title>
+    <para>
+      The format of the search GET URL is:
+    </para>
+    <synopsis><![CDATA[<base-url>/search/<pattern>]]></synopsis>
+    <para>
+      This mode is used to query for certain MBean. It takes a single
+      argument <literal>pattern</literal> for
+      specifying the search parameter like in 
+      <synopsis><![CDATA[http://localhost:8080/jolokia/search/*:j2eeType=J2EEServer,*]]></synopsis>
+    </para>
+    <para>
+      You can use patterns as described <ulink
+      url="http://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html">here</ulink>,
+      i.e. it may contain wildcards like <literal>*</literal> and
+      <literal>?</literal>. The Mbean names matching the query
+      are returned as a list within the response.
+    </para>
+  </section>
+  
+  <section id="post-search">
+    <title>POST search request</title>
+    <para>
+      A search POST request knows the following keys:
+    </para>
+    <table>
+      <title>POST Search Request</title>
+      <thead>
+        <tr>
+          <td>Key</td>
+          <td>Description</td>
+          <td>Example</td>
+          </tr>        
+      </thead>
+      <tr>
+        <td><constant>type</constant></td>
+        <td><emphasis role="bold">search</emphasis></td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>mbean</constant></td>
+        <td>The MBean pattern to search for</td>
+        <td><literal>java.lang:*</literal></td>
+      </tr>
+    </table>
+    <para>
+      The following request searches for all MBeans registered in the
+      domain <literal>java.lang</literal>
+    </para>
+    <programlisting><![CDATA[
+{ 
+   "type":"SEARCH",
+   "mbean":"java.lang:*",
+}]]></programlisting>
+  </section>
+
+  <section id="response-search">
+    <title>Search response</title>
+    <para>
+      The answer is a list of MBean names which matches the pattern. A
+      <literal>404</literal> Response will be returned in case no MBean
+      matches this name.
+    </para>
+    <para>
+      For example, the request
+      <informalexample>
+        <literallayout class="monospaced">http://localhost:8888/j4p/search/*:j2eeType=J2EEServer,*</literallayout>
+      </informalexample>
+      results in
+      <programlisting><![CDATA[
+ {
+   "value": [
+              "jboss.management.local:j2eeType=J2EEServer,name=Local"
+            ],
+   "status":200,
+   "timestamp":1245305648,
+   "request": {
+       "mbean":"*:j2eeType=J2EEServer,*","type":"search"
+   }
+ }]]></programlisting>
+    </para>
+    <para>
+      The returned MBean names are properly <ulink
+      url="http://download.oracle.com/javase/1.5.0/docs/api/javax/management/ObjectName.html">quoted</ulink>
+      so that they can be directly used as 
+      input for other requests.
+    </para>
+  </section>  
+</section>

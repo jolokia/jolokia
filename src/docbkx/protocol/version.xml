@@ -1,4 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-      <section id="version">
-        <title>Getting the agent version (version)</title>
-      </section>
+<section id="version">
+  <title>Getting the agent version (version)</title>
+  <para>
+    The Jolokia command <constant>version</constant> returns the version of
+    the Jolokia agent along with the protocol version. 
+  </para>
+
+  
+  <section id="get-version">
+    <title>GET version request</title>
+    <para>
+      The GET URL for a version request has the following format:
+    </para>
+    <synopsis><![CDATA[<base-url>/version]]></synopsis>
+  </section>
+  <section id="post-version">
+    <title>POST version request</title>
+    <para>
+      A version POST request has only a single key
+      <constant>version</constant> which has to be set to 
+      <emphasis role="bold">version</emphasis>.
+    </para>
+  </section>
+  <section id="response-version">
+    <title>Version response</title>
+    <para>
+      The response value for a version request looks like:
+    </para>
+    <programlisting><![CDATA[
+ {
+    "timestamp":1287143106,
+    "status":200,
+    "request":{"type":"version"},
+    "value":{
+              "protocol":"4.0",
+              "agent":"0.80"
+             }
+ }]]></programlisting>
+  </section>
+  <para>
+    <literal>protocol</literal> in the response value contains the
+    protoco version used, <literal>agent</literal> ist the version of
+    the Jolokia agent. See <xref linkend="versions"/> for the various
+    protocol versions and the interoperatibility. 
+  </para>  
+</section>

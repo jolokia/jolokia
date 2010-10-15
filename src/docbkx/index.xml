@@ -1,26 +1,9 @@
 <?xml version='1.0' encoding="iso-8859-1" ?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
-[
-<!ENTITY introduction       SYSTEM "introduction.xml">
-<!ENTITY architecture       SYSTEM "architecture.xml">
-<!ENTITY agents             SYSTEM "agents.xml">
-<!ENTITY security           SYSTEM "security.xml">
-<!ENTITY proxy              SYSTEM "proxy.xml">
-<!ENTITY protocol           SYSTEM "protocol.xml">
-<!ENTITY protocol_read      SYSTEM "protocol/read.xml">
-<!ENTITY protocol_write     SYSTEM "protocol/write.xml">
-<!ENTITY protocol_exec      SYSTEM "protocol/exec.xml">
-<!ENTITY protocol_search    SYSTEM "protocol/search.xml">
-<!ENTITY protocol_list      SYSTEM "protocol/list.xml">
-<!ENTITY protocol_version   SYSTEM "protocol/version.xml">
-<!ENTITY clients            SYSTEM "clients.xml">
-<!ENTITY sample             SYSTEM "sample.xml">
-<!ENTITY jmx4perl           SYSTEM "jmx4perl.xml">
-]>
-<book>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
-    <title>Jolokia - Reference Documentation</title>
-    <releaseinfo>0.80-SNAPSHOT</releaseinfo>
+    <title>Jolokia - Reference Documentation<inlinegraphic align="right" fileref="jolokia_logo.png"/></title>
+    <releaseinfo>&version;</releaseinfo>
     <authorgroup>
       <author>
         <firstname>Roland</firstname>
@@ -34,18 +17,18 @@
   </bookinfo>
   <toc/>
 
-  &introduction;
-  &architecture;
-  &agents;
-  &security;
-  &proxy;
-  &protocol;
-  &mbeans;
-  &clients;
+  <xi:include href='introduction.xml'/>
+  <xi:include href='architecture.xml'/>
+  <xi:include href='agents.xml'/>
+  <xi:include href='security.xml'/>
+  <xi:include href='proxy.xml'/>
+  <xi:include href='protocol.xml'/>
+  <xi:include href='mbeans.xml'/>
+  <xi:include href='clients.xml'/>
 
   <appendix id="appendix">
     <title>Appendix</title>
-    &sample;
-    &jmx4perl;
+    <xi:include href='sample.xml'/>
+    <xi:include href='jmx4perl.xml'/>
   </appendix>
 </book>

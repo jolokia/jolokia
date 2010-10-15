@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="protocol">
+<chapter id="protocol" xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Jolokia Protocol</title>
     <para>
-      Jolokia uses JSON over HTTP for its communication. In this
-      chapter the Jolokia protocol is defined. The communicatin is
-      based on a request-response paradigm, where each requests
-      results in a single response. 
+      Jolokia uses a JSON-over-HTTP protocol which is described in
+      this chapter. The communication is based on a request-response
+      paradigm, where each requests results in a single response.
     </para>
     <sidebar>
+      <title>GET URLs are chatty</title>
       Keep in mind
       that many web servers log the requested path of every request, including
       parameters passed to a GET request, so sending messages over GET
@@ -15,13 +15,15 @@
     </sidebar>
     <para>
       Jolokia requests can be sent in two ways: Either as a HTTP GET
-      request, in which case the request parameters are encoded in the
-      URL. Or as a POST request where the request is put into a JSON
-      payload in the HTTP request's body. GET based requests are
-      mostly suitable for simple use cases and for testing the agent
-      via a browser. The focus is on simple usage.
-      POST based requests are more appropriate for complex
-      requests. E.g. bulk requests are only possible with POST.
+      request, in which case the request parameters are encoded
+      completely in the URL. Or as a POST request where the request is
+      put into a JSON payload in the HTTP request's body. GET based
+      requests are mostly suitable for simple use cases and for
+      testing the agent via a browser. The focus here is on
+      simplicity.  POST based requests uses a JSON representation of
+      the request within the HTTP body. They are more appropriate for
+      complex requests and provide some additional features (e.g. bulk
+      requests are only possible with POST).
     </para>
     <para>
       The response returned by the agent uses always JSON for its data
@@ -30,12 +32,19 @@
     </para>
     <para>
       The rest of this chapter is divided into two parts: First, the
-      general structure of requests and response are explained after
-      which the representation of Jolokia supported operations 
-      defined (<xref linkend="read"/>, <xref linkend="write"/>, <xref
-      linkend="exec"/>, <xref linkend="search"/>, <xref
-      linkend="list"/>, <xref linkend="list"/>)
+      general structure of requests and responses are explained after
+      which the representation of Jolokia supported operations defined.
     </para>
+    <note>
+      Unfortunately the notation <emphasis>operation</emphasis> is
+      used in different contexts, which should be
+      distinguished. <emphasis>Jolokia operations</emphasis> denote
+      the various kind of Jolokia requests, whereas <emphasis>JMX
+      operations</emphasis> are methods which can be invoked on an JMX
+      MBean. Wherever the context requires it, this documents uses
+      <emphasis>Jolokia</emphasis> or <emphasis>JMX</emphasis> as
+      prefix.  
+    </note>
     <section id="request-response">
       <title>Requests and Responses</title>
       <para>
@@ -43,8 +52,8 @@
         requests, which are distinguished by the HTTP method used, GET
         or POST. Regardless what method is used, the agent doesn't
         keep any state on the server side (except of course that
-        MBeans might obviously be stateful). So in this aspect, the
-        communication can be considered RESTlike
+        MBeans are mostly obviously stateful). So in this aspect, the
+        communication can be considered REST like.
         <footnote id="rest-comment">
           <para>This document will avoid the term REST as much as
           possible in order to avoid provocating any dogmatic
@@ -58,12 +67,12 @@
           HTTP GET requests. These requests encode all its parameters
           within the access URL. Typically, Jolokia uses the pathinfo
           part of an URL to extract the parameters. Within the
-          pathinfo, each part is separated by a slash
+          path-info, each part is separated by a slash
           (<literal>/</literal>).  In general, the request URL looks
           like
           <synopsis><![CDATA[<base-url>/<type>/<arg1>/<arg2>/..../]]></synopsis>
           The <literal>&lt;base-url&gt;</literal> specifies the URL
-          under which the Jolakia agent is accessible in general. It
+          under which the agent is accessible. It
           typically looks like
           <uri>http://localhost:8080/jolokia</uri>, but depends
           obviously on your deployment setup. Normally, the last part
@@ -77,7 +86,7 @@
         </para>
         <para>
           For example, the following URL executes a
-          <constant>read</constant> operation on the MBean
+          <constant>read</constant> Jolokia operation on the MBean
           <literal>java.lang:type=Memory</literal> for reading the
           attribute <literal>HeapMemoryUsage</literal> (see <xref
           linkend="read"/>). It is assumed, that the agent is
@@ -88,6 +97,9 @@
           </informalexample>
         </para>
         <sidebar>
+          <title>
+            Why escaping ?
+          </title>
             You might wonder, why simple URI encoding isn't enough for
             escaping slashes. The reason is rather simple:
             JBoss/Tomcat has a strange behaviour to return an HTTP
@@ -95,7 +107,7 @@
             noSlash</literal> for any URL which contains an escaped
             slash in the path info (i.e. <literal>%2F</literal>). The
             reason behind this behaviour is security related, slashes
-            gets decoded on the agent side bevore the agent-servlet
+            gets decoded on the agent side before the agent-servlet
             gets the request. Other appservers might exhibit a similar
             behaviour.
         </sidebar>
@@ -145,8 +157,8 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           </informalexample>
         </para>
         <para>
-          Luckily, the POST request variant doesn't need this sort
-          of escaping. It is described in the next section.
+          Luckily, the POST request variant doesn't need this slash
+          mangling. It is described in the next section.
         </para>
       </section>
 
@@ -156,29 +168,28 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           POST requests are the most powerful way for communicating
           with the Jolokia agent. There are no escaping issues and it
           allows for features which are not available with GET
-          requests. POST requests uses a fixed URL (except for <xref
-          linkend="operational-parameters"/>) and put their payload
+          requests. POST requests uses a fixed URL and put their payload
           within the HTTP request's body. This payload is represented
           in JSON, a data serialization format coming from JavaScript
           world.
         </para>
         <para>
           The JSON format for a single request is a JSON object, which
-          is essentially a map with key (or
+          is essentially a map with keys (or
           <emphasis>attributes</emphasis>) and values. All requests
-          have a common mandatory attribute, <emphasis
-          role="bold">type</emphasis>, which specifies the kind of JMX
-          operation to perform. The other attributes are either operation
-          specific as described in <xref
-          linkend="jolokia-operations"/> or are <emphasis>operational
+          have a common mandatory attribute,
+          <constant>type</constant>, which specifies the kind of JMX
+          operation to perform. The other attributes are either
+          operation specific as described in <xref
+          linkend="jolokia-operations"/> or are <emphasis>processing
           parameters</emphasis> which influence the overall behaviour
           and can be mixed in to any request. See <xref
-          linkend="operational-parameters"/> for details.
+          linkend="processing-parameters"/> for details.
         </para>
         <para>
           A sample read request in JSON format looks like in the
           following example. It has a <constant>type</constant>
-          <emphasis role="bold">read</emphasis>
+          "read"
           (case doesn't matter) and the three attributes
           <constant>mbean</constant>, <constant>attribute</constant>
           and <constant>path</constant> which are specific to a read
@@ -190,13 +201,13 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
     "mbean" : "java.lang:type=Memory",
     "attribute" : "HeapMemoryUsage",
     "path" : "used",
-  },
- ]]]></programlisting>
+  }]]></programlisting>
         <para>
           Each request JSON object results in a single JSON response
-          object contained in the HTTP answer's body. Multiple
-          requests can be send in a single HTTP request by putting
-          individual Jolokia request into an JSON array:
+          object contained in the HTTP answer's body. A <emphasis>bulk
+          request</emphasis> contains multiple Jolokia requests within
+          a single HTTP request. This is done by putting individual
+          Jolokia requests into a JSON array:
         </para>
         <programlisting><![CDATA[
  [
@@ -234,8 +245,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           In the non-error case a JSON response looks mostly the same
           for each request type except for the
           <constant>value</constant> attribute which is request type
-          specific. The error case is described in <xref
-          linkend="error-handling"/>.
+          specific. 
         </para>
         <para>
           The format of a single Jolokia response is
@@ -259,7 +269,11 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           For successful requests, the <constant>status</constant> is
           always <literal>200</literal>. The
           <constant>timestamp</constant> contains the epoch
-          time<footnote>Seconds since 1.1.1970</footnote> when the
+          time<footnote id="epoch-time">
+          <para>
+            Seconds since 1.1.1970
+          </para>
+          </footnote> when the
           request has been handled. The request leading to this
           response can be found under the attribute
           <constant>request</constant>. Finally and optionally, if
@@ -286,13 +300,12 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
                   \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
                   \tat org.cpan.jmx4perl.JmxRequest.<init>(Unknown Source) ...."
   }]]></programlisting>
-        <sidebar>
-          <para>
-            When it comes to status codes it is important to
-            distinguis status codes as they included in Jolokia JSON
-            response objects and the HTTP status code of the (outer)
-            HTTP response. There can be many Jolokia status codes, one
-            for each request contained in the single HTTP request. The
+        <para>
+            For status codes it is important to distinguish status
+            codes as they included in Jolokia JSON response objects
+            and the HTTP status code of the (outer) HTTP
+            response. There can be many Jolokia status codes, one for
+            each request contained in the single HTTP request. The
             HTTP status code merely reflect the status of agent itself
             (i.e. whether it could perform the operation), whereas the
             Jolokia response status reflects the result of the
@@ -300,20 +313,25 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
             exception). So it is not uncommon to have an HTTP status
             code of 200, but the contained JSON response(s) indicate
             some errors.
-          </para>
-        </sidebar>
+        </para>
         <para>
           I.e. the <constant>status</constant> has a code in the range
           <literal>400 .. 499</literal> or <literal>500 .. 599</literal>
           as it is specified for HTTP return codes. The
           <constant>error</constant> member contains an error
           description. This is typically the message of an exception
-          occured on the agent side<footnote>If the server exception
-          is a subtype of <class>MBeanException</class>, the wrapped
-          exception's message is used.</footnote>.
+          occured on the agent side<footnote
+          id="mbeanexception-wrapping">
+          <para>
+            If the server exception
+            is a subtype of <classname>MBeanException</classname>, the wrapped
+            exception's message is used.
+          </para>
+          </footnote>.
           The <constant>stacktrace</constant> contains a Java stacktrace
           occured on the server side (if any stacktrace is available).
-        </para>
+          </para>
+
         <para>
           For each type of operation, the format of the
           <constant>value</constant> entry is explained in
@@ -364,18 +382,277 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
     <section id="jolokia-operations">
       <title>Jolokia operations</title>
 
-      &protocol_read;
-      &protocol_write;
-      &protocol_exec;
-      &protocol_search;
-      &protocol_list;
-      &protocol_version;
+      <xi:include href='protocol/read.xml'/>
+      <xi:include href='protocol/write.xml'/>
+      <xi:include href='protocol/exec.xml'/>
+      <xi:include href='protocol/search.xml'/>
+      <xi:include href='protocol/list.xml'/>
+      <xi:include href='protocol/version.xml'/>
+
     </section>
         
-    <section id="operational-parameters">
-      <title>Operational parameters</title>
+    <section id="processing-parameters">
+      <title>Processing parameters</title>
+      <para>
+        Jolokia operations can be influenced by so called
+        <emphasis>processing parameters</emphasis>. These parameters
+        are provided differently for POST and GET requests.
+      </para>
+      <para>
+        For GET request, the processing parameter are given as normal
+        query parameters:
+        <synopsis><![CDATA[<GET request URL>?param1=value1&param2=value2&...]]></synopsis>
+        For example the request
+        <synopsis><![CDATA[http://localhost:8080/jolokia/list?maxObjects=100]]></synopsis>
+        will limit the response to at max 100 values.
+      </para>
+      <para>
+        POST request take the processing instructions within the
+        JSON request below the key <constant>config</constant>:
+      </para>
+        <programlisting><![CDATA[
+  {
+    "type" : "list"
+    "config" : { 
+                 "maxObjects" : "100"
+               } 
+  }]]></programlisting>
+      <para>
+        The list of known processing parameters is:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><literal>maxDepth</literal></term>
+          <listitem>
+            <para>
+              Maximum depth of the tree traversal into a bean's
+              properties. The maximum value as configured in the
+              agent's configuration is a hard limit
+              and cannot be exceeded by a query parameter.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>maxCollectionSize</literal></term>
+          <listitem>
+            <para>
+              For collections (lists, maps) this is the maximum
+              size. 
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>maxObjects</literal></term>
+          <listitem>
+            <para>
+              Number of objects to visit in total. A hard limit
+              can be configured in the agent's configuration. 
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>ignoreErrors</literal></term>
+          <listitem>
+            <para>
+              If set to "true", a Jolokia operation will not return an
+              error if an JMX operation fails, but includes the
+              exception message as value. This is useful for e.g. the
+              read operation when requesting multiple attributes'
+              values. Default: false 
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </section>
     
+    <section id="serialization">
+      <title>Object serialization</title>
+      <para>
+        Jolokia has some object serialization facilities in order to
+        convert complex Java data types to JSON and vice
+        versa. Serialization works in both ways in requests and
+        responses, but the capabilities differ.
+      </para>
+      <para>
+        Complex data types returned from the agent can be serialized
+        completely into a JSON value object. It can detect cycles in
+        the object graph and provides a way to limit the depth of
+        serialization. For certain types (like
+        <classname>File</classname> or
+        <classname>ObjectName</classname>) it uses simplifier to not
+        expose internal and redundant information. 
+      </para>
+      <para>
+        Object values used for values in 
+        <emphasis>write</emphasis> operations and arguments in
+        <emphasis>exec</emphasis>, type support is limited to a
+        handful of data types.
+      </para>
+      <section id="serialization-response">
+        <title>Response value serialization</title>
+        <para>
+          Jolokia can serialize any object into a JSON representation
+          when generating the response. It uses some specific
+          converters for certain well known data type with a generic
+          bean converter as fallback.
+        </para>
+        <para>
+          The following types are directly supported:
+          <itemizedlist>
+            <listitem>
+              Arrays and <classname>java.util.List</classname>
+              are converted to JSON arrays
+            </listitem>
+            <listitem>
+              <classname>java.util.Map</classname> gets
+              converted into a JSON object
+            </listitem>
+            <listitem>
+              <classname>javax.management.openmbean.CompositeData</classname>
+              is converted in a JSON object, with the keys taken from
+              the <classname>CompositeData</classname>'s key set and
+              the value are its values.
+            </listitem>
+            <listitem>
+              <classname>javax.management.openmbean.TabularData</classname>
+              is serialized into a JSON array, with the elements as
+              maps (this entries are of type
+              <classname>CompositeData</classname>). 
+            </listitem>
+            <listitem>
+              <classname>java.lang.Class</classname> gets converted to
+              a JSON object with keys <literal>name</literal> (the class
+              name> and <literal>interfaces</literal> (the implemented
+              interfaces, if any)
+            </listitem>
+            <listitem>
+              <classname>java.io.File</classname> becomes a JSON
+              object with keys <literal>name</literal>,
+              <literal>modified</literal>, <literal>length</literal>,
+              <literal>directory</literal>,
+              <literal>canonicalPath</literal>,
+              <literal>exists</literal> and <literal>lastModified</literal>
+            </listitem>
+            <listitem>
+              <classname>javax.management.ObjectName</classname> is
+              converted into a JSON object with the single key
+              <literal>objectName</literal>. 
+            </listitem>
+            <listitem>
+              <classname>java.net.URL</classname> becomes a JSON
+              object with the key <literal>url</literal> containing
+              the URL as String.
+            </listitem>
+            <listitem>
+              <classname>java.util.Date</classname> is represented by
+              its string form.
+            </listitem>
+          </itemizedlist>
+        </para>
+        <para>
+          Primitive and simple types (like String) are
+          directly converted into its string presentation. All other
+          objects of a complex type are serialized via reflection recursively.
+        </para>
+        <para>
+          Serialization can be influence by certain processing
+          parameters given with the request (see <xref
+          linkend="processing-parameters"/>). I.e. the recursive
+          process of JSON serialization can be stopped when the data
+          set gets too large. Self and other circular references
+          are detected, too. If this happen, special values indicate
+          the truncation of the generated JSON object.
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term><constant>[this]</constant></term>
+            <listitem>
+              <para>
+                This label is used when a property contains a self reference 
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><constant>[Depth limit .... ]</constant></term>
+            <listitem>
+              <para>
+                When a depth limit is used or the hard depth limit
+                is exceeded, this label contains a string
+                representation of the next object one level deeper.
+                (see <xref linkend="processing-parameters"/>,
+                parameter <literal>maxDepth</literal>)
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><constant>[Reference .... ]</constant></term>
+            <listitem>
+              <para>
+                If during the traversal an object is visited a second time, this label is
+                used in order to break the cycle. 
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><constant>[Object limit exceeded]</constant></term>
+            <listitem>
+              <para>
+                The total limit of object has been exceeded and hence
+                the object are not deserialized further.  (see <xref
+                linkend="processing-parameters"/>, parameters
+                <literal>maxCollectionSize</literal> and
+                <literal>maxObjects</literal>)
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>  
+      </section>
+      
+      <section id="serialization-request">
+        <title>Request parameter serialization</title>
+        <para>
+          The following types can used for request parameters in write
+          and exec requests, both for POST and GET requests:
+          <itemizedlist>
+            <listitem>String</listitem>
+            <listitem>Integer / int</listitem>
+            <listitem>Long / long</listitem>
+            <listitem>Byte / byte</listitem>
+            <listitem>Shirt / short</listitem>
+            <listitem>Float / float</listitem>
+            <listitem>Double / double</listitem>
+            <listitem>char</listitem>
+            <listitem>Boolean / boolean</listitem>
+          </itemizedlist>
+        </para>
+        <para>
+          The serialized value is simply the string representation of
+          those types. Arrays of the given types are supported,
+          too. These are serialized as a comma separated list.
+        </para>
+        <note>
+          The array support is somewhat limited since it makes a
+          naiive split on commas. It does not yet take into account
+          any quoting or escaping.
+        </note>
+        <para>
+          A <constant>null</constant> value is serialized as
+          <literal>[null]</literal>, an empty String as
+          <literal>""</literal><footnote>
+          <para>This is obviously not a
+          perfect solution. We are working on it.</para></footnote>.
+        </para>
+        <para>
+          Finally object of type
+          <classname>org.json.simple.JSONObject</classname> and
+          <classname>org.json.simple.JSONArray</classname> are
+          serialized in it JSON representation and can be used for
+          operations and attributes which take arguments of these
+          types. 
+        </para>
+      </section>
+    </section>
+
     <section id="history">
       <title>Tracking historical values</title>
       <para>
@@ -403,10 +680,23 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           </varlistentry>
         </variablelist>
       </para>
+      <para>
+        Optionally, a <constant>history</constant> entry might be
+        present. This is the case, when <emphasis>history
+        tracking</emphasis> is switched on. A certain JMX
+        operation on an Jolokia specific MBean has to be executed
+        to turn history tracking on. See <xref linkend="history"/>
+        for details. If this is the case,
+        <constant>history</constant> contains an array of json
+        object, which have two attribute: <constant>value</constant>
+        containing the historical value (which can be as complex
+        as any value) and <constant>timestamp</constant> indicating
+        the time when this value was current.
+      </para>
     </section>
 
     <section id="versions">
-      <title>Protocol versions</title>
+      <title>Jolokia protocol versions</title>
       <para>
         The protocol definition is versioned. It contains of a major
         and minor version. Changes in the minor version are backward
@@ -425,789 +715,4 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         </varlistentry>
       </variablelist>
     </section>
-    <!-- =======================================================================  -->
-    <section id="request">
-      <para>
-        In addition to the command provided as a path, the agent knows about
-        some query parameters which influence the value returned. These are
-        described in <xref linkend="queryparams"/>
-      </para>
-      <para>
-        For POST the complete request is specified in the POST content. This
-        content is a JSON representation of the JMX request. Beside the
-        operations available for a simple GET request, POST requests can
-        contain additional parameters, e.g. for specifying a
-        proxy. Additionally, with POST request you can submit multiple JMX
-        request at a time to process bulk operations and minimizing turnaround
-        times.
-      </para>
-      <para>
-        The supported operations are described now in the following
-        sections.
-      </para>
-      <section id="get-requests">
-        <title>GET-Requests</title>
-        <section id="get-read">
-          <title>read</title>
-          <para>
-            Mode used for reading an JMX attributes. The operation specific parameters have
-            the following format.
-            <synopsis><![CDATA[<mbean name>/<attribute name>/<inner path>]]></synopsis>
-            <variablelist>
-              <varlistentry>
-                <term><literal>mbean name</literal> (mandatory)</term>
-                <listitem>
-                  <para>
-                    The canonical name of the MBean for which the
-                    attribute should be fetched. Please refer to the
-                    JMX documentation for the definition of a
-                    <emphasis>canonical name</emphasis>. In short, it
-                    contains two parts: A domain part and a list of
-                    properties which are separated by
-                    <literal>:</literal>. Properties themselves are
-                    combines in a comma separated list of key-value
-                    pairs. Example:
-                  </para>
-                  <informalexample>
-                    <literallayout>
-java.lang:type=Memory
-java.lang:name=Code Cache,type=MemoryPool
-                    </literallayout>
-                  </informalexample>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><literal>attribute name</literal> (mandatory)</term>
-                <listitem>
-                  <para>
-                    This is the name of the attribute which is requested.                   
-                  </para>
-                  <informalexample>
-                    <literallayout>
-HeapMemoryUsage
-SystemProperties
-                    </literallayout>
-                  </informalexample>           
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><literal>inner path</literal> (optional)</term>
-                <listitem>
-                  <para>
-                    This is an optional part which specifies an inner
-                    path within the attribute's type. j4p agent knows
-                    how to serialize certain complex data types with
-                    JSON, i.e. collections and
-                    <literal>CompositeData</literal>. Please refer to
-                    the next section for more details about JSON
-                    serialization. An <emphasis>inner path</emphasis>
-                    can be used to specify a certain substructure
-                    (plain value, array, hash) within the returned
-                    complex attribute value. Think of it as something
-                    like "XPath lite". This is best explained by an
-                    example:
-                  </para>
-                  <para>
-                    The attribute <literal>HeapMemoryUsage</literal> of the MBean 
-                    <literal>java.lang:type=Memory</literal> can be
-                    requested with the URL 
-                    <literal>http://localhost:8080/j4p/read/java.lang:type=Memory/HeapMemoryUsage</literal>
-                    which returns a complex JSON structure like
-                    <programlisting language="json">
- {
-   "committed" : 18292736,
-   "used" : 15348352,
-   "max" : 532742144,
-   "init" : 0
- }</programlisting>
-                  </para>
-                  <para>
-                    In order to get to the value for used heap memory
-                    you should specify an inner path
-                    <literal>used</literal>, so that the request
-                    <literal>http://localhost:8080/j4p/read/java.lang:type=Memory/HeapMemoryUsage/used</literal>
-                    results in a response of
-                    <literal>15348352</literal>.  If the attribute
-                    contains arrays at some level, use a numeric index
-                    as part of the innerpath if you want to traverse
-                    into this array.
-                  </para>
-                </listitem>
-              </varlistentry>              
-            </variablelist>
-          </para>
-        </section>
-        <section id="get-write">
-          <title>write</title>
-          <para>
-            Writing an attribute is quite similar to reading, except that the URL takes an
-            additional <literal>value</literal> element:
-            <synopsis><![CDATA[<mbean name>/<attribute name>/<value>/<inner path>]]></synopsis>
-          </para>
-          <variablelist>
-            <varlistentry>
-              <term><literal>mbean name</literal> (mandatory)</term>
-              <listitem>
-                <para>
-                  The MBean name as described above (see <xref linkend="get-read"/> for details)
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>attribute name</literal> (mandatory)</term>
-              <listitem>
-                <para>
-                  The attribute name (see <xref linkend="get-read"/> for details)
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>value</literal> (mandatory)</term>
-              <listitem>
-                <para>
-                  The value to set in its string representation. Note,
-                  that only values can be set, which have one for the
-                  following types:
-                  <itemizedlist>
-                    <listitem>String</listitem>
-                    <listitem>Integer / int</listitem>
-                    <listitem>Long / long</listitem>
-                    <listitem>Boolean / boolean</listitem>
-                    <listitem>Array or List of the types above, separated by commas</listitem>
-                  </itemizedlist>
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>inner path</literal> (optional)</term>
-              <listitem>
-                <para>
-                  An optional inner path for specifying an inner object on which to set the
-                  value. See <xref linkend="get-read"/> for more on inner pathes.
-                </para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-          <para>
-            For example, you can set the garbage collector to verbose mode by using
-            something like
-            <informalexample>
-              <literallayout class="monospaced">http://localhost:8080/j4p/write/java.lang:type=Memory/Verbose/true</literallayout>
-            </informalexample>
-          </para>
-        </section>
-        <section id="get-exec">
-          <title>exec</title>
-          <para>
-            With this mode, you can execute a JMX operation on a target MBean. The format
-            of this looks like
-            <synopsis><![CDATA[<mbean name>/<operation name>/<arg1>/<arg2>/....]]></synopsis>
-          </para>
-          <variablelist>
-            <varlistentry>
-              <term><literal>mbean name</literal> (mandatory)</term>
-              <listitem>
-                <para>
-                  The MBean name as described above (see <xref linkend="get-read"/> for details)
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>operation name</literal> (mandatory)</term>
-              <listitem>
-                <para>
-                  Name of the operation to execute
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>arg1</literal>, <literal>arg2</literal>, ... </term>
-              <listitem>
-                <para>
-                  String representation for the arguments required to execute this
-                  operation. Only certain data types can be used here as desribed for the
-                  write mode (see <xref linkend="get-write"/>).
-                </para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-          <para>
-            For example, to execute a garbage collection you use
-            <informalexample>
-              <literallayout class="monospaced">http://localhost:8080/j4p/exec/java.lang:type=Memory/gc</literallayout>
-            </informalexample>
-          </para>
-        </section>
-        <section id="get-search">
-          <title>search</title>
-          <para>
-            This mode is used to query for certain MBean. It takes a single argument for
-            specifying the search parameter like in 
-            <synopsis><![CDATA[http://localhost:8080/j4p/search/*:j2eeType=J2EEServer,*]]></synopsis>
-          </para>
-          <para>
-            You can use patterns as described <ulink
-            url="http://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html">here</ulink>,
-            i.e. it may contain wildcards like <literal>*</literal> and
-            <literal>?</literal>. The Mbean names matching the query
-            are returned as a list within the response.
-          </para>
-        </section>
-        <section id="get-list">
-          <title>list</title>
-          <para>
-            The list operation allows you to get information about the
-            accessible MBeans. This information includes the MBean
-            names, their attributes and operations along with type
-            information and description (as far as they are provided
-            by the MBean author which doesn't seem to be often the
-            case).
-          </para>
-          <para>
-            A list-request can take these specific, optional,  parameters
-            <synopsis><![CDATA[<inner path>]]></synopsis>
-          </para>
-          <variablelist>
-            <varlistentry>
-              <term><literal>inner path</literal> (optional)</term>
-              <listitem>
-                <para>
-                  The <emphasis>inner path</emphasis>, as above,
-                  specifies a subset of the complete response. You can
-                  use this to select a specific domain, MBean or
-                  attribute/operation. See below for the format of the
-                  complete answer.
-                </para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </section>
-      </section>
-      <section id="post-requests">
-        <title>POST Requests</title>
-        <para>
-          All operations as desrcibed above are available for post
-          requests as well. In its most general form, the content of a
-          POST has the following format:          
-        </para>
-        <programlisting><![CDATA[
- [
-  {
-    "attribute":"HeapMemoryUsage",
-    "mbean":"java.lang:type=Memory",
-    "path":"used",
-    "type":"read"
-  },
-  { 
-    "mbean":"*:type=Memory,*",
-    "type":"search"
-  }
- ]]]></programlisting>
-        <para>
-          In this case, multiple request are represented as a JSON array with maps, where
-          the map's entries are the single request's attribute along with its value. For
-          a single request, the array can be omitted. Depending on whether you send an
-          array of requests or a single request you get an array of responses or a single
-          response as result.          
-        </para>
-        <para>
-          The parameters known to a single request are:
-          <variablelist>
-            <varlistentry>
-              <term><literal></literal></term>
-              <listitem>
-
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>type</literal></term>
-              <listitem>
-                Operational type which can be <literal>READ"</literal>,
-                <literal>WRITE</literal>, <literal>EXEC</literal>, 
-                <literal>"LIST"</literal>,
-                <literal>"SEARCH"</literal>. The type is case
-                insensitive.  
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>mbean</literal></term>
-              <listitem>
-                Mbean name in its canonical format. 
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>attribute</literal></term>
-              <listitem>
-                If type is <literal>read</literal> or
-                <literal>WRITE</literal> this specifies the requested
-                attribute
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>value</literal></term>
-              <listitem>
-                For <literal>value</literal> this specifies the value to set
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>arguments</literal></term>
-              <listitem>
-                List of arguments for <literal>EXEC</literal> operations
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>path</literal></term>
-              <listitem>
-                Inner path 
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>max_depth</literal>, <literal>max_objects</literal>, <literal>max_list_size</literal></term>
-              <listitem>
-                Optional parameters in order to influence the size of the returned JSON
-                response. 
-              </listitem>
-            </varlistentry>
-          </variablelist>  
-        </para>      
-      </section>      
-    </section>
-    <section id="response">
-      <title>Response</title>
-      <para>
-        As already mentioned, the response is an HTTP response
-        containing a JSON payload. This section describes the format
-        of the retuned answer, depending on the operation mode. In
-        general, two kinds of responses can be classified: In the
-        normal case, a HTTP Response with response code 200 is
-        returned, containing the result of the operation as a JSON
-        payload. In case of an error, a 4xx or 5xx code will be
-        returned and the JSON payload contains details about the error
-        occured.
-      </para>
-      <para>
-        In the non-error case, the top-level JSON response objects
-        contains a <literal>value</literal> a
-        <literal>status</literal> of 200 and a
-        <literal>request</literal>, which encapsulated the original
-        request. This <literal>request</literal> has as members a
-        <literal>type</literal> member for the operational mode
-        ("read", "list", ...) and additional entries containing the
-        operation specific parameters as given in the request URL.
-      </para>
-      <section id="resp-read">
-        <title>read</title>
-        <para>
-          A typical response for an attribute read operation for an URL like 
-          <informalexample>
-            <literallayout class="monospaced">http://localhost:8080/j4p/java.lang:type=Memory/HeapMemoryUsage/</literallayout>
-          </informalexample>
-          looks like 
-        </para>
-        <programlisting><![CDATA[
- {
-   "value":{
-             "init":134217728,
-             "max":532742144,
-             "committed":133365760,
-             "used":19046472
-           },
-   "status":200,
-   "timestamp":1244839118,
-   "request":{
-               "mbean":"java.lang:type=Memory",
-               "type":"read",
-               "attribute":"HeapMemoryUsage"
-             },
-   "history":[{"value":{
-                         "init":"134217728",
-                         "max":"532742144",
-                         "committed":"133365760",
-                         "used":"18958208"
-                       },
-               "timestamp":1244839045
-             }, ....
-             ]
- }]]></programlisting>
-        <para>
-          As you can see, the <literal>value</literal> contains the
-          attribute's value, either as a single, simple value if the
-          attribute has a primitive type, or a complex JSON structure
-          (containing maps and arrays) if the attribute has a more
-          complex type understood by the Jolokia agent. For complex
-          object types, which can not be serialized by the Jolokia
-          agent directly, bean properties (i.e public, no-argument
-          <literal>get</literal> methods on the Java objects) are
-          examined recursively up to a maximum depth. You can
-          influence the traversal by providing regular HTTP query
-          parameters to the request URL. The known parameters are
-        </para>
-          <variablelist>
-            <varlistentry>
-              <term><literal>maxDepth</literal></term>
-              <listitem>
-                <para>
-                  Maximum depth of the tree traversal into a bean's
-                  properties. The maximum value as configured in the
-                  agent's <filename>web.xml</filename> is a hard limit
-                  and cannot be exceeded by a query parameter (5)
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>maxCollectionSize</literal></term>
-              <listitem>
-                <para>
-                  For collections (lists, maps) this is the maximum
-                  size. By default, no limit applies to collections.
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><literal>maxObjects</literal></term>
-              <listitem>
-                <para>
-                  Number of objects to visit in total. A hard limit
-                  can be configured in the agent's
-                  <filename>web.xml</filename> deployment
-                  descriptor. (10000)
-                </para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-          <para>
-            If bean serialization is used, certain special values indicate some special
-            treatment:            
-          </para>
-          <variablelist>
-            <varlistentry>
-              <term><constant>[this]</constant></term>
-              <listitem>
-                <para>
-                  This label is used when a property contains a self reference 
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><constant>[Depth limit .... ]</constant></term>
-              <listitem>
-                <para>
-                  When a depth limit is used or the hard depth limit
-                  is exceeded, this label contains a string
-                  representation of the next object one level deeper.
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><constant>[Reference .... ]</constant></term>
-              <listitem>
-                <para>
-                  If during the traversal an object is visited a second time, this label is
-                  used in order to break the cycle. 
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><constant>[Object limit exceeded]</constant></term>
-              <listitem>
-                <para>
-                  The total limit of object has been exceeded and
-                  hence the object are not deserialized further.
-                </para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-          <para>
-            For a successul request the <constant>status</constant> is
-            always <literal>200</literal>.  <constant>timestamp</constant> contains the
-            timestamp (i.e. epoch seconds) when the attribute was read
-            on the server.
-          </para>
-          <para>
-            Optionally, a <constant>history</constant> entry might be
-            present. This is the case, when <emphasis>history
-            tracking</emphasis> is switched on. A certain JMX
-            operation on an Jolokia specific MBean has to be executed
-            to turn history tracking on. See <xref linkend="history"/>
-            for details. If this is the case,
-            <constant>history</constant> contains an array of json
-            object, which have two attribute: <constant>value</constant>
-            containing the historical value (which can be as complex
-            as any value) and <constant>timestamp</constant> indicating
-            the time when this value was current.
-          </para>
-          <para>
-            The <literal>request</literal>'s attribute are:
-        </para>
-          <variablelist>
-            <varlistentry>
-              <term><constant>mbean</constant></term>
-              <listitem>
-                <para>
-                  name of the requested MBean
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><constant>attribute</constant></term>
-              <listitem>
-                <para>
-                  attribute name
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><constant>type</constant></term>
-              <listitem>
-                <para>
-                  always <constant>read</constant>
-                </para>
-              </listitem>
-            </varlistentry>
-            <varlistentry>
-              <term><constant>path</constant></term>
-              <listitem>
-                <para>
-                  an optional path, if provided in the request.
-                </para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-      </section>
-      <section id="response-write">
-        <title>write</title>
-        <para>
-          As response for a writing operation you get back the old value if the value was
-          set. For a request 
-          <synopsis><![CDATA[http://localhost:8080/j4p/write/java.lang:type=ClassLoading/Verbose/true]]></synopsis>
-          you get the answer (supposed that verbose mode was switched off for class
-          loading at the time this request was sent)
-        </para>
-        <programlisting><![CDATA[
- { 
-   "value":"false",
-   "status":200,
-   "request": {
-                "mbean":"java.lang:type=ClassLoading",
-                "type":"write",
-                "attribute":"Verbose",
-                "value":"true"
-              }
- }]]></programlisting>
-        <para>
-          The response is quite similar to the read operation except for
-          the additional <constant>value</constant> element in the request
-          (and of course, the different <constant>type</constant>).        
-        </para>
-      </section>
-      <section id="response-exec">
-        <title>exec</title>
-        <para>
-          For an <constant>exec</constant> operation, the response
-          contains the return value of the
-          opeartion. <constant>null</constant> is returned if either the
-          operation return a null value or the operation is declared as
-          void. A typical response for an URL like
-          <synopsis><![CDATA[http://localhost:8080/j4p/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO]]></synopsis>
-          looks like
-        </para>
-        <programlisting><![CDATA[
- {
-   "value":null,
-   "status":200,
-   "request": {
-                "type":"exec",
-                "mbean":"java.util.logging:type=Logging",
-                "operation":"setLoggerLevel",
-                "arguments":["global","INFO"]
-              }
-}
-
-]]></programlisting>
-      </section>
-      <section id="response-search">
-        <title>search</title>
-        <para>
-          Searching for MBean names is done with the
-          <constant>search</constant> operation. As single argument a
-          MBean search pattern like
-          <literal>*:j2eeType=J2EEServer,*</literal> has to be
-          provided. The answer is a list of MBean names which matches
-          the pattern. A <literal>404</literal> Response will be
-          returned in case no MBean matches this name.
-        </para>
-        <para>
-          Examples:
-          <informalexample>
-            <literallayout class="monospaced">http://localhost:8888/j4p/search/*:j2eeType=J2EEServer,*</literallayout>
-          </informalexample>
-          results in
-          <programlisting><![CDATA[
- {
-   "value": [
-              "jboss.management.local:j2eeType=J2EEServer,name=Local"
-            ],
-   "status":200,
-   "timestamp":1245305648,
-   "request": {
-       "mbean":"*:j2eeType=J2EEServer,*","type":"search"
-   }
- }]]></programlisting>
-        </para>
-      </section>
-      <section id="response-list">
-        <title>list</title>
-        <para>
-          The list operation (without a <constant>path</constant>) returns
-          a JSON object containing a <constant>value</constant>,
-          <constant>status</constant> and <constant>request</constant>
-          member as for <constant>read</constant> operations.
-        </para>
-        <para>
-          The <constant>value</constant> has the following format:
-        </para>
-        <programlisting><![CDATA[
- { 
-  <domain> : 
-  {
-    <prop list> : 
-    {
-      "attr" : 
-      {
-        <attr name> : 
-        { 
-          "type" : <attribute type>,
-          "desc" : <textual description of attribute>,
-          "rw"   : true/false
-        },
-        ....
-      }, 
-      "op" :
-      {
-         <operation name> :
-         {
-           "args" : [
-                      { 
-                       "type" : <argument type>
-                       "name" : <argument name>
-                       "desc" : <textual description of argument>
-                      },
-                      .....
-                     ],
-           "ret"  : <return type>,
-           "desc" : <textual description of operation>
-         }, 
-         .....
-      }
-    }, 
-    ....
-  },
-  ....
- }]]></programlisting>
-        <para>
-          The <literal>domain name</literal> and the <literal>property
-          list</literal> together uniquely identify a single MBean. The
-          property list is in the so called <emphasis>canonical
-          order</emphasis>, i.e. in the form
-          <literal><![CDATA["<key1>=<val1>,<key2>=<val2>,.."]]></literal>
-          where the keys are ordered alphabetically. Each MBean has zero
-          or more attributes and operations which can be reached in an
-          MBeans JSON object with the keys <constant>attr</constant> and
-          <constant>op</constant> respectively. Within these groups the
-          contained information is explained above in the schema and
-          consist of Java types for attributes, arguments and return
-          values, descriptive information and whether an attribute is
-          writable (<constant>rw</constant> == <constant>true</constant>) or
-          read-only.
-        </para>
-        <para>
-          As for reading attributes you can fetch a subset of this information using an
-          path. E.g a path of <literal>domain/prop-list</literal> would return the value for a single
-          bean only. For example, a request 
-          <informalexample>
-            <literallayout><![CDATA[http://localhost:8080/j4p/list/java.lang/type=Memory]]></literallayout>
-          </informalexample>
-          results in an answer
-        </para>
-        <programlisting><![CDATA[
- {
-   "value":
-   { 
-     "op":
-     { 
-       "gc":
-       {
-         "args":[],
-         "ret":"void",
-         "desc":"gc"
-       }
-     },
-     "attr":
-     {
-       "NonHeapMemoryUsage":
-       {
-         "type":"javax.management.openmbean.CompositeData",
-         "rw":false,
-         "desc":"NonHeapMemoryUsage"
-       },
-       "Verbose":
-       {
-         "type":"boolean",
-         "rw":true,
-         "desc":"Verbose"
-       },
-       "HeapMemoryUsage":
-       {
-         "type":"javax.management.openmbean.CompositeData",
-         "rw":false,
-         "desc":"HeapMemoryUsage"
-       },
-       "ObjectPendingFinalizationCount":
-       {
-         "type":"int",
-         "rw":false,
-         "desc":"ObjectPendingFinalizationCount"
-       }
-     }
-   },
-   "status":200,
-   "request":
-   {
-     "type":"list",
-     "path":"java.lang\/type=Memory"
-   }
- }]]></programlisting>      
-      </section>
-      <section id="response-version">
-        <title>version</title>
-        <para>
-          A command <constant>version</constant> returns the version of
-          the Jolokia agent. The response looks like any other response,
-          the version number itself is returned as
-          <constant>value</constant> attribute in the response.
-        </para>
-      </section>
-      <section id="response-error">
-        <title>Error Response</title>
-        <para>
-          An error response looks like
-        </para>
-        <programlisting><![CDATA[
-  {
-    "status":400,
-    "error":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'",
-    "stacktrace":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'\n
-                  \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
-                  \tat org.cpan.jmx4perl.JmxRequest.<init>(Unknown Source) ...."
-  }]]></programlisting>
-        <para>
-          I.e. the <constant>status</constant> has a code in the range
-          <literal>400 .. 499</literal> or <literal>500 .. 599</literal>
-          as it is specified for HTTP return codes. The
-          <constant>error</constant> member contains an error description
-          while <constant>stacktrace</constant> contains a Java stacktrace
-          occured on the server side (if any).
-        </para>
-      </section>
-   </section>
 </chapter>

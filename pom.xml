@@ -76,6 +76,8 @@
         <configuration>
           <includes>index.xml</includes>
           <xincludeSupported>true</xincludeSupported>
+          <tableBordersWithCss>true</tableBordersWithCss>
+          <imgSrcPath>images/</imgSrcPath>
           <foCustomization>src/docbkx/styles/reference-pdf.xsl</foCustomization>
           <htmlStylesheet>css/stylesheet.css</htmlStylesheet>
           <!-- produce single-page html output -->
@@ -85,7 +87,7 @@
           <entities>
             <entity>
               <name>version</name>
-              <value>${project.version}</value>
+              <value>${version}</value>
             </entity>
           </entities>
           <postProcess>
@@ -96,11 +98,11 @@
               </fileset>
             </copy>
             <copy todir="${project.basedir}/target/site/reference/html">
-              <fileset dir="${project.basedir}/src/docbkx/resources">
+              <fileset dir="${project.basedir}/src/docbkx">
                 <include name="**/*.css" />
                 <include name="**/*.png" />
                 <include name="**/*.gif" />
-              <include name="**/*.jpg" />
+                <include name="**/*.jpg" />
               </fileset>
             </copy>
             <move file="${project.basedir}/target/site/reference/pdf/index.pdf"

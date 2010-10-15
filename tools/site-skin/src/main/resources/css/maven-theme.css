@@ -303,11 +303,7 @@ a {
   text-decoration: none;
 }
 
-a:link {
-  color:#a20000;
-}
-
-a:visited {
+a:link, a:visited {
   color:#a20000;
 }
 

@@ -8,7 +8,7 @@
     managable entities.
   </para>
   <para>
-    I love JMX. It is a well crafted specification, created in times
+    We love JMX. It is a well crafted specification, created in times
     where other concepts like EJBs failed spectacularly. Even more
     than ten years after its incubation it is still the one-and-only
     when it comes to management in the Java world. What I like
@@ -21,7 +21,6 @@
     probably obsolete. Add-on standards like JSR-77 didn't received
     the adoption level they deserved. And then there is JSR-160, JMX
     remoting. 
-
   </para>  
 
 </chapter>

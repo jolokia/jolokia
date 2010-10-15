@@ -1,4 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="read">
   <title>Reading attributes (read)</title>
+  <para>
+    Reading MBean attributes is probably the most used JMX method,
+    especially when it comes to monitoring. Concerning Jolokia, it is
+    also the most powerful one with the richest semantics. Obviously
+    the value of a single attribute can be fetched, but Jolokia
+    supports also fetching of a list of given attributes on a single
+    MBean or even on multiple MBeans matching a certain pattern.
+  </para>
+  <para>
+    Reading attributes as supported by both kinds of requests,
+    <literal>GET</literal> and <literal>POST</literal>. 
+  </para>
+  <note>
+    Don't confuse fetching multiple attributes on possibly multiple
+    MBeans with bulk requests. A single read request will always result
+    in a single read response, even when multiple attribute values are
+    fetched. Only the single response's <literal>value</literal> will
+    differ dependent on what kind of read request was performed.
+  </note>
+  <warning>
+    <emphasis>The description of multi-attribute and pattern fetching
+    is still missing.</emphasis>
+  </warning>
+  
+  <section id="get-read">
+    <title>GET read request</title>
+    <para>
+      The GET URL for a read request has the following format:
+    </para>
+    <synopsis><![CDATA[<base-url>/read/<mbean name>/<attribute name>/<inner path>]]></synopsis>
+        <table>
+      <title>GET Read Request</title>
+      <thead>
+        <tr>
+          <td>Part</td>
+          <td>Description</td>
+          <td>Example</td>
+        </tr>        
+      </thead>
+      <tr>
+        <td><literal>&lt;mbean name&gt;</literal></td>
+        <td>
+          The <ulink
+          url="http://download.oracle.com/javase/6/docs/api/javax/management/ObjectName.html">ObjectName</ulink>
+          of the MBean for which the attribute should be fetched. It
+          contains two parts: A domain part and a list of properties
+          which are separated by <literal>:</literal>. Properties
+          themselves are combined in a comma separated list of
+          key-value pairs. Example:          
+        </td>
+        <td><literal>java.lang:type=Memory</literal></td>
+      </tr>
+      <tr>
+        <td><literal>&lt;attribute name&gt;</literal></td>
+        <td>Name of attribute to read</td>
+        <td><literal>HeapMemoryUsage</literal></td>
+      </tr>
+      <tr>
+        <td><literal>&lt;inner path&gt;</literal></td>
+        <td>
+          This optional part describes an <emphasis>inner
+          path</emphasis> as described in <xref linkend="pathes"/>
+        </td>
+        <td><literal>used</literal></td>
+      </tr>
+    </table>
+
+    <para>
+      With this URL the used heap memory can be obtained:
+      <informalexample>
+        <literallayout class="monospaced">http://localhost:8080/jolokia/java.lang:type=Memory/HeapMemoryUsage/used</literallayout>
+      </informalexample>           
+    </para>
+  </section>  
+  <section id="post-read">
+    <title>POST read request</title>
+    <para>
+      A the keys available for read POST requests are shown in the
+      following table.
+    </para>
+    <table>
+      <title>POST Read Request</title>
+      <thead>
+        <tr>
+          <td>Key</td>
+          <td>Description</td>
+          <td>Example</td>
+        </tr>        
+      </thead>
+      <tr>
+        <td><constant>type</constant></td>
+        <td><emphasis role="bold">read</emphasis></td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>mbean</constant></td>
+        <td>MBean's ObjectName</td>
+        <td><literal>java.lang:type=Memory</literal></td>
+      </tr>
+      <tr>
+        <td><constant>attribute</constant></td>
+        <td>Attribute name to read</td>
+        <td><literal>HeapMemoryUsage</literal></td>
+      </tr>
+      <tr>
+        <td><constant>path</constant></td>
+        <td>Inner path for accessing the value of a complex value
+        (<xref linkend="pathes"/>)</td>
+        <td><constant>used</constant></td>
+      </tr>
+    </table>
+    <para>
+      The following request fetches the number of active threads:      
+    </para>
+    <programlisting><![CDATA[
+{ 
+   "type":"read",
+   "mbean":"java.lang:type=Threading",
+   "attribute":"ThreadCount"
+}]]></programlisting>
+  </section>
+  <section id="response-read">
+    <title>Read response</title>
+    <para>
+      The general format of the JSON response is described in <xref
+      linkend="responses"/> in detail.  A typical response for an
+      attribute read operation for an URL like
+      <informalexample>
+        <literallayout class="monospaced">http://localhost:8080/j4p/java.lang:type=Memory/HeapMemoryUsage/</literallayout>
+      </informalexample>
+      looks like 
+    </para>
+    <programlisting><![CDATA[
+ {
+   "value":{
+             "init":134217728,
+             "max":532742144,
+             "committed":133365760,
+             "used":19046472
+           },
+   "status":200,
+   "timestamp":1244839118,
+   "request":{
+               "mbean":"java.lang:type=Memory",
+               "type":"read",
+               "attribute":"HeapMemoryUsage"
+             },
+   "history":[{"value":{
+                         "init":"134217728",
+                         "max":"532742144",
+                         "committed":"133365760",
+                         "used":"18958208"
+                       },
+               "timestamp":1244839045
+             }, ....
+             ]
+ }]]></programlisting>
+    <para>
+      The <constant>value</constant> contains the response's
+      value. For simple data types it is a scalar value, more complex
+      types are serialized into a JSON object. See <xref
+      linkend="serialization"/> for detail on object serialization.
+    </para>
+  </section>  
 </section>
