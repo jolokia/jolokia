@@ -100,6 +100,23 @@
         <h3 class='releaseinfo'>Version <xsl:value-of select="."/></h3>
     </xsl:template>
 
+    <xsl:template match="sidebar">
+      <div class="sidebar-border">
+        <div>
+          <xsl:apply-templates select="." mode="class.attribute"/>
+          <xsl:call-template name="anchor"/>
+          <xsl:call-template name="formal.object.heading">
+            <xsl:with-param name="title">
+              <xsl:apply-templates select="." mode="title.markup">
+                <xsl:with-param name="allow-anchors" select="'1'"/>
+              </xsl:apply-templates>
+            </xsl:with-param>
+          </xsl:call-template>
+          <xsl:apply-templates/>
+        </div>      
+      </div>
+    </xsl:template>
+
     <!-- CHAPTER/APPENDIX TITLES -->
 
     <!-- Use an <h1> instead of <h2> for chapter titles -->

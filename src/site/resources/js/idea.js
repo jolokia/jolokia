@@ -1,0 +1,19 @@
+reformal_wdg_w    = "713";
+reformal_wdg_h    = "450";
+reformal_wdg_domain    = "jolokia";
+reformal_wdg_mode    = 0;
+reformal_wdg_title   = "Feature Requests";
+reformal_wdg_ltitle  = "Feature Request";
+reformal_wdg_lfont   = "Verdana, Geneva, sans-serif";
+reformal_wdg_lsize   = "12px";
+reformal_wdg_color   = "#931800";
+reformal_wdg_bcolor  = "#eaeaea";
+reformal_wdg_tcolor  = "#931800";
+reformal_wdg_align   = "right";
+reformal_wdg_waction = 0;
+reformal_wdg_vcolor  = "#CCC";
+reformal_wdg_cmline  = "#E0E0E0";
+reformal_wdg_glcolor  = "#931800";
+reformal_wdg_tbcolor  = "#FFFFFF";
+ 
+reformal_wdg_bimage = "53733b9a75311a092b8047316e0c1738.png";

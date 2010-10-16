@@ -2,7 +2,10 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <book xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
-    <title>Jolokia - Reference Documentation<inlinegraphic align="right" fileref="jolokia_logo.png"/></title>
+    <title>
+      <inlinegraphic align="right" fileref="jolokia_logo.png"/>
+      Jolokia - Reference Documentation
+    </title>
     <releaseinfo>&version;</releaseinfo>
     <authorgroup>
       <author>

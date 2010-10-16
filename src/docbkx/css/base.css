@@ -191,7 +191,7 @@ pre {
     font-size: 100%;
 }
 
-.note, .tip, .sidebar {
+.note, .tip {
     padding-top: 0.7em;
     padding-bottom: 0.7em;
     padding-left: 1.2em;
@@ -209,7 +209,7 @@ pre {
     color: #5283a1;
 }
 
-.tip, .sidebar {
+.tip {
     float: right;
     clear: right;
     margin-left: 2em;
@@ -224,9 +224,24 @@ pre {
     border: solid #e2d2c9 1px;
 }
 
+.sidebar-border {
+    float: right;
+    clear: right;
+    background: #FFFFFF;
+    padding-left: 0em;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    max-width: 32%;
+    width: 32%;
+}
 .sidebar {
     background: #FAF7F5;
     border: solid #e2d2c9 1px;
+    margin-left: 1.2em;
+    padding-left: 1.2em;
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    padding-right: 1.2em;
 }
 
 .tip .title {
