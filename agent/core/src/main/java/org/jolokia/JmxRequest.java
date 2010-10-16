@@ -51,14 +51,40 @@ public class JmxRequest {
         REMNOTIF("remnotif"),
         CONFIG("config");
 
-        private String value;
+        private String name;
 
-        Type(String pValue) {
-            value = pValue;
+        static private Map<String,Type> typesByNameMap = new HashMap<String, Type>();
+
+        static {
+            for (Type t : Type.values()) {
+                typesByNameMap.put(t.getName(),t);
+            }
         }
 
-        public String getValue() {
-            return value;
+        Type(String pName) {
+            name = pName;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * Get the request type by a string representation. This is case insensitive.
+         * @param pName the type associated with the given name
+         * @return type type looked up
+         * @throws IllegalArgumentException if the argument is either <code>null</code> or
+         *         does not map to a type.
+         */
+        public static Type getTypeByName(String pName) {
+            if (pName == null) {
+                throw new IllegalArgumentException("No type given");
+            }
+            Type type = typesByNameMap.get(pName.toLowerCase());
+            if (type == null) {
+                throw new IllegalArgumentException("No type with name '" + pName + "' exists");
+            }
+            return type;
         }
     };
 
@@ -107,11 +133,7 @@ public class JmxRequest {
      *
      */
     JmxRequest(Map<String,?> pMap) throws MalformedObjectNameException {
-        type = Type.valueOf((String) pMap.get("type"));
-        if (type == null) {
-            throw new IllegalArgumentException("Type is required");
-        }
-
+        type = Type.getTypeByName((String) pMap.get("type"));
         initObjectName((String) pMap.get("mbean"));
 
         initAttribute(pMap.get("attribute"));
@@ -344,7 +366,7 @@ public class JmxRequest {
      */
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
-        ret.put("type",type.value);
+        ret.put("type",type.name);
         if (objectName != null) {
             ret.put("mbean",objectName.getCanonicalName());
         }

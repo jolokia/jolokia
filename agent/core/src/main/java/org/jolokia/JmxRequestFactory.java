@@ -92,7 +92,7 @@ public final class JmxRequestFactory {
 
             // Get all path elements as a reverse stack
             Stack<String> elements = extractElementsFromPath(pathInfo);
-            Type type = extractType(elements.pop());
+            Type type = Type.getTypeByName(elements.pop());
 
             Processor processor = PROCESSOR_MAP.get(type);
             if (processor == null) {
@@ -265,15 +265,6 @@ public final class JmxRequestFactory {
         return s;
         //return URLDecoder.decode(s,"UTF-8");
 
-    }
-
-    private static Type extractType(String pTypeS) {
-        for (Type t : Type.values()) {
-            if (t.getValue().equals(pTypeS)) {
-                return t;
-            }
-        }
-        throw new IllegalArgumentException("Invalid request type '" + pTypeS + "'");
     }
 
     private static List<String> prepareExtraArgs(Stack<String> pElements) {
