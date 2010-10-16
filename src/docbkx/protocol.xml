@@ -200,7 +200,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         </para>
         <programlisting><![CDATA[
   {
-    "type" : "read"
+    "type" : "read",
     "mbean" : "java.lang:type=Memory",
     "attribute" : "HeapMemoryUsage",
     "path" : "used",
@@ -215,7 +215,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         <programlisting><![CDATA[
  [
   {
-    "type" : "read"
+    "type" : "read",
     "attribute" : "HeapMemoryUsage",
     "mbean" : "java.lang:type=Memory",
     "path" : "used",
