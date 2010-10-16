@@ -172,7 +172,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           allows for features which are not available with GET
           requests. POST requests uses a fixed URL and put their payload
           within the HTTP request's body. This payload is represented
-          in <ulink url="http://www.json.org">JSON</a>, a
+          in <ulink url="http://www.json.org">JSON</ulink>, a
           data serialization format originating from JavaScript
           world.
         </para>
