@@ -36,9 +36,9 @@
       which the representation of Jolokia supported operations defined.
     </para>
     <note>
-      Unfortunately the notation <emphasis>operation</emphasis> is
-      used in different contexts, which should be
-      distinguished. <emphasis>Jolokia operations</emphasis> denote
+      Unfortunately the term <emphasis>operation</emphasis> is
+      used in different contexts which should be
+      distinguished from one another. <emphasis>Jolokia operations</emphasis> denote
       the various kind of Jolokia requests, whereas <emphasis>JMX
       operations</emphasis> are methods which can be invoked on an JMX
       MBean. Wherever the context requires it, this documents uses
@@ -53,7 +53,9 @@
         or POST. Regardless what method is used, the agent doesn't
         keep any state on the server side (except of course that
         MBeans are mostly obviously stateful). So in this aspect, the
-        communication can be considered REST like.
+        communication can be considered
+       <ulink url="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</ulink>
+        like.
         <footnote id="rest-comment">
           <para>This document will avoid the term REST as much as
           possible in order to avoid provocating any dogmatic
@@ -63,7 +65,7 @@
       <section id="get-request">
         <title>GET requests</title>
         <para>
-          The most simplest way to access the Jolokia is by sending
+          The simplest way to access the Jolokia is by sending
           HTTP GET requests. These requests encode all its parameters
           within the access URL. Typically, Jolokia uses the pathinfo
           part of an URL to extract the parameters. Within the
@@ -100,14 +102,14 @@
           <title>
             Why escaping ?
           </title>
-            You might wonder, why simple URI encoding isn't enough for
+            You might wonder why simple URI encoding isn't enough for
             escaping slashes. The reason is rather simple:
-            JBoss/Tomcat has a strange behaviour to return an HTTP
+            JBoss/Tomcat has a strange behaviour when returning an HTTP
             response <literal>HTTP/1.x 400 Invalid URI:
             noSlash</literal> for any URL which contains an escaped
             slash in the path info (i.e. <literal>%2F</literal>). The
             reason behind this behaviour is security related, slashes
-            gets decoded on the agent side before the agent-servlet
+            get decoded on the agent side before the agent-servlet
             gets the request. Other appservers might exhibit a similar
             behaviour.
         </sidebar>
@@ -128,7 +130,7 @@
         <para>
           Client libraries like <ulink
           url="http://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</ulink>
-          does this sort of escaping transparently. If the part
+          do this sort of escaping transparently. If the part
           (e.g. MBean's name) <emphasis>ends</emphasis> in a slash you
           need to use a <literal>+</literal> instead of a minus, so
           the j4p agent can combine parts properly. For example to
@@ -145,8 +147,8 @@
 $input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
 $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         <para>
-          Said all this, this sort of strange escaping can be
-          avoided alltogether, if a slightly different variant for a
+          All of this said, this sort of strange escaping can be
+          avoided alltogether if a slightly different variant for a
           request is used (which doesn't look that REST-stylish,
           though). Instead of providing the information as path-info
           a query parameter <literal>p</literal> can be used
@@ -165,12 +167,13 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
       <section id="post-request">
         <title>POST requests</title>
         <para>
-          POST requests are the most powerful way for communicating
-          with the Jolokia agent. There are no escaping issues and it
+          POST requests are the most powerful way to communicate
+          with the Jolokia agent. There are fewer escaping issues and it
           allows for features which are not available with GET
           requests. POST requests uses a fixed URL and put their payload
           within the HTTP request's body. This payload is represented
-          in JSON, a data serialization format coming from JavaScript
+          in <ulink url="http://www.json.org">JSON</a>, a
+          data serialization format originating from JavaScript
           world.
         </para>
         <para>
@@ -187,7 +190,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           linkend="processing-parameters"/> for details.
         </para>
         <para>
-          A sample read request in JSON format looks like in the
+          A sample read request in JSON format looks like the
           following example. It has a <constant>type</constant>
           "read"
           (case doesn't matter) and the three attributes
@@ -197,7 +200,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         </para>
         <programlisting><![CDATA[
   {
-    "type" : "read"
+    "type" : "read",
     "mbean" : "java.lang:type=Memory",
     "attribute" : "HeapMemoryUsage",
     "path" : "used",
@@ -212,7 +215,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         <programlisting><![CDATA[
  [
   {
-    "type" : "read"
+    "type" : "read",
     "attribute" : "HeapMemoryUsage",
     "mbean" : "java.lang:type=Memory",
     "path" : "used",
@@ -239,7 +242,9 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
           result of the operation as a JSON payload. In case of an
           error, a 4xx or 5xx code will be returned and the JSON
           payload contains details about the error
-          occured. 
+          occured (e.g. 404 means "not found"). (See
+          <ulink url="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">this page</ulink>
+          for more information about HTTP error codes..)
         </para>
         <para>
           In the non-error case a JSON response looks mostly the same
@@ -267,7 +272,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
  }]]></programlisting>
         <para>
           For successful requests, the <constant>status</constant> is
-          always <literal>200</literal>. The
+          always <literal>200</literal> (the HTTP success code). The
           <constant>timestamp</constant> contains the epoch
           time<footnote id="epoch-time">
           <para>
@@ -302,10 +307,10 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
   }]]></programlisting>
         <para>
             For status codes it is important to distinguish status
-            codes as they included in Jolokia JSON response objects
+            codes as they appear in Jolokia JSON response objects
             and the HTTP status code of the (outer) HTTP
             response. There can be many Jolokia status codes, one for
-            each request contained in the single HTTP request. The
+            each Jolokia request contained in the single HTTP request. The
             HTTP status code merely reflect the status of agent itself
             (i.e. whether it could perform the operation), whereas the
             Jolokia response status reflects the result of the
@@ -632,7 +637,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         </para>
         <note>
           The array support is somewhat limited since it makes a
-          naiive split on commas. It does not yet take into account
+          native split on commas. It does not yet take into account
           any quoting or escaping.
         </note>
         <para>
@@ -660,7 +665,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         along with a timestamp. If history tracking is switched on,
         then the agent will put the list of historical values specific
         for this request into the response. History tracking is
-        toggled by an MBean operation on a Jolokia owned MBean (see
+        toggled by an MBean operation on a Jolokia-owned MBean (see
         <xref linkend="mbeans"/>). This has to be done individually on each
         attribute or JMX operation to be tracked.
       </para>
@@ -688,10 +693,10 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         to turn history tracking on. See <xref linkend="history"/>
         for details. If this is the case,
         <constant>history</constant> contains an array of json
-        object, which have two attribute: <constant>value</constant>
+        objects which have two attributes: <constant>value</constant>
         containing the historical value (which can be as complex
-        as any value) and <constant>timestamp</constant> indicating
-        the time when this value was current.
+        as any other value) and <constant>timestamp</constant> indicating
+        the time when this value was current (as measured by the server).
       </para>
     </section>
 
@@ -700,7 +705,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
       <para>
         The protocol definition is versioned. It contains of a major
         and minor version. Changes in the minor version are backward
-        compatibel to other protocol with the same major
+        compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
         protocol version <emphasis role="bold">4.0</emphasis>
@@ -709,7 +714,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         <varlistentry>
           <term><emphasis role="bold">4.0</emphasis> (17.10.2010)</term>
           <listitem>
-            <para>This is the initial for Jolokia. Version below 4 are
+            <para>This is the initial version for Jolokia. Versions below 4 are
             implemented by jmx4perl</para>
           </listitem>
         </varlistentry>
