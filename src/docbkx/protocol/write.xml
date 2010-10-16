@@ -43,7 +43,7 @@
           <td>   
             Inner path for accessing the parent object on which to set the value.
             (See also <xref linkend="pathes"/>). Note, that this is
-            <emphasis>not</emphasis> the path to the attributxe itself,
+            <emphasis>not</emphasis> the path to the attribute itself,
             but to the object carrying this attribute. With a given
             path it is possible to deeply set an value on a complex
             object. 

@@ -466,6 +466,20 @@
 #if ( $locale )
     <meta http-equiv="Content-Language" content="$locale.language" />
 #end
+ #if ( $decoration.body.head )
+      #foreach( $item in $decoration.body.head.getChildren() )
+        ## Workaround for DOXIA-150 due to a non-desired behaviour in p-u
+        ## @see org.codehaus.plexus.util.xml.Xpp3Dom#toString()
+        ## @see org.codehaus.plexus.util.xml.Xpp3Dom#toUnescapedString()
+        #set ( $documentHeader = '<?xml version="1.0" encoding="UTF-8"?>' )
+        #if ( $item.name == "script" )
+          $StringUtils.replace( $item.toUnescapedString(), $documentHeader, "" )
+        #else
+          $StringUtils.replace( $item.toString(), $documentHeader, "" )
+        #end
+      #end
+    #end
+    $headContent
   </head>
   <body class="composite" onload="prettyPrint()">
     <div class="container_24">

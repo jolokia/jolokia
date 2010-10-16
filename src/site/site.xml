@@ -37,7 +37,6 @@
       <item name="Overview" href="/documentation.html"/>
       <item name="Tutorial" href="/tutorial.html"/>
       <item name="Reference Manual" href="/reference/html/index.html"/>
-      <item name="Protocol Specification" href="/protocol.html"/>
     </menu>
     <menu name="Agents">
       <item name="Overview" href="agent.html"/>

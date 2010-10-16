@@ -87,7 +87,7 @@
           <entities>
             <entity>
               <name>version</name>
-              <value>${version}</value>
+              <value>${project.version}</value>
             </entity>
           </entities>
           <postProcess>

@@ -7,7 +7,10 @@
     <title>Support</title>
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
-
+  <head>
+<script type="text/javascript" src="js/idea.js"></script>
+<script type="text/javascript" language="JavaScript" src="http://widget.idea.informer.com/tabn2v3.js"></script><noscript><a href="http://jolokia.useridea.com">Feature Requests feedback</a> <a href="http://useridea.com"> Powered by <img src="http://widget.useridea.com/i/reformal_ru.png" /></a></noscript>
+  </head>
   <body>
     <section name="Support">
       <p>
@@ -26,17 +29,17 @@
         or with monetary support (donations via pledgie or flattring
         Jolokia).
       </p>
-      <subsection name="Bug tracking">
+      <subsection name="Bug tracking and Feature Requests">
         <p>
           Jolokia uses GitHub's <a
           href="http://github.com/rhuss/jolokia/issues">bug tracker</a>
-          for managing bugs and feature request. 
+          for managing bugs and <a href="http://jolokia.idea.informer.com/">idea.informer.com</a> for 
+          <a href="javascript:MyOtziv.mo_show_box();">feature requests</a>.
         </p>
       </subsection>
       <subsection name="Forum">
         <p>
-          A <a href="./forum.html">forum</a> (kindly provided by <a
-          href="http://www.nabble.com">Nabble</a>) for Jolokia related
+          A <a href="./forum.html">forum</a> for Jolokia related
           discussions can be found <a href="./forum.html">here</a>. Don't
           hesitate to put it under fire with your questions and
           suggestions.
@@ -80,8 +83,7 @@
             <a href="http://www.jmx4perl.org">jmx4perl</a>) in you server
             landscape. We are especially expert for large scale integration in
             large Nagios and OP5 setups, not only for monitoring JMX MBeans
-            but for Nagios in general (see here and here for some work my
-            collegues have done).
+            but for Nagios in general.
           </li>
           <li>
             Consulting and custom programming, e.g. an agent manager for mass
@@ -134,7 +136,7 @@
           project. I have been asked for this possibility. Donations
           will help keeping up the movivation for further enhancements
           of Jolokia (and to honor the past development which took some
-          efforts). The motivation is high anyway, though.
+          efforts). The motivation is high anywayh, though.
         </p>
         <p>
           There are two way: Either via a direct donation with <a href="http://pledgie.com/">Pledgie</a>

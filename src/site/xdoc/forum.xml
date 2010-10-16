@@ -11,7 +11,7 @@
   <body>
     <section name="Forum">
       <a id="nabblelink" href="http://jolokia.963608.n3.nabble.com/">Jolokia</a>
-      <script src="http://jolokia.963608.n3.nabble.com/embed/f1377287"></script>
+      <script src="http://jolokia.963608.n3.nabble.com/embed/f1377287" type="text/javascript"></script>
     </section>
   </body>
 </document>

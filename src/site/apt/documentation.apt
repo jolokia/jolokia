@@ -11,15 +11,7 @@ Documentation
   
  The {{{./reference/html/index.html}reference manual}} contains a comprehensive
  documentation to Jolokia, its agents and client bindings. There is also
- a {{{./reference/pdf/index.html}PDF version}}.
+ a {{{./reference/pdf/jolokia-reference.pdf}PDF version}}.
 
- <The reference manual is still young, so don't expect too much
- from it. It is a work in progress.>
-
-* Protocol
-
- Jolokia communicates via HTTP, where the request can be either a
- simple GET request or a POST request with a JSON payload. In both
- cases, the response is encoded in JSON representation. The format of
- Jolokia requests and responses is defined in the
- {{{./protocol.html}protocol specification}} 
+ <The reference manual is still young, so it is only partly
+ completed. It is a work in progress.>
