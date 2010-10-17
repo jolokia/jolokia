@@ -387,7 +387,7 @@
         </snapshotRepository>
         <site>
           <id>jolokia-site</id>
-          <url>scpexe://labs.consol.de/home/jolokia/www/htdocs_staging/</url>
+          <url>scpexe://labs.consol.de/home/jolokia/www/htdocs</url>
         </site>
       </distributionManagement>
       <build>
