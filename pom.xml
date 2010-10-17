@@ -332,8 +332,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>0.80-SNAPSHOT</currentStableVersion>
-    <currentSnapshotVersion>0.80-SNAPSHOT</currentSnapshotVersion>
+    <currentStableVersion>0.80</currentStableVersion>
+    <currentSnapshotVersion>0.81-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
   </properties>
 
