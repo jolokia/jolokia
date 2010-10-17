@@ -290,6 +290,12 @@ ul {
     margin-bottom: 2px;
     margin-top: 3px;
 }
+
+dd {
+    margin: 0px 25px 10px 25px;
+    text-align: justify;
+}
+
 p {
     margin: 10px 25px;
     text-align: justify;
@@ -399,14 +405,10 @@ div.source {
 }
 
 dt {
-  padding: 4px 4px 4px 24px;
+  padding: 4px 4px 0px 24px;
   color: #333333;
-  background-color: #ccc;
   font-weight: bold;
   font-size: 14px;
-  background-image: url(../images/h3.jpg);
-  background-repeat: no-repeat;
-  background-position: left bottom;
 }
 .subsectionTitle {
   font-size: 13px;
@@ -474,6 +476,16 @@ li table.bodyTable {
 
 .str { 
     color: #061;
+}
+
+/* news date */
+
+div.news-date {
+    color: #C7C7C7;
+    font-size: 10px;
+    float: right;
+    clear: both;
+    margin-top: -40px;
 }
 
 /* ========================== */

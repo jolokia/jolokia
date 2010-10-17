@@ -7,10 +7,10 @@ REST-stylish way.
 
 Multiple agents are provided for different environments:
 
-* __WAR Agent__ for deployment as web application in a JEE Server 
+* __WAR Agent__ for deployment as web application in a JEE Server. 
 * __OSGi Agent__ for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
-  all-in-one) 
+  all-in-one).
 * __Mule Agent__ for usage within a [Mule][3] ESB
 * __JVM JDK6 Agent__ which can be used with any Oracle/Sun JVM,
   Version 6 
@@ -72,11 +72,7 @@ JSR-160 connectors:
 Resources
 ---------
 
-More information on jolokia can be found at [www.jolokia.org][5]
-(coming soon). 
-
-Until the launch of the website (expected in fall 2010), you can
-already use the [support forum][9] or contact me directly via GitHub. 
+More information on jolokia can be found at [www.jolokia.org][5].
 
  [1]: http://github.com/rhuss/jolokia/raw/master/src/site/resources/images/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org

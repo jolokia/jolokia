@@ -26,23 +26,81 @@
         On the other hand, the are ways for supporting the development
         of Jolokia, too. You can contribute code and bug-fixes via <a
         href="http://github.com/rhuss/jolokia">GitHub</a> (prefered)
-        or with monetary support (donations via pledgie or flattring
+        or with financial support (donations via Pledgie or flattring
         Jolokia).
       </p>
-      <subsection name="Bug tracking and Feature Requests">
-        <p>
-          Jolokia uses GitHub's <a
-          href="http://github.com/rhuss/jolokia/issues">bug tracker</a>
-          for managing bugs and <a href="http://jolokia.idea.informer.com/">idea.informer.com</a> for 
-          <a href="javascript:MyOtziv.mo_show_box();">feature requests</a>.
-        </p>
+      <subsection name="Communication channels">
+        <dl>
+          <dt>Forum</dt>
+          <dd>
+            A <a href="./forum.html">forum</a> for Jolokia related
+            discussions is intended for usage questiones. Don't
+            hesitate to fill it up with your questions and
+            suggestions.
+          </dd>
+          <dt>Bug Reports</dt>
+          <dd>
+            Jolokia uses GitHub's <a
+            href="http://github.com/rhuss/jolokia/issues">bug
+            tracker</a> for dealing with bugs. Please fill in any
+            issue you find.
+          </dd>
+          <dt>Feature Requests</dt>
+          <dd>
+            Feature Requests are collected via <a
+            href="http://jolokia.idea.informer.com/">jolokia.idea.informer.com</a>. They
+            can be added and voted for <a
+            href="javascript:MyOtziv.mo_show_box();">inline</a>,
+            too. Even if you don't have a new feature idea, please
+            have a look at the existing requests and vote for them if
+            you want to influence Jolokia's roadmap. We need your
+            feedback !
+          </dd>
+        </dl>
       </subsection>
-      <subsection name="Forum">
+      <subsection name="Source">
         <p>
-          A <a href="./forum.html">forum</a> for Jolokia related
-          discussions can be found <a href="./forum.html">here</a>. Don't
-          hesitate to put it under fire with your questions and
-          suggestions.
+          Jolokia uses <a
+          href="http://github.com/rhuss/jolokia">GitHub</a> as source
+          repository and employs a <a
+          href="http://help.github.com/pull-requests/">Fork + Pull
+          Model</a> for development.
+        </p>
+        <p>
+          We are always looking for volunteers to enhance Jolokia. If
+          you would like start to participate, we suggest the
+          following way:
+        </p>
+        <ul>
+          <li>
+            Check for an open <a
+            href="javascript:MyOtziv.mo_show_box();">feature request</a>
+            you like or unresolved (and open) <a
+            href="http://github.com/rhuss/jolokia/issues">bug</a>.
+          </li>
+          <li>
+            Fork Jolokia by visiting the <a
+            href="http://github.com/rhuss/jolokia">project page</a>
+            (use "Fork" from the menu). 
+          </li>
+          <li>
+            Leave a short note, on what you are working (so that we
+            can update the status of the feature request or bug). 
+          </li>
+          <li>
+            After finishing your implementation, send a <a
+            href="http://help.github.com/pull-requests">pull
+            request</a>.
+          </li>
+          <li>
+            After briefly reviewing the code contribution, it will
+            integrated into the master repository.
+          </li>
+        </ul>
+        <p>
+          Please note, that all the contributed code must be
+          licensable under <a href="license.html">Apache License</a>,
+          Version 2.
         </p>
       </subsection>
       <subsection name="Blog">
@@ -67,20 +125,20 @@
           (and from my co-workers as well).
         </p>
       </subsection>
-      <subsection name="Commercial Support">
+      <subsection name="Professional Support">
         <p>
-          Thanks to my employer <a href="http://www.consol.de">ConSol*</a>, we
-          are able to offer you professional support and consulting. I.e. we
-          do (and already have done for jmx4perl with quite some success):
+          Thanks to <a href="http://www.consol.de">ConSol*</a>, we are
+          able to offer professional support and consulting. I.e. we
+          do (and already have done for jmx4perl with quite some
+          success):
         </p>
         <ul>
           <li>
-            Support with certain service level agreements, up to 7x24
-            support. 
+            Support with certain service level agreements, up to 7x24.
           </li>
           <li>
             Workshops for evaluating how to best integrate Jolokia (and 
-            <a href="http://www.jmx4perl.org">jmx4perl</a>) in you server
+            <a href="http://www.jmx4perl.org">jmx4perl</a>) in your server
             landscape. We are especially expert for large scale integration in
             large Nagios and OP5 setups, not only for monitoring JMX MBeans
             but for Nagios in general.
@@ -97,25 +155,6 @@
       </p>
       <p>
         So, that was it for the plug ;-)
-      </p>
-      </subsection>
-      <subsection name="Source">
-        <p>
-          Jolokia uses <a href="http://www.github.com">GitHub</a> as source
-          repository. Send me pull requests for enhancing Jolokia featurewise
-          or fixing some bugs. They will be considered all and potentially
-          integrated after reviewinv. Please note, that all the contributed
-          code must be licensable under <a href="license.html">Apache License</a>,
-          Version 2.
-        </p>
-        <p>
-          Jolokia source can be found <a
-          href="http://github.com/rhuss/jolokia">online</a>, the clone
-          URL is 
-          <code>git@github.com:rhuss/jolokia.git</code> 
-      </p>
-      <p>
-        Visit Jolokia and then ... <a href="http://github.com/rhuss/jolokia/fork">fork it</a> !
       </p>
       </subsection>
       <subsection name="Your Support for Jolokia">

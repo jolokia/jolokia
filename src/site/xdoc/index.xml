@@ -9,7 +9,7 @@
   <body>
     <div class="teaser">
       <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br/>
-      <div class="subtitle">It is fast, simple, polyglot and adds unique features. 
+      <div class="subtitle">It is fast, simple, polyglot and has unique features. 
       It's JMX on <a href="http://en.wikipedia.org/wiki/Capsaicin">Capsaicin</a>.</div>
     </div>
     <p>
@@ -17,8 +17,7 @@
       connectors.  It is an agent based approach with support for many
       platforms. In addition to basic JMX operations it enhances JMX
       remoting with unique features like bulk requests or fine grained
-      security policies. Have a look yourself at these <a
-      href="features-nb.html">features</a>.
+      security policies. 
     </p>
     <subsection name="Starting points">
       <ul>
@@ -37,48 +36,43 @@
           platforms (JEE, OSGi, Mule, JDK6 JVM).          
         </li>
         <li>
-          <a href="client.html">Client libraries</a> include language
-          bindings for <a href="client/java.html">Java</a> and <a
-          href="client/perl.html">Perl</a>. 
+          The <a href="support.html">support</a> page contains
+          information for how to get Jolokia support and how to
+          participate in the evolution of Jolokia.
         </li>
       </ul>
     </subsection>
     <section name="News">
-      <subsection name="Alpha version of www.jolokia.org deployed">
+      <subsection name="www.jolokia.org launched">
+        <div class="news-date">2010-10-17</div>
         <p>
-          Well, it's really more work than expected, but setting up a
-          proper web site and making a release is really, really much
-          work. I wanted to have it ready right now, but its not yet
-          finished (e.g. I'm still waiting on some
-          icons). Nevertheless, it's still more than a skeleton, so I
-          push it out <strong>now</strong> (without big announcement
-          yet). Of course, final touches will hapen until november as
-          well as a <em>regular</em> (== non-snapshot) release.
+          Finally, <a href="index.html">www.jolokia.org</a> has
+          arrived. It provides many pieces of useful information about
+          Jolokia, but is not completely finished yet. The <a
+          href="reference/htm/index.html">reference manual</a> needs
+          still some work as well as some other pages.  Hopefully you
+          enjoy it nevertheless. <a href="forum.html">Feedback</a> is
+          highly appreciated.
         </p>
         <p>
           <em>Release soon, release often</em>. That's what they told
           me. 
         </p>
       </subsection>
-      <subsection name="Jolokia 0.80-SNAPSHOT">
+      <subsection name="Jolokia 0.80 released">
+        <div class="news-date">2010-10-17</div>
         <p>
-          The current snapshot release 0.80-SNAPSHOT which you can
-          find on the <a href="./download.html">Download</a> page and
-          on out maven repository is identical to the agent part of <a
+          The first version of Jolokia has been released. Version 0.80
+          can be obtained from the <a
+          href="./download.html">Download</a> page and from our maven
+          repository. This version is identical to the agent part of
+          <a
           href="http://search.cpan.org/~roland/jmx4perl-0.72/">jmx4perl
-          0.72</a> feature- and codewise. So it 
-          <strong>is</strong> quite usable ;-).
+          0.72</a>, feature- and codewise. Future versions of jmx4perl
+          will be packaged without agent but with a dependency on
+          Jolokia. 
         </p>
       </subsection>
-        <!-- 
-      <subsection name="Version 0.80 released">
-        Jolokia 0.80 is the initial release. It is the direct the
-        successor of the agent part from Jmx4Perl 0.72 with no
-        additional features. Get it from the
-        <a href="download.html">Download</a> page and read the
-        announcement in our blog.
-      </subsection>
-        -->
   </section>
 </body>
 
