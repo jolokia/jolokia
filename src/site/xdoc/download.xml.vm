@@ -102,7 +102,7 @@
    </releases>
  </repository>]]></pre>
         <p>
-          Snapshots are deployed regularly and can be accessed via this repository:
+          Snapshots are deployed regulary and can be accessed via this repository:
         </p>
         <pre class="prettyprint"><![CDATA[
  <repository>
