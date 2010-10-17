@@ -86,8 +86,7 @@ public class JolokiaDemo {
         <ul>
           <li>
             <a
-                href="http://labs.consol.de/maven/repository/org/jolokia/\
-jolokia-client-java/0.80/jolokia-client-java-0.80.jar">jolokia-client-java.0.80.jar</a>
+                href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/0.80/jolokia-client-java-0.80.jar">jolokia-client-java.0.80.jar</a>
           </li>
           <li>
             <a

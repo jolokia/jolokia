@@ -27,9 +27,8 @@
         </li>
         <li>          
           The <a href="documentation.html">Documentation</a> includes
-          a <a href="tutorial.html">tutorial</a>, a <a
-          href="reference/html/index.html">reference manual</a> and the JSON <a
-          href="protocol.html">protocol specification</a>.
+          a <a href="tutorial.html">tutorial</a> and a <a
+          href="reference/html/index.html">reference manual</a>.
         </li>
         <li>
           <a href="agent.html">Agents</a> are available for many
@@ -49,7 +48,7 @@
           Finally, <a href="index.html">www.jolokia.org</a> has
           arrived. It provides many pieces of useful information about
           Jolokia, but is not completely finished yet. The <a
-          href="reference/htm/index.html">reference manual</a> needs
+          href="reference/html/index.html">reference manual</a> needs
           still some work as well as some other pages.  Hopefully you
           enjoy it nevertheless. <a href="forum.html">Feedback</a> is
           highly appreciated.

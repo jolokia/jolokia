@@ -114,7 +114,7 @@ Agents
 
 * Mule Agent
 
-  The {{{http://http://www.mulesoft.org}Mule Standalone ESB}} offers a dedicated JMX agent
+  The {{{http://www.mulesoft.org}Mule Standalone ESB}} offers a dedicated JMX agent
   interface, into which this agents plugs in seemlessly. 
 
   This agent has been tested for Mule 2 and Mule 3.
