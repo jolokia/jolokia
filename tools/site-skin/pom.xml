@@ -11,7 +11,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-site-skin</artifactId>
-  <version>0.80-SNAPSHOT</version>
+  <version>0.81-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>jolokia-site-skin</name>
