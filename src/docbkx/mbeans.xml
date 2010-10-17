@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <chapter id="mbeans">
   <title>Jolokia MBeans</title>
-  
+  <note>
+    <para>
+      This chapter, when finished, will explain the varios specific
+      MBeans that Jolokia will register. These provide services
+      switching on debug, manuplation the history, dumping all MBean
+      Servers found, and more.
+    </para>
+  </note>
 </chapter>

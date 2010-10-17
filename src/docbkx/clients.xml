@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="clients">
     <title>Clients</title>
+
+    <note>
+      Currently, two client implementations exists for Jolokia:
+      Jmx4Perl, the Perl-Binding (grandfather of all clients ;-) and a
+      Java library. JavaScript is in the pipeline. More on this late
+      on in this chapter.
+    </note>
 </chapter>

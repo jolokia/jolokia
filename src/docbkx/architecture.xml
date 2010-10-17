@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="architecture">
   <title>Architecture</title>
+
+  <note>
+    Overview of Jolokia's architecture, its differences to
+    JSR-160. Depending on the setup, Jolokia can operate in a
+    standalone mode or in an proxy mode, which allows for agentless
+    operation on the target server.
+  </note>
   
   <section id="agent-mode">
     <title>Agent mode</title>

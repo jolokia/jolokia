@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="agents">
   <title>Agents</title>
-  
+ 
+  <note>
+    Work in progress. This chapter will introduce the various kinds of
+    agents available, along with installation and configuration hints.
+  </note>
 </chapter>

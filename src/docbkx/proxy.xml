@@ -2,4 +2,10 @@
 <chapter id="proxy">
     <title>Proxy Mode </title>
     
+    <note>
+      Using Jolokia in the proxy mode enables for agentless operation
+      on the target server. A dedicated agent deployment proxies by
+      accepting Jolokia requests as input, translating them to JSR-160
+      requests for the target. More on this later ...
+    </note>
 </chapter>

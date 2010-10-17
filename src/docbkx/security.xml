@@ -2,4 +2,14 @@
 <chapter id="security">
     <title>Security</title>
 
+    <note>
+      Security in JSR-160 remoting is an all-or-nothing option. Either
+      all MBeans are accesible or none (except your application server
+      uses a SecurityManager, but that is rarely the case). Jolokia on
+      the other hand alllows for fine grained security defined in a
+      security policy. It allows for access restrictions on MBean
+      names (or patterns), attributes, operation, source IP address
+      (or a subnet) and type of Jolokia operation. This chapter will
+      talk about this.
+    </note>
 </chapter>

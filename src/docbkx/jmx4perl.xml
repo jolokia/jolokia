@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section id="jmx4perl">
   <title>Jmx4Perl</title>
+  <note>
+    More on Jmx4Perl here. It is more than a simple client binding,
+    providing some useful command line tools like a full feature
+    shell.
+  </note>
 </section>
