@@ -40,27 +40,27 @@
           </tr>
           <tr>
             <td>WAR-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>            
           </tr>
           <tr>
             <td>Osgi-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>            
           </tr>
           <tr>
             <td>Osgi-Agent (full bundle)</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>            
           </tr>
           <tr>
             <td>Mule-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>            
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-jvm-jdk6/${currentStableVersion}/jolokia-jvm-jdk6-${currentStableVersion}-agent.jar">jolokia-jvm-jdk6-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-jvm-jdk6/${currentStableVersion}/jolokia-jvm-jdk6-${currentStableVersion}-agent.jar">jolokia-jvm-jdk6-${currentStableVersion}-agent.jar</a></td>            
           </tr>
           <tr>
             <td>Java Client Library</td>
-            <td><a href="http://labs.consol.de/maven/snapshots-repository/org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>            
           </tr>
         </tbody>
       </table>
