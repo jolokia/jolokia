@@ -254,7 +254,7 @@
   
   <scm>
     <connection>scm:git:git://github.com/rhuss/jolokia.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:rhuss/jolokia.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/rhuss/jolokia.git</developerConnection>
     <tag>HEAD</tag>
     <url>http://github.com/rhuss/jolokia</url>
   </scm>
