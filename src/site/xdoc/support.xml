@@ -9,6 +9,7 @@
   </properties>
   <head>
 <script type="text/javascript" src="js/idea.js"></script>
+<script type="text/javascript" src="js/flattr.js"></script>
 <script type="text/javascript" language="JavaScript" src="http://widget.idea.informer.com/tabn2v3.js"></script><noscript><a href="http://jolokia.useridea.com">Feature Requests feedback</a> <a href="http://useridea.com"> Powered by <img src="http://widget.useridea.com/i/reformal_ru.png" /></a></noscript>
   </head>
   <body>
@@ -64,7 +65,7 @@
           href="http://github.com/rhuss/jolokia">GitHub</a> as source
           repository and employs a <a
           href="http://help.github.com/pull-requests/">Fork + Pull
-          Model</a> for development.
+          Model</a> for development. The git clone URL is <code>git@github.com:rhuss/jolokia.git</code>.
         </p>
         <p>
           We are always looking for volunteers to enhance Jolokia. If
@@ -191,8 +192,9 @@
             src='http://www.pledgie.com/campaigns/13618.png?skin_name=chrome'
             border='0' /></a>
           </div>
-          <div style="float:right; margin-right: 150px;">
-            
+          <div style="float:right; margin-right: 50px; margin-top: 20px;">
+           <a class="FlattrButton" style="display:none;"
+              href="http://www.jolokia.org"></a> 
           </div>        
           <span style="clear: both;"></span>
         </div>
