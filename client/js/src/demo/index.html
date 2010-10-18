@@ -32,13 +32,9 @@
             "path" : "used"
           }
         </textarea>
-        <!--
-        <select>
-            <option onclick="setRequest(eval jQuery(this).value());">{type:'READ',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage',path:'used'}</option>
-            <option onclick="setRequest({type:'READ',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage'});">HeapMemoryUsage (all)</option>
-        </select>
-        -->
-        <div id="requestListArea"></div>
+        <br/>Select a request from the following list:<br/>
+        <div id="requestListArea" style="font-size:80%"></div>
+        <span style="background-color:#e0e0e0;">[Auto-send on click?<input type="checkbox" id="checkboxAutosend"/>]</span>
     </td>
     <td rowspan="2" width="50%" valign="top">
         post() implementation:<br/>
@@ -53,10 +49,7 @@
 <tr>
     <td valign="top">
         Then:
-        <input type="button" onclick="sendViaRequest();" value="Send via JolokiaJS.Request.post()"/>
-        or <input type="button" onclick="sendViaJQuery();" value="Send via jQuery"/>
-
-
+        <input type="button" id="buttonSendRequest" onclick="sendViaRequest();" value="Send via JolokiaJS.Request.post()"/>
         <br/>
         RESPONSE:<br/>
 
