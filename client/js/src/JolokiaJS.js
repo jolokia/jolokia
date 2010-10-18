@@ -230,11 +230,21 @@ JolokiaJS.isFunction = function(obj)
     ;
 }
 
+/**
+    A class for holding, manipulating, and posting Jolokia requests.
+
+    If passed an argument, the argument must be a simple
+    object containing a Jolokia-formatted request, or
+    a JSON string of such an object. If the argument is malformed
+    then this function might throw an exception. Optionally,
+    the value may be empty/false/null/undefined, in which case
+    it is ignored.
+*/
 JolokiaJS.Request = function() {
     this.$d = {
         fields:{}
     };
-    if( arguments.length ) {
+    if( arguments.length && arguments[0]) {
         this.fromJ4P(arguments[0]);
     }
 };
@@ -296,6 +306,13 @@ JolokiaJS.Request.tryFirebug = function(xhr) {
 
 };
 
+/**
+    Common implementations of low-level Request.post() functions,
+    all of which are independent on the concrete post() implementation.
+    Such implementations are encouraged to use these functions, as they
+    take care of enforcing certain framework-level conventions
+    such as the calling of onSuccess()/onError() callbacks.
+*/
 JolokiaJS.Request.postImpl = {
     /**
         A helper function for concrete implementations
@@ -734,15 +751,11 @@ JolokiaJS.Request.postImpl = {
                 throw new Error("Only POST requests are currently implemented!");
             }
             request = request || this;
-            //alert("JolokiaJS.Request.post(): posting: "+args.toSource());
             var data = request.toJ4PString();
-             //alert("data:\n"+data);
-
             var method = args.method;
             var ajopt =
             {
                 url: args.url,
-                //data: jsonable,
                 data:data,
                 type: args.method,
                 async: args.asynchronous,
@@ -767,7 +780,6 @@ JolokiaJS.Request.postImpl = {
             {
                 ajopt.timeout = args.timeout;
             }
-            //alert("opts:\n"+JSON.stringify(ajopt,undefined,4));
             try
             {
                 var xhr = jQuery.ajax(ajopt);
@@ -777,7 +789,7 @@ JolokiaJS.Request.postImpl = {
             catch(e)
             {
                 args.errorMessage = e.toString();
-                JolokiaJS.Request.postImpl.onPostError( request, args );
+                JolokiaJS.Request.postImpl.onPostError(request, args);
                 return undefined;
             }
         }/*jQuery*/
@@ -787,7 +799,9 @@ JolokiaJS.Request.postImpl = {
 
 /**
     Returns an object holding this object's state in a JSONizable form.
-    The structure is that defined by the Jolokia/j4p protocol.
+    The structure is that defined by the Jolokia/j4p protocol. The object
+    is a shallow copy, so do not unduly modify it. To deeply clone it, JSONize
+    it.
 */
 JolokiaJS.Request.prototype.toJ4PObj = function() {
     return {
@@ -818,7 +832,12 @@ JolokiaJS.Request.prototype.toJSON = function(indentation) {
 
 /**
     Populates this object from the given json string or object
-    which contains Jolokia-format Response data.
+    which contains Jolokia-format Response data. If the argument is malformed
+    then this function might throw an exception.
+
+    This function clears all Jolokia-level request state but does not
+    clear any postOptions() which have been set on this object,
+    nor any custom properties set by the client.
 */
 JolokiaJS.Request.prototype.fromJ4P = function(json) {
     var obj = ((json instanceof String) || ('string' === typeof json))
@@ -905,12 +924,19 @@ JolokiaJS.Request.prototype.set = JolokiaJS.setterImpl;
     See JolokiaJS.getterImpl().
 */
 JolokiaJS.Request.prototype.get = JolokiaJS.getterImpl;
+/** Gets or sets the 'type' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.type = JolokiaJS.generateAccessor('type');
+/** Gets or sets the 'mbean' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.mbean = JolokiaJS.generateAccessor('mbean');
+/** Gets or sets the 'attribute' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.attribute = JolokiaJS.generateAccessor('attribute');
+/** Gets or sets the 'path' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.path = JolokiaJS.generateAccessor('path');
+/** Gets or sets the 'value' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.value = JolokiaJS.generateAccessor('value');
+/** Gets or sets the 'arguments' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.arguments = JolokiaJS.generateAccessor('arguments');
+/** Gets or sets the 'operation' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Request.prototype.operation = JolokiaJS.generateAccessor('operation');
 
 /**
@@ -1009,7 +1035,7 @@ JolokiaJS.Request.prototype.postOptions = function(obj)
 {
     /**
         i would REALLY rather create/return deep copies
-        of the objects, mainly to avoid cross-polinization
+        of the objects, mainly to avoid cross-polenization
         of props between unrelated messages, but...
 
         using JSON.parse( JSON.stringify(obj) ) to do the deep
@@ -1055,6 +1081,10 @@ JolokiaJS.Request.prototype.postBackend =
 
 /**
     A class for holding Jolokia response data.
+
+    If passed an argument, the argument must be a simple
+    object containing a Jolokia-formatted response, or
+    a JSON string of such an object.
 */
 JolokiaJS.Response = function() {
     this.$d = {
@@ -1071,22 +1101,28 @@ JolokiaJS.Response = function() {
 JolokiaJS.Response.prototype.set = JolokiaJS.setterImpl;
 /** See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.get = JolokiaJS.getterImpl;
-
+/** Gets or sets the 'value' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.value = JolokiaJS.generateAccessor('value');
+/** Gets or sets the 'timestamp' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.timestamp = JolokiaJS.generateAccessor('timestamp');
+/** Gets or sets the 'status' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.status = JolokiaJS.generateAccessor('status');
+/** Gets or sets the 'error' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.error = JolokiaJS.generateAccessor('error');
+/** Gets or sets the 'history' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.history = JolokiaJS.generateAccessor('history');
+/** Gets or sets the 'stacktrace' request field. See JolokiaJS.getterImpl(). */
 JolokiaJS.Response.prototype.stacktrace = JolokiaJS.generateAccessor('stacktrace');
 
 /**
-    If called with no arguments it ruturns this object's associated request
-    as a JolokiaJS.Request object.
+    If called with no arguments it returns this object's associated request
+    (as a JolokiaJS.Request object).
 
     If passed an argument, it is assumed to be a JolokiaJS.Request
     or a JSON string or object suitable for passing to the
-    JolokiaJS.Request constructor. In that case it sets this
-    object's associated request and returns this object.
+    JolokiaJS.Request constructor. In those cases it sets this
+    object's associated request and returns this object. If the given
+    argument is malformed, this function may throw an exception.
 */
 JolokiaJS.Response.prototype.request = function(json) {
     if( 0 == arguments.length ) return this.$d.fields['request'];
@@ -1095,7 +1131,7 @@ JolokiaJS.Response.prototype.request = function(json) {
             this.$d.fields['request'] = json;
         }
         else {
-            this.$d.fields['request'] = new JolokiaJS.Request(json);
+            this.$d.fields['request'] = json ? new JolokiaJS.Request(json) : undefined;
         }
         return this;
     }
@@ -1125,6 +1161,10 @@ JolokiaJS.Response.prototype.toJ4PString = function(indentation) {
     simple object in the structure specified by the Jolokia Response
     protocol, or a JSON string of such an object. This function populates
     this object's state based on that structure.
+
+    All Jolokia-level response data is cleared/reset by this function,
+    but JolokiaJS-level properties are retained. That said, a Response
+    currently has no JolokiaJS-level properties :/.
 */
 JolokiaJS.Response.prototype.fromJ4P = function(json) {
     var obj = ((json instanceof String) || ('string' == typeof json))

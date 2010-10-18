@@ -13,30 +13,6 @@ function loadFirebugLite() {
     document.body.appendChild(fb);
 };
 
-function sendViaJQuery() {
-    var taRes = jQuery('#taRESPONSE');
-    taRes.attr('value',"Sending...");
-    var json = jQuery('#taREQUEST').attr('value');
-    var ajopt = {
-        async:true,
-        data:json,
-        dataType:'text',
-        url:'/jolokia/',
-        type:'POST',
-        success:function(data) {
-            var val = JSON.stringify(JSON.parse(data),undefined,4);
-            taRes.attr('value',val);
-        },
-        error:function(xhr,textStatus,error) {
-            taRes.attr('value',"ERROR:\nXHR="+JSON.stringify(xhr)
-                        +"\ntextStatus="+textStatus
-                        +"\nerrorThrown="+error);
-        }
-    };
-    //alert("opts:\n"+JSON.stringify(ajopt,undefined,4));
-    jQuery.ajax(ajopt);
-}
-
 function sendViaRequest() {
 
     var taRes = jQuery('#taRESPONSE');
@@ -153,18 +129,38 @@ updatePlot.req = (new JolokiaJS.Request({
         }
     });
 
-
+// Switches JolokiaJS.Request.post() impl. b must be-a implementation function.
 function switchBackend( b )
 {
     JolokiaJS.Request.prototype.postBackend = b;
     jQuery('#taPostImpl').attr('value',b.toString());
 }
 
+// obj must be-a simple object form of a Jolokia request. It is turned into a JolokiaJS.Request
+// and its JSON'd form is copied to #taREQUEST.
+function setRequest(obj) {
+    var req;
+    try {
+        req = new JolokiaJS.Request(obj);
+    }
+    catch(e) {
+        alert("Invalid Request JSON:\n"+JSON.stringify(obj,undefined,4));
+        return;
+    }
+    var taRes = jQuery('#taREQUEST');
+    taRes.attr('value',req.toJ4PString(JolokiaJS.options.toJSONSpacing));
+
+
+}
+
+
 function setupDemo() {
     switchBackend(
         JolokiaJS.Request.postImpl.concrete.XMLHttpRequest
         //JolokiaJS.Request.postImpl.concrete.jQuery
     );
+
+    // Set up list of pre-selected bean ops...
     var list = [
         {n:"Jolokia version",
          r:{type:'VERSION'}
@@ -183,36 +179,42 @@ function setupDemo() {
         },
         {n:"List all Beans",
          r:{type:'SEARCH',mbean:'*:*'}
+        },
+        {n:"Intentional error",
+         r:{type:'XYZ',mbean:'*:*'}
         }
     ];
 
-    var tgt = jQuery('#requestListArea');
-    tgt.html("Select a request:<br/>");
-    var i, a;
+    //tgt.html("Select a request:<br/>");
+    var buttonSend = jQuery('#buttonSendRequest');
+    var cbAutosend = jQuery('#checkboxAutosend');
+
+    // Extra level of indirection needed to capture some local vars. This isn't working
+    // for me when i inline this function in the for() loop.
     function captureKludge(a,r) {
-        a.click( function() { setRequest(r.r); } );
+        a.click( function() {
+            setRequest(r.r);
+            if( cbAutosend.attr('checked') ) {
+                buttonSend.click();
+            }
+        });
     }
+    var tgt = jQuery('#requestListArea');
+    var i, a;
+    var x = 0;
     for( i in list ) {
         var r = list[i];
         a = jQuery('<a href="#"></a>').text('['+r.n+']');
         captureKludge(a,r);
         tgt.append(' ').append( a );
+        // Go ahead and post the first entry...
+        if( 1 == ++x ) {
+            a.click();
+            if( ! cbAutosend.attr('checked') ) {
+                buttonSend.click();
+            }
+        }
     }
-}
-
-function setRequest(obj) {
-    var req;
-    try {
-        req = new JolokiaJS.Request(obj);
-    }
-    catch(e) {
-        alert("Invalid Request JSON:\n"+JSON.stringify(obj,undefined,4));
-        return;
-    }
-    var taRes = jQuery('#taREQUEST');
-    taRes.attr('value',req.toJ4PString(JolokiaJS.options.toJSONSpacing));
-
-
 }
 
 function setupMemoryCollector(ms) {
