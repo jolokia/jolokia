@@ -37,10 +37,13 @@
         <span style="background-color:#e0e0e0;">[Auto-send on click?<input type="checkbox" id="checkboxAutosend"/>]</span>
     </td>
     <td rowspan="2" width="50%" valign="top">
-        post() implementation:<br/>
-        Switch:
-            <button onclick="switchBackend(JolokiaJS.Request.postImpl.concrete.XMLHttpRequest);">XMLHttpRequest</button>
-            or <button onclick="switchBackend(JolokiaJS.Request.postImpl.concrete.jQuery);">jQuery</button>
+        Select <tt>JolokaJS.Request.post()</tt> implementation:<br/>
+        <input type="radio" name="radioSwitchBackend" onclick="switchBackend(JolokiaJS.Request.postImpl.concrete.XMLHttpRequest);" checked='checked'/>XMLHttpRequest
+        <input type="radio" name="radioSwitchBackend" onclick="switchBackend(JolokiaJS.Request.postImpl.concrete.jQuery);"/>jQuery
+        <!--
+        <button onclick="switchBackend(JolokiaJS.Request.postImpl.concrete.XMLHttpRequest);">XMLHttpRequest</button>
+        or <button onclick="switchBackend(JolokiaJS.Request.postImpl.concrete.jQuery);">jQuery</button>
+        -->
         <br/>
         (Both should behave essentially identically.)<br/>
         <textarea rows="30" cols="60" id="taPostImpl"></textarea>
