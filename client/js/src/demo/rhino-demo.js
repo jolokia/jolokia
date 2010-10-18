@@ -81,8 +81,8 @@ JolokiaJS.Request.options.ajax.afterPost = function(req,opt) {
     print("POSTing finished.");
 };
 
-// Default onResponse() handler:
-JolokiaJS.Request.options.ajax.onResponse = function(resp,req) {
+// Default onSuccess() handler:
+JolokiaJS.Request.options.ajax.onSuccess = function(resp,req) {
     print("GOT RESPONSE:\n",resp.toJ4PString(4));
 };
 
