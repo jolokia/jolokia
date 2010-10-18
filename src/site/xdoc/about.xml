@@ -21,7 +21,7 @@
         Nagios host contacting the watched systems mostly remotely
         with various techniques. For Java applications, <a
         href="http://java.sun.com/javase/technologies/core/mntr-mgmt/javamanagement/">JMX</a>
-        is of course the the proper choice which provides <a
+        is of course the proper choice which provides <a
         href="http://jcp.org/en/jsr/detail?id=160">JSR-160</a>
         connectors remote access to the local MBeans. At this time,
         indeed several JMX Nagios plugins were already
@@ -111,8 +111,10 @@
     <section name="Acknowledgments">
       <ul>
         <li>
-          <a href="http://www.amazon.de/Nagios-Praxisbuch-Open-Source-Monitoring-Unternehmen/dp/3827328004">Gerhard Lausser</a> for pushing me hard to come with jmx4perl and
-          a way to let use JMX from a Java hostile environment.
+          <a
+          href="http://www.amazon.de/Nagios-Praxisbuch-Open-Source-Monitoring-Unternehmen/dp/3827328004">Gerhard
+          Lausser</a> for pushing me hard to come up with jmx4perl and a
+          way to allow JMX usage from a Java hostile environment.
         </li>
         <li>
           My employer <a href="http://www.consol.com">ConSol*</a> for
