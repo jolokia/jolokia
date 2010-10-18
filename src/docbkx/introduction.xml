@@ -33,7 +33,7 @@
     This is where Jolokia comes into play. It is agent based approach,
     living side by side with JSR-160, but uses the much more open HTTP
     for its transport business where the data payload is serialized in
-    JSON. This open a whole new world for different, non-Java
+    JSON. This opens a whole new world for different, non-Java
     clients. Beside this protocol switch, Jolokia provides new
     features for JMX remoting, which are not available for JSR-160
     connectors: Bulk requests allow for multiple JMX operations with a

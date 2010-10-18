@@ -57,7 +57,7 @@
               serialization used in JSR-160 communication.  The JSON
               payload is in general much smaller than its
               correspondent serialized Java object
-              representation. Bulk request (which are not available
+              representation. Bulk requests (which are not available
               for JSR-160 remoting) can boost performance even
               further. <a href="features/fast.html">More ...</a>
             </p>

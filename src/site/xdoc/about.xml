@@ -57,7 +57,7 @@
       </p>
       <p>
         That was the birth of <a href="http://www.jmx4perl.org">jmx4perl</a> in May
-        2009. Coming from a strong perl background (being a SGI system
+        2009. Coming from a strong Perl background (being a SGI system
         administrator at university in my former life), my initial goal
         was to use pure Perl for accessing remote JMX information without
         the need of a local Java integration.  In turned out that an agent
@@ -100,7 +100,7 @@
         of at most <a
         href="http://en.wikipedia.org/wiki/Scoville_scale#List_of_Scoville_ratings">1,075,000</a>. I'm
         a chili head and grow chilis since 2006. I love 
-        chilis as much as JMX. That's the main reason reason.
+        chilis as much as JMX. That's the main reason.
       </p>
       <p>        
         The other is, that a chili is a good metaphore for a hot, new
