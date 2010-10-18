@@ -1,8 +1,17 @@
 
 JolokiaJS.Request.prototype.postBackend =
-    JolokiaJS.Request.postImpl.concrete.XMLHttpRequest
-    //JolokiaJS.Request.postImpl.concrete.jQuery
+    //JolokiaJS.Request.postImpl.concrete.XMLHttpRequest
+    JolokiaJS.Request.postImpl.concrete.jQuery
 ;
+
+function loadFirebugLite() {
+    var fb=document.createElement('script');
+    fb.setAttribute('src',
+                    'https://getfirebug.com/firebug-lite.js'
+                    //'firebug-lite.js'
+                    );
+    document.body.appendChild(fb);
+};
 
 function sendViaJQuery() {
     var taRes = jQuery('#taRESPONSE');
@@ -64,7 +73,6 @@ function sendViaRequest() {
     };
     req.post(popt);
 }
-
 
 ////////////////////////////////////////////////////////////////////////
 // updatePlot() code by http://banjo.rbfh.de:11111/graphs/
@@ -145,10 +153,70 @@ updatePlot.req = (new JolokiaJS.Request({
         }
     });
 
-function setupDemo() {
-    //updatePlot.req.timerID = setInterval( function() { updatePlot.req.post(); }, 5000 );
+
+function switchBackend( b )
+{
+    JolokiaJS.Request.prototype.postBackend = b;
+    jQuery('#taPostImpl').attr('value',b.toString());
 }
+
+function setupDemo() {
+    switchBackend(
+        JolokiaJS.Request.postImpl.concrete.XMLHttpRequest
+        //JolokiaJS.Request.postImpl.concrete.jQuery
+    );
+    var list = [
+        {n:"Jolokia version",
+         r:{type:'VERSION'}
+        },
+        {n:"Heap memory (used)",
+         r:{type:'READ',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage',path:'used'}
+        },
+        {n:"Heap memory (all)",
+         r:{type:'READ',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage'}
+        },
+        {n:"List java.lang Beans",
+         r:{type:'SEARCH',mbean:'java.lang:*'}
+        },
+        {n:"List Jolokia Beans",
+         r:{type:'SEARCH',mbean:'jolokia:*'}
+        },
+        {n:"List all Beans",
+         r:{type:'SEARCH',mbean:'*:*'}
+        }
+    ];
+
+    var tgt = jQuery('#requestListArea');
+    tgt.html("Select a request:<br/>");
+    var i, a;
+    function captureKludge(a,r) {
+        a.click( function() { setRequest(r.r); } );
+    }
+    for( i in list ) {
+        var r = list[i];
+        a = jQuery('<a href="#"></a>').text('['+r.n+']');
+        captureKludge(a,r);
+        tgt.append(' ').append( a );
+    }
+}
+
+function setRequest(obj) {
+    var req;
+    try {
+        req = new JolokiaJS.Request(obj);
+    }
+    catch(e) {
+        alert("Invalid Request JSON:\n"+JSON.stringify(obj,undefined,4));
+        return;
+    }
+    var taRes = jQuery('#taREQUEST');
+    taRes.attr('value',req.toJ4PString(JolokiaJS.options.toJSONSpacing));
+
+
+}
+
 function setupMemoryCollector(ms) {
     updatePlot.req.post();
     updatePlot.req.timerID = setInterval( function() { updatePlot.req.post(); }, ms || 5000 );
 }
+
