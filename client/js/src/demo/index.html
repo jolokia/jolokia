@@ -39,6 +39,7 @@ function sendViaJQuery() {
     //alert("opts:\n"+JSON.stringify(ajopt,undefined,4));
     jQuery.ajax(ajopt);
 }
+
 function sendViaRequest() {
 
     var taRes = jQuery('#taRESPONSE');
@@ -56,7 +57,7 @@ function sendViaRequest() {
     var req = new JolokiaJS.Request(json);
     var popt = {
         method:'POST',
-        onResponse:function(response,request) {
+        onSuccess:function(response,request) {
             //alert("REQUEST.toJ4PString():\n"+request.toJ4PString());
             var val = response.toJ4PString(4);
             taRes.attr('value',val);
@@ -67,17 +68,19 @@ function sendViaRequest() {
         beforePost: function(request, connectOpt)
         {
             //alert("Posting:\n"+request.toJSON()+"Options:\n"+JSON.stringify(connectOpt,undefined,4));
-            jQuery("#jolokiaUrl").text(connectOpt.url);
             return true;
         },
         afterPost: function(request, connectOpt)
         {
         }
     };
-    //taRes.attr('value',req.toJ4P());
     req.post(popt);
 }
 
+
+////////////////////////////////////////////////////////////////////////
+// updatePlot() code by http://banjo.rbfh.de:11111/graphs/
+// Updates a visual graphic of server memory usage.
 var used        = [];
 var max         = [];
 var comitted    = [];
@@ -136,19 +139,30 @@ updatePlot.req = (new JolokiaJS.Request({
         attribute:'HeapMemoryUsage'
     }))
     .postOptions({
-        onResponse: updatePlot,
-        onError:function(req,opt) {alert("Error:\n"+JSON.stringify(opt,undefined,4));}
+       //url:'errorTest',
+        onSuccess: updatePlot,
+        onError:function(req,opt) {
+            var tid = req.timerID;
+            req.timerID = undefined;
+            alert("Error collecting memory stats! Disabling stat collection loop.\n"
+                 +JSON.stringify(opt,undefined,4));
+            cancelTimeout( tid )
+         /* HOLY SHIT! When i call cancelTimeout(),
+            Chrome is killing this function and not executing any
+            lines which come after cancelTimeout()! i really need to cancel the timer
+            BEFORE alert() runs, but can't because of this behaviour.
+         */
+          ;
+        }
     });
 
 jQuery(document).ready( function(){
-    setInterval( function() { updatePlot.req.post(); }, 2000 );
+    updatePlot.req.timerID = setInterval( function() { updatePlot.req.post(); }, 5000 );
 });
 </script>
 <body>
 REQUEST: <input type="button" onclick="sendViaRequest();" value="Send via JolokiaJS.Request.post()"/>
 <input type="button" onclick="sendViaJQuery();" value="Send directly via jQuery"/>
-<br/>
-<div id="jolokiaUrl"></div>
 <br/>
 <textarea rows="15" cols="60" id="taREQUEST">
     {
@@ -167,7 +181,7 @@ RESPONSE:<br/>
 </textarea>
 
 <hr/>
-Server memory usage (code by <a href="banjo.rbfh.de:11111/graphs/">DaTa</a>):<br/>
+Server memory usage (code by <a href="http://banjo.rbfh.de:11111/graphs/">DaTa</a>):<br/>
 <div id="heap" style="width:800px;height:300px;"></div>
  <div id="legend"></div>
  Used: <span id="used"></span><br />

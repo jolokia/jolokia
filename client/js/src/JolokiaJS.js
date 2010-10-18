@@ -87,7 +87,7 @@ primary public source code repository.)
         mbean:'java.lang:type=Memory'
     });
     req.post({
-        onResponse:function(resp,req){
+        onSuccess:function(resp,req){
             var val = resp.value();
             ... do something with val ...
         },
@@ -247,7 +247,7 @@ JolokiaJS.Request.options = {
         loginName:undefined,
         loginPassword:undefined,
         asynchronous:true,
-        onResponse:function(response,request) {
+        onSuccess:function(response,request) {
         },
         onError:function(request,connectionOpts) {
             alert("JolokiaJS.Request.options.onError():\n"
@@ -302,8 +302,8 @@ JolokiaJS.Request.postImpl = {
 
         - opt must be the options object used to construct the request,
         i.e. the return value from JolokiaJS.Request.postImpl.normalizePostParameters().
-        If opt.onResponse is-a function then it is called as
-        opt.onResponse(JolokiaJS.Request,JolokiaJS.Response) it is called
+        If opt.onSuccess is-a function then it is called as
+        opt.onSuccess(JolokiaJS.Request,JolokiaJS.Response) it is called
         after the Response object is created.
 
         If opt.afterPost is a function then it is called with (request,opt)
@@ -350,15 +350,14 @@ JolokiaJS.Request.postImpl = {
             }
             try
             {
-
                 /**
                   Possible TODO: check if the response can be instantiated
                   by the factory, and if it can then instantiate it regardless
-                  of whether onResponse() is defined. This allows the constructors
-                  to perform arbitrary logic without requiring that onResponse()
+                  of whether onSuccess() is defined. This allows the constructors
+                  to perform arbitrary logic without requiring that onSuccess()
                   be set.
                 */
-                if( JolokiaJS.isFunction( opt.onResponse  ) )
+                if( JolokiaJS.isFunction( opt.onSuccess  ) )
                 {
                     //alert( typeof data+" "+status+" "+data );
                     var resp = (data instanceof JolokiaJS.Response)
@@ -368,12 +367,26 @@ JolokiaJS.Request.postImpl = {
                     /**
                       If the ctor throws then the onError() callback will end up being called,
                       which (slightly) violates the API docs which say that onError() is never
-                      called in combination with onResponse() unless onResponse() throws.
-                      Since we only construct just before calling onResponse(), we can justify
-                      this as being "part of the onResponse() call." Sounds good to me.
+                      called in combination with onSuccess() unless onSuccess() throws.
+                      Since we only construct just before calling onSuccess(), we can justify
+                      this as being "part of the onSuccess() call." Sounds good to me.
                     */
-                    //resp.request(request);// ARGUABLE, b/c we MIGHT conflict with the JSON data, e.g. case differences.
-                    opt.onResponse( resp, request );
+                    resp.request(request)
+                    /*ARGUABLE, b/c we MIGHT conflict with the JSON
+                      data, e.g. case differences. However, i discussed this behaviour briefly
+                      with Roland Huss (Jolokia author) and he agreed that giving the original
+                      request object back is the right thing to do here.
+                    */
+                    if( "200" != ""+resp.status() )
+                    {
+                        if( JolokiaJS.isFunction( opt.onError  ) )
+                        {
+                            opt.onError( request, opt );
+                        }
+                    }
+                    else {
+                        opt.onSuccess( resp, request );
+                    }
                 }
                 return true;
             }
@@ -422,7 +435,7 @@ JolokiaJS.Request.postImpl = {
         to report such failures. This is, if the server actually responds
         with a Message result, even if that Message represents an error,
         this function should not be called. The exception is if the
-        onResponse() call throws an exception - if it does, the onError()
+        onSuccess() call throws an exception - if it does, the onError()
         handler will be called and passed the error (as a string) via
         opt.errorMessage.
 
@@ -461,14 +474,14 @@ JolokiaJS.Request.postImpl = {
 
     {
     url:XXX, // XXX==see below
-    onResponse:YYY, // YYY=see below
+    onSuccess:YYY, // YYY=see below
 
     ... other properties defined in JolokiaJS.Request.options.ajax ...
     }
 
     Where XXX and YYY depend on the arguments passed to this function...
 
-    Conventionally it takes its arguments in the form (url,onResponse),
+    Conventionally it takes its arguments in the form (url,onSuccess),
     but "going forward" it should be passed a properties object.
 
     Here are the supported arguments:
@@ -478,10 +491,10 @@ JolokiaJS.Request.postImpl = {
     args = () = {superset of this.postOptions() and JolokiaJS.Request.options.ajax)}
 
     // DEPRECATED: do not use:
-    args = (function YYY) = {url:ZZZ, onResponse=YYY}
+    args = (function YYY) = {url:ZZZ, onSuccess=YYY}
 
     // DEPRECATED: do not use:
-    args = (XXX (not-a Object) ) = {url:XXX, onResponse=ZZZ}
+    args = (XXX (not-a Object) ) = {url:XXX, onSuccess=ZZZ}
 
     args = {...properties object: see below ...}
 
@@ -630,9 +643,9 @@ JolokiaJS.Request.postImpl = {
                                     +"["+args.url+"]: "
                                     +"Status text=["+xhr.statusText+"]"
                                 ;
-                            JolokiaJS.Request.postImpl.onPostError( request, args );
                         }
                         else { /*maybe it was was set by the timeout handler. */ }
+                        JolokiaJS.Request.postImpl.onPostError( request, args );
                         return;
                     }
                 }
@@ -663,7 +676,6 @@ JolokiaJS.Request.postImpl = {
                 if( 'POST' ===  args.method.toUpperCase() )
                 {
                     xhrOpen();
-                    //xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.setRequestHeader("Content-Type", "text/plain");
                     xhr.setRequestHeader("Content-length", json.length);
                     xhr.setRequestHeader("Connection", "close");
@@ -674,6 +686,7 @@ JolokiaJS.Request.postImpl = {
                     //throw new Error("GET requests are not yet implemented!");
                     var u = /\/$/.test(args.url) ? args.url : "/"+args.url
                         + request.toHttpGETPath();
+                    args.url = u;
                     xhrOpen();
                     xhr.send(null);
                 }
@@ -1007,7 +1020,7 @@ JolokiaJS.Request.prototype.postOptions = function(obj)
 
         using JSON.parse( JSON.stringify(obj) ) to do the deep
         copy (i.e., the easy way) will fail for Function members,
-        and we want to support obj.onResponse() and obj.onError().
+        and we want to support obj.onSuccess() and obj.onError().
     */
     if( undefined === this.$d.postOpt )
     {
