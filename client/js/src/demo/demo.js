@@ -180,6 +180,15 @@ function setupDemo() {
         {n:"List all Beans",
          r:{type:'SEARCH',mbean:'*:*'}
         },
+        {n:"Enable Jolokia debug",
+         r:{type:"write",mbean:'jolokia:type=Config',attribute:'Debug',value:'true'}
+        },
+        {n:"Jolokia debug info",
+         r:{type:"exec",mbean:'jolokia:type=Config',operation:'debugInfo'}
+        },
+        {n:"Reset Jolokia debug info",
+         r:{type:"exec",mbean:'jolokia:type=Config',operation:'resetDebugInfo'}
+        },
         {n:"Intentional error",
          r:{type:'XYZ',mbean:'*:*'}
         }
