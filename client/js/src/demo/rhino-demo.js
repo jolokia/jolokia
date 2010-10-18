@@ -28,9 +28,15 @@
 })();
 
 
-// The concrete postBackend() implementation we will use:
-JolokiaJS.Request.postImpl.concrete.rhinoJava = function(args) {
-    var request = this;
+/**
+ The concrete postBackend() implementation we will use:
+ This function must either be bound as a member of
+ a JolokiaJS.Request object or the second argument must
+ be such an object. In the former case the second argument
+ need not be passed in.
+*/
+JolokiaJS.Request.postImpl.concrete.rhinoJava = function(args,request) {
+    request = request || this;
     try {
         var url = new java.net.URL( args.url );
         var con = url.openConnection();

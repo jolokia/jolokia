@@ -284,6 +284,17 @@ JolokiaJS.Request.prototype.toHttpGETPath = function() {
     }
 
 };
+JolokiaJS.Request.tryFirebug = function(xhr) {
+    if( ('undefined'!==(typeof window)) && ('firebug' in window) && ('watchXHR' in window.firebug) )
+    { /* plug in to firebug lite's XHR monitor... */
+        window.firebug.watchXHR( xhr );
+        return;
+    }
+    else if( 'undefined' !== typeof Firebug) {
+        
+    }
+
+};
 
 JolokiaJS.Request.postImpl = {
     /**
@@ -590,14 +601,17 @@ JolokiaJS.Request.postImpl = {
             This implementation supports for the connection timeout option but does not
             support synchronous operation.
 
-            This implementation requires that the 'this' object be-a JolokiaJS.Request.
+            This implementation requires that the 'this' object be-a JolokiaJS.Request OR
+            that the request parameter be a JolokiaJS.Request object.
+            In the former case the second argument need not be passed in.
         */
-        XMLHttpRequest: function(args)
+        XMLHttpRequest: function(args,request)
         {
-            //alert( 'popt='+JSON.stringify( args ));
+            if( args.method != "POST") {
+                throw new Error("Only POST requests are currently implemented!");
+            }
             var json = this.toJ4PString();
-            var request = this;
-            //alert("JolokiaJS.Request.post(): posting: "+opt.toSource());
+            request = request || this;
             var xhr = new XMLHttpRequest();
             var hitTimeout = false;
             var done = false;
@@ -652,16 +666,11 @@ JolokiaJS.Request.postImpl = {
             };
 
             xhr.onreadystatechange = onStateChange;
-            if( ('undefined'!==(typeof window)) && ('firebug' in window) && ('watchXHR' in window.firebug) )
-            { /* plug in to firebug lite's XHR monitor... */
-                window.firebug.watchXHR( xhr );
-            }
+            JolokiaJS.Request.tryFirebug(xhr);
             var startTime = (new Date()).getTime();
             var timeout = args.timeout || 10000/*arbitrary!*/;
             try
             {
-                //alert( JSON.stringify( args  ));
-                //alert( JSON.stringify( request.postOptions()  ));
                 function xhrOpen()
                 {
                     if( 'loginName' in args )
@@ -683,7 +692,6 @@ JolokiaJS.Request.postImpl = {
                 }
                 else /* assume GET */
                 {
-                    //throw new Error("GET requests are not yet implemented!");
                     var u = /\/$/.test(args.url) ? args.url : "/"+args.url
                         + request.toHttpGETPath();
                     args.url = u;
@@ -700,7 +708,7 @@ JolokiaJS.Request.postImpl = {
                 return undefined;
             }
         }/*XMLHttpRequest*/,
-                /**
+        /**
             This is a concrete implementation of JolokiaJS.Request.prototype.post()
             which uses the jQuery AJAX API to send a message request and fetch
             the response.
@@ -716,18 +724,18 @@ JolokiaJS.Request.postImpl = {
 
             Returns the XMLHttpRequest object.
 
-            This implementation requires that the 'this' object be-a JolokiaJS.Request.
+            This implementation requires that the 'this' object be-a JolokiaJS.Request OR
+            that the request parameter be a JolokiaJS.Request object.
+            In the former case the second argument need not be passed in.
         */
-        jQuery:function(args)
+        jQuery:function(args,request)
         {
-            //var jsonable = {};
-            //jsonable[JolokiaJS.Request.options.requestKey] = this.toJSON();
             if( args.method != "POST") {
                 throw new Error("Only POST requests are currently implemented!");
             }
-            var request = this;
+            request = request || this;
             //alert("JolokiaJS.Request.post(): posting: "+args.toSource());
-            var data = this.toJ4PString();
+            var data = request.toJ4PString();
              //alert("data:\n"+data);
 
             var method = args.method;
@@ -742,7 +750,7 @@ JolokiaJS.Request.postImpl = {
                 username: (undefined !== args.loginName) ? args.loginName : undefined,
                 error: function(xhr, textStatus, errorThrown)
                 {
-                    //this === the options for this ajax request
+                    //reminder: this === the options for this ajax request
                     args.errorMessage = "Error sending a '"+ajopt.type+"' JolokiaJS.Request to ["+ajopt.url+"]: "
                             +"Status text=["+textStatus+"]"
                             +(errorThrown ? ("Error=["+errorThrown+"]") : "")
@@ -753,17 +761,6 @@ JolokiaJS.Request.postImpl = {
                 {
                     JolokiaJS.Request.postImpl.onPostSuccess( request, data, args );
                 },
-                /* Set dataType=text instead of json for deeply archaic reasons:
-
-                    On ajax success we call new JolokiaJS.Response(data), which calls JolokiaJS(data).
-                    We want the data which goes to that ctor to be a STRING, and
-                    not an Object, because of the JolokiaJS() ctor kludge involving
-                    null id/timestamp flags. Passing it a string will bypass that kludge,
-                    which means the resulting JolokiaJS.Response object cannot get
-                    id/timestamp values which differ from those in the string input.
-                    That, in turn, makes it possible for us to detect if incoming data
-                    is missing those fields.
-                */
                 dataType: 'json'
             };
             if( undefined !== args.timeout )
@@ -774,10 +771,7 @@ JolokiaJS.Request.postImpl = {
             try
             {
                 var xhr = jQuery.ajax(ajopt);
-                if( xhr && ('undefined'!==(typeof window)) && ('firebug' in window) && ('watchXHR' in window.firebug) )
-                { /* plug in to firebug lite's XHR monitor... */
-                    window.firebug.watchXHR( xhr );
-                }
+                if( xhr ) JolokiaJS.Request.tryFirebug(xhr);
                 return xhr;
             }
             catch(e)
