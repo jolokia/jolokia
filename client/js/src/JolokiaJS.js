@@ -83,7 +83,7 @@ primary public source code repository.)
    Example:
 
    var req = new JolokiaJS.Request({
-        type:'READ',
+        type:'read',
         mbean:'java.lang:type=Memory'
     });
     req.post({
@@ -104,7 +104,7 @@ JolokiaJS = {
 };
 
 /**
-    Generic options intended for use within JolokiaJS.
+    Generic options intended for use internally within JolokiaJS.
 */
 JolokiaJS.options = {
     /**
@@ -205,7 +205,7 @@ JolokiaJS.generateObjAccessor = function(PropKey)
 };
 
 
-/*
+/**
     Returns true if v is-a Array.
 */
 JolokiaJS.isArray = function( v )
@@ -249,23 +249,93 @@ JolokiaJS.Request = function() {
     }
 };
 
+/**
+    Holds various class-level default configuration values.
+*/
 JolokiaJS.Request.options = {
+    /**
+        Holds class-level AJAX-related configuration options for the Request class.
+    */
     ajax:{
+        /**
+            URL of the remote Jolokia agent. Normally (when running in a browser) the
+            agent must be served from the same origin server as the JolokiaJS (or else
+            JolokiaJS will not be able to establish a connection due to the Same Origin
+            Policy).
+        */
         url:'/jolokia/',
+        /**
+            Default timeout (in milliseconds) for message-sending requests. It is not
+            guaranteed to be honored by any given back-end.
+        */
         timeout:15000,
+        /**
+            The default HTTP method to use for message requests. Must be one of
+            "GET" or "POST" (case-sensitive), and POST is highly recommended.
+        */
         method:'POST',
+        /**
+            Optional HTTP-level user name for login purposes. Not supported by
+            all back-ends.
+        */
         loginName:undefined,
+        /**
+            Optional HTTP-level user password for login purposes. Not supported by
+            all back-ends.
+        */
         loginPassword:undefined,
+        /**
+            Default synchronicity mode. Not all backends support both async and synchronous
+            operation, and may ignore this setting.
+        */
         asynchronous:true,
+        /**
+            The callback called by the message-passing back-end when a response is received with a status
+            code of 200. It is passed the response object and the originating request. The originating
+            request is also available via response.request(), so this argument may be omitted from
+            client implementations.
+        */
         onSuccess:function(response,request) {
         },
+        /**
+            The callback called by the message-passing back-end when either
+            a request connection cannot be established (e.g. wrong URL) or the response
+            returns a non-200 status code.
+            
+            The connectionOpts object is a superset of the connection-level options passed
+            to request.post(), request.postOptions(), and the values set in JolokiaJS.Request.options.ajax.
+            post() implementations should set the property connectionOpts.errorMessage before
+            calling this, to pass on any error text to the client.
+        */
         onError:function(request,connectionOpts) {
             alert("JolokiaJS.Request.options.onError():\n"
                   +JSON.stringify(connectionOpts,undefined,4));
         },
+        /**
+            An optional callack called by Request.post() before a request is sent.
+            If this callback throws, no request is sent and the onError() callback is
+            NOT called. If this function returns an instance of JolokiaJS.Response then
+            no request is actually posted and the given Response object is used in
+            place of one we would have fetched via the network request. For all further
+            processing purposes, the response will be treated as if it came in over the
+            network. e.g. it will be passed to the onSuccess() callack if it has a status
+            code of 200.
+            
+            This function can be used to start a "waiting..." animation, for example.
+        */
         beforePost: function(request, connectOpt)
         {
         },
+        /**
+            This callback is called after a post()'s network connection has been processed,
+            but before the onSuccess()/onError() callback is called.
+
+            This function can be used to stop a "waiting..." animation, for example, which
+            gets started via the beforePost() callback.
+            
+            FIXME: make sure we have well-defined rules about whether or not the
+            onError() handler will be called if this function throws.
+        */
         afterPost: function(request, connectOpt)
         {
         }
@@ -273,6 +343,8 @@ JolokiaJS.Request.options = {
 };
 
 /**
+    INCOMPLETE - do not use.
+
    Returns the path part of a Jolokia request for use when
    using HTTP GET. The returned value is dependent on the
    request's type and does NOT have a leading slash.
@@ -294,6 +366,13 @@ JolokiaJS.Request.prototype.toHttpGETPath = function() {
     }
 
 };
+
+/**
+    Internal routine which tries to add the given XMLHttpRequest
+    object to the firebug API. That said, the firebug XHR API has apparently
+    changed considerably since this function was written, and this function
+    currently only handles very old versions (test with firebug lite 1.2).
+*/
 JolokiaJS.Request.tryFirebug = function(xhr) {
     if( ('undefined'!==(typeof window)) && ('firebug' in window) && ('watchXHR' in window.firebug) )
     { /* plug in to firebug lite's XHR monitor... */
@@ -509,24 +588,13 @@ JolokiaJS.Request.postImpl = {
 
     Where XXX and YYY depend on the arguments passed to this function...
 
-    Conventionally it takes its arguments in the form (url,onSuccess),
-    but "going forward" it should be passed a properties object.
+    It should be passed a properties object.
 
     Here are the supported arguments:
 
-    Assuming: var popt = this.postOptions();
-
     args = () = {superset of this.postOptions() and JolokiaJS.Request.options.ajax)}
 
-    // DEPRECATED: do not use:
-    args = (function YYY) = {url:ZZZ, onSuccess=YYY}
-
-    // DEPRECATED: do not use:
-    args = (XXX (not-a Object) ) = {url:XXX, onSuccess=ZZZ}
-
     args = {...properties object: see below ...}
-
-    A value of ZZZ means the value is inherited, as described below.
 
     If the argument is a properties object, all properties from that object
     are copied (shallowly) into the returned object.
@@ -542,7 +610,7 @@ JolokiaJS.Request.postImpl = {
     What all this means is: it supports the arguments conventions required
     by the JolokiaJS.Request.post() interface, and returns the arguments in a
     normalized form which all API-conformant concrete implementations of
-    JolokiaJS.Request.prototype.post() can (and should) use for their arguments
+    JolokiaJS.Request.prototype.postBackend() can (and should) use for their arguments
     handling.
 
     ACHTUNG:
@@ -561,7 +629,7 @@ JolokiaJS.Request.postImpl = {
     instead of passing arguments (possibly with undefined values) directly to
     this function.
 
-    To avoid cross-message pollination, this function deeply copies any
+    To avoid cross-message pollenation, this function deeply copies any
     properties which are themselves non-function objects (by cloning them
     via JSON).
     */
