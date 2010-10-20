@@ -22,7 +22,7 @@
       </p>
       <subsection name="Bash">
         <p>
-          Jolokia can be contatcted withot any client library directly
+          Jolokia can be contacted withot any client library directly
           from a Bash script. This example checks, that the Memory used doesn't
           exceeds 90% of the available memory, and if so, restarts the
           Tomcat server (without any error handling, though):

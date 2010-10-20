@@ -1,7 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="architecture">
   <title>Architecture</title>
-
+  <para>
+    The architecture of Jolokia is quite different to JSR-160
+    connectors. One of the most striking difference is Jolokia's
+    typeless approach omitting a complete serialization of Java
+    objects. 
+  </para>
+  <para>
+    JSR-160, released in ..., had a different design goal. It is a
+    specification, where a client can transparently invoke MBean
+    calls, regardless whether the MBean resides in a local MBeanServer
+    or in a remote one. This seems to be quite some comfort for the
+    clients of this API, but it is also dangerous
+    <emphasis>because</emphasis> it hides the remoteness of certain
+    calls. There a quite some subtle issues, performance related are
+    being  one of them. (Es ist eben nicht egal), whether a call is
+    invoked locally or remotely. A called should be at least aware
+    what happens and what are the consequences. On the other side,
+    there are message passing models, which include remoting
+    explicitely, so that the caller <emphasis>knows</emphasis> from
+    the programming model that he is calling a potentially expensive
+    remote call. 
+  </para>
+  <para>
+    One problem with JSR-160 is it implicite reliance on RMI and its
+    requirement for a complete (Java) object serialization mechanism
+    for passing management information over the wire. This closes the
+    door for a lot of enviroments which are not Java (or better, JVM)
+    aware. Jolokia uses a typeless approach, where some sort of
+    lighweight serialization to JSON is used (in both directions, but
+    a bit <link ...>asymmetrically</link>). Of course this approach
+    has some drawbacks, but also quite some advantages. At least it is
+    unique in the JMX world ;-). 
+  </para>
   <note>
     Overview of Jolokia's architecture, its differences to
     JSR-160. Depending on the setup, Jolokia can operate in a
@@ -11,11 +43,122 @@
   
   <section id="agent-mode">
     <title>Agent mode</title>
+    <para>
+      Figure ... show the enviroment, where Jolokia operates. The
+      hear of Jolokia is the <link>agent</link>, which exports on the
+      frontside a JSON based protocol over HTTP that get bridged to
+      invocation of local JMX MBeans. It lives outside the JSR-160 space
+      and hence requires a different setup. For exporting its protocol
+      via HTTP various techniques are available. The most prominent one
+      it to put the agent into an servlet container. This can be a
+      lightweight one like Tomcat or Jetty or a full blown JEE
+      Server. Since it acts like a usual Web-application the deployment
+      of the agent is well understood and should pose no entry barrier
+      for any developer who ever dealt with a servlet container.
+    </para>
+    <para>
+      But there is more. Specialized agents are able to use an OSGi
+      HTTPService or comes with an embedded Jetty-Server in case of the
+      Mule agent. Finally the JVM JDK6 agent uses the HTTP-Server
+      included with every Sun/Oracle JVM 6 (although this server has not
+      the best performance footprint). Agent are described in detail in
+      <xref linkend="agents"/>
+    </para>
+    <para>
+      Beside the prefatored agents, Jolokia can be also integrated into
+      own applications very easily. The <link>joloki-core</link> library
+      (which comes bundled as a jar), includes the servlet which can be
+      easily added to the web.xml of your custom application. Also,
+      multiple Jolokia agents can be deployed in the same JVM without
+      problem<footnote>
+      <para>
+        Since the agent deploys some Jolokia specific MBeans, for multi
+        agents deployments it is important to use the
+        <constant>mbeanQualifier</constant> init parameter to distinguish
+        multiple Jolokia MBean. See <xref linkend="agents"/> for
+        details. 
+      </para>
+    </footnote>.
+    </para>
   </section>
     
   <section id="proxy-mode">
     <title>Proxy Mode</title>
+    <para>
+      The proxy mode is the solution, when it is impossible to deploy
+      the Jolokia agent on the target platform. The only prerequisite
+      for the server to access is, that it exports its MBeans via a
+      JSR-160 connector. Most of the time, this happens for political
+      reason, where it is simply not allowed to deploy an extra piece
+      of software or where it takes a lengthy process for making this
+      happen. Another reason could be, that the target servers already
+      export JMX via JSR-160 and you want to avoid the extra step to
+      deploy the agent. 
+    </para>
 
-  </section>
-    
+    <para>
+      Although the <emphasis>agent based</emphasis> is the most simplest
+      way to access JMX, there are circumstances which prevent the
+      deployment of a dedicated agent servlet. This kind of restrictions
+      are mostly politically motivated. For these situations, jmx4perl
+      provides an operational mode known as the <emphasis>proxy
+      mode</emphasis> with which the target platform can be monitored
+      without installing the j4p agent servlet on it. This works by using
+      j4p.war as a JMX Proxy, which translates our JSON/HTTP protocol on
+      the frontside to JSR-160 JMX remote requests on the backend and vice
+      versa.
+    </para>
+    <para>
+      A dedicated proxy serlvet server is needed for hosting
+      <literal>jolokia.war</literal>, which supports both the
+      <emphasis>agent mode</emphasis> and the <emphasis>proxy
+      mode</emphasis>. A lightweight container like Tomcat or Jetty is a
+      perfect choice for this mode. 
+    </para>
+
+    <para>
+      Said all this, the proxy mode has some limitations:
+    </para>      
+    <itemizedlist>
+      
+      <listitem>
+        There is no automatic merging of JMX MBeanServers as in the case
+        of the direct mode. Most application servers uses an own
+        MBeanServer in addition to the
+        <literal>PlatformMBeanServer</literal> (which is always
+        present). Each MBean is registered only in one MBeanServer. The
+        choice, which <literal>MBeanServer</literal> to use has to be
+        given upfront, usually as a part of the JMX Service URL. But even
+        then (as it is the case for JBoss 5.1) you might run into problem
+        when selecting the proper MBeanServer.
+      </listitem>
+      <listitem>
+        Proxying adds an additional remote layer which causes additional
+        problems. I.e. the complex operations like
+        <constant>list</constant> might fail in the proxy mode because of
+        serialization issues. E.g. for JBoss it happens that certain
+        MBeanInfo objects requested for the list operation are not
+        serializable. This is a bug of JBoss, but I expect similar
+        limitations for other application servers as well.
+      </listitem>
+      <listitem>
+        Certain workarounds (like the JBoss "<emphasis>can not find MXBeans before MBeanInfo has
+        been fetched</emphasis>" bug) works only in agent mode.
+      </listitem>
+      <listitem>
+        It is astonishingly hard to set up an application server for JSR-160
+        export. And there are even cases (combinations of JDK and AppServer Version)
+        which don't work at all properly (e.g. JDK 1.5 and JBoss 5). For certain
+        application servers, detailed setup instructions are published at
+        our <ulink ur="http://labs.consol.de/tags/jsr-160/">blog</ulink>.
+      </listitem>
+    </itemizedlist>
+    <para>
+      To summarize, the proxy mode should be used only when required. The agent
+      servlet on its own is more powerful than the proxy mode since it eliminates an
+      additional layer, which adds to the overall complexity and performance. Also,
+      minor additional features like merging of MBeanServers are not available in the
+      proxy mode.
+    </para>    
+  </section>    
 </chapter>
