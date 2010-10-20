@@ -168,6 +168,9 @@ function setupDemo() {
         {n:"Heap memory (all)",
          r:{type:'READ',mbean:'java.lang:type=Memory',attribute:'HeapMemoryUsage'}
         },
+        {n:"Run GC",
+         r:{type:"exec",mbean:'java.lang:type=Memory',operation:'gc'}
+        },
         {n:"List java.lang Beans",
          r:{type:'SEARCH',mbean:'java.lang:*'}
         },
