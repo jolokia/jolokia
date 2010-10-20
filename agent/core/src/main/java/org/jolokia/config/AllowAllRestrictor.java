@@ -29,6 +29,10 @@ import javax.management.ObjectName;
  * @since Jul 28, 2009
  */
 public class AllowAllRestrictor implements Restrictor {
+    public boolean isHttpMethodAllowed(JmxRequest.HttpMethod pMethod) {
+        return true;
+    }
+
     public boolean isTypeAllowed(JmxRequest.Type pType) {
         return true;
     }

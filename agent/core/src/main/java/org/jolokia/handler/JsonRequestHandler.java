@@ -66,29 +66,46 @@ public abstract class JsonRequestHandler {
      * if the request cannot be handle by the provided server.
      * Does a check for restrictions as well
      *
-     * @param server server to try
-     * @param request request to process
+     * @param pServer server to try
+     * @param pRequest request to process
      * @return the object result from the request
      *
      * @throws InstanceNotFoundException if the provided server cant handle the request
      * @throws AttributeNotFoundException
      * @throws ReflectionException
      * @throws MBeanException
+     * @throws java.io.IOException
      */
-    public Object handleRequest(MBeanServerConnection server,JmxRequest request)
+    public Object handleRequest(MBeanServerConnection pServer,JmxRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
-        checkForType(request);
-        return doHandleRequest(server,request);
+        checkForRestriction(pRequest);
+        checkHttpMethod(pRequest);
+        return doHandleRequest(pServer, pRequest);
     }
 
     /**
-     * Check whether there is a restriction on the type to apply
-     * @param pRequest
+     * Check whether there is a restriction on the type to apply. This method should be overwritten
+     * by specific handlers if they support a more sophisticated check than only for the type
+     *
+     * @param pRequest request to check
      */
-    protected void checkForType(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxRequest pRequest) {
         if (!restrictor.isTypeAllowed(getType())) {
             throw new SecurityException("Command type " +
                     getType() + " not allowed due to policy used");
+        }
+    }
+
+    /**
+     * Check whether the HTTP method with which the request was sent is allowed according to the policy
+     * installed
+     *
+     * @param pRequest request to check
+     */
+    private void checkHttpMethod(JmxRequest pRequest) {
+        if (!restrictor.isHttpMethodAllowed(pRequest.getHttpMethod())) {
+            throw new SecurityException("HTTP method " + pRequest.getHttpMethod().getMethod() +
+                    " is not allowed according to the installed security policy");
         }
     }
 
@@ -119,7 +136,7 @@ public abstract class JsonRequestHandler {
      */
     public Object handleRequest(Set<MBeanServerConnection> servers, JmxRequest request)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
-        checkForType(request);
+        checkForRestriction(request);
         return doHandleRequest(servers,request);
     }
 

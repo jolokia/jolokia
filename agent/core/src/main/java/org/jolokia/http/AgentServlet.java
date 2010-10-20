@@ -153,13 +153,9 @@ public class AgentServlet extends HttpServlet {
         return new ServletRequestHandler() {
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                     throws IOException, MalformedObjectNameException {
-                if (backendManager.isDebug()) {
-                    logHandler.debug("URI: " + pReq.getRequestURI());
-                    logHandler.debug("Path-Info: " + pReq.getPathInfo());
-                }
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
-                return requestHandler.handleRequestInputStream(is, encoding);
+                return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding);
             }
         };
     }
@@ -167,14 +163,7 @@ public class AgentServlet extends HttpServlet {
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) {
-                JmxRequest jmxReq =
-                        JmxRequestFactory.createRequestFromUrl(pReq.getPathInfo(),pReq.getParameterMap());
-                if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
-                    logHandler.debug("URI: " + pReq.getRequestURI());
-                    logHandler.debug("Path-Info: " + pReq.getPathInfo());
-                    logHandler.debug("Request: " + jmxReq.toString());
-                }
-                return requestHandler.executeRequest(jmxReq);
+                return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(),pReq.getParameterMap());
             }
         };
     }

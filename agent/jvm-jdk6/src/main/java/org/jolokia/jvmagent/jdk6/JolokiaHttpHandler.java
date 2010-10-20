@@ -14,7 +14,6 @@ import javax.management.MalformedObjectNameException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.jolokia.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.ConfigKey;
 import org.jolokia.http.HttpRequestHandler;
@@ -103,21 +102,12 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         }
     }
 
-    private JSONAware executeGetRequest(ParsedUri parsedUri) {
-        JmxRequest jmxReq =
-                JmxRequestFactory.createRequestFromUrl(parsedUri.getPathInfo(),parsedUri.getParameterMap());
-        if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
-            debug("URI: " + parsedUri);
-            debug("Path-Info: " + parsedUri.getPathInfo());
-            debug("Request: " + jmxReq.toString());
-        }
-        return requestHandler.executeRequest(jmxReq);
+    private JSONAware executeGetRequest(URI pUri) {
+        ParsedUri parsedUri = new ParsedUri(pUri,context);
+        return requestHandler.handleGetRequest(pUri.toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
 
     private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {
-        if (backendManager.isDebug()) {
-            debug("URI: " + pUri);
-        }
         String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
         String cType =  headers.getFirst("Content-Type");
@@ -128,7 +118,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             }
         }
         InputStream is = pExchange.getRequestBody();
-        return requestHandler.handleRequestInputStream(is, encoding);
+        return requestHandler.handlePostRequest(pUri.toString(),is, encoding);
     }
 
 

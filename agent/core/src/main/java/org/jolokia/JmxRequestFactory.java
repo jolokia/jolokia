@@ -85,7 +85,7 @@ public final class JmxRequestFactory {
      * @param pParameterMap HTTP Query parameters
      * @return a newly created {@link org.jolokia.JmxRequest}
      */
-    public static JmxRequest createRequestFromUrl(String pPathInfo, Map<String,String[]> pParameterMap) {
+    public static JmxRequest createGetRequest(String pPathInfo, Map<String,String[]> pParameterMap) {
         JmxRequest request = null;
         try {
             String pathInfo = extractPathInfo(pPathInfo, pParameterMap);
@@ -119,6 +119,40 @@ public final class JmxRequestFactory {
         }
     }
 
+    /**
+     * Create a list of {@link JmxRequest}s from a JSON list representing jmx requests
+     *
+     * @param pJsonRequests JSON representation of a list of {@link org.jolokia.JmxRequest}
+     * @return list with one or more {@link org.jolokia.JmxRequest}
+     * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
+     */
+    public static List<JmxRequest> createPostRequests(List pJsonRequests) throws MalformedObjectNameException {
+        List<JmxRequest> ret = new ArrayList<JmxRequest>();
+        for (Object o : pJsonRequests) {
+            if (!(o instanceof Map)) {
+                throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
+                        ". Expected map, but found: " + o);
+            }
+            ret.add(new JmxRequest((Map) o));
+        }
+        return ret;
+    }
+
+    /**
+     * Create a single {@link JmxRequest}s from a JSON map representation of a request
+     *
+     * @param pRequestMap JSON representation of a {@link org.jolokia.JmxRequest}
+     * @return the created {@link org.jolokia.JmxRequest}
+     * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
+     */
+    public static JmxRequest createPostRequest(Map<String,?> pRequestMap) throws MalformedObjectNameException {
+        return new JmxRequest(pRequestMap);
+    }
+
+
+
+    // ================================================================================================
+
     // Extract path info either from the 'real' URL path, or from an request parameter
     private static String extractPathInfo(String pPathInfo, Map<String, String[]> pParameterMap) {
         String pathInfo = pPathInfo;
@@ -141,35 +175,6 @@ public final class JmxRequestFactory {
     }
 
 
-    /**
-     * Create a list of {@link JmxRequest}s from a JSON list representing jmx requests
-     *
-     * @param pJsonRequests JSON representation of a list of {@link org.jolokia.JmxRequest}
-     * @return list with one or more {@link org.jolokia.JmxRequest}
-     * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
-     */
-    public static List<JmxRequest> createRequestsFromJson(List pJsonRequests) throws MalformedObjectNameException {
-        List<JmxRequest> ret = new ArrayList<JmxRequest>();
-        for (Object o : pJsonRequests) {
-            if (!(o instanceof Map)) {
-                throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
-                        ". Expected map, but found: " + o);
-            }
-            ret.add(new JmxRequest((Map) o));
-        }
-        return ret;
-    }
-
-    /**
-     * Create a single {@link JmxRequest}s from a JSON map representation of a request
-     *
-     * @param pJsonRequest JSON representation of a {@link org.jolokia.JmxRequest}
-     * @return the created {@link org.jolokia.JmxRequest}
-     * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
-     */
-    public static JmxRequest createSingleRequestFromJson(Map<String,?> pJsonRequest) throws MalformedObjectNameException {
-        return new JmxRequest(pJsonRequest);
-    }
 
     /*
     We need to use this special treating for slashes (i.e. to escape with '/-/') because URI encoding doesnt work

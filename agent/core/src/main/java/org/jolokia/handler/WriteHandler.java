@@ -46,7 +46,7 @@ public class WriteHandler extends JsonRequestHandler {
     }
 
     @Override
-    protected void checkForType(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxRequest pRequest) {
         if (!getRestrictor().isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
             throw new SecurityException("Writing attribute " + pRequest.getAttributeName() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
