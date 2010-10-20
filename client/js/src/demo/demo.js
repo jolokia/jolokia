@@ -77,10 +77,10 @@ function updatePlot(resp,req) {
     if(comitted.length > maxval) comitted.shift();
     if(init.length > maxval) init.shift();
 
-    var ts = resp.timestamp();
+    var ts = parseInt( resp.timestamp() );
     start = ts;
     ts *= 1000.0;
-
+    
     used.push([ts, val.used]);
     max.push([ts, val.max]);
     init.push([ts, val.init]);
