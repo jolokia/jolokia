@@ -117,14 +117,11 @@ updatePlot.req = (new JolokiaJS.Request({
         onError:function(req,opt) {
             var tid = req.timerID;
             req.timerID = undefined;
-            alert("Error collecting memory stats! Disabling stat collection loop.\n"
-                 +JSON.stringify(opt,undefined,4));
-            if( undefined !== tid ) cancelTimeout( tid )
-         /* HOLY SHIT! When i call cancelTimeout(),
-            Chrome is killing this function and not executing any
-            lines which come after cancelTimeout()! i really need to cancel the timer
-            BEFORE alert() runs, but can't because of this behaviour.
-         */
+            clearInterval( tid );
+	    var msg = "Error collecting memory stats! Disabling stat collection loop.\n"
+                      + JSON.stringify(opt,undefined,4);
+	    jQuery('#memoryResponse').text(msg);
+	    jQuery('#heap').html('<pre>'+msg+'</pre>');
           ;
         }
     });
