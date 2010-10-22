@@ -6,6 +6,14 @@
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
 
+  <head>
+    <meta name="description" content="Jolokia is an alernative to JSR-160 connectors for remote JMX access. It provides REST-like access to JMX with JSON over HTTP."/>
+    <link rel="alternate" 
+          type="application/rss+xml" 
+          title="Jolokia" 
+          href="http://labs.consol.de/tags/jolokia/feed" />
+  </head>
+
   <body>
     <div class="teaser">
       <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br/>
