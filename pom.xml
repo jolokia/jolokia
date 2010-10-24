@@ -376,8 +376,17 @@
       <name>SpringSource Enterprise Bundle Repository</name>
       <url>http://repository.springsource.com/maven/bundles/milestone</url>
     </pluginRepository>
+    <pluginRepository>
+      <id>Codehaus Snapshots</id>
+      <url>http://snapshots.repository.codehaus.org/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>  <!-- Workaround for MNG-2974, see note below -->
+      </releases>
+    </pluginRepository>  
   </pluginRepositories>
-
 
   <profiles>
     <profile>

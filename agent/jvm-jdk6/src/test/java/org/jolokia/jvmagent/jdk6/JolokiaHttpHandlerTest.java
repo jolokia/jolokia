@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent.jdk6;
-
 /*
  * Copyright 2009-2010 Roland Huss
  *
@@ -15,6 +13,8 @@ package org.jolokia.jvmagent.jdk6;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.jolokia.jvmagent.jdk6;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;

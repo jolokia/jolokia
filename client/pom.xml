@@ -19,6 +19,7 @@
 
   <modules>
     <module>java</module>
+    <module>javascript</module>
   </modules>
 
   <profiles>
