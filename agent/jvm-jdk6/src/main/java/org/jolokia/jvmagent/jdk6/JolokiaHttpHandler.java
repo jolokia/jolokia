@@ -102,9 +102,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         }
     }
 
-    private JSONAware executeGetRequest(URI pUri) {
-        ParsedUri parsedUri = new ParsedUri(pUri,context);
-        return requestHandler.handleGetRequest(pUri.toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
+    private JSONAware executeGetRequest(ParsedUri parsedUri) {
+        return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
 
     private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {

@@ -27,7 +27,7 @@ import javax.management.*;
 import java.io.IOException;
 import java.util.*;
 
-import static org.easymock.classextension.EasyMock.*;
+import static org.easymock.EasyMock.*;
 import static org.jolokia.JmxRequest.Type.READ;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
