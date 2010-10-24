@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+  <display-name>JSON JMX Agent</display-name>
+
+  <servlet>
+    <servlet-name>jolokia-agent</servlet-name>
+    <servlet-class>org.jolokia.http.AgentServlet</servlet-class>
+    <init-param>
+      <description>
+        Classnames (comma separated) of RequestDispatcher used in addition
+        to the LocalRequestDispatcher
+      </description>
+      <param-name>dispatcherClasses</param-name>
+      <param-value>org.jolokia.jsr160.Jsr160RequestDispatcher</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        Debugging state after startup. Can be changed via
+        the Config MBean during runtime
+      </description>
+      <param-name>debug</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        Entries to keep in the history. Can be changed during
+        runtime via the config MBean
+      </description>
+      <param-name>historyMaxEntries</param-name>
+      <param-value>10</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        Maximum number of entries to keed in the local
+        debug history if switched on. Can be change via
+        the config MBean during runtime.
+      </description>
+      <param-name>debugMaxEntries</param-name>
+      <param-value>100</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        Maximum depth when traversion bean properties.
+        If set to 0, depth checking is disabled
+      </description>
+      <param-name>maxDepth</param-name>
+      <param-value>15</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        Maximum size of collections returned when
+        serializing to JSON. When set to 0, not
+        collections are truncated.
+      </description>
+      <param-name>maxCollectionSize</param-name>
+      <param-value>1000</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        Maximum number of objects which is traversed
+        when serializing a single response. Use this
+        as airbag to avoid boosting your memory and
+        network traffic. Nevertheless, when set to 0
+        not limit is used.
+      </description>
+      <param-name>maxObjects</param-name>
+      <param-value>0</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>jolokia-agent</servlet-name>
+    <url-pattern>/jolokia/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>
+
+<!--
+
+ jmx4perl - WAR Agent for exporting JMX via JSON
+
+ Copyright (C) 2009 Roland Huß, roland@cpan.org
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+ A commercial license is available as well. Please contact roland@cpan.org for
+ further details.
+-->

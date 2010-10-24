@@ -61,7 +61,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     }
 
     // Handle for remembering registered MBeans
-    private static class MBeanHandle {
+    final private static class MBeanHandle {
         private ObjectName objectName;
         private MBeanServer server;
 
@@ -70,6 +70,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
             objectName = pRegisteredName;
         }
     }
+
     // Handles remembered for unregistering
     private List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
 
