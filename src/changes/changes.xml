@@ -15,8 +15,10 @@
         nevertheless, so no rollback here). 
       </action>
       <action dev="roland" type="add" date="2010-10-24">
-        New request parameter "callback" allows for sending a response as JavaScript function
-        (JSONP). For POST request this parameter must be given in the URL and is valid for bulk requests, too
+        New request parameter "callback" allows for sending a response
+        as JavaScript function (JSONP). For POST request this
+        parameter must be given as URL parameter and is valid for bulk
+        requests, too.
       </action>
     </release>
   </body>

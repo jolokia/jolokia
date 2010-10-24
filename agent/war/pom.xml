@@ -28,6 +28,24 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>7.0.0.pre5</version>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <webAppConfig>
+            <contextPath>/jolokia</contextPath>
+          </webAppConfig>
+          <stopPort>9999</stopPort>
+          <stopKey>foo</stopKey>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   
   <reporting>
     <plugins>
@@ -42,6 +60,7 @@
           </reportSet>
         </reportSets>
       </plugin>
+
     </plugins>
   </reporting>
 
