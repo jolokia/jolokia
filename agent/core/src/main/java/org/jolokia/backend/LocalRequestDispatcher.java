@@ -40,12 +40,6 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
     private RequestHandlerManager requestHandlerManager;
 
-    // MBean of configuration MBean
-    private ObjectName configMBeanName;
-
-    // Name of the exposed MBeanServerHandler-MBean
-    private ObjectName mbeanServerHandlerMBeanName;
-
     // An (optional) qualifier for registering MBeans.
     private String qualifier;
 

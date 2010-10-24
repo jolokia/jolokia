@@ -61,11 +61,11 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     }
 
     // Handle for remembering registered MBeans
-    private class MBeanHandle {
+    private static class MBeanHandle {
         private ObjectName objectName;
         private MBeanServer server;
 
-        MBeanHandle(MBeanServer pServer, ObjectName pRegisteredName) {
+        private MBeanHandle(MBeanServer pServer, ObjectName pRegisteredName) {
             server = pServer;
             objectName = pRegisteredName;
         }
