@@ -226,12 +226,7 @@ public class BackendManager {
     public void destroy() {
         try {
             localDispatcher.destroy();
-        } catch (MalformedObjectNameException e) {
-            // wont happen
-            error("Invalid name for config MBean: " + e,e);
-        } catch (InstanceNotFoundException e) {
-            error("MBean not found: " + e,e);
-        } catch (MBeanRegistrationException e) {
+        } catch (JMException e) {
             error("Cannot unregister MBean: " + e,e);
         }
     }

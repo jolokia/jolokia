@@ -47,7 +47,7 @@ public class ExecHandler extends JsonRequestHandler {
     }
 
     @Override
-    protected void checkForType(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxRequest pRequest) {
         if (!getRestrictor().isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {
             throw new SecurityException("Operation " + pRequest.getOperation() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());

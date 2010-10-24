@@ -61,11 +61,12 @@ public class ReadHandler extends JsonRequestHandler {
      *
      * @param pServer server on which to request the attribute
      * @param pRequest the request itself.
-     * @return
+     * @return the attribute's value
      */
     @Override
     public Object doHandleRequest(MBeanServerConnection pServer, JmxRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        checkRestriction(pRequest.getObjectName(), pRequest.getAttributeName());
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
     }
 
@@ -236,7 +237,7 @@ public class ReadHandler extends JsonRequestHandler {
     @Override
     // We override it here with a noop since we do a more fine grained
     // check during processing of the request.
-    protected void checkForType(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxRequest pRequest) {
 
     }
 }

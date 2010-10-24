@@ -441,6 +441,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"#if ( $locale ) xml:lang="$locale.language" lang="$locale.language"#end>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=${outputEncoding}" />
+    <meta name="keywords" content="jmx, jmx-rest-bridge, java, jmx4perl, jolokia, jsr-160, json, jmx-rest"/>
     <title>$title</title>
     <style type="text/css" media="all">
       @import url("$relativePath/css/reset.css");

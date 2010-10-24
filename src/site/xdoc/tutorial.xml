@@ -144,13 +144,13 @@ $ java Jolokia
         </p>
         <ul>
           <li>
-            <strong>jmx4perl</strong> is a command for explore the
+            <strong>jmx4perl</strong> is a command for exploring the
             JMX space by providing arguments on the command line.
           </li>
           <li>
             <strong>j4psh</strong> is a readline based, colored,
             interactive shell with context sensitive command
-            completetion on MBean names and attributes/operations. It
+            completion on MBean names and attributes/operations. It
             is a perfect tool for interactively exploring MBeans and
             their values.
           </li>

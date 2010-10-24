@@ -22,10 +22,23 @@ import javax.management.ObjectName;
 
 
 /**
+ * A Restrictor is used to restrict the access to MBeans based on
+ * various parameters.
+ *
  * @author roland
  * @since Jul 28, 2009
  */
 public interface Restrictor {
+
+    /**
+     * Check whether the HTTP method with which the request
+     * was sent is allowed.
+     *
+     * @param pMethod method to check
+     * @return true if there is no restriction on the method with which the request
+     *         was sent, false otherwise
+     */
+    boolean isHttpMethodAllowed(JmxRequest.HttpMethod pMethod);
 
     /**
      * Check whether the provided command type is allowed in principal

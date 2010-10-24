@@ -19,6 +19,8 @@
 
   <modules>
     <module>java</module>
+    <module>javascript</module>
+    <module>javascript/demo</module>
   </modules>
 
   <profiles>

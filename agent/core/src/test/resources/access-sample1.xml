@@ -21,6 +21,10 @@
 
   Text is ignored
 
+  <http>
+      <method>post</method>
+  </http>
+
   <commands>
     <command>list</command>
     <command>version</command>

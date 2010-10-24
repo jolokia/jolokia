@@ -44,13 +44,35 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     private Set<MBeanServer> mBeanServers;
     private Set<MBeanServerConnection> mBeanServerConnections;
 
+
     // Whether we are running under JBoss
     private boolean isJBoss = checkForClass("org.jboss.mx.util.MBeanServerLocator");
+
+    // Whether running under Websphere
+    private boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
+    private boolean isWebsphere7 = checkForClass("com.ibm.websphere.management.AdminContext");
+    private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
     // Optional domain for registering this handler as a mbean
     private String qualifier;
 
-    // private boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
+    public void init() throws MalformedObjectNameException, InstanceAlreadyExistsException, NotCompliantMBeanException {
+        registerMBean(this,getObjectName());
+    }
+
+    // Handle for remembering registered MBeans
+    final private static class MBeanHandle {
+        private ObjectName objectName;
+        private MBeanServer server;
+
+        private MBeanHandle(MBeanServer pServer, ObjectName pRegisteredName) {
+            server = pServer;
+            objectName = pRegisteredName;
+        }
+    }
+
+    // Handles remembered for unregistering
+    private List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
 
 
     /**
@@ -114,6 +136,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         throw objNotFoundException;
     }
 
+
     /**
      * Register a MBean under a certain name to the first availabel MBeans server
      *
@@ -127,18 +150,22 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     public ObjectName registerMBean(Object pMBean,String ... pOptionalName)
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
         if (mBeanServers.size() > 0) {
-            Exception lastExp = null;
-            for (MBeanServer server : mBeanServers) {
-                try {
-                    return registerMBeanAtServer(server, pMBean, pOptionalName);
-                } catch (RuntimeException exp) {
-                    lastExp = exp;
-                } catch (MBeanRegistrationException exp) {
-                    lastExp = exp;
+            synchronized (mBeanHandles) {
+                Exception lastExp = null;
+                for (MBeanServer server : mBeanServers) {
+                    try {
+                        ObjectName registeredName = registerMBeanAtServer(server, pMBean, pOptionalName);
+                        mBeanHandles.add(new MBeanHandle(server,registeredName));
+                        return registeredName;
+                    } catch (RuntimeException exp) {
+                        lastExp = exp;
+                    } catch (MBeanRegistrationException exp) {
+                        lastExp = exp;
+                    }
                 }
-            }
-            if (lastExp != null) {
-                throw new IllegalStateException("Could not register " + pMBean + ": " + lastExp,lastExp);
+                if (lastExp != null) {
+                    throw new IllegalStateException("Could not register " + pMBean + ": " + lastExp,lastExp);
+                }
             }
         }
         throw new IllegalStateException("No MBeanServer initialized yet");
@@ -146,7 +173,11 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     private ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String[] pName)
             throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
-        if (pName != null && pName.length > 0 && pName[0] != null) {
+        // Websphere adds extra parts to the object name if registered explicitly, but
+        // we need a defined name on the client side. So we register it with 'null' in websphere
+        // and let the bean define its name. On the other side, Resin throws an exception
+        // if registering with a null name, so we have to do this explicit check on Websphere
+        if (!isWebsphere6 &&  pName != null && pName.length > 0 && pName[0] != null) {
             ObjectName oName = new ObjectName(pName[0]);
             return pServer.registerMBean(pMBean,oName).getObjectName();
         } else {
@@ -156,16 +187,38 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     }
 
     /**
-     * Unregisters a MBean under a certain name to the first availabel MBeans server
+     * Unregister all previously registered MBean. This is tried for all previously
+     * registered MBeans
      *
-     * @param pMBeanName object name to unregister
+     * @throws JMException if an exception occurs during unregistration
      */
-    public void unregisterMBean(ObjectName pMBeanName)
-            throws MBeanRegistrationException, InstanceNotFoundException, MalformedObjectNameException {
-        if (mBeanServers.size() > 0) {
-            mBeanServers.iterator().next().unregisterMBean(pMBeanName);
-        } else {
-            throw new IllegalStateException("No MBeanServer initialized yet");
+    public void unregisterMBeans() throws JMException {
+        synchronized (mBeanHandles) {
+            List<JMException> exceptions = new ArrayList<JMException>();
+            List<MBeanHandle> unregistered = new ArrayList<MBeanHandle>();
+            for (MBeanHandle handle : mBeanHandles) {
+                try {
+                    handle.server.unregisterMBean(handle.objectName);
+                    unregistered.add(handle);
+                } catch (InstanceNotFoundException e) {
+                    exceptions.add(e);
+                } catch (MBeanRegistrationException e) {
+                    exceptions.add(e);
+                }
+            }
+            // Remove all successfully unregistered handles
+            mBeanHandles.removeAll(unregistered);
+
+            // Throw error if any exception occured during unregistration
+            if (exceptions.size() == 1) {
+                throw exceptions.get(0);
+            } else if (exceptions.size() > 1) {
+                StringBuffer ret = new StringBuffer();
+                for (JMException e : exceptions) {
+                    ret.append(e.getMessage()).append("\n");
+                }
+                throw new JMException(ret.toString());
+            }
         }
     }
 

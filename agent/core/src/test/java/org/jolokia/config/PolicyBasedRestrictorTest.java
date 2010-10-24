@@ -26,30 +26,8 @@ import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
-
-/*
- * jolokia - WAR Agent for exporting JMX via JSON
- *
- * Copyright (C) 2009 Roland Huß, roland@cpan.org
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * A commercial license is available as well. Please contact roland@cpan.org for
- * further details.
- */
 
 /**
  * @author roland
@@ -66,6 +44,8 @@ public class PolicyBasedRestrictorTest {
         assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Memory"),"gc"));
         assertFalse(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Threading"),"gc"));
+        assertTrue(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.POST));
+        assertFalse(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.GET));
     }
 
     @Test
@@ -116,7 +96,10 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config,name=Bla"),"Debug"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("jolokia:type=Threading"),"gc"));
         assertTrue(restrictor.isTypeAllowed(JmxRequest.Type.READ));
+        assertTrue(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.GET));
+        assertTrue(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.POST));
     }
+
 
     @Test
     public void deny() throws MalformedObjectNameException {
@@ -204,4 +187,29 @@ public class PolicyBasedRestrictorTest {
         }
 
     }
+
+    @Test
+    public void illegalHttpMethod() {
+        InputStream is = getClass().getResourceAsStream("/illegal5.xml");
+        try {
+            new PolicyBasedRestrictor(is);
+            fail();
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains("bla"));
+        }
+    }
+
+    @Test
+    public void illegalHttpMethodTag() {
+        InputStream is = getClass().getResourceAsStream("/illegal6.xml");
+        try {
+            new PolicyBasedRestrictor(is);
+            fail();
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains("method"));
+            assertTrue(exp.getMessage().contains("blubber"));
+        }
+    }
+
+
 }

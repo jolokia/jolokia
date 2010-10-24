@@ -139,4 +139,9 @@ public class ParsedUri {
             throw new IllegalArgumentException("Cannot decode to UTF-8. Should not happen, though.",e);
         }
     }
+
+    @Override
+    public String toString() {
+        return uri.toString();
+    }
 }

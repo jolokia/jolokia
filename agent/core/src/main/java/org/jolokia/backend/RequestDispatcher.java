@@ -37,15 +37,16 @@ public interface RequestDispatcher {
      * @param pJmxReq the request to dispatch
      * @return result object
      * @throws InstanceNotFoundException when a certain MBean could not be found
-     * @throws AttributeNotFoundException in case an attributes couldnt be resolved
+     * @throws AttributeNotFoundException in case an attributes couldn't be resolved
      * @throws ReflectionException
      * @throws MBeanException
+     * @throws java.io.IOException if an IO error occurs during dispatching
      */
     Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
 
     /**
-     * Check wether current dispatcher can handle the given request
+     * Check whether current dispatcher can handle the given request
      *
      * @param pJmxRequest request to check
      * @return true if this dispatcher can handle the request

@@ -41,6 +41,8 @@ public class PolicyBasedRestrictor implements Restrictor {
 
     private Set<JmxRequest.Type> typeSet;
 
+    private Set<String> httpMethodsSet;
+
     private Set<String> allowedHostsSet;
     private Set<String> allowedSubnetsSet;
 
@@ -61,6 +63,7 @@ public class PolicyBasedRestrictor implements Restrictor {
             Document doc =
                     DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pInput);
             initTypeSet(doc);
+            initHttpMethodSet(doc);
             initMBeanSets(doc);
             initAllowedHosts(doc);
         }
@@ -77,6 +80,10 @@ public class PolicyBasedRestrictor implements Restrictor {
 
     // ===============================================================================
     // Lookup methods
+
+    public boolean isHttpMethodAllowed(JmxRequest.HttpMethod method) {
+        return httpMethodsSet == null || httpMethodsSet.contains(method.getMethod());
+    }
 
     public boolean isTypeAllowed(JmxRequest.Type pType) {
         return typeSet == null || typeSet.contains(pType);
@@ -169,6 +176,30 @@ public class PolicyBasedRestrictor implements Restrictor {
                 String typeName = commandNode.getTextContent().trim();
                 JmxRequest.Type type = JmxRequest.Type.valueOf(typeName.toUpperCase());
                 typeSet.add(type);
+            }
+        }
+    }
+
+    private void initHttpMethodSet(Document pDoc) {
+        NodeList nodes = pDoc.getElementsByTagName("http");
+        if (nodes.getLength() > 0) {
+            // Leave typeSet null if no commands has been given...
+            httpMethodsSet = new HashSet<String>();
+        }
+        for (int i = 0;i<nodes.getLength();i++) {
+            Node node = nodes.item(i);
+            NodeList childs = node.getChildNodes();
+            for (int j = 0;j<childs.getLength();j++) {
+                Node commandNode = childs.item(j);
+                if (commandNode.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+                assertNodeName(commandNode,"method");
+                String methodName = commandNode.getTextContent().trim().toLowerCase();
+                if (!methodName.equals("post") || methodName.equals("get")) {
+                    throw new SecurityException("HTTP method must be either GET or POST, but not " + methodName);
+                }
+                httpMethodsSet.add(methodName);
             }
         }
     }
@@ -292,9 +323,9 @@ public class PolicyBasedRestrictor implements Restrictor {
             }
         }
         StringBuffer buffer = new StringBuffer();
-        for (int i=0;i<pExpected.length;i++) {
+        for (int i=0; i < pExpected.length; i++) {
             buffer.append(pExpected[i]);
-            if (i<pExpected.length-1) {
+            if (i < pExpected.length-1) {
                 buffer.append(",");
             }
         }

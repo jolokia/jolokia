@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 import org.apache.http.*;
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
@@ -213,5 +214,14 @@ public class J4pClient  {
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(T ... pRequests) throws J4pException {
         return execute(Arrays.asList(pRequests));
+    }
+
+    /**
+     * Expose the embedded {@link org.apache.http.client.HttpClient} for tuning connection parameters.
+     *
+     * @return the http client used for HTTP communications
+     */
+    public HttpClient getHttpClient() {
+        return httpClient;
     }
 }

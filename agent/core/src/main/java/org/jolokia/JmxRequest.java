@@ -35,6 +35,25 @@ import org.json.simple.JSONObject;
 public class JmxRequest {
 
     /**
+     * Enumeration holding the method which
+     * lead to this request
+     */
+    public enum HttpMethod {
+        POST("post"),
+        GET("get");
+
+        private String method;
+
+        HttpMethod(String pMethod) {
+            method = pMethod;
+        }
+
+        public String getMethod() {
+            return method;
+        }
+    }
+
+    /**
      * Enumeration for encapsulating the request mode.
      */
     public enum Type {
@@ -53,7 +72,7 @@ public class JmxRequest {
 
         private String name;
 
-        static private Map<String,Type> typesByNameMap = new HashMap<String, Type>();
+        private static Map<String,Type> typesByNameMap = new HashMap<String, Type>();
 
         static {
             for (Type t : Type.values()) {
@@ -105,32 +124,42 @@ public class JmxRequest {
     // A value fault handler for dealing with exception when extracting values
     private ValueFaultHandler valueFaultHandler = NOOP_VALUE_FAULT_HANDLER;
 
+    // HTTP method which lead to this request
+    private HttpMethod method;
+
     /**
-     * Create a request with the given type (with no MBean name)
+     * Create a request with the given type (with no MBean name).
+     * Constructor used for GET requests without an object name.
      *
      * @param pType requests type
      */
     JmxRequest(Type pType) {
         type = pType;
+        method = HttpMethod.GET;
     }
 
     /**
      * Create a request with given type for a certain MBean.
      * Other parameters of the request need to be set explicitely via a setter.
+     * This constructor has to be used only for GET requests.
      *
      * @param pType requests type
      * @param pObjectNameS MBean name in string representation
-     * @throws MalformedObjectNameException if the name couldnot properly translated
+    * @throws MalformedObjectNameException if the name could not properly be translated
      *         into a JMX {@link javax.management.ObjectName}
      */
     JmxRequest(Type pType,String pObjectNameS) throws MalformedObjectNameException {
         type = pType;
         initObjectName(pObjectNameS);
+        method = HttpMethod.GET;
     }
 
     /**
-     * Create a request out of a parameter map
-     *
+     * Create a request out of a parameter map as obtained from a POST request. The request
+     * itself is marked as a POST request.
+     * @param pMap JSON object as map representing the request
+     * @throws MalformedObjectNameException if the name could not properly bw translated
+     *         into a JMX {@link javax.management.ObjectName}
      */
     JmxRequest(Map<String,?> pMap) throws MalformedObjectNameException {
         type = Type.getTypeByName((String) pMap.get("type"));
@@ -146,6 +175,7 @@ public class JmxRequest {
         initProcessingConfig((Map<String,?>) pMap.get("config"));
 
         initValueFaultHandler();
+        method = HttpMethod.POST;
     }
 
     public String getObjectNameAsString() {
@@ -232,7 +262,7 @@ public class JmxRequest {
     }
 
     final void setProcessingConfig(String pKey, Object pValue) {
-        ConfigKey cKey = ConfigKey.getByKey(pKey);
+        ConfigKey cKey = ConfigKey.getRequestConfigKey(pKey);
         if (cKey != null) {
             processingConfig.put(cKey,pValue != null ? pValue.toString() : null);
         }
@@ -319,6 +349,9 @@ public class JmxRequest {
         }
     }
 
+    public HttpMethod getHttpMethod() {
+        return method;
+    }
 
     @Override
     public String toString() {

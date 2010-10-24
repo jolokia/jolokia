@@ -57,11 +57,31 @@ public class HttpRequestHandler {
         logHandler = pLogHandler;
     }
 
+    /**
+     * Handle a GET request
+     *
+     * @param pUri URI leading to this request
+     * @param pPathInfo path of the request
+     * @param pParameterMap parameters of the GET request  @return the response
+     */
+    public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) {
+        JmxRequest jmxReq =
+                JmxRequestFactory.createGetRequest(pPathInfo,pParameterMap);
+
+        if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
+            logHandler.debug("URI: " + pUri);
+            logHandler.debug("Path-Info: " + pPathInfo);
+            logHandler.debug("Request: " + jmxReq.toString());
+        }
+
+        return executeRequest(jmxReq);
+    }
 
     /**
      * Handle the input stream as given by a POST request
      *
-     * @param pInputStream inputstream of the post request
+     * @param pUri URI leading to this request
+     * @param pInputStream input stream of the post request
      * @param pEncoding optional encoding for the stream. If null, the default encoding is used
      * @return the JSON object containing the json results for one or more {@link JmxRequest} contained
      *         within the answer.
@@ -69,16 +89,19 @@ public class HttpRequestHandler {
      * @throws MalformedObjectNameException if one or more request contain an invalid MBean name
      * @throws IOException if reading from the input stream fails
      */
-    public JSONAware handleRequestInputStream(InputStream pInputStream, String pEncoding)
+    public JSONAware handlePostRequest(String pUri,InputStream pInputStream, String pEncoding)
             throws MalformedObjectNameException, IOException {
+        if (backendManager.isDebug()) {
+            logHandler.debug("URI: " + pUri);
+        }
+
         JSONAware jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof List) {
-            List<JmxRequest> jmxRequests = JmxRequestFactory.createRequestsFromJson((List) jsonRequest);
+            List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest);
 
             JSONArray responseList = new JSONArray();
             for (JmxRequest jmxReq : jmxRequests) {
-                boolean debug = backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation());
-                if (debug) {
+                if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
                     logHandler.debug("Request: " + jmxReq.toString());
                 }
                 // Call handler and retrieve return value
@@ -87,7 +110,7 @@ public class HttpRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof Map) {
-            JmxRequest jmxReq = JmxRequestFactory.createSingleRequestFromJson((Map<String, ?>) jsonRequest);
+            JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest);
             return executeRequest(jmxReq);
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest.toJSONString());
@@ -115,7 +138,7 @@ public class HttpRequestHandler {
      * @param pJmxReq the request to execute
      * @return the JSON representation of the answer.
      */
-    public JSONObject executeRequest(JmxRequest pJmxReq) {
+    private JSONObject executeRequest(JmxRequest pJmxReq) {
         // Call handler and retrieve return value
         try {
             return backendManager.handleRequest(pJmxReq);

@@ -240,7 +240,19 @@
           </reportSet>
         </reportSets>
       </plugin>
-
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changes-plugin</artifactId>
+        <version>2.3</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>changes-report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
     </plugins>
     
   </reporting>
@@ -314,13 +326,6 @@
         <version>3.0</version>
         <scope>test</scope>
       </dependency>
-      
-      <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymockclassextension</artifactId>
-        <version>3.0</version>
-        <scope>test</scope>
-      </dependency>
 
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
@@ -371,8 +376,17 @@
       <name>SpringSource Enterprise Bundle Repository</name>
       <url>http://repository.springsource.com/maven/bundles/milestone</url>
     </pluginRepository>
+    <pluginRepository>
+      <id>Codehaus Snapshots</id>
+      <url>http://snapshots.repository.codehaus.org/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>  <!-- Workaround for MNG-2974, see note below -->
+      </releases>
+    </pluginRepository>  
   </pluginRepositories>
-
 
   <profiles>
     <profile>

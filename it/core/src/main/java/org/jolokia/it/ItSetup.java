@@ -142,12 +142,10 @@ public class ItSetup {
 
     @SuppressWarnings("PMD.SystemPrintln")
     private void unregisterMBeans() {
-        for (ObjectName name : testBeans) {
-            try {
-                mBeanHandler.unregisterMBean(name);
-            } catch (Exception e) {
-                System.out.println("Exception while unregistering " + name + e);
-            }
+        try {
+            mBeanHandler.unregisterMBeans();
+        } catch (Exception e) {
+            System.out.println("Exception while unregistering " + e);
         }
     }
 
