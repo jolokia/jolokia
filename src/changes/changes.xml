@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+  <properties>
+    <title>Jolokia</title>
+    <author email="roland@jolokia.org">Roland Huß</author>
+  </properties>
+  <body>
+    <release version="0.81-SNAPSHOT" date="2010-10-24" description="Current Snapshot release">
+      <action dev="roland" type="fix" date="2010-10-24">
+        Fixed MBean registration issue with Websphere AS 7.0 where
+        MBean registration via the MBeanRegistration intefaces causes
+        the WAS MBeanServer to raise a NPE (but register the MBean
+        nevertheless, so no rollback here). 
+      </action>
+      <action dev="roland" type="add" date="2010-10-24">
+        New request parameter "callback" allows for sending a response as JavaScript function
+        (JSONP). For POST request this parameter must be given in the URL and is valid for bulk requests, too
+      </action>
+    </release>
+  </body>
+</document>
