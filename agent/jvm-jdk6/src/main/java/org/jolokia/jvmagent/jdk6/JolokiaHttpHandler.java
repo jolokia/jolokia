@@ -74,6 +74,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     public void handle(HttpExchange pExchange) throws IOException {
         JSONAware json = null;
         int code = 200;
+        URI uri = pExchange.getRequestURI();
+        ParsedUri parsedUri = new ParsedUri(uri,context);
         try {
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
@@ -81,11 +83,10 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             String method = pExchange.getRequestMethod();
 
             // Dispatch for the proper HTTP request method
-            URI uri = pExchange.getRequestURI();
             if ("GET".equalsIgnoreCase(method)) {
-                json = executeGetRequest(uri);
+                json = executeGetRequest(parsedUri);
             } else if ("POST".equalsIgnoreCase(method)) {
-                json = executePostRequest(pExchange, uri);
+                json = executePostRequest(pExchange, parsedUri);
             } else {
                 throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
             }
@@ -98,23 +99,22 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             code = (Integer) error.get("status");
             json = error;
         } finally {
-            sendResponse(pExchange,code,json.toJSONString());
+            sendResponse(pExchange,parsedUri,code,json.toJSONString());
         }
     }
 
-    private JSONAware executeGetRequest(URI pUri) {
-        ParsedUri parsedUri = new ParsedUri(pUri,context);
+    private JSONAware executeGetRequest(ParsedUri parsedUri) {
         JmxRequest jmxReq =
                 JmxRequestFactory.createRequestFromUrl(parsedUri.getPathInfo(),parsedUri.getParameterMap());
         if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
-            debug("URI: " + pUri);
+            debug("URI: " + parsedUri);
             debug("Path-Info: " + parsedUri.getPathInfo());
             debug("Request: " + jmxReq.toString());
         }
         return requestHandler.executeRequest(jmxReq);
     }
 
-    private JSONAware executePostRequest(HttpExchange pExchange, URI pUri) throws MalformedObjectNameException, IOException {
+    private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {
         if (backendManager.isDebug()) {
             debug("URI: " + pUri);
         }
@@ -132,12 +132,14 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     }
 
 
-    private void sendResponse(HttpExchange pExchange, int pCode, String s) throws IOException {
+    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, int pCode, String pJson) throws IOException {
         OutputStream out = null;
+        String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
         try {
             Headers headers = pExchange.getResponseHeaders();
-            headers.set("Content-Type","text/plain; charset=utf-8");
-            byte[] response = s.getBytes();
+            headers.set("Content-Type",(callback == null ? "text/plain" : "text/javascript") + "; charset=utf-8");
+            String content = callback == null ? pJson : callback + "(" + pJson + ");";
+            byte[] response = content.getBytes();
             pExchange.sendResponseHeaders(pCode,response.length);
             out = pExchange.getResponseBody();
             out.write(response);

@@ -133,7 +133,13 @@ public class AgentServlet extends HttpServlet {
             code = (Integer) error.get("status");
             json = error;
         } finally {
-            sendResponse(pResp,code,json.toJSONString());
+            String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+            if (callback != null) {
+                // Send a JSONP response
+                sendResponse(pResp,code,"text/javascript",callback + "(" + json.toJSONString() +  ");");
+            } else {
+                sendResponse(pResp,code,"text/plain",json.toJSONString());
+            }
         }
     }
 
@@ -179,7 +185,7 @@ public class AgentServlet extends HttpServlet {
         Map<ConfigKey,String> ret = new HashMap<ConfigKey, String>();
         while (e.hasMoreElements()) {
             String keyS = (String) e.nextElement();
-            ConfigKey key = ConfigKey.getByKey(keyS);
+            ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
             if (key != null) {
                 ret.put(key,pConfig.getInitParameter(keyS));
             }
@@ -187,13 +193,13 @@ public class AgentServlet extends HttpServlet {
         return ret;
     }
 
-    private void sendResponse(HttpServletResponse pResp, int pStatusCode, String pJsonTxt) throws IOException {
+    private void sendResponse(HttpServletResponse pResp, int pStatusCode, String pContentType, String pJsonTxt) throws IOException {
         try {
             pResp.setCharacterEncoding("utf-8");
-            pResp.setContentType("text/plain");
+            pResp.setContentType(pContentType);
         } catch (NoSuchMethodError error) {
             // For a Servlet 2.3 container, set the charset by hand
-            pResp.setContentType("text/plain; charset=utf-8");
+            pResp.setContentType(pContentType + "; charset=utf-8");
         }
         pResp.setStatus(pStatusCode);
         PrintWriter writer = pResp.getWriter();

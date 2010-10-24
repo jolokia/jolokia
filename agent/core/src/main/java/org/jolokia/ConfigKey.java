@@ -27,62 +27,82 @@ import java.util.Map;
 public enum ConfigKey {
 
     // Maximum number of history entries to keep
-    HISTORY_MAX_ENTRIES("historyMaxEntries","10"),
+    HISTORY_MAX_ENTRIES("historyMaxEntries",true, false, "10"),
 
     // Whether debug is switched on or not
-    DEBUG("debug","false"),
+    DEBUG("debug",true, false, "false"),
 
     // Maximum number of debug entries to hold
-    DEBUG_MAX_ENTRIES("debugMaxEntries","100"),
+    DEBUG_MAX_ENTRIES("debugMaxEntries",true, false, "100"),
 
     // Dispatcher to use
-    DISPATCHER_CLASSES("dispatcherClasses"),
+    DISPATCHER_CLASSES("dispatcherClasses", true, false),
 
     // Maximum traversal depth for serialization of complex objects.
-    MAX_DEPTH("maxDepth",null),
+    MAX_DEPTH("maxDepth",true, true, null),
 
     // Maximum size of collections returned during serialization.
     // If larger, the collection is truncated
-    MAX_COLLECTION_SIZE("maxCollectionSize",null),
+    MAX_COLLECTION_SIZE("maxCollectionSize",true, true, null),
 
     // Maximum number of objects returned by serialization
-    MAX_OBJECTS("maxObjects",null),
+    MAX_OBJECTS("maxObjects",true, true, null),
 
     // Context used for agent, used e.g. in the OSGi activator
     // (but not for the servlet, this is done in web.xml)
-    AGENT_CONTEXT("agentContext","/jolokia"),
+    AGENT_CONTEXT("agentContext",true, false, "/jolokia"),
 
     // User and password for authentication purposes.
-    USER("user"),
-    PASSWORD("password"),
+    USER("user", false, true),
+    PASSWORD("password", false, true),
 
     // Runtime configuration (i.e. must come in with a request)
     // for ignoring errors during JMX operations and JSON serialization.
     // This works only for certain operations like pattern reads.
-    IGNORE_ERRORS("ignoreErrors"),
+    IGNORE_ERRORS("ignoreErrors", false, true),
 
     // Optional domain name for registering own MBeans
-    MBEAN_QUALIFIER("mbeanQualifier");
+    MBEAN_QUALIFIER("mbeanQualifier", true, false),
+
+    // Option which can be given to a request to speficy a JSONP callback.
+    // The generated answer will be of type text/javascript and it will
+    // contain a JSON function to be called.
+    CALLBACK("callback", false, true);
 
     private String key;
     private String defaultValue;
+    private boolean globalConfig;
+    private boolean requestConfig;
+
     private static Map<String, ConfigKey> keyByName;
+    private static Map<String, ConfigKey> globalKeyByName;
+    private static Map<String, ConfigKey> requestKeyByName;
 
     // Build up internal reverse map
     static {
         keyByName = new HashMap<String, ConfigKey>();
+        globalKeyByName = new HashMap<String, ConfigKey>();
+        requestKeyByName = new HashMap<String, ConfigKey>();
         for (ConfigKey ck : ConfigKey.values()) {
             keyByName.put(ck.getKeyValue(),ck);
+            if (ck.isGlobalConfig()) {
+                globalKeyByName.put(ck.getKeyValue(),ck);
+            }
+            if (ck.isRequestConfig()) {
+                requestKeyByName.put(ck.getKeyValue(),ck);
+            }
         }
     }
 
-    ConfigKey(String pValue) {
-        this(pValue,null);
+    ConfigKey(String pValue,boolean pIsGlobalConfig,boolean pIsRequestConfig) {
+        this(pValue,pIsGlobalConfig,pIsRequestConfig,null);
     }
 
-    ConfigKey(String pValue, String pDefault) {
+    ConfigKey(String pValue, boolean pIsGlobalConfig, boolean pIsRequestConfig, String pDefault) {
         key = pValue;
         defaultValue = pDefault;
+        globalConfig = pIsGlobalConfig;
+        requestConfig = pIsRequestConfig;
     }
 
     @Override
@@ -90,8 +110,15 @@ public enum ConfigKey {
         return key;
     }
 
-    public static ConfigKey getByKey(String pKeyS) {
+    public static ConfigKey getConfigKey(String pKeyS) {
         return keyByName.get(pKeyS);
+    }
+
+    public static ConfigKey getGlobalConfigKey(String pKeyS) {
+        return globalKeyByName.get(pKeyS);
+    }
+    public static ConfigKey getRequestConfigKey(String pKeyS) {
+        return requestKeyByName.get(pKeyS);
     }
 
     public String getKeyValue() {
@@ -100,6 +127,14 @@ public enum ConfigKey {
 
     public String getDefaultValue() {
         return defaultValue;
+    }
+
+    public boolean isGlobalConfig() {
+        return globalConfig;
+    }
+
+    public boolean isRequestConfig() {
+        return requestConfig;
     }
 
     // Extract value from map, including a default value if

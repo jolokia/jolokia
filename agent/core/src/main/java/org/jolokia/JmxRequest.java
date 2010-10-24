@@ -232,7 +232,7 @@ public class JmxRequest {
     }
 
     final void setProcessingConfig(String pKey, Object pValue) {
-        ConfigKey cKey = ConfigKey.getByKey(pKey);
+        ConfigKey cKey = ConfigKey.getRequestConfigKey(pKey);
         if (cKey != null) {
             processingConfig.put(cKey,pValue != null ? pValue.toString() : null);
         }
