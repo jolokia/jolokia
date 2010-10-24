@@ -206,6 +206,7 @@ function setupDemo() {
             if( cbAutosend.attr('checked') ) {
                 buttonSend.click();
             }
+            return false;
         });
     }
     var tgt = jQuery('#requestListArea');
