@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.81-SNAPSHOT" date="2010-10-24" description="Current Snapshot release">
+    <release version="0.81-SNAPSHOT" description="Current Snapshot release">
       <action dev="roland" type="fix" date="2010-10-24">
         Fixed MBean registration issue with Websphere AS 7.0 where
         MBean registration via the MBeanRegistration intefaces causes
