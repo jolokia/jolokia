@@ -20,6 +20,13 @@
         parameter must be given as URL parameter and is valid for bulk
         requests, too.
       </action>
+      <action dev="roland" type="add" date="2010-10-24">
+        Security policy can now globally restrict to a certain HTTP
+        method.  Within the &lt;http&gt; section of the policy file,
+        &lt;method&gt; tags define the allowed methods ("get" or
+        "post"). If this section is missing, all methods are
+        allowed. If only one method is given, the other is forbidden.
+      </action>
     </release>
   </body>
 </document>
