@@ -489,6 +489,13 @@ div.news-date {
 }
 
 /* ========================== */
+/* Nabble */
+
+div#nabbleforum {
+    margin-top: -30px;
+}
+
+/* ========================== */
 /* Idea.Informer */
 
 .tegdiw_pot h2 {
