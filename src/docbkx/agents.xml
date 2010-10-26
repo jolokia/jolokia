@@ -1,7 +1,200 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="agents" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Agents</title>
- 
+  
+  <para>
+    Jolokia is an agent based approach to JMX, which requires to
+    install an extra piece of software, the
+    <emphasis>agent</emphasis>. This software either needs to be
+    deployed on the target server which should be accessed via remote
+    JMX (<xref linkend="agent-mode"/>). Or it can be installed on a
+    dedicated proxy server (<xref linkend="proxy-mode"/>). For both
+    operational modes, there exist four different kind of
+    agents<footnote>
+      <para>
+        Although the proxy mode is available for all four agents, you
+        are normally free to setup the proxy environment. The
+        recommendation here is the war-agent for which very
+        lightweight servlet container exists. Tomcat or Jetty are both
+        a perfect choice for a Jolokia proxy server.
+      </para>
+    </footnote>.    
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term><emphasis role="bold">Webarchive (War) agent</emphasis></term>
+      <listitem>
+        This agent is packaged as a JEE Webarchive (War). It is the
+        standard installation artifact for Java webapplicaton and
+        problem one of the best known deployment format. Jolokia ships
+        with an war-agent, which can be deployed like any other web
+        application. This agent has been tested on a wealth of JEE
+        servers, well known market leaders and more seldom species.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">OSGi agent</emphasis></term>
+      <listitem>
+        <ulink url="">OSGi</ulink> is a middleware specification
+        focussing on modularity and a well defined dynamic lifecycle
+        <footnote>
+          <para>
+            Of course, there is much more on OSGi, a platform and
+            programing model which I <emphasis>really</emphasis>
+            like. So to say, this is my personal pet agent ;-).
+          </para>
+        </footnote>.  The Jolokia OSGi agent bundles comes in two
+        flavors: One minimal one with the dependency on a running
+        <ulink url="">OSGi HttpService</ulink>, and a all-in-one
+        bundle including an embedded HttpServer (which is not
+        exported). The former is the recommended, puristic solution,
+        the later is provided for a quick startup for initial testing
+        the OSGi agent (but should be replaced with the minimal bundle
+        for production setups).
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">Mule agent</emphasis></term>
+      <listitem>
+        <ulink url="">Mule</ulink> is one of the leading Open Source
+        Enterprise Service Bus (ESB). It provides a management api
+        into which a dedicated Jolokia agent plugs in nicely. This
+        agent includes an embedded Jetty for providing JMX HTTP
+        access. 
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">JVM JDK6 agent</emphasis></term>
+      <listitem>
+        Starting with Java 6 the JDK provided by Sun
+        (now Oracle) contains a lightweight HTTP-Server which is used
+        e.g. for reference WebService stack included in Java
+        6. Together with the Java-agent API (normally used by
+        profilers and other development tools requiring the
+        instrumentation during class loading phase), the JVM 6 Jolokia
+        agent is the most generic one. It is able to instrument
+        <emphasis>any</emphasis> Java application running on a
+        Sun/Oralce JDK 6<footnote>
+        <para>
+          You could even instrument a JEE application server this way,
+          however this is not recommended.
+        </para>
+        </footnote>.
+        It is fully feature, however tends to be a bit slow since the
+        provided HTTP-Server is not optimized for performance. However
+        it is useful for servers like Hadoop or Teracotta which does
+        not provide a convenient hook for an HTTP exporting agent.
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+  <section id="war-agent">
+    <title>War Agent</title>
+    <para>
+      
+    </para>
+
+    <table>
+      <title>Servlet init parameters</title>
+      <thead>
+        <tr>
+          <td>Parameter</td>
+          <td>Description</td>
+          <td>Default</td>
+          <td>Example</td>
+        </tr>        
+      </thead>
+      <tr>
+        <td><constant>dispatcherClasses</constant></td>
+        <td>
+          Classnames (comma separated) of <constant>RequestDispatcher</constant> used in addition
+          to the
+          <constant>LocalRequestDispatcher</constant>. Dispatchers are
+          a tecnique used by the JSR-160 proxy to dispatch (or
+          'route') a request to a different destination.
+        </td>
+        <td>
+          ---
+        </td>
+        <td>
+          <literal>org.jolokia.jsr160.Jsr160RequestDispatcher</literal>
+          (this is the dispatcher for the JSR-160 proxy)
+        </td>
+      </tr>
+      <tr>
+        <td><constant>debug</constant></td>
+        <td>
+          Debugging state after startup. Can be changed via
+          the config MBean during runtime.
+        </td>
+        <td>
+          <constant>false</constant>
+        </td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>historyMaxEntries</constant></td>
+        <td>
+          Entries to keep in the history. Can be changed during
+          runtime via the config MBean.
+        </td>
+        <td>
+          <constant>10</constant>
+        </td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>debugMaxEntries</constant></td>
+        <td>
+          Maximum number of entries to keed in the local
+          debug history if switched on. Can be change via
+          the config MBean during runtime.
+        </td>
+        <td>
+          <constant>100</constant>
+        </td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>maxDepth</constant></td>
+        <td>
+          Maximum depth when traversion bean properties.
+          If set to 0, depth checking is disabled
+        </td>
+        <td>
+          <constant>15</constant>
+        </td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>maxCollectionSize</constant></td>
+        <td>
+          Maximum size of collections returned when
+          serializing to JSON. When set to 0, not
+          collections are truncated.
+        </td>
+        <td>
+          <constant>1000</constant>
+        </td>
+        <td/>
+      </tr>
+      <tr>
+        <td><constant>maxObjects</constant></td>
+        <td>
+          Maximum number of objects which is traversed
+          when serializing a single response. Use this
+          as airbag to avoid boosting your memory and
+          network traffic. Nevertheless, when set to 0
+          not limit is used.
+        </td>
+        <td>
+          <constant>0</constant>
+        </td>
+        <td/>
+      </tr>
+    </table>
+
+  </section>
   <note>
     Work in progress. This chapter will introduce the various kinds of
     agents available, along with installation and configuration hints.

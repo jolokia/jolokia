@@ -30,7 +30,7 @@
     door for a lot of enviroments which are not Java (or better, JVM)
     aware. Jolokia uses a typeless approach, where some sort of
     lighweight serialization to JSON is used (in both directions, but
-    a bit <link ...>asymmetrically</link>). Of course this approach
+    a bit <link>asymmetrically</link>). Of course this approach
     has some drawbacks, but also quite some advantages. At least it is
     unique in the JMX world ;-). 
   </para>
@@ -109,7 +109,7 @@
       versa.
     </para>
     <para>
-      A dedicated proxy serlvet server is needed for hosting
+      A dedicated proxy servlet server is needed for hosting
       <literal>jolokia.war</literal>, which supports both the
       <emphasis>agent mode</emphasis> and the <emphasis>proxy
       mode</emphasis>. A lightweight container like Tomcat or Jetty is a
@@ -120,7 +120,6 @@
       Said all this, the proxy mode has some limitations:
     </para>      
     <itemizedlist>
-      
       <listitem>
         There is no automatic merging of JMX MBeanServers as in the case
         of the direct mode. Most application servers uses an own
@@ -142,8 +141,9 @@
         limitations for other application servers as well.
       </listitem>
       <listitem>
-        Certain workarounds (like the JBoss "<emphasis>can not find MXBeans before MBeanInfo has
-        been fetched</emphasis>" bug) works only in agent mode.
+        Certain workarounds (like the JBoss "<emphasis>can not find
+        MXBeans before MBeanInfo has been fetched</emphasis>" bug)
+        works only in agent mode.
       </listitem>
       <listitem>
         It is astonishingly hard to set up an application server for JSR-160

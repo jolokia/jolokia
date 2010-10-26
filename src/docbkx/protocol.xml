@@ -719,11 +719,13 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           <varlistentry>
             <term><emphasis role="bold">setHistoryEntriesForOperation</emphasis></term>
             <listitem>              
+              <emphasis>(todo)</emphasis>
             </listitem>
           </varlistentry>
           <varlistentry>
             <term><emphasis role="bold">setHistoryEntriesForAttribute</emphasis></term>
             <listitem>              
+              <emphasis>(todo)</emphasis>
             </listitem>
           </varlistentry>
         </variablelist>
