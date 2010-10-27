@@ -42,6 +42,12 @@ public class BackendManagerTest implements LogHandler {
 
     BackendManager backendManager;
 
+    @AfterMethod
+    public void destroyBackendManager() {
+        if (backendManager != null) {
+            backendManager.destroy();
+        }
+    }
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         backendManager = new BackendManager(new HashMap(),this);
@@ -62,7 +68,6 @@ public class BackendManagerTest implements LogHandler {
         JmxRequest req = new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory").build();
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue(RequestDispatcherTest.called);
-        backendManager.destroy();
     }
 
     @Test
@@ -102,12 +107,16 @@ public class BackendManagerTest implements LogHandler {
             assertNotNull(pRestrictor);
         }
 
-        public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public JSONObject dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             called = true;
             if (pJmxReq.getType() == JmxRequest.Type.READ) {
-                return new JSONObject();
+                JSONObject ret = new JSONObject();
+                ret.put("value",new JSONObject());
+                return ret;
             } else if (pJmxReq.getType() == JmxRequest.Type.WRITE) {
-                return "faultyFormat";
+                JSONObject ret = new JSONObject();
+                ret.put("value","faultyFormat");
+                return ret;
             }
             return null;
         }
@@ -116,7 +125,7 @@ public class BackendManagerTest implements LogHandler {
             return true;
         }
 
-        public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
+        public boolean getResultInterpretation(JmxRequest pJmxRequest) {
             return false;
         }
     }
@@ -127,7 +136,7 @@ public class BackendManagerTest implements LogHandler {
 
         // No special constructor --> fail
 
-        public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public JSONObject dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             return null;
         }
 
@@ -135,7 +144,7 @@ public class BackendManagerTest implements LogHandler {
             return false;
         }
 
-        public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
+        public boolean getResultInterpretation(JmxRequest pJmxRequest) {
             return false;
         }
     }

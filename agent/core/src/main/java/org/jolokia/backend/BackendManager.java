@@ -95,6 +95,7 @@ public class BackendManager {
         initStores(pConfig);
     }
 
+
     // Construct configured dispatchers by reflection. Returns always
     // a list, an empty one if no request dispatcher should be created
     private List<RequestDispatcher> createRequestDispatchers(String pClasses,
@@ -147,6 +148,7 @@ public class BackendManager {
      * @throws AttributeNotFoundException
      * @throws ReflectionException
      * @throws MBeanException
+     * @throws java.io.IOException
      */
     public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
             ReflectionException, MBeanException, IOException {
@@ -165,33 +167,27 @@ public class BackendManager {
             debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
             debug("Response: " + json);
         }
-        // Ok, we did it ...
-        json.put("status",200 /* success */);
+        // Ok, we did it and set the status if not already set (which can happen for a direkt proxy request)
+        if (!json.containsKey("status")) {
+            json.put("status",200 /* success */);
+        }
         return json;
     }
 
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
-        Object retValue = null;
-        boolean useValueWithPath = false;
-        boolean found = false;
         for (RequestDispatcher dispatcher : requestDispatchers) {
             if (dispatcher.canHandle(pJmxReq)) {
-                retValue = dispatcher.dispatchRequest(pJmxReq);
-                useValueWithPath = dispatcher.useReturnValueWithPath(pJmxReq);
-                found = true;
-                break;
+                return dispatcher.dispatchRequest(pJmxReq);
             }
         }
-        if (!found) {
-            throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
-        }
-        return objectToJsonConverter.convertToJson(retValue,pJmxReq,useValueWithPath);
+        throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
     }
 
     // init various application wide stores for handling history and debug output.
-    private void initStores(Map<ConfigKey, String> pConfig) {
+    private void initStores(Map<ConfigKey, String> pConfig)
+            throws OperationsException {
         int maxEntries = getIntConfigValue(pConfig,HISTORY_MAX_ENTRIES);
         int maxDebugEntries = getIntConfigValue(pConfig,DEBUG_MAX_ENTRIES);
 
@@ -201,21 +197,12 @@ public class BackendManager {
             debug = true;
         }
 
-
         historyStore = new HistoryStore(maxEntries);
         debugStore = new DebugStore(maxDebugEntries,debug);
+    }
 
-        try {
-            localDispatcher.init(historyStore,debugStore);
-        } catch (NotCompliantMBeanException e) {
-            error("Error registering config MBean: " + e,e);
-        } catch (MBeanRegistrationException e) {
-            error("Cannot register MBean: " + e,e);
-        } catch (MalformedObjectNameException e) {
-            error("Invalid name for config MBean: " + e,e);
-        } catch (InstanceAlreadyExistsException e) {
-            error("Config MBean already exists: " + e,e);
-        }
+    private void registerJolokiaMBeans() throws OperationsException {
+        localDispatcher.registerJolokiaMBeans(historyStore, debugStore);
     }
 
     private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {
@@ -231,12 +218,11 @@ public class BackendManager {
     // Remove MBeans again.
     public void destroy() {
         try {
-            localDispatcher.destroy();
+            localDispatcher.unregisterJolokiaMBeans();
         } catch (JMException e) {
             error("Cannot unregister MBean: " + e,e);
         }
     }
-
 
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
         return restrictor.isRemoteAccessAllowed(pRemoteHost,pRemoteAddr);

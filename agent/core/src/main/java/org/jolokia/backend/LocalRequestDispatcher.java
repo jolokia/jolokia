@@ -26,6 +26,7 @@ import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.*;
 import org.jolokia.history.HistoryStore;
+import org.json.simple.JSONObject;
 
 import javax.management.*;
 
@@ -44,13 +45,14 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
     // An (optional) qualifier for registering MBeans.
     private String qualifier;
+    private ObjectToJsonConverter objectToJsonConverter;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
      *
-     * @param objectToJsonConverter a serializer to JSON
-     * @param stringToObjectConverter a de-serializer for arguments
-     * @param restrictor restrictor which checks the access for various operations
+     * @param pObjectToJsonConverter a serializer to JSON
+     * @param pStringToObjectConverter a de-serializer for arguments
+     * @param pRestrictor restrictor which checks the access for various operations
      * @param pQualifier optional qualifier for registering own MBean to allow for multiple J4P instances in the VM
      * @param pLogHandler local handler used for logging out errors and warnings
      */
@@ -67,27 +69,24 @@ public class LocalRequestDispatcher implements RequestDispatcher {
                 new RequestHandlerManager(objectToJsonConverter,stringToObjectConverter,mBeanServerHandler.getServerHandle(),restrictor);
     }
 
-
-
     // Can handle any request
     public boolean canHandle(JmxRequest pJmxRequest) {
         return true;
     }
 
-    public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
-        return handler.useReturnValueWithPath();
-    }
-
-    public Object dispatchRequest(JmxRequest pJmxReq)
+    public JSONObject dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
-        return mBeanServerHandler.dispatchRequest(handler, pJmxReq);
+        Object retValue = mBeanServerHandler.dispatchRequest(handler, pJmxReq);
+        return objectToJsonConverter.convertToJson(retValue,pJmxReq,handler.useReturnValueWithPath());
     }
 
-    public void init(HistoryStore pHistoryStore, DebugStore pDebugStore)
-            throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        mBeanServerHandler.init();
+    public void unregisterJolokiaMBeans() throws JMException {
+        mBeanServerHandler.unregisterMBeans();
+    }
+
+    public void registerJolokiaMBeans(HistoryStore pHistoryStore, DebugStore pDebugStore) throws OperationsException {
+        mBeanServerHandler.registerMBean(mBeanServerHandler, mBeanServerHandler.getObjectName());
 
         // Register the Config MBean
         Config config = new Config(pHistoryStore,pDebugStore,qualifier,Config.OBJECT_NAME);

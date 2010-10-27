@@ -1,4 +1,4 @@
-package org.jolokia.jsr160;
+package org.jolokia.proxy;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -24,6 +24,7 @@ import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
+import org.json.simple.JSONObject;
 
 import javax.management.*;
 import javax.management.remote.JMXConnector;
@@ -43,12 +44,14 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     private RequestHandlerManager requestHandlerManager;
 
-    public Jsr160RequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
-                                   StringToObjectConverter stringToObjectConverter,
-                                   ServerHandle serverInfo,
-                                   Restrictor restrictor) {
+    private ObjectToJsonConverter objectToJsonConverter;
+
+    public Jsr160RequestDispatcher(ObjectToJsonConverter pObjectToJsonConverter,
+                                   StringToObjectConverter pStringToObjectConverter,
+                                   Restrictor pRestrictor) {
         requestHandlerManager = new RequestHandlerManager(
-                objectToJsonConverter, stringToObjectConverter, serverInfo, restrictor);
+                pObjectToJsonConverter, pStringToObjectConverter, pRestrictor);
+        objectToJsonConverter = pObjectToJsonConverter;
     }
 
     /**
@@ -63,19 +66,21 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
      * @throws MBeanException
      * @throws IOException
      */
-    public Object dispatchRequest(JmxRequest pJmxReq)
+    public JSONObject dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
 
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);
         try {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
+            Object retValue;
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
-                return handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),pJmxReq);
+                retValue = handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),pJmxReq);
             } else {
-                return handler.handleRequest(connection,pJmxReq);
+                retValue = handler.handleRequest(connection,pJmxReq);
             }
+            return objectToJsonConverter.convertToJson(retValue,pJmxReq,handler.useReturnValueWithPath());
         } finally {
             releaseConnector(connector);
         }
@@ -121,11 +126,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     }
 
     public boolean canHandle(JmxRequest pJmxRequest) {
-        return pJmxRequest.getTargetConfig() != null;
-    }
-
-    public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
-        return handler.useReturnValueWithPath();
+        String targetUrl = pJmxRequest.getTargetConfigUrl();
+        return targetUrl != null && targetUrl.startsWith("service:jmx");
     }
 }

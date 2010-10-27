@@ -14,7 +14,7 @@
         to the LocalRequestDispatcher
       </description>
       <param-name>dispatcherClasses</param-name>
-      <param-value>org.jolokia.jsr160.Jsr160RequestDispatcher</param-value>
+      <param-value>org.jolokia.proxy.Jsr160RequestDispatcher</param-value>
     </init-param>
     <init-param>
       <description>

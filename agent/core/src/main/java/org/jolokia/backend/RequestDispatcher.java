@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.JmxRequest;
+import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -32,7 +33,7 @@ import org.jolokia.JmxRequest;
 public interface RequestDispatcher {
     /**
      * Dispatch a {@link org.jolokia.JmxRequest} to a certain backend
-     * and return the result of the JMX action.
+     * and return the result of the JMX action. This return value should be 
      *
      * @param pJmxReq the request to dispatch
      * @return result object
@@ -40,8 +41,9 @@ public interface RequestDispatcher {
      * @throws AttributeNotFoundException in case an attributes couldnt be resolved
      * @throws ReflectionException
      * @throws MBeanException
+     * @throws IOException
      */
-    Object dispatchRequest(JmxRequest pJmxReq)
+    JSONObject dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
 
     /**
@@ -52,14 +54,4 @@ public interface RequestDispatcher {
      */
     boolean canHandle(JmxRequest pJmxRequest);
 
-    /**
-     * Whether a return value should be returned directly, ignoring any path.
-     * E.g for the WriteHandler this is important to return the original value,
-     * (using the path would return the new value)
-     *
-     * @param pJmxRequest request for getting the handler
-     * @return true if the value should be directly returned, false if the path within
-     *         the request should be respected.
-     */
-    boolean useReturnValueWithPath(JmxRequest pJmxRequest);
 }

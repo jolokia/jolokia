@@ -21,7 +21,7 @@
   <modules>
     <module>core</module>
     <module>war</module>
-    <module>jsr160</module>
+    <module>proxy</module>
     <module>mule</module>
     <module>osgi</module>
     <module>osgi-bundle</module>
