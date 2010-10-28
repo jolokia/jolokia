@@ -1,12 +1,17 @@
 package org.jolokia.backend;
 
-import org.jolokia.*;
-import org.jolokia.config.*;
+import org.jolokia.ConfigKey;
+import org.jolokia.JmxRequest;
+import org.jolokia.LogHandler;
+import org.jolokia.config.DebugStore;
+import org.jolokia.config.Restrictor;
+import org.jolokia.config.RestrictorFactory;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
-import org.jolokia.LogHandler;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -67,8 +72,13 @@ public class BackendManager {
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
 
+    // Template for executing JMX related actions, with proper error handling
+    private ErrorHandlingTemplate jmxExecTemplate;
+    private ErrorHandlingTemplate.Callback execRequestCallback;
+
     public BackendManager(Map<ConfigKey,String> pConfig, LogHandler pLogHandler) {
 
+<<<<<<< HEAD
 
         // Central objects
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
@@ -90,6 +100,10 @@ public class BackendManager {
         requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
                                                       objectToJsonConverter,stringToObjectConverter, serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);
+
+        // Template for executing the real request, including proper error handling
+        jmxExecTemplate = new ErrorHandlingTemplate();
+        execRequestCallback = createJmxExecCallback();
 
         // Backendstore for remembering agent state
         initStores(pConfig);
@@ -138,43 +152,72 @@ public class BackendManager {
         }
     }
 
+
+    /**
+     * Execute multiple requests at once (bulk request). A sophisticated algorithm takes
+     * care to collect requests and dispatch them to the appropriate dispatchers.
+     *
+     * @param jmxRequests
+     * @return
+     */
+    public JSONAware executeRequests(List<JmxRequest> jmxRequests) {
+        JSONArray responseList = new JSONArray();
+        for (JmxRequest jmxReq : jmxRequests) {
+            if (isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
+                logHandler.debug("Request: " + jmxReq.toString());
+            }
+            // Call handler and retrieve response
+            JSONObject resp = executeRequest(jmxReq);
+            responseList.add(resp);
+        }
+        return responseList;
+    }
+
+
+
+
     /**
      * Handle a single JMXRequest. The response status is set to 200 if the request
      * was successful
      *
      * @param pJmxReq request to perform
      * @return the already converted answer.
-     * @throws InstanceNotFoundException
-     * @throws AttributeNotFoundException
-     * @throws ReflectionException
-     * @throws MBeanException
-     * @throws java.io.IOException
      */
-    public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
-            ReflectionException, MBeanException, IOException {
-
-        boolean debug = isDebug() && !"debugInfo".equals(pJmxReq.getOperation());
-
-        long time = 0;
-        if (debug) {
-            time = System.currentTimeMillis();
-        }
-        JSONObject json = callRequestDispatcher(pJmxReq);
-
-        // Update global history store
-        historyStore.updateAndAdd(pJmxReq,json);
-        if (debug) {
-            debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
-            debug("Response: " + json);
-        }
-        // Ok, we did it and set the status if not already set (which can happen for a direkt proxy request)
-        if (!json.containsKey("status")) {
-            json.put("status",200 /* success */);
-        }
-        return json;
+    public JSONObject executeRequest(final JmxRequest pJmxReq) {
+        return jmxExecTemplate.executeRequest(execRequestCallback,pJmxReq);
     }
 
-    // call the an appropriate request dispatcher
+
+    // Callback for executing a request. It's statelesse (no closure), so only
+    // a singleton object needs to be created (in the constructor)
+    private ErrorHandlingTemplate.Callback createJmxExecCallback() {
+        return new ErrorHandlingTemplate.Callback() {
+            public JSONObject execute(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+                boolean debug = isDebug() && !"debugInfo".equals(pJmxReq.getOperation());
+
+                long time = 0;
+                if (debug) {
+                    time = System.currentTimeMillis();
+                }
+                JSONObject json = callRequestDispatcher(pJmxReq);
+
+                // Update global history store
+                historyStore.updateAndAdd(pJmxReq, json);
+                if (debug) {
+                    debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
+                    debug("Response: " + json);
+                }
+                // Ok, we did it and set the status if not already set (which can happen for a direkt proxy request)
+                if (!json.containsKey("status")) {
+                    json.put("status", 200 /* success */);
+                }
+                return json;
+            }
+        };
+    }
+
+
+    // call the an appropriate request dispatcher for a single request
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         for (RequestDispatcher dispatcher : requestDispatchers) {
@@ -184,6 +227,12 @@ public class BackendManager {
         }
         throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
     }
+
+
+    public JSONObject handleThrowable(Throwable pThrowable) {
+        return jmxExecTemplate.handleThrowable(pThrowable);
+    }
+
 
     // init various application wide stores for handling history and debug output.
     private void initStores(Map<ConfigKey, String> pConfig)
@@ -199,10 +248,6 @@ public class BackendManager {
 
         historyStore = new HistoryStore(maxEntries);
         debugStore = new DebugStore(maxDebugEntries,debug);
-    }
-
-    private void registerJolokiaMBeans() throws OperationsException {
-        localDispatcher.registerJolokiaMBeans(historyStore, debugStore);
     }
 
     private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {

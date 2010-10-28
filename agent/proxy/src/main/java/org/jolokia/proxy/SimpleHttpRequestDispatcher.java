@@ -16,6 +16,7 @@
 
 package org.jolokia.proxy;
 
+import com.sun.net.httpserver.HttpHandler;
 import org.jolokia.JmxRequest;
 import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.Restrictor;
@@ -23,24 +24,22 @@ import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import sun.net.www.HeaderParser;
 
 import javax.management.*;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Dispatcher for Jolokia requests. This is useful if the agent is used in
@@ -49,14 +48,14 @@ import java.util.Map;
  * @author roland
  * @since Nov 11, 2009
  */
-public class SimpleRequestDispatcher implements RequestDispatcher {
+public class SimpleHttpRequestDispatcher implements RequestDispatcher {
 
     private RequestHandlerManager requestHandlerManager;
+    private JSONParser parser;
 
-    public SimpleRequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
-                                   StringToObjectConverter stringToObjectConverter,
-                                   Restrictor restrictor) {
-        // We only push the request object directly to the target
+    public SimpleHttpRequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
+                                       StringToObjectConverter stringToObjectConverter,
+                                       Restrictor restrictor) {
     }
 
     /**
@@ -74,7 +73,6 @@ public class SimpleRequestDispatcher implements RequestDispatcher {
      */
     public JSONObject dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
-
         URL targetUrl = new URL(pJmxReq.getTargetConfigUrl());
         URLConnection connection = targetUrl.openConnection();
         if (connection instanceof HttpURLConnection) {
@@ -82,20 +80,37 @@ public class SimpleRequestDispatcher implements RequestDispatcher {
             httpConnection.setDoOutput(true);
             httpConnection.setRequestMethod("POST");
 
+            try {
+                httpConnection.connect();
+            } catch (IOException exp) {
+                if (httpConnection.getErrorStream() != null) {
+                    // Handle error
+                    String resp = readResponse(httpConnection.getErrorStream(),httpConnection.getContentEncoding());
+                }
+            }
+
+
             // Write request as JSON to the target server
             OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-
+            JSONObject request = pJmxReq.toJSON();
+            // Remove the target
+            request.remove("target");
+            out.write(pJmxReq.toJSON().toJSONString());
             out.close();
 
-            // Read HttpResponse
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuffer buf = new StringBuffer();
-            String line;
-            while ((line = in.readLine()) != null) {
-                buf.append(line);
+            if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                // We got an error. First we try to parse the answer nevertheless, since
+                // the agent on the other side might already send an appropriate JSON request.
+                //
             }
-            in.close();
 
+            // Read HttpResponse
+            String resp = readResponse(httpConnection.getInputStream(),httpConnection.getContentEncoding());
+            try {
+                parser.parse(resp);
+            } catch (ParseException e) {
+                // Invalid content
+            }
             // Create JSON response
 
             // TODO: The dispatcher itself should decided, whether an Object is returned or the JSON answer directly.
@@ -105,9 +120,45 @@ public class SimpleRequestDispatcher implements RequestDispatcher {
         }
     }
 
+    public List<JSONObject> dispatchRequests(List<JmxRequest> pJmxRequests) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        // TODO (inklusive consistent error handling)
+        return null;
+    }
+
+    private String readResponse(InputStream pInputStream,String pEncoding) throws IOException {
+        BufferedReader in = new BufferedReader(
+                pEncoding != null ?
+                        new InputStreamReader(pInputStream) :
+                        new InputStreamReader(pInputStream,pEncoding));
+        StringBuffer buf = new StringBuffer();
+        String line;
+        while ((line = in.readLine()) != null) {
+            buf.append(line);
+        }
+        in.close();
+        return buf.toString();
+    }
+
+    private JSONAware parseResponse(InputStream pInputStream, String pEncoding) throws IOException {
+        InputStreamReader reader = null;
+        try {
+            reader =
+                    pEncoding != null ?
+                            new InputStreamReader(pInputStream, pEncoding) :
+                            new InputStreamReader(pInputStream);
+            return (JSONAware) parser.parse(reader);
+        } catch (ParseException exp) {
+            throw new IllegalArgumentException("Invalid JSON request " + reader,exp);
+        }
+    }
+
     public boolean canHandle(JmxRequest pJmxRequest) {
         String targetUrl = pJmxRequest.getTargetConfigUrl();
         return targetUrl != null && targetUrl.startsWith("http");
+    }
+
+    public boolean supportsBulkRequests() {
+        return false;
     }
 
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {

@@ -63,6 +63,7 @@ public class HttpRequestHandler {
      * @param pUri URI leading to this request
      * @param pPathInfo path of the request
      * @param pParameterMap parameters of the GET request  @return the response
+     * @return JSON answer
      */
     public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) {
         JmxRequest jmxReq =
@@ -74,7 +75,8 @@ public class HttpRequestHandler {
             logHandler.debug("Request: " + jmxReq.toString());
         }
 
-        return executeRequest(jmxReq);
+        // Call handler and retrieve return value
+        return backendManager.executeRequest(jmxReq);
     }
 
     /**
@@ -98,20 +100,11 @@ public class HttpRequestHandler {
         JSONAware jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof List) {
             List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest);
-
-            JSONArray responseList = new JSONArray();
-            for (JmxRequest jmxReq : jmxRequests) {
-                if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
-                    logHandler.debug("Request: " + jmxReq.toString());
-                }
-                // Call handler and retrieve return value
-                JSONObject resp = executeRequest(jmxReq);
-                responseList.add(resp);
-            }
-            return responseList;
+            return backendManager.executeRequests(jmxRequests);
         } else if (jsonRequest instanceof Map) {
             JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest);
-            return executeRequest(jmxReq);
+            // Call handler and retrieve return value
+            return backendManager.executeRequest(jmxReq);
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest.toJSONString());
         }
@@ -168,23 +161,7 @@ public class HttpRequestHandler {
      * @return its JSON representation
      */
     public JSONObject handleThrowable(Throwable pThrowable) {
-        JSONObject json;
-        Throwable exp = pThrowable;
-        if (exp instanceof RuntimeMBeanException) {
-            // Unwrap
-            exp = exp.getCause();
-        }
-        if (exp instanceof IllegalArgumentException) {
-            json = getErrorJSON(400,exp);
-        } else if (exp instanceof IllegalStateException) {
-            json = getErrorJSON(500,exp);
-        } else if (exp instanceof SecurityException) {
-            // Wipe out stacktrace
-            json = getErrorJSON(403,new Exception(exp.getMessage()));
-        } else {
-            json = getErrorJSON(500,exp);
-        }
-        return json;
+        return backendManager.handleThrowable(pThrowable);
     }
 
 

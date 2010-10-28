@@ -86,6 +86,10 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         }
     }
 
+    public List<JSONObject> dispatchRequests(List<JmxRequest> pJmxRequests) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        throw new UnsupportedOperationException("JSR-160 dispatchers does not support bulk requests");
+    }
+
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
     private JMXConnector getConnector(JmxRequest pJmxReq) throws IOException {
         JmxRequest.TargetConfig targetConfig = pJmxReq.getTargetConfig();
@@ -128,5 +132,9 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     public boolean canHandle(JmxRequest pJmxRequest) {
         String targetUrl = pJmxRequest.getTargetConfigUrl();
         return targetUrl != null && targetUrl.startsWith("service:jmx");
+    }
+
+    public boolean supportsBulkRequests() {
+        return false;
     }
 }

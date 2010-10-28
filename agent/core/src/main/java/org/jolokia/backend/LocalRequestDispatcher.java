@@ -29,6 +29,8 @@ import org.jolokia.history.HistoryStore;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -74,11 +76,21 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         return true;
     }
 
+    // The local dispatcher supports bulk requests, of course.
+    public boolean supportsBulkRequests() {
+        return true;
+    }
+
     public JSONObject dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         Object retValue = mBeanServerHandler.dispatchRequest(handler, pJmxReq);
-        return objectToJsonConverter.convertToJson(retValue,pJmxReq,handler.useReturnValueWithPath());
+        return objectToJsonConverter.convertToJson(retValue, pJmxReq, handler.useReturnValueWithPath());
+    }
+
+    public List<JSONObject> dispatchRequests(List<JmxRequest> pJmxRequests) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        // TODO: Perform dispatching to request, but also error handling
+        return null;
     }
 
     public void unregisterJolokiaMBeans() throws JMException {

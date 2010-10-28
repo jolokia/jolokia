@@ -146,7 +146,7 @@ public final class JmxRequestFactory {
                 throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
                         ". Expected map, but found: " + o);
             }
-            ret.add(new JmxRequest((Map) o));
+            ret.add(createPostRequest((Map) o));
         }
         return ret;
     }

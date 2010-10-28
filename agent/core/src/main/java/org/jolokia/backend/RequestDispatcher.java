@@ -1,6 +1,7 @@
 package org.jolokia.backend;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.management.*;
 
@@ -46,6 +47,25 @@ public interface RequestDispatcher {
     JSONObject dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
 
+
+    /**
+     * Method called for bulk requests, but only if this handler supports
+     * bulk requests. Otherwise {@link #dispatchRequest(org.jolokia.JmxRequest)} is
+     * called multiple times, for each request in the bulk request once.
+     *
+     * @param pJmxRequests request to issue
+     * @return a list of {@link org.json.simple.JSONObject} representing the individual
+     * answers.
+     *
+     * @throws InstanceNotFoundException
+     * @throws AttributeNotFoundException
+     * @throws ReflectionException
+     * @throws MBeanException
+     * @throws IOException
+     */
+    List<JSONObject> dispatchRequests(List<JmxRequest> pJmxRequests)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
+
     /**
      * Check wether current dispatcher can handle the given request
      *
@@ -53,5 +73,14 @@ public interface RequestDispatcher {
      * @return true if this dispatcher can handle the request
      */
     boolean canHandle(JmxRequest pJmxRequest);
+
+    /**
+     * Return true if this dispatched supports bulk requests. If this is true,
+     * and a bulk request arrives, it gets all request which it can handle
+     * at once so that the request can be optimized
+     *
+     * @return true if the dispatch supports bulk requests
+     */
+    boolean supportsBulkRequests();
 
 }
