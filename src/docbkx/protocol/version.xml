@@ -18,7 +18,7 @@
     <title>POST version request</title>
     <para>
       A version POST request has only a single key
-      <constant>version</constant> which has to be set to 
+      <constant>type</constant> which has to be set to 
       <emphasis role="bold">version</emphasis>.
     </para>
   </section>
