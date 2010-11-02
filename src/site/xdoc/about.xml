@@ -13,10 +13,10 @@
       <p style="text-align: left;">
         <img src="images/jolokia_home.png" style="float: right; margin: 0 0 10px 20px;" alt="Jolokia, homegrown"/>
         All started up early 2009 when my colleague Gerhard Lausser,
-        our local Nagios guru and complained heavily about how damned
-        hard it is to monitor JEE servers with <a
-        href="http://www.nagios.org">Nagios</a>. As you might know,
-        Nagios uses a pletoria of plugins for doing the hard
+        our local Nagios guru, came up in my office and complained
+        heavily about how damned hard it is to monitor JEE servers
+        with <a href="http://www.nagios.org">Nagios</a>. As you might
+        know, Nagios uses a plethora of plugins for doing the hard
         monitoring stuff. These are running locally on a central
         Nagios host contacting the watched systems mostly remotely
         with various techniques. For Java applications, <a
