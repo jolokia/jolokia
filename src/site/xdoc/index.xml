@@ -7,7 +7,7 @@
   </properties>
 
   <head>
-    <meta name="description" content="Jolokia is an alernative to JSR-160 connectors for remote JMX access. It provides REST-like access to JMX with JSON over HTTP."/>
+    <meta name="description" content="Jolokia is an alternative to JSR-160 connectors for remote JMX access. It provides REST-like access to JMX with JSON over HTTP."/>
     <link rel="alternate" 
           type="application/rss+xml" 
           title="Jolokia" 
