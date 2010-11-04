@@ -40,7 +40,7 @@
   </section>
   <para>
     <literal>protocol</literal> in the response value contains the
-    protoco version used, <literal>agent</literal> ist the version of
+    protocol version used, <literal>agent</literal> ist the version of
     the Jolokia agent. See <xref linkend="versions"/> for the various
     protocol versions and the interoperatibility. 
   </para>  
