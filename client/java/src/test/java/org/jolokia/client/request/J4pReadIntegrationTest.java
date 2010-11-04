@@ -123,7 +123,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     public void mbeanPattern() throws MalformedObjectNameException, J4pException {
         J4pReadRequest req = new J4pReadRequest("*:type=attribute","LongSeconds");
         J4pReadResponse resp = j4pClient.execute(req);
-        assertEquals(1,resp.getObjectNames().size());
+        assertEquals(2,resp.getObjectNames().size());
         Map respVal = resp.getValue();
         assertTrue(respVal.containsKey(itSetup.getAttributeMBean()));
         Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
@@ -161,7 +161,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         J4pReadRequest req = new J4pReadRequest("*:type=attribute","LongSeconds","List");
         assertNull(req.getPath());
         J4pReadResponse resp = j4pClient.execute(req);
-        assertEquals(1,resp.getObjectNames().size());
+        assertEquals(2,resp.getObjectNames().size());
         Map respVal = resp.getValue();
         Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
         assertEquals(2,attrs.size());

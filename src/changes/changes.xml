@@ -27,6 +27,12 @@
         "post"). If this section is missing, all methods are
         allowed. If only one method is given, the other is forbidden.
       </action>
+      <action dev="roland" type="add" date="2010-11-04">
+        Added an alias for MBean "jmx4perl:type=Config"
+        to "jolokia:type=Config" for backwards compatibility with jmx4perl
+        clients &lt; 0.80
+      </action>
+      
     </release>
   </body>
 </document>

@@ -36,10 +36,14 @@ public class Config implements ConfigMBean,MBeanRegistration {
     // Optional domain to used fo registering this MBean
     private String qualifier;
 
-    public Config(HistoryStore pHistoryStore, DebugStore pDebugStore, String pQualifier) {
+    // MBean Objectname under which this bean should be registered
+    private String objectName;
+
+    public Config(HistoryStore pHistoryStore, DebugStore pDebugStore, String pQualifier, String pObjectName) {
         historyStore = pHistoryStore;
         debugStore = pDebugStore;
         qualifier = pQualifier;
+        objectName = pObjectName;
     }
 
     public void setHistoryEntriesForAttribute(String pMBean, String pAttribute, String pPath, String pTarget, int pMaxEntries)
@@ -97,8 +101,10 @@ public class Config implements ConfigMBean,MBeanRegistration {
     }
 
     public String getObjectName() {
-        return OBJECT_NAME + (qualifier != null ? "," + qualifier : "");
+        return objectName + (qualifier != null ? "," + qualifier : "");
     }
+
+
     // ========================================================================
 
     // Provide our own name on registration

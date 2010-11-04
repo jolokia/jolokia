@@ -34,7 +34,7 @@ public class ItSetup {
 
     private MBeanServerHandler mBeanHandler;
 
-    private String domain = "jolokia.it";
+    private String[] domains = new String[] { "jolokia.it","jmx4perl.it" } ;
 
     private String[] strangeNamesShort = {
             "simple",
@@ -89,14 +89,18 @@ public class ItSetup {
         try {
             // Register my test mbeans
             for (String name : strangeNamesShort) {
-                String strangeName = domain + ":type=naming,name=" + name;
-                strangeNames.add(strangeName);
-                registerMBean(new ObjectNameChecking(),strangeName);
+                for (String domain : domains) {
+                    String strangeName = domain + ":type=naming,name=" + name;
+                    strangeNames.add(strangeName);
+                    registerMBean(new ObjectNameChecking(),strangeName);
+                }
             }
             for (String name : escapedNamesShort) {
-                String escapedName = domain + ":type=escape,name=" + ObjectName.quote(name);
-                escapedNames.add(escapedName);
-                registerMBean(new ObjectNameChecking(),escapedName);
+                for (String domain: domains) {
+                    String escapedName = domain + ":type=escape,name=" + ObjectName.quote(name);
+                    escapedNames.add(escapedName);
+                    registerMBean(new ObjectNameChecking(),escapedName);
+                }
             }
 
             // Other MBeans
@@ -108,9 +112,10 @@ public class ItSetup {
             } catch (ClassNotFoundException exp) {
                 isWebsphere = false;
             }
-            registerMBean(new OperationChecking(),isWebsphere ? null : getOperationMBean());
-            registerMBean(new AttributeChecking(),isWebsphere ? null : getAttributeMBean());
-
+            for (String domain : domains) {
+                registerMBean(new OperationChecking(domain),isWebsphere ? null : domain + ":type=operation");
+                registerMBean(new AttributeChecking(domain),isWebsphere ? null : domain + ":type=attribute");
+            }
         } catch (RuntimeException e) {
             throw new RuntimeException("Error",e);
         } catch (Exception exp) {
@@ -119,11 +124,11 @@ public class ItSetup {
     }
 
     public String getAttributeMBean() {
-        return domain + ":type=attribute";
+        return domains[0] + ":type=attribute";
     }
 
     public String getOperationMBean() {
-        return domain + ":type=operation";
+        return domains[0] + ":type=operation";
     }
 
     @SuppressWarnings("PMD.SystemPrintln")

@@ -46,8 +46,10 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private Map complexMap;
     private Map map;
     private Object bean;
+    private String domain;
 
-    public AttributeChecking() {
+    public AttributeChecking(String pDomain) {
+        domain = pDomain;
         reset();
     }
 
@@ -174,7 +176,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
-        return new ObjectName("jolokia.it:type=attribute");
+        return new ObjectName(domain + ":type=attribute");
     }
 
     public void postRegister(Boolean registrationDone) {

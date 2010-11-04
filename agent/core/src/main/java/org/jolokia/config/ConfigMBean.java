@@ -32,7 +32,9 @@ public interface ConfigMBean {
     // Name under which this bean gets registered
     String OBJECT_NAME = "jolokia:type=Config";
 
-
+    // Legacy name for jmx4perl version < 0.80
+    String LEGACY_OBJECT_NAME = "jmx4perl:type=Config";
+    
     // Operations
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> is null

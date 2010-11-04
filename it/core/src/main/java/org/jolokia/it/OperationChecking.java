@@ -25,6 +25,11 @@ import javax.management.*;
 public class OperationChecking implements OperationCheckingMBean,MBeanRegistration {
 
     private int counter = 0;
+    private String domain;
+
+    public OperationChecking(String pDomain) {
+        domain = pDomain;
+    }
 
     public void reset() {
         counter = 0;
@@ -67,7 +72,7 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
-        return new ObjectName("jolokia.it:type=operation");
+        return new ObjectName(domain + ":type=operation");
 
     }
 
