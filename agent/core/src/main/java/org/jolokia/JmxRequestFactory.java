@@ -105,8 +105,11 @@ public final class JmxRequestFactory {
             // Extract all additional args from the remaining path info
             request.setExtraArgs(prepareExtraArgs(elements));
 
-            // Setup JSON representation
+            // Setup processing parameters from the given query parameters
             extractParameters(request,pParameterMap);
+
+            // Initialize value fault handler depending on the given parameter
+            request.initValueFaultHandler();
             return request;
         } catch (NoSuchElementException exp) {
             throw new IllegalArgumentException("Invalid path info " + pPathInfo,exp);

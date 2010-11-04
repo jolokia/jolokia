@@ -26,7 +26,7 @@ public interface MBeanServerHandlerMBean {
 
     // Name of MBean used for registration
     String OBJECT_NAME = "jolokia:type=ServerHandler";
-
+    
     /**
      * Get a summary information of all MBeans found on the server
      *

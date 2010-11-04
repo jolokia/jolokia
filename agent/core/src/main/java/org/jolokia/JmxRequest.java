@@ -448,7 +448,7 @@ public class JmxRequest {
         }
     }
 
-    private void initValueFaultHandler() {
+    void initValueFaultHandler() {
         String s;
         s = getProcessingConfig(ConfigKey.IGNORE_ERRORS);
         if (s != null && s.matches("^(true|yes|on|1)$")) {
