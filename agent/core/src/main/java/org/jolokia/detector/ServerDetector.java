@@ -1,0 +1,48 @@
+/*
+ * Copyright 2009-2010 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jolokia.detector;
+
+import javax.management.MBeanServer;
+import java.util.Set;
+
+/**
+ * A detector identifies a specific server. This is typically done by inspecting
+ * the runtime environment e.g. for the existance of certain classes. If a detector
+ * successfully detect 'its' server, it return a {@link ServerInfo} containing type, version
+ * and some optional information
+ * @author roland
+ * @since 05.11.10
+ */
+public interface ServerDetector {
+
+    /**
+     * Detect the server. A {@link ServerInfo} descriptor is returned
+     * in case of a successful detection, <code>null</code> otherwise.
+     *
+     *
+     * @param pMbeanServers a set of MBeanServers which can be used for detecting server informations
+     * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
+     */
+    public ServerInfo detect(Set<MBeanServer> pMbeanServers);
+
+    /*
+     * Popularity of this server, the detector is responsible for. This is a heuristic value
+     * in between 0 .. 100 (100 being the 'most popular') used for calculating the order in which
+     * detectors are queried
+     */
+    int getPopularity();
+}

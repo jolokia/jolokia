@@ -6,6 +6,8 @@ import java.util.Map;
 import org.jolokia.JmxRequest;
 import org.jolokia.Version;
 import org.jolokia.config.Restrictor;
+import org.jolokia.detector.ServerInfo;
+import org.json.simple.JSONObject;
 
 import javax.management.*;
 
@@ -34,8 +36,11 @@ import javax.management.*;
  */
 public class VersionHandler extends JsonRequestHandler {
 
-    public VersionHandler(Restrictor pRestrictor) {
+    ServerInfo serverInfo;
+
+    public VersionHandler(Restrictor pRestrictor, ServerInfo pServerInfo) {
         super(pRestrictor);
+        serverInfo = pServerInfo;
     }
 
     @Override
@@ -45,9 +50,12 @@ public class VersionHandler extends JsonRequestHandler {
 
     @Override
     public Object doHandleRequest(MBeanServerConnection server, JmxRequest request) {
-        Map<String,String> ret = new HashMap<String, String>();
+        JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
+        if (serverInfo != null) {
+            ret.put("info",serverInfo);
+        }
         return ret;
     }
 }

@@ -11,7 +11,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.jolokia.JmxRequest;
+import org.jolokia.detector.ServerDetector;
+import org.jolokia.detector.ServerInfo;
 import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.util.ServiceObjectFactory;
+import sun.misc.Sort;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -56,6 +60,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // Optional domain for registering this handler as a mbean
     private String qualifier;
 
+    // Information about the server environment
+    private ServerInfo serverInfo;
+
     public void init() throws MalformedObjectNameException, InstanceAlreadyExistsException, NotCompliantMBeanException {
         registerMBean(this,getObjectName());
     }
@@ -88,7 +95,27 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      */
     public MBeanServerHandler(String pQualifier) {
         initMBeanServers();
+        serverInfo = detectServer();
         qualifier = pQualifier;
+    }
+
+    // Detect the server by delegating it to a set of predefined detectors. These will be created
+    // by a lookup mechanism, queried and thrown away after this method
+    private ServerInfo detectServer() {
+        List<ServerDetector> detectors =
+                ServiceObjectFactory.createServiceObjects("/META-INF/detectors-default","/META-INF/detectors");
+        Collections.sort(detectors,new Comparator<ServerDetector>() {
+            public int compare(ServerDetector o1, ServerDetector o2) {
+                return o2.getPopularity() - o1.getPopularity();
+            }
+        });
+        for (ServerDetector detector : detectors) {
+            ServerInfo info = detector.detect(mBeanServers);
+            if (info != null) {
+                return info;
+            }
+        }
+        return null;
     }
 
     /**
@@ -228,6 +255,16 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      */
     public Set<MBeanServer> getMBeanServers() {
         return Collections.unmodifiableSet(mBeanServers);
+    }
+
+    /**
+     * Get information about the detected server this agent is running on.
+     *
+     * @return the server info if detected or <code>null</code> if no server
+     *          could be detected.
+     */
+    public ServerInfo getServerInfo() {
+        return serverInfo;
     }
 
     // =================================================================================

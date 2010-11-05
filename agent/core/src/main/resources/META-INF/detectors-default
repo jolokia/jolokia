@@ -1,0 +1,2 @@
+org.jolokia.detector.TomcatDetector
+org.jolokia.detector.JettyDetector

@@ -20,6 +20,7 @@ import org.jolokia.JmxRequest;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.detector.ServerInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,21 +36,15 @@ public class RequestHandlerManager {
             new HashMap<JmxRequest.Type, JsonRequestHandler>();
 
     public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
-                                     StringToObjectConverter pStringToObjectConverter,
-                                     Restrictor pRestrictor) {
-        registerRequestHandlers(pObjectToJsonConverter,pStringToObjectConverter,pRestrictor);
-    }
-
-    protected final void registerRequestHandlers(ObjectToJsonConverter objectToJsonConverter,
-                                           StringToObjectConverter stringToObjectConverter,
-                                           Restrictor restrictor) {
+            StringToObjectConverter pStringToObjectConverter,
+            ServerInfo pServerInfo, Restrictor pRestrictor) {
         JsonRequestHandler handlers[] = {
-                new ReadHandler(restrictor),
-                new WriteHandler(restrictor,objectToJsonConverter),
-                new ExecHandler(restrictor,stringToObjectConverter),
-                new ListHandler(restrictor),
-                new VersionHandler(restrictor),
-                new SearchHandler(restrictor)
+                new ReadHandler(pRestrictor),
+                new WriteHandler(pRestrictor, pObjectToJsonConverter),
+                new ExecHandler(pRestrictor, pStringToObjectConverter),
+                new ListHandler(pRestrictor),
+                new VersionHandler(pRestrictor,pServerInfo),
+                new SearchHandler(pRestrictor)
         };
         for (JsonRequestHandler handler : handlers) {
             REQUEST_HANDLER_MAP.put(handler.getType(),handler);

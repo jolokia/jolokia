@@ -4,6 +4,7 @@ import org.jolokia.*;
 import org.jolokia.config.*;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.detector.ServerInfo;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.LogHandler;
 import org.json.simple.JSONObject;
@@ -83,8 +84,9 @@ public class BackendManager {
         localDispatcher = new LocalRequestDispatcher(objectToJsonConverter,
                                                      stringToObjectConverter,
                                                      restrictor,pConfig.get(ConfigKey.MBEAN_QUALIFIER));
+        ServerInfo serverInfo = localDispatcher.getServerInfo();
         requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
-                                                      objectToJsonConverter,stringToObjectConverter,restrictor);
+                                                      objectToJsonConverter,stringToObjectConverter,serverInfo,restrictor);
         requestDispatchers.add(localDispatcher);
 
         // Backendstore for remembering state
@@ -96,28 +98,30 @@ public class BackendManager {
     private List<RequestDispatcher> createRequestDispatchers(String pClasses,
                                                              ObjectToJsonConverter pObjectToJsonConverter,
                                                              StringToObjectConverter pStringToObjectConverter,
-                                                             Restrictor pRestrictor) {
+                                                             ServerInfo serverInfo, Restrictor pRestrictor) {
         List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
         if (pClasses != null && pClasses.length() > 0) {
             String[] names = pClasses.split("\\s*,\\s*");
             for (String name : names) {
-                ret.add(createDispatcher(name, pObjectToJsonConverter, pStringToObjectConverter, pRestrictor));
+                ret.add(createDispatcher(name, pObjectToJsonConverter, pStringToObjectConverter, serverInfo, pRestrictor));
             }
         }
         return ret;
     }
 
     // Create a single dispatcher
-    private RequestDispatcher createDispatcher(String pDispatcherClass, ObjectToJsonConverter pObjectToJsonConverter, StringToObjectConverter pStringToObjectConverter, Restrictor pRestrictor) {
+    private RequestDispatcher createDispatcher(String pDispatcherClass, ObjectToJsonConverter pObjectToJsonConverter, StringToObjectConverter pStringToObjectConverter, ServerInfo serverInfo, Restrictor pRestrictor) {
         try {
             Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
             Constructor constructor = clazz.getConstructor(ObjectToJsonConverter.class,
                                                            StringToObjectConverter.class,
+                                                           ServerInfo.class,
                                                            Restrictor.class);
             return (RequestDispatcher)
-                            constructor.newInstance(pObjectToJsonConverter,
-                                                    pStringToObjectConverter,
-                                                    pRestrictor);
+                    constructor.newInstance(pObjectToJsonConverter,
+                                            pStringToObjectConverter,
+                                            serverInfo,
+                                            pRestrictor);
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Couldn't load class " + pDispatcherClass + ": " + e,e);
         } catch (NoSuchMethodException e) {
