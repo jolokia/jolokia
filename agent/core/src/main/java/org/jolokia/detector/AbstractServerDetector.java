@@ -110,6 +110,21 @@ abstract public class AbstractServerDetector implements ServerDetector {
     }
 
 
+    /**
+     * Get the version number from a JSR-77 compliant server
+     *
+     * @param pMbeanServers servers to query
+     * @return version number or null if not found.
+     */
+    protected String getVersionFromJsr77(Set<MBeanServer> pMbeanServers) {
+        Set<ObjectName> names = searchMBeans(pMbeanServers,"*:j2eeType=J2EEServer,*");
+        // Take the first one
+        if (names != null && names.size() > 0) {
+            return (String) getAttributeValue(pMbeanServers,names.iterator().next(),"serverVersion");
+        }
+        return null;
+    }
+
 
     // ===========================================================================
 

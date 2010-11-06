@@ -20,34 +20,41 @@ import javax.management.MBeanServer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
+ * A detector for jetty
+ *
  * @author roland
  * @since 05.11.10
  */
 public class JettyDetector extends AbstractServerDetector {
+
+
     public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
-        for (String serverClassName : new String[] {"org.mortbay.jetty.Server", "org.eclipse.jetty.server.Server" }) {
-            try {
-                Class serverClass = getClass(serverClassName);
-                if (serverClass != null) {
-                    Method method = null;
-                    method = serverClass.getMethod("getVersion");
-                    String version = (String) method.invoke(null);
-                    int major = extractMajorVersion(version);
-                    return new ServerInfo(major < 7 ? "Mortbay" : "Eclipse","jetty",version,null,null);
-                }
-            } catch (NoSuchMethodException e) {
-            } catch (InvocationTargetException e) {
-            } catch (IllegalAccessException e) {
-            }
+        Class serverClass = getClass("org.mortbay.jetty.Server");
+        if (serverClass != null) {
+            return new ServerInfo("Mortbay", "jetty", getVersion(serverClass), null, null);
+        }
+        serverClass = getClass("org.eclipse.jetty.server.Server");
+        if (serverClass != null) {
+            return new ServerInfo("Eclipse", "jetty", getVersion(serverClass), null, null);
         }
         return null;
     }
 
-    // Go up the classloader stack to eventually find the server class
+    private String getVersion(Class serverClass) {
+        try {
+            Method method = serverClass.getMethod("getVersion");
+            return (String) method.invoke(null);
+        } catch (NoSuchMethodException e) {
+        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException e) {
+        }
+        return null;
+    }
+
+    // Go up the classloader stack to eventually find the server class. The WebAppClassLoader
+    // hide the the server classes loader by the parent class loader.
     protected Class getClass(String pClassName) {
         ClassLoader loader = getClassLoader();
         do {
@@ -60,17 +67,6 @@ public class JettyDetector extends AbstractServerDetector {
 
     public int getPopularity() {
         return 80;
-    }
-
-    private int extractMajorVersion(String version) {
-        Pattern pattern = Pattern.compile("^(\\d+)");
-        Matcher matcher = pattern.matcher(version);
-        if (matcher.find()) {
-            String majorS = matcher.group(1);
-            return Integer.parseInt(majorS);
-        } else {
-            return 0;
-        }
     }
 
 }

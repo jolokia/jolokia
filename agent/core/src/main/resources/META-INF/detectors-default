@@ -1,2 +1,3 @@
 org.jolokia.detector.TomcatDetector
 org.jolokia.detector.JettyDetector
+org.jolokia.detector.JBossDetector
