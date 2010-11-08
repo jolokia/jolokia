@@ -52,5 +52,5 @@ public class JBossDetector extends AbstractServerDetector {
 
 /*
 jboss.web:J2EEApplication=none,J2EEServer=none,j2eeType=WebModule,name=//localhost/jolokia --> path
-
+jboss.web:name=HttpRequest1,type=RequestProcessor,worker=http-bhut%2F172.16.239.130-8080 --> remoteAddr, serverPort, protocol
 */
