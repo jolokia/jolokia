@@ -50,12 +50,12 @@
       </ul>
     </subsection>
     <section name="News">
-      <subsection name="Meet us at Devoxx">
-        <div class="news-date">2010-11-3</div>
+      <subsection name="Meet us at Devoxx !">
+        <div class="news-date">2010-11-08</div>
         <p>
           We will be hanging around in Antwerp at the very fine <a
           href="http://www.devoxx.com">Devoxx</a> from 15th to 19th
-          November. Leave me a mail at roland@jolokia.org or follow us
+          November. Leave me a mail at devoxx@jolokia.org or follow us
           on Twitter (<a
           href="http://www.twitter.com/jolokia_jmx">@jolokia_jmx</a>)
           if you are interested in Jolokia's current state and its

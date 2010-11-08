@@ -5,6 +5,10 @@
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
 
+  <head>
+    <script type="text/javascript" src="js/idea.js"></script>
+    <script type="text/javascript" language="JavaScript" src="http://widget.idea.informer.com/tabn2v3.js"></script><noscript><a href="http://jolokia.useridea.com">Feature Requests feedback</a> <a href="http://useridea.com"> Powered by <img src="http://widget.useridea.com/i/reformal_ru.png" /></a></noscript>
+  </head>
   <body>
     <!-- The body of the document contains a number of sections -->
     <div class="feature grid_18 alpha">
