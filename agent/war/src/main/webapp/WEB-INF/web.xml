@@ -10,7 +10,7 @@
     <servlet-class>org.jolokia.http.AgentServlet</servlet-class>
     <init-param>
       <description>
-        Classnames (comma separated) of RequestDispatcher used in addition
+        Class names (comma separated) of RequestDispatcher used in addition
         to the LocalRequestDispatcher
       </description>
       <param-name>dispatcherClasses</param-name>
@@ -43,7 +43,7 @@
     </init-param>
     <init-param>
       <description>
-        Maximum depth when traversion bean properties.
+        Maximum depth when traversing bean properties.
         If set to 0, depth checking is disabled
       </description>
       <param-name>maxDepth</param-name>
@@ -77,6 +77,29 @@
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
+  <!--
+  Example Configuration for switching on BASIC security. The role 'Jolokia'
+  must be mapped to real users with passwords on the Appserver side:
+
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>Jolokia</realm-name>
+  </login-config>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Jolokia-Agent Access</web-resource-name>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>Jolokia</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-role>
+    <role-name>Jolokia</role-name>
+  </security-role>
+  -->
 </web-app>
 
 <!--

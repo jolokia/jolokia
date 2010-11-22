@@ -97,11 +97,17 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         pConnector.close();
     }
 
-    private Map<String,Object> prepareEnv(Map<String, Object> pEnv) {
-        if (pEnv == null || pEnv.size() == 0) {
-            return pEnv;
+    /**
+     * Override this if a special environment setup is required for JSR-160 connection
+     *
+     * @param pTargetConfig the target configuration as obtained from the request
+     * @return the prepared environment
+     */
+    protected Map<String,Object> prepareEnv(Map<String, Object> pTargetConfig) {
+        if (pTargetConfig == null || pTargetConfig.size() == 0) {
+            return pTargetConfig;
         }
-        Map<String,Object> ret = new HashMap<String, Object>(pEnv);
+        Map<String,Object> ret = new HashMap<String, Object>(pTargetConfig);
         String user = (String) ret.remove("user");
         String password  = (String) ret.remove("password");
         if (user != null && password != null) {
