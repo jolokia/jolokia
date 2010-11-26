@@ -32,7 +32,11 @@
         to "jolokia:type=Config" for backwards compatibility with jmx4perl
         clients &lt; 0.80
       </action>
-      
+      <action dev="roland" type="fix" date="2010-11-27" issue="GIT-14">
+        Change HttpClient to a thread safe connection manager by default,
+        extended J4pClient construction with a builder pattern
+      </action>
+
     </release>
   </body>
 </document>

@@ -40,6 +40,7 @@ abstract public class AbstractJ4pIntegrationTest {
 
     protected static final String J4P_DEFAULT_URL = SERVER_BASE_URL + J4P_CONTEXT;
 
+
     private String j4pUrl;
 
     // Client which can be used by subclasses for testing
@@ -56,12 +57,31 @@ abstract public class AbstractJ4pIntegrationTest {
             jettyServer.start();
             j4pUrl = J4P_DEFAULT_URL;
             // Start the integration MBeans
-            itSetup.start();            
+            itSetup.start();
+        } else {
+            j4pUrl = testUrl;
+        }
+        j4pClient = J4pClient.url(j4pUrl).pooledConnections().build();
+	}
+
+
+    protected void startWithoutAgent() throws Exception {
+        String testUrl = System.getProperty("j4p.url");
+        itSetup = new ItSetup();
+        if (testUrl == null) {
+            jettyServer = new Server(JETTY_DEFAULT_PORT);
+            jettyServer.start();
+            j4pUrl = J4P_DEFAULT_URL;
+            // Start the integration MBeans
+            itSetup.start();
         } else {
             j4pUrl = testUrl;
         }
         j4pClient = new J4pClient(j4pUrl);
 	}
+
+
+
 
     @AfterClass
 	public void stop() throws Exception {
@@ -72,4 +92,9 @@ abstract public class AbstractJ4pIntegrationTest {
             itSetup.stop();
         }
 	}
+
+    public String getJ4pUrl() {
+        return j4pUrl;
+    }
+
 }

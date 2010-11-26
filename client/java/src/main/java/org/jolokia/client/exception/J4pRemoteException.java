@@ -50,7 +50,7 @@ public class J4pRemoteException extends J4pException {
     }
 
     /**
-     * Get status of this response (similar in meaning of HTTP stati)
+     * Get status of this response (similar in meaning of HTTP status)
      *
      * @return status
      */
@@ -59,17 +59,18 @@ public class J4pRemoteException extends J4pException {
     }
 
     /**
-     * Get the server side stacktrace as string when {@link #isError()} is true. Return <code>null</code>
-     * if no error has occured.
+     * Get the server side stack trace as string. Return <code>null</code>
+     * if no stack trace could be retrieved.
      *
-     * @return server side stacktrace as string
+     * @return server side stack trace as string
      */
     public String getRemoteStackTrace() {
         return remoteStacktrace;
     }
 
     /**
-     * Get the request leading to this exception
+     * Get the request leading to this exception. Can be null if this exception occurred during a bulk requests
+     * containing multiple single requests.
      *
      * @return request which caused this exception
      */

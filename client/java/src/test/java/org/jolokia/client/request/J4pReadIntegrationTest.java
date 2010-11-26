@@ -17,12 +17,17 @@ package org.jolokia.client.request;
  */
 
 import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CyclicBarrier;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.testng.annotations.Test;
@@ -56,7 +61,50 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
         }
     }
-        
+
+    @Test
+    public void error404ConnectionTest() throws Exception {
+        final J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
+        try {
+            stop();
+            startWithoutAgent();
+            j4pClient.execute(req);
+            fail();
+        } catch (J4pRemoteException exp) {
+            assertEquals(404,exp.getStatus());
+        }
+        stop();
+        start();
+
+        final CyclicBarrier barrier = new CyclicBarrier(10);
+        final Queue errors = new ConcurrentLinkedQueue();
+        Runnable run = new Runnable() {
+            public void run() {
+                try {
+                    j4pClient.execute(req);
+                } catch (Exception e) {
+                    errors.add(1);
+                    System.err.println(e);
+                }
+                try {
+                    barrier.await();
+                } catch (InterruptedException ex) {
+                    return;
+                } catch (BrokenBarrierException ex) {
+                    return;
+                }
+            }
+        };
+
+        for (int i = 0;i < 10; i++) {
+            new Thread(run).start();
+        }
+        if (barrier.await() == 0) {
+            //System.err.println("Finished");
+            assertEquals("Concurrent calls should work", 0, errors.size());
+        }
+    }
+
     @Test
     public void multipleAttributes() throws MalformedObjectNameException, J4pException {
         J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes");

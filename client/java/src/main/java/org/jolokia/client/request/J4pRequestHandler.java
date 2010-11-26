@@ -119,12 +119,18 @@ public class J4pRequestHandler {
     @SuppressWarnings("PMD.PreserveStackTrace")
     public JSONAware extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
         HttpEntity entity = pHttpResponse.getEntity();
-        JSONParser parser = new JSONParser();
-        Header contentEncoding = entity.getContentEncoding();
-        if (contentEncoding != null) {
-            return (JSONAware) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
-        } else {
-            return (JSONAware) parser.parse(new InputStreamReader(entity.getContent()));
+        try {
+            JSONParser parser = new JSONParser();
+            Header contentEncoding = entity.getContentEncoding();
+            if (contentEncoding != null) {
+                return (JSONAware) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
+            } else {
+                return (JSONAware) parser.parse(new InputStreamReader(entity.getContent()));
+            }
+        } finally {
+            if (entity != null) {
+                entity.consumeContent();
+            }
         }
     }
 

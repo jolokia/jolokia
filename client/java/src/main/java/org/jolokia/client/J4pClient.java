@@ -21,7 +21,9 @@ import java.util.*;
 
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
 import org.jolokia.client.request.J4pResponse;
@@ -38,7 +40,7 @@ import org.json.simple.parser.ParseException;
 public class J4pClient  {
 
     // Http client used for connecting the j4p Agent
-    private DefaultHttpClient httpClient = new DefaultHttpClient();
+    private HttpClient httpClient;
 
     // Creating and parsing HTTP-Requests and Responses
     private J4pRequestHandler requestHandler;
@@ -50,7 +52,26 @@ public class J4pClient  {
      */
     public J4pClient(String pJ4pServerUrl) {
         requestHandler = new J4pRequestHandler(pJ4pServerUrl);
+
+        // Using the default as defined in the client builder
+        J4pClientBuilder builder = new J4pClientBuilder();
+        HttpParams params = builder.getHttpParams();
+        ClientConnectionManager cm = builder.createClientConnectionManager();
+        httpClient = new DefaultHttpClient(cm, params);
     }
+
+
+    /**
+     * Constructor using a given HttpClient
+     *
+     * @param pJ4pServerUrl the agent URL for how to contact the server.
+     * @param pHttpClient HTTP client to use for the connecting to the agent
+     */
+    public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient) {
+        requestHandler = new J4pRequestHandler(pJ4pServerUrl);
+        httpClient = pHttpClient;
+    }
+
 
     /**
      * Execute a single J4pRequest returning a single response.
@@ -81,7 +102,7 @@ public class J4pClient  {
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pException {
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod));
-            JSONAware jsonResponse = extractJsonResponse(response);
+            JSONAware jsonResponse = extractJsonResponse(pRequest,response);
             if (! (jsonResponse instanceof JSONObject)) {
                 throw new J4pException("Invalid JSON answer for a single request (expected a map but got a " + jsonResponse.getClass() + ")");
             }
@@ -98,17 +119,17 @@ public class J4pClient  {
     }
 
     @SuppressWarnings("PMD.PreserveStackTrace")
-    private JSONAware extractJsonResponse(HttpResponse pResponse) throws J4pException {
+    private <T extends J4pRequest> JSONAware extractJsonResponse(T pRequest, HttpResponse pResponse) throws J4pException {
         try {
             return requestHandler.extractJsonResponse(pResponse);
         } catch (IOException e) {
             throw new J4pException("IO-Error while reading the response: " + e,e);
         } catch (ParseException e) {
-            // It's a parese exception. Now, check whether the HTTResponse is
+            // It's a parse exception. Now, check whether the HTTResponse is
             // an error and prepare the proper J4pException
             StatusLine statusLine = pResponse.getStatusLine();
             if (HttpStatus.SC_OK != statusLine.getStatusCode()) {
-                throw new J4pException(statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
+                throw new J4pRemoteException(pRequest,statusLine.getReasonPhrase(),statusLine.getStatusCode(),null);
             }
             throw new J4pException("Could not parse answer: " + e,e);
         }
@@ -128,7 +149,7 @@ public class J4pClient  {
     public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests) throws J4pException {
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests));
-            JSONAware jsonResponse = extractJsonResponse(response);
+            JSONAware jsonResponse = extractJsonResponse(null, response);
 
             verifyJsonResponse(jsonResponse);
 
@@ -226,4 +247,58 @@ public class J4pClient  {
     public HttpClient getHttpClient() {
         return httpClient;
     }
+
+    // =============================================================================================
+    // Builder for setting up an agent
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#url} */
+    public static J4pClientBuilder url(String pUrl) {
+        return new J4pClientBuilder().url(pUrl);
+    }
+
+    /** See {@link J4pClientBuilder#singleConnection()} */
+    public static J4pClientBuilder singleConnection() {
+        return new J4pClientBuilder().singleConnection();
+    }
+
+    /** See {@link J4pClientBuilder#pooledConnections()} */
+    public static J4pClientBuilder pooledConnections() {
+        return new J4pClientBuilder().pooledConnections();
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#connectionTimeout(int)} */
+    public static J4pClientBuilder connectionTimeout(int pTimeOut) {
+        return new J4pClientBuilder().connectionTimeout(pTimeOut);
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#maxTotalConnections(int)} */
+    public static J4pClientBuilder maxTotalConnections(int pConnections) {
+        return new J4pClientBuilder().maxTotalConnections(pConnections);
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#maxConnectionPoolTimeout(int)} */
+    public static J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
+        return new J4pClientBuilder().maxConnectionPoolTimeout(pConnectionPoolTimeout);
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#contentCharset(String)} */
+    public static J4pClientBuilder contentCharset(String pContentCharset) {
+        return new J4pClientBuilder().contentCharset(pContentCharset);
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#expectContinue(boolean)} */
+    public static J4pClientBuilder expectContinue(boolean pUse) {
+        return new J4pClientBuilder().expectContinue(pUse);
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#tcpNoDelay(boolean)} */
+    public static J4pClientBuilder tcpNoDelay(boolean pUse) {
+        return new J4pClientBuilder().tcpNoDelay(pUse);
+    }
+
+    /** See {@link org.jolokia.client.J4pClientBuilder#socketBufferSize(int)} */
+    public static J4pClientBuilder socketBufferSize(int pSize) {
+        return new J4pClientBuilder().socketBufferSize(pSize);
+    }
+
 }
