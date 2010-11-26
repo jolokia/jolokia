@@ -194,7 +194,9 @@ public class J4pClient  {
     // Validate a result object and create a remote exception in case of an error
     private <T extends J4pRequest> J4pRemoteException validate(T pRequest, JSONObject pJsonRespObject) {
         Long status = (Long) pJsonRespObject.get("status");
-        if (status != 200) {
+        if (status == null) {
+            return new J4pRemoteException(pRequest,"Invalid response received: " + pJsonRespObject.toJSONString(),500,null);
+        } else if (status != 200) {
             return new J4pRemoteException(pRequest,(String) pJsonRespObject.get("error"),status.intValue(),(String) pJsonRespObject.get("stacktrace"));
         } else {
             return null;
