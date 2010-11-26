@@ -14,7 +14,7 @@
         to the LocalRequestDispatcher
       </description>
       <param-name>dispatcherClasses</param-name>
-      <param-value>org.jolokia.proxy.Jsr160RequestDispatcher</param-value>
+      <param-value>org.jolokia.proxy.Jsr160RequestDispatcher,org.jolokia.proxy.SimpleHttpRequestDispatcher</param-value>
     </init-param>
     <init-param>
       <description>
@@ -34,7 +34,7 @@
     </init-param>
     <init-param>
       <description>
-        Maximum number of entries to keed in the local
+        Maximum number of entries to keep in the local
         debug history if switched on. Can be change via
         the config MBean during runtime.
       </description>

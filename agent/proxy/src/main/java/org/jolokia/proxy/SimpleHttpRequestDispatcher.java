@@ -42,8 +42,8 @@ import java.net.URLConnection;
 import java.util.*;
 
 /**
- * Dispatcher for Jolokia requests. This is useful if the agent is used in
- * a JavaScript library to cicumvent the 'same origin' policy.
+ * Dispatcher for Jolokia requests. This is especially useful if the agent is used in
+ * a JavaScript library to circumvent the 'same origin' policy.
  *
  * @author roland
  * @since Nov 11, 2009
@@ -51,11 +51,11 @@ import java.util.*;
 public class SimpleHttpRequestDispatcher implements RequestDispatcher {
 
     private RequestHandlerManager requestHandlerManager;
-    private JSONParser parser;
 
     public SimpleHttpRequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
                                        StringToObjectConverter stringToObjectConverter,
                                        Restrictor restrictor) {
+        // TODO: Evaluate access restrictions
     }
 
     /**
@@ -76,45 +76,52 @@ public class SimpleHttpRequestDispatcher implements RequestDispatcher {
         URL targetUrl = new URL(pJmxReq.getTargetConfigUrl());
         URLConnection connection = targetUrl.openConnection();
         if (connection instanceof HttpURLConnection) {
+            // TODO: Move HTTP client handling into extra class
+            // and use Apache's HttpClient if available
+
             HttpURLConnection httpConnection = (HttpURLConnection) connection;
             httpConnection.setDoOutput(true);
+            httpConnection.setDoInput(true);
             httpConnection.setRequestMethod("POST");
 
+            // TODO: Use authentication
             try {
                 httpConnection.connect();
             } catch (IOException exp) {
                 if (httpConnection.getErrorStream() != null) {
-                    // Handle error
+                    // TODO: Handle error
                     String resp = readResponse(httpConnection.getErrorStream(),httpConnection.getContentEncoding());
                 }
             }
 
-
             // Write request as JSON to the target server
             OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
             JSONObject request = pJmxReq.toJSON();
-            // Remove the target
+            // Remove the target so it will get process accordingly
+            // (Maybe introduce a stack of target for multiple hops)
             request.remove("target");
-            out.write(pJmxReq.toJSON().toJSONString());
+            out.write(request.toJSONString());
             out.close();
 
-            if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            //if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 // We got an error. First we try to parse the answer nevertheless, since
-                // the agent on the other side might already send an appropriate JSON request.
-                //
-            }
+                // the agent on the other side might already send an appropriate JSON response.
+                // TODO
+            //}
 
             // Read HttpResponse
             String resp = readResponse(httpConnection.getInputStream(),httpConnection.getContentEncoding());
+
+            // Create JSON response
             try {
-                parser.parse(resp);
+                JSONParser parser = new JSONParser();
+                return (JSONObject) parser.parse(resp);
             } catch (ParseException e) {
                 // Invalid content
+                // TODO
+                return null;
             }
-            // Create JSON response
-
-            // TODO: The dispatcher itself should decided, whether an Object is returned or the JSON answer directly.
-            return null;
+            // TODO: The dispatcher itself should decide, whether an Object is returned or the JSON answer directly.
         } else {
             throw new IllegalArgumentException(targetUrl + " is not a HTTP(S) Url");
         }
@@ -128,8 +135,8 @@ public class SimpleHttpRequestDispatcher implements RequestDispatcher {
     private String readResponse(InputStream pInputStream,String pEncoding) throws IOException {
         BufferedReader in = new BufferedReader(
                 pEncoding != null ?
-                        new InputStreamReader(pInputStream) :
-                        new InputStreamReader(pInputStream,pEncoding));
+                        new InputStreamReader(pInputStream,pEncoding) :
+                        new InputStreamReader(pInputStream));
         StringBuffer buf = new StringBuffer();
         String line;
         while ((line = in.readLine()) != null) {
@@ -142,6 +149,7 @@ public class SimpleHttpRequestDispatcher implements RequestDispatcher {
     private JSONAware parseResponse(InputStream pInputStream, String pEncoding) throws IOException {
         InputStreamReader reader = null;
         try {
+            JSONParser parser = new JSONParser();
             reader =
                     pEncoding != null ?
                             new InputStreamReader(pInputStream, pEncoding) :

@@ -168,6 +168,7 @@ public class BackendManager {
             }
             // Call handler and retrieve response
             JSONObject resp = executeRequest(jmxReq);
+            resp.put("request",jmxReq.toJSON());
             responseList.add(resp);
         }
         return responseList;
@@ -184,11 +185,12 @@ public class BackendManager {
      * @return the already converted answer.
      */
     public JSONObject executeRequest(final JmxRequest pJmxReq) {
-        return jmxExecTemplate.executeRequest(execRequestCallback,pJmxReq);
+        JSONObject ret = jmxExecTemplate.executeRequest(execRequestCallback,pJmxReq);
+        ret.put("request",pJmxReq.toJSON());
+        return ret;
     }
 
-
-    // Callback for executing a request. It's statelesse (no closure), so only
+    // Callback for executing a request. It's stateless (no closure), so only
     // a singleton object needs to be created (in the constructor)
     private ErrorHandlingTemplate.Callback createJmxExecCallback() {
         return new ErrorHandlingTemplate.Callback() {

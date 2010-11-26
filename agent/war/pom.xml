@@ -24,7 +24,7 @@
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-jsr160</artifactId>
+      <artifactId>jolokia-proxy</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
