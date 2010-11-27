@@ -79,7 +79,7 @@ public class J4pClientBuilder {
      * The Agent URL to connect to
      * @param pUrl agent URL
      */
-    public J4pClientBuilder url(String pUrl) {
+    public final J4pClientBuilder url(String pUrl) {
         url = pUrl;
         return this;
     }
@@ -88,7 +88,7 @@ public class J4pClientBuilder {
      * Use a {@link org.apache.http.impl.conn.SingleClientConnManager} for connecting to the agent. This
      * is not very suitable in multithreaded environements
      */
-    public J4pClientBuilder singleConnection() {
+    public final J4pClientBuilder singleConnection() {
         pooledConnections = false;
         return this;
     }
@@ -98,7 +98,7 @@ public class J4pClientBuilder {
      * uses a pool of connections (see {@link #maxTotalConnections(int) and {@link #maxConnectionPoolTimeout(int)} for
      * tuning the pool}
      */
-    public J4pClientBuilder pooledConnections() {
+    public final J4pClientBuilder pooledConnections() {
         pooledConnections = true;
         return this;
     }
@@ -108,7 +108,7 @@ public class J4pClientBuilder {
      * interpreted as an infinite timeout.
      * @param pTimeOut timeout in milliseconds
      */
-    public J4pClientBuilder connectionTimeout(int pTimeOut) {
+    public final J4pClientBuilder connectionTimeout(int pTimeOut) {
         HttpConnectionParams.setConnectionTimeout(params,pTimeOut);
         return this;
     }
@@ -117,7 +117,7 @@ public class J4pClientBuilder {
      * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
      * @param pConnections number of max. simultaneous connections
      */
-    public J4pClientBuilder maxTotalConnections(int pConnections) {
+    public final J4pClientBuilder maxTotalConnections(int pConnections) {
         ConnManagerParams.setMaxTotalConnections(params, pConnections);
         return this;
     }
@@ -128,7 +128,7 @@ public class J4pClientBuilder {
      *
      * @param pConnectionPoolTimeout timeout in milliseconds
      */
-    public J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
+    public final J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
         ConnManagerParams.setTimeout(params,pConnectionPoolTimeout);
         return this;
     }
@@ -137,7 +137,7 @@ public class J4pClientBuilder {
      * Defines the charset to be used per default for encoding content body.
      * @param pContentCharset the charset to use
      */
-    public J4pClientBuilder contentCharset(String pContentCharset) {
+    public final J4pClientBuilder contentCharset(String pContentCharset) {
         HttpProtocolParams.setContentCharset(params, pContentCharset);
         return this;
     }
@@ -151,10 +151,10 @@ public class J4pClientBuilder {
      * The use of the 'Expect: 100-continue' handshake can result in noticable peformance
      * improvement for entity enclosing requests that require the target server's authentication.
      *
-     * @param pUse whether to use this algo or not
+     * @param pUse whether to use this algorithm or not
      */
-    public J4pClientBuilder expectContinue(boolean pUse) {
-        HttpProtocolParams.setUseExpectContinue(params,true);
+    public final J4pClientBuilder expectContinue(boolean pUse) {
+        HttpProtocolParams.setUseExpectContinue(params,pUse);
         return this;
     }
 
@@ -166,7 +166,7 @@ public class J4pClientBuilder {
      * of an increase in bandwidth consumption.
      * @param pUse whether to use NO_DELAY or not
      */
-    public J4pClientBuilder tcpNoDelay(boolean pUse) {
+    public final J4pClientBuilder tcpNoDelay(boolean pUse) {
         HttpConnectionParams.setTcpNoDelay(params,pUse);
         return this;
     }
@@ -176,7 +176,7 @@ public class J4pClientBuilder {
      * transmitting HTTP messages.
      * @param pSize size of socket buffer
      */
-    public J4pClientBuilder socketBufferSize(int pSize) {
+    public final J4pClientBuilder socketBufferSize(int pSize) {
         HttpConnectionParams.setSocketBufferSize(params,pSize);
         return this;
     }
