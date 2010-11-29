@@ -201,7 +201,9 @@ public final class JmxRequestFactory {
 
         extractElements(ret,elementStack,null);
         if (ret.size() == 0) {
-            throw new IllegalArgumentException("No request type given");
+            // If no request type (i.e. the agent is queried directly
+            // we return version and server meta information instead
+            ret.push(JmxRequest.Type.VERSION.getName());
         }
 
         // Reverse stack
