@@ -20,6 +20,7 @@ import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -79,6 +80,17 @@ abstract public class AbstractServerDetector implements ServerDetector {
     }
 
     /**
+     * Check whether a certain MBean exists
+     * @param pMBeanServers set of MBeanServers to query for
+     * @param pObjectName the objectname to check. Can be a pattern in which case this method
+     *        return true if one or more MBeans of all MBeanServers match this pattern
+     * @return true if at least one MBean of the given name (or pattern) exists
+     */
+    protected boolean mBeanExists(Set<MBeanServer> pMBeanServers,String pObjectName) {
+        return searchMBeans(pMBeanServers,pObjectName) != null;
+    }
+
+    /**
      * Get the string representation of an attribute
      *
      * @param pMbeanServers set of MBeanServers to query. The first one wins.
@@ -86,7 +98,7 @@ abstract public class AbstractServerDetector implements ServerDetector {
      * @param pAttribute attribute to lookup
      * @return string value of attribute or <code>null</code> if the attribute could not be fetched
      */
-    protected Object getAttributeValue(Set<MBeanServer> pMbeanServers,String pMBean,String pAttribute) {
+    protected String getAttributeValue(Set<MBeanServer> pMbeanServers,String pMBean,String pAttribute) {
         try {
             ObjectName oName = new ObjectName(pMBean);
             return getAttributeValue(pMbeanServers,oName,pAttribute);
@@ -95,18 +107,53 @@ abstract public class AbstractServerDetector implements ServerDetector {
         }
     }
 
-    protected Object getAttributeValue(Set<MBeanServer> pMbeanServers,ObjectName pMBean,String pAttribute) {
+    /**
+     * Get the string representation of an attribute
+     *
+     * @param pMbeanServers set of MBeanServers to query. The first one wins.
+     * @param pMBean name of MBean to lookup
+     * @param pAttribute attribute to lookup
+     * @return string value of attribute or <code>null</code> if the attribute could not be fetched
+     */
+    protected String getAttributeValue(Set<MBeanServer> pMbeanServers,ObjectName pMBean,String pAttribute) {
         try {
             for (MBeanServer s : pMbeanServers) {
                 Object attr = s.getAttribute(pMBean,pAttribute);
                 if (attr != null) {
-                    return attr;
+                    return attr.toString();
                 }
             }
             return null;
         } catch (JMException e) {
             return null;
         }
+    }
+
+    /**
+     * Get a single attribute for a given MBeanName pattern.
+     *
+     * @param pMbeanServers the mbean servers to query
+     * @param pMBeanName a MBean name or pattern. If multiple MBeans are found, each is queried for the attribute
+     * @param pAttribute the attribute to lookup
+     * @return the string value of the attribute or null if either no MBeans could be found, or 0 or more than 1 attribute
+     *         are found on those mbeans
+     */
+    protected String getSingleStringAttribute(Set<MBeanServer> pMbeanServers, String pMBeanName, String pAttribute) {
+        Set<ObjectName> serverMBeanNames = searchMBeans(pMbeanServers,pMBeanName);
+        if (serverMBeanNames == null || serverMBeanNames.size() == 0) {
+            return null;
+        }
+        Set<String> serverVersions = new HashSet<String>();
+        for (ObjectName oName : serverMBeanNames) {
+            String val = getAttributeValue(pMbeanServers,oName,pAttribute);
+            if (val != null) {
+                serverVersions.add(val);
+            }
+        }
+        if (serverVersions.size() == 0 || serverVersions.size() > 1) {
+            return null;
+        }
+        return serverVersions.iterator().next();
     }
 
 

@@ -15,7 +15,6 @@ import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerInfo;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.util.ServiceObjectFactory;
-import sun.misc.Sort;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -104,11 +103,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     private ServerInfo detectServer() {
         List<ServerDetector> detectors =
                 ServiceObjectFactory.createServiceObjects("/META-INF/detectors-default","/META-INF/detectors");
-        Collections.sort(detectors,new Comparator<ServerDetector>() {
-            public int compare(ServerDetector o1, ServerDetector o2) {
-                return o2.getPopularity() - o1.getPopularity();
-            }
-        });
         for (ServerDetector detector : detectors) {
             ServerInfo info = detector.detect(mBeanServers);
             if (info != null) {

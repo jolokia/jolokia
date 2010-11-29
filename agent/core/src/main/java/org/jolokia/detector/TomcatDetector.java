@@ -35,21 +35,10 @@ public class TomcatDetector extends AbstractServerDetector {
 
 
     public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
-        Set<ObjectName> serverMBeanNames = searchMBeans(pMbeanServers,"*:type=Server");
-        if (serverMBeanNames == null || serverMBeanNames.size() == 0) {
+        String serverInfo = getSingleStringAttribute(pMbeanServers, "*:type=Server", "serverInfo");
+        if (serverInfo == null) {
             return null;
         }
-        Set<String> serverVersions = new HashSet<String>();
-        for (ObjectName oName : serverMBeanNames) {
-            Object val = getAttributeValue(pMbeanServers,oName,"serverInfo");
-            if (val != null) {
-                serverVersions.add(val.toString());
-            }
-        }
-        if (serverVersions.size() == 0 || serverVersions.size() > 1) {
-            return null;
-        }
-        String serverInfo = serverVersions.iterator().next();
         Matcher matcher = SERVER_INFO_PATTERN.matcher(serverInfo);
         if (matcher.matches()) {
             String product = matcher.group(1);
@@ -62,7 +51,4 @@ public class TomcatDetector extends AbstractServerDetector {
         return null;
     }
 
-    public int getPopularity() {
-        return 95;
-    }
 }

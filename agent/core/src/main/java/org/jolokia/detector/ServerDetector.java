@@ -39,10 +39,4 @@ public interface ServerDetector {
      */
     public ServerInfo detect(Set<MBeanServer> pMbeanServers);
 
-    /*
-     * Popularity of this server, the detector is responsible for. This is a heuristic value
-     * in between 0 .. 100 (100 being the 'most popular') used for calculating the order in which
-     * detectors are queried
-     */
-    int getPopularity();
 }

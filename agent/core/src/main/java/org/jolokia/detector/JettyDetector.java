@@ -65,8 +65,4 @@ public class JettyDetector extends AbstractServerDetector {
         return null;
     }
 
-    public int getPopularity() {
-        return 80;
-    }
-
 }

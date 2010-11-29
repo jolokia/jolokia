@@ -16,10 +16,7 @@
 
 package org.jolokia.detector;
 
-import com.sun.tools.javac.resources.version;
-
 import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import java.util.Set;
 
 /**
@@ -27,7 +24,9 @@ import java.util.Set;
  * @since 06.11.10
  */
 public class JBossDetector extends AbstractServerDetector {
-    
+
+    private boolean useClassLookup = true;
+
     public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
         if (checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JR77 call
@@ -41,15 +40,18 @@ public class JBossDetector extends AbstractServerDetector {
                 return new ServerInfo("JBoss","jboss",version,null,null);
             }
         }
+        if (mBeanExists(pMbeanServers, "jboss.system:type=Server")) {
+            String versionFull = getAttributeValue(pMbeanServers, "jboss.system:type=Server","Version");
+            String version = null;
+            if (versionFull != null) {
+                version = versionFull.replaceAll("\\(.*", "").trim();
+            }
+            return new ServerInfo("JBoss","jboss",version,null,null);
+        }
+
         return null;
     }
-
-
-    public int getPopularity() {
-        return 80;
-    }
 }
-
 /*
 jboss.web:J2EEApplication=none,J2EEServer=none,j2eeType=WebModule,name=//localhost/jolokia --> path
 jboss.web:name=HttpRequest1,type=RequestProcessor,worker=http-bhut%2F172.16.239.130-8080 --> remoteAddr, serverPort, protocol
