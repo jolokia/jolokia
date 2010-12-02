@@ -34,6 +34,8 @@ import static org.jolokia.ConfigKey.*;
 
 
 /**
+ * OSGi Activator for the Jolokia Agent
+ *
  * @author roland
  * @since Dec 27, 2009
  */
@@ -41,6 +43,10 @@ public class JolokiaActivator implements BundleActivator {
 
     // Context associated with this activator
     private BundleContext bundleContext;
+
+    // Thread-Locals which will be used for holding the bundle context and
+    // the https service during initialization
+    private static final ThreadLocal<BundleContext> bundleContextThreadLocal = new ThreadLocal<BundleContext>();
 
     // Tracker to be used for the LogService
     private ServiceTracker logTracker;
@@ -103,6 +109,17 @@ public class JolokiaActivator implements BundleActivator {
         return getConfiguration(AGENT_CONTEXT);
     }
 
+    /**
+     * Get the current bundle context. This static method can be used during startup
+     * of the agent servlet. At other times, this method will return null
+     *
+     * @return the current bundle context during adding of a HttpService, null at other
+     *         times
+     */
+    public static BundleContext getCurrentBundleContext() {
+        return bundleContextThreadLocal.get();
+    }
+
     // ==================================================================================
 
     // Customizer for registering servlet at a HttpService
@@ -142,6 +159,7 @@ public class JolokiaActivator implements BundleActivator {
 
         public Object addingService(ServiceReference reference) {
             HttpService service = (HttpService) context.getService(reference);
+            bundleContextThreadLocal.set(context);
             try {
                 service.registerServlet(getServletAlias(),
                                         createServlet(logHandler),
@@ -151,6 +169,8 @@ public class JolokiaActivator implements BundleActivator {
                 logHandler.error("Servlet Exception: " + e,e);
             } catch (NamespaceException e) {
                 logHandler.error("Namespace Exception: " + e,e);
+            } finally {
+                bundleContextThreadLocal.remove();
             }
             return service;
         }

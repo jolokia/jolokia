@@ -173,7 +173,8 @@ public final class JmxRequestFactory {
         if (pathInfo != null && pathInfo.length() > 0) {
             return pathInfo;
         } else {
-            throw new IllegalArgumentException("No pathinfo given and no query parameter 'p'");
+            return "";
+            //throw new IllegalArgumentException("No pathinfo given and no query parameter 'p'");
         }
     }
 

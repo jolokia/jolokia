@@ -42,12 +42,7 @@ public class ServiceObjectFactory {
 
     private static <T> void readServiceDefinitions(Map<String, T> pExtractorMap, List<T> pExtractors, String pDefPath) {
         try {
-            Enumeration<URL> resUrls = Thread.currentThread().getContextClassLoader().getResources(pDefPath);
-            if (!resUrls.hasMoreElements()) {
-                // Try to use this class classloader
-                URL res = ServiceObjectFactory.class.getResource(pDefPath);
-                resUrls = Collections.enumeration(res != null ? Arrays.asList(res) : Collections.<URL>emptyList());
-            }
+            Enumeration<URL> resUrls = ServiceObjectFactory.class.getClassLoader().getResources(pDefPath);
             while (resUrls.hasMoreElements()) {
                 readServiceDefinitionFromUrl(pExtractorMap, pExtractors, resUrls.nextElement());
             }
@@ -95,7 +90,7 @@ public class ServiceObjectFactory {
                     pExtractors.remove(ext);
                 }
             } else {
-                Class<T> clazz = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(pLine);
+                Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(pLine);
                 T ext = (T) clazz.newInstance();
                 pExtractorMap.put(pLine,ext);
                 pExtractors.add(ext);
