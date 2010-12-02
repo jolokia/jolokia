@@ -23,6 +23,20 @@ import java.net.URL;
 import java.util.*;
 
 /**
+ * A simple factory for creating services with no-arg constructors from a textual
+ * descriptor. This descriptor, which must be a resource loadable by this class'
+ * classloader, is a plain text file which looks like
+ *
+ * <pre>
+ *   org.jolokia.detector.TomcatDetector,50
+ *   !org.jolokia.detector.JettyDetector
+ *   org.jolokia.detector.JBossDetector
+ *   org.jolokia.detector.WebsphereDetector,1500
+ * </pre>
+ *
+ * If a line starts with <code>!</code> it is removed if it has been added previously.
+ * The optional second numeric value is the order in which the services are returned.
+ *
  * @author roland
  * @since 05.11.10
  */
@@ -30,29 +44,44 @@ public class ServiceObjectFactory {
 
     private ServiceObjectFactory() {}
 
+    /**
+     * Create a list of services ordered according to the ordering given in the
+     * service descriptor files. Note, that the descriptor will be looked up
+     * in the whole classpath space, which can result in reading in multiple
+     * descriptors with a single path. Note, that the reading order for mutiple
+     * resources with the same name is not defined.
+     *
+     * @param pDescriptorPaths a list of resource paths which are handle in the given order.
+     *        Normally, default service should be given as first parameter so that custom
+     *        descriptors have a chance to remove a default service.
+     * @param <T> type of the service objects to create
+     * @return a ordered list of created services.
+     */
     public static <T> List<T> createServiceObjects(String... pDescriptorPaths) {
-        Map<String,T> extractorMap = new HashMap<String,T>();
-        List<T> extractors = new LinkedList<T>();
-
+        ServiceEntry.resetDefaultOrder();
+        TreeMap<ServiceEntry,T> extractorMap = new TreeMap<ServiceEntry,T>();
         for (String descriptor : pDescriptorPaths) {
-            readServiceDefinitions(extractorMap, extractors, descriptor);
+            readServiceDefinitions(extractorMap, descriptor);
         }
-        return extractors;
+        ArrayList<T> ret = new ArrayList<T>();
+        for (T service : extractorMap.values()) {
+            ret.add(service);
+        }
+        return ret;
     }
 
-    private static <T> void readServiceDefinitions(Map<String, T> pExtractorMap, List<T> pExtractors, String pDefPath) {
+    private static <T> void readServiceDefinitions(Map<ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
             Enumeration<URL> resUrls = ServiceObjectFactory.class.getClassLoader().getResources(pDefPath);
             while (resUrls.hasMoreElements()) {
-                readServiceDefinitionFromUrl(pExtractorMap, pExtractors, resUrls.nextElement());
+                readServiceDefinitionFromUrl(pExtractorMap, resUrls.nextElement());
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e,e);
         }
     }
 
-    private static <T> void readServiceDefinitionFromUrl(Map<String, T> pExtractorMap,
-                                                         List<T> pExtractors, URL pUrl) {
+    private static <T> void readServiceDefinitionFromUrl(Map<ServiceEntry, T> pExtractorMap,URL pUrl) {
         String line = null;
         Exception error = null;
         LineNumberReader reader = null;
@@ -60,7 +89,7 @@ public class ServiceObjectFactory {
             reader = new LineNumberReader(new InputStreamReader(pUrl.openStream()));
             line = reader.readLine();
             while (line != null) {
-                createOrRemoveService(pExtractorMap, pExtractors, line);
+                createOrRemoveService(pExtractorMap, line);
                 line = reader.readLine();
             }
         } catch (ClassNotFoundException e) {
@@ -76,24 +105,21 @@ public class ServiceObjectFactory {
         } finally {
             closeReader(reader);
             if (error != null) {
-                throw new IllegalStateException("Cannot load extractor " + line + " defined in " +
+                throw new IllegalStateException("Cannot load service " + line + " defined in " +
                         pUrl + " : " + error + ". Aborting",error);
             }
         }
     }
-    private static <T> void createOrRemoveService(Map<String, T> pExtractorMap, List<T> pExtractors, String pLine)
+    private static <T> void createOrRemoveService(Map<ServiceEntry, T> pExtractorMap, String pLine)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (pLine.length() > 0) {
-            if (pLine.startsWith("!")) {
-                T ext = pExtractorMap.remove(pLine.substring(1));
-                if (ext != null) {
-                    pExtractors.remove(ext);
-                }
+            ServiceEntry entry = new ServiceEntry(pLine);
+            if (entry.isRemove()) {
+                T ext = pExtractorMap.remove(entry);
             } else {
-                Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(pLine);
+                Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(entry.getClassName());
                 T ext = (T) clazz.newInstance();
-                pExtractorMap.put(pLine,ext);
-                pExtractors.add(ext);
+                pExtractorMap.put(entry,ext);
             }
         }
     }
@@ -108,4 +134,77 @@ public class ServiceObjectFactory {
         }
     }
 
+    // =============================================================================
+
+    private static class ServiceEntry implements Comparable<ServiceEntry> {
+        private String className;
+        private boolean remove;
+        private Integer order;
+
+        private static ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<Integer>() {
+            @Override
+            protected Integer initialValue() {
+                return new Integer(100);
+            }
+        };
+
+        public ServiceEntry(String pLine) {
+            String[] parts = pLine.split(",");
+            if (parts[0].startsWith("!")) {
+                remove = true;
+                className = parts[0].substring(1);
+            } else {
+                remove = false;
+                className = parts[0];
+            }
+            if (parts.length > 1) {
+                try {
+                    order = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException exp) {
+                    order = nextDefaultOrder();
+                }
+            } else {
+                order = nextDefaultOrder();
+            }
+        }
+
+        private Integer nextDefaultOrder() {
+            Integer defaultOrder = defaultOrderHolder.get();
+            defaultOrderHolder.set(defaultOrder + 1);
+            return defaultOrder;
+        }
+
+        private static void resetDefaultOrder() {
+            defaultOrderHolder.remove();
+        }
+
+        private String getClassName() {
+            return className;
+        }
+
+        private boolean isRemove() {
+            return remove;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ServiceEntry that = (ServiceEntry) o;
+
+            if (!className.equals(that.className)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return className.hashCode();
+        }
+
+        public int compareTo(ServiceEntry o) {
+            return order - o.order;
+        }
+    }
 }
