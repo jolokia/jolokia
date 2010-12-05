@@ -143,17 +143,17 @@ abstract public class AbstractServerDetector implements ServerDetector {
         if (serverMBeanNames == null || serverMBeanNames.size() == 0) {
             return null;
         }
-        Set<String> serverVersions = new HashSet<String>();
+        Set<String> attributeValues = new HashSet<String>();
         for (ObjectName oName : serverMBeanNames) {
             String val = getAttributeValue(pMbeanServers,oName,pAttribute);
             if (val != null) {
-                serverVersions.add(val);
+                attributeValues.add(val);
             }
         }
-        if (serverVersions.size() == 0 || serverVersions.size() > 1) {
+        if (attributeValues.size() == 0 || attributeValues.size() > 1) {
             return null;
         }
-        return serverVersions.iterator().next();
+        return attributeValues.iterator().next();
     }
 
 

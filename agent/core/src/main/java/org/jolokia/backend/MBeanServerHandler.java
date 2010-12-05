@@ -102,7 +102,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // by a lookup mechanism, queried and thrown away after this method
     private ServerInfo detectServer() {
         List<ServerDetector> detectors =
-                ServiceObjectFactory.createServiceObjects("/META-INF/detectors-default","/META-INF/detectors");
+                ServiceObjectFactory.createServiceObjects("META-INF/detectors-default","META-INF/detectors");
         for (ServerDetector detector : detectors) {
             ServerInfo info = detector.detect(mBeanServers);
             if (info != null) {

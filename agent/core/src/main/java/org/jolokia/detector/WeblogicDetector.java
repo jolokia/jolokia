@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package org.jolokia.osgi.detector;
+package org.jolokia.detector;
 
 import java.util.Set;
 
 import javax.management.MBeanServer;
-
-import org.jolokia.detector.ServerInfo;
+import javax.management.ObjectName;
 
 /**
- * Detector for the Apache Felix OSGi Platform
+ * Detector for Weblogic Appservers
  *
  * @author roland
- * @since 02.12.10
+ * @since 05.12.10
  */
-public class FelixDetector extends AbstractOsgiServerDetector {
+public class WeblogicDetector extends AbstractServerDetector {
     public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
-        if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
-            String version = getSystemBundleVersion();
-            return new ServerInfo("Apache","felix",version,null,null);
-        } else {
-            return null;
+        String domainConfigMBean = getSingleStringAttribute(pMbeanServers,"*:Name=RuntimeService,*","DomainConfiguration");
+        if (domainConfigMBean != null) {
+            String version = getSingleStringAttribute(pMbeanServers,domainConfigMBean,"ConfigurationVersion");
+            return new ServerInfo("Bea","weblogic",version,null,null);
         }
+        return null;
     }
 }

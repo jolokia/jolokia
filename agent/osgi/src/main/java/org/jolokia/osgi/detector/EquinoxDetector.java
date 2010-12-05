@@ -23,18 +23,20 @@ import javax.management.MBeanServer;
 import org.jolokia.detector.ServerInfo;
 
 /**
- * Detector for the Apache Felix OSGi Platform
+ * Detector for the Eclipse Equinix Platform
  *
  * @author roland
  * @since 02.12.10
  */
-public class FelixDetector extends AbstractOsgiServerDetector {
+public class EquinoxDetector extends AbstractOsgiServerDetector {
     public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
-        if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
+        if (checkSystemBundleForSymbolicName("org.eclipse.osgi")) {
             String version = getSystemBundleVersion();
-            return new ServerInfo("Apache","felix",version,null,null);
+            version = version.replaceFirst("\\.v\\d+$","");
+            return new ServerInfo("Eclipse","equinox",version,null,null);
         } else {
             return null;
         }
     }
+
 }

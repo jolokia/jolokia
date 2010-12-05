@@ -30,6 +30,7 @@ import java.util.Set;
 public class JettyDetector extends AbstractServerDetector {
 
 
+
     public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
         Class serverClass = getClass("org.mortbay.jetty.Server");
         if (serverClass != null) {

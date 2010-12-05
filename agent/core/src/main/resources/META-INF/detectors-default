@@ -1,4 +1,6 @@
 org.jolokia.detector.TomcatDetector
 org.jolokia.detector.JettyDetector
 org.jolokia.detector.JBossDetector
+org.jolokia.detector.GlassfishDetector
+org.jolokia.detector.WeblogicDetector
 org.jolokia.detector.WebsphereDetector
