@@ -19,7 +19,8 @@ package org.jolokia.detector;
 import java.util.Set;
 
 import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /**
  * Detector for Weblogic Appservers
@@ -28,12 +29,27 @@ import javax.management.ObjectName;
  * @since 05.12.10
  */
 public class WeblogicDetector extends AbstractServerDetector {
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String domainConfigMBean = getSingleStringAttribute(pMbeanServers,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
             String version = getSingleStringAttribute(pMbeanServers,domainConfigMBean,"ConfigurationVersion");
-            return new ServerInfo("Bea","weblogic",version,null,null);
+            return new ServerHandle("Bea","weblogic",version,null,null);
         }
         return null;
+    }
+
+    @Override
+    public void addMBeanServers(Set<MBeanServer> servers) {
+        // Weblogic stores the MBeanServer in a JNDI context
+        InitialContext ctx;
+        try {
+            ctx = new InitialContext();
+            MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
+            if (server != null) {
+                servers.add(server);
+            }
+        } catch (NamingException e) {
+            // expected and can happen on non-Weblogic platforms
+        }
     }
 }

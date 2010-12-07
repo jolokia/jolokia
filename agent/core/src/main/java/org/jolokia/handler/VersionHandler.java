@@ -1,12 +1,12 @@
 package org.jolokia.handler;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 import org.jolokia.JmxRequest;
 import org.jolokia.Version;
 import org.jolokia.config.Restrictor;
-import org.jolokia.detector.ServerInfo;
+import org.jolokia.detector.ServerHandle;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -36,11 +36,11 @@ import javax.management.*;
  */
 public class VersionHandler extends JsonRequestHandler {
 
-    ServerInfo serverInfo;
+    ServerHandle serverHandle;
 
-    public VersionHandler(Restrictor pRestrictor, ServerInfo pServerInfo) {
+    public VersionHandler(Restrictor pRestrictor, ServerHandle pServerHandle) {
         super(pRestrictor);
-        serverInfo = pServerInfo;
+        serverHandle = pServerHandle;
     }
 
     @Override
@@ -49,13 +49,25 @@ public class VersionHandler extends JsonRequestHandler {
     }
 
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request) {
+    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
+        return true;
+    }
+
+    @Override
+    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
-        if (serverInfo != null) {
-            ret.put("info",serverInfo);
+        if (serverHandle != null) {
+            ret.put("info", serverHandle.toJSONObject(servers));
         }
         return ret;
     }
+
+    @Override
+    // Wont be called
+    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request) {
+        return null;
+    }
+
 }

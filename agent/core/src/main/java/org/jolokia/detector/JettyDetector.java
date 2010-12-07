@@ -31,14 +31,14 @@ public class JettyDetector extends AbstractServerDetector {
 
 
 
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         Class serverClass = getClass("org.mortbay.jetty.Server");
         if (serverClass != null) {
-            return new ServerInfo("Mortbay", "jetty", getVersion(serverClass), null, null);
+            return new ServerHandle("Mortbay", "jetty", getVersion(serverClass), null, null);
         }
         serverClass = getClass("org.eclipse.jetty.server.Server");
         if (serverClass != null) {
-            return new ServerInfo("Eclipse", "jetty", getVersion(serverClass), null, null);
+            return new ServerHandle("Eclipse", "jetty", getVersion(serverClass), null, null);
         }
         return null;
     }

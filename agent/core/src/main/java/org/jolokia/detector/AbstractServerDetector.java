@@ -16,12 +16,10 @@
 
 package org.jolokia.detector;
 
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.HashSet;
-import java.util.Set;
+import javax.management.*;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Base class for server detectors
@@ -60,14 +58,15 @@ abstract public class AbstractServerDetector implements ServerDetector {
     /**
      * Check for the existence of a certain MBean. All known MBeanServers are queried
      *
+     *
      * @param pMbeanServers mbean servers to query for
      * @param pMbeanPattern MBean name pattern for MBeans to check for
      * @return set of {@link ObjectName}s if the pattern matches, null if no match was found
      */
-    protected Set<ObjectName> searchMBeans(Set<MBeanServer> pMbeanServers, String pMbeanPattern) {
+    protected Set<ObjectName> searchMBeans(Set<? extends MBeanServerConnection> pMbeanServers, String pMbeanPattern) {
         try {
             ObjectName oName = new ObjectName(pMbeanPattern);
-            for (MBeanServer s : pMbeanServers) {
+            for (MBeanServerConnection s : pMbeanServers) {
                 Set<ObjectName> names = s.queryNames(oName,null);
                 if (names != null && names.size() > 0) {
                     return names;
@@ -76,7 +75,9 @@ abstract public class AbstractServerDetector implements ServerDetector {
             return null;
         } catch (MalformedObjectNameException e) {
             return null;
-        }
+        } catch (IOException e) {
+            return null;
+       }
     }
 
     /**
@@ -86,19 +87,20 @@ abstract public class AbstractServerDetector implements ServerDetector {
      *        return true if one or more MBeans of all MBeanServers match this pattern
      * @return true if at least one MBean of the given name (or pattern) exists
      */
-    protected boolean mBeanExists(Set<MBeanServer> pMBeanServers,String pObjectName) {
+    protected boolean mBeanExists(Set<? extends MBeanServerConnection> pMBeanServers,String pObjectName) {
         return searchMBeans(pMBeanServers,pObjectName) != null;
     }
 
     /**
      * Get the string representation of an attribute
      *
+     *
      * @param pMbeanServers set of MBeanServers to query. The first one wins.
      * @param pMBean object name of MBean to lookup
      * @param pAttribute attribute to lookup
      * @return string value of attribute or <code>null</code> if the attribute could not be fetched
      */
-    protected String getAttributeValue(Set<MBeanServer> pMbeanServers,String pMBean,String pAttribute) {
+    protected String getAttributeValue(Set<? extends MBeanServer> pMbeanServers,String pMBean,String pAttribute) {
         try {
             ObjectName oName = new ObjectName(pMBean);
             return getAttributeValue(pMbeanServers,oName,pAttribute);
@@ -110,14 +112,16 @@ abstract public class AbstractServerDetector implements ServerDetector {
     /**
      * Get the string representation of an attribute
      *
+     *
+     *
      * @param pMbeanServers set of MBeanServers to query. The first one wins.
      * @param pMBean name of MBean to lookup
      * @param pAttribute attribute to lookup
      * @return string value of attribute or <code>null</code> if the attribute could not be fetched
      */
-    protected String getAttributeValue(Set<MBeanServer> pMbeanServers,ObjectName pMBean,String pAttribute) {
+    protected String getAttributeValue(Set<? extends MBeanServerConnection> pMbeanServers,ObjectName pMBean,String pAttribute) {
         try {
-            for (MBeanServer s : pMbeanServers) {
+            for (MBeanServerConnection s : pMbeanServers) {
                 Object attr = s.getAttribute(pMBean,pAttribute);
                 if (attr != null) {
                     return attr.toString();
@@ -126,11 +130,14 @@ abstract public class AbstractServerDetector implements ServerDetector {
             return null;
         } catch (JMException e) {
             return null;
+        } catch (IOException e) {
+            return null;
         }
     }
 
     /**
      * Get a single attribute for a given MBeanName pattern.
+     *
      *
      * @param pMbeanServers the mbean servers to query
      * @param pMBeanName a MBean name or pattern. If multiple MBeans are found, each is queried for the attribute
@@ -138,7 +145,7 @@ abstract public class AbstractServerDetector implements ServerDetector {
      * @return the string value of the attribute or null if either no MBeans could be found, or 0 or more than 1 attribute
      *         are found on those mbeans
      */
-    protected String getSingleStringAttribute(Set<MBeanServer> pMbeanServers, String pMBeanName, String pAttribute) {
+    protected String getSingleStringAttribute(Set<? extends MBeanServerConnection> pMbeanServers, String pMBeanName, String pAttribute) {
         Set<ObjectName> serverMBeanNames = searchMBeans(pMbeanServers,pMBeanName);
         if (serverMBeanNames == null || serverMBeanNames.size() == 0) {
             return null;
@@ -172,6 +179,9 @@ abstract public class AbstractServerDetector implements ServerDetector {
         return null;
     }
 
+    // Do nothing by default, leaving the implementation
+    // optional for each specific detector
+    public void addMBeanServers(Set<MBeanServer> pServers) {}
 
     // ===========================================================================
 

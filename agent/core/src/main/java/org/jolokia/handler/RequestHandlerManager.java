@@ -20,7 +20,7 @@ import org.jolokia.JmxRequest;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.detector.ServerInfo;
+import org.jolokia.detector.ServerHandle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,13 +37,13 @@ public class RequestHandlerManager {
 
     public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
             StringToObjectConverter pStringToObjectConverter,
-            ServerInfo pServerInfo, Restrictor pRestrictor) {
+            ServerHandle pServerHandle, Restrictor pRestrictor) {
         JsonRequestHandler handlers[] = {
                 new ReadHandler(pRestrictor),
                 new WriteHandler(pRestrictor, pObjectToJsonConverter),
                 new ExecHandler(pRestrictor, pStringToObjectConverter),
                 new ListHandler(pRestrictor),
-                new VersionHandler(pRestrictor,pServerInfo),
+                new VersionHandler(pRestrictor, pServerHandle),
                 new SearchHandler(pRestrictor)
         };
         for (JsonRequestHandler handler : handlers) {

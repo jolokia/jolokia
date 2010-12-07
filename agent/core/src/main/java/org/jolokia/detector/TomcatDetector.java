@@ -17,8 +17,7 @@
 package org.jolokia.detector;
 
 import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.util.HashSet;
+
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +33,7 @@ public class TomcatDetector extends AbstractServerDetector {
     private final static Pattern SERVER_INFO_PATTERN = Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+)");
 
 
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String serverInfo = getSingleStringAttribute(pMbeanServers, "*:type=Server", "serverInfo");
         if (serverInfo == null) {
             return null;
@@ -45,7 +44,7 @@ public class TomcatDetector extends AbstractServerDetector {
             String version = matcher.group(2);
             // TODO: Extract access URL
             if (product.toLowerCase().contains("tomcat")) {
-                return new ServerInfo("Apache","tomcat",version,null,null);
+                return new ServerHandle("Apache","tomcat",version,null,null);
             }
         }
         return null;

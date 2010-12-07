@@ -18,6 +18,7 @@ package org.jolokia.osgi.detector;
 
 import java.util.Dictionary;
 
+import org.jolokia.detector.AbstractServerDetector;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.osgi.JolokiaActivator;
 import org.osgi.framework.Bundle;
@@ -27,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * @author roland
  * @since 04.12.10
  */
-abstract public class AbstractOsgiServerDetector implements ServerDetector {
+abstract public class AbstractOsgiServerDetector extends AbstractServerDetector {
     protected String getSystemBundleVersion() {
         Dictionary headers = getSystemBundleHeaders();
         return (String) headers.get("Bundle-Version");

@@ -16,11 +16,13 @@
 
 package org.jolokia.detector;
 
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 
 /**
  * Detector for Glassfish servers
@@ -33,7 +35,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*GlassFish.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
     private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^\\s*GlassFish.*?\\s([.\\d]+)\\s.*$?");
 
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String version = null;
         boolean amxBooted = false;
         String fullVersion = getSingleStringAttribute(pMbeanServers,"com.sun.appserv:j2eeType=J2EEServer,*","serverVersion");
@@ -64,14 +66,18 @@ public class GlassfishDetector extends AbstractServerDetector {
         }
         if (version != null) {
             Map<String,String> extraInfo = null;
-            if (version.startsWith("3")) {
+            if (hasAmx(version)) {
                 extraInfo = new HashMap<String,String>();
                 extraInfo.put("amxBooted",Boolean.toString(amxBooted));
             }
-            return new ServerInfo("Sun","glassfish",version,null,extraInfo);
+            return new GlassfishServerHandle("Sun","glassfish",version,null,extraInfo);
         } else {
             return null;
         }
+    }
+
+    private boolean hasAmx(String pVersion) {
+        return pVersion.startsWith("3");
     }
 
     private String getVersionFromFullVersion(String pOriginalVersion,String pFullVersion) {
@@ -83,6 +89,22 @@ public class GlassfishDetector extends AbstractServerDetector {
             return v3Matcher.group(1);
         } else {
             return pOriginalVersion;
+        }
+    }
+
+    private class GlassfishServerHandle extends ServerHandle {
+
+        public GlassfishServerHandle(String vendor, String product, String version, URL agentUrl, Map<String, String> extraInfo) {
+            super(vendor, product, version, agentUrl, extraInfo);
+        }
+
+        @Override
+        public Map<String, String> getExtraInfo(Set<? extends MBeanServerConnection> pServers) {
+            Map<String,String> extra = super.getExtraInfo(pServers);
+            if (extra != null && hasAmx(getVersion())) {
+                extra.put("amdBooted",Boolean.toString(mBeanExists(pServers,"amx:type=domain-root,*")));
+            }
+            return extra;
         }
     }
 }

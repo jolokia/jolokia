@@ -22,7 +22,7 @@ import org.jolokia.config.DebugStore;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.detector.ServerInfo;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.*;
 import org.jolokia.history.HistoryStore;
 
@@ -62,7 +62,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
         // Request handling manager 
         requestHandlerManager =
-                new RequestHandlerManager(objectToJsonConverter,stringToObjectConverter,mBeanServerHandler.getServerInfo(),restrictor);
+                new RequestHandlerManager(objectToJsonConverter,stringToObjectConverter,mBeanServerHandler.getServerHandle(),restrictor);
     }
 
 
@@ -101,7 +101,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         mBeanServerHandler.unregisterMBeans();
     }
 
-    public ServerInfo getServerInfo() {
-        return mBeanServerHandler.getServerInfo();                
+    public ServerHandle getServerInfo() {
+        return mBeanServerHandler.getServerHandle();
     }
 }

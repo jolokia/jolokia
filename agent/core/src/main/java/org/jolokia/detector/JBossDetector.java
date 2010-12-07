@@ -16,8 +16,15 @@
 
 package org.jolokia.detector;
 
-import javax.management.MBeanServer;
+import javax.management.*;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Map;
 import java.util.Set;
+
+import org.jolokia.JmxRequest;
 
 /**
  * @author roland
@@ -27,7 +34,7 @@ public class JBossDetector extends AbstractServerDetector {
 
     private boolean useClassLookup = true;
 
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JR77 call
             String version = getVersionFromJsr77(pMbeanServers);
@@ -37,7 +44,7 @@ public class JBossDetector extends AbstractServerDetector {
                     // Strip off boilerplate
                     version = version.substring(0,idx);
                 }
-                return new ServerInfo("JBoss","jboss",version,null,null);
+                return new ServerHandle("JBoss","jboss",version,null,null);
             }
         }
         if (mBeanExists(pMbeanServers, "jboss.system:type=Server")) {
@@ -46,10 +53,57 @@ public class JBossDetector extends AbstractServerDetector {
             if (versionFull != null) {
                 version = versionFull.replaceAll("\\(.*", "").trim();
             }
-            return new ServerInfo("JBoss","jboss",version,null,null);
+            return new JBossServerHandle(version,null,null);
         }
 
         return null;
+    }
+
+    // Special handling for JBoss
+    @Override
+    public void addMBeanServers(Set<MBeanServer> servers) {
+        try {
+            Class locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
+            Method method = locatorClass.getMethod("locateJBoss");
+            servers.add((MBeanServer) method.invoke(null));
+        }
+        catch (ClassNotFoundException e) { /* Ok, its *not* JBoss, continue with search ... */ }
+        catch (NoSuchMethodException e) { }
+        catch (IllegalAccessException e) { }
+        catch (InvocationTargetException e) { }
+    }
+
+    // ========================================================================
+    private class JBossServerHandle extends ServerHandle {
+
+        public JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
+            super("JBoss", "jboss", version, agentUrl, extraInfo);
+        }
+
+        @Override
+        public void preDispatch(Set<MBeanServer> pMBeanServers, JmxRequest pJmxReq) {
+            if (pJmxReq.getObjectName() != null &&
+                    "java.lang".equals(pJmxReq.getObjectName().getDomain())) {
+            try {
+                // invoking getMBeanInfo() works around a bug in getAttribute() that fails to
+                // refetch the domains from the platform (JDK) bean server (e.g. for MXMBeans)
+                for (MBeanServer s : pMBeanServers) {
+                    try {
+                        s.getMBeanInfo(pJmxReq.getObjectName());
+                        return;
+                    } catch (InstanceNotFoundException exp) {
+                        // Only one server can have the name. So, this exception
+                        // is being expected to happen
+                    }
+                }
+            } catch (IntrospectionException e) {
+                throw new IllegalStateException("Workaround for JBoss failed for object " + pJmxReq.getObjectName() + ": " + e);
+            } catch (ReflectionException e) {
+                throw new IllegalStateException("Workaround for JBoss failed for object " + pJmxReq.getObjectName() + ": " + e);
+            }
+        }
+    }
+
     }
 }
 /*

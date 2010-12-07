@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-package org.jolokia.osgi.detector;
+package org.jolokia.detector;
 
 import java.util.Set;
 
 import javax.management.MBeanServer;
 
-import org.jolokia.detector.ServerHandle;
-
 /**
- * Detector for the Eclipse Equinix Platform
- *
  * @author roland
- * @since 02.12.10
+ * @since 05.12.10
  */
-public class EquinoxDetector extends AbstractOsgiServerDetector {
+public class GeronimoDetector extends AbstractServerDetector {
+
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        if (checkSystemBundleForSymbolicName("org.eclipse.osgi")) {
-            String version = getSystemBundleVersion();
-            version = version.replaceFirst("\\.v\\d+$","");
-            return new ServerHandle("Eclipse","equinox",version,null,null);
+        String version = getSingleStringAttribute(pMbeanServers,"geronimo:j2eeType=J2EEServer","serverVersion");
+        if (version != null) {
+            return new ServerHandle("Apache","geronimo",version,null,null);
         } else {
             return null;
         }
     }
-
 }

@@ -20,7 +20,7 @@ import java.util.Set;
 
 import javax.management.MBeanServer;
 
-import org.jolokia.detector.ServerInfo;
+import org.jolokia.detector.ServerHandle;
 
 /**
  * Detector for the Apache Felix OSGi Platform
@@ -29,10 +29,11 @@ import org.jolokia.detector.ServerInfo;
  * @since 02.12.10
  */
 public class FelixDetector extends AbstractOsgiServerDetector {
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers) {
+
+    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
             String version = getSystemBundleVersion();
-            return new ServerInfo("Apache","felix",version,null,null);
+            return new ServerHandle("Apache","felix",version,null,null);
         } else {
             return null;
         }

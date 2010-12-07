@@ -43,11 +43,11 @@ public class WebSphereDetectorTest {
         expect(mockServer.getAttribute(serverMbean,"serverVersion")).andReturn(SERVER_VERSION_V6);
         replay(mockServer);
 
-        ServerInfo info = detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer)));
+        ServerHandle info = detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer)));
         assertEquals(info.getVendor(),"IBM");
         assertEquals(info.getProduct(),"websphere");
-        assertNotNull(info.getExtraInfo());
-        assertEquals(info.getExtraInfo().get("buildDate"),"8/14/10");
+        assertNotNull(info.getExtraInfo(null));
+        assertEquals(info.getExtraInfo(null).get("buildDate"),"8/14/10");
     }
 
 

@@ -4,3 +4,4 @@ org.jolokia.detector.JBossDetector
 org.jolokia.detector.GlassfishDetector
 org.jolokia.detector.WeblogicDetector
 org.jolokia.detector.WebsphereDetector
+org.jolokia.detector.GeronimoDetector

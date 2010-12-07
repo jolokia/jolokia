@@ -17,12 +17,13 @@
 package org.jolokia.detector;
 
 import javax.management.MBeanServer;
+
 import java.util.Set;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting
  * the runtime environment e.g. for the existance of certain classes. If a detector
- * successfully detect 'its' server, it return a {@link ServerInfo} containing type, version
+ * successfully detect 'its' server, it return a {@link ServerHandle} containing type, version
  * and some optional information
  * @author roland
  * @since 05.11.10
@@ -30,13 +31,19 @@ import java.util.Set;
 public interface ServerDetector {
 
     /**
-     * Detect the server. A {@link ServerInfo} descriptor is returned
+     * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.
      *
      *
      * @param pMbeanServers a set of MBeanServers which can be used for detecting server informations
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
-    public ServerInfo detect(Set<MBeanServer> pMbeanServers);
+    ServerHandle detect(Set<MBeanServer> pMbeanServers);
 
+    /**
+     * Add server specific MBeanServers
+     *
+     * @param pMBeanServers set to add detected MBeanServers to
+     */
+    void addMBeanServers(Set<MBeanServer> pMBeanServers);
 }
