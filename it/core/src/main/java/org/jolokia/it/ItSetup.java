@@ -92,14 +92,14 @@ public class ItSetup {
                 for (String domain : domains) {
                     String strangeName = domain + ":type=naming,name=" + name;
                     strangeNames.add(strangeName);
-                    registerMBean(new ObjectNameChecking(),strangeName);
+                    registerMBean(new ObjectNameChecking(strangeName),strangeName);
                 }
             }
             for (String name : escapedNamesShort) {
                 for (String domain: domains) {
                     String escapedName = domain + ":type=escape,name=" + ObjectName.quote(name);
                     escapedNames.add(escapedName);
-                    registerMBean(new ObjectNameChecking(),escapedName);
+                    registerMBean(new ObjectNameChecking(escapedName),escapedName);
                 }
             }
 

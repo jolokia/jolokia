@@ -109,7 +109,7 @@ public class WebsphereDetector extends AbstractServerDetector {
             // Websphere adds extra parts to the object name if registered explicitly, but
             // we need a defined name on the client side. So we register it with 'null' in websphere
             // and let the bean define its name.
-            if (isWebsphere6) {
+            if (isWebsphere6 && pMBean instanceof MBeanRegistration) {
                 return pServer.registerMBean(pMBean,null).getObjectName();
             } else {
                 return super.registerMBeanAtServer(pServer, pMBean, pName);
