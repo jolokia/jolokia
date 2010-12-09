@@ -17,6 +17,8 @@ package org.jolokia.it;
  */
 
 
+import javax.management.*;
+
 /**
  * We need to use MBeanRegisration because Websphere wont let us set our name
  * directly while registering (it always add some boilerplate to the name). Using this
@@ -26,8 +28,28 @@ package org.jolokia.it;
  * @author roland
  * @since Jun 25, 2009
  */
-public class ObjectNameChecking implements ObjectNameCheckingMBean {
+public class ObjectNameChecking implements ObjectNameCheckingMBean,MBeanRegistration {
+
+    private String name;
+
+    public ObjectNameChecking(String pStrangeName) {
+        name = pStrangeName;
+    }
+
     public String getOk() {
         return "OK";
+    }
+
+    public ObjectName preRegister(MBeanServer server, ObjectName pDesiredName) throws Exception {
+        return new ObjectName(name);
+    }
+
+    public void postRegister(Boolean registrationDone) {
+    }
+
+    public void preDeregister() throws Exception {
+    }
+
+    public void postDeregister() {
     }
 }

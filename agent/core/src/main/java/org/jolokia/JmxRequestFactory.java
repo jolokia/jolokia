@@ -173,7 +173,8 @@ public final class JmxRequestFactory {
         if (pathInfo != null && pathInfo.length() > 0) {
             return pathInfo;
         } else {
-            throw new IllegalArgumentException("No pathinfo given and no query parameter 'p'");
+            return "";
+            //throw new IllegalArgumentException("No pathinfo given and no query parameter 'p'");
         }
     }
 
@@ -201,7 +202,9 @@ public final class JmxRequestFactory {
 
         extractElements(ret,elementStack,null);
         if (ret.size() == 0) {
-            throw new IllegalArgumentException("No request type given");
+            // If no request type (i.e. the agent is queried directly
+            // we return version and server meta information instead
+            ret.push(JmxRequest.Type.VERSION.getName());
         }
 
         // Reverse stack

@@ -7,12 +7,11 @@ import org.jolokia.converter.StringToObjectConverter;
 
 import static org.jolokia.ConfigKey.*;
 
+import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
 import javax.management.AttributeNotFoundException;
 
-import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.*;
 
 /*
@@ -55,6 +54,8 @@ public final class ObjectToJsonConverter {
 
     // Used for converting string to objects when setting attributes
     private StringToObjectConverter stringToObjectConverter;
+
+
 
     private Integer hardMaxDepth,hardMaxCollectionSize,hardMaxObjects;
 
@@ -376,93 +377,10 @@ public final class ObjectToJsonConverter {
             handlers.addAll(Arrays.asList(pSimplifyHandlers));
         } else {
             // Add all
-            addSimplifiersFromDescriptor();
+            handlers.addAll(ServiceObjectFactory.<Extractor>createServiceObjects(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
         }
     }
 
-    // Read in default and custom defintions for simpifiers and add them to
-    // our handlers
-    private void addSimplifiersFromDescriptor() {
-        Map<String,Extractor> extractorMap = new HashMap<String,Extractor>();
-        List<Extractor> extractors = new LinkedList<Extractor>();
-
-        readSimplifierDefinitions(extractorMap, extractors, SIMPLIFIERS_DEFAULT_DEF);
-        readSimplifierDefinitions(extractorMap, extractors, SIMPLIFIERS_DEF);
-        handlers.addAll(extractors);
-    }
-
-    private void readSimplifierDefinitions(Map<String, Extractor> pExtractorMap, List<Extractor> pExtractors, String pDefinition) {
-        try {
-            Enumeration<URL> resUrls = Thread.currentThread().getContextClassLoader().getResources(pDefinition);
-            if (!resUrls.hasMoreElements()) {
-                // Try to use this class classloader
-                URL res = getClass().getResource(pDefinition);
-                resUrls = Collections.enumeration(res != null ? Arrays.asList(res) : Collections.<URL>emptyList());
-            }
-            while (resUrls.hasMoreElements()) {
-                readSimplifierDefinitionFromUrl(pExtractorMap, pExtractors, resUrls.nextElement());
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot load extractor from " + pDefinition + ": " + e,e);
-        }
-    }
-
-    private void readSimplifierDefinitionFromUrl(Map<String, Extractor> pExtractorMap, List<Extractor> pExtractors, URL pUrl) {
-        String line = null;
-        Exception error = null;
-        LineNumberReader reader = null;
-        try {
-            reader = new LineNumberReader(new InputStreamReader(pUrl.openStream()));
-            line = reader.readLine();
-            while (line != null) {
-                createOrRemoveSimplifier(pExtractorMap, pExtractors, line);
-                line = reader.readLine();
-            }
-        } catch (ClassNotFoundException e) {
-            error = e;
-        } catch (InstantiationException e) {
-            error = e;
-        } catch (IllegalAccessException e) {
-            error = e;
-        } catch (ClassCastException e) {
-            error = e;
-        } catch (IOException e) {
-            error = e;
-        } finally {
-            closeReader(reader);
-            if (error != null) {
-                throw new IllegalStateException("Cannot load extractor " + line + " defined in " +
-                        pUrl + " : " + error + ". Aborting",error);
-            }
-        }
-    }
-
-    private void closeReader(LineNumberReader pReader) {
-        if (pReader != null) {
-            try {
-                pReader.close();
-            } catch (IOException e) {
-                // Best effort
-            }
-        }
-    }
-
-    private void createOrRemoveSimplifier(Map<String, Extractor> pExtractorMap, List<Extractor> pExtractors, String pLine)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        if (pLine.length() > 0) {
-            if (pLine.startsWith("!")) {
-                Extractor ext = pExtractorMap.remove(pLine.substring(1));
-                if (ext != null) {
-                    pExtractors.remove(ext);
-                }
-            } else {
-                Class clazz = Thread.currentThread().getContextClassLoader().loadClass(pLine);
-                Extractor ext = (Extractor) clazz.newInstance();
-                pExtractorMap.put(pLine,ext);
-                pExtractors.add(ext);
-            }
-        }
-    }
 
     // =============================================================================
     // Context used for detecting call loops and the like

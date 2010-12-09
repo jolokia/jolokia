@@ -25,6 +25,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>4.2.0</version>
@@ -54,7 +61,7 @@
             <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>org.jolokia.it.Activator</Bundle-Activator>
             <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>
-            <Embed-Dependency>jolokia-core;inline=true</Embed-Dependency>
+            <Embed-Dependency>jolokia-core;inline=true,json-simple;inline=true</Embed-Dependency>
             <!-- Needed because we export an embedded package only -->
             <Import-Package>
               !org.json.simple.*,

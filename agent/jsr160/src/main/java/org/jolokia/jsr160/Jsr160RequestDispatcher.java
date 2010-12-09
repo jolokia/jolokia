@@ -21,6 +21,7 @@ import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 
@@ -44,9 +45,10 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     public Jsr160RequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
                                    StringToObjectConverter stringToObjectConverter,
+                                   ServerHandle serverInfo,
                                    Restrictor restrictor) {
         requestHandlerManager = new RequestHandlerManager(
-                objectToJsonConverter, stringToObjectConverter, restrictor);
+                objectToJsonConverter, stringToObjectConverter, serverInfo, restrictor);
     }
 
     /**

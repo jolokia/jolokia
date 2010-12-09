@@ -17,8 +17,7 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.*;
 
@@ -28,6 +27,8 @@ import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.LogHandler;
+import org.jolokia.detector.ServerDetector;
+import org.jolokia.detector.ServerHandle;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -42,7 +43,7 @@ public class BackendManagerTest implements LogHandler {
     BackendManager backendManager;
 
     @Test
-    public void simplRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         backendManager = new BackendManager(new HashMap(),this);
         JmxRequest req = new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
@@ -95,7 +96,7 @@ public class BackendManagerTest implements LogHandler {
 
         static boolean called = false;
 
-        public RequestDispatcherTest(ObjectToJsonConverter pObjectToJsonConverter,StringToObjectConverter pStringConverter,Restrictor pRestrictor) {
+        public RequestDispatcherTest(ObjectToJsonConverter pObjectToJsonConverter,StringToObjectConverter pStringConverter,ServerHandle pServerHandle,Restrictor pRestrictor) {
             assertNotNull(pObjectToJsonConverter);
             assertNotNull(pStringConverter);
             assertNotNull(pRestrictor);
@@ -138,4 +139,5 @@ public class BackendManagerTest implements LogHandler {
             return false;
         }
     }
+
 }

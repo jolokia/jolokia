@@ -1,0 +1,2 @@
+org.jolokia.osgi.detector.FelixDetector,1000
+org.jolokia.osgi.detector.EquinoxDetector,1010

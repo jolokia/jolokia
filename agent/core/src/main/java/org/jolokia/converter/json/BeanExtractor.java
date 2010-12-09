@@ -2,6 +2,7 @@ package org.jolokia.converter.json;
 
 import org.jolokia.JmxRequest;
 import org.jolokia.converter.StringToObjectConverter;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import javax.management.AttributeNotFoundException;
@@ -85,6 +86,9 @@ public class BeanExtractor implements Extractor {
         if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass())) {
             // No further diving, use these directly
             return pValue.toString();
+        } else if (pValue instanceof JSONAware) {
+            // We can return it directly since the object itself already know how to serialize itself
+            return pValue;
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
             List<String> attributes = extractBeanAttributes(pValue);
