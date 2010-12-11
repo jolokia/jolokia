@@ -16,14 +16,14 @@
 
 package org.jolokia.detector;
 
-import org.jolokia.JmxRequest;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
-
 import java.net.URL;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 import javax.management.*;
+
+import org.jolokia.JmxRequest;
+import org.json.simple.JSONObject;
 
 /**
  * Information about the the server product the agent is running in.

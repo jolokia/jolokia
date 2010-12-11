@@ -62,7 +62,8 @@ public class JettyDetector extends AbstractServerDetector {
             try {
                 return Class.forName(pClassName,false, loader);
             } catch (ClassNotFoundException e) {}
-        } while ( (loader = loader.getParent()) != null);
+            loader = loader.getParent();
+        } while (loader != null);
         return null;
     }
 

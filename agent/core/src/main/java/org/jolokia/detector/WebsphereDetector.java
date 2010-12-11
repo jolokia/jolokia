@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  */
 public class WebsphereDetector extends AbstractServerDetector {
 
-    private final static Pattern SERVER_VERSION_PATTERN =
+    private static final Pattern SERVER_VERSION_PATTERN =
             Pattern.compile("^Version\\s+([0-9.]+)\\s*$.*?^Build Date\\s+([0-9/]+)\\s*$",
                     Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 

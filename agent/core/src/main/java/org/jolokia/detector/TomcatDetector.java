@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public class TomcatDetector extends AbstractServerDetector {
 
-    private final static Pattern SERVER_INFO_PATTERN = Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+)");
+    private static final Pattern SERVER_INFO_PATTERN = Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+)");
 
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {

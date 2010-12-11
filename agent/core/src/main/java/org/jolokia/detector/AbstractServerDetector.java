@@ -27,7 +27,7 @@ import java.util.*;
  * @author roland
  * @since 05.11.10
  */
-abstract public class AbstractServerDetector implements ServerDetector {
+public abstract class AbstractServerDetector implements ServerDetector {
 
     /**
      * Check for the existence of a given class

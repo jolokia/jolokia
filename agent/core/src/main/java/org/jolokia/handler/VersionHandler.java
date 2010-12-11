@@ -36,7 +36,7 @@ import javax.management.*;
  */
 public class VersionHandler extends JsonRequestHandler {
 
-    ServerHandle serverHandle;
+    private ServerHandle serverHandle;
 
     public VersionHandler(Restrictor pRestrictor, ServerHandle pServerHandle) {
         super(pRestrictor);

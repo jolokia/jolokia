@@ -46,7 +46,7 @@ public class JolokiaActivator implements BundleActivator {
 
     // Thread-Locals which will be used for holding the bundle context and
     // the https service during initialization
-    private static final ThreadLocal<BundleContext> bundleContextThreadLocal = new ThreadLocal<BundleContext>();
+    private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
 
     // Tracker to be used for the LogService
     private ServiceTracker logTracker;
@@ -117,7 +117,7 @@ public class JolokiaActivator implements BundleActivator {
      *         times
      */
     public static BundleContext getCurrentBundleContext() {
-        return bundleContextThreadLocal.get();
+        return BUNDLE_CONTEXT_THREAD_LOCAL.get();
     }
 
     // ==================================================================================
@@ -159,7 +159,7 @@ public class JolokiaActivator implements BundleActivator {
 
         public Object addingService(ServiceReference reference) {
             HttpService service = (HttpService) context.getService(reference);
-            bundleContextThreadLocal.set(context);
+            BUNDLE_CONTEXT_THREAD_LOCAL.set(context);
             try {
                 service.registerServlet(getServletAlias(),
                                         createServlet(logHandler),
@@ -170,7 +170,7 @@ public class JolokiaActivator implements BundleActivator {
             } catch (NamespaceException e) {
                 logHandler.error("Namespace Exception: " + e,e);
             } finally {
-                bundleContextThreadLocal.remove();
+                BUNDLE_CONTEXT_THREAD_LOCAL.remove();
             }
             return service;
         }

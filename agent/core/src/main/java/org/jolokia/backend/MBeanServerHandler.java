@@ -226,11 +226,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         List<ServerDetector> detectors =
                 ServiceObjectFactory.createServiceObjects("META-INF/detectors-default", "META-INF/detectors");
         // An detector at the end of the chain in order to get a default handle
-        detectors.add(new AbstractServerDetector() {
-            public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-                return new ServerHandle(null,null,null,null,null);
-            }
-        });
+        detectors.add(new FallbackServerDetector());
         return detectors;
     }
 
@@ -358,5 +354,14 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     }
 
     public void postDeregister() {
+    }
+
+    // ==================================================================================
+    // Fallback server detector which matches always
+
+    private static class FallbackServerDetector extends AbstractServerDetector {
+        public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+            return new ServerHandle(null,null,null,null,null);
+        }
     }
 }

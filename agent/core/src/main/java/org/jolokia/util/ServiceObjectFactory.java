@@ -40,7 +40,7 @@ import java.util.*;
  * @author roland
  * @since 05.11.10
  */
-public class ServiceObjectFactory {
+public final class ServiceObjectFactory {
 
     private ServiceObjectFactory() {}
 
@@ -115,7 +115,7 @@ public class ServiceObjectFactory {
         if (pLine.length() > 0) {
             ServiceEntry entry = new ServiceEntry(pLine);
             if (entry.isRemove()) {
-                T ext = pExtractorMap.remove(entry);
+                pExtractorMap.remove(entry);
             } else {
                 Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(entry.getClassName());
                 T ext = (T) clazz.newInstance();
@@ -144,7 +144,7 @@ public class ServiceObjectFactory {
         private static ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<Integer>() {
             @Override
             protected Integer initialValue() {
-                return new Integer(100);
+                return Integer.valueOf(100);
             }
         };
 
@@ -188,12 +188,12 @@ public class ServiceObjectFactory {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) { return true; }
+            if (o == null || getClass() != o.getClass()) { return false; }
 
             ServiceEntry that = (ServiceEntry) o;
 
-            if (!className.equals(that.className)) return false;
+            if (!className.equals(that.className)) { return false; }
 
             return true;
         }

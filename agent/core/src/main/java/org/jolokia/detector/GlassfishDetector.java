@@ -41,11 +41,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         String fullVersion = getSingleStringAttribute(pMbeanServers,"com.sun.appserv:j2eeType=J2EEServer,*","serverVersion");
         if (fullVersion != null) {
             if (GLASSFISH_VERSION.matcher(fullVersion).matches()) {
-                // Ok, its a glassfish
-                Matcher v2Matcher =  GLASSFISH_VERSION.matcher(fullVersion);
-                if (v2Matcher.matches()) {
-                    version = v2Matcher.group(1);
-                }
+                version = GLASSFISH_VERSION.matcher(fullVersion).group(1);
             }
         }
         if (fullVersion == null || "3".equals(version)) {

@@ -32,14 +32,12 @@ import org.jolokia.JmxRequest;
  */
 public class JBossDetector extends AbstractServerDetector {
 
-    private boolean useClassLookup = true;
-
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JR77 call
             String version = getVersionFromJsr77(pMbeanServers);
             if (version != null) {
-                int idx = version.indexOf(" ");
+                int idx = version.indexOf(' ');
                 if (idx >= 0) {
                     // Strip off boilerplate
                     version = version.substring(0,idx);
@@ -74,7 +72,7 @@ public class JBossDetector extends AbstractServerDetector {
     }
 
     // ========================================================================
-    private class JBossServerHandle extends ServerHandle {
+    private static class JBossServerHandle extends ServerHandle {
 
         public JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
             super("JBoss", "jboss", version, agentUrl, extraInfo);
