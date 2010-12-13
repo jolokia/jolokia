@@ -22,6 +22,7 @@ import java.util.*;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.jolokia.client.exception.*;
@@ -96,10 +97,10 @@ public class J4pClient  {
      * @param <R> response type
      * @param <T> request type
      * @return response object
-     * @throws java.io.IOException when the execution fails
-     * @throws org.json.simple.parser.ParseException if parsing of the JSON answer fails
+     * @throws J4pConnectException if the connection to the agent fails
+     * @throws J4pException if something's wrong
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pException {
+    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pConnectException,J4pException {
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod));
             JSONAware jsonResponse = extractJsonResponse(pRequest,response);
@@ -113,6 +114,8 @@ public class J4pClient  {
             } else {
                 throw exp;
             }
+        } catch (HttpHostConnectException exp) {
+            throw new J4pConnectException("Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + exp.getMessage(),exp);
         } catch (IOException e) {
             throw new J4pException("IO-Error while contacting the server: " + e,e);
         }

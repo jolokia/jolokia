@@ -28,8 +28,7 @@ import javax.management.ObjectName;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.jolokia.client.J4pClient;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.*;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -62,6 +61,16 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
+    @Test void errorConnectionRefusedTest() throws J4pException, MalformedObjectNameException {
+        try {
+            final J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
+            J4pClient anotherClient = new J4pClient("http://localhost:27654/jolokia");
+            anotherClient.execute(req);
+            fail();
+        } catch (J4pConnectException exp) {
+            // all fine
+        }
+    }
     @Test
     public void error404ConnectionTest() throws Exception {
         final J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds");

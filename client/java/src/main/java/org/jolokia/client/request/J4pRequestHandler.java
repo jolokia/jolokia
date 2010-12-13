@@ -188,4 +188,11 @@ public class J4pRequestHandler {
         return ESCAPED_SLASH_PATTERN.matcher(encodedRet).replaceAll("/");
     }
 
+    /**
+     * Get the J4p Server URL
+     * @return the URL to the Jolokia agent on the server side
+     */
+    public String getJ4pServerUrl() {
+        return j4pServerUrl;
+    }
 }
