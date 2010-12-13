@@ -80,4 +80,11 @@ public abstract class J4pResponse<T extends J4pRequest> {
     public <V> V getValue() {
         return (V) jsonResponse.get("value");
     }
+
+    /**
+     * Get response as JSON Object
+     */
+    public JSONObject asJSONObject() {
+        return jsonResponse;
+    }
 }
