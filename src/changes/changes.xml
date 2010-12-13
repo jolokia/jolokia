@@ -36,7 +36,16 @@
         Change HttpClient to a thread safe connection manager by default,
         extended J4pClient construction with a builder pattern
       </action>
-
+      <action dev="roland" type="add" date="2010-12-10">
+        Added a server detection facility (available via the 'version' command)
+        and made 'version' the default command if no command is given in the request URL
+        for a GET request.
+      </action>
+      <action dev="roland" type="add" date="2010-12-10">
+        Added a "error_type" key to the Jolokia response in case of an remote exception,
+        which will contain the Java class name of this error. Added getErrorType() to
+        the J4pRemoteException for the Java-Client.
+      </action>
     </release>
   </body>
 </document>

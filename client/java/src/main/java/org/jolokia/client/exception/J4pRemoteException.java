@@ -35,18 +35,32 @@ public class J4pRemoteException extends J4pException {
     // Request leading to this error
     private J4pRequest request;
 
+    // Java class of remote error
+    private String errorType;
+
     /**
      * Constructor for a remote exception
      *
      * @param pMessage error message of the exception occurred remotely
+     * @param pErrorType
      * @param pStatus status code
      * @param pStacktrace stacktrace of the remote exception
      */
-    public J4pRemoteException(J4pRequest pJ4pRequest,String pMessage,int pStatus,String pStacktrace) {
+    public J4pRemoteException(J4pRequest pJ4pRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace) {
         super(pMessage);
         status = pStatus;
+        errorType = pErrorType;
         remoteStacktrace = pStacktrace;
         request = pJ4pRequest;
+    }
+
+    /**
+     * Java class of remote exception in string representation
+     *
+     * @return error type
+     */
+    public String getErrorType() {
+        return errorType;
     }
 
     /**

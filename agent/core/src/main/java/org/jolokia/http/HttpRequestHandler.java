@@ -195,7 +195,8 @@ public class HttpRequestHandler {
         JSONObject jsonObject = new JSONObject();
         Throwable unwrapped = unwrapException(pExp);
         jsonObject.put("status",pErrorCode);
-         jsonObject.put("error",getExceptionMessage(unwrapped));
+        jsonObject.put("error",getExceptionMessage(unwrapped));
+        jsonObject.put("error_type",unwrapped.getClass().toString());
         StringWriter writer = new StringWriter();
         pExp.printStackTrace(new PrintWriter(writer));
         jsonObject.put("stacktrace",writer.toString());
