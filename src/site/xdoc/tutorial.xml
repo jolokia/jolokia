@@ -209,7 +209,7 @@ cpan[4]> install Term::Clui
           is optional. Now, fire up j4psh and let the fun begin:
         </p>
         <div align="center">
-          <img src="images/j4psh_screenshot.png"/>
+          <img src="images/j4psh_screenshot.png" alt="j4psh screenshot"/>
         </div>
         <p>
           Don't forget to try out TAB triggered command and argument completion !
