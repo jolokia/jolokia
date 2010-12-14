@@ -42,7 +42,7 @@ public class JBossDetector extends AbstractServerDetector {
                     // Strip off boilerplate
                     version = version.substring(0,idx);
                 }
-                return new ServerHandle("JBoss","jboss",version,null,null);
+                return new JBossServerHandle(version,null,null);
             }
         }
         if (mBeanExists(pMbeanServers, "jboss.system:type=Server")) {

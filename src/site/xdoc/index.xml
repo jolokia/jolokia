@@ -50,6 +50,22 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia 0.81.0 released">
+        <div class="news-date">2010-12-14</div>
+        <p>
+          This minor release brings back full backwards compatibility
+          with <a
+          href="http://search.cpan.org/~roland/jmx4perl-0.73/">jmx4perl
+          0.73</a> and the Jolokia agents can be used as drop in
+          replacemt for the (deprecated) j4p agents. Beside bug fixes,
+          this release also contains some minor addional features like
+          JSONP support, a new security configuration parameter for
+          restrictions on the HTTP method in use, minor tunings of the
+          Java client API and a server detection facility for the
+          "version" command. All changes are summarized <a
+          href="changes-report.html">here</a>.
+        </p>
+      </subsection>
       <subsection name="Meet us at Devoxx !">
         <div class="news-date">2010-11-08</div>
         <p>
@@ -77,20 +93,6 @@
         <p>
           <em>Release soon, release often</em>. That's what they told
           me. 
-        </p>
-      </subsection>
-      <subsection name="Jolokia 0.80 released">
-        <div class="news-date">2010-10-17</div>
-        <p>
-          The first version of Jolokia has been released. Version 0.80
-          can be obtained from the <a
-          href="./download.html">Download</a> page and from our maven
-          repository. This version is identical to the agent part of
-          <a
-          href="http://search.cpan.org/~roland/jmx4perl-0.72/">jmx4perl
-          0.72</a>, feature- and codewise. Future versions of jmx4perl
-          will be packaged without agent but with a dependency on
-          Jolokia. 
         </p>
       </subsection>
   </section>

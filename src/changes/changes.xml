@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.81-SNAPSHOT" description="Current Snapshot release">
+    <release version="0.81" description="Release 0.81.0">
       <action dev="roland" type="fix" date="2010-10-24">
         Fixed MBean registration issue with Websphere AS 7.0 where
         MBean registration via the MBeanRegistration intefaces causes
@@ -21,9 +21,9 @@
         requests, too.
       </action>
       <action dev="roland" type="add" date="2010-10-24">
-        Security policy can now globally restrict to a certain HTTP
-        method.  Within the &lt;http&gt; section of the policy file,
-        &lt;method&gt; tags define the allowed methods ("get" or
+        Security policy can now be globally restricted to a certain
+        HTTP method.  Within the &lt;http&gt; section of the policy
+        file, &lt;method&gt; tags define the allowed methods ("get" or
         "post"). If this section is missing, all methods are
         allowed. If only one method is given, the other is forbidden.
       </action>

@@ -33,7 +33,7 @@ import javax.management.MBeanServerConnection;
 public class GlassfishDetector extends AbstractServerDetector {
 
     private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*GlassFish.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
-    private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^\\s*GlassFish.*?\\s([.\\d]+)\\s.*$?");
+    private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^\\s*GlassFish.*?\\sv?([.\\d]+)\\s.*$?");
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String version = null;
