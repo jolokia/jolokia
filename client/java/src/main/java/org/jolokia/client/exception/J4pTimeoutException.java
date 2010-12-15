@@ -16,17 +16,19 @@
 
 package org.jolokia.client.exception;
 
-import java.net.ConnectException;
+import java.io.IOException;
+
+import org.apache.http.conn.ConnectTimeoutException;
 
 /**
- * Exception thrown when the connection to the server fails.
+ * Exception thrown in case of an timeout
  *
  * @author roland
- * @since 13.12.10
+ * @since 15.12.10
  */
-public class J4pConnectException extends J4pException {
+public class J4pTimeoutException extends J4pException {
 
-    public J4pConnectException(String pMessage, ConnectException pNestedException) {
-        super(pMessage,pNestedException);
+    public J4pTimeoutException(String pMessage, ConnectTimeoutException pException) {
+        super(pMessage,pException);
     }
 }

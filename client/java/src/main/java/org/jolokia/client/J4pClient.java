@@ -17,12 +17,12 @@ package org.jolokia.client;
  */
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.*;
 
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.*;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.jolokia.client.exception.*;
@@ -114,10 +114,9 @@ public class J4pClient  {
             } else {
                 throw exp;
             }
-        } catch (HttpHostConnectException exp) {
-            throw new J4pConnectException("Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + exp.getMessage(),exp);
-        } catch (IOException e) {
-            throw new J4pException("IO-Error while contacting the server: " + e,e);
+        }
+        catch (IOException e) {
+            throw mapIOException(e);
         }
     }
 
@@ -158,7 +157,7 @@ public class J4pClient  {
 
             return extractResponses(jsonResponse, pRequests);
         } catch (IOException e) {
-            throw new J4pException("IO-Error while contacting the server: " + e,e);
+            throw mapIOException(e);
         }
     }
 
@@ -200,6 +199,22 @@ public class J4pClient  {
         }
         return ret;
     }
+
+    // Map IO-Exceptions accordingly
+    private J4pException mapIOException(IOException pException) throws J4pException {
+        if (pException instanceof ConnectException) {
+            return new J4pConnectException(
+                    "Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
+                    (ConnectException) pException);
+        } else if (pException instanceof ConnectTimeoutException) {
+            return new J4pTimeoutException(
+                    "Read timeout while request " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
+                    (ConnectTimeoutException) pException);
+        } else {
+            return new J4pException("IO-Error while contacting the server: " + pException,pException);
+        }
+    }
+
 
     // Verify the returned JSON answer.
     private void verifyJsonResponse(JSONAware pJsonResponse) throws J4pException {
