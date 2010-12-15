@@ -114,6 +114,17 @@ public class J4pClientBuilder {
     }
 
     /**
+     * Sets value of the SO_TIMEOUT parameter.
+     *
+     * @param pTimeOut SO_TIMEOUT value in milliseconds, 0 mean no timeout at all.
+     */
+
+    public final J4pClientBuilder socketTimeout(int pTimeOut) {
+        HttpConnectionParams.setSoTimeout(params,pTimeOut);
+        return this;
+    }
+
+    /**
      * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
      * @param pConnections number of max. simultaneous connections
      */

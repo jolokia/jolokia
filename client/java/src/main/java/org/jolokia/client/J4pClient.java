@@ -275,6 +275,11 @@ public class J4pClient  {
         return new J4pClientBuilder().connectionTimeout(pTimeOut);
     }
 
+    /** See {@link org.jolokia.client.J4pClientBuilder#socketTimeout(int)} */
+    public static J4pClientBuilder socketTimeout(int pTimeOut) {
+        return new J4pClientBuilder().socketTimeout(pTimeOut);
+    }
+
     /** See {@link org.jolokia.client.J4pClientBuilder#maxTotalConnections(int)} */
     public static J4pClientBuilder maxTotalConnections(int pConnections) {
         return new J4pClientBuilder().maxTotalConnections(pConnections);
