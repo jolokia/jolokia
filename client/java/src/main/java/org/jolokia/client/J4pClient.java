@@ -97,10 +97,9 @@ public class J4pClient  {
      * @param <R> response type
      * @param <T> request type
      * @return response object
-     * @throws J4pConnectException if the connection to the agent fails
-     * @throws J4pException if something's wrong
+     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pConnectException,J4pException {
+    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pException {
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod));
             JSONAware jsonResponse = extractJsonResponse(pRequest,response);

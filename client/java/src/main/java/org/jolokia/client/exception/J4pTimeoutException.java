@@ -16,8 +16,6 @@
 
 package org.jolokia.client.exception;
 
-import java.io.IOException;
-
 import org.apache.http.conn.ConnectTimeoutException;
 
 /**
