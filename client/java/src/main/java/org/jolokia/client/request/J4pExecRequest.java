@@ -82,12 +82,12 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     private String getArrayForArgument(Object[] pArg) {
         StringBuilder inner = new StringBuilder();
         for (int i = 0; i< pArg.length; i++) {
-            inner.append(pArg[i].toString());
+            inner.append(nullEscape(pArg[i].toString()));
             if (i < pArg.length - 1) {
                 inner.append(",");
             }
         }
-        return nullEscape(inner.toString());
+        return inner.toString();
     }
 
     private String nullEscape(Object pArg) {
