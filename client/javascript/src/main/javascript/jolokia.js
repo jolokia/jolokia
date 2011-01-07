@@ -17,6 +17,8 @@
 /* =================================
  * Jolokia Javascript Client library
  * =================================
+ *
+ * Requires jQuery and json2.js (if no native JSON.stringify() support is available)
  */
 
 var Jolokia = (function($) {
@@ -53,6 +55,9 @@ var Jolokia = (function($) {
         /**
          * The request method using one or more JSON requests
          * and sending it to the target URL.
+         *
+         * @param request the request to send
+         * @param params parameters used for sending the request
          */
         this.request = function(request,params) {
             var opts = $.extend({},this,params);
@@ -179,7 +184,7 @@ var Jolokia = (function($) {
 
     // ===============================================================================================
 
-    // Return back constructor function
+    // Return back exported function/constructor
     return Jolokia;
 
 })(jQuery);

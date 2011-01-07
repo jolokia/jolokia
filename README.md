@@ -74,7 +74,7 @@ Resources
 
 More information on jolokia can be found at [www.jolokia.org][5].
 
- [1]: http://github.com/rhuss/jolokia/raw/master/src/site/resources/images/jolokia_logo.png "Jolokia"
+ [1]: http://labs.consol.de/wp-content/uploads/2010/10/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
  [3]: http://www.mulesoft.org
  [4]: http://www.jmx4perl.org
