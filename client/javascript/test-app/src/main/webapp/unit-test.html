@@ -176,7 +176,7 @@
       asyncTest("Bulk Request with dispatched functions and error",5,function() {
         j4p.request(
         [{type: "version"},
-         {type: "exec",mbean: "Blub:type=Bla", operation: "Blub"},
+         {type: "exec",mbean: "Blub:type=Bla"},
          {type: "read",mbean: "java.lang:type=Runtime",attribute: "Name"}],
         {
           success: [
