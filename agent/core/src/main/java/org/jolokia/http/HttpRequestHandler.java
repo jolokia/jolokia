@@ -156,6 +156,8 @@ public class HttpRequestHandler {
             return getErrorJSON(500,e);
         } catch (IOException e) {
             return getErrorJSON(500,e);
+        } catch (IllegalArgumentException e) {
+            return getErrorJSON(400,e);
         }
     }
 
