@@ -99,9 +99,12 @@ public class ExecHandler extends JsonRequestHandler {
      */
     private OperationAndParamType extractOperationTypes(MBeanServerConnection pServer, JmxRequest pRequest)
             throws ReflectionException, InstanceNotFoundException, IOException {
+        if (pRequest.getOperation() == null) {
+            throw new IllegalArgumentException("No operation given for exec Request on MBean " + pRequest.getObjectName());
+        }
         List<String> opArgs = splitOperation(pRequest.getOperation());
         String operation = opArgs.get(0);
-        List<String> types = null;
+        List<String> types;
         if (opArgs.size() > 1) {
             types = opArgs.subList(1,opArgs.size());
         } else {
