@@ -56,26 +56,34 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo.javascript</groupId>
+        <groupId>com.devspan.mojo.javascript</groupId>
         <artifactId>javascript-maven-plugin</artifactId>
-        <version>1.0-alpha-1-SNAPSHOT</version>
+        <version>0.9.3</version>
         <extensions>true</extensions>
+        <configuration>
+          <useArtifactId>false</useArtifactId>
+        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>war-package</goal>
-              <goal>prepare-tests</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>7.0.0.pre5</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
+          <systemProperties>
+            <systemProperty>
+              <name>org.mortbay.util.FileResource.checkAliases</name>
+              <value>false</value>
+            </systemProperty>
+          </systemProperties>
           <webAppConfig>
             <contextPath>/</contextPath>
           </webAppConfig>
@@ -83,30 +91,7 @@
           <stopKey>foo</stopKey>
         </configuration>
       </plugin>
-
-      <plugin>
-        <executions>
-          <execution>
-            <goals><goal>javascript-test</goal></goals>
-          </execution>
-        </executions>
-        <groupId>com.carbonfive.javascript-test</groupId>
-        <artifactId>javascript-test-maven-plugin</artifactId>
-        <version>1.0-beta1</version>
-        <configuration>
-          <includes>
-            <include>src/test/javascript/suite*.html</include>
-          </includes>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
   
-  <pluginRepositories>
-    <pluginRepository>
-      <id>c5-public-repository</id>
-      <name>Carbon Five Public Repository</name>
-      <url>http://mvn.carbonfive.com/public</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

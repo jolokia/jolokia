@@ -40,17 +40,18 @@ var Jolokia = (function($) {
     };
 
     function Jolokia(param) {
-
         // If called without 'new', we are constructing an object
         // nevertheless
         if ( !(this instanceof arguments.callee) ) {
             return new Jolokia(param);
         }
 
-        if (param == null || param.url == null) {
-            throw new SyntaxError("No URL given");
-        }
+        assertNotNull(param,"No parameters given");
+        assertNotNull(param.url,"No URL given");
         $.extend(this,DEFAULT_CLIENT_PARAMS,param);
+
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // Public methods
 
         /**
          * The request method using one or more JSON requests
@@ -63,30 +64,61 @@ var Jolokia = (function($) {
             var opts = $.extend({},this,params);
             var ajax_params = {};
 
-            if (opts.method == "POST" || $.isArray(request)) {
+            if (opts.method && opts.method.toUpperCase() === "POST" || $.isArray(request)) {
                 $.extend(ajax_params,POST_AJAX_PARAMS);
                 ajax_params.data = JSON.stringify(request);
                 ajax_params.url = opts.url;
             } else {
                 $.extend(ajax_params,GET_AJAX_PARAMS);
                 ajax_params.dataType = opts.jsonp ? "jsonp" : "json";
-                ajax_params.url = createGetUrl(opts.url,request);
+                ajax_params.url = opts.url + "/" + constructGetUrlPath(request);
             }
 
-            // Callbacks
+            // Dispatch Callbacks to error and success handlers
             if (params.success) {
-                var success_callbacks = $.isArray(params.success) ? params.success : [ params.success ],
-                        idx = 0,
-                        length = success_callbacks.length;
-                ajax_params.success = function(data,textStatus,xmlRequest) {
-                    success_callbacks[idx++ % length](data,textStatus,xmlRequest);
+                var success_callback = constructCallbackDispatcher(params.success);
+                var error_callback = constructCallbackDispatcher(params.error);
+                ajax_params.success = function(data) {
+                    var responses = $.isArray(data) ? data : [ data ];
+                    for (var idx = 0; idx < responses.length; idx++) {
+                        var resp = responses[idx];
+                        if (resp.status == null || resp.status != 200) {
+                            error_callback(resp,idx);
+                        } else {
+                            success_callback(resp,idx);
+                        }
+                    }
                 };
-                $.ajax(ajax_params);
             }
+
+            if (params.ajaxError) {
+                // Global error handler
+                ajax_params.error = params.ajaxError;
+            }
+
+            // Perform the request
+            $.ajax(ajax_params);
         };
+
+        // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     }
 
-    // ======================================================================================================
+    // Private Methods:
+
+    // Construct a callback dispatcher for appropriately dispatching
+    // to a single callback or within an array of callbacks
+    function constructCallbackDispatcher(callback) {
+        if (callback == null) {
+            return function() {}; // noop
+        }
+        var callbackArray = $.isArray(callback) ? callback : [ callback ];
+        return function(response,idx) {
+            callbackArray[idx % callbackArray.length](response,idx);
+        }
+    }
+
+
+    // ========================================================================
     // GET-Request handling
 
     /**
@@ -95,22 +127,16 @@ var Jolokia = (function($) {
      * @param base_url to request to
      * @param request the request to convert to URL format
      */
-    function createGetUrl(base_url, request) {
+    function constructGetUrlPath(request) {
         var type = request.type;
-        if (type == null) {
-            throw new Error("No request type given for building a GET request");
-        }
+        assertNotNull(type,"No request type given for building a GET request");
         type = type.toLowerCase();
         var extractor = GET_URL_EXTRACTORS[type];
-        if (extractor == null) {
-            throw new Error("Unknown request type " + type);
-        }
+        assertNotNull(extractor,"Unknown request type " + type);
         var parts = extractor(request);
         var url = type;
-        for (var i = 0; i < parts.length; i++) {
-            url += "/" + escapePart(parts[i]);
-        }
-        return base_url + "/" + url;
+        $.each(parts,function(i,v) { url += "/" + escapePart(v) });
+        return url;
     }
 
     // Extractors used for preparing a GET request, i.e. for creating a stack
@@ -183,8 +209,16 @@ var Jolokia = (function($) {
     }
 
     // ===============================================================================================
+    // Utility methods:
+
+    function assertNotNull(object,message) {
+        if (object == null) {
+            throw new Error(message);
+        }
+    }
+
+    // ================================================================================================
 
     // Return back exported function/constructor
     return Jolokia;
-
 })(jQuery);
