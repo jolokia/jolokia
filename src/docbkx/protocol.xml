@@ -300,6 +300,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
         <programlisting><![CDATA[
   {
     "status":400,
+    "error_type":"java.lang.IllegalArgumentException",
     "error":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'",
     "stacktrace":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'\n
                   \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
@@ -312,7 +313,7 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
             response. There can be many Jolokia status codes, one for
             each Jolokia request contained in the single HTTP request. The
             HTTP status code merely reflect the status of agent itself
-            (i.e. whether it could perform the operation), whereas the
+            (i.e. whether it could perform the operation at all), whereas the
             Jolokia response status reflects the result of the
             operation (e.g. whether the performed operation throws an
             exception). So it is not uncommon to have an HTTP status
@@ -332,7 +333,8 @@ $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
             is a subtype of <classname>MBeanException</classname>, the wrapped
             exception's message is used.
           </para>
-          </footnote>.
+          </footnote>. Finally, <constant>error_type</constant> contains the Java class name
+          of the exception occured.
           The <constant>stacktrace</constant> contains a Java stacktrace
           occured on the server side (if any stacktrace is available).
           </para>

@@ -134,6 +134,8 @@ public class HttpRequestHandler {
     /**
      * Execute a single {@link org.jolokia.JmxRequest}. If a checked  exception occurs,
      * this gets translated into the appropriate JSON object which will get returned.
+     * Note, that these exceptions gets *not* translated into an HTTP error, since they are
+     * supposed <em>Jolokia</em> specific errors above the transport layer.
      *
      * @param pJmxReq the request to execute
      * @return the JSON representation of the answer.
@@ -154,11 +156,13 @@ public class HttpRequestHandler {
             return getErrorJSON(500,e);
         } catch (IOException e) {
             return getErrorJSON(500,e);
+        } catch (IllegalArgumentException e) {
+            return getErrorJSON(400,e);
         }
     }
 
     /**
-     * Utilit method for handling single runtime exceptions and errors.
+     * Utility method for handling single runtime exceptions and errors.
      *
      * @param pThrowable exception to handle
      * @return its JSON representation
@@ -216,41 +220,6 @@ public class HttpRequestHandler {
     public void checkClientIPAccess(String pHost, String pAddress) {
         if (!backendManager.isRemoteAccessAllowed(pHost,pAddress)) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
-        }
-    }
-
-    /**
-     * Extract the the result code for a JSON answer. If multiple responses are contained,
-     * the result code is the highest code found within the list of responses
-     *
-     * @param pJson response object
-     * @return the result code
-     */
-    public int extractResultCode(JSONAware pJson) {
-        if (pJson instanceof List) {
-            int maxCode = 0;
-            for (JSONAware j : (List<JSONAware>) pJson) {
-                int code = extractStatus(j);
-                if (code > maxCode) {
-                    maxCode = code;
-                }
-            }
-            return maxCode;
-        } else {
-            return extractStatus(pJson);
-        }
-    }
-
-    // Extract status from a json object
-    private int extractStatus(JSONAware pJson) {
-        if (pJson instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) pJson;
-            if (!jsonObject.containsKey("status")) {
-                throw new IllegalStateException("No status given in response " + pJson);
-            }
-            return (Integer) jsonObject.get("status");
-        } else {
-            throw new IllegalStateException("Internal: Not a JSONObject but a " + pJson.getClass() + " " + pJson);
         }
     }
 
