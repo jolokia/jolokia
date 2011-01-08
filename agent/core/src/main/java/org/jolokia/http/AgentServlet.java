@@ -120,16 +120,12 @@ public class AgentServlet extends HttpServlet {
 
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
-            code = requestHandler.extractResultCode(json);
             if (backendManager.isDebug()) {
                 backendManager.info("Response: " + json);
             }
-        } catch (RuntimeMBeanException exp) {
-            JSONObject error = requestHandler.handleThrowable(exp.getTargetException());
-            code = (Integer) error.get("status");
-            json = error;
         } catch (Throwable exp) {
-            JSONObject error = requestHandler.handleThrowable(exp);
+            JSONObject error = requestHandler.handleThrowable(
+                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
             code = (Integer) error.get("status");
             json = error;
         } finally {

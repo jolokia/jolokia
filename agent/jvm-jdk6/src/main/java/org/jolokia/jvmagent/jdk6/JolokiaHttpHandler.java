@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
+import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -89,12 +90,12 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             } else {
                 throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
             }
-            code = requestHandler.extractResultCode(json);
             if (backendManager.isDebug()) {
                 backendManager.info("Response: " + json);
             }
         } catch (Throwable exp) {
-            JSONObject error = requestHandler.handleThrowable(exp);
+            JSONObject error = requestHandler.handleThrowable(
+                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
             code = (Integer) error.get("status");
             json = error;
         } finally {
