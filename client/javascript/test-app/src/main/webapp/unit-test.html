@@ -29,13 +29,23 @@
   <script>
   $(document).ready(function(){
 
-    var j4p = new Jolokia({url: "http://localhost:8080/jolokia"});
+    var j4p = new Jolokia("/jolokia");
 
-    singleRequestTest("GET-Requests", { method: "GET" });
-    singleRequestTest("POST-Requests", { method: "POST" });
-    singleRequestTest("GET-Requests with jsonp", { jsonp: true });
+    // Single requests
+    $.each([
+             ["GET-Requests", { method: "GET" } ],
+             ["POST-Requests", { method: "POST" }],
+             ["GET-Requests with jsonp", { jsonp: true }]
+         ],function(i,o) {
 
-    errorTest("GET-Requests", { method: "GET", jsonp: false });
+      singleRequestTest(o[0],o[1]);
+      errorTest(o[0],o[1]);
+
+    });
+
+    // Bulk requests
+    bulkRequestTests();
+
     // ==========================================================================================
 
     // Single Request Tests
@@ -77,7 +87,6 @@
                   success: function(response) {
                     equals(response.request.type,"exec","Type must be exec");
                     ok(response.value == null,"Return Value is null ");
-                    console.log(JSON.stringify(response));
                     start();
                   }
                 }));
@@ -105,18 +114,88 @@
         $.extend(extraParams,
                 {
                   error: function(response) {
-                    log(response);
-                    start();
-                  },
-                  success: function(response) {
-                    log(response);
-                    start();
-                  },
-                  ajaxError: function(response) {
-                    log(response);
+                    equals(response.status,404,"Instance not (404 status code)");
+                    equals(response.error_type,"javax.management.InstanceNotFoundException","javax.management.InstanceNotFoundException");
+                    ok(response.error != null,"Error description");
+                    ok(response.stacktrace != null,"Stacktrace");
                     start();
                   }
                 }));
+      });
+      asyncTest("Invalid URL",function() {
+        Jolokia({url: "/bla"}).request(
+        { type: "version" },
+        $.extend(extraParams,
+                {
+                  ajaxError: function(xhr,textStatus,errorThrown) {
+                    equals(textStatus,"error","Ajax Error");
+                    equals(xhr.status,404,"Not found HTTP code")
+                    start();
+                  }
+                }));
+      });
+
+    }
+
+
+    function bulkRequestTests() {
+      module("Bulk requests");
+      asyncTest("Simple Bulk Request",2,function() {
+        j4p.request(
+        [{type: "version"},{type: "read",mbean: "java.lang:type=Threading",attribute: "ThreadCount"}],
+        {
+          success: function(response,idx) {
+            switch(idx) {
+              case 0:
+                ok(response.value.agent >= 0.80,"Version request");
+                break;
+              case 1:
+                equals(response.request.type,"read","Read request");
+                start();
+                break;
+            }
+          }
+        });
+      });
+
+      asyncTest("Bulk Request with dispatched functions",2,function() {
+        j4p.request(
+        [{type: "version"},{type: "read",mbean: "java.lang:type=Runtime",attribute: "Name"}],
+        {
+          success: [
+                   function(response,idx) {
+                     ok(response.value.agent >= 0.80,"Version request");
+                   },
+                   function(response,idx) {
+                     equals(response.request.type,"read","Read request");
+                     start();
+                   }]
+          });
+      });
+
+      asyncTest("Bulk Request with dispatched functions and error",5,function() {
+        j4p.request(
+        [{type: "version"},
+         {type: "exec",mbean: "Blub:type=Bla", operation: "Blub"},
+         {type: "read",mbean: "java.lang:type=Runtime",attribute: "Name"}],
+        {
+          success: [
+                   function(response,idx) {
+                     equals(idx,0,"Success 1st request");
+                     ok(response.value.agent >= 0.80,"Version request");
+                   },
+                   function(response,idx) {
+                     throw new Error("Must not be called");
+                   },
+                   function(response,idx) {
+                     equals(idx,2,"Success 3rd request");
+                     equals(response.request.type,"read","Read request");
+                     start();
+                   }],
+          error: function(response,idx) {
+            equals(idx,1,"Error for 2nd request");
+          }
+        });
       });
     }
 

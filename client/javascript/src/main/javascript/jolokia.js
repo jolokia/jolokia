@@ -45,7 +45,10 @@ var Jolokia = (function($) {
         if ( !(this instanceof arguments.callee) ) {
             return new Jolokia(param);
         }
-
+        // Allow a single URL parameter as well
+        if (typeof param === "string") {
+            param = {url: param};
+        }
         assertNotNull(param,"No parameters given");
         assertNotNull(param.url,"No URL given");
         $.extend(this,DEFAULT_CLIENT_PARAMS,param);
@@ -62,23 +65,23 @@ var Jolokia = (function($) {
          */
         this.request = function(request,params) {
             var opts = $.extend({},this,params);
-            var ajax_params = {};
+            var ajaxParams = {};
 
             if (opts.method && opts.method.toUpperCase() === "POST" || $.isArray(request)) {
-                $.extend(ajax_params,POST_AJAX_PARAMS);
-                ajax_params.data = JSON.stringify(request);
-                ajax_params.url = opts.url;
+                $.extend(ajaxParams,POST_AJAX_PARAMS);
+                ajaxParams.data = JSON.stringify(request);
+                ajaxParams.url = opts.url;
             } else {
-                $.extend(ajax_params,GET_AJAX_PARAMS);
-                ajax_params.dataType = opts.jsonp ? "jsonp" : "json";
-                ajax_params.url = opts.url + "/" + constructGetUrlPath(request);
+                $.extend(ajaxParams,GET_AJAX_PARAMS);
+                ajaxParams.dataType = opts.jsonp ? "jsonp" : "json";
+                ajaxParams.url = opts.url + "/" + constructGetUrlPath(request);
             }
 
             // Dispatch Callbacks to error and success handlers
-            if (params.success) {
+            if (params.success || params.error) {
                 var success_callback = constructCallbackDispatcher(params.success);
                 var error_callback = constructCallbackDispatcher(params.error);
-                ajax_params.success = function(data) {
+                ajaxParams.success = function(data) {
                     var responses = $.isArray(data) ? data : [ data ];
                     for (var idx = 0; idx < responses.length; idx++) {
                         var resp = responses[idx];
@@ -93,11 +96,11 @@ var Jolokia = (function($) {
 
             if (params.ajaxError) {
                 // Global error handler
-                ajax_params.error = params.ajaxError;
+                ajaxParams.error = params.ajaxError;
             }
 
             // Perform the request
-            $.ajax(ajax_params);
+            $.ajax(ajaxParams);
         };
 
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
