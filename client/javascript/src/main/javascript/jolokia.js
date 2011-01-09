@@ -68,7 +68,7 @@ var Jolokia = (function($) {
             var opts = $.extend({},this,params);
             var ajaxParams = {};
 
-            if (opts.method && opts.method.toUpperCase() === "POST" || $.isArray(request)) {
+            if (extractMethod(opts,request) === "post") {
                 $.extend(ajaxParams,POST_AJAX_PARAMS);
                 ajaxParams.data = JSON.stringify(request);
                 ajaxParams.url = opts.url;
@@ -78,10 +78,15 @@ var Jolokia = (function($) {
                 ajaxParams.url = opts.url + "/" + constructGetUrlPath(request);
             }
 
+            // Global error handler
+            if (opts.ajaxError) {
+                ajaxParams.error = opts.ajaxError;
+            }
+
             // Dispatch Callbacks to error and success handlers
-            if (params.success || params.error) {
-                var success_callback = constructCallbackDispatcher(params.success);
-                var error_callback = constructCallbackDispatcher(params.error);
+            if (opts.success || opts.error) {
+                var success_callback = constructCallbackDispatcher(opts.success);
+                var error_callback = constructCallbackDispatcher(opts.error);
                 ajaxParams.success = function(data) {
                     var responses = $.isArray(data) ? data : [ data ];
                     for (var idx = 0; idx < responses.length; idx++) {
@@ -93,17 +98,22 @@ var Jolokia = (function($) {
                         }
                     }
                 };
+
+                // Perform the request
+                $.ajax(ajaxParams);
             } else {
-                // TODO: Perform sync request
+                // Synchronous operation requested (i.e. no callbacks provided)
+                if (opts.jsonp) {
+                    throw Error("JSONP is not supported for synchronous requests");
+                }
+                ajaxParams.async = false;
+                var xhr = $.ajax(ajaxParams);
+                if (jQuery.httpSuccess(xhr)) {
+                    return $.parseJSON(xhr.responseText);
+                } else {
+                    return null;
+                }
             }
-
-            if (params.ajaxError) {
-                // Global error handler
-                ajaxParams.error = params.ajaxError;
-            }
-
-            // Perform the request
-            $.ajax(ajaxParams);
         };
 
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -115,7 +125,9 @@ var Jolokia = (function($) {
     // to a single callback or within an array of callbacks
     function constructCallbackDispatcher(callback) {
         if (callback == null) {
-            return function() {}; // noop
+            return function(response) {
+                console.log("Ignoring response " + JSON.stringify(response));
+            };
         }
         var callbackArray = $.isArray(callback) ? callback : [ callback ];
         return function(response,idx) {
@@ -123,6 +135,33 @@ var Jolokia = (function($) {
         }
     }
 
+    // Extract the HTTP-Method to use and make some sanity checks if
+    // the method was provided as part of the options, but dont fit
+    // to the request given
+    function extractMethod(opts, request) {
+        var methodGiven = opts && opts.method ? opts.method.toLowerCase() : null,
+                method;
+        if (methodGiven) {
+            if (methodGiven === "get") {
+                if ($.isArray(request)) {
+                    throw new Error("Cannot use GET with bulk requests");
+                }
+                if (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) {
+                    throw new Error("Cannot use GET for read with multiple attributes");
+                }
+            }
+            method = methodGiven;
+        } else {
+            // Determine method dynamically
+            method = ($.isArray(request) ||
+                    (request.type.toLowerCase() === "read" && $.isArray(request.attribute))) ?
+                    "post" : "get";
+        }
+        if (opts.jsonp && method === "post") {
+            throw new Error("Can not use JSONP with POST requests");
+        }
+        return method;
+    }
 
     // ========================================================================
     // GET-Request handling
@@ -149,7 +188,12 @@ var Jolokia = (function($) {
     // key: lowercase request type
     var GET_URL_EXTRACTORS = {
         "read" : function(request) {
-            return appendPath([ request.mbean, request.attribute ],request.path);
+            if (request.attribute == null) {
+                // Path gets ignored for multiple attribute fetch
+                return [ request.mbean ];
+            } else {
+                return appendPath([ request.mbean, request.attribute ],request.path);
+            }
         },
         "write" : function(request) {
             return appendPath([ request.mbean, request.attribute, valueToString(request.value) ],request.path);

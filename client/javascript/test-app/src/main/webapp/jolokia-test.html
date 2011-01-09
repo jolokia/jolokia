@@ -46,6 +46,15 @@
     // Bulk requests
     bulkRequestTests();
 
+    // Synchronous requests
+    syncTests();
+
+    // Check for HTTP method detection
+    httpMethodDetectionTests();
+
+    // Advanced READ tests
+    advancedReadTests();
+
     // ==========================================================================================
 
     // Single Request Tests
@@ -104,7 +113,7 @@
                   }
                 }));
       });
-    };
+    }
 
     function errorTest(label,extraParams) {
       module("Error-Test: " + label);
@@ -134,9 +143,9 @@
                   }
                 }));
       });
-
     }
 
+    // ==============================================================================
 
     function bulkRequestTests() {
       module("Bulk requests");
@@ -194,6 +203,123 @@
                    }],
           error: function(response,idx) {
             equals(idx,1,"Error for 2nd request");
+          }
+        });
+      });
+    }
+
+    // ==============================================================================
+
+    function syncTests() {
+      module("Sync Tests");
+      test("Simple Memory Read Request", function() {
+        var resp = j4p.request({ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage"});
+        equals(resp.request.type,"read","Type must be read");
+        ok(resp.value != null,"Value must be set: " + JSON.stringify(resp.value));
+        ok(resp.value.used != null,"Composite data returned: " );
+      });
+
+      test("Simple request with Jolokia Error",function() {
+        var resp = j4p.request({ type: "READ", mbean: "bla"});
+        equals(resp.error_type,"java.lang.IllegalArgumentException","Illegal Argument");
+      });
+
+      test("Simple request with HTTP Error",function() {
+        var resp = new Jolokia("/bla").request(
+        { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage"},
+        {
+          ajaxError: function(xhr) {
+            ok(!$.httpSuccess(xhr));
+          }
+        });
+        ok(resp == null,"No response should be returned");
+      });
+
+      test("No JSONP with sync requests",function() {
+        raises(function() {
+          var resp = j4p.request(
+          { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage"},
+          { jsonp: true });
+        },"Must throw an ERROR");
+      });
+    }
+
+    // ==========================================================================================
+
+    // Invalid HTTP types for given requests
+    function httpMethodDetectionTests() {
+      module("HTTP method detection");
+      test("Sanity HTTP Method detection checks",function() {
+        raises(function() {
+          j4p.request(
+                  [{type: "version"},{type: "list"}],
+                  { method: "get" }
+                  );
+        },"No GET for bulk requests");
+        raises(function() {
+          j4p.request(
+          { type: "read", mbean: "java.lang:type=Memory", attribute: [ "HeapMemoryUsage", "NonHeapMemoryUsage"]},
+          { method: "get" }
+                  );
+        },"No GET for read with array arguments");
+        raises(function() {
+          j4p.request(
+          { type: "version"},
+          { method: "post", jsonp: true }
+                  );
+        },"No POST for JSONP");
+        raises(function() {
+        j4p.request(
+                [{type: "version"},{type: "list"}],
+                { jsonp: true }
+                );
+        },"No JSONP with bulk requests");
+      });
+    }
+
+    // ==========================================================================================================
+    function advancedReadTests() {
+      module("Advanced READ");
+      asyncTest("Multiple Attribute Read Request",function() {
+        j4p.request(
+        { type: "READ", mbean: "java.lang:type=Memory", attribute: ["HeapMemoryUsage","NonHeapMemoryUsage"]},
+        {
+          success: function(response) {
+            equals(response.request.type,"read","Type must be read");
+            ok(response.value != null,"Value must be set: " + JSON.stringify(response.value));
+            ok(response.value.HeapMemoryUsage,"HeapMemoryUsage set");
+            ok(response.value.HeapMemoryUsage.used,"HeapMemoryUsage.used set");
+            ok(response.value.NonHeapMemoryUsage,"NonHeapMemoryUsage set");
+            start();
+          }
+        });
+      });
+      asyncTest("All Attribute Read Request",function() {
+        j4p.request(
+        { type: "READ", mbean: "java.lang:type=Memory"},
+        {
+          success: function(response) {
+            equals(response.request.type,"read","Type must be read");
+            ok(response.value != null,"Value must be set: " + JSON.stringify(response.value));
+            ok($.isPlainObject(response.value),"Hash returned");
+            ok(response.value.HeapMemoryUsage,"HeapMemoryUsage set");
+            ok(response.value.HeapMemoryUsage.used,"HeapMemoryUsage.used set");
+            ok(response.value.NonHeapMemoryUsage,"NonHeapMemoryUsage set");
+            start();
+          }
+        });
+      });
+      asyncTest("Pattern Attribute Read Request",function() {
+        j4p.request(
+        { type: "READ", mbean: "java.lang:type=*"},
+        {
+          success: function(response) {
+            equals(response.request.type,"read","Type must be read");
+            ok(response.value != null,"Value must be set: " + JSON.stringify(response.value));
+            ok($.isPlainObject(response.value),"Hash returned");
+            ok(response.value["java.lang:type=Memory"]);
+            ok(response.value["java.lang:type=Memory"].HeapMemoryUsage.used);
+            start();
           }
         });
       });

@@ -32,7 +32,9 @@
 
     var j4p = new Jolokia("/jolokia");
 
-    j4p.getAttribute();
+    module("Simplified requests");
+    var value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
+    console.log(value);
   });
 
   </script>

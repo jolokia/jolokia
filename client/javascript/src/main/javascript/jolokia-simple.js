@@ -15,15 +15,53 @@
  */
 
 if (Jolokia) {
-    Jolokia.prototype.getAttribute = function(mbean,attribute,opts) {
-        this.request(
-        { type: "read", mbean: mbean, attribute: attribute },
-        {
-            success: function(resp) {
-                console.log(JSON.stringify(resp));
+    (function($) {
+        /**
+         * Get one or more attributes
+         *
+         * @param mbean objectname of MBean to query. Can be a pattern
+         * @param attribute attribute name. If an array, multiple attributes are fetched
+         * @param path optional path within the return value
+         * @param opts options passed to Jolokia.request()
+         */
+        function getAttribute(mbean,attribute,path,opts) {
+            if (arguments.length === 3 && typeof path == "object") {
+                opts = path;
+                path = null;
             }
-        });
-    }
+            var req = { type: "read", mbean: mbean, attribute: attribute };
+            if (path != null) {
+                req.path = path;
+            }
+
+            return extractValue(this.request(req,prepareSucessCallback(opts)));
+        }
+
+        // =======================================================================
+
+        function extractValue(response) {
+            return response != null ? response.value : null;
+        }
+
+        function prepareSucessCallback(opts) {
+            if (opts && opts.success) {
+                var parm = $.extend({},opts);
+                parm.success = new function(resp) {
+                    opts.success(resp.value);
+                };
+                return parm;
+            } else {
+                return opts;
+            }
+        }
+
+
+        // Extend the Jolokia prototype with new functionality (mixin)
+        $.extend(Jolokia.prototype,
+                 {
+                     "getAttribute" : getAttribute
+                 });
+    })(jQuery);
 } else {
     console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
 }
