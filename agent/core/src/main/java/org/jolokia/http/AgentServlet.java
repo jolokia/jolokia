@@ -113,7 +113,6 @@ public class AgentServlet extends HttpServlet {
     @SuppressWarnings("PMD.AvoidCatchingThrowable")
     private void handle(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONAware json = null;
-        int code = 200; // Success
         try {
             // Check access policy
             requestHandler.checkClientIPAccess(pReq.getRemoteHost(),pReq.getRemoteAddr());
@@ -126,15 +125,14 @@ public class AgentServlet extends HttpServlet {
         } catch (Throwable exp) {
             JSONObject error = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
-            code = (Integer) error.get("status");
             json = error;
         } finally {
             String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
             if (callback != null) {
                 // Send a JSONP response
-                sendResponse(pResp,code,"text/javascript",callback + "(" + json.toJSONString() +  ");");
+                sendResponse(pResp, "text/javascript",callback + "(" + json.toJSONString() +  ");");
             } else {
-                sendResponse(pResp,code,"text/plain",json.toJSONString());
+                sendResponse(pResp, "text/plain",json.toJSONString());
             }
         }
     }
@@ -178,7 +176,7 @@ public class AgentServlet extends HttpServlet {
         return ret;
     }
 
-    private void sendResponse(HttpServletResponse pResp, int pStatusCode, String pContentType, String pJsonTxt) throws IOException {
+    private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {
         try {
             pResp.setCharacterEncoding("utf-8");
             pResp.setContentType(pContentType);
@@ -186,7 +184,7 @@ public class AgentServlet extends HttpServlet {
             // For a Servlet 2.3 container, set the charset by hand
             pResp.setContentType(pContentType + "; charset=utf-8");
         }
-        pResp.setStatus(pStatusCode);
+        pResp.setStatus(200);
         PrintWriter writer = pResp.getWriter();
         writer.write(pJsonTxt);
     }

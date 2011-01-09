@@ -96,10 +96,9 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         } catch (Throwable exp) {
             JSONObject error = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
-            code = (Integer) error.get("status");
             json = error;
         } finally {
-            sendResponse(pExchange,parsedUri,code,json.toJSONString());
+            sendResponse(pExchange,parsedUri, json.toJSONString());
         }
     }
 
@@ -122,7 +121,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     }
 
 
-    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, int pCode, String pJson) throws IOException {
+    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, String pJson) throws IOException {
         OutputStream out = null;
         String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
         try {
@@ -130,7 +129,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             headers.set("Content-Type",(callback == null ? "text/plain" : "text/javascript") + "; charset=utf-8");
             String content = callback == null ? pJson : callback + "(" + pJson + ");";
             byte[] response = content.getBytes();
-            pExchange.sendResponseHeaders(pCode,response.length);
+            pExchange.sendResponseHeaders(200,response.length);
             out = pExchange.getResponseBody();
             out.write(response);
         } finally {
