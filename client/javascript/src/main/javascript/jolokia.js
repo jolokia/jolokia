@@ -15,10 +15,11 @@
  */
 
 /* =================================
- * Jolokia Javascript Client library
+ * Jolokia Javascript Client Library
  * =================================
  *
- * Requires jQuery and json2.js (if no native JSON.stringify() support is available)
+ * Requires jQuery and json2.js
+ * (if no native JSON.stringify() support is available)
  */
 
 var Jolokia = (function($) {
@@ -92,6 +93,8 @@ var Jolokia = (function($) {
                         }
                     }
                 };
+            } else {
+                // TODO: Perform sync request
             }
 
             if (params.ajaxError) {
@@ -127,7 +130,6 @@ var Jolokia = (function($) {
     /**
      * Create the URL used for a GET request
      *
-     * @param base_url to request to
      * @param request the request to convert to URL format
      */
     function constructGetUrlPath(request) {
