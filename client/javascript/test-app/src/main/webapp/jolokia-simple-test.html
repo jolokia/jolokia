@@ -33,8 +33,45 @@
     var j4p = new Jolokia("/jolokia");
 
     module("Simplified requests");
-    var value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
-    console.log(value);
+    test("get_attribute (sync)",function() {
+      var value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
+      ok(value > 0,"Positive used HeapMemory");
+      value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage");
+      ok(value.used,"Composite Data returned");
+      value = j4p.getAttribute("java.lang:type=Memory",["HeapMemoryUsage","NonHeapMemoryUsage"]);
+      ok(value.HeapMemoryUsage.max,"Multi attribute read, HeapMemoryUsage.max");
+      ok(value.NonHeapMemoryUsage.used,"Multi attribute read, HeapMemoryUsage.used");
+      value = j4p.getAttribute("java.lang:type=Memory");
+      ok(value.HeapMemoryUsage.max,"All attribute read, HeapMemoryUsage.max");
+      ok(value.NonHeapMemoryUsage.used,"All attribute read, HeapMemoryUsage.used");
+      value = j4p.getAttribute("java.lang:type=*");
+      ok(value["java.lang:type=Memory"].HeapMemoryUsage.max,"Pattern read, java.lang:type=Memory,HeapMemoryUsage.max");
+      value = j4p.getAttribute("bla:blub=x",{ method: "get" });
+      ok(value == null,"Error call");
+    });
+
+    asyncTest("get_attribute (sync with error)",function() {
+      var value = j4p.getAttribute("bla:blub=x",{ error: function(resp) {
+        equals(resp.error_type,"javax.management.InstanceNotFoundException","Exception type");
+        start();
+      }});
+      ok(value == null,"Error call");
+    });
+
+    asyncTest("get_attribute (async)",function() {
+      var value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used", {
+        success: function(val) {
+          ok(val > 0,"Positive HeapMemory");
+          start();
+        }
+      });
+     // ok(value == null,"No sync return value");
+    });
+
+    function log(response) {
+      console.log(JSON.stringify(response));
+    }
+
   });
 
   </script>
