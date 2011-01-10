@@ -32,6 +32,11 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
+  <properties>
+    <sonar.language>js</sonar.language>
+    <sonar.dynamicAnalysis>false</sonar.dynamicAnalysis>
+  </properties>
+  
   <dependencies>
   </dependencies>
 

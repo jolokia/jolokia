@@ -72,9 +72,20 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
+  <servlet>
+    <servlet-name>j4p-it</servlet-name>
+    <servlet-class>org.jolokia.it.servlet.TestMBeanRegisteringServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>jolokia-agent</servlet-name>
     <url-pattern>/jolokia/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>j4p-it</servlet-name>
+    <url-pattern>/jolokia-it</url-pattern>
   </servlet-mapping>
 
 </web-app>

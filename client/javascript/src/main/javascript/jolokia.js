@@ -122,7 +122,7 @@ var Jolokia = (function($) {
             }
 
             // Dispatch Callbacks to error and success handlers
-            if (opts.success || opts.error) {
+            if (opts.success) {
                 var success_callback = constructCallbackDispatcher(opts.success);
                 var error_callback = constructCallbackDispatcher(opts.error);
                 ajaxParams.success = function(data) {

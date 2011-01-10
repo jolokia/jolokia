@@ -47,10 +47,23 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-it-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-javascript</artifactId>
       <type>javascript</type>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
