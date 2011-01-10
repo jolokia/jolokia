@@ -43,7 +43,19 @@
         <groupId>com.devspan.mojo.javascript</groupId>
         <artifactId>javascript-maven-plugin</artifactId>
         <version>0.9.3</version>
+        <configuration>
+          <scriptClassifier>min</scriptClassifier>
+          <compressor>jsmin</compressor>
+          <skipStats>false</skipStats>
+        </configuration>
         <extensions>true</extensions>
+         <executions>
+          <execution>
+            <goals>
+              <goal>attach-compressed</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>

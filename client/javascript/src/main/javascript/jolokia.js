@@ -18,7 +18,7 @@
  * Jolokia Javascript Client Library
  * =================================
  *
- * Requires jQuery and json2.js
+ * Requires jquery.js and json2.js
  * (if no native JSON.stringify() support is available)
  */
 
