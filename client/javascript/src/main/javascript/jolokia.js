@@ -40,6 +40,35 @@ var Jolokia = (function($) {
         dataType: "json"
     };
 
+    /**
+     * Constructor for creating a client to the Jolokia agent.
+     *
+     * An object containing the default parameters can be provided as argument.
+     *
+     * <dl>
+     *   <dt>url</dt>
+     *   <dd></dd>
+     *   <dt>method</dt>
+     *   <dd></dd>
+     *   <dt>jsonp</dt>
+     *   <dd></dd>
+     *   <dt>success</dt>
+     *   <dd></dd>
+     *   <dt>error</dt>
+     *   <dd></dd>
+     *   <dt>ajaxError</dt>
+     *   <dd></dd>
+     *   <dt>username</dt>
+     *   <dd></dd>
+     *   <dt>password</dt>
+     *   <dd></dd>
+     *   <dt>timeout</dt>
+     *   <dd></dd>
+     * </dl>
+     *
+     * @param param either a string in which case it is used as the URL to the agent or
+     *              an object with the default parameters as key-value pairs
+     */
     function Jolokia(param) {
         // If called without 'new', we are constructing an object
         // nevertheless
@@ -50,8 +79,6 @@ var Jolokia = (function($) {
         if (typeof param === "string") {
             param = {url: param};
         }
-        assertNotNull(param,"No parameters given");
-        assertNotNull(param.url,"No URL given");
         $.extend(this,DEFAULT_CLIENT_PARAMS,param);
 
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -63,10 +90,21 @@ var Jolokia = (function($) {
          *
          * @param request the request to send
          * @param params parameters used for sending the request
+         * @return the response object if called synchronously or nothing if called for async operation.
          */
         this.request = function(request,params) {
             var opts = $.extend({},this,params);
+            assertNotNull(opts.url,"No URL given");
+
             var ajaxParams = {};
+
+            // Copy over direct params for the jQuery ajax call
+            $.each(["username", "password", "timeout"],function(i,key) {
+                if (opts[key]) {
+                    ajaxParams[key] = opts[key];
+                }
+            });
+
 
             if (extractMethod(opts,request) === "post") {
                 $.extend(ajaxParams,POST_AJAX_PARAMS);
