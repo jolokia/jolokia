@@ -99,7 +99,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         public Map<String, String> getExtraInfo(Set<? extends MBeanServerConnection> pServers) {
             Map<String,String> extra = super.getExtraInfo(pServers);
             if (extra != null && hasAmx(getVersion())) {
-                extra.put("amdBooted",Boolean.toString(mBeanExists(pServers,"amx:type=domain-root,*")));
+                extra.put("amxBooted",Boolean.toString(mBeanExists(pServers,"amx:type=domain-root,*")));
             }
             return extra;
         }
