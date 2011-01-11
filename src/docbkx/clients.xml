@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="clients">
+<chapter id="clients" xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Clients</title>
 
     <note>
       Currently, two client implementations exists for Jolokia:
-      Jmx4Perl, the Perl-Binding (grandfather of all clients ;-) and a
-      Java library. JavaScript is in the pipeline. More on this late
-      on in this chapter.
+      Jmx4Perl, the Perl-Binding (grandfather of all clients ;-), a
+      Java library and a Javascript library.
     </note>
+
+    <xi:include href='client/javascript.xml'/>
+
 </chapter>

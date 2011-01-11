@@ -40,31 +40,15 @@ var Jolokia = (function($) {
         dataType: "json"
     };
 
+    // Processing parameters which are added to the
+    // URL as query parameters if given as options
+    var PROCESSING_PARAMS = ["maxDepth","maxCollectionSize","maxObjects","ignoreErrors"];
+
     /**
      * Constructor for creating a client to the Jolokia agent.
      *
-     * An object containing the default parameters can be provided as argument.
-     *
-     * <dl>
-     *   <dt>url</dt>
-     *   <dd></dd>
-     *   <dt>method</dt>
-     *   <dd></dd>
-     *   <dt>jsonp</dt>
-     *   <dd></dd>
-     *   <dt>success</dt>
-     *   <dd></dd>
-     *   <dt>error</dt>
-     *   <dd></dd>
-     *   <dt>ajaxError</dt>
-     *   <dd></dd>
-     *   <dt>username</dt>
-     *   <dd></dd>
-     *   <dt>password</dt>
-     *   <dd></dd>
-     *   <dt>timeout</dt>
-     *   <dd></dd>
-     * </dl>
+     * An object containing the default parameters can be provided as argument. For the possible parameters
+     * see {@link #request()}.
      *
      * @param param either a string in which case it is used as the URL to the agent or
      *              an object with the default parameters as key-value pairs
@@ -85,12 +69,83 @@ var Jolokia = (function($) {
         // Public methods
 
         /**
-         * The request method using one or more JSON requests
-         * and sending it to the target URL.
+         * The request method using one or more JSON requests and sending it to the agent. Beside the
+         * request a bunch of options can be given, which are merged with the options provided
+         * at the constructor (where the options given here take precedence).
+         *
+         * Known options are:
+         *
+         * <dl>
+         *   <dt>url</dt>
+         *   <dd>Agent URL, which is mandatory</dd>
+         *   <dt>method</dt>
+         *   <dd>
+         *     Either "post" or "get" depending on the desired HTTP method (case does not matter).
+         *     Please note, that bulk requests are not possible with "get". On the other
+         *     hand, JSONP requests are not possible with "post" (which obviously implies
+         *     that bulk request cannot be used with JSONP requests). Also, when using a
+         *     <code>read</code> type request for multiple attributes, this also can
+         *     only be sent as "post" requests. If not given, a HTTP method is determined
+         *     dyamically. If a method is selected which doesn't fit to the request, an error
+         *     is raised.
+         *   </dd>
+         *   <dt>jsonp</dt>
+         *   <dd>
+         *     Whether the request should be sent via JSONP (a technique for allowing cross
+         *     domain request circumventing the infamous "same-origin-policy"). This can be
+         *     used only with HTTP "get" requests.
+         *    </dd>
+         *   <dt>success</dt>
+         *   <dd>
+         *     Callback function which is called for a successful request. The callback receives
+         *     the response as single argument. If no <code>success</code> callback is given, then
+         *     the request is performed synchronously and gives back the response as return
+         *     value.
+         *   </dd>
+         *   <dt>error</dt>
+         *   <dd>
+         *     Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
+         *     suceeded with a status code of 200, but the response object contains a status other
+         *     than OK (200) which happens if the request JMX operation fails. This callback receives
+         *     the full Jolokia response object (with a key <code>error</code> set). If no error callback
+         *     is given, but an asynchronous operation is performed, the error response is printed
+         *     to the Javascript console by default.
+         *   </dd>
+         *   <dt>ajaxError</dt>
+         *   <dd>
+         *     Global error callback called when the Ajax request itself failed. It obtains the same arguments
+         *     as the error callback given for <code>jQuery.ajax()</code>, i.e. the <code>XmlHttpResonse</code>,
+         *     a text status and an error thrown. Refer to the jQuery documentation for more information about
+         *     this error handler.
+         *   </dd>
+         *   <dt>username</dt>
+         *   <dd>A username used for HTTP authentication</dd>
+         *   <dt>password</dt>
+         *   <dd>A password used for HTTP authentication</dd>
+         *   <dt>timeout</dt>
+         *   <dd>Timeout for the HTTP request</dd>
+         *   <dt>maxDepth</dt>
+         *   <dd>Maximum traversal depth for serialization of complex return values</dd>
+         *   <dt>maxCollectionSize</dt>
+         *   <dd>
+         *      Maximum size of collections returned during serialization.
+         *      If larger, the collection is returned truncated.
+         *   </dd>
+         *   <dt>maxObjects</dt>
+         *   <dd>
+         *      Maximum number of objects contained in the response.
+         *   </dd>
+         *   <dt>ignoreErrors</dt>
+         *   <dd>
+         *     If set to true, errors during JMX operations and JSON serialization
+         *     are ignored. Otherwise if a single deserialization fails, the whole request
+         *     returns with an error. This works only for certain operations like pattern reads..
+         *   </dd>
+         * </dl>
          *
          * @param request the request to send
          * @param params parameters used for sending the request
-         * @return the response object if called synchronously or nothing if called for async operation.
+         * @return the response object if called synchronously or nothing if called for asynchronous operation.
          */
         this.request = function(request,params) {
             var opts = $.extend({},this,params);
@@ -105,8 +160,7 @@ var Jolokia = (function($) {
                 }
             });
 
-
-            if (extractMethod(opts,request) === "post") {
+            if (extractMethod(request,opts) === "post") {
                 $.extend(ajaxParams,POST_AJAX_PARAMS);
                 ajaxParams.data = JSON.stringify(request);
                 ajaxParams.url = opts.url;
@@ -115,6 +169,9 @@ var Jolokia = (function($) {
                 ajaxParams.dataType = opts.jsonp ? "jsonp" : "json";
                 ajaxParams.url = opts.url + "/" + constructGetUrlPath(request);
             }
+
+            // Add processing parameters as query parameters
+            ajaxParams.url = addProcessingParameters(ajaxParams.url,opts);
 
             // Global error handler
             if (opts.ajaxError) {
@@ -159,6 +216,8 @@ var Jolokia = (function($) {
 
     // Private Methods:
 
+    // ========================================================================
+
     // Construct a callback dispatcher for appropriately dispatching
     // to a single callback or within an array of callbacks
     function constructCallbackDispatcher(callback) {
@@ -176,7 +235,7 @@ var Jolokia = (function($) {
     // Extract the HTTP-Method to use and make some sanity checks if
     // the method was provided as part of the options, but dont fit
     // to the request given
-    function extractMethod(opts, request) {
+    function extractMethod(request,opts) {
         var methodGiven = opts && opts.method ? opts.method.toLowerCase() : null,
                 method;
         if (methodGiven) {
@@ -201,14 +260,23 @@ var Jolokia = (function($) {
         return method;
     }
 
+    // Add processing parameters given as request options
+    // to an URL as GET query parameters
+    function addProcessingParameters(url, opts) {
+        var sep = url.indexOf("?") > 0 ? "&" : "?";
+        $.each(PROCESSING_PARAMS,function(i,key) {
+            if (opts[key] != null) {
+                url += sep + key + "=" + opts[key];
+                sep = "&";
+            }
+        });
+        return url;
+    }
+
     // ========================================================================
     // GET-Request handling
 
-    /**
-     * Create the URL used for a GET request
-     *
-     * @param request the request to convert to URL format
-     */
+    // Create the URL used for a GET request
     function constructGetUrlPath(request) {
         var type = request.type;
         assertNotNull(type,"No request type given for building a GET request");
@@ -261,7 +329,7 @@ var Jolokia = (function($) {
         return part;
     }
 
-    // Split up a path and append it to a given array
+    // Split up a path and append it to a given array. TODO: Check for escaped slashes
     function appendPath(array,path) {
          return path ? $.merge(array,path.split(/\//)) : array;
     }
