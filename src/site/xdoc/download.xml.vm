@@ -64,7 +64,42 @@
           </tr>
         </tbody>
       </table>
-
+      <subsection name="Javascript Library">
+        <p>
+          The Jolokia Javascript client library comes in two variants:
+          <code>jolokia.js</code> contains the basics and can be used
+          with its <code>request()</code> for sending JSON
+          requests. <code>jolokia-simple.js</code> adds on this code
+          and provides a simplified API for Jolokia request, but is
+          slightly less powerful. The <code>-min</code> versions are
+          compressed with all documentation stripped off and
+          recommended for production use.
+        </p>
+        <table>
+          <tbody>
+            <tr>
+              <th>Script</th>
+              <th>Download</th>
+            </tr>
+            <tr>
+              <td>Base script</td>
+              <td><a href="dist/{$currentStableVersion}/js/jolokia.js">jolokia.js</a></td>            
+            </tr>
+            <tr>
+              <td>Base script, compressed</td>
+              <td><a href="dist/{$currentStableVersion}/js/jolokia.js">jolokia-min.js</a></td>            
+          </tr>
+          <tr>
+            <td>Simplified API</td>
+            <td><a href="dist/{$currentStableVersion}/js/jolokia-simple.js">jolokia-simple.js</a></td>            
+          </tr>
+          <tr>
+            <td>Simplified API, compressed</td>
+            <td><a href="dist/{$currentStableVersion}/js/jolokia.js">jolokia-simple-min.js</a></td>            
+          </tr>
+          </tbody>
+        </table>
+      </subsection>
       <subsection name="Maven">
         <p>
           The main agent functionality is encapsulated in a core jar,
@@ -84,6 +119,23 @@
    <artifactId>jolokia-client-java</artifactId>
    <version>${currentStableVersion}</version>
  </dependency>]]></pre>
+        <p>
+          The Javascript library can easily be used as Maven
+          dependency by use of <a href="">javascript-maven-plugin</a>:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+ <dependency>
+   <groupId>org.jolokia</groupId>
+   <artifactId>jolokia-client-javascript</artifactId>
+   <type>javascript</type>
+   <version>${currentStableVersion}</version>
+ </dependency>]]></pre>
+        <p>
+          Use a classifier <code>compressed</code> for referencing to
+          the compressed versions. A full example, including the
+          plugin configuration can be found in the <a
+          href="../reference/html/clients.html#js-maven">Reference Manual</a>
+        </p>
         <p>
           For automatic dependency resolution, please add the
           following repository to your <code>pom.xml</code> to get the offcially released

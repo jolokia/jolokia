@@ -50,6 +50,30 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia 0.82 released">
+        <div class="news-date">2011-01-16</div>
+        <p>
+          The <a href="client/javascript.html">Jolokia Javascript
+          Client Library</a> has arrived. This is the most notable
+          addition to this release. It's now a piece of cake to query 
+          MBeans from within your Browser dynamically via Ajax calls. 
+        </p>
+        <p>
+          This release contains also a substantial change concerning
+          the error handling. In former versions, the HTTP return code
+          of a Jolokia request reflected the success status of the JMX
+          operation itself. This is no longer the case, the HTTP
+          status code will always be 200 as long as the agent could
+          perform its work, regardless of any error happened during
+          performing the JMX operation. The Jolokia status code
+          contained in the returned JSON response indicates the state
+          of the JMX operation. This change decouples errors on the
+          transport and Jolokia layer making a dedicated error
+          handling much easier. When the HTTP code is 200, the
+          response contains always a JSON object, that's guaranteed
+          now. 
+      </p>
+      </subsection>
       <subsection name="Jolokia 0.81 released">
         <div class="news-date">2010-12-14</div>
         <p>

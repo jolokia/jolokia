@@ -40,6 +40,7 @@
     </menu>
     <menu name="Clients" href="../../client.html">
       <item name="Java" href="../../client/java.html"/>
+      <item name="Javasript" href="../../client/javascript.html"/>
       <item name="Perl" href="../../client/perl.html"/>
     </menu>
     <menu name="Modules">
@@ -50,7 +51,8 @@
       <item name="Osgi" href="../jolokia-osgi/index.html"/>
       <item name="Osgi-Bundle" href="../jolokia-osgi-bundle/index.html"/>
       <item name="JVM Agent" href="../jolokia-jvm-jdk6/index.html"/>
-      <item name="Client" href="../../jolokia-client-parent/jolokia-client-java/index.html"/>
+      <item name="Java Client" href="../../jolokia-client-parent/jolokia-client-java/index.html"/>
+      <item name="Javascript Client" href="../../jolokia-client-parent/jolokia-client-javascript/index.html"/>
       <item name="Integration Tests" href="../../jolokia-it-parent/jolokia-it-core/index.html"/>
     </menu>
     <menu ref="reports"/>

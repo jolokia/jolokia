@@ -56,6 +56,30 @@ if ($memory->{"used"} / $memory->{"max"} > 0.9) {
     sleep(120);
 }]]></pre>
       </subsection>
+      <subsection name="Javascript">
+        <p>
+          The JSON based Jolokia protocol fits perfectly in the
+          Javascript world. Jolokia provides a <a
+          href="../client/javascript.html">Javascript client
+          library</a> which makes it a piece of cake to access JMX
+          information directly from within the browser. A variant of
+          the memory example above looks in Javascript like this:
+        </p>
+        <pre class="prettyprint"><![CDATA[
+var j4p = new Jolokia("/jolokia");
+j4p.request(
+ {
+   type: "read",
+   mbean: "java.lang:type=Memory",
+   attribute: "HeapMemoryUsage"
+ },{
+   success: function(resp) {
+      if (resp.value.used / resp.value.max > 0.9) {
+         alert("Memory exceeds 90% threshold");
+      }
+   }
+ });]]></pre>
+      </subsection>
       <subsection name="Java">
         <p>
           The Jolokia agents can be accessed from Java as well. The
@@ -97,14 +121,14 @@ public class JolokiaSample {
         <p>
           In fact, serving non-java environments is one of the most
           outstanding strength of Jolokia. The focus is on the future
-          evolution of Jolokia is to provide more client libraries. Top
-          on the list are Javascript (guess why ;-) and Scala. If you
-          like to add a client library in your favourite language, go
+          evolution of Jolokia is to provide more client
+          libraries. Top on the list are Groovy and Scala. If you like
+          to add a client library in your favourite language, go
           ahead, we would be happy to include it. Currently, the
           tendency is to keep JVM based languages (+ Javascript) under
           the Jolokia umbrella, but support for others (like <a
-          href="http://www.jmx4perl.org">jmx4perl</a>) hosted elsewhere
-          is in our focus as well. But well, let's see ;-).
+          href="http://www.jmx4perl.org">jmx4perl</a>) hosted
+          elsewhere is in our focus as well. But well, let's see ;-).
         </p>
       </subsection>
       <subsection name="Next">
