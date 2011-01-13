@@ -135,7 +135,8 @@ if (Jolokia) {
          * <pre>
          *  {
          *    protocol: "4.0",
-         *    agent:"0.81",
+         *    agent: "0.82",
+         *    client: "0.82",
          *    info: {
          *       product: "glassfish",
          *       vendor": "Sun",
@@ -145,7 +146,7 @@ if (Jolokia) {
          *  }
          * </pre>
          *
-         * @param opts
+         * @param opts optional options for Jolokia.request()
          * @param version and other meta information as object
          */
         function version(opts) {

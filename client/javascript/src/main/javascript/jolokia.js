@@ -59,6 +59,10 @@ var Jolokia = (function($) {
         if ( !(this instanceof arguments.callee) ) {
             return new Jolokia(param);
         }
+
+        // Jolokia Javascript Client version
+        this.CLIENT_VERSION = "0.82";
+
         // Allow a single URL parameter as well
         if (typeof param === "string") {
             param = {url: param};

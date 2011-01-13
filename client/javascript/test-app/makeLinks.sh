@@ -20,4 +20,10 @@ rm jolokia.js
 ln -s ../../../../../src/main/javascript/jolokia.js .
 rm jolokia-simple.js
 ln -s ../../../../../src/main/javascript/jolokia-simple.js .
+cd ../test
+rm jolokia-test.js
+ln -s ../../../../src/main/javascript/test/jolokia-test.js .
+rm jolokia-simple-test.js
+ln -s ../../../../src/main/javascript/test/jolokia-simple-test.js .
+
 cd ../../../..

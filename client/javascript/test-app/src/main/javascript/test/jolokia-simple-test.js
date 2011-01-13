@@ -152,6 +152,7 @@ $(document).ready(function() {
         test("version (sync)", function() {
             var value = j4p.version({method: "post"});
             ok(value.protocol >= 4, "Protocol >= 4");
+            ok(j4p.CLIENT_VERSION >= 0.82,"Client version: " + j4p.CLIENT_VERSION);
         });
 
         asyncTest("version (async)", function() {
