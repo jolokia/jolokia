@@ -14,6 +14,10 @@
         exception (like security constraint violations) happen on the top agent level,
         otherwise 200 is returned (even when an Jolokia response object contains an error).
       </action>
+      <action dev="roland" type="add" date="2011-01-16">
+        Added a Javascript client library including about 120 unit
+        tests and a new section in the reference manual.
+      </action>
     </release>
     <release version="0.81" description="Release 0.81" date="2010-12-14">
       <action dev="roland" type="fix" date="2010-10-24">
