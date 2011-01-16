@@ -3,7 +3,7 @@
     <title>Clients</title>
 
     <note>
-      Currently, two client implementations exists for Jolokia:
+      Currently, three client implementations exists for Jolokia:
       Jmx4Perl, the Perl-Binding (grandfather of all clients ;-), a
       Java library and a Javascript library.
     </note>

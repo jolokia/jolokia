@@ -136,7 +136,6 @@ if (Jolokia) {
          *  {
          *    protocol: "4.0",
          *    agent: "0.82",
-         *    client: "0.82",
          *    info: {
          *       product: "glassfish",
          *       vendor": "Sun",

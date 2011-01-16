@@ -56,7 +56,7 @@
     </para>
     <programlisting><![CDATA[
 { 
-   "type":"READ",
+   "type":"LIST",
    "path":"java.lang/type=Memory"
 }]]></programlisting>
   </section>

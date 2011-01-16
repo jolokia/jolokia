@@ -31,7 +31,7 @@
       The GET URL for a read request has the following format:
     </para>
     <synopsis><![CDATA[<base-url>/read/<mbean name>/<attribute name>/<inner path>]]></synopsis>
-        <table>
+    <table>
       <title>GET Read Request</title>
       <thead>
         <tr>

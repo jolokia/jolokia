@@ -142,11 +142,11 @@
           </informalexample>
           The corresponding perl code
           for creating escaping a single parht looks like
-        </para>
+        </para> 
         <programlisting language="perl"><![CDATA[
 $input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
 $input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
-        <para>
+       <para>
           All of this said, this sort of strange escaping can be
           avoided alltogether if a slightly different variant for a
           request is used (which doesn't look that REST-stylish,
