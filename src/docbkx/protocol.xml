@@ -131,12 +131,14 @@
           Client libraries like <ulink
           url="http://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</ulink>
           do this sort of escaping transparently. If the part
-          (e.g. MBean's name) <emphasis>ends</emphasis> in a slash you
-          need to use a <literal>+</literal> instead of a minus, so
-          the j4p agent can combine parts properly. For example to
-          encode a MBean name like
-          <literal>test:strangeName=/bla//</literal>, this should be
-          encoded like
+          (e.g. MBean's name) <emphasis>starts</emphasis> with a slash
+          you need to use a <literal>^</literal> instead of a minus,
+          so the j4p agent can combine parts properly. The same is
+          true, if the part <emphasis>ends</emphasis> with a slash,
+          than the corresponding minus must be replaced with a
+          <literal>+</literal>. For example to encode a MBean name
+          like <literal>test:strangeName=/bla//</literal>, this should
+          be encoded like
           <informalexample>
             <literallayout class="monospaced">.../test:strangeName=/-/bla/-+/attribute</literallayout>
           </informalexample>
@@ -145,7 +147,9 @@
         </para> 
         <programlisting language="perl"><![CDATA[
 $input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
-$input =~ s|-/$|+/|; # The last slash needs a special escape]]></programlisting>
+$input =~ s|^/-|/^|; # The first slash needs to be escaped (first)
+$input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
+]]></programlisting>
        <para>
           All of this said, this sort of strange escaping can be
           avoided alltogether if a slightly different variant for a
