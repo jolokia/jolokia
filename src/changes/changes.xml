@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.82">
+    <release version="0.82" description="Release 0.82" date="2011-01-16">
       <action dev="roland" type="update" date="2011-01-08">
         The HTTP status code returned with a HTTP response does not reflect the
         status of the JMX operation itself. An HTTP error occurs only if an processing

@@ -83,19 +83,19 @@
             </tr>
             <tr>
               <td>Base script</td>
-              <td><a href="dist/{$currentStableVersion}/js/jolokia.js">jolokia.js</a></td>            
+              <td><a href="dist/${currentStableVersion}/js/jolokia.js">jolokia.js</a></td>            
             </tr>
             <tr>
               <td>Base script, compressed</td>
-              <td><a href="dist/{$currentStableVersion}/js/jolokia.js">jolokia-min.js</a></td>            
+              <td><a href="dist/${currentStableVersion}/js/jolokia-min.js">jolokia-min.js</a></td>            
           </tr>
           <tr>
             <td>Simplified API</td>
-            <td><a href="dist/{$currentStableVersion}/js/jolokia-simple.js">jolokia-simple.js</a></td>            
+            <td><a href="dist/${currentStableVersion}/js/jolokia-simple.js">jolokia-simple.js</a></td>            
           </tr>
           <tr>
             <td>Simplified API, compressed</td>
-            <td><a href="dist/{$currentStableVersion}/js/jolokia.js">jolokia-simple-min.js</a></td>            
+            <td><a href="dist/${currentStableVersion}/js/jolokia-simple-min.js">jolokia-simple-min.js</a></td>            
           </tr>
           </tbody>
         </table>
