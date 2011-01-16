@@ -141,7 +141,7 @@
             <literallayout class="monospaced">.../test:strangeName=/-/bla/-+/attribute</literallayout>
           </informalexample>
           The corresponding perl code
-          for creating escaping a single parht looks like
+          for creating escaping a single part looks like
         </para> 
         <programlisting language="perl"><![CDATA[
 $input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
