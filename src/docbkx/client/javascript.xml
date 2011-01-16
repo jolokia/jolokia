@@ -100,7 +100,7 @@ console.log("Heap Memory used: " + value);
       the agent's version for a agent running on the same server which
       delivered the Javascript looks like:
     </para>
-    <programlisting language="javascript" id="js-request-constructor-example"><![CDATA[
+    <programlisting language="javascript"><![CDATA[
 var j4p = new Jolokia({url: "/jolokia"});
 var response = j4p.request({type: "version"},{method: "post"});
 console.log("Agent Version: " + response.value.agent);]]></programlisting>
@@ -134,7 +134,7 @@ console.log("Agent Version: " + response.value.agent);]]></programlisting>
         The following example shows a single and bulk request call to
         the Jolokia agent:
       </para>
-      <programlisting language="javascript" id="js-request-constructor-example"><![CDATA[
+      <programlisting language="javascript"><![CDATA[
 var j4p = new Jolokia({url: "/jolokia"});
 var req1 = { type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" };
 var req2 = { type: "list" };
