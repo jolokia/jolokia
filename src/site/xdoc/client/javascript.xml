@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Jolokia Javascript Client library</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="Javascript Client Library">
+      <p>
+        Jolokia's Javascript client library allows for easy access to
+        the Jolokia client from within Javascript scripts. It
+        encapsulates the JSON/HTTP access within a simple object
+        layer. 
+      </p>
+      <p>
+        The Javascript client binding provides the following features:         
+      </p>
+      <ul>
+        <li>Synchronous and asynchronous operations</li>
+        <li>Support for JSONP for accessing servers other than the one
+        serving the Javscript file</li>
+        <li>Support for all Jolokia features like bulk requests or JMX
+        proxy calls</li>
+        <li>Simple access methods like <code>get_attribute</code> or
+        <code>exec</code> in addition to a generic
+        <code>request</code> method.</li>
+      </ul>
+      <p>
+        Documentation for the Javascript library can be found in the
+        reference manual in the chapter <a
+        href="../reference/html/clients.html#client-javascript">Javascript
+        Client Library</a>. 
+      </p>
+      <subsection name="Installation">
+        <p>
+          The Jolokia Javascript library can be downloaded from the <a
+          href="../download.html">download page</a>. It is divided
+          into two scripts: <code>jolokia.js</code> contains the basic
+          <code>Jolokia</code> object definition which provides the
+          generic <code>request()</code>
+          method. <code>jolokia-simple.js</code> adds to this
+          definition methods for a simplified access, which are easier
+          to use but less powerful. In addition these libs require <a
+          href="http://www.jquery.com">jQuery</a> and, if the target
+          brosers don't support native JSON serialization, <a
+          href="https://github.com/douglascrockford/JSON-js">json2.js</a>. A typical setup in an HTML page
+          using the library looks like:
+        </p>
+        <pre class="pretty-print lang-html">
+<![CDATA[<head>
+  <script type="text/javascript" src="jquery-1.4.4.js"></script>
+  <script type="text/javascript" src="json2.js"></script>
+  <script type="text/javascript" src="jolokia.js"></script>
+  <script type="text/javascript" src="jolokia-simple.js"></script>
+</head>]]></pre>
+        <p>
+          For production setup, the minified versions
+          (e.g. <code>jolokia-min.js</code>) are recommended since the
+          original are blown up with inline documentation. 
+        </p>
+      </subsection>
+      <subsection name="Example">
+        <p>
+          The following simple example shows how to fetch the used
+          Heap Memory from a Jolokia agent:
+        </p>
+        <pre class="prettyprint lang-javascript">  // Create a new jolokia client accessing the agent on the same 
+  // Host which serves this document:
+  var j4p = new Jolokia("/jolokia");
+          
+  // Request the memory information asynchronously and print it on 
+  // the console
+  j4p.request(
+     { 
+        type: "read", 
+        mbean: "java.lang:type=Memory", 
+        attribute: "HeapMemoryUsage" 
+     },
+     { 
+        success: function(response) {
+            console.log(JSON.stringify(response));
+            console.log("Heap-Memory used: " + response.value.used);
+        }
+     });
+
+  // Same as above, but synchronously and with the simple API:
+  console.log("Heap-Memory used:" + 
+              j4p.getAttribute("java.lang.type=Memory","HeapMemoryUsage","used"));</pre>
+      </subsection>
+      
+    </section>
+  </body>
+</document>
