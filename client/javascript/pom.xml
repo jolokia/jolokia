@@ -41,8 +41,8 @@
   </dependencies>
 
   <build>
+    <sourceDirectory>src/main/javascript</sourceDirectory>
     <outputDirectory>target/scripts</outputDirectory>
-    <testOutputDirectory>target/test-scripts</testOutputDirectory>
     <plugins>
       <plugin>
         <groupId>com.devspan.mojo.javascript</groupId>
