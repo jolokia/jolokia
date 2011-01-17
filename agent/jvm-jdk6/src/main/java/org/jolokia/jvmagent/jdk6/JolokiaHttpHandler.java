@@ -70,10 +70,9 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidCatchingThrowable")
+    @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     public void handle(HttpExchange pExchange) throws IOException {
         JSONAware json = null;
-        int code = 200;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri,context);
         try {
