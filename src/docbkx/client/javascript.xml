@@ -80,10 +80,11 @@ console.log("Heap Memory used: " + value);
 ]]></programlisting>
     <para>
       A Jolokia client is always created as an instance of
-      <classname>Jolokia</classname>. Requests to agent are sent by
-      calling methods on this object. The constructing function takes
-      a plain object, which provides default parameters when calling
-      the 
+      <classname>Jolokia</classname>. Requests to the agent are sent
+      by calling methods on this object. The constructing function
+      takes a plain object, which provides default parameters which
+      are used in the <methodname>request()</methodname> if no
+      overriding are given there.
     </para>
   </section>
   
@@ -118,7 +119,7 @@ console.log("Agent Version: " + response.value.agent);]]></programlisting>
         objects. They have exactly the same format, which is expected
         and returned by the agent as defined in <xref
         linkend="protocol"/> for POST requests. All request types are
-        types are supported. 
+        supported.
       </para>
       <para>
         The <methodname>request()</methodname> expects as its first
@@ -272,15 +273,17 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
       Requests can be send either synchronously or asynchronously via
       Ajax. If a <constant>success</constant> callback is given in the
       request options, the request is performed asynchronously via an
-      Ajax HTTP request. The callback receives a single argument when
-      called, a Jolokia JSON response object (see <xref
-      linkend="request-response"/>). The value of this option can be
-      an array of callback functions which are called in a round robin
-      fashion when multiple responses are received in case of bulk
-      requests. These callbacks are called only when the returned
-      Jolokia response has a status code of <constant>200</constant>,
-      otherwise the callback(s) given with the
-      <constant>error</constant> option are consulted. If no error
+      Ajax HTTP request. The callback as arguments a Jolokia JSON
+      response object (see <xref linkend="request-response"/>) and an
+      integer index indicating for which response this callback is
+      called. For bulk requests, this index corresponds to the array
+      index of the request which lead to this response. The value of
+      this option can be an array of callback functions which are
+      called in a round robin fashion when multiple responses are
+      received in case of bulk requests. These callbacks are called
+      only when the returned Jolokia response has a status code of
+      <constant>200</constant>, otherwise the callback(s) given with
+      the <constant>error</constant> option are consulted. If no error
       callback is given, the error is printed on the console by
       default. As for success callbacks, error callbacks reveive the
       Jolokia error response as a JSON object.
@@ -351,7 +354,7 @@ j4p.request(
       <constant>"true"</constant>. 
     </para>
     <para>
-      A explained in <xref linkend="request-response"/> the Jolokia
+      As explained in <xref linkend="request-response"/> the Jolokia
       agent supports two HTTP methods, <constant>GET</constant> and
       <constant>POST</constant>. <constant>POST</constant> is more
       powerful since it supports more features. I.e. bulk requests and
@@ -407,7 +410,7 @@ j4p.request(
       described in <xref linkend="js-request-options-table"/>. There
       is one notable difference for asynchronous callbacks and
       synchronous return values though: In case of a successful call,
-      the callback is feed with the response's
+      the callback is fed with the response's
       <constant>value</constant> object, not the full response
       (i.e. <code>response.value</code>). Similar, for synchronous
       operations the value itself is returned. In case of an error,
@@ -442,7 +445,7 @@ var memoryUsed = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","use
         <term>setAttribute(mbean,attribute,value,path,opts)</term>
         <listitem>
           <para>
-            For setting an JMX attribute, this method takes the MBean
+            For setting an JMX attribute, this method takes the MBean's
             name <code>mbean</code>, the attribute
             <code>attribute</code> and the value to set as
             <code>value</code>. The optional <code>path</code> is the
@@ -466,7 +469,7 @@ var gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory","Verbose",true);
             With this method, a JMX operation can be executed on the
             MBean <code>mbean</code>. Beside the operation's name
             <code>operation</code>, one or more arguments can be given
-            dependening on the signature of the JMX operation. The
+            depending on the signature of the JMX operation. The
             return value is the return value of the operation. See
             <xref linkend="exec"/> for details.
           </para>
@@ -494,7 +497,7 @@ j4p.execute("java.lang:type=Threading","dumpAllThreads",true,true,
             if none is found. See <xref linkend="search"/> for details.            
           </para>
           <para>
-            The following example lookus up all application servers
+            The following example looks up all application servers
             available in all domains: 
           </para>
           <programlisting language="javascript"><![CDATA[
@@ -534,8 +537,7 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
             method.
           </para>
           <para>
-            A sample return version return value for a Glassfish
-            server looks like:
+            A sample return value for a Glassfish server looks like:
           </para>
           <programlisting language="javascript"><![CDATA[
 {

@@ -12,7 +12,7 @@
     <section name="Javascript Client Library">
       <p>
         Jolokia's Javascript client library allows for easy access to
-        the Jolokia client from within Javascript scripts. It
+        the Jolokia agent from within Javascript scripts. It
         encapsulates the JSON/HTTP access within a simple object
         layer. 
       </p>

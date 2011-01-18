@@ -145,7 +145,7 @@
               href="client/perl.html">Perl</a> and <a
               href="client/javascript.html">Javascript</a> client
               libraries are already available, other language bindings
-              are in the pipeline (e.g. Javascript). <a
+              are in the pipeline (e.g. Scala). <a
               href="features/polyglot.html">More ...</a>
             </p>
           </section>

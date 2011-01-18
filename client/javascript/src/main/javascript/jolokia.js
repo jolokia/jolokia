@@ -229,6 +229,9 @@ var Jolokia = (function($) {
             return function(response) {
                 console.log("Ignoring response " + JSON.stringify(response));
             };
+        } else if (callback === "ignore") {
+            // Ignore the return value
+            return function() {};
         }
         var callbackArray = $.isArray(callback) ? callback : [ callback ];
         return function(response,idx) {
