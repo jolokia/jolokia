@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.management.ObjectName;
 
+import org.jolokia.LogHandler;
 import org.jolokia.backend.MBeanServerHandler;
 
 /**
@@ -68,7 +69,21 @@ public class ItSetup {
     private List<ObjectName> testBeans = new ArrayList<ObjectName>();
 
     public ItSetup() {
-        mBeanHandler = new MBeanServerHandler("type=it");
+        mBeanHandler = new MBeanServerHandler("type=it", new LogHandler() {
+
+            public void debug(String message) {
+                System.err.println(message);
+            }
+
+            public void info(String message) {
+                System.err.println(message);
+            }
+
+            public void error(String message, Throwable t) {
+                System.err.println(message);
+                t.printStackTrace(System.err);
+            }
+        });
     }
 
     public void start() {

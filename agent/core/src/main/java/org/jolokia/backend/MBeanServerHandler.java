@@ -7,6 +7,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.JmxRequest;
+import org.jolokia.LogHandler;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.util.ServiceObjectFactory;
@@ -66,21 +67,14 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     private List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
 
     /**
-     * Create a new MBeanServer with no qualifier
-     */
-    public MBeanServerHandler() {
-        this(null);
-    }
-
-    /**
      * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
      *
      * @param pQualifier optional qualifier used for registering this object as an MBean (can be null)
      */
-    public MBeanServerHandler(String pQualifier) {
+    public MBeanServerHandler(String pQualifier,LogHandler pLogHandler) {
         List<ServerDetector> detectors = lookupDetectors();
         initMBeanServers(detectors);
-        serverHandle = detectServers(detectors);
+        serverHandle = detectServers(detectors,pLogHandler);
         qualifier = pQualifier;
     }
 
@@ -274,12 +268,19 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     // Detect the server by delegating it to a set of predefined detectors. These will be created
     // by a lookup mechanism, queried and thrown away after this method
-    private ServerHandle detectServers(List<ServerDetector> pDetectors) {
+    private ServerHandle detectServers(List<ServerDetector> pDetectors, LogHandler pLogHandler) {
         // Now detect the server
         for (ServerDetector detector : pDetectors) {
-            ServerHandle info = detector.detect(mBeanServers);
-            if (info != null) {
-                return info;
+            try {
+                ServerHandle info = detector.detect(mBeanServers);
+                if (info != null) {
+                    return info;
+                }
+            } catch (Exception exp) {
+                // We are defensive here and wont stop the servlet because
+                // there is a problem with the server detection. A error will be logged
+                // nevertheless, though.
+                pLogHandler.error("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp,exp);
             }
         }
         return null;

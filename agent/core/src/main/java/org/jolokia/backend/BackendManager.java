@@ -83,13 +83,15 @@ public class BackendManager {
         // Create and remember request dispatchers
         localDispatcher = new LocalRequestDispatcher(objectToJsonConverter,
                                                      stringToObjectConverter,
-                                                     restrictor,pConfig.get(ConfigKey.MBEAN_QUALIFIER));
+                                                     restrictor,
+                                                     pConfig.get(ConfigKey.MBEAN_QUALIFIER),
+                                                     logHandler);
         ServerHandle serverHandle = localDispatcher.getServerInfo();
         requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
                                                       objectToJsonConverter,stringToObjectConverter, serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);
 
-        // Backendstore for remembering state
+        // Backendstore for remembering agent state
         initStores(pConfig);
     }
 

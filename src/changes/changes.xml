@@ -7,6 +7,13 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="0.83" description="Release 0.83-SNAPSHOT">
+      <action dev="roland" type="fix" date="2011-01-25">
+        Fixed problem for Jetty Detector with Jetty Version &lt; 6.1.4 and made
+        server detection to more conservative so that the servlet starts up nevertheless
+        when an exception occurs during the detection phase (call in the servlet's init method).
+      </action>
+    </release>
     <release version="0.82" description="Release 0.82" date="2011-01-16">
       <action dev="roland" type="update" date="2011-01-08">
         The HTTP status code returned with a HTTP response does not reflect the

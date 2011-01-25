@@ -17,6 +17,7 @@ package org.jolokia.backend;
  */
 
 import org.jolokia.JmxRequest;
+import org.jolokia.LogHandler;
 import org.jolokia.config.Config;
 import org.jolokia.config.DebugStore;
 import org.jolokia.config.Restrictor;
@@ -51,13 +52,14 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @param stringToObjectConverter a de-serializer for arguments
      * @param restrictor restrictor which checks the access for various operations
      * @param pQualifier optional qualifier for registering own MBean to allow for multiple J4P instances in the VM
+     * @param pLogHandler local handler used for logging out errors and warnings
      */
     public LocalRequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
                                   StringToObjectConverter stringToObjectConverter,
-                                  Restrictor restrictor, String pQualifier) {
+                                  Restrictor restrictor, String pQualifier, LogHandler pLogHandler) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
-        mBeanServerHandler = new MBeanServerHandler(pQualifier);
+        mBeanServerHandler = new MBeanServerHandler(pQualifier,pLogHandler);
         qualifier = pQualifier;
 
         // Request handling manager 

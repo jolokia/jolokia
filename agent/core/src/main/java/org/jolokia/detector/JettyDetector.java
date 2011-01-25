@@ -17,8 +17,8 @@
 package org.jolokia.detector;
 
 import javax.management.MBeanServer;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+
+import java.lang.reflect.*;
 import java.util.Set;
 
 /**
@@ -46,10 +46,17 @@ public class JettyDetector extends AbstractServerDetector {
     private String getVersion(Class serverClass) {
         try {
             Method method = serverClass.getMethod("getVersion");
-            return (String) method.invoke(null);
+            if (Modifier.isStatic(method.getModifiers())) {
+                return (String) method.invoke(null);
+            } else {
+                Constructor ctr = serverClass.getConstructor();
+                Object server = ctr.newInstance();
+                return (String) method.invoke(server);
+            }
         } catch (NoSuchMethodException e) {
         } catch (InvocationTargetException e) {
         } catch (IllegalAccessException e) {
+        } catch (InstantiationException e) {
         }
         return null;
     }
