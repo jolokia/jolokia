@@ -191,5 +191,17 @@
         <span class="hl-value"><xsl:apply-templates mode="xslthl"/></span>
     </xsl:template>
 
-
+    <xsl:template name="user.head.content">
+        <script type="text/javascript">
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://labs.consol.de/piwik/" : "http://labs.consol.de/piwik/");
+        document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+        </script><script type="text/javascript">
+        try {
+        var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+        piwikTracker.trackPageView();
+        piwikTracker.enableLinkTracking();
+        } catch( err ) {}
+        </script><noscript><p><img src="http://labs.consol.de/piwik/piwik.php?idsite=1" style="border:0" alt="" /></p></noscript>
+        <!-- End Piwik Tracking Tag -->
+    </xsl:template>
 </xsl:stylesheet>
