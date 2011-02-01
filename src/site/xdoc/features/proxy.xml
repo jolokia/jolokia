@@ -83,11 +83,11 @@ http://jolokia-proxy:8080/jolokia</pre>
             not available. Also, certain workarounds for bugs in the
             server's JMX implementation are not available. (e.g. see
             this <a href="">blog post</a> for a JBoss bug when
-            accession MBeans in the PlatformMBeanServer)
+            accessing MXBeans in the PlatformMBeanServer)
           </li>
           <li>
             When no-standard Java types are returned by JMX operations
-            or attribute read call, these types must be available on
+            or attribute read calls, these types must be available on
             the proxy, too. Using the Jolokia agent directly, complex
             data types are serialized deeply into a JSON
             representation automatically. 
@@ -96,7 +96,7 @@ http://jolokia-proxy:8080/jolokia</pre>
             For each Jolokia request, a new JMX connection (likely
             using RMI) is created which is an exensive operation. A
             future version of Jolokia will tackle this by providing
-            some sort of optional connection pooling.
+            some sort of optional JSR-160 connection pooling.
           </li>
         </ul>
       </subsection>

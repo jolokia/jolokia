@@ -32,7 +32,7 @@
         parameters this poses a performance problem. With Jolokia, it
         has been confirmed that it scales up very well in a Nagios
         environment with 500 servers monitoring about 10 parameters on
-        each server.
+        each server every 5 minutes.
       </p>
       <p>
         Especially <a href="bulk-requests.html">bulk requests</a> can
@@ -41,8 +41,8 @@
         many parameters with a single server turnaround. 
       </p>
       <p>
-        Jolokia uses the <a href="">super fast</a> JSON serialization
-        library <a href="">json-simple</a>. Along with the fact that
+        Jolokia uses the <a href="http://code.google.com/p/json-simple/wiki/PerformanceTesting">super fast</a> JSON serialization
+        library <a href="http://code.google.com/p/json-simple/">json-simple</a>. Along with the fact that
         JSON itself is a very compact data format with small overhead
         compared to RMI, this adds to the good performance experience.
       </p>

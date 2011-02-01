@@ -90,9 +90,9 @@
           operations are allowed in general.  For each command type
           present, the principle behaviour is allow this command for all
           MBeans. To remove an MBean (attribute/operation), a <code>&lt;deny&gt;</code>
-          section has to be added.  For each comman type missing, the
+          section has to be added.  For each command type missing, the
           command is disabled by default. For certain MBeans it can be
-          selectively by enabled by using an <code>&lt;allow&gt;</code>
+          selectively be enabled by using an <code>&lt;allow&gt;</code>
           section below. Within the allow and deny sections, MBean names
           and attribute/operation names can be specified with a pattern
           using wildcards (?,*)
