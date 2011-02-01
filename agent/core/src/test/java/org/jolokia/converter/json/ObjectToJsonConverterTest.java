@@ -87,6 +87,12 @@ public class ObjectToJsonConverterTest {
     }
 
     @Test
+    public void fileSimplifier() throws AttributeNotFoundException {
+        Map result = (Map) converter.extractObject(new File("/tmp"),new Stack<String>(),true);
+        assertNull(result.get("parent"));
+    }
+
+    @Test
     public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
         Map result = (Map) converter.extractObject(name,new Stack<String>(),true);

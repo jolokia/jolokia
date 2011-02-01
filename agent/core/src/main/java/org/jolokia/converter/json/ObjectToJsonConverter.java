@@ -60,7 +60,7 @@ public final class ObjectToJsonConverter {
     private Integer hardMaxDepth,hardMaxCollectionSize,hardMaxObjects;
 
     // Definition of simplifiers
-    private static final String SIMPLIFIERS_DEFAULT_DEF = "/META-INF/simplifiers-default";
+    private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/simplifiers-default";
     private static final String SIMPLIFIERS_DEF = "META-INF/simplifiers";
 
     public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter,

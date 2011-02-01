@@ -58,16 +58,20 @@ public final class ServiceObjectFactory {
      * @return a ordered list of created services.
      */
     public static <T> List<T> createServiceObjects(String... pDescriptorPaths) {
-        ServiceEntry.resetDefaultOrder();
-        TreeMap<ServiceEntry,T> extractorMap = new TreeMap<ServiceEntry,T>();
-        for (String descriptor : pDescriptorPaths) {
-            readServiceDefinitions(extractorMap, descriptor);
+        try {
+            ServiceEntry.initDefaultOrder();
+            TreeMap<ServiceEntry,T> extractorMap = new TreeMap<ServiceEntry,T>();
+            for (String descriptor : pDescriptorPaths) {
+                readServiceDefinitions(extractorMap, descriptor);
+            }
+            ArrayList<T> ret = new ArrayList<T>();
+            for (T service : extractorMap.values()) {
+                ret.add(service);
+            }
+            return ret;
+        } finally {
+            ServiceEntry.removeDefaultOrder();
         }
-        ArrayList<T> ret = new ArrayList<T>();
-        for (T service : extractorMap.values()) {
-            ret.add(service);
-        }
-        return ret;
     }
 
     private static <T> void readServiceDefinitions(Map<ServiceEntry, T> pExtractorMap, String pDefPath) {
@@ -115,7 +119,18 @@ public final class ServiceObjectFactory {
         if (pLine.length() > 0) {
             ServiceEntry entry = new ServiceEntry(pLine);
             if (entry.isRemove()) {
-                pExtractorMap.remove(entry);
+                // Removing is a bit complex since we need to find out
+                // the proper key since the order is part of equals/hash
+                // so we cant fetch/remove it directly
+                Set<ServiceEntry> toRemove = new HashSet<ServiceEntry>();
+                for (ServiceEntry key : pExtractorMap.keySet()) {
+                    if (key.getClassName().equals(entry.getClassName())) {
+                       toRemove.add(key);
+                    }
+                }
+                for (ServiceEntry key : toRemove) {
+                    pExtractorMap.remove(key);
+                }
             } else {
                 Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(entry.getClassName());
                 T ext = (T) clazz.newInstance();
@@ -174,7 +189,11 @@ public final class ServiceObjectFactory {
             return defaultOrder;
         }
 
-        private static void resetDefaultOrder() {
+        private static void initDefaultOrder() {
+            defaultOrderHolder.set(100);
+        }
+
+        private static void removeDefaultOrder() {
             defaultOrderHolder.remove();
         }
 
@@ -205,6 +224,17 @@ public final class ServiceObjectFactory {
 
         public int compareTo(ServiceEntry o) {
             return order - o.order;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("ServiceEntry");
+            sb.append("{className='").append(className).append('\'');
+            sb.append(", remove=").append(remove);
+            sb.append(", order=").append(order);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }
