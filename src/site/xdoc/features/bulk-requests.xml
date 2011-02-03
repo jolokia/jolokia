@@ -30,8 +30,8 @@
         those parameters ?
       </p>
       <p>
-        With Jolokia's <strong>bulk requests</strong> are pieces of
-        cake. A single HTTP POST request can carry a list of JSON
+        With Jolokia's <strong>bulk requests</strong> this is a piece
+        of cake. A single HTTP POST request can carry a list of JSON
         request objects, which are dispatched by the Jolokia agent on
         the server side into multiple local JMX calls. The results are
         collected and returned as list of JSON response objects. In
