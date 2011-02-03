@@ -18,24 +18,11 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>4.2.0</version>
       <scope>provided</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -59,10 +46,8 @@
             <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>org.jolokia.it.Activator</Bundle-Activator>
             <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>
-            <Embed-Dependency>jolokia-core;inline=true,json-simple;inline=true</Embed-Dependency>
             <!-- Needed because we export an embedded package only -->
             <Import-Package>
-              !org.json.simple.*,
               org.osgi.framework;version="[1.0.0,2.0.0)",
               *
             </Import-Package>

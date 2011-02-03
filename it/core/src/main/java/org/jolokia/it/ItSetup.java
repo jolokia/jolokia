@@ -17,13 +17,11 @@
 
 package org.jolokia.it;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.ObjectName;
-
-import org.jolokia.LogHandler;
-import org.jolokia.backend.MBeanServerHandler;
+import javax.management.*;
 
 /**
  * @author roland
@@ -32,8 +30,6 @@ import org.jolokia.backend.MBeanServerHandler;
 public class ItSetup {
 
     private static final long serialVersionUID = 42L;
-
-    private MBeanServerHandler mBeanHandler;
 
     private String[] domains = new String[] { "jolokia.it","jmx4perl.it" } ;
 
@@ -66,24 +62,9 @@ public class ItSetup {
     private List<String> escapedNames = new ArrayList<String>();
 
 
-    private List<ObjectName> testBeans = new ArrayList<ObjectName>();
+    private List<ObjectName> registeredMBeans = new ArrayList<ObjectName>();
 
     public ItSetup() {
-        mBeanHandler = new MBeanServerHandler("type=it", new LogHandler() {
-
-            public void debug(String message) {
-                System.err.println(message);
-            }
-
-            public void info(String message) {
-                System.err.println(message);
-            }
-
-            public void error(String message, Throwable t) {
-                System.err.println(message);
-                t.printStackTrace(System.err);
-            }
-        });
     }
 
     public void start() {
@@ -147,26 +128,24 @@ public class ItSetup {
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private ObjectName registerMBean(Object pObject, String ... pName) {
-        try {
-            ObjectName oName = mBeanHandler.registerMBean(pObject,pName);
-            System.out.println("Registered " + oName);
-            testBeans.add(oName);
-            return oName;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Cannot register MBean " + (pName != null && pName.length > 0 ? pName[0] : pObject),e);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot register MBean " + (pName != null && pName.length > 0 ? pName[0] : pObject),e);
+    private void unregisterMBeans() {
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        for (ObjectName name : registeredMBeans) {
+            try {
+                server.unregisterMBean(name);
+            } catch (Exception e) {
+                System.out.println("Exception while unregistering " + e);
+            }
         }
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private void unregisterMBeans() {
-        try {
-            mBeanHandler.unregisterMBeans();
-        } catch (Exception e) {
-            System.out.println("Exception while unregistering " + e);
-        }
+    private void registerMBean(Object pObject,String pName)
+            throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        ObjectName registeredName = server.registerMBean(pObject, new ObjectName(pName)).getObjectName();
+        System.out.println("Registered " + registeredName);
+        registeredMBeans.add(registeredName);
     }
 
     public List<String> getStrangeNames() {
