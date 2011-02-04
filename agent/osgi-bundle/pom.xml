@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-jetty-bundle</artifactId>
-      <version>0.7.0</version>
+      <version>0.8.1</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -75,16 +75,19 @@
               jolokia-osgi;inline=false,
               <!-- Must be included again to be visible in the classpath -->
               json-simple;inline=false,
-              pax-web-jetty-bundle;inline=false
+              pax-web-jetty-bundle;inline=false,
             </Embed-Dependency>
             <!-- Needed because we export an embedded package only -->
             <_exportcontents>org.jolokia;version="${project.version}"</_exportcontents>
             <Import-Package>
               !org.jolokia,
               <!-- Included internally -->
-              !org.json.simple.*,
               !org.ops4j.pax.web.*,
               !org.slf4j,
+              com.sun.org.apache.commons.logging; resolution:=optional,
+              org.apache.commons.logging; version="1.0.4"; resolution:=optional,
+              javax.servlet.*; resolution:= optional,
+              org.mortbay.*; resolution:=optional,
               org.osgi.framework;version="[1.0.0,2.0.0)",
               org.osgi.service.http;version="[1.0.0,2.0.0)",
               org.osgi.service.log;version="[1.0.0,2.0.0)",
