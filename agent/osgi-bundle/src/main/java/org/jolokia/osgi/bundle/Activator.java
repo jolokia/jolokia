@@ -16,8 +16,8 @@ package org.jolokia.osgi.bundle;
  *  limitations under the License.
  */
 
+import org.apache.felix.http.jetty.internal.JettyActivator;
 import org.jolokia.osgi.JolokiaActivator;
-import org.ops4j.pax.web.service.jetty.internal.CompositeActivator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -36,24 +36,24 @@ public class Activator implements BundleActivator {
     // Jolokia Activator
     private JolokiaActivator jolokiaActivator;
 
-    // Pax-Web Activator
-    private CompositeActivator paxWebActivator;
+    // Felix Jetty Activator
+    private JettyActivator felixHttpWebActivator;
 
     public Activator() {
         jolokiaActivator = new JolokiaActivator();
-        paxWebActivator = new CompositeActivator();
+        felixHttpWebActivator = new JettyActivator();
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void start(BundleContext pContext) throws Exception {
-        paxWebActivator.start(pContext);
+        felixHttpWebActivator.start(pContext);
         jolokiaActivator.start(pContext);
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void stop(BundleContext pContext) throws Exception {
         jolokiaActivator.stop(pContext);
-        paxWebActivator.stop(pContext);
+        felixHttpWebActivator.stop(pContext);
     }
 
 }

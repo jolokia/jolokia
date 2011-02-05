@@ -64,8 +64,7 @@
             <Bundle-Name>Jolokia Agent</Bundle-Name>
             <Embed-Directory>lib</Embed-Directory>
             <Embed-Dependency>json-simple;inline=false,jolokia-core;inline=true</Embed-Dependency>
-            <!-- Needed because we export an embedded package only -->
-            <_exportcontents>org.jolokia;version="${project.version}"</_exportcontents>
+            <Export-Package>org.jolokia.osgi.context;version="${project.version}"</Export-Package>
             <Import-Package>
               !org.jolokia,
               org.osgi.framework;version="[1.0.0,2.0.0)",

@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import org.jolokia.ConfigKey;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.LogHandler;
+import org.jolokia.osgi.context.JolokiaContext;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
@@ -39,7 +40,7 @@ import static org.jolokia.ConfigKey.*;
  * @author roland
  * @since Dec 27, 2009
  */
-public class JolokiaActivator implements BundleActivator {
+public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
     // Context associated with this activator
     private BundleContext bundleContext;
@@ -60,6 +61,12 @@ public class JolokiaActivator implements BundleActivator {
     // Our own log handler
     private LogHandler logHandler;
 
+    // HttpContext used for authorization
+    private HttpContext jolokiaHttpContext;
+
+    // Registration object for this JolokiaContext
+    private ServiceRegistration jolokiaServiceRegistration;
+
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
 
@@ -71,6 +78,9 @@ public class JolokiaActivator implements BundleActivator {
         // Track HttpService
         httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
         httpServiceTracker.open();
+
+        // Register us as JolokiaContext
+        jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(),this,null);
     }
 
     public void stop(BundleContext pBundleContext) {
@@ -82,23 +92,28 @@ public class JolokiaActivator implements BundleActivator {
         httpServiceTracker.close();
         httpServiceTracker = null;
 
+        jolokiaServiceRegistration.unregister();
+        jolokiaServiceRegistration = null;
         bundleContext = null;
     }
 
     /**
      * Get the security context for out servlet. Dependend on the configuration,
-     * this is either a no-op context or one which authenticates with a given used
+     * this is either a no-op context or one which authenticates with a given user
      *
      * @return the HttpContext with which the agent servlet gets registered.
      */
-    public HttpContext getHttpContext() {
-        final String user = getConfiguration(USER);
-        final String password = getConfiguration(PASSWORD);
-        if (user == null) {
-            return new JolokiaHttpContext();
-        } else {
-            return new JolokiaAuthenticatedHttpContext(user, password);
+    public synchronized HttpContext getHttpContext() {
+        if (jolokiaHttpContext == null) {
+            final String user = getConfiguration(USER);
+            final String password = getConfiguration(PASSWORD);
+            if (user == null) {
+                jolokiaHttpContext = new JolokiaHttpContext();
+            } else {
+                jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
+            }
         }
+        return jolokiaHttpContext;
     }
 
     /**
@@ -128,7 +143,7 @@ public class JolokiaActivator implements BundleActivator {
         return new AgentServlet(pLogHandler);
     }
 
-    private Dictionary<String,String> getConfig() {
+    protected Dictionary<String,String> getConfiguration() {
         Dictionary<String,String> config = new Hashtable<String,String>();
         for (ConfigKey key : ConfigKey.values()) {
             String value = getConfiguration(key);
@@ -163,7 +178,7 @@ public class JolokiaActivator implements BundleActivator {
             try {
                 service.registerServlet(getServletAlias(),
                                         createServlet(logHandler),
-                                        getConfig(),
+                                        getConfiguration(),
                                         getHttpContext());
             } catch (ServletException e) {
                 logHandler.error("Servlet Exception: " + e,e);
