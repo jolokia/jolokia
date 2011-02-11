@@ -8,7 +8,10 @@
   </properties>
   <body>
     <release version="0.83" description="Release 0.83-SNAPSHOT">
-      <action dev="roland" type="add" date="2011-02-05">
+      <action dev="roland" type="add" date="2011-02-11">
+        Added PGP signing for the deployed artifacts
+      </action>
+      <action dev="roland" type="add" date="2011-02-11">
         Introduced org.jolokia.osgi.servlet.JolokiaServlet which gets exported by the jolokia-osgi
         bundle and allows for programmatic registration of the servlet without the use of an
         OSGi HttpService.
