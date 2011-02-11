@@ -19,7 +19,7 @@ package org.jolokia.osgi.detector;
 import java.util.Dictionary;
 
 import org.jolokia.detector.AbstractServerDetector;
-import org.jolokia.osgi.JolokiaActivator;
+import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -35,14 +35,22 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
 
     protected boolean checkSystemBundleForSymbolicName(String pSymbolicName) {
         Dictionary headers = getSystemBundleHeaders();
-        String name = (String) headers.get("Bundle-SymbolicName");
-        return name.startsWith(pSymbolicName);
+        if (headers != null) {
+            String name = (String) headers.get("Bundle-SymbolicName");
+            return name.startsWith(pSymbolicName);
+        } else {
+            // No bundle context given --> no osgi server detection available
+            return false;
+        }
     }
 
     private Dictionary getSystemBundleHeaders() {
-        BundleContext context = JolokiaActivator.getCurrentBundleContext();
-
-        Bundle systemBundle = context.getBundle(0);
-        return systemBundle.getHeaders();
+        BundleContext context = JolokiaServlet.getCurrentBundleContext();
+        if (context != null) {
+            Bundle systemBundle = context.getBundle(0);
+            return systemBundle.getHeaders();
+        } else {
+            return null;
+        }
     }
 }

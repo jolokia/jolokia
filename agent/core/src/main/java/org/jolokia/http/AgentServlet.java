@@ -40,20 +40,10 @@ import java.util.Map;
  *
  * <p>
  * It uses a REST based approach which translates a GET Url into a
- * request. See {@link JmxRequest} for details about the URL format.
- * <p>
- * For now, only the request type
- * {@link org.jolokia.JmxRequest.Type#READ} for reading MBean
- * attributes is supported.
- * <p>
- * For the transfer via JSON only certain types are supported. Among basic types
- * like strings or numbers, collections, arrays and maps are also supported (which
- * translate into the corresponding JSON structure). Additional the OpenMBean types
- * {@link javax.management.openmbean.CompositeData} and {@link javax.management.openmbean.TabularData}
- * are supported as well. Refer to {@link org.jolokia.converter.json.ObjectToJsonConverter}
- * for additional information.
- ** 
- * @author roland@cpan.org
+ * request. See the <a href="http://www.jolokia.org/reference/index.html>reference documentation</a>
+ * for a detailed description of this servlet's features.
+ *
+ * @author roland@jolokia.org
  * @since Apr 18, 2009
  */
 public class AgentServlet extends HttpServlet {
@@ -72,17 +62,18 @@ public class AgentServlet extends HttpServlet {
     // Request handler for parsing request parameters and building up a response
     private HttpRequestHandler requestHandler;
 
-    public AgentServlet() {
-        this(null);
-    }
-
-    public AgentServlet(LogHandler pLogHandler) {
-        logHandler = pLogHandler != null ? pLogHandler : getDefaultLogHandler();
+    public void setLogHandler(LogHandler pLogHandler) {
+        logHandler = pLogHandler;
     }
 
     @Override
-    public final void init(ServletConfig pConfig) throws ServletException {
+    public void init(ServletConfig pConfig) throws ServletException {
         super.init(pConfig);
+
+        // Initialize a loghandler if not given already
+        if (logHandler == null) {
+            logHandler = getDefaultLogHandler();
+        }
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -189,6 +180,9 @@ public class AgentServlet extends HttpServlet {
         writer.write(pJsonTxt);
     }
 
+
+
+    // Default log handler using this servlet's logging facility for logging
     private LogHandler getDefaultLogHandler() {
         return new LogHandler() {
             public void debug(String message) {

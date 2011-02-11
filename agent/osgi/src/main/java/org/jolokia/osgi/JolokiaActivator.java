@@ -6,9 +6,8 @@ import java.util.Hashtable;
 import javax.servlet.ServletException;
 
 import org.jolokia.ConfigKey;
-import org.jolokia.http.AgentServlet;
-import org.jolokia.LogHandler;
-import org.jolokia.osgi.context.JolokiaContext;
+import org.jolokia.osgi.servlet.JolokiaContext;
+import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
@@ -45,21 +44,11 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     // Context associated with this activator
     private BundleContext bundleContext;
 
-    // Thread-Locals which will be used for holding the bundle context and
-    // the https service during initialization
-    private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
-
-    // Tracker to be used for the LogService
-    private ServiceTracker logTracker;
-
     // Tracker for HttpService
     private ServiceTracker httpServiceTracker;
 
     // Prefix used for configuration values
     private static final String CONFIG_PREFIX = "org.jolokia";
-
-    // Our own log handler
-    private LogHandler logHandler;
 
     // HttpContext used for authorization
     private HttpContext jolokiaHttpContext;
@@ -69,11 +58,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
-
-        // Track logging service
-        logTracker = new ServiceTracker(pBundleContext, LogService.class.getName(), null);
-        logTracker.open();
-        logHandler = new ActivatorLogHandler(logTracker);
 
         // Track HttpService
         httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
@@ -86,9 +70,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     public void stop(BundleContext pBundleContext) {
         assert pBundleContext.equals(bundleContext);
 
-        logTracker.close();
-        logTracker = null;
-        logHandler = null;
         httpServiceTracker.close();
         httpServiceTracker = null;
 
@@ -124,24 +105,10 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         return getConfiguration(AGENT_CONTEXT);
     }
 
-    /**
-     * Get the current bundle context. This static method can be used during startup
-     * of the agent servlet. At other times, this method will return null
-     *
-     * @return the current bundle context during adding of a HttpService, null at other
-     *         times
-     */
-    public static BundleContext getCurrentBundleContext() {
-        return BUNDLE_CONTEXT_THREAD_LOCAL.get();
-    }
 
     // ==================================================================================
 
     // Customizer for registering servlet at a HttpService
-
-    private AgentServlet createServlet(LogHandler pLogHandler) {
-        return new AgentServlet(pLogHandler);
-    }
 
     protected Dictionary<String,String> getConfiguration() {
         Dictionary<String,String> config = new Hashtable<String,String>();
@@ -174,18 +141,15 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
         public Object addingService(ServiceReference reference) {
             HttpService service = (HttpService) context.getService(reference);
-            BUNDLE_CONTEXT_THREAD_LOCAL.set(context);
             try {
                 service.registerServlet(getServletAlias(),
-                                        createServlet(logHandler),
+                                        new JolokiaServlet(context),
                                         getConfiguration(),
                                         getHttpContext());
             } catch (ServletException e) {
-                logHandler.error("Servlet Exception: " + e,e);
+                logError("Servlet Exception: " + e, e);
             } catch (NamespaceException e) {
-                logHandler.error("Namespace Exception: " + e,e);
-            } finally {
-                BUNDLE_CONTEXT_THREAD_LOCAL.remove();
+                logError("Namespace Exception: " + e, e);
             }
             return service;
         }
@@ -199,35 +163,21 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         }
     }
 
-    private static final class ActivatorLogHandler implements LogHandler {
-
-        private ServiceTracker logTracker;
-
-        private ActivatorLogHandler(ServiceTracker pLogTracker) {
-            logTracker = pLogTracker;
-        }
-
-        public void debug(String message) {
-            log(LogService.LOG_DEBUG,message);
-        }
-
-        public void info(String message) {
-            log(LogService.LOG_INFO,message);
-        }
-
-        private void log(int level,String message) {
-            LogService logService = (LogService) logTracker.getService();
-            if (logService != null) {
-                logService.log(level,message);
+    private void logError(String message,Throwable throwable) {
+        ServiceReference lRef = bundleContext.getServiceReference(LogService.class.getName());
+        if (lRef != null) {
+            try {
+                LogService logService = (LogService) bundleContext.getService(lRef);
+                if (logService != null) {
+                    logService.log(LogService.LOG_ERROR,message,throwable);
+                    return;
+                }
+            } finally {
+                bundleContext.ungetService(lRef);
             }
         }
-
-        public void error(String message, Throwable t) {
-            LogService logService = (LogService) logTracker.getService();
-            if (logService != null) {
-                logService.log(LogService.LOG_ERROR,message,t);
-            }
-        }
+        System.err.println("Jolokia-Error: " + message + " : " + throwable.getMessage());
     }
+
 
 }

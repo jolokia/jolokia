@@ -8,11 +8,16 @@
   </properties>
   <body>
     <release version="0.83" description="Release 0.83-SNAPSHOT">
+      <action dev="roland" type="add" date="2011-02-05">
+        Introduced org.jolokia.osgi.servlet.JolokiaServlet which gets exported by the jolokia-osgi
+        bundle and allows for programmatic registration of the servlet without the use of an
+        OSGi HttpService.
+      </action>
       <action dev="roland" type="update" date="2011-02-05">
         Update jolokia-osgi-bundle to include Felix's HttpService implementation
         (since its is a bit smaller and fits better due to the packages already
         included). Now the bundle can be deployed without dependencies at all on Felix
-        and Equinox.
+        and Equinox. I recommend to use the 'pure' bundle and a given HttpService, though.
       </action>
       <action dev="roland" type="fix" date="2011-01-25">
         Fixed problem for Jetty Detector with Jetty Version &lt; 6.1.4 and made

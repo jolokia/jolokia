@@ -64,9 +64,11 @@
             <Bundle-Name>Jolokia Agent</Bundle-Name>
             <Embed-Directory>lib</Embed-Directory>
             <Embed-Dependency>json-simple;inline=false,jolokia-core;inline=true</Embed-Dependency>
-            <Export-Package>org.jolokia.osgi.context;version="${project.version}"</Export-Package>
+            <Export-Package>
+              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
+            </Export-Package>
             <Import-Package>
-              !org.jolokia,
+              org.jolokia.osgi.servlet;version="${project.version}",
               org.osgi.framework;version="[1.0.0,2.0.0)",
               org.osgi.service.http;version="[1.0.0,2.0.0)",
               org.osgi.service.log;version="[1.0.0,2.0.0)",

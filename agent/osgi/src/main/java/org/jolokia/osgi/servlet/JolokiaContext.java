@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.osgi.context;
+package org.jolokia.osgi.servlet;
 
 import org.osgi.service.http.HttpContext;
 
@@ -27,7 +27,20 @@ import org.osgi.service.http.HttpContext;
  * @since 04.02.11
  */
 public interface JolokiaContext {
+
+    /**
+     * Get the HttpService context used for authentication. A client can use
+     * this context in order to use the same authentication as this Jolokia
+     * handler
+     *
+     * @return HttpService context
+     */
     HttpContext getHttpContext();
 
+    /**
+     * Get the context path (alias) under which the jolokia servlet  is registered
+     *
+     * @return the context (e.g. "/jolokia")
+     */
     String getServletAlias();
 }
