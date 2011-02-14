@@ -5,12 +5,14 @@
   <script type="text/javascript" src="../scripts/jquery-1.4.4.js"></script>
   <script type="text/javascript" src="../scripts/support/jquery.flot.js"></script>
   <script type="text/javascript" src="../scripts/lib/jolokia.js"></script>
+  <script type="text/javascript" src="../scripts/lib/jolokia-simple.js"></script>
   <script type="text/javascript" src="../scripts/lib/json2.js"></script>
 </head>
 <body>
 <h1>Jolokia Memory Plot Demo</h1>
 
 <div id="memory" style="width:600px;height:300px;margin-top: 20px;"></div>
+<input type="submit" id="gc" value="Garbage Collection"/>
 
 <script id="source" language="javascript" type="text/javascript">
 
@@ -36,7 +38,15 @@
                     setTimeout(run,1000);
                   }
                 });
+    
   }
+  $("#gc").click(function() {
+    j4p.execute("java.lang:type=Memory","gc", {
+      success: function() {
+        console.log("Garbage collection performed");
+      }
+    });
+  });
   run();
 </script>
 </body>

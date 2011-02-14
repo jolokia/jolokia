@@ -33,11 +33,11 @@
    # Basic usage
    print "Memory Used: ",
           JMX::Jmx4Perl
-              ->new(url => "http://localhost:8080/j4p")
+              ->new(url => "http://localhost:8080/jolokia")
               ->get_attribute(MEMORY_HEAP_USED);
 
    # Advanced:
-   my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/j4p",
+   my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia",
                                product => "jboss");
    my $request = new JMX::Jmx4Perl::Request({type => READ,
                                              mbean => "java.lang:type=Memory",
