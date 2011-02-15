@@ -323,5 +323,4 @@ public class J4pClient  {
     public static J4pClientBuilder socketBufferSize(int pSize) {
         return new J4pClientBuilder().socketBufferSize(pSize);
     }
-
 }

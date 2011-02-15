@@ -14,7 +14,7 @@
         <img src="../images/features/polyglot_large.png" alt="Polyglot"/>
       </div>
       <p>
-        The next examples demonstrates the usage of Jolokia with
+        The next examples demonstrate the usage of Jolokia with
         various different clients.  The samples check for memory and
         performs some action if the used heap memory exceeds a certain
         threshold. No error handling was included in order to focus on
