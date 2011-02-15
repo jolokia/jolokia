@@ -8,6 +8,9 @@
   </properties>
   <body>
     <release version="0.83" description="Release 0.83-SNAPSHOT">
+      <action dev="roland" type="add" date="2011-02-15">
+        Added a Virgo detector (tested with 2.1)
+      </action>
       <action dev="roland" type="add" date="2011-02-11">
         Added PGP signing for the deployed artifacts
       </action>

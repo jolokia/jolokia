@@ -33,6 +33,19 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
         return (String) headers.get("Bundle-Version");
     }
 
+    protected String getBundleVersion(String pSymbolicName) {
+        BundleContext context = JolokiaServlet.getCurrentBundleContext();
+        if (context != null) {
+            for (Bundle bundle: context.getBundles()) {
+                if (pSymbolicName.equalsIgnoreCase(bundle.getSymbolicName())) {
+                    Dictionary headers = bundle.getHeaders();
+                    return (String) headers.get("Bundle-Version");
+                }
+            }
+        }
+        return null;
+    }
+
     protected boolean checkSystemBundleForSymbolicName(String pSymbolicName) {
         Dictionary headers = getSystemBundleHeaders();
         if (headers != null) {
