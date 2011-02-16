@@ -89,9 +89,9 @@ public class JolokiaCommands implements CommandMarker {
 
     private void updateDependencies(Element configuration) {
         ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		List<Element> databaseDependencies =
+		List<Element> dependencies =
                 XmlUtils.findElements("/configuration/jolokia/dependencies/dependency", configuration);
-		for (Element dependencyElement : databaseDependencies) {
+        for (Element dependencyElement : dependencies) {
             Dependency dep = new Dependency(dependencyElement);
             Set<Dependency> givenDeps = project.getDependenciesExcludingVersion(dep);
             for (Dependency given : givenDeps) {
@@ -99,8 +99,8 @@ public class JolokiaCommands implements CommandMarker {
                     log.info("Updating " + dep.getGroupId() + ":" + dep.getArtifactId() + " from version " + given.getVersionId() + " to " + dep.getVersionId());
                 }
             }
-			projectOperations.dependencyUpdate(dep);
-		}
+            projectOperations.addDependency(dep);
+        }
 	}
     private void updateWebXml(Element pConfiguration) {
         String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
@@ -121,13 +121,14 @@ public class JolokiaCommands implements CommandMarker {
 
     private WebXmlUtils.WebXmlParam[] getDefaultParams(Element configuration) {
 		List<Element> initParams =
-                XmlUtils.findElements("/configuration/jolokia/initParams", configuration);
+                XmlUtils.findElements("/configuration/jolokia/initParams/init-param", configuration);
         ArrayList<WebXmlUtils.WebXmlParam> ret = new ArrayList<WebXmlUtils.WebXmlParam>();
         for (Element initParam : initParams) {
             ret.add(new WebXmlUtils.WebXmlParam(
                     getTextContent(initParam, "param-name"),
-                    getTextContent(initParam,"param-value")
-                    ));
+                    getTextContent(initParam,"param-value")));
+//                    getTextContent(initParam,"description")
+//                    ));
 
         }
         return ret.toArray(new WebXmlUtils.WebXmlParam[ret.size()]);

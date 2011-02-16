@@ -59,6 +59,7 @@
           <instructions>
             <Bundle-SymbolicName>org.jolokia.osgi</Bundle-SymbolicName>
             <Bundle-Description>Jolokia agent exposing JMX via HTTP/JSON</Bundle-Description>
+
             <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>org.jolokia.osgi.JolokiaActivator</Bundle-Activator>
             <Bundle-Name>Jolokia Agent</Bundle-Name>

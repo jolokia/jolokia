@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-  ~ Copyright 2009-2010 Roland Huss
+  ~ Copyright 2009-2011 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~     http://www.apache.org/licenses/LICENSE-2.0
   ~
   ~ Unless required by applicable law or agreed to in writing, software
   ~ distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@
   <properties>
     <roo.version>1.1.2.BUILD-SNAPSHOT</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jolokia.version>${project.version}</jolokia.version>
   </properties>
   <repositories>
     <repository>
@@ -166,6 +167,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <useAgent>true</useAgent>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -175,7 +179,9 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.roo</Bundle-SymbolicName>
-            <Bundle-Copyright>Copyright Roland Huss. All Rights Reserved.</Bundle-Copyright>
+            <Bundle-Name>Jolokia - Roo Addon</Bundle-Name>
+            <Bundle-Description>Jolokia - Roo Addon</Bundle-Description>
+            <Bundle-Copyright>Copyright Roland Huss. All Rights Reserved. Licensed under the APL, version 2.0</Bundle-Copyright>
             <Bundle-DocURL>${project.url}</Bundle-DocURL>
           </instructions>
           <remoteOBR>true</remoteOBR>
@@ -208,5 +214,12 @@
         </configuration>
       </plugin>
     </plugins>
+
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
   </build>
 </project>
