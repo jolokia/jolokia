@@ -134,6 +134,13 @@
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
           <version>2.0.1</version>
+          <configuration>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+            <packaging>${project.packaging}</packaging>
+            <remoteOBR>true</remoteOBR>
+          </configuration>
         </plugin>
 
         <plugin>
@@ -282,7 +289,7 @@
       <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
-  
+
   <developers>
     <developer>
       <name>Roland Huss</name>
@@ -432,7 +439,41 @@
         </plugins>
       </build>
     </profile>
-    
+
+    <profile>
+      <id>obr-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <configuration>
+              <repositoryId>consol-labs-release</repositoryId>
+              <bundleUrl>httppgp://labs.consol.de/maven/repository/org/jolokia/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
+              <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/repository</url>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>obr-snapshot</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <configuration>
+              <repositoryId>consol-labs-snapshots</repositoryId>
+              <bundleUrl>httppgp://labs.consol.de/maven/snapshots-repository/org/jolokia/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
+              <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/snapshots-repository</url>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>maven-3</id>
       <activation>
