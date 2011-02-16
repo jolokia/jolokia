@@ -15,7 +15,7 @@
 			<lineEnding>unix</lineEnding>
 			<useDefaultExcludes>true</useDefaultExcludes>
 			<includes>
-				<include>readme.txt</include>
+				<include>README</include>
 			</includes>
 		</fileSet>
 		<fileSet>
@@ -24,8 +24,7 @@
 			<lineEnding>unix</lineEnding>
 			<useDefaultExcludes>true</useDefaultExcludes>
 			<includes>
-				<include>*.txt</include>
-				<include>*.TXT</include>
+				<include>LICENSE</include>
 			</includes>
 		</fileSet>
 		<fileSet>

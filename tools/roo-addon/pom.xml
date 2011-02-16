@@ -32,7 +32,7 @@
   </parent>
 
   <properties>
-    <roo.version>1.1.2.BUILD-SNAPSHOT</roo.version>
+    <roo.version>1.1.1.RELEASE</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jolokia.version>${project.version}</jolokia.version>
   </properties>
@@ -90,6 +90,12 @@
     <dependency>
       <groupId>org.springframework.roo</groupId>
       <artifactId>org.springframework.roo.support</artifactId>
+      <version>${roo.version}</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.model</artifactId>
       <version>${roo.version}</version>
       <type>bundle</type>
     </dependency>
@@ -182,10 +188,9 @@
             <Bundle-Name>Jolokia - Roo Addon</Bundle-Name>
             <Bundle-Description>Jolokia - Roo Addon</Bundle-Description>
             <Bundle-Copyright>Copyright Roland Huss. All Rights Reserved. Licensed under the APL, version 2.0</Bundle-Copyright>
-            <Bundle-DocURL>${project.url}</Bundle-DocURL>
+            <Bundle-DocURL>http://www.jolokia.org/reference/roo.html</Bundle-DocURL>
           </instructions>
-          <remoteOBR>true</remoteOBR>
-          <bundleUrl>httppgp://labs.consol.de/maven/repository/${project.groupId}/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
+          <obrRepository>roo-repository.xml</obrRepository>
         </configuration>
       </plugin>
       <plugin>

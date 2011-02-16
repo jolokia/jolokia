@@ -1,0 +1,28 @@
+This is the Jolokia Roo-Addon. It allows to introduce a Jolokia agent
+servlet agent to an existing Web-Project.
+
+The single command provided is 
+
+ jolokia setup 
+
+which will be available as soon as a WEB-INF/web.xml is there. This 
+command will add the necessary dependencies to the pom.xml (upgrading
+any if there is already a Jolokia dependency in place to the Jolokia version
+associated with this addon) and adapt WEB-INF/web.xml to include a mapping
+to the Jolokia agent under "/jolokia".
+
+The command knows about these options:
+
+  --addAccessPolicy       This will add a sample "jolokia-access.xml" into
+                          resources/ with no restrictions. It can be
+                          adapted to configure fine granular access
+                          security to the agent
+
+  --addDefaultInitParams  With this options the servlet definition
+                          will contain the possible init parameters
+                          with their default values
+
+  --addJsr160Proxy        The servlet will be prepared so that it can
+                          act as a JSR-160 Proxy as well
+
+For more information, please refer to www.jolokia.org
