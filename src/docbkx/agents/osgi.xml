@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<section id="agents-osgi">
+  <title>OSGi Agents</title>
+    <sidebar>Threre are multiple free implementations of an OSGi
+    HttpService available. This bundle has been tested with the <ulink
+    url="http://wiki.ops4j.org/display/paxweb/Pax+Web">Pax Web</ulink>
+    and <ulink
+    url="http://felix.apache.org/site/apache-felix-http-service.html">Apache
+    Felix</ulink> HttpService which both come with an embedded Jetty
+    as servlet container by default.</sidebar>
+  <para>
+    Jolokia agents are also available as <ulink
+    url="http://www.osgi.org">OSGi</ulink> bundles. There are two
+    flavors of this agent: A nearly bare agent
+    <filename>jolokia-osgi.jar</filename> declaring all its package
+    dependencies as imports in its Manifest and an all-in-one bundle
+    <filename>jolokia-osgi-bundle.jar</filename> with minimal
+    dependecies. The pure bundle fits best the OSGi philosophy and is
+    hence the recommended bundle. The all-in-one monster is good for a
+    quick start since normally no additional bundles are required.
+  </para>
+  <section id="agents-osgi-pure">
+    <title>jolokia-osgi.jar</title>
+    <para>
+      This bundle depends mostly on a running <ulink
+      url="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi
+      HttpService</ulink> which is uses for registering the agent
+      servlet.
+    </para>
+    <para>
+      All package imports of this bundle are listed in <xref
+      linkend="table-agents-osgi-deps"/>. Note that the
+      <classname>org.osgi.framework.*</classname> and
+      <classname>javax.*</classname> packages are typically exported
+      by the sytem bundle, so no extra installation efforts are
+      required here. Whether the
+      <classname>org.osgi.service.*</classname> interfaces are
+      available depends on your OSGi container. If they are not
+      provided, they can be easily fetched and install from e.g.
+      <ulink
+      url="http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar">maven
+      central</ulink>. Often the LogService interface is exported also
+      out of the box but not the HttpService. You will notice any
+      missing package dependency during the resolve phase while
+      installing <filename>jolokia-osgi.jar</filename>.
+    </para>
+    <table id="table-agents-osgi-deps">
+      <title>Package Imports of jolokia-osgi.jar</title>
+      <thead>
+        <tr>
+          <td>Package</td>
+          <td>SB</td>
+          <td>Package</td>
+          <td>SB</td>
+          <td>Package</td>
+          <td>SB</td>
+          <td>Package</td>
+          <td>SB</td>
+        </tr>          
+      </thead>
+      <tr>
+        <td>org.osgi.framework</td>
+        <td>X</td>
+        <td>javax.servlet</td>
+        <td></td>
+        <td>org.w3c.dom</td>
+        <td>X</td>
+        <td>javax.management</td>
+        <td>X</td>
+      </tr>
+      <tr>
+        <td>org.osgi.service.http</td>
+        <td></td>
+        <td>javax.servlet.http</td>
+        <td></td>
+        <td>org.xml.sax</td>
+        <td>X</td>
+        <td>javax.management.openmbean</td>
+        <td>X</td>
+      </tr>
+      <tr>
+        <td>org.osgi.service.log</td>
+        <td>?</td>
+        <td>javax.naming</td>
+        <td>X</td>
+        <td>javax.xml.parsers</td>
+        <td>X</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+    <para>
+      This agent bundle consumes two services by default: As stated
+      above an
+      <classname>org.osgi.service.http.HttpService</classname> which
+      is used to register (deregister) the Jolokia agent as a servlet
+      under the context <literal>/jolokia</literal> by default as soon
+      as the HttpService becomes available (unavailable). Second, an
+      <classname>org.osgi.service.log.LogService</classname> is used
+      for logging, if available. If such a service is not registered,
+      the Jolokia bundle uses the standard
+      <methodname>HttpServlet.log()</methodname> method for its
+      logging needs.
+    </para>
+    <para>
+      The Jolokia OSGi bundle can be configured via properties which
+      typically can be configured in a global configuration file of
+      the OSGi container. All properties starts with a prefix
+      <literal>org.jolokia</literal> and are listed in <xref
+      linkend="table-agents-osgi-properties"/>. They are mostly the
+      same as the possible <literal>init-param</literal> values for
+      a Jolokia servlet when used in a JEE WAR artifact.
+    </para>
+    <table id="table-agents-osgi-properties">
+      <title>Jolokia Bundle Properties</title>
+      <thead>
+        <tr>
+          <td>Property</td>
+          <td>Default</td>
+          <td>Description</td>
+        </tr>
+      </thead>
+      <tr>
+        <td>org.jolokia.user</td>
+        <td></td>
+        <td>User used for authentication with HTTP Basic
+        Authentication. If not given, no authentication is used.</td>
+      </tr>
+      <tr>
+        <td>org.jolokia.password</td>
+        <td></td>
+        <td>Password used for authentication with HTTP Basic
+        Autentication.</td>
+      </tr>
+      <tr>
+        <td>org.jolokia.agentContext</td>
+        <td>/jolokia</td>
+        <td>Context path of the agent servlet</td>
+      </tr>
+      <tr>
+        <td>org.jolokia.dispatcherClasses</td>
+        <td></td>
+        <td>
+          Class names (comma separated) of request dispatchers used in
+          addition to the LocalRequestDispatcher. E.g using a value
+          of
+          <classname>org.jolokia.jsr160.Jsr160RequestDispatcher</classname>
+          allows the agent to play the role of an JSR-160 proxy.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.debug</td>
+        <td>false</td>
+        <td>
+          Debugging state after startup. This can be changed via the
+          Config MBean (<literal>jolokia:type=Config</literal>) during
+          runtime
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.debugMaxEntries</td>
+        <td>100</td>
+        <td>
+          Maximum number of entries to keed in the local debug history
+          if switched on. This can be changed via the config MBean at
+          runtime.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.maxDepth</td>
+        <td>0</td>
+        <td>
+          Maximum depth when traversing bean properties.
+          If set to 0, depth checking is disabled
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.maxCollectionSize</td>
+        <td>0</td>
+        <td>
+          Maximum size of collections returned when
+          serializing to JSON. When set to 0, not
+          collections are truncated.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.maxObjects</td>
+        <td>0</td>
+        <td>
+          Maximum number of objects which is traversed
+          when serializing a single response. Use this
+          as airbag to avoid boosting your memory and
+          network traffic. Nevertheless, when set to 0
+          not limit is used.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.historyMaxEntries</td>
+        <td>10</td>
+        <td>
+          Entries to keep in the history. This can be changed at
+          runtime via the Jolokia config MBean.
+        </td>
+      </tr>
+    </table>
+    <para>
+      This bundle also exports a service
+      <classname>org.jolokia.osgi.servlet.JolokiaContext</classname>
+      which can be used to obtain context information of the
+      registered agent like the context path under which this
+      servlet can be reached or the
+      <classname>org.osgi.service.http.HttpContext</classname> which
+      is used for authentication. Note that this service is only
+      available when the agent servlet is active (i.e. when an
+      HttpService is registered). 
+    </para>
+  </section>
+
+  <section id="agents-osgi-bundle">
+    <title>jolokia-osgi-bundle.jar</title>
+    <para>
+      The all-in-one bundle includes an implementation of
+      <classname>org.osgi.service.http.HttpService</classname>,
+      i.e. the <ulink
+      href="http://felix.apache.org/site/apache-felix-http-service.html">Felix
+      implementation</ulink>. The HttpService will be registered as
+      OSGi service during startup, so it is available for other
+      bundles as well. The only package import requirement for this
+      bundle is <classname>org.osgi.service.LogService</classname>,
+      since the Felix Webservice requires this during startup. As
+      mentioned above, normally the LogService interface gets exported
+      by default in the standard containers, but if not, you need to
+      install it e.g. from the OSGi <ulink
+      url="http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar">compendium
+      </ulink> definitions.
+    </para>
+    <para>
+      This bundle can be configured the same way as the pure bundle as
+      described in <xref linkend="agents-osgi-pure"/>. Additionally,
+      the embedded Felix HttpService can be configured as described in
+      its <ulink
+      url="http://felix.apache.org/site/apache-felix-http-service.html#ApacheFelixHTTPService-ConfigurationProperties">documentation</ulink>. E.g. setting
+      the port to 9090 instead of the default port 8080, a property
+      <literal>org.osgi.service.http.port=9090</literal> needs to be
+      set. This might be useful, if this bundle is used within
+      containers which already occupy the default port (Glassfish,
+      Eclipse Virgo) but don't expose an OSGi HttpService which could
+      be consumed.
+    </para>
+  </section>
+  <section id="agents-osgi-servlet">
+    <title>Programmatic servlet registration</title>
+    <para>
+      It is also possible to register the Jolokia agent servlet
+      manually instead of relying of the OSGi bundle activator which
+      comes within the agents. For this use case
+      <filename>jolokia-osgi.jar</filename> should be used. This
+      bundle exports the package
+      <classname>org.jolokia.osgi.servlet</classname> which includes
+      the servlet class <classname>JolokiaServlet</classname>. This
+      class has two constructors: A default constructor without
+      arguments and one with a single
+      <classname>BundleContext</classname> argument. The later has
+      the advantage, that it will use an OSGi
+      <classname>LogService</classname> if available and adds
+      various OSGi server detectors which adds serverinformations
+      like product name and server version to the
+      <literal>version</literal> command. Refer <xref linkend="version"/> for
+      details about the server infos provided. 
+    </para>
+    <para>
+      Please note that for this use case the bundle
+      <classname>org.jolokia.osgi</classname> should not be
+      <emphasis>started</emphasis> but left in the state
+      <emphasis>resolved</emphasis>. Otherwise, as soon as an OSGi
+      HttpService registers, this bundle will try to add yet another
+      agent servlet to this service which is probably not what you
+      want. 
+    </para>
+  </section>
+</section>

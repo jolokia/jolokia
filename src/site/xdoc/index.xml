@@ -50,6 +50,31 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia 0.83 released">
+        <div class="news-date">2011-02-19</div>
+        <p>
+          A brand new <a
+          href="http://www.springsource.org/roo">Roo</a> addon for
+          integrating Jolokia into a Roo managed web project. It will
+          register a Jolokia agent servlet into the project's
+          web.xml. More about this add-on can be found in the <a
+          href="reference/html/tools.html#tools-roo">reference
+          manual</a>.
+        </p>
+        <p>
+          The OSGi agents have been revisited and the all-in-one
+          bundle has been fine tuned. The reference documentation
+          contains now also a section about these <a
+          href="reference/html/agents/osgi.html">OSGi
+          agents</a>. Furthermore, <a href="">Eclipse Virgo</a> 2.1
+          has been added to our test suite and a dedicated Virgo
+          server detector has been added. 
+        </p>
+        <p>
+          These and more changes are listed in the <a
+          href="changes-report.html">change log</a>.
+        </p>
+      </subsection>
       <subsection name="Jolokia 0.82 released">
         <div class="news-date">2011-01-16</div>
         <p>
@@ -72,7 +97,7 @@
           handling much easier. When the HTTP code is 200, the
           response contains always a JSON object, that's guaranteed
           now. 
-      </p>
+        </p>
       </subsection>
       <subsection name="Jolokia 0.81 released">
         <div class="news-date">2010-12-14</div>

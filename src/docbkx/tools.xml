@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chapter id="tools" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <title>Tools</title>
+  <para>
+    Various tools complete the Jolokia portfolio. Some of the are
+    available under the Jolokia umbrella, some of them are hosted
+    elsewhere. This chapter gives an overview of this tool landscape.
+  </para>
+
+  <xi:include href='tools/roo.xml'/>
+
+</chapter>

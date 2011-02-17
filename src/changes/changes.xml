@@ -7,7 +7,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.83" description="Release 0.83-SNAPSHOT">
+    <release version="0.83" description="Release 0.83" date="2001-02-19">
+      <action dev="roland" type="update" date="2011-02-15">
+        Reference Manual updated with sections about the OSGi agent
+        and the new Roo addon.
+      </action>
+      <action dev="roland" type="add" date="2011-02-17">
+        Jolokia Roo addon added.
+      </action>
       <action dev="roland" type="add" date="2011-02-15">
         Added a Virgo detector (tested with 2.1)
       </action>

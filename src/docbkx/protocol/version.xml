@@ -6,13 +6,17 @@
     the Jolokia agent along with the protocol version. 
   </para>
 
-  
   <section id="get-version">
     <title>GET version request</title>
     <para>
       The GET URL for a version request has the following format:
     </para>
     <synopsis><![CDATA[<base-url>/version]]></synopsis>
+    <para>
+      For GET request the <literal>version</literal> part can be
+      omitted since this is the default command if no command is
+      provided as path info.
+    </para>
   </section>
   <section id="post-version">
     <title>POST version request</title>

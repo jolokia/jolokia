@@ -24,6 +24,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-jsr160</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
@@ -64,7 +70,11 @@
             <Bundle-Activator>org.jolokia.osgi.JolokiaActivator</Bundle-Activator>
             <Bundle-Name>Jolokia Agent</Bundle-Name>
             <Embed-Directory>lib</Embed-Directory>
-            <Embed-Dependency>json-simple;inline=false,jolokia-core;inline=true</Embed-Dependency>
+            <Embed-Dependency>
+              json-simple;inline=false,
+              jolokia-core;inline=true,
+              jolokia-jsr160;inline=true
+            </Embed-Dependency>
             <Export-Package>
               org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
             </Export-Package>

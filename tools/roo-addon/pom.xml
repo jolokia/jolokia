@@ -188,7 +188,7 @@
             <Bundle-Name>Jolokia - Roo Addon</Bundle-Name>
             <Bundle-Description>Jolokia - Roo Addon</Bundle-Description>
             <Bundle-Copyright>Copyright Roland Huss. All Rights Reserved. Licensed under the APL, version 2.0</Bundle-Copyright>
-            <Bundle-DocURL>http://www.jolokia.org/reference/roo.html</Bundle-DocURL>
+            <Bundle-DocURL>http://www.jolokia.org/reference/html/tools.html#tools-roo</Bundle-DocURL>
           </instructions>
           <obrRepository>roo-repository.xml</obrRepository>
         </configuration>

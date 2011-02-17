@@ -28,6 +28,7 @@
   <xi:include href='protocol.xml'/>
   <xi:include href='mbeans.xml'/>
   <xi:include href='clients.xml'/>
+  <xi:include href='tools.xml'/>
 
   <appendix id="appendix">
     <title>Appendix</title>

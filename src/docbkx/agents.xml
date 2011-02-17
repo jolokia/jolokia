@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter id="agents">
+<chapter id="agents" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Agents</title>
  
   <note>
     Work in progress. This chapter will introduce the various kinds of
     agents available, along with installation and configuration hints.
   </note>
+
+  <xi:include href='agents/war.xml'/>
+  <xi:include href='agents/osgi.xml'/>
+  <xi:include href='agents/mule.xml'/>
+  <xi:include href='agents/jvmjdk6.xml'/>
+
 </chapter>
