@@ -31,9 +31,9 @@ import org.jolokia.detector.ServerHandle;
 public class VirgoDetector extends AbstractOsgiServerDetector {
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String version = getBundleVersion("org.eclipse.virgo.kernel.agent.dm");
+        String version = getBundleVersion("org.eclipse.virgo.kernel.userregion");
         if (version != null) {
-            String type = getBundleVersion("org.eclipse.gemini.web.core") != null ? "web" : "kernel";
+            String type = getBundleVersion("org.eclipse.gemini.web.core") != null ? "gemini" : "kernel";
             Map<String,String> extraInfo = new HashMap<String,String>();
             extraInfo.put("type",type);
             return new ServerHandle("Eclipse","Virgo",version,null,extraInfo);
