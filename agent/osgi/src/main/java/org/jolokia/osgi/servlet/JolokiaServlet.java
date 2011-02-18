@@ -49,7 +49,7 @@ public class JolokiaServlet extends AgentServlet {
 
     // Thread-Locals which will be used for holding the bundle context and
     // the https service during initialization
-    private static final ThreadLocal<BundleContext> bundleContextThreadLocal = new ThreadLocal<BundleContext>();
+    private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
 
     public JolokiaServlet() {
         this(null);
@@ -70,11 +70,11 @@ public class JolokiaServlet extends AgentServlet {
         // We are making the bundle context available here as a thread local
         // so that the server detector has access to the bundle in order to detect
         // the Osgi-Environment
-        bundleContextThreadLocal.set(bundleContext);
+        BUNDLE_CONTEXT_THREAD_LOCAL.set(bundleContext);
         try {
             super.init(pConfig);
         } finally {
-            bundleContextThreadLocal.remove();
+            BUNDLE_CONTEXT_THREAD_LOCAL.remove();
         }
     }
 
@@ -96,7 +96,7 @@ public class JolokiaServlet extends AgentServlet {
      *         times
      */
     public static BundleContext getCurrentBundleContext() {
-        return bundleContextThreadLocal.get();
+        return BUNDLE_CONTEXT_THREAD_LOCAL.get();
     }
 
 
