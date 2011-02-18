@@ -20,6 +20,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.J4pRemoteException;
+import org.json.simple.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -59,6 +61,24 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     @Test
+    public void stringArray() throws MalformedObjectNameException, J4pException {
+        try {
+            final String input[] = new String[] { "eins", "zwei", null, "drei" };
+            checkWrite("StringArray", null, input,new ResponseAssertion() {
+                public void assertResponse(J4pResponse resp) {
+                    JSONArray val = (JSONArray) resp.getValue();
+                    assertEquals(val.size(), input.length);
+                    for (int i = 0; i < input.length; i++) {
+                        assertEquals(val.get(i),input[i]);
+                    }
+                }
+            });
+        } catch (J4pRemoteException exp) {
+            exp.printStackTrace();
+        }
+    }
+
+    @Test
     public void access() throws MalformedObjectNameException {
         J4pWriteRequest req = new J4pWriteRequest("jolokia.it:type=attribute","List","bla");
         req.setPath("0");
@@ -69,7 +89,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         assertEquals(req.getType(),J4pType.WRITE);
     }
 
-    private void checkWrite(String pAttribute,String pPath,Object pValue) throws MalformedObjectNameException, J4pException {
+    private void checkWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
         for (String method : new String[] { "GET", "POST" }) {
             reset();
             J4pReadRequest readReq = new J4pReadRequest("jolokia.it:type=attribute",pAttribute);
@@ -77,7 +97,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
                 readReq.setPath(pPath);
             }
             J4pReadResponse readResp = j4pClient.execute(readReq,method);
-            String oldValue = readResp.getValue();
+            Object oldValue = readResp.getValue();
             assertNotNull("Old value must not be null",oldValue);
 
             J4pWriteRequest req = new J4pWriteRequest("jolokia.it:type=attribute",pAttribute,pValue,pPath);
@@ -85,13 +105,20 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
             assertEquals("Old value should be returned",oldValue,resp.getValue());
 
             readResp = j4pClient.execute(readReq);
-            assertEquals("New value should be set",pValue != null ? pValue.toString() : null,readResp.getValue());
+            if (pFinalAssert != null && pFinalAssert.length > 0) {
+                pFinalAssert[0].assertResponse(readResp);
+            } else {
+                assertEquals("New value should be set",pValue != null ? pValue.toString() : null,readResp.getValue());
+            }
         }
     }
 
 
     private void reset() throws MalformedObjectNameException, J4pException {
-        j4pClient.execute(new J4pExecRequest("jolokia.it:type=attribute","reset"));
+        j4pClient.execute(new J4pExecRequest("jolokia.it:type=attribute", "reset"));
     }
 
+    private interface ResponseAssertion {
+        void assertResponse(J4pResponse resp);
+    }
 }

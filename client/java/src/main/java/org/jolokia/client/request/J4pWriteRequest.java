@@ -81,7 +81,7 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
     List<String> getRequestParts() {
         List<String> parts = super.getRequestParts();
         parts.add(attribute);
-        parts.add(convertToString(value));
+        parts.add(serializeArgumentToRequestPart(value));
         if (path != null) {
             // Split up path
             parts.addAll(Arrays.asList(path.split("/")));
@@ -93,25 +93,13 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
     JSONObject toJson() {
         JSONObject ret = super.toJson();
         ret.put("attribute",attribute);
-        ret.put("value",convertToString(value));
+        // TODO: Rework the whole serialization stuff for write and exec requests
+        ret.put("value",serializeArgumentToRequestPart(value));
         if (path != null) {
             ret.put("path",path);
         }
         return ret;
     }
-
-    // Convert an object to its string representation
-    private String convertToString(Object pValue) {
-        if (pValue == null) {
-            return "[null]";
-        }
-        if (pValue instanceof String && ((String) pValue).length() == 0) {
-            return "\"\"";
-        }
-        // TODO: Expand for array handling and more sophisticated type handling
-        return pValue.toString();
-    }
-
 
     // ==============================================================================================
     /**

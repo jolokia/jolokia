@@ -68,36 +68,10 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
         ret.add(operation);
         if (arguments.size() > 0) {
             for (int i = 0; i < arguments.size(); i++) {
-                Object arg = arguments.get(i);
-                if (arg != null && arg.getClass().isArray()) {
-                    ret.add(getArrayForArgument((Object[]) arg));
-                } else  {
-                    ret.add(nullEscape(arg));
-                }
+                ret.add(serializeArgumentToRequestPart(arguments.get(i)));
             }
         }
         return ret;
-    }
-
-    private String getArrayForArgument(Object[] pArg) {
-        StringBuilder inner = new StringBuilder();
-        for (int i = 0; i< pArg.length; i++) {
-            inner.append(nullEscape(pArg[i].toString()));
-            if (i < pArg.length - 1) {
-                inner.append(",");
-            }
-        }
-        return inner.toString();
-    }
-
-    private String nullEscape(Object pArg) {
-        if (pArg == null) {
-            return "[null]";
-        } else if (pArg instanceof String && ((String) pArg).length() == 0) {
-            return "\"\"";
-        } else {
-            return pArg.toString();
-        }
     }
 
     @Override
@@ -107,16 +81,7 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
         if (arguments.size() > 0) {
             JSONArray args = new JSONArray();
             for (Object arg : arguments) {
-                if (arg != null && arg.getClass().isArray()) {
-                    JSONArray innerArray = new JSONArray();
-                    for (Object inner : (Object []) arg) {
-                        innerArray.add(inner != null ? inner.toString() : "[null]");
-                    }
-                    args.add(innerArray);
-                }
-                else {
-                    args.add(arg != null ? arg.toString() : "[null]");
-                }
+                args.add(serializeArgumentToJson(arg));
             }
             ret.put("arguments",args);
         }

@@ -318,7 +318,7 @@ public class JmxRequest {
     }
 
     /**
-     * Whether this request has no attribute names associated  (which normall means, that all attributes should be fetched).
+     * Whether this request has no attribute names associated  (which normally means, that all attributes should be fetched).
      * @return true if no attribute name is stored.
      */
     public boolean hasAttribute() {
