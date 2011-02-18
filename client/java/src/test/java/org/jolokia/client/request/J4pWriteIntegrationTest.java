@@ -16,14 +16,15 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
+import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
-
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
 
 /**
  * Integration test for writing attributes
@@ -58,6 +59,12 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         checkWrite("Bean","name","");
     }
 
+	// @Test
+	// public void stringArray() throws MalformedObjectNameException,
+	// J4pException {
+	// checkComplexWrite("Bean", null, new String[] { "String", "Array" });
+	// }
+
     @Test
     public void access() throws MalformedObjectNameException {
         J4pWriteRequest req = new J4pWriteRequest("jolokia.it:type=attribute","List","bla");
@@ -89,6 +96,31 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
+	private void checkComplexWrite(String pAttribute, String pPath,
+			Object pValue) throws MalformedObjectNameException, J4pException {
+		for (String method : new String[] { "GET", "POST" }) {
+			reset();
+			J4pReadRequest readReq = new J4pReadRequest(
+					"jolokia.it:type=attribute", pAttribute);
+			if (pPath != null) {
+				readReq.setPath(pPath);
+			}
+			J4pReadResponse readResp = j4pClient.execute(readReq, method);
+			JSONObject oldValue = readResp.getValue();
+			assertNotNull("Old value must not be null", oldValue);
+
+			J4pWriteRequest req = new J4pWriteRequest(
+					"jolokia.it:type=attribute", pAttribute, pValue, pPath);
+			J4pWriteResponse resp = j4pClient.execute(req, method);
+			assertEquals("Old value should be returned", oldValue,
+					resp.getValue());
+
+			readResp = j4pClient.execute(readReq);
+			assertEquals("New value should be set",
+					pValue != null ? pValue.toString() : null,
+					readResp.getValue());
+		}
+	}
 
     private void reset() throws MalformedObjectNameException, J4pException {
         j4pClient.execute(new J4pExecRequest("jolokia.it:type=attribute","reset"));

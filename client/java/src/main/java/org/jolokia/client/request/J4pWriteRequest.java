@@ -37,10 +37,10 @@ import org.json.simple.JSONObject;
 public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
 
     // Name of attribute to set
-    private String attribute;
+    private final String attribute;
 
     // Value of the attribute to set
-    private Object value;
+    private final Object value;
 
     // Inner path (optional)
     private String path;
@@ -115,7 +115,7 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
         	int length = Array.getLength(pValue);
         	List<Object> values = new ArrayList<Object>();
         	for (int i = 0; i < length; i++) {
-        		values.add(Array.get(values, i));
+				values.add(Array.get(pValue, i));
         	}
         	return JSONArray.toJSONString(values);
         }
