@@ -17,14 +17,12 @@ package org.jolokia.client.request;
  */
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
@@ -113,11 +111,14 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
         }
         if (pValue.getClass().isArray()) {
         	int length = Array.getLength(pValue);
-        	List<Object> values = new ArrayList<Object>();
+			StringBuilder values = new StringBuilder();
         	for (int i = 0; i < length; i++) {
-				values.add(Array.get(pValue, i));
+				if (i > 0) {
+					values.append(',');
+				}
+				values.append(Array.get(pValue, i));
         	}
-        	return JSONArray.toJSONString(values);
+			return values.toString();
         }
         // TODO: Expand for more sophisticated type handling
         return pValue.toString();

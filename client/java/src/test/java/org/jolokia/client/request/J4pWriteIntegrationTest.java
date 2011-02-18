@@ -19,11 +19,13 @@ package org.jolokia.client.request;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
+import java.lang.reflect.Array;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
-import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.testng.annotations.Test;
 
 /**
@@ -59,11 +61,11 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         checkWrite("Bean","name","");
     }
 
-	// @Test
-	// public void stringArray() throws MalformedObjectNameException,
-	// J4pException {
-	// checkComplexWrite("Bean", null, new String[] { "String", "Array" });
-	// }
+	@Test
+	public void stringArray() throws MalformedObjectNameException, J4pException {
+		checkArrayWrite("StringArray", null,
+				new String[] { "String", "Array" });
+	}
 
     @Test
     public void access() throws MalformedObjectNameException {
@@ -96,7 +98,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
-	private void checkComplexWrite(String pAttribute, String pPath,
+	private void checkArrayWrite(String pAttribute, String pPath,
 			Object pValue) throws MalformedObjectNameException, J4pException {
 		for (String method : new String[] { "GET", "POST" }) {
 			reset();
@@ -106,7 +108,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 				readReq.setPath(pPath);
 			}
 			J4pReadResponse readResp = j4pClient.execute(readReq, method);
-			JSONObject oldValue = readResp.getValue();
+			JSONArray oldValue = readResp.getValue();
 			assertNotNull("Old value must not be null", oldValue);
 
 			J4pWriteRequest req = new J4pWriteRequest(
@@ -116,9 +118,13 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 					resp.getValue());
 
 			readResp = j4pClient.execute(readReq);
-			assertEquals("New value should be set",
-					pValue != null ? pValue.toString() : null,
-					readResp.getValue());
+			JSONArray arrayResp = readResp.getValue();
+			int length = Array.getLength(pValue);
+			assertEquals("Array length should match", length, arrayResp.size());
+			for (int i = 0; i < length; i++) {
+				assertEquals("Item #" + i + " should match",
+						Array.get(pValue, i), arrayResp.get(i));
+			}
 		}
 	}
 
