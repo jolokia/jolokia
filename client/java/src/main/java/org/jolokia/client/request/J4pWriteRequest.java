@@ -16,12 +16,15 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
@@ -108,7 +111,15 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
         if (pValue instanceof String && ((String) pValue).length() == 0) {
             return "\"\"";
         }
-        // TODO: Expand for array handling and more sophisticated type handling
+        if (pValue.getClass().isArray()) {
+        	int length = Array.getLength(pValue);
+        	List<Object> values = new ArrayList<Object>();
+        	for (int i = 0; i < length; i++) {
+        		values.add(Array.get(values, i));
+        	}
+        	return JSONArray.toJSONString(values);
+        }
+        // TODO: Expand for more sophisticated type handling
         return pValue.toString();
     }
 
