@@ -54,16 +54,17 @@
               <a style="background: none;" href="features/fast.html"><img src="images/features/fast.png" alt="Fast"/></a>
             </div>
             <p>
-              Jolokia uses the super fast JSON serialization
-              library <a style="background: none; padding: 0" href="http://code.google.com/p/json-simple/">json-simple</a>
-              for parsing requests and creating responses. Due to its
-              typeless nature, it's faster than Java object
-              serialization used in JSR-160 communication.  The JSON
-              payload is in general much smaller than its
-              correspondent serialized Java object
-              representation. Bulk requests (which are not available
-              for JSR-160 remoting) can boost performance even
-              further. <a href="features/fast.html">More ...</a>
+              Jolokia uses the super fast JSON serialization library
+              <a style="background: none; padding: 0"
+              href="http://code.google.com/p/json-simple/">json-simple</a>
+              for parsing requests and creating responses. Although
+              the binary protocols (JRMP or IIOP) used by the standard
+              JSR-160 connectors are naturally much compacter than a
+              textual representation like JSON and although they have
+              some performance advantages, Jolokia balances this for
+              many use cases with advanced features like bulk requests
+              and low startup times.<a href="features/fast.html">More
+              ...</a>
             </p>
           </section>
         </div>
@@ -121,14 +122,16 @@
               <a style="background: none;" href="features/simple.html"><img src="images/features/simple.png" alt="Simple"/></a>
             </div>
             <p>
-              It's simple. Jolokia can be used with a simple Web
-              browser since it supports both, GET and POST requests. A
-              custom, simple, REST-like URL encoding enables simple
-              access from any client platform. The <a href="">Java</a>
-              and <a href="">Perl</a> client libraries' API is designed
-              for a simple usage, using a request-response
-              paradigma. They are not harder to use as any other HTTP
-              library. <a href="features/simple.html">More ...</a>
+              It's simple. The agent is easy to install, often easier
+              than setting up a standard JSR-160 RMI
+              connector. Jolokia agents can be accessed with a Web
+              browser for simple request.  A custom, REST-like URL
+              encoding enables easy access from any client
+              platform. The client libraries' API are designed for a
+              simple, typeless usage, using a request-response
+              paradigma. They are not harder to use than any other
+              HTTP library. <a href="features/simple.html">More
+              ...</a>
             </p>
           </section>
         </div>

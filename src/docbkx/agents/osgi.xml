@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="agents-osgi">
   <title>OSGi Agents</title>
-    <sidebar>Threre are multiple free implementations of an OSGi
+    <sidebar>Threre are several free implementations of an OSGi
     HttpService available. This bundle has been tested with the <ulink
     url="http://wiki.ops4j.org/display/paxweb/Pax+Web">Pax Web</ulink>
     and <ulink
@@ -222,7 +222,7 @@
       The all-in-one bundle includes an implementation of
       <classname>org.osgi.service.http.HttpService</classname>,
       i.e. the <ulink
-      href="http://felix.apache.org/site/apache-felix-http-service.html">Felix
+      url="http://felix.apache.org/site/apache-felix-http-service.html">Felix
       implementation</ulink>. The HttpService will be registered as
       OSGi service during startup, so it is available for other
       bundles as well. The only package import requirement for this
@@ -253,7 +253,7 @@
     <para>
       It is also possible to register the Jolokia agent servlet
       manually instead of relying of the OSGi bundle activator which
-      comes within the agents. For this use case
+      comes with the agents. For this use case
       <filename>jolokia-osgi.jar</filename> should be used. This
       bundle exports the package
       <classname>org.jolokia.osgi.servlet</classname> which includes

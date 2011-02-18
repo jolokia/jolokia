@@ -40,6 +40,8 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class JolokiaServlet extends AgentServlet {
 
+    private static final long serialVersionUID = 23L;
+
     private BundleContext bundleContext;
 
     // Tracker to be used for the LogService

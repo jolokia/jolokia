@@ -163,6 +163,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         }
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     private void logError(String message,Throwable throwable) {
         ServiceReference lRef = bundleContext.getServiceReference(LogService.class.getName());
         if (lRef != null) {

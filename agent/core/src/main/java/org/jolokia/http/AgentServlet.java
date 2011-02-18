@@ -62,7 +62,7 @@ public class AgentServlet extends HttpServlet {
     // Request handler for parsing request parameters and building up a response
     private HttpRequestHandler requestHandler;
 
-    public void setLogHandler(LogHandler pLogHandler) {
+    protected void setLogHandler(LogHandler pLogHandler) {
         logHandler = pLogHandler;
     }
 

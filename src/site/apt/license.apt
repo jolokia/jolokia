@@ -23,7 +23,8 @@ License
   under the Apache License 2.0 as well.
 
  * The OSGi bundle includes the
-   {{{http://wiki.ops4j.org/display/paxweb/Download}Pax Web - Jetty Bundle}} which has its own licensing.
+   {{{http://felix.apache.org/site/apache-felix-http-service.html}Apache
+   Felix HttpService Bundle}} which is licensed under the APL.
 
  * This web-site uses the {{{http://960.gs/}960 Grid System}} for its
    layout. This is released under the GPL and MIT license.
