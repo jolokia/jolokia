@@ -16,8 +16,7 @@
 
 package org.jolokia.osgi.servlet;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 
 import org.jolokia.LogHandler;
 import org.jolokia.http.AgentServlet;
@@ -57,16 +56,27 @@ public class JolokiaServlet extends AgentServlet {
 
     public JolokiaServlet(BundleContext pContext) {
         bundleContext = pContext;
+    }
+
+    @Override
+    public void init(ServletConfig pConfig) throws ServletException {
+        // If no bundle context was provided, we are looking up the servlet context
+        // for the bundlect context, which will be available usually in servlet extender
+        if (bundleContext == null) {
+            // try to lookup bundle context from the servlet context
+            ServletContext servletContext = pConfig.getServletContext();
+            bundleContext = (BundleContext) servletContext.getAttribute("osgi-bundlecontext");
+        }
+
+        // If there is a bundle context available, set up a tracker for tracking the logging
+        // service
         if (bundleContext != null) {
             // Track logging service
             logTracker = new ServiceTracker(bundleContext, LogService.class.getName(), null);
             logTracker.open();
             setLogHandler(new ActivatorLogHandler(logTracker));
         }
-    }
 
-    @Override
-    public void init(ServletConfig pConfig) throws ServletException {
         // We are making the bundle context available here as a thread local
         // so that the server detector has access to the bundle in order to detect
         // the Osgi-Environment
