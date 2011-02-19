@@ -4,7 +4,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-war</artifactId>
-  <version>0.83-SNAPSHOT</version>
+  <version>0.83</version>
   <name>jolokia-war</name>
   <packaging>war</packaging>
   <description>agent as web application</description>
@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>0.83-SNAPSHOT</version>
+    <version>0.83</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
