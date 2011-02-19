@@ -39,25 +39,27 @@ Agents
 
   The WAR agent has been tested to work on
 
-  * JBoss 4.2.3 GA, 5.1.0 GA & 6.0.0 M3
+  * JBoss 4.2.3 GA, 5.1.0 GA & 6.0.0 GA
 
   * Oracle WebLogic 9.2 MP3 & 10.0.2.0
 
-  * Glassfish 2.1.1 and v3
+  * Glassfish 2.1.1 and 3.0.1
 
   * IBM Websphere 6.1 & 7.0
 
-  * Apache Tomcat 5.5.28 & 6.0.26
+  * Apache Tomcat 5.5.31 & 6.0.30 & 7.0.6
 
-  * Jetty 5.1.15 & 6.1.22 & 7.0.1 (with JMX enabled) & 8.0.0.M0
+  * Jetty 5.1.15 & 6.1.26 & 7.2.2 & 8.0.0.M2
 
   * Resin 3.1.9
 
-  * Jonas 4.10.7 (with Jetty 5.1.10 and Tomcat 5.5.28) and 5.1.1
+  * Jonas 4.10.7 (with Jetty 5.1.10 and Tomcat 5.5.28) & 5.1.1 & 5.2.0-M3
 
-  * Apache Geronimo 2.2 (Jetty 7 and Tomcat 6)
+  * Apache Geronimo 2.2 (Jetty 7 and Tomcat 6) & 3.0 M1
 
   * Spring dm Server 2.0.0.RELEASE
+
+  * Eclipse Virgo 2.1
 
   []
 
@@ -80,9 +82,11 @@ Agents
 
   The OSGi agent has been tested with the following containers:
 
-  * Felix 2.0.4 & 3.0.1
+  * Felix 2.0.5 & 3.0.8
 
-  * Equinox 3.5.2 & 3.6.0
+  * Equinox 3.5.2 & 3.6.1 & 3.7 M5
+
+  * Virgo 2.1
 
   []
 

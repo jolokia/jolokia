@@ -65,8 +65,8 @@
           The OSGi agents have been revisited and the all-in-one
           bundle has been fine tuned. The reference documentation
           contains now also a section about these <a
-          href="reference/html/agents/osgi.html">OSGi
-          agents</a>. Furthermore, <a href="">Eclipse Virgo</a> 2.1
+          href="reference/html/agents.html#agents-osgi">OSGi
+          agents</a>. Furthermore, <a href="http://www.eclipse.org/virgo/">Eclipse Virgo</a> 2.1
           has been added to our test suite and a dedicated Virgo
           server detector has been added. 
         </p>

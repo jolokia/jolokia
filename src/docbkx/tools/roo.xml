@@ -14,7 +14,7 @@
     </para>
     <programlisting><![CDATA[
 roo> osgi obr url add --url http://labs.consol.de/maven/repository/roo-repository.xml
-roo> osgi obr deploy org.jolokia.roo]]></programlisting>
+roo> osgi obr start --bundleSymbolicName org.jolokia.roo]]></programlisting>
     <para>
       Alteratively, if there are problems with the approach above
       (which is currently the case because the hard coded public PGP
