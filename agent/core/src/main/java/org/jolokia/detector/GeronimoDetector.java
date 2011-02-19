@@ -27,7 +27,7 @@ import javax.management.MBeanServer;
 public class GeronimoDetector extends AbstractServerDetector {
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String version = getSingleStringAttribute(pMbeanServers,"geronimo:j2eeType=J2EEServer","serverVersion");
+        String version = getSingleStringAttribute(pMbeanServers,"geronimo:j2eeType=J2EEServer,*","serverVersion");
         if (version != null) {
             return new ServerHandle("Apache","geronimo",version,null,null);
         } else {
