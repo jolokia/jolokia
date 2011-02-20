@@ -1,0 +1,44 @@
+* mvn clean install
+* Check integration tests (with jmx4perl/it/it.pl)
+
+# =======================================================================
+# Increase Version Numbers:
+
+vi src/docbkx/index.xml
+vi client/javascript/src/javascript/jolokia.js
+vi pom.xml
+--> <currentStableVersion>0.82</currentStableVersion>
+    <currentSnapshotVersion>0.83-SNAPSHOT</currentSnapshotVersion>
+
+# ========================================================================
+# Build release
+git clone git@github.com:rhuss/jolokia.git
+cd jolokia
+mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs release:prepare
+mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs release:perform
+cd target/checkout/target
+
+# Copy assembly to labs:
+# at jolokia@labs.consol.de: mkdir -p www/dist/0.84/js
+scp *gz *zip jolokia@labs.consol.de:www/dist/0.84/
+cd ../client/javascript/target 
+scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/0.84/js/
+
+# ========================================================================
+# Recreate Website (~/jolokia)
+
+# Update version numbers in site.xml
+find . -name site.xml | xargs perl -i -p -e s/0.83-SNAPSHOT/0.84-SNAPSHOT/
+# Update 0.83-SNAPSHOT --> 0.84-SNAPSHOT
+vi tools/site-skin/pom.xml
+git commit -a
+
+# Adapted tracking code
+git co piwik
+git rebase master
+cd tools/site-plugin; mvn clean intall;
+mvn -Pdist-labs site site:deploy
+
+
+
+
