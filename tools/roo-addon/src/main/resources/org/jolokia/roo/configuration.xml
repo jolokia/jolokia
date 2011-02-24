@@ -25,6 +25,19 @@
         <version>${jolokia.version}</version>
       </dependency>
     </dependencies>
+    <repositories>
+      <repository>
+        <id>labs-consol-release</id>
+        <name>ConSol* Labs Repository (Releases)</name>
+        <url>http://labs.consol.de/maven/repository</url>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+      </repository>
+    </repositories>
     <initParams>
       <init-param>
         <description>

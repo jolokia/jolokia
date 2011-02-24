@@ -20,21 +20,21 @@
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-roo</artifactId>
   <packaging>bundle</packaging>
-  <version>0.84-SNAPSHOT</version>
+  <version>0.83.1</version>
   <name>jolokia-roo</name>
   <description>jolokia roo addon</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>0.84-SNAPSHOT</version>
+    <version>0.83</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <properties>
     <roo.version>1.1.1.RELEASE</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jolokia.version>${project.version}</jolokia.version>
+    <jolokia.version>0.83</jolokia.version>
   </properties>
   <repositories>
     <repository>

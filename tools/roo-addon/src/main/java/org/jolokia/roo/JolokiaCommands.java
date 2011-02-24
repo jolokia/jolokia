@@ -86,6 +86,9 @@ public class JolokiaCommands implements CommandMarker {
         // Update dependencies
         updateDependencies(configuration,Boolean.parseBoolean(addJsr160Proxy));
 
+        // Add labs repository if not present
+        addRepository(configuration);
+
         // Update web.xml
         updateWebXml(configuration, Boolean.parseBoolean(addJsr160Proxy), Boolean.parseBoolean(addDefaultInitParams));
 
@@ -118,6 +121,20 @@ public class JolokiaCommands implements CommandMarker {
             projectOperations.addDependency(dep);
         }
 	}
+
+    private void addRepository(Element configuration) {
+        ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+        List<Element> repositories =
+                XmlUtils.findElements("/configuration/jolokia/repositories/repository", configuration);
+        for (Element repositoryElement : repositories) {
+            Repository repository = new Repository(repositoryElement);
+            if (!project.isRepositoryRegistered(repository)) {
+                projectOperations.addRepository(repository);
+            }
+        }
+    }
+
+
 
     private void updateWebXml(Element pConfiguration, boolean pAddjsr160proxy, boolean pAdddefaultinitparams) {
         InputStream is = null;
