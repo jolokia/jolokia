@@ -39,6 +39,7 @@ git rebase master
 cd tools/site-plugin; mvn clean intall;
 mvn -Pdist-labs site site:deploy
 
-
+# Roo-Plugin
+# Adapte uri in root-repository.xml to use a httpgpg URL
 
 
