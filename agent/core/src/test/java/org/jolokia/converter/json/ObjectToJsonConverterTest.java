@@ -83,7 +83,7 @@ public class ObjectToJsonConverterTest {
     public void customSimplifier() throws AttributeNotFoundException {
         Date date = new Date();
         Map result = (Map) converter.extractObject(date,new Stack<String>(),true);
-        assertEquals(Long.toString(date.getTime()),result.get("millis"));
+        assertEquals(date.getTime(),result.get("millis"));
     }
 
     @Test

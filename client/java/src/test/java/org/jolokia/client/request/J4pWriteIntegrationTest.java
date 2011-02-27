@@ -37,17 +37,17 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException {
-        checkWrite("IntValue",null,42);
+        checkWrite("IntValue",null,42L);
     }
 
     @Test
     public void withPath() throws MalformedObjectNameException, J4pException {
-        checkWrite("ComplexNestedValue","Blub/1/numbers/0","13");
+        checkWrite("ComplexNestedValue","Blub/1/numbers/0",13L);
     }
 
     @Test
     public void withBeanPath() throws MalformedObjectNameException, J4pException {
-        checkWrite("Bean","value","41");
+        checkWrite("Bean","value",41L);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
             if (pFinalAssert != null && pFinalAssert.length > 0) {
                 pFinalAssert[0].assertResponse(readResp);
             } else {
-                assertEquals("New value should be set",pValue != null ? pValue.toString() : null,readResp.getValue());
+                assertEquals("New value should be set",pValue != null ? pValue : null,readResp.getValue());
             }
         }
     }

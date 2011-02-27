@@ -49,7 +49,7 @@ public class BackendManagerTest implements LogHandler {
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
-        assertTrue(Long.parseLong( (String) ((Map) ret.get("value")).get("used")) > 0);
+        assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
         backendManager.destroy();
     }
 

@@ -39,9 +39,9 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         j4pClient.execute(request);
         request = new J4pExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
         J4pExecResponse resp = j4pClient.execute(request);
-        assertEquals("0",resp.getValue());
+        assertEquals(0L,resp.getValue());
         resp = j4pClient.execute(request);
-        assertEquals("1",resp.getValue());
+        assertEquals(1L,resp.getValue());
     }
 
     @Test
@@ -74,14 +74,14 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void nullArgumentCheck() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"nullArgumentCheck",null,null);
         J4pExecResponse resp = j4pClient.execute(request);
-        assertEquals("true",resp.getValue());
+        assertEquals(true,resp.getValue());
     }
 
     @Test
     public void emptyStringArgumentCheck() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"emptyStringArgumentCheck","");
         J4pExecResponse resp = j4pClient.execute(request);
-        assertEquals("true",resp.getValue());
+        assertEquals(true,resp.getValue());
     }
 
     @Test

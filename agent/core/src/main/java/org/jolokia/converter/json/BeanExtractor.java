@@ -83,11 +83,8 @@ public class BeanExtractor implements Extractor {
     private Object exctractJsonifiedValue(Object pValue, Stack<String> pExtraArgs,
                                           ObjectToJsonConverter pConverter, JmxRequest.ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
-        if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass())) {
+        if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
             // No further diving, use these directly
-            return pValue.toString();
-        } else if (pValue instanceof JSONAware) {
-            // We can return it directly since the object itself already know how to serialize itself
             return pValue;
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
