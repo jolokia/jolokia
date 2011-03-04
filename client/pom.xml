@@ -20,7 +20,7 @@
   <modules>
     <module>java</module>
     <module>javascript</module>
-    <!--<module>javascript/test-app</module>-->
+    <module>javascript/test-app</module>
   </modules>
 
   <profiles>
