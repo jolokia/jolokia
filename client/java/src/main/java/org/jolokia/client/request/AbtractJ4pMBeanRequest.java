@@ -119,12 +119,12 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
         if (pArg != null && pArg.getClass().isArray()) {
             JSONArray innerArray = new JSONArray();
             for (Object inner : (Object []) pArg) {
-                innerArray.add(inner != null ? inner.toString() : "[null]");
+                innerArray.add(inner != null ? inner.toString() : null);
             }
             return innerArray;
         }
         else {
-            return pArg != null ? pArg.toString() : "[null]";
+            return pArg != null ? pArg : null;
         }
     }
 

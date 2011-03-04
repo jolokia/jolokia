@@ -6,6 +6,7 @@ import org.jolokia.converter.StringToObjectConverter;
 
 import javax.management.*;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,23 +71,17 @@ public class ExecHandler extends JsonRequestHandler {
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         OperationAndParamType types = extractOperationTypes(server,request);
         Object[] params = new Object[types.paramClasses.length];
-        List<String> args = request.getExtraArgs();
+        List<Object> args = request.getArguments();
         if (args.size() != types.paramClasses.length) {
             throw new IllegalArgumentException("Invalid operation parameters. Operation " +
                     request.getOperation() + " on " + request.getObjectName() + " requires " + types.paramClasses.length +
                     " parameters, not " + args.size() + " as given");
         }
         for (int i = 0;i <  types.paramClasses.length; i++) {
-            params[i] = stringToObjectConverter.convertFromString(types.paramClasses[i],args.get(i));
+            params[i] = stringToObjectConverter.prepareValue(types.paramClasses[i], args.get(i));
         }
 
-        // Remove args from request, so that the rest can be interpreted as path for the return
-        // value
-        for (int i = 0; i < types.paramClasses.length; i++) {
-            // Remove from front
-            args.remove(0);
-        }
-
+        // TODO: Maybe allow for a path as well which could be applied on the return value ...
         return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
     }
 

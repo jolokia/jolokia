@@ -66,15 +66,12 @@ public interface Extractor {
      * @param pInner object on which to set the value
      * @param pAttribute attribute of the object to set
      * @param pValue the new value to set
-     * @param pExtraArgs extra arguments which contain e.g. a path
-     * @param jsonify whether to convert to a JSON object/list or whether the plain object
-     *        should be returned. The later is required for writing an inner value
 
      * @return the old value
      * @throws IllegalAccessException if the attribute to set to is not accessible
      * @throws InvocationTargetException reflection error
      */
-    Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, String pValue)
+    Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException;
 
     /**

@@ -56,22 +56,22 @@ public class ArrayExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, String pValueS)
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
         Class clazz = pInner.getClass();
         if (!clazz.isArray()) {
             throw new IllegalArgumentException("Not an array to set a value, but " + clazz +
-                    ". (index = " + pAttribute + ", value = " + pValueS + ")");
+                    ". (index = " + pAttribute + ", value = " +  pValue + ")");
         }
         int idx;
         try {
             idx = Integer.parseInt(pAttribute);
         } catch (NumberFormatException exp) {
             throw new IllegalArgumentException("Non-numeric index for accessing array " + pInner +
-                    ". (index = " + pAttribute + ", value to set = " + pValueS + ")",exp);
+                    ". (index = " + pAttribute + ", value to set = " +  pValue + ")",exp);
         }
         Class type = clazz.getComponentType();
-        Object value = pConverter.convertFromString(type.getName(),pValueS);
+        Object value = pConverter.prepareValue(type.getName(), pValue);
         Object oldValue = Array.get(pInner, idx);
         Array.set(pInner, idx, value);
         return oldValue;

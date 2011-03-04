@@ -61,7 +61,7 @@ public class TabularDataExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, String pValue)
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("TabularData cannot be written to");
     }

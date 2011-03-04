@@ -193,7 +193,7 @@ public class BeanExtractor implements Extractor {
     }
 
     // Using standard set semantics
-    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, String pValue)
+    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
         String rest = new StringBuffer(pAttribute.substring(0,1).toUpperCase())
@@ -229,7 +229,7 @@ public class BeanExtractor implements Extractor {
             oldValue = null;
         }
         AccessController.doPrivileged(new SetMethodAccessibleAction(found));
-        found.invoke(pInner,pConverter.convertFromString(params[0].getName(),pValue));
+        found.invoke(pInner,pConverter.prepareValue(params[0].getName(),pValue));
         return oldValue;
     }
 

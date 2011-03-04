@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.JmxRequest.Type;
+import org.jolokia.converter.StringToObjectConverter;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -103,7 +104,16 @@ public final class JmxRequestFactory {
             request = processor.process(elements);
 
             // Extract all additional args from the remaining path info
-            request.setExtraArgs(prepareExtraArgs(elements));
+            List<String> extraArgs = prepareExtraArgs(elements);
+            if (type == JmxRequest.Type.EXEC) {
+                List<Object> args = new ArrayList<Object>();
+                for (String arg : extraArgs) {
+                    args.add(StringToObjectConverter.convertSpecialStringTags(arg));
+                }
+                request.setArguments(args);
+            } else {
+                request.setPathParts(extraArgs);
+            }
 
             // Setup processing parameters from the given query parameters
             extractParameters(request,pParameterMap);
@@ -330,7 +340,7 @@ public final class JmxRequestFactory {
             public JmxRequest process(Stack<String> e) throws MalformedObjectNameException {
                 JmxRequest req = new JmxRequest(Type.WRITE,e.pop());
                 req.setAttributeName(e.pop());
-                req.setValue(e.pop());
+                req.setValue(StringToObjectConverter.convertSpecialStringTags(e.pop()));
                 return req;
             }
         });

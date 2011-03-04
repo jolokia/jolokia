@@ -62,7 +62,7 @@ public class CompositeDataExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, String pValue)
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("CompositeData cannot be written to");
     }

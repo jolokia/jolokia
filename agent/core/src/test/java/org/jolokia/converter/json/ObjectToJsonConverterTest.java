@@ -105,7 +105,7 @@ public class ObjectToJsonConverterTest {
     public void convertToJsonTest() throws MalformedObjectNameException, AttributeNotFoundException {
         JmxRequest req =
                 new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory").
-                        extraArgs("name").build();
+                        pathParts("name").build();
         File file = new File("myFile");
         JSONObject ret = converter.convertToJson(file,req,false);
         assertEquals( ((Map) ret.get("value")).get("name"),"myFile");
