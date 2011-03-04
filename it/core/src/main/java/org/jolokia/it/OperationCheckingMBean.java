@@ -16,6 +16,9 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author roland
  * @since Jun 30, 2009
@@ -39,4 +42,16 @@ public interface OperationCheckingMBean {
     boolean emptyStringArgumentCheck(String arg1);
 
     String arrayArguments(String args[], String extra);
+
+    Object objectArrayArg(Object[] args);
+
+    Object listArgument(List arg);
+
+    Boolean booleanArguments(boolean arg1, Boolean arg2);
+
+    Map mapArgument(Map arg);
+
+    int intArguments(int arg1, Integer arg2);
+
+    double doubleArguments(double arg1, Double arg2);
 }

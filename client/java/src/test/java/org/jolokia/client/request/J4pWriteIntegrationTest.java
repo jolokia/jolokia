@@ -16,6 +16,8 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
+import java.util.*;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -61,6 +63,39 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     @Test
+    void map() throws MalformedObjectNameException, J4pException {
+        Map map = createTestMap();
+        checkWrite(new String[]{"POST"}, "Map", null, map);
+        checkWrite("Map","fcn","svw");
+        checkWrite("Map","zahl",20L);
+    }
+
+    private Map createTestMap() {
+        Map map = new HashMap();
+        map.put("eins","fcn");
+        map.put("zwei","bvb");
+        map.put("drei",true);
+        map.put("vier",null);
+        map.put("fuenf",12L);
+        return map;
+    }
+
+    @Test
+    void list() throws MalformedObjectNameException, J4pException {
+        List list = new ArrayList();
+        list.add("fcn");
+        list.add(42L);
+        list.add(createTestMap());
+        list.add(null);
+        list.add(23.2);
+        checkWrite(new String[] { "POST" }, "List",null,list);
+        checkWrite("List","0",null);
+        checkWrite("List","0","");
+        checkWrite("List","2",42L);
+    }
+
+
+    @Test
     public void stringArray() throws MalformedObjectNameException, J4pException {
         try {
             final String input[] = new String[] { "eins", "zwei", null, "drei" };
@@ -90,7 +125,11 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     private void checkWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        for (String method : new String[] { "GET", "POST" }) {
+        checkWrite(new String[] { "GET", "POST" },pAttribute,pPath,pValue,pFinalAssert);
+    }
+
+    private void checkWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+        for (String method : methods) {
             reset();
             J4pReadRequest readReq = new J4pReadRequest("jolokia.it:type=attribute",pAttribute);
             if (pPath != null) {
@@ -112,7 +151,6 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
             }
         }
     }
-
 
     private void reset() throws MalformedObjectNameException, J4pException {
         j4pClient.execute(new J4pExecRequest("jolokia.it:type=attribute", "reset"));
