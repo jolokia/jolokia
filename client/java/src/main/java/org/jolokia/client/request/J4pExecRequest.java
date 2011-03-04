@@ -41,7 +41,12 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     public J4pExecRequest(ObjectName pMBeanName,String pOperation,Object ... pArgs) {
         super(J4pType.EXEC, pMBeanName);
         operation = pOperation;
-        arguments = Arrays.asList(pArgs);
+        if (pArgs == null) {
+            arguments = new ArrayList<Object>();
+            arguments.add(null);
+        } else {
+            arguments = Arrays.asList(pArgs);
+        }
     }
 
     public J4pExecRequest(String pMBeanName, String pOperation,Object ... pArgs)

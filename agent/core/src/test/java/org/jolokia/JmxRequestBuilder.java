@@ -69,13 +69,23 @@ public class JmxRequestBuilder {
         return this;
     }
 
-    public JmxRequestBuilder extraArgs(List<String> pExtraArgs) {
-        request.setExtraArgs(pExtraArgs);
+    public JmxRequestBuilder pathParts(List<String> pExtraArgs) {
+        request.setPathParts(pExtraArgs);
         return this;
     }
 
-    public JmxRequestBuilder extraArgs(String ... pExtraArgs) {
-        request.setExtraArgs(Arrays.asList(pExtraArgs));
+    public JmxRequestBuilder pathParts(String... pExtraArgs) {
+        request.setPathParts(Arrays.asList(pExtraArgs));
+        return this;
+    }
+
+    public JmxRequestBuilder arguments(List<Object> pArguments) {
+        request.setArguments(pArguments);
+        return this;
+    }
+
+    public JmxRequestBuilder arguments(Object ... pArguments) {
+        request.setArguments(Arrays.asList(pArguments));
         return this;
     }
 }

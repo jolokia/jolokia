@@ -16,6 +16,9 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
+import java.util.List;
+import java.util.Map;
+
 import javax.management.*;
 
 /**
@@ -57,6 +60,49 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
 
     public String arrayArguments(String args[], String extra) {
         return args[0];
+    }
+
+    public Object objectArrayArg(Object[] args) {
+        if (args == null) {
+            return null;
+        } else {
+            return args[0];
+        }
+    }
+
+    public Object listArgument(List arg) {
+        if (arg == null) {
+            return null;
+        }
+        return arg.get(0);
+    }
+
+    public Boolean booleanArguments(boolean arg1, Boolean arg2) {
+        if (arg2 == null) {
+            return null;
+        }
+        return arg1 && arg2;
+    }
+
+    public Map mapArgument(Map arg) {
+        if (arg == null) {
+            return null;
+        }
+        return arg;
+    }
+
+    public int intArguments(int arg1, Integer arg2) {
+        if (arg2 == null) {
+            return -1;
+        }
+        return arg1 + arg2;
+    }
+
+    public double doubleArguments(double arg1, Double arg2) {
+        if (arg2 == null) {
+            return -1.0;
+        }
+        return arg1 + arg2;
     }
 
     public int overloadedMethod(String arg) {

@@ -79,11 +79,20 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
      * @return the string representation
      */
     protected String serializeArgumentToRequestPart(Object pArg) {
-        if (pArg != null && pArg.getClass().isArray()) {
-            return getArrayForArgument((Object[]) pArg);
-        } else  {
-            return nullEscape(pArg);
+        if (pArg != null) {
+            if (pArg.getClass().isArray()) {
+                return getArrayForArgument((Object[]) pArg);
+            } else if (List.class.isAssignableFrom(pArg.getClass())) {
+                List list = (List) pArg;
+                Object[] args = new Object[list.size()];
+                int i = 0;
+                for (Object e : list) {
+                    args[i++] = e;
+                }
+                return getArrayForArgument(args);
+            }
         }
+        return nullEscape(pArg);
     }
 
     /**
@@ -119,12 +128,12 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
         if (pArg != null && pArg.getClass().isArray()) {
             JSONArray innerArray = new JSONArray();
             for (Object inner : (Object []) pArg) {
-                innerArray.add(inner != null ? inner.toString() : "[null]");
+                innerArray.add(inner);
             }
             return innerArray;
         }
         else {
-            return pArg != null ? pArg.toString() : "[null]";
+            return pArg;
         }
     }
 

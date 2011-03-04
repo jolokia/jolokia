@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>0.84-SNAPSHOT</version>
+    <version>0.90-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-site-skin</artifactId>
-  <version>0.84-SNAPSHOT</version>
+  <version>0.90-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>jolokia-site-skin</name>

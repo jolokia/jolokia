@@ -94,7 +94,7 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
         JSONObject ret = super.toJson();
         ret.put("attribute",attribute);
         // TODO: Rework the whole serialization stuff for write and exec requests
-        ret.put("value",serializeArgumentToRequestPart(value));
+        ret.put("value",serializeArgumentToJson(value));
         if (path != null) {
             ret.put("path",path);
         }

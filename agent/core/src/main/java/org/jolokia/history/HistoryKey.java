@@ -57,7 +57,7 @@ public class HistoryKey implements Serializable {
             if (pJmxReq.getType() == JmxRequest.Type.READ && secondary == null) {
                 secondary = "(all)";
             }
-            path = pJmxReq.getExtraArgsAsPath();
+            path = pJmxReq.getPath();
         }
         if (secondary == null) {
             throw new IllegalArgumentException(type + " name must not be null");
@@ -153,7 +153,7 @@ public class HistoryKey implements Serializable {
         sb.append("{type='").append(type).append('\'');
         sb.append(", mBean=").append(mBean);
         sb.append(", secondary='").append(secondary).append('\'');
-        sb.append(", paJ4th='").append(path).append('\'');
+        sb.append(", path='").append(path).append('\'');
         sb.append(", target='").append(target).append('\'');
         sb.append('}');
         return sb.toString();

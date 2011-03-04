@@ -59,7 +59,7 @@ public class ListExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, String pValueS)
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
         List list = (List) pInner;
         int idx;
@@ -67,7 +67,7 @@ public class ListExtractor implements Extractor {
             idx = Integer.parseInt(pAttribute);
         } catch (NumberFormatException exp) {
             throw new IllegalArgumentException("Non-numeric index for accessing collection " + pInner +
-                    ". (index = " + pAttribute + ", value to set = " + pValueS + ")",exp);
+                    ". (index = " + pAttribute + ", value to set = " +  pValue + ")",exp);
         }
 
         // For a collection, we can infer the type within the collection. We are trying to fetch
@@ -75,8 +75,8 @@ public class ListExtractor implements Extractor {
         Object oldValue = list.get(idx);
         Object value =
                 oldValue != null ?
-                        pConverter.convertFromString(oldValue.getClass().getName(),pValueS) :
-                        pValueS;
+                        pConverter.prepareValue(oldValue.getClass().getName(), pValue) :
+                        pValue;
         list.set(idx,value);
         return oldValue;
     }

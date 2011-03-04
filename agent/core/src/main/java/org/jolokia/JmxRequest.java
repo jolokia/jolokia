@@ -112,8 +112,9 @@ public class JmxRequest {
     private ObjectName objectName;
     private List<String> attributeNames;
     private boolean multiAttributeMode = false;
-    private String value;
-    private List<String> extraArgs;
+    private Object value;
+    private List<String> pathParts;
+    private List<Object> arguments;
     private String operation;
     private Type type;
     private TargetConfig targetConfig = null;
@@ -167,8 +168,8 @@ public class JmxRequest {
 
         initAttribute(pMap.get("attribute"));
         initPath((String) pMap.get("path"));
-        initArguments((List) pMap.get("arguments"));
-        value = (String) pMap.get("value");
+        arguments = (List<Object>) pMap.get("arguments");
+        value = pMap.get("value");
         operation = (String) pMap.get("operation");
         initTargetConfig((Map) pMap.get("target"));
 
@@ -186,14 +187,18 @@ public class JmxRequest {
         return objectName;
     }
 
-    public List<String> getExtraArgs() {
-        return extraArgs;
+    public List<String> getPathParts() {
+        return pathParts;
     }
 
-    public String getExtraArgsAsPath() {
-        if (extraArgs != null && extraArgs.size() > 0) {
+    public List<Object> getArguments() {
+        return arguments;
+    }
+
+    public String getPath() {
+        if (pathParts != null && pathParts.size() > 0) {
             StringBuffer buf = new StringBuffer();
-            Iterator<String> it = extraArgs.iterator();
+            Iterator<String> it = pathParts.iterator();
             while (it.hasNext()) {
                 buf.append(escapePathPart(it.next()));
                 if (it.hasNext()) {
@@ -224,7 +229,7 @@ public class JmxRequest {
         return ret;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -333,9 +338,14 @@ public class JmxRequest {
         operation = pOperation;
     }
 
-    void setExtraArgs(List<String> pExtraArgs) {
-        extraArgs = pExtraArgs;
+    void setPathParts(List<String> pPathParts) {
+        pathParts = pPathParts;
     }
+
+    public void setArguments(List<Object> pArguments) {
+        arguments = pArguments;
+    }
+
 
     public TargetConfig getTargetConfig() {
         return targetConfig;
@@ -367,8 +377,11 @@ public class JmxRequest {
             ret.append(type).append(" mbean=").append(objectNameS);
         }
 
-        if (extraArgs != null && extraArgs.size() > 0) {
-            ret.append(", extra=").append(extraArgs);
+        if (pathParts != null && pathParts.size() > 0) {
+            ret.append(", path=").append(pathParts);
+        }
+        if (arguments != null && arguments.size() > 0) {
+            ret.append(", arguments=").append(arguments);
         }
         if (targetConfig != null) {
             ret.append(", target=").append(targetConfig);
@@ -404,7 +417,12 @@ public class JmxRequest {
             ret.put("mbean",objectName.getCanonicalName());
         }
         addAttributesAsJson(ret);
-        addExtraArgsAsJson(ret);
+        if (pathParts != null && pathParts.size() > 0) {
+            ret.put("path", getPath());
+        }
+        if (arguments != null && arguments.size() > 0) {
+            ret.put("arguments", arguments);
+        }
         if (value != null) {
             ret.put("value", value);
         }
@@ -424,16 +442,6 @@ public class JmxRequest {
                 pJsonObject.put("attribute",attributeNames);
             } else {
                 pJsonObject.put("attribute",attributeNames.get(0));
-            }
-        }
-    }
-
-    private void addExtraArgsAsJson(JSONObject pJsonObject) {
-        if (extraArgs != null && extraArgs.size() > 0) {
-            if (type == Type.READ || type == Type.WRITE) {
-                pJsonObject.put("path",getExtraArgsAsPath());
-            } else if (type == Type.EXEC) {
-                pJsonObject.put("arguments",extraArgs);
             }
         }
     }
@@ -470,35 +478,11 @@ public class JmxRequest {
         }
     }
 
-    private void initArguments(List pArguments) {
-        if (pArguments != null && pArguments.size() > 0) {
-            extraArgs = new ArrayList<String>();
-            for (Object val : pArguments) {
-                if (val instanceof List) {
-                    extraArgs.add(listToString((List) val));
-                } else {
-                    extraArgs.add(val != null ? val.toString() : null);
-                }
-            }
-        }
-    }
-
-    private String listToString(List pList) {
-        StringBuilder arrayArg = new StringBuilder();
-        for (int i = 0; i < pList.size(); i++) {
-            arrayArg.append(pList.get(i) != null ? pList.get(i).toString() : "[null]");
-            if (i < pList.size() - 1) {
-                arrayArg.append(",");
-            }
-        }
-        return arrayArg.toString();
-    }
-
     private void initPath(String pPath) {
         if (pPath != null) {
-            extraArgs = splitPath(pPath);
+            pathParts = splitPath(pPath);
         } else {
-            extraArgs = new ArrayList<String>();
+            pathParts = new ArrayList<String>();
         }
     }
 

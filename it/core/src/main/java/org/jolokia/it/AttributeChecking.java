@@ -62,10 +62,11 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
             origFile = File.createTempFile("bla",".txt");
             file = origFile;
             objectName = new ObjectName("bla:type=blub");
-            list = Arrays.asList("jolokia","habanero");
+            list = Arrays.asList("jolokia","habanero",42);
             map = new HashMap();
             map.put("fcn","meister");
             map.put("bayern","mittelfeld");
+            map.put("zahl",10L);
             complexMap = new HashMap();
             List inner = new ArrayList();
             Map anotherInner = new HashMap();

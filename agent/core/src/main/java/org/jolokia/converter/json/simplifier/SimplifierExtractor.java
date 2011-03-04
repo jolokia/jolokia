@@ -91,7 +91,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
     }
 
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner,
-                                 String pAttribute, String pValue) throws IllegalAccessException, InvocationTargetException {
+                                 String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
         // never called
         throw new IllegalArgumentException("A simplify handler can't set a value");
     }

@@ -26,10 +26,10 @@ package org.jolokia;
  */
 public final class Version {
 
-    private static final String VERSION = "0.83";
+    private static final String VERSION = "0.90";
 
     // Major.Minor version of protocol
-    private static final String PROTOCOL = "4.1";
+    private static final String PROTOCOL = "4.2";
 
     private Version() {}
 

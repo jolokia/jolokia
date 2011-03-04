@@ -141,7 +141,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         assertTrue(allAttrs.contains("LongSeconds"));
         assertTrue(allAttrs.contains("SmallMinutes"));
 
-        String val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
+        Double val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
         assertNotNull(val);
 
         try {
@@ -151,7 +151,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(exp.getMessage().contains("Aufsteiger"));
         }
 
-        String longVal = resp.getValue("LongSeconds");
+        Double longVal = resp.getValue("LongSeconds");
         assertNotNull(longVal);
 
         try {
@@ -225,7 +225,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         assertTrue(attrs.containsKey("LongSeconds"));
         assertTrue(attrs.containsKey("List"));
 
-        String longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
+        Double longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
         assertNotNull(longVal);
 
         try {

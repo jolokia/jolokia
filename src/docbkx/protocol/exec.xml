@@ -49,7 +49,7 @@
           operation. Only certain data types can be used here as
           desribed in <xref linkend="serialization-request"/>.
         </td>
-        <td><literal>["true","true"]</literal></td>
+        <td><literal>"true","true"</literal></td>
       </tr>
     </table>
 
@@ -96,7 +96,7 @@
             An array of arguments for invoking this operation. The value must be serializable as described in 
             <xref linkend="serialization-request"/>.
           </td>
-          <td><literal>["true","true"]</literal></td>
+          <td><literal>[true,true]</literal></td>
         </tr>
       </table>
     <para>
@@ -109,7 +109,7 @@
    "type":"EXEC",
    "mbean":"java.lang:type=Threading",
    "operation":"dumpAllThreads",
-   "arguments":["true","true"]
+   "arguments":[true,true]
 }]]></programlisting>
 
   </section>

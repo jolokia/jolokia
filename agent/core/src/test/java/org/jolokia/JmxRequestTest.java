@@ -50,8 +50,8 @@ public class JmxRequestTest {
         JmxRequest req =
                 new JmxRequestBuilder(JmxRequest.Type.LIST,"test:name=split").
                         build();
-        req.setExtraArgs(Arrays.asList("hello/world","second"));
-        String combined = req.getExtraArgsAsPath();
+        req.setPathParts(Arrays.asList("hello/world", "second"));
+        String combined = req.getPath();
         assertEquals(combined,"hello\\/world/second");
     }
 }

@@ -71,7 +71,7 @@ public class MapExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, String pValueS)
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         Map<Object,Object> map = (Map<Object,Object>) pInner;
         Object oldValue = null;
@@ -88,8 +88,8 @@ public class MapExtractor implements Extractor {
         }
         Object value =
                 oldValue != null ?
-                        pConverter.convertFromString(oldValue.getClass().getName(),pValueS) :
-                        pValueS;
+                        pConverter.prepareValue(oldValue.getClass().getName(),pValue) :
+                        pValue;
         map.put(oldKey,value);
         return oldValue;
     }

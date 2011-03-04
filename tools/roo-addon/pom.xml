@@ -20,14 +20,14 @@
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-roo</artifactId>
   <packaging>bundle</packaging>
-  <version>0.84-SNAPSHOT</version>
+  <version>0.90-SNAPSHOT</version>
   <name>jolokia-roo</name>
   <description>jolokia roo addon</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>0.84-SNAPSHOT</version>
+    <version>0.90-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 

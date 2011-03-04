@@ -1,8 +1,7 @@
 package org.jolokia.converter;
 
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -68,31 +67,114 @@ public class StringToObjectConverter {
         TYPE_SIGNATURE_MAP.put("D",double.class);
     }
 
-    public Object convertFromString(String pType, String pValue) {
-        // TODO: Look for an external solution or support more types
+    public Object prepareValue(String pExpectedClassName, Object pValue) {
+        if (pValue == null) {
+            return null;
+        } else {
+            Object param = prepareForDirectUsage(pExpectedClassName, pValue);
+            if (param == null) {
+                // Ok, we try to convert it from a string
+                return convertFromString(pExpectedClassName, pValue.toString());
+            }
+            return param;
+        }
+    }
+
+    /**
+     * For GET requests, where operation arguments and values to write are given in
+     * string representation as part of the URL, certain special tags are used to indicate
+     * special values:
+     *
+     * <ul>
+     *    <li><code>[null]</code> for indicating a null value</li>
+     *    <li><code>""</code> for indicating an empty string</li>
+     * </ul>
+     *
+     * This method converts these tags to the proper value. If not a tag, the original
+     * value is returned.
+     *
+     * If you need this tag values in the original semantics, please use POST requests.
+     *
+     * @param pValue the string value to check for a tag
+     * @return the converted value or the original one if no tag has been found.
+     */
+    public static String convertSpecialStringTags(String pValue) {
         if ("[null]".equals(pValue)) {
+            // Null marker for get requests
+            return null;
+        } else if ("\"\"".equals(pValue)) {
+            // Special string value for an empty String
+            return "";
+        } else {
+            return pValue;
+        }
+    }
+
+    // ======================================================================================================
+
+    // Check whether an argument can be used directly or whether it needs some sort
+    // of conversion
+    private Object prepareForDirectUsage(String pExpectedClassName, Object pArgument) {
+        try {
+            Class expectedClass = Class.forName(pExpectedClassName,true,Thread.currentThread().getContextClassLoader());
+            Class givenClass = pArgument.getClass();
+            if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
+                List argAsList = (List) pArgument;
+                Class valueType = expectedClass.getComponentType();
+                Object ret = Array.newInstance(valueType, argAsList.size());
+                int i = 0;
+                for (Object value : argAsList) {
+                    if (value == null) {
+                        if (!valueType.isPrimitive()) {
+                            Array.set(ret,i++,null);
+                        } else {
+                            throw new IllegalArgumentException("Cannot use a null value in an array of type " + valueType.getSimpleName());
+                        }
+                    } else {
+                        if (valueType.isAssignableFrom(value.getClass())) {
+                            // Can be set directly
+                            Array.set(ret,i++,value);
+                        } else {
+                            // Try to convert from string
+                            Array.set(ret,i++,convertFromString(valueType.getCanonicalName(), value.toString()));
+                        }
+                    }
+                }
+                return ret;
+            } else {
+                return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
+            }
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Deserialize a string representation to an object for a given type
+     *
+     * @param pType type to convert to
+     * @param pValue the value to convert from
+     * @return the converted value
+     */
+    Object convertFromString(String pType, String pValue) {
+        String value = convertSpecialStringTags(pValue);
+
+        if (value == null) {
             return null;
         }
         if (pType.startsWith("[") && pType.length() >= 2) {
-            return convertToArray(pType, pValue);
-        }
-
-        // Special string value
-        if ("\"\"".equals(pValue)) {
-            if (matchesType(pType,String.class)) {
-                return "";
-            }
-            throw new IllegalArgumentException("Cannot convert empty string tag to type " + pType);
+            return convertToArray(pType, value);
         }
 
         Extractor extractor = EXTRACTOR_MAP.get(pType);
         if (extractor == null) {
             throw new IllegalArgumentException(
-                    "Cannot convert string " + pValue + " to type " +
+                    "Cannot convert string " + value + " to type " +
                             pType + " because no converter could be found");
         }
-        return extractor.extract(pValue);
+        return extractor.extract(value);
     }
+
 
     // Convert an array
     private Object convertToArray(String pType, String pValue) {

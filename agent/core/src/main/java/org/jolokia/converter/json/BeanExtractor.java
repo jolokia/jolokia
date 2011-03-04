@@ -83,11 +83,8 @@ public class BeanExtractor implements Extractor {
     private Object exctractJsonifiedValue(Object pValue, Stack<String> pExtraArgs,
                                           ObjectToJsonConverter pConverter, JmxRequest.ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
-        if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass())) {
+        if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
             // No further diving, use these directly
-            return pValue.toString();
-        } else if (pValue instanceof JSONAware) {
-            // We can return it directly since the object itself already know how to serialize itself
             return pValue;
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
@@ -196,7 +193,7 @@ public class BeanExtractor implements Extractor {
     }
 
     // Using standard set semantics
-    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, String pValue)
+    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
         String rest = new StringBuffer(pAttribute.substring(0,1).toUpperCase())
@@ -232,7 +229,7 @@ public class BeanExtractor implements Extractor {
             oldValue = null;
         }
         AccessController.doPrivileged(new SetMethodAccessibleAction(found));
-        found.invoke(pInner,pConverter.convertFromString(params[0].getName(),pValue));
+        found.invoke(pInner,pConverter.prepareValue(params[0].getName(),pValue));
         return oldValue;
     }
 

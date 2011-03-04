@@ -100,7 +100,7 @@ public final class ObjectToJsonConverter {
      */
     public JSONObject convertToJson(Object pValue, JmxRequest pRequest, boolean pUseValueWithPath)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pUseValueWithPath ? reverseArgs(pRequest) : new Stack<String>();
+        Stack<String> extraStack = pUseValueWithPath ? reversePath(pRequest) : new Stack<String>();
 
         setupContext(pRequest);
 
@@ -135,16 +135,16 @@ public final class ObjectToJsonConverter {
      */
     public Object[] getValues(String pType, Object pCurrentValue, JmxRequest pRequest)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
-        List<String> extraArgs = pRequest.getExtraArgs();
+        List<String> pathParts = pRequest.getPathParts();
 
-        if (extraArgs != null && extraArgs.size() > 0) {
+        if (pathParts != null && pathParts.size() > 0) {
             if (pCurrentValue == null ) {
                 throw new IllegalArgumentException(
                         "Cannot set value with path when parent object is not set");
             }
 
-            String lastPathElement = extraArgs.remove(extraArgs.size()-1);
-            Stack<String> extraStack = reverseArgs(pRequest);
+            String lastPathElement = pathParts.remove(pathParts.size()-1);
+            Stack<String> extraStack = reversePath(pRequest);
             // Get the object pointed to do with path-1
 
             try {
@@ -167,7 +167,7 @@ public final class ObjectToJsonConverter {
         } else {
             // Return the objectified value
             return new Object[] {
-                    stringToObjectConverter.convertFromString(pType,pRequest.getValue()),
+                    stringToObjectConverter.prepareValue(pType,pRequest.getValue()),
                     pCurrentValue
             };
         }
@@ -198,16 +198,16 @@ public final class ObjectToJsonConverter {
         return (ret != null && ret == 0) ? null : ret;
     }
 
-    private Stack<String> reverseArgs(JmxRequest pRequest) {
-        Stack<String> extraStack = new Stack<String>();
-        List<String> extraArgs = pRequest.getExtraArgs();
-        if (extraArgs != null) {
+    private Stack<String> reversePath(JmxRequest pRequest) {
+        Stack<String> pathStack = new Stack<String>();
+        List<String> pathParts = pRequest.getPathParts();
+        if (pathParts != null) {
             // Needs first extra argument at top of the stack
-            for (int i = extraArgs.size() - 1;i >=0;i--) {
-                extraStack.push(extraArgs.get(i));
+            for (int i = pathParts.size() - 1;i >=0;i--) {
+                pathStack.push(pathParts.get(i));
             }
         }
-        return extraStack;
+        return pathStack;
     }
 
 
@@ -265,7 +265,7 @@ public final class ObjectToJsonConverter {
     }
 
     // returns the old value
-    private Object setObjectValue(Object pInner, String pAttribute, String pValue)
+    private Object setObjectValue(Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
 
         // Call various handlers depending on the type of the inner object, as is extract Object
@@ -281,7 +281,7 @@ public final class ObjectToJsonConverter {
         }
 
         throw new IllegalStateException(
-                "Internal error: No handler found for class " + clazz + " for getting object value." +
+                "Internal error: No handler found for class " + clazz + " for setting object value." +
                         " (object: " + pInner + ", attribute: " + pAttribute + ", value: " + pValue + ")");
 
 
