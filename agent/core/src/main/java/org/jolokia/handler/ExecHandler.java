@@ -1,17 +1,15 @@
 package org.jolokia.handler;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.*;
+
 import org.jolokia.JmxRequest;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
-
-import javax.management.*;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -76,7 +74,7 @@ public class ExecHandler extends JsonRequestHandler {
         if (nrParams > 0 && (args == null || args.size() != types.paramClasses.length)) {
             throw new IllegalArgumentException("Invalid operation parameters. Operation " +
                     request.getOperation() + " on " + request.getObjectName() + " requires " + types.paramClasses.length +
-                    " parameters, not " + args.size() + " as given");
+                    " parameters, not " + (args == null ? 0 : args.size()) + " as given");
         }
         for (int i = 0;i < nrParams; i++) {
             params[i] = stringToObjectConverter.prepareValue(types.paramClasses[i], args.get(i));

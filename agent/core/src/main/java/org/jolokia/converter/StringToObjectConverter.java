@@ -211,10 +211,6 @@ public class StringToObjectConverter {
         return pValue.split("\\s*,\\s*");
     }
 
-    private boolean matchesType(String pType, Class pClass) {
-        return pClass.getName().equals(pType);
-    }
-
     // ===========================================================================
     // Extractor interface
     private interface Extractor {
