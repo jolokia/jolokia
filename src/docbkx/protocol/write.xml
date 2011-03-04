@@ -125,7 +125,7 @@
                 "mbean":"java.lang:type=ClassLoading",
                 "type":"write",
                 "attribute":"Verbose",
-                "value":"true"
+                "value":true
               }
  }]]></programlisting>
       <para>

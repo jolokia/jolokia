@@ -55,8 +55,7 @@
         MBeans are mostly obviously stateful). So in this aspect, the
         communication can be considered
        <ulink url="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</ulink>
-        like.
-        <footnote id="rest-comment">
+        like<footnote id="rest-comment">
           <para>This document will avoid the term REST as much as
           possible in order to avoid provocating any dogmatic
           resentments.</para> 
@@ -159,7 +158,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           instead. This should be URL encoded, though. For the
           example above, the alternative is
           <informalexample>
-            <literallayout class="monospaced">http:localhost:8080/jolokia?p=/read/test:strangeName=%2Fbla%2F%2F/attribute</literallayout>
+            <literallayout class="monospaced">http://localhost:8080/jolokia?p=/read/test:strangeName=%2Fbla%2F%2F/attribute</literallayout>
           </informalexample>
         </para>
         <para>
@@ -425,7 +424,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
   {
     "type" : "list"
     "config" : { 
-                 "maxObjects" : "100"
+                 "maxObjects" : 100
                } 
   }]]></programlisting>
       <para>
@@ -622,45 +621,83 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
       <section id="serialization-request">
         <title>Request parameter serialization</title>
         <para>
-          The following types can used for request parameters in write
-          and exec requests, both for POST and GET requests:
-          <itemizedlist>
-            <listitem>String</listitem>
-            <listitem>Integer / int</listitem>
-            <listitem>Long / long</listitem>
-            <listitem>Byte / byte</listitem>
-            <listitem>Shirt / short</listitem>
-            <listitem>Float / float</listitem>
-            <listitem>Double / double</listitem>
-            <listitem>char</listitem>
-            <listitem>Boolean / boolean</listitem>
-          </itemizedlist>
+          Serialization in the upstream direction (i.e. when sending
+          values for <constant>write</constant> operations or arguments
+          for <constant>exec</constant> operations) differs from
+          from the object serializaton as used as response values
+          which is described in <xref
+          linkend="serialization-response"/>. The capabilities also
+          differ for POST and GET requests, where for GET requests
+          serialization is limited to basic types and simple
+          arrays. POST requests support a much more powerful
+          mechanism, including the serialization of
+          <constant>Maps</constant> and <constant>Lists</constant>.
         </para>
-        <para>
-          The serialized value is simply the string representation of
-          those types. Arrays of the given types are supported,
-          too. These are serialized as a comma separated list.
-        </para>
-        <note>
-          The array support is somewhat limited since it makes a
-          native split on commas. It does not yet take into account
-          any quoting or escaping.
-        </note>
-        <para>
-          A <constant>null</constant> value is serialized as
-          <literal>[null]</literal>, an empty String as
-          <literal>""</literal><footnote>
-          <para>This is obviously not a
-          perfect solution. We are working on it.</para></footnote>.
-        </para>
-        <para>
-          Finally object of type
-          <classname>org.json.simple.JSONObject</classname> and
-          <classname>org.json.simple.JSONArray</classname> are
-          serialized in it JSON representation and can be used for
-          operations and attributes which take arguments of these
-          types. 
-        </para>
+        <section>
+          <title>GET request values</title>
+          <para>
+            Since parameters get encoded in the URL for GET request,
+            only the following types can used for values and arguments
+            in <constant>write</constant> and
+            <constant>exec</constant> requests:
+            <itemizedlist>
+              <listitem>String</listitem>
+              <listitem>Integer / int</listitem>
+              <listitem>Long / long</listitem>
+              <listitem>Byte / byte</listitem>
+              <listitem>Shirt / short</listitem>
+              <listitem>Float / float</listitem>
+              <listitem>Double / double</listitem>
+              <listitem>char</listitem>
+              <listitem>Boolean / boolean</listitem>
+            </itemizedlist>
+          </para>
+          <para>
+            The serialized value is simply the string representation of
+            those types. Arrays of the given types are supported,
+            too. These are serialized as a comma separated list.
+          </para>
+          <note>
+            The array support is somewhat limited since it makes a
+            native split on commas. It does not yet take into account
+            any quoting or escaping. For a much saver way to transport
+            arrays to the agent, please consider using POST requests.
+          </note>
+          <para>
+            Certain tag values are used to mark special values. 
+            A <constant>null</constant> value is serialized as
+            <literal>[null]</literal>, an empty String as
+            <literal>""</literal>. Tag values are not required for
+            POST requests.
+          </para>
+        </section>
+        <section>
+          <title>POST request values</title>
+          <para>
+            POST request take advantage of the JSON type of the value
+            transfered. These are basic types for numbers
+            (<literal>42</literal> or <literal>23.5</literal>,
+            booleans (<literal>true</literal> or
+            <literal>false</literal>) and strings
+            (<literal>"habanero"</literal>). Also, JSON knows about
+            <constant>null</constant> values so no special 'tags' like
+            for GET requests are required. Since JSON supports
+            intrinsically key-value maps and array types, these can be
+            used directly, too. I.e. if the JMX operation to execute
+            takes a <constant>Map</constant> argument, the argument
+            can be given as a JSON object.
+          </para>
+          <para>
+            The agent knows how to convert an JSON array to Java
+            Arrays (of a basic type) or Lists, depending on the
+            requirement as dictated by the MBeans operation or
+            attribute signature. Numbers in JSON are always transfered
+            as long or double values and are as well tried to fit 
+            to the MBean's signature. In case of an overflow
+            (e.g. when trying to treat a long with a too large value
+            as int), an exception is raised.
+          </para>
+        </section>
       </section>
     </section>
 
@@ -717,6 +754,21 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
         protocol version <emphasis role="bold">4.0</emphasis>
       </para>
       <variablelist>
+        <varlistentry>
+          <term><emphasis role="bold">4.2</emphasis> (4.3.2011)</term>
+          <listitem>
+            <para>
+              Response values are returned in the native JSON
+              datatype, not always as strings as in previous versions
+              of this protocol. Parameter serialization for writing
+              attribute values or for arguments in exec operations has
+              been enhanced for POST requests, which are now
+              represented as native JSON types and not in a string
+              representation as before. GET requests still use a
+              simplified string representation.
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><emphasis role="bold">4.0</emphasis> (17.10.2010)</term>
           <listitem>

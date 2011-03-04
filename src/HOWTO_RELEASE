@@ -6,6 +6,7 @@
 
 vi src/docbkx/index.xml
 vi client/javascript/src/javascript/jolokia.js
+vi agent/core/src/main/java/org/jolokia/Version.java
 vi pom.xml
 --> <currentStableVersion>0.82</currentStableVersion>
     <currentSnapshotVersion>0.83-SNAPSHOT</currentSnapshotVersion>

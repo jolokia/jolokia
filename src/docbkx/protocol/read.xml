@@ -10,7 +10,7 @@
     MBean or even on multiple MBeans matching a certain pattern.
   </para>
   <para>
-    Reading attributes as supported by both kinds of requests,
+    Reading attributes are supported by both kinds of requests,
     <literal>GET</literal> and <literal>POST</literal>. 
   </para>
   <note>
@@ -149,10 +149,10 @@
                "attribute":"HeapMemoryUsage"
              },
    "history":[{"value":{
-                         "init":"134217728",
-                         "max":"532742144",
-                         "committed":"133365760",
-                         "used":"18958208"
+                         "init":134217728,
+                         "max":532742144,
+                         "committed":133365760,
+                         "used":18958208
                        },
                "timestamp":1244839045
              }, ....
