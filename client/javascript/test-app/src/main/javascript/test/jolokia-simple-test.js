@@ -55,9 +55,9 @@ $(document).ready(function() {
 
         test("setAttribute (sync)", function() {
             var oldValue = j4p.getAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled");
-            var value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", oldValue === "true" ? false : true);
+            var value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", oldValue ? false : true);
             equals(oldValue, value, "Old-Value should be returned");
-            value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", value === "true" ? false : true);
+            value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", value ? false : true);
             ok(oldValue != value, "Alternate state");
             value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0");
             equals(value, 42);
@@ -100,7 +100,7 @@ $(document).ready(function() {
             value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "bla,blub", "x");
             equals(value, "bla");
             value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null);
-            equals(value, "true");
+            equals(value, true);
             j4p.execute("jolokia.it:type=operation", "reset");
         });
 
@@ -116,7 +116,7 @@ $(document).ready(function() {
         asyncTest("execute (async)", function() {
             var value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null, {
                 success: function(value) {
-                    equals(value, "true");
+                    equals(value, true);
                     start()
                 }
             });

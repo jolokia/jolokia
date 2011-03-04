@@ -70,14 +70,15 @@ public class ExecHandler extends JsonRequestHandler {
     public Object doHandleRequest(MBeanServerConnection server, JmxRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         OperationAndParamType types = extractOperationTypes(server,request);
-        Object[] params = new Object[types.paramClasses.length];
+        int nrParams = types.paramClasses.length;
+        Object[] params = new Object[nrParams];
         List<Object> args = request.getArguments();
-        if (args.size() != types.paramClasses.length) {
+        if (nrParams > 0 && (args == null || args.size() != types.paramClasses.length)) {
             throw new IllegalArgumentException("Invalid operation parameters. Operation " +
                     request.getOperation() + " on " + request.getObjectName() + " requires " + types.paramClasses.length +
                     " parameters, not " + args.size() + " as given");
         }
-        for (int i = 0;i <  types.paramClasses.length; i++) {
+        for (int i = 0;i < nrParams; i++) {
             params[i] = stringToObjectConverter.prepareValue(types.paramClasses[i], args.get(i));
         }
 
