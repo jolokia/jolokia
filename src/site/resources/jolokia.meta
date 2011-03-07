@@ -4,6 +4,7 @@
    ],
    "versions" : {
       "0.83" : {
+         "jolokia-access" : "http://www.jolokia.org/templates/jolokia-access.xml",
          "jmx4perl" : "[0.73,1.0)"
       },
       "0.82" : {
@@ -39,5 +40,8 @@
          "jolokia-war-%v.war",
          "jolokia.war"
       ]
+   },
+   "templates" : {
+      "jolokia-access" : "http://www.jolokia.org/templates/jolokia-access.xml"
    }
 }
