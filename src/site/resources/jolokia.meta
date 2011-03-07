@@ -1,0 +1,43 @@
+{
+   "repositories" : [
+      "http://labs.consol.de/maven/repository"
+   ],
+   "versions" : {
+      "0.83" : {
+         "jmx4perl" : "[0.73,1.0)"
+      },
+      "0.82" : {
+         "jmx4perl" : "[0.73,1.0)"
+      },
+      "0.81" : {
+         "jmx4perl" : "[0.73,1.0)"
+      }
+   },
+   "mapping" : {
+      "osgi" : [
+         "jolokia-osgi",
+         "jolokia-osgi-%v.jar",
+         "jolokia.jar"
+      ],
+      "mule" : [
+         "jolokia-mule",
+         "jolokia-mule-%v.jar",
+         "jolokia-mule.jar"
+      ],
+      "osgi-bundle" : [
+         "jolokia-osgi-bundle",
+         "jolokia-osgi-bundle-%v.jar",
+         "jolokia-bundle.jar"
+      ],
+      "jdk6" : [
+         "jolokia-jvm-jdk6",
+         "jolokia-jvm-jdk6-%v-agent.jar",
+         "jolokia.jar"
+      ],
+      "war" : [
+         "jolokia-war",
+         "jolokia-war-%v.war",
+         "jolokia.war"
+      ]
+   }
+}
