@@ -24,6 +24,16 @@ cd target/checkout/target
 scp *gz *zip jolokia@labs.consol.de:www/dist/0.84/
 cd ../client/javascript/target 
 scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/0.84/js/
+# ========================================================================
+# Adapte meta data
+
+# Add new release to jolokia.meta
+vi src/site/resources/jolokia.meta
+# Sign and create checksums
+gpg -a -b src/site/resources/jolokia.meta
+shasum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.sha1
+md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
+ 
 
 # ========================================================================
 # Recreate Website (~/jolokia)
@@ -41,6 +51,6 @@ cd tools/site-plugin; mvn clean intall;
 mvn -Pdist-labs site site:deploy
 
 # Roo-Plugin
-# Adapte uri in root-repository.xml to use a httpgpg URL
+# Adapt uri in root-repository.xml to use a httpgpg URL
 
 
