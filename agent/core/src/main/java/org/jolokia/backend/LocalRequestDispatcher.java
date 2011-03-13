@@ -58,17 +58,18 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @param pQualifier optional qualifier for registering own MBean to allow for multiple J4P instances in the VM
      * @param pLogHandler local handler used for logging out errors and warnings
      */
-    public LocalRequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
+    public LocalRequestDispatcher(ObjectToJsonConverter pObjectToJsonConverter,
                                   StringToObjectConverter stringToObjectConverter,
                                   Restrictor restrictor, String pQualifier, LogHandler pLogHandler) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
         mBeanServerHandler = new MBeanServerHandler(pQualifier,pLogHandler);
+        objectToJsonConverter = pObjectToJsonConverter;
         qualifier = pQualifier;
 
         // Request handling manager 
         requestHandlerManager =
-                new RequestHandlerManager(objectToJsonConverter,stringToObjectConverter,mBeanServerHandler.getServerHandle(),restrictor);
+                new RequestHandlerManager(pObjectToJsonConverter,stringToObjectConverter,mBeanServerHandler.getServerHandle(),restrictor);
     }
 
     // Can handle any request

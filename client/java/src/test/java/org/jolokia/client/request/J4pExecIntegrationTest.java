@@ -159,7 +159,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 j4pClient.execute(request,type);
                 fail();
             } catch (J4pRemoteException exp) {
-                assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                assertEquals("java.lang.IllegalArgumentException",exp.getErrorType());
             }
         }
     }
@@ -182,7 +182,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 j4pClient.execute(request,type);
                 fail();
             } catch (J4pRemoteException exp) {
-                assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                assertEquals("java.lang.IllegalArgumentException",exp.getErrorType());
             }
         }
     }
@@ -205,7 +205,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 j4pClient.execute(request,type);
                 fail();
             } catch (J4pRemoteException exp) {
-                assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                assertEquals("java.lang.IllegalArgumentException",exp.getErrorType());
             }
         }
     }

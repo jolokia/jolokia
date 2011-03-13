@@ -4,10 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-jsr160</artifactId>
+  <artifactId>jolokia-proxy</artifactId>
   <version>0.90-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>jolokia-jsr160</name>
+  <name>jolokia-proxy</name>
   <description>proxy handler for JSR-160/Jolokia proxy requests</description>
 
   <parent>

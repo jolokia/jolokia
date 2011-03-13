@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2011 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@ public class ErrorHandlingTemplate {
         jsonObject.put("error",getExceptionMessage(unwrapped));
         StringWriter writer = new StringWriter();
         pExp.printStackTrace(new PrintWriter(writer));
+        jsonObject.put("error_type",pExp.getClass().getName());
         jsonObject.put("stacktrace",writer.toString());
         return jsonObject;
     }

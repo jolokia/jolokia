@@ -127,36 +127,6 @@ public class HttpRequestHandler {
     }
 
     /**
-     * Execute a single {@link org.jolokia.JmxRequest}. If a checked  exception occurs,
-     * this gets translated into the appropriate JSON object which will get returned.
-     * Note, that these exceptions gets *not* translated into an HTTP error, since they are
-     * supposed <em>Jolokia</em> specific errors above the transport layer.
-     *
-     * @param pJmxReq the request to execute
-     * @return the JSON representation of the answer.
-     */
-    private JSONObject executeRequest(JmxRequest pJmxReq) {
-        // Call handler and retrieve return value
-        try {
-            return backendManager.handleRequest(pJmxReq);
-        } catch (ReflectionException e) {
-            return getErrorJSON(404,e);
-        } catch (InstanceNotFoundException e) {
-            return getErrorJSON(404,e);
-        } catch (MBeanException e) {
-            return getErrorJSON(500,e);
-        } catch (AttributeNotFoundException e) {
-            return getErrorJSON(404,e);
-        } catch (UnsupportedOperationException e) {
-            return getErrorJSON(500,e);
-        } catch (IOException e) {
-            return getErrorJSON(500,e);
-        } catch (IllegalArgumentException e) {
-            return getErrorJSON(400,e);
-        }
-    }
-
-    /**
      * Utility method for handling single runtime exceptions and errors.
      *
      * @param pThrowable exception to handle
@@ -167,27 +137,6 @@ public class HttpRequestHandler {
     }
 
 
-    /**
-     * Get the JSON representation for a an exception
-     *
-     * @param pErrorCode the HTTP error code to return
-     * @param pExp the exception or error occured
-     * @return the json representation
-     */
-    public JSONObject getErrorJSON(int pErrorCode, Throwable pExp) {
-        JSONObject jsonObject = new JSONObject();
-        Throwable unwrapped = unwrapException(pExp);
-        jsonObject.put("status",pErrorCode);
-        jsonObject.put("error",getExceptionMessage(unwrapped));
-        jsonObject.put("error_type",unwrapped.getClass().getName());
-        StringWriter writer = new StringWriter();
-        pExp.printStackTrace(new PrintWriter(writer));
-        jsonObject.put("stacktrace",writer.toString());
-        if (backendManager.isDebug()) {
-            backendManager.error("Error " + pErrorCode,pExp);
-        }
-        return jsonObject;
-    }
 
 
     /**

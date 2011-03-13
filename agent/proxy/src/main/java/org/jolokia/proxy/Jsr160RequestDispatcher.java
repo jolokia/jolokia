@@ -48,9 +48,10 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     public Jsr160RequestDispatcher(ObjectToJsonConverter pObjectToJsonConverter,
                                    StringToObjectConverter pStringToObjectConverter,
+                                   ServerHandle pServerHandle,
                                    Restrictor pRestrictor) {
         requestHandlerManager = new RequestHandlerManager(
-                pObjectToJsonConverter, pStringToObjectConverter, pRestrictor);
+                pObjectToJsonConverter, pStringToObjectConverter, pServerHandle, pRestrictor);
         objectToJsonConverter = pObjectToJsonConverter;
     }
 

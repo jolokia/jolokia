@@ -54,7 +54,7 @@ public class BackendManagerTest implements LogHandler {
         JmxRequest req = new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
-        JSONObject ret = backendManager.handleRequest(req);
+        JSONObject ret = backendManager.executeRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
         backendManager.destroy();
     }

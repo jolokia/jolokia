@@ -76,7 +76,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         initMBeanServers(detectors);
         serverHandle = detectServers(detectors,pLogHandler);
         qualifier = pQualifier;
-        initMBeanServers();
+        initMBeanServers(detectors);
     }
 
     /**
@@ -134,7 +134,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      *
      * @return the name under which the MBean is registered.
      */
-    public ObjectName registerMBean(Object pMBean,String ... pOptionalName) throws OperationsException {
+    public ObjectName registerMBean(Object pMBean,String ... pOptionalName) throws MalformedObjectNameException, InstanceAlreadyExistsException, NotCompliantMBeanException {
         if (mBeanServers.size() > 0) {
             synchronized (mBeanHandles) {
                 Exception lastExp = null;

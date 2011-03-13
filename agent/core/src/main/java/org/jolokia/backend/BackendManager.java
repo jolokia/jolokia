@@ -78,8 +78,6 @@ public class BackendManager {
 
     public BackendManager(Map<ConfigKey,String> pConfig, LogHandler pLogHandler) {
 
-<<<<<<< HEAD
-
         // Central objects
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
         objectToJsonConverter = new ObjectToJsonConverter(stringToObjectConverter,pConfig);
@@ -237,9 +235,8 @@ public class BackendManager {
 
 
     // init various application wide stores for handling history and debug output.
-    private void initStores(Map<ConfigKey, String> pConfig)
-            throws OperationsException {
-        int maxEntries = getIntConfigValue(pConfig,HISTORY_MAX_ENTRIES);
+    private void initStores(Map<ConfigKey, String> pConfig) {
+            int maxEntries = getIntConfigValue(pConfig,HISTORY_MAX_ENTRIES);
         int maxDebugEntries = getIntConfigValue(pConfig,DEBUG_MAX_ENTRIES);
 
         String doDebug = DEBUG.getValue(pConfig);
