@@ -1,6 +1,6 @@
 package org.jolokia.config;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.*;
 
 import javax.management.ObjectName;
 
@@ -29,11 +29,11 @@ import javax.management.ObjectName;
  * @since Jul 28, 2009
  */
 public class AllowAllRestrictor implements Restrictor {
-    public boolean isHttpMethodAllowed(JmxRequest.HttpMethod pMethod) {
+    public boolean isHttpMethodAllowed(HttpMethod pMethod) {
         return true;
     }
 
-    public boolean isTypeAllowed(JmxRequest.Type pType) {
+    public boolean isTypeAllowed(RequestType pType) {
         return true;
     }
 

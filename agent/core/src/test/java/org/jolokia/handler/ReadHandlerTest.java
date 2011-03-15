@@ -16,8 +16,8 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
-import org.jolokia.JmxRequest;
-import org.jolokia.JmxRequestBuilder;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.config.AllowAllRestrictor;
 import org.jolokia.config.Restrictor;
 import org.testng.annotations.*;
@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.JmxRequest.Type.READ;
+import static org.jolokia.request.RequestType.READ;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 

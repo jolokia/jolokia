@@ -1,8 +1,9 @@
 package org.jolokia.history;
 
-import org.jolokia.JmxRequest;
-import org.jolokia.JmxRequest.Type;
-import static org.jolokia.JmxRequest.Type.*;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.RequestType;
+
+import static org.jolokia.request.RequestType.*;
 
 import java.io.Serializable;
 
@@ -42,7 +43,7 @@ public class HistoryKey implements Serializable {
 
     HistoryKey(JmxRequest pJmxReq) {
         validate(pJmxReq);
-        Type rType = pJmxReq.getType();
+        RequestType rType = pJmxReq.getType();
         if (pJmxReq.getTargetConfig() != null) {
             target = pJmxReq.getTargetConfig().getUrl();
         }
@@ -54,7 +55,7 @@ public class HistoryKey implements Serializable {
         } else {
             type = "attribute";
             secondary = pJmxReq.isMultiAttributeMode() ? pJmxReq.getAttributeNames().get(0) : pJmxReq.getAttributeName();
-            if (pJmxReq.getType() == JmxRequest.Type.READ && secondary == null) {
+            if (pJmxReq.getType() == RequestType.READ && secondary == null) {
                 secondary = "(all)";
             }
             path = pJmxReq.getPath();
@@ -65,7 +66,7 @@ public class HistoryKey implements Serializable {
     }
 
     private void validate(JmxRequest pJmxRequest) {
-        Type rType = pJmxRequest.getType();
+        RequestType rType = pJmxRequest.getType();
         if (rType != EXEC && rType != READ && rType != WRITE) {
             throw new IllegalArgumentException(
                     "History supports only READ/WRITE/EXEC commands (and not " + rType + ")");

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -31,7 +31,7 @@ import org.jolokia.JmxRequest;
  */
 public interface RequestDispatcher {
     /**
-     * Dispatch a {@link org.jolokia.JmxRequest} to a certain backend
+     * Dispatch a {@link JmxRequest} to a certain backend
      * and return the result of the JMX action.
      *
      * @param pJmxReq the request to dispatch

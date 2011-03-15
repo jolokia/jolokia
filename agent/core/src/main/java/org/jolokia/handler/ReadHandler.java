@@ -1,6 +1,6 @@
 package org.jolokia.handler;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.config.Restrictor;
 
 import javax.management.*;
@@ -37,8 +37,8 @@ public class ReadHandler extends JsonRequestHandler {
     }
 
     @Override
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.READ;
+    public RequestType getType() {
+        return RequestType.READ;
     }
 
     /**
@@ -74,7 +74,7 @@ public class ReadHandler extends JsonRequestHandler {
     public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         ObjectName oName = pRequest.getObjectName();
-        JmxRequest.ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
+        ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
         if (oName.isPattern()) {
             return fetchAttributesForMBeanPattern(pServers, pRequest);
         } else {
@@ -85,7 +85,7 @@ public class ReadHandler extends JsonRequestHandler {
     private Object fetchAttributesForMBeanPattern(Set<MBeanServerConnection> pServers, JmxRequest pRequest)
             throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
         ObjectName objectName = pRequest.getObjectName();
-        JmxRequest.ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
+        ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
         Set<ObjectName> names = searchMBeans(pServers, objectName);
         Map<String,Object> ret = new HashMap<String, Object>();
         List<String> attributeNames = pRequest.getAttributeNames();
@@ -140,7 +140,7 @@ public class ReadHandler extends JsonRequestHandler {
     }
 
     private Object fetchAttributes(Set<MBeanServerConnection> pServers, ObjectName pMBeanName, List<String> pAttributeNames,
-                                   JmxRequest.ValueFaultHandler pFaultHandler)
+                                   ValueFaultHandler pFaultHandler)
             throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         List<String> attributes = pAttributeNames;
         if (shouldAllAttributesBeFetched(pAttributeNames)) {

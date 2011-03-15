@@ -7,9 +7,10 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.request.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -41,8 +42,8 @@ public class ExecHandler extends JsonRequestHandler {
     }
 
     @Override
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.EXEC;
+    public RequestType getType() {
+        return RequestType.EXEC;
     }
 
     @Override

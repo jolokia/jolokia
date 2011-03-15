@@ -21,14 +21,13 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.*;
 import org.jolokia.ConfigKey;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.LogHandler;
-import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.request.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -45,7 +44,7 @@ public class BackendManagerTest implements LogHandler {
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         backendManager = new BackendManager(new HashMap(),this);
-        JmxRequest req = new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory")
+        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
@@ -59,7 +58,7 @@ public class BackendManagerTest implements LogHandler {
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         config.put(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
         backendManager = new BackendManager(config,this);
-        JmxRequest req = new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory").build();
+        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue(RequestDispatcherTest.called);
         backendManager.destroy();
@@ -104,9 +103,9 @@ public class BackendManagerTest implements LogHandler {
 
         public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             called = true;
-            if (pJmxReq.getType() == JmxRequest.Type.READ) {
+            if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();
-            } else if (pJmxReq.getType() == JmxRequest.Type.WRITE) {
+            } else if (pJmxReq.getType() == RequestType.WRITE) {
                 return "faultyFormat";
             }
             return null;

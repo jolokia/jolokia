@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 
 /**
  * @author roland

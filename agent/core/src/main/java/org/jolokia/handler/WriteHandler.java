@@ -1,8 +1,9 @@
 package org.jolokia.handler;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -41,8 +42,8 @@ public class WriteHandler extends JsonRequestHandler {
     }
 
     @Override
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.WRITE;
+    public RequestType getType() {
+        return RequestType.WRITE;
     }
 
     @Override

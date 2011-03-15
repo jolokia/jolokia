@@ -1,7 +1,7 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.JmxRequest;
 import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.request.ValueFaultHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
@@ -63,7 +63,7 @@ public class BeanExtractor implements Extractor {
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Stack<String> pExtraArgs,boolean jsonify)
             throws AttributeNotFoundException {
-        JmxRequest.ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+        ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
         if (!pExtraArgs.isEmpty()) {
             // Still some path elements available, so dive deeper
             String attribute = pExtraArgs.pop();
@@ -81,7 +81,7 @@ public class BeanExtractor implements Extractor {
     }
 
     private Object exctractJsonifiedValue(Object pValue, Stack<String> pExtraArgs,
-                                          ObjectToJsonConverter pConverter, JmxRequest.ValueFaultHandler pFaultHandler)
+                                          ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
             // No further diving, use these directly
@@ -104,7 +104,7 @@ public class BeanExtractor implements Extractor {
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private Object extractJsonifiedPropertyValue(Object pValue, String pAttribute, Stack<String> pExtraArgs,
-                                                  ObjectToJsonConverter pConverter, JmxRequest.ValueFaultHandler pFaultHandler)
+                                                  ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         Object value = extractBeanPropertyValue(pValue, pAttribute, pFaultHandler);
         if (value == null) {
@@ -149,7 +149,7 @@ public class BeanExtractor implements Extractor {
         }
     }
 
-    private Object extractBeanPropertyValue(Object pValue, String pAttribute, JmxRequest.ValueFaultHandler pFaultHandler)
+    private Object extractBeanPropertyValue(Object pValue, String pAttribute, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         Class clazz = pValue.getClass();
 

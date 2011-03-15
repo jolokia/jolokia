@@ -1,7 +1,8 @@
 package org.jolokia.handler;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.config.Restrictor;
+import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public abstract class JsonRequestHandler {
      * The type of request which can be served by this handler
      * @return the request typ of this handler
      */
-    public abstract JmxRequest.Type getType();
+    public abstract RequestType getType();
 
     /**
      * Override this if you want all servers as list in the argument, e.g.
@@ -52,9 +53,9 @@ public abstract class JsonRequestHandler {
      *
      * @param pRequest request to decide on whether to handle all request at once
      * @return whether you want to have
-     * {@link #doHandleRequest(javax.management.MBeanServerConnection, org.jolokia.JmxRequest)}
+     * {@link #doHandleRequest(javax.management.MBeanServerConnection, JmxRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(java.util.Set, org.jolokia.JmxRequest)} (<code>true</code>) called.
+     * {@link #doHandleRequest(java.util.Set, JmxRequest)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(JmxRequest pRequest) {
         return false;

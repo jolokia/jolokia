@@ -3,10 +3,11 @@ package org.jolokia.handler;
 import java.io.IOException;
 import java.util.*;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.Version;
 import org.jolokia.config.Restrictor;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.request.RequestType;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -44,8 +45,8 @@ public class VersionHandler extends JsonRequestHandler {
     }
 
     @Override
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.VERSION;
+    public RequestType getType() {
+        return RequestType.VERSION;
     }
 
     @Override

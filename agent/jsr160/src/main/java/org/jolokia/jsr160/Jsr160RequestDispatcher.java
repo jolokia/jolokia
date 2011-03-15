@@ -16,7 +16,7 @@ package org.jolokia.jsr160;
  *  limitations under the License.
  */
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
@@ -24,6 +24,7 @@ import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
+import org.jolokia.request.ProxyTargetConfig;
 
 import javax.management.*;
 import javax.management.remote.JMXConnector;
@@ -83,7 +84,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
     private JMXConnector getConnector(JmxRequest pJmxReq) throws IOException {
-        JmxRequest.TargetConfig targetConfig = pJmxReq.getTargetConfig();
+        ProxyTargetConfig targetConfig = pJmxReq.getTargetConfig();
         if (targetConfig == null) {
             throw new IllegalArgumentException("No proxy configuration in request " + pJmxReq);
         }
@@ -105,9 +106,9 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
      * @param pTargetConfig the target configuration as obtained from the request
      * @return the prepared environment
      */
-    protected Map<String,Object> prepareEnv(Map<String, Object> pTargetConfig) {
+    protected Map<String,Object> prepareEnv(Map<String, String> pTargetConfig) {
         if (pTargetConfig == null || pTargetConfig.size() == 0) {
-            return pTargetConfig;
+            return null;
         }
         Map<String,Object> ret = new HashMap<String, Object>(pTargetConfig);
         String user = (String) ret.remove("user");

@@ -1,7 +1,8 @@
 package org.jolokia.handler;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.config.Restrictor;
+import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -40,8 +41,8 @@ public class SearchHandler extends JsonRequestHandler {
     }
 
     @Override
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.SEARCH;
+    public RequestType getType() {
+        return RequestType.SEARCH;
     }
 
     @Override

@@ -6,10 +6,11 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.RequestType;
 import org.json.simple.JSONObject;
 
-import static org.jolokia.JmxRequest.Type.*;
+import static org.jolokia.request.RequestType.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -140,7 +141,7 @@ public class HistoryStore implements Serializable {
         long timestamp = System.currentTimeMillis() / 1000;
         pJson.put(KEY_TIMESTAMP,timestamp);
 
-        JmxRequest.Type type  = pJmxReq.getType();
+        RequestType type  = pJmxReq.getType();
         if (type == EXEC || type == WRITE) {
             HistoryEntry entry = historyStore.get(new HistoryKey(pJmxReq));
             if (entry != null) {

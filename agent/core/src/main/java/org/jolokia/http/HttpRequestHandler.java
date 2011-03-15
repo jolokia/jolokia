@@ -2,6 +2,8 @@ package org.jolokia.http;
 
 import org.jolokia.*;
 import org.jolokia.backend.BackendManager;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JmxRequestFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
@@ -80,16 +82,18 @@ public class HttpRequestHandler {
     /**
      * Handle the input stream as given by a POST request
      *
+     *
      * @param pUri URI leading to this request
      * @param pInputStream input stream of the post request
      * @param pEncoding optional encoding for the stream. If null, the default encoding is used
+     * @param pParameterMap additional processing parameters
      * @return the JSON object containing the json results for one or more {@link JmxRequest} contained
      *         within the answer.
      *
      * @throws MalformedObjectNameException if one or more request contain an invalid MBean name
      * @throws IOException if reading from the input stream fails
      */
-    public JSONAware handlePostRequest(String pUri,InputStream pInputStream, String pEncoding)
+    public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
             throws MalformedObjectNameException, IOException {
         if (backendManager.isDebug()) {
             logHandler.debug("URI: " + pUri);
@@ -97,7 +101,7 @@ public class HttpRequestHandler {
 
         JSONAware jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof List) {
-            List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest);
+            List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,pParameterMap);
 
             JSONArray responseList = new JSONArray();
             for (JmxRequest jmxReq : jmxRequests) {
@@ -110,7 +114,7 @@ public class HttpRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof Map) {
-            JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest);
+            JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,pParameterMap);
             return executeRequest(jmxReq);
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest.toJSONString());
@@ -132,7 +136,7 @@ public class HttpRequestHandler {
     }
 
     /**
-     * Execute a single {@link org.jolokia.JmxRequest}. If a checked  exception occurs,
+     * Execute a single {@link JmxRequest}. If a checked  exception occurs,
      * this gets translated into the appropriate JSON object which will get returned.
      * Note, that these exceptions gets *not* translated into an HTTP error, since they are
      * supposed <em>Jolokia</em> specific errors above the transport layer.

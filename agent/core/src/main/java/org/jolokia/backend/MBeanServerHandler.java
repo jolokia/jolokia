@@ -6,7 +6,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.LogHandler;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;

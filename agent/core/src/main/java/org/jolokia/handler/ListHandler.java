@@ -1,8 +1,9 @@
 package org.jolokia.handler;
 
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.config.Restrictor;
+import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -56,8 +57,8 @@ public class ListHandler extends JsonRequestHandler {
     private static final String KEY_READ_WRITE = "rw";
     private static final String KEY_ATTRIBUTE = "attr";
 
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.LIST;
+    public RequestType getType() {
+        return RequestType.LIST;
     }
 
     public ListHandler(Restrictor pRestrictor) {

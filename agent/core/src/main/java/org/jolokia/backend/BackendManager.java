@@ -7,6 +7,7 @@ import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.LogHandler;
+import org.jolokia.request.JmxRequest;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -38,7 +39,7 @@ import static org.jolokia.ConfigKey.*;
 
 /**
  * Backendmanager for dispatching to various backends based on a given
- * {@link org.jolokia.JmxRequest}
+ * {@link JmxRequest}
  *
  * @author roland
  * @since Nov 11, 2009

@@ -140,7 +140,7 @@ public class AgentServlet extends HttpServlet {
                     throws IOException, MalformedObjectNameException {
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
-                return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding);
+                return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding,pReq.getParameterMap());
             }
         };
     }

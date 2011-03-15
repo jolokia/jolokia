@@ -20,14 +20,14 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.JmxRequest;
-import org.jolokia.JmxRequestBuilder;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JmxRequestBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.jolokia.JmxRequest.Type.*;
+import static org.jolokia.request.RequestType.*;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 

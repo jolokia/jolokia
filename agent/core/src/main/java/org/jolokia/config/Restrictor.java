@@ -1,6 +1,6 @@
 package org.jolokia.config;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.*;
 
 import javax.management.ObjectName;
 
@@ -38,7 +38,7 @@ public interface Restrictor {
      * @return true if there is no restriction on the method with which the request
      *         was sent, false otherwise
      */
-    boolean isHttpMethodAllowed(JmxRequest.HttpMethod pMethod);
+    boolean isHttpMethodAllowed(HttpMethod pMethod);
 
     /**
      * Check whether the provided command type is allowed in principal
@@ -46,7 +46,7 @@ public interface Restrictor {
      * @param pType type to check
      * @return true, if the type is allowed, false otherwise
      */
-    boolean isTypeAllowed(JmxRequest.Type pType);
+    boolean isTypeAllowed(RequestType pType);
 
     /**
      * Check whether reading of an attribute is allowed
