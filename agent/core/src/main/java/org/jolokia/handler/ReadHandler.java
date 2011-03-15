@@ -30,7 +30,7 @@ import java.util.*;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ReadHandler extends JsonRequestHandler {
+public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     public ReadHandler(Restrictor pRestrictor) {
         super(pRestrictor);
@@ -46,12 +46,13 @@ public class ReadHandler extends JsonRequestHandler {
      * done by the upper level. If the request is for an MBean pattern or multiple attributes
      * are required, we try multiple request for multiple server.
      *
+     *
      * @param pRequest request to decide on whether to handle all request at once
      * @return true if this is a multi attribute request, has an MBean pattern to look for or is a request for
      *         all attributes.
      */
     @Override
-    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
+    public boolean handleAllServersAtOnce(JmxReadRequest pRequest) {
         return pRequest.getObjectName().isPattern() || pRequest.isMultiAttributeMode() || !pRequest.hasAttribute();
     }
 
@@ -59,19 +60,20 @@ public class ReadHandler extends JsonRequestHandler {
      * Used for a request to a single attribute from a single MBean. Merging of MBeanServers is done
      * one layer above.
      *
+     *
      * @param pServer server on which to request the attribute
      * @param pRequest the request itself.
      * @return the attribute's value
      */
     @Override
-    public Object doHandleRequest(MBeanServerConnection pServer, JmxRequest pRequest)
+    public Object doHandleRequest(MBeanServerConnection pServer, JmxReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         checkRestriction(pRequest.getObjectName(), pRequest.getAttributeName());
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
     }
 
     @Override
-    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxRequest pRequest)
+    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         ObjectName oName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
@@ -82,7 +84,7 @@ public class ReadHandler extends JsonRequestHandler {
         }
     }
 
-    private Object fetchAttributesForMBeanPattern(Set<MBeanServerConnection> pServers, JmxRequest pRequest)
+    private Object fetchAttributesForMBeanPattern(Set<MBeanServerConnection> pServers, JmxReadRequest pRequest)
             throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
         ObjectName objectName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
@@ -237,7 +239,7 @@ public class ReadHandler extends JsonRequestHandler {
     @Override
     // We override it here with a noop since we do a more fine grained
     // check during processing of the request.
-    protected void checkForRestriction(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxReadRequest pRequest) {
 
     }
 }

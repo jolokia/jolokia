@@ -152,7 +152,7 @@ public class BackendManager {
     public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
             ReflectionException, MBeanException, IOException {
 
-        boolean debug = isDebug() && !"debugInfo".equals(pJmxReq.getOperation());
+        boolean debug = isDebug();
 
         long time = 0;
         if (debug) {

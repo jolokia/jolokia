@@ -16,8 +16,7 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
-import org.jolokia.request.JmxRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.*;
 import org.jolokia.config.AllowAllRestrictor;
 import org.jolokia.config.Restrictor;
 import org.testng.annotations.*;
@@ -51,7 +50,7 @@ public class ReadHandlerTest {
 
     @Test
     public void singleBeanSingleAttribute() throws Exception {
-        JmxRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
                 attribute("testAttribute").
                 build();
 
@@ -65,7 +64,7 @@ public class ReadHandlerTest {
 
     @Test
     public void singleBeanNoAttributes() throws Exception {
-        JmxRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
                 attribute(null).
                 build();
 
@@ -89,7 +88,7 @@ public class ReadHandlerTest {
 
     @Test
     public void singleBeanMultiAttributes() throws Exception {
-        JmxRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
                 attributes(Arrays.asList("attr0","attr1")).
                 build();
 
@@ -110,7 +109,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternNoMatch() throws Exception {
         ObjectName patternMBean = new ObjectName("bla:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attribute("mem1").
                 build();
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
@@ -125,7 +124,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternSingleAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attribute("mem1").
                 build();
 
@@ -146,17 +145,18 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternNoAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest[] requests = new JmxRequest[] {
+        JmxReadRequest[] requests = new JmxReadRequest[2];
+        requests[0] =
                 new JmxRequestBuilder(READ, patternMBean).
                         attribute(null).
-                        build(),
+                        build();
+        requests[1] =
                 new JmxRequestBuilder(READ, patternMBean).
                         // A single null element is enough to denote "all"
                         attributes(Arrays.asList((String) null)).
-                        build()
-        };
+                        build();
 
-        for (JmxRequest request : requests) {
+        for (JmxReadRequest request : requests) {
             ObjectName beans[] =  {
                     new ObjectName("java.lang:type=Memory"),
                     new ObjectName("java.lang:type=GarbageCollection")
@@ -188,7 +188,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternNoAttributesFound() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attribute(null).
                 build();
         ObjectName beans[] =  {
@@ -214,7 +214,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternNoMatchingAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attribute("blub").
                 build();
 
@@ -235,7 +235,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternMultiAttributes1() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attributes(Arrays.asList("mem0","gc3")).
                 build();
 
@@ -259,7 +259,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternMultiAttributes3() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attributes(Arrays.asList("bla")).
                 build();
 
@@ -281,7 +281,7 @@ public class ReadHandlerTest {
     @Test(groups = "java6")
     public void searchPatternMultiAttributes4() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
-        JmxRequest request = new JmxRequestBuilder(READ, patternMBean).
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attributes(Arrays.asList("common")).
                 build();
 
@@ -318,7 +318,7 @@ public class ReadHandlerTest {
     // ==============================================================================================================
     @Test
     public void handleAllServersAtOnceTest() throws MalformedObjectNameException {
-        JmxRequest request = new JmxRequestBuilder(READ, testBeanName).
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
                 attribute("attr").
                 build();
         assertFalse(handler.handleAllServersAtOnce(request));
@@ -345,7 +345,7 @@ public class ReadHandlerTest {
         expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
         handler = new ReadHandler(restrictor);
 
-        JmxRequest request = new JmxRequestBuilder(READ, testBeanName).
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
                 attribute("attr").
                 build();
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);

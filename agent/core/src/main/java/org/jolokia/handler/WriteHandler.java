@@ -1,9 +1,8 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -32,7 +31,7 @@ import java.lang.reflect.InvocationTargetException;
  * @author roland
  * @since Jun 12, 2009
  */
-public class WriteHandler extends JsonRequestHandler {
+public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
 
     private ObjectToJsonConverter objectToJsonConverter;
 
@@ -47,7 +46,7 @@ public class WriteHandler extends JsonRequestHandler {
     }
 
     @Override
-    protected void checkForRestriction(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxWriteRequest pRequest) {
         if (!getRestrictor().isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
             throw new SecurityException("Writing attribute " + pRequest.getAttributeName() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
@@ -55,7 +54,7 @@ public class WriteHandler extends JsonRequestHandler {
     }
 
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request)
+    public Object doHandleRequest(MBeanServerConnection server, JmxWriteRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
 
         try {
@@ -74,7 +73,7 @@ public class WriteHandler extends JsonRequestHandler {
         }
     }
 
-    private Object setAttribute(JmxRequest request, MBeanServerConnection server)
+    private Object setAttribute(JmxWriteRequest request, MBeanServerConnection server)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
             ReflectionException, IntrospectionException, InvalidAttributeValueException, IllegalAccessException, InvocationTargetException, IOException {
         // Old value, will throw an exception if attribute is not known. That's good.

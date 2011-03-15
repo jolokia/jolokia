@@ -6,8 +6,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.request.JmxRequest;
-import org.jolokia.request.RequestType;
+import org.jolokia.request.*;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.request.RequestType.*;
@@ -50,6 +49,9 @@ public class HistoryStore implements Serializable {
     private static final String KEY_VALUE = "value";
     private static final String KEY_TIMESTAMP = "timestamp";
 
+    private Map<RequestType,HistoryUpdater> historyUpdaters = new HashMap<RequestType, HistoryUpdater>();
+
+
     /**
      * Constructor for a history store
      *
@@ -60,6 +62,7 @@ public class HistoryStore implements Serializable {
         globalMaxEntries = pTotalMaxEntries;
         historyStore = new HashMap<HistoryKey, HistoryEntry>();
         patterns = new HashMap<HistoryKey, Integer>();
+        initHistoryUpdaters();
     }
 
     /**
@@ -142,26 +145,55 @@ public class HistoryStore implements Serializable {
         pJson.put(KEY_TIMESTAMP,timestamp);
 
         RequestType type  = pJmxReq.getType();
-        if (type == EXEC || type == WRITE) {
-            HistoryEntry entry = historyStore.get(new HistoryKey(pJmxReq));
-            if (entry != null) {
-                synchronized(entry) {
-                    // A history data to json object for the response
-                    pJson.put(KEY_HISTORY,entry.jsonifyValues());
-
-                    // Update history for next time
-                    if (type == EXEC) {
-                        entry.add(pJson.get(KEY_VALUE),timestamp);
-                    } else if (type == WRITE) {
-                        // The new value to set as string representation
-                        entry.add(pJmxReq.getValue(),timestamp);
-                    }
-                }
-            }
-        } else if (type == READ) {
-            updateReadHistory(pJmxReq, pJson, timestamp);
+        HistoryUpdater updater = historyUpdaters.get(type);
+        if (updater != null) {
+            updater.updateHistory(pJson,pJmxReq,timestamp);
         }
     }
+
+
+    // =======================================================================================================
+
+    // Interface for updating a history entry for a certain type
+    interface HistoryUpdater<R extends JmxRequest> {
+        void updateHistory(JSONObject pJson,R request,long pTimestamp);
+    }
+
+    // A set of updaters which are dispatched to for certain request types
+    private void initHistoryUpdaters() {
+        historyUpdaters.put(RequestType.EXEC,
+                            new HistoryUpdater<JmxExecRequest>() {
+                                public void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
+                                    HistoryEntry entry = historyStore.get(new HistoryKey(request));
+                                    if (entry != null) {
+                                        synchronized(entry) {
+                                            pJson.put(KEY_HISTORY,entry.jsonifyValues());
+                                            entry.add(pJson.get(KEY_VALUE),pTimestamp);
+                                        }
+                                    }
+                                }
+                            });
+        historyUpdaters.put(RequestType.WRITE,
+                            new HistoryUpdater<JmxWriteRequest>() {
+                                public void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
+                                    HistoryEntry entry = historyStore.get(new HistoryKey(request));
+                                    if (entry != null) {
+                                        synchronized(entry) {
+                                            pJson.put(KEY_HISTORY,entry.jsonifyValues());
+                                            entry.add(request.getValue(),pTimestamp);
+                                        }
+                                    }
+                                }
+                            });
+        historyUpdaters.put(RequestType.READ,
+                            new HistoryUpdater<JmxReadRequest>() {
+                                public void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
+                                    updateReadHistory(request,pJson,pTimestamp);
+                                }
+                            });
+
+    }
+
 
     // Remove entries
     private void removeEntries(HistoryKey pKey) {
@@ -187,7 +219,7 @@ public class HistoryStore implements Serializable {
 
     // Update potentially multiple history entries for a READ request which could
     // return multiple values with a single request
-    private void updateReadHistory(JmxRequest pJmxReq, JSONObject pJson, long pTimestamp)  {
+    private void updateReadHistory(JmxReadRequest pJmxReq, JSONObject pJson, long pTimestamp)  {
         ObjectName name = pJmxReq.getObjectName();
         if (name.isPattern()) {
             // We have a pattern and hence a value structure
@@ -239,8 +271,9 @@ public class HistoryStore implements Serializable {
             Object value = attrEntry.getValue();
             HistoryKey key;
             try {
+                String target = pJmxReq.getTargetConfig() != null ? pJmxReq.getTargetConfig().getUrl() : null;
                 key = new HistoryKey(pBeanName,attrName,null /* No path support for complex read handling */,
-                                     pJmxReq.getTargetConfigUrl());
+                                     target);
             } catch (MalformedObjectNameException e) {
                 // Shouldnt occur since we get the MBeanName from a JMX operation's result. However,
                 // we will rethrow it

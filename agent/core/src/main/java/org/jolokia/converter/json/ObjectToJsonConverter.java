@@ -2,12 +2,11 @@ package org.jolokia.converter.json;
 
 
 import org.jolokia.ConfigKey;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.converter.StringToObjectConverter;
 
 import static org.jolokia.ConfigKey.*;
 
-import org.jolokia.request.ValueFaultHandler;
 import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
 import javax.management.AttributeNotFoundException;
@@ -124,6 +123,7 @@ public final class ObjectToJsonConverter {
      * new value is set via the path expression. The old value is the value of the object specified
      * by the given path.
      *
+     *
      * @param pType type of the outermost object to set as returned by an MBeanInfo structure.
      * @param pCurrentValue the object of the outermost object which can be null
      * @param pRequest the initial request
@@ -134,7 +134,7 @@ public final class ObjectToJsonConverter {
      * @throws IllegalAccessException if access to MBean fails
      * @throws InvocationTargetException reflection error when setting an object's attribute
      */
-    public Object[] getValues(String pType, Object pCurrentValue, JmxRequest pRequest)
+    public Object[] getValues(String pType, Object pCurrentValue, JmxWriteRequest pRequest)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         List<String> pathParts = pRequest.getPathParts();
 

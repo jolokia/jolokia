@@ -1,8 +1,7 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.config.Restrictor;
-import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -29,7 +28,7 @@ import java.util.Set;
  * @author roland
  * @since Jun 12, 2009
  */
-public abstract class JsonRequestHandler {
+public abstract class JsonRequestHandler<R extends JmxRequest> {
 
     // Restrictor for restricting operations
 
@@ -51,13 +50,14 @@ public abstract class JsonRequestHandler {
      * to query each server on your own. By default, dispatching of the servers
      * are done for you
      *
+     *
      * @param pRequest request to decide on whether to handle all request at once
      * @return whether you want to have
-     * {@link #doHandleRequest(javax.management.MBeanServerConnection, JmxRequest)}
+     * {@link #doHandleRequest(MBeanServerConnection, JmxRequest)}
      * (<code>false</code>) or
      * {@link #doHandleRequest(java.util.Set, JmxRequest)} (<code>true</code>) called.
      */
-    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
+    public boolean handleAllServersAtOnce(R pRequest) {
         return false;
     }
 
@@ -66,6 +66,7 @@ public abstract class JsonRequestHandler {
      * {@link javax.management.InstanceNotFoundException}
      * if the request cannot be handle by the provided server.
      * Does a check for restrictions as well
+     *
      *
      * @param pServer server to try
      * @param pRequest request to process
@@ -77,7 +78,7 @@ public abstract class JsonRequestHandler {
      * @throws MBeanException
      * @throws java.io.IOException
      */
-    public Object handleRequest(MBeanServerConnection pServer,JmxRequest pRequest)
+    public Object handleRequest(MBeanServerConnection pServer, R pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         checkForRestriction(pRequest);
         checkHttpMethod(pRequest);
@@ -90,7 +91,7 @@ public abstract class JsonRequestHandler {
      *
      * @param pRequest request to check
      */
-    protected void checkForRestriction(JmxRequest pRequest) {
+    protected void checkForRestriction(R pRequest) {
         if (!restrictor.isTypeAllowed(getType())) {
             throw new SecurityException("Command type " +
                     getType() + " not allowed due to policy used");
@@ -103,7 +104,7 @@ public abstract class JsonRequestHandler {
      *
      * @param pRequest request to check
      */
-    private void checkHttpMethod(JmxRequest pRequest) {
+    private void checkHttpMethod(R pRequest) {
         if (!restrictor.isHttpMethodAllowed(pRequest.getHttpMethod())) {
             throw new SecurityException("HTTP method " + pRequest.getHttpMethod().getMethod() +
                     " is not allowed according to the installed security policy");
@@ -114,6 +115,7 @@ public abstract class JsonRequestHandler {
      * Abstract method to be subclassed by a concrete handler for performing the
      * request.
      *
+     *
      * @param server server to try
      * @param request request to process
      * @return the object result from the request
@@ -123,7 +125,7 @@ public abstract class JsonRequestHandler {
      * @throws ReflectionException
      * @throws MBeanException
      */
-    protected abstract Object doHandleRequest(MBeanServerConnection server,JmxRequest request)
+    protected abstract Object doHandleRequest(MBeanServerConnection server, R request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
 
     /**
@@ -135,7 +137,7 @@ public abstract class JsonRequestHandler {
      * @param request request to process
      * @return the object found
      */
-    public Object handleRequest(Set<MBeanServerConnection> servers, JmxRequest request)
+    public Object handleRequest(Set<MBeanServerConnection> servers, R request)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
         checkForRestriction(request);
         return doHandleRequest(servers,request);
@@ -149,7 +151,7 @@ public abstract class JsonRequestHandler {
      * @param request the original request
      * @return the result of the the request.
      */
-    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxRequest request)
+    public Object doHandleRequest(Set<MBeanServerConnection> servers, R request)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         return null;
     }

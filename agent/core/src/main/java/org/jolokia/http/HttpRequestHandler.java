@@ -70,7 +70,7 @@ public class HttpRequestHandler {
         JmxRequest jmxReq =
                 JmxRequestFactory.createGetRequest(pPathInfo,pParameterMap);
 
-        if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
+        if (backendManager.isDebug()) {
             logHandler.debug("URI: " + pUri);
             logHandler.debug("Path-Info: " + pPathInfo);
             logHandler.debug("Request: " + jmxReq.toString());
@@ -105,7 +105,7 @@ public class HttpRequestHandler {
 
             JSONArray responseList = new JSONArray();
             for (JmxRequest jmxReq : jmxRequests) {
-                if (backendManager.isDebug() && !"debugInfo".equals(jmxReq.getOperation())) {
+                if (backendManager.isDebug()) {
                     logHandler.debug("Request: " + jmxReq.toString());
                 }
                 // Call handler and retrieve return value

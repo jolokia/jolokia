@@ -1,7 +1,6 @@
 package org.jolokia.history;
 
-import org.jolokia.request.JmxRequest;
-import org.jolokia.request.RequestType;
+import org.jolokia.request.*;
 
 import static org.jolokia.request.RequestType.*;
 
@@ -41,46 +40,61 @@ public class HistoryKey implements Serializable {
     private String path;
     private String target;
 
-    HistoryKey(JmxRequest pJmxReq) {
-        validate(pJmxReq);
-        RequestType rType = pJmxReq.getType();
-        if (pJmxReq.getTargetConfig() != null) {
-            target = pJmxReq.getTargetConfig().getUrl();
+    HistoryKey(JmxReadRequest pJmxReq) {
+        init(pJmxReq);
+
+        if (pJmxReq.getAttributeNames() != null && pJmxReq.getAttributeNames().size() > 1) {
+            throw new IllegalArgumentException("A key cannot contain more than one attribute");
         }
-        mBean = pJmxReq.getObjectName();
-        if (rType == EXEC) {
-            type = "operation";
-            secondary = pJmxReq.getOperation();
-            path = null;
-        } else {
-            type = "attribute";
-            secondary = pJmxReq.isMultiAttributeMode() ? pJmxReq.getAttributeNames().get(0) : pJmxReq.getAttributeName();
-            if (pJmxReq.getType() == RequestType.READ && secondary == null) {
-                secondary = "(all)";
-            }
-            path = pJmxReq.getPath();
+
+        type = "attribute";
+        secondary = pJmxReq.isMultiAttributeMode() ? pJmxReq.getAttributeNames().get(0) : pJmxReq.getAttributeName();
+        if (secondary == null) {
+            secondary = "(all)";
         }
+        path = pJmxReq.getPath();
         if (secondary == null) {
             throw new IllegalArgumentException(type + " name must not be null");
         }
     }
 
-    private void validate(JmxRequest pJmxRequest) {
-        RequestType rType = pJmxRequest.getType();
-        if (rType != EXEC && rType != READ && rType != WRITE) {
-            throw new IllegalArgumentException(
-                    "History supports only READ/WRITE/EXEC commands (and not " + rType + ")");
-        }
-        if (pJmxRequest.getObjectNameAsString() == null) {
-            throw new IllegalArgumentException("MBean name must not be null");
-        }
-        if (pJmxRequest.getObjectName().isPattern()) {
-            throw new IllegalArgumentException("MBean name must not be a pattern");
-        }
-        if (pJmxRequest.getAttributeNames() != null && pJmxRequest.getAttributeNames().size() > 1) {
-            throw new IllegalArgumentException("A key cannot contain more than one attribute");
+    HistoryKey(JmxWriteRequest pJmxReq) {
+        init(pJmxReq);
+
+        type = "attribute";
+        secondary = pJmxReq.getAttributeName();
+        path = pJmxReq.getPath();
+        if (secondary == null) {
+            throw new IllegalArgumentException(type + " name must not be null");
         }
     }
+
+    HistoryKey(JmxExecRequest pJmxReq) {
+        init(pJmxReq);
+
+        type = "operation";
+        secondary = pJmxReq.getOperation();
+        path = null;
+        if (secondary == null) {
+            throw new IllegalArgumentException(type + " name must not be null");
+        }
+    }
+
+
+    private void init(JmxObjectNameRequest pJmxReq) {
+
+        if (pJmxReq.getObjectNameAsString() == null) {
+            throw new IllegalArgumentException("MBean name must not be null");
+        }
+        if (pJmxReq.getObjectName().isPattern()) {
+            throw new IllegalArgumentException("MBean name must not be a pattern");
+        }
+        if (pJmxReq.getTargetConfig() != null) {
+            target = pJmxReq.getTargetConfig().getUrl();
+        }
+        mBean = pJmxReq.getObjectName();
+    }
+
 
     public HistoryKey(String pMBean, String pOperation, String pTarget) throws MalformedObjectNameException {
         type = "operation";

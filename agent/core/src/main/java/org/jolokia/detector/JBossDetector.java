@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
+import org.jolokia.request.JmxObjectNameRequest;
 import org.jolokia.request.JmxRequest;
 
 /**
@@ -80,28 +81,30 @@ public class JBossDetector extends AbstractServerDetector {
 
         @Override
         public void preDispatch(Set<MBeanServer> pMBeanServers, JmxRequest pJmxReq) {
-            if (pJmxReq.getObjectName() != null &&
-                    "java.lang".equals(pJmxReq.getObjectName().getDomain())) {
-            try {
-                // invoking getMBeanInfo() works around a bug in getAttribute() that fails to
-                // refetch the domains from the platform (JDK) bean server (e.g. for MXMBeans)
-                for (MBeanServer s : pMBeanServers) {
+            if (pJmxReq instanceof JmxObjectNameRequest) {
+                JmxObjectNameRequest request = (JmxObjectNameRequest) pJmxReq;
+                if (request.getObjectName() != null &&
+                        "java.lang".equals(request.getObjectName().getDomain())) {
                     try {
-                        s.getMBeanInfo(pJmxReq.getObjectName());
-                        return;
-                    } catch (InstanceNotFoundException exp) {
-                        // Only one server can have the name. So, this exception
-                        // is being expected to happen
+                        // invoking getMBeanInfo() works around a bug in getAttribute() that fails to
+                        // refetch the domains from the platform (JDK) bean server (e.g. for MXMBeans)
+                        for (MBeanServer s : pMBeanServers) {
+                            try {
+                                s.getMBeanInfo(request.getObjectName());
+                                return;
+                            } catch (InstanceNotFoundException exp) {
+                                // Only one server can have the name. So, this exception
+                                // is being expected to happen
+                            }
+                        }
+                    } catch (IntrospectionException e) {
+                        throw new IllegalStateException("Workaround for JBoss failed for object " + request.getObjectName() + ": " + e);
+                    } catch (ReflectionException e) {
+                        throw new IllegalStateException("Workaround for JBoss failed for object " + request.getObjectName() + ": " + e);
                     }
                 }
-            } catch (IntrospectionException e) {
-                throw new IllegalStateException("Workaround for JBoss failed for object " + pJmxReq.getObjectName() + ": " + e);
-            } catch (ReflectionException e) {
-                throw new IllegalStateException("Workaround for JBoss failed for object " + pJmxReq.getObjectName() + ": " + e);
             }
         }
-    }
-
     }
 }
 /*

@@ -1,8 +1,7 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.config.Restrictor;
-import org.jolokia.request.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -31,7 +30,7 @@ import java.util.regex.Pattern;
  * @author roland
  * @since Jun 18, 2009
  */
-public class SearchHandler extends JsonRequestHandler {
+public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
 
     // Pattern for value in which case the value needs to be escaped
     private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile(":\",=\\*?");
@@ -47,7 +46,7 @@ public class SearchHandler extends JsonRequestHandler {
 
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request)
+    public Object doHandleRequest(MBeanServerConnection server, JmxSearchRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, MBeanException, IOException {
         Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
         if (names == null || names.size() == 0) {

@@ -7,10 +7,9 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.request.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -33,7 +32,7 @@ import org.jolokia.request.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ExecHandler extends JsonRequestHandler {
+public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
     private StringToObjectConverter stringToObjectConverter;
 
     public ExecHandler(Restrictor pRestrictor,StringToObjectConverter pStringToObjectConverter) {
@@ -47,7 +46,7 @@ public class ExecHandler extends JsonRequestHandler {
     }
 
     @Override
-    protected void checkForRestriction(JmxRequest pRequest) {
+    protected void checkForRestriction(JmxExecRequest pRequest) {
         if (!getRestrictor().isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {
             throw new SecurityException("Operation " + pRequest.getOperation() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
@@ -61,12 +60,13 @@ public class ExecHandler extends JsonRequestHandler {
      * as well. This way, overloaded JMX operation can be used. If an overloaded JMX operation
      * is called without specifying the argument types, then an exception is raised.
      *
+     *
      * @param server server to try
      * @param request request to process from where the operation and its arguments are extracted.
      * @return the return value of the operation call
      */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request)
+    public Object doHandleRequest(MBeanServerConnection server, JmxExecRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         OperationAndParamType types = extractOperationTypes(server,request);
         int nrParams = types.paramClasses.length;
@@ -92,7 +92,7 @@ public class ExecHandler extends JsonRequestHandler {
      * @param pRequest the exec request
      * @return combined object containing the operation name and parameter classes
      */
-    private OperationAndParamType extractOperationTypes(MBeanServerConnection pServer, JmxRequest pRequest)
+    private OperationAndParamType extractOperationTypes(MBeanServerConnection pServer, JmxExecRequest pRequest)
             throws ReflectionException, InstanceNotFoundException, IOException {
         if (pRequest.getOperation() == null) {
             throw new IllegalArgumentException("No operation given for exec Request on MBean " + pRequest.getObjectName());
@@ -132,7 +132,7 @@ public class ExecHandler extends JsonRequestHandler {
      * @return a list of signature. If the operation is overloaded, this contains mutliple entries,
      *         otherwise only a single entry is contained
      */
-    private List<MBeanParameterInfo[]> extractMBeanParameterInfos(MBeanServerConnection pServer, JmxRequest pRequest,
+    private List<MBeanParameterInfo[]> extractMBeanParameterInfos(MBeanServerConnection pServer, JmxExecRequest pRequest,
                                                                   String pOperation)
             throws InstanceNotFoundException, ReflectionException, IOException {
         try {
@@ -196,7 +196,7 @@ public class ExecHandler extends JsonRequestHandler {
         return ret;
     }
 
-    private String getErrorMessageForMissingSignature(JmxRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
+    private String getErrorMessageForMissingSignature(JmxExecRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
         StringBuffer msg = new StringBuffer("Operation ");
         msg.append(pOperation).
                 append(" on MBEan ").

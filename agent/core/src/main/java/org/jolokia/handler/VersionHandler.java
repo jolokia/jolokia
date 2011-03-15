@@ -3,11 +3,10 @@ package org.jolokia.handler;
 import java.io.IOException;
 import java.util.*;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.Version;
 import org.jolokia.config.Restrictor;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.RequestType;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -35,7 +34,7 @@ import javax.management.*;
  * @author roland
  * @since Jun 12, 2009
  */
-public class VersionHandler extends JsonRequestHandler {
+public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
 
     private ServerHandle serverHandle;
 
@@ -50,12 +49,12 @@ public class VersionHandler extends JsonRequestHandler {
     }
 
     @Override
-    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
+    public boolean handleAllServersAtOnce(JmxVersionRequest pRequest) {
         return true;
     }
 
     @Override
-    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
@@ -67,7 +66,7 @@ public class VersionHandler extends JsonRequestHandler {
 
     @Override
     // Wont be called
-    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request) {
+    public Object doHandleRequest(MBeanServerConnection server, JmxVersionRequest request) {
         return null;
     }
 
