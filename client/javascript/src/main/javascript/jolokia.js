@@ -167,7 +167,7 @@ var Jolokia = (function($) {
             if (extractMethod(request,opts) === "post") {
                 $.extend(ajaxParams,POST_AJAX_PARAMS);
                 ajaxParams.data = JSON.stringify(request);
-                ajaxParams.url = opts.url;
+                ajaxParams.url = ensureTrailingSlash(opts.url);
             } else {
                 $.extend(ajaxParams,GET_AJAX_PARAMS);
                 ajaxParams.dataType = opts.jsonp ? "jsonp" : "json";
@@ -207,7 +207,7 @@ var Jolokia = (function($) {
                 }
                 ajaxParams.async = false;
                 var xhr = $.ajax(ajaxParams);
-                if (jQuery.httpSuccess(xhr)) {
+                if (httpSuccess(xhr)) {
                     return $.parseJSON(xhr.responseText);
                 } else {
                     return null;
@@ -253,12 +253,16 @@ var Jolokia = (function($) {
                 if (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) {
                     throw new Error("Cannot use GET for read with multiple attributes");
                 }
+                if (request.target) {
+                    throw new Error("Cannot use GET request with proxy mode");
+                }
             }
             method = methodGiven;
         } else {
             // Determine method dynamically
-            method = ($.isArray(request) ||
-                    (request.type.toLowerCase() === "read" && $.isArray(request.attribute))) ?
+            method = $.isArray(request) ||
+                    (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) ||
+                    request.target ?
                     "post" : "get";
         }
         if (opts.jsonp && method === "post") {
@@ -294,6 +298,15 @@ var Jolokia = (function($) {
         var url = type;
         $.each(parts,function(i,v) { url += "/" + escapePart(v) });
         return url;
+    }
+
+    // For POST requests it is recommended to have a trailing slash at the URL
+    // in order to avoid a redirect which the results in a GET request.
+    // See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=331194#c1
+    // for an explanation
+    function ensureTrailingSlash(url) {
+        // Squeeze any URL to a single one, optionally adding one
+        return url.replace(/\/*$/,"/");
     }
 
     // Extractors used for preparing a GET request, i.e. for creating a stack
@@ -369,6 +382,17 @@ var Jolokia = (function($) {
             return value.toString();
         }
     }
+
+    // Check whether a synchronous request was a success or not
+    // Taken from jQuery 1.4
+    function httpSuccess(xhr) {
+        try {
+            return !xhr.status && location.protocol === "file:" ||
+				xhr.status >= 200 && xhr.status < 300 ||
+                    xhr.status === 304 || xhr.status === 1223;
+        } catch(e) {}
+		return false;
+	}
 
     // ===============================================================================================
     // Utility methods:

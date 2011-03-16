@@ -8,6 +8,18 @@
   </properties>
   <body>
     <release version="0.90" description="Release 0.90" date="">
+      <action dev="roland" type="update" date="2011-03-16">
+        jolokia.js: Works now with jQuery 1.5.1, too (but still doesn't use 
+        the advanced Ajax features)
+      </action>
+      <action dev="roland" type="update" date="2011-03-16">
+        jolokia.js: Added an HTTP method upgrade to "post" if a proxy
+        target is provided.
+      </action>
+      <action dev="roland" type="update" date="2011-03-16">
+        jolokia.js: Add a trailing slash to the Jolokia URL if a
+        "post" request is requested.
+      </action>
       <action dev="roland" type="update" date="2011-03-04">
         Changed protocol in order to support JSON types for return
         values and write/exec parameters instead of only plain strings

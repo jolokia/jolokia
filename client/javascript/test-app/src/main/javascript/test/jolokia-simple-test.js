@@ -16,7 +16,7 @@
 
 $(document).ready(function() {
 
-    var j4p = new Jolokia("/jolokia/");
+    var j4p = new Jolokia("/jolokia");
 
     module("Simplified requests");
     test("getAttribute (sync)", function() {

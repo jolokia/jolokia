@@ -16,7 +16,7 @@
 
 $(document).ready(function() {
 
-    var j4p = new Jolokia("/jolokia/");
+    var j4p = new Jolokia("/jolokia");
 
     // Single requests
     $.each([
@@ -276,6 +276,13 @@ $(document).ready(function() {
                         { jsonp: true }
                         );
             }, "No JSONP with bulk requests");
+            raises(function() {
+                j4p.request(
+                { type: "read", mbean: "java.lang:type=Memory", attribute: "NonHeapMemoryUsage",
+                  target: { url: "service:jmx:hsp://njw810/default/jboss?shared=true" }},
+                { method: "get" }
+                        );
+            }, "No 'target' config with GET requests");
         });
     }
 
