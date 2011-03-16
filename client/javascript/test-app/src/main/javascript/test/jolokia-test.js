@@ -16,7 +16,7 @@
 
 $(document).ready(function() {
 
-    var j4p = new Jolokia("/jolokia");
+    var j4p = new Jolokia("/jolokia/");
 
     // Single requests
     $.each([
@@ -119,10 +119,11 @@ $(document).ready(function() {
                      }));
         });
         asyncTest("Invalid URL", function() {
-            Jolokia({url: "/bla"}).request(
+            Jolokia({url: "bla"}).request(
             { type: "version" },
             $.extend(extraParams,
                      {
+                         success: function(response) {},
                          ajaxError: function(xhr, textStatus, errorThrown) {
                              equals(textStatus, "error", "Ajax Error");
                              equals(xhr.status, 404, "Not found HTTP code")

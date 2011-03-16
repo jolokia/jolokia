@@ -87,12 +87,16 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>7.0.0.pre5</version>
+        <version>7.1.6.v20100715</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <systemProperties>
             <systemProperty>
               <name>org.mortbay.util.FileResource.checkAliases</name>
+              <value>false</value>
+            </systemProperty>
+            <systemProperty>
+              <name>org.eclipse.jetty.util.FileResource.checkAliases</name>
               <value>false</value>
             </systemProperty>
           </systemProperties>
@@ -112,5 +116,4 @@
       <url>https://oss.sonatype.org/content/groups/public</url>
     </pluginRepository>
   </pluginRepositories>
-
 </project>
