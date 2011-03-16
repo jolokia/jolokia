@@ -1,12 +1,11 @@
 package org.jolokia.backend;
 
-import org.jolokia.*;
 import org.jolokia.config.*;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
-import org.jolokia.LogHandler;
+import org.jolokia.util.LogHandler;
 import org.jolokia.request.JmxRequest;
 import org.json.simple.JSONObject;
 
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.jolokia.ConfigKey.*;
+import static org.jolokia.config.ConfigKey.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss

@@ -1,9 +1,9 @@
 package org.jolokia.http;
 
-import org.jolokia.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;

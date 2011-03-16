@@ -85,7 +85,7 @@ public final class JmxRequestFactory {
      * @param pParameterMap HTTP Query parameters
      * @return a newly created {@link JmxRequest}
      */
-    public static JmxRequest createGetRequest(String pPathInfo, Map<String,String[]> pParameterMap) {
+    public static <R extends JmxRequest> R createGetRequest(String pPathInfo, Map<String,String[]> pParameterMap) {
         RequestType type = null;
         try {
             String pathInfo = extractPathInfo(pPathInfo, pParameterMap);
@@ -95,7 +95,7 @@ public final class JmxRequestFactory {
             type = RequestType.getTypeByName(elements.pop());
 
             // Parse request
-            return getProcessor(type).process(elements,extractParameters(pParameterMap));
+            return (R) getProcessor(type).process(elements,extractParameters(pParameterMap));
         } catch (NoSuchElementException exp) {
             throw new IllegalArgumentException("Invalid path info " + pPathInfo,exp);
         } catch (MalformedObjectNameException e) {
@@ -295,6 +295,9 @@ public final class JmxRequestFactory {
     }
 
     private static List<String> prepareExtraArgs(Stack<String> pElements) {
+        if (pElements == null || pElements.size() == 0) {
+            return null;
+        }
         List<String> ret = new ArrayList<String>();
         while (!pElements.isEmpty()) {
             String element = pElements.pop();
@@ -333,13 +336,13 @@ public final class JmxRequestFactory {
         return processor;
     }
 
-    private interface Processor {
+    private interface Processor<R extends JmxRequest> {
         // For GET requests
-        JmxRequest process(Stack<String> e, Map<String, String> pParams)
+        R process(Stack<String> e, Map<String, String> pParams)
                 throws MalformedObjectNameException;
 
         // For POST requests
-        JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+        R process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException;
     }
 
@@ -355,9 +358,9 @@ public final class JmxRequestFactory {
 
     static {
         PROCESSOR_MAP = new HashMap<RequestType, Processor>();
-        PROCESSOR_MAP.put(RequestType.READ,new Processor() {
+        PROCESSOR_MAP.put(RequestType.READ,new Processor<JmxReadRequest>() {
 
-            public JmxRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxReadRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxReadRequest(
                         e.pop(),  // object name
                         popOrNull(e), // attributes (can be null)
@@ -365,14 +368,14 @@ public final class JmxRequestFactory {
                         pParams);
             }
 
-            public JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxReadRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                     throws MalformedObjectNameException {
                 return new JmxReadRequest(requestMap,pParams);
             }
         });
 
-        PROCESSOR_MAP.put(RequestType.WRITE,new Processor() {
-            public JmxRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        PROCESSOR_MAP.put(RequestType.WRITE,new Processor<JmxWriteRequest>() {
+            public JmxWriteRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxWriteRequest(
                         e.pop(), // object name
                         e.pop(), // attribute name
@@ -381,14 +384,14 @@ public final class JmxRequestFactory {
                         pParams);
             }
 
-            public JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxWriteRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                     throws MalformedObjectNameException {
                 return new JmxWriteRequest(requestMap,pParams);
             }
         });
 
-        PROCESSOR_MAP.put(RequestType.EXEC,new Processor() {
-            public JmxRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        PROCESSOR_MAP.put(RequestType.EXEC,new Processor<JmxExecRequest>() {
+            public JmxExecRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxExecRequest(
                         e.pop(), // Object name
                         e.pop(), // Operation name
@@ -398,6 +401,9 @@ public final class JmxRequestFactory {
 
             private List<String> prepareArguments(Stack<String> e) {
                 List<String> extraArgs = prepareExtraArgs(e);
+                if (extraArgs == null) {
+                    return null;
+                }
                 List<String> args = new ArrayList<String>();
                 for (String arg : extraArgs) {
                     args.add(StringToObjectConverter.convertSpecialStringTags(arg));
@@ -406,44 +412,44 @@ public final class JmxRequestFactory {
             }
 
 
-            public JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxExecRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                     throws MalformedObjectNameException {
                 return new JmxExecRequest(requestMap,pParams);
             }
         });
 
-        PROCESSOR_MAP.put(RequestType.LIST,new Processor() {
-            public JmxRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        PROCESSOR_MAP.put(RequestType.LIST,new Processor<JmxListRequest>() {
+            public JmxListRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxListRequest(
                         prepareExtraArgs(e), // path
                         pParams);
             }
 
-            public JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxListRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                     throws MalformedObjectNameException {
                 return new JmxListRequest(requestMap,pParams);
             }
         });
 
-        PROCESSOR_MAP.put(RequestType.VERSION,new Processor() {
+        PROCESSOR_MAP.put(RequestType.VERSION,new Processor<JmxVersionRequest>() {
 
-            public JmxRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxVersionRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxVersionRequest(pParams);
             }
 
-            public JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxVersionRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                     throws MalformedObjectNameException {
                 return new JmxVersionRequest(requestMap,pParams);
             }
         });
 
-        PROCESSOR_MAP.put(RequestType.SEARCH,new Processor() {
+        PROCESSOR_MAP.put(RequestType.SEARCH,new Processor<JmxSearchRequest>() {
 
-            public JmxRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxSearchRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxSearchRequest(e.pop(),pParams);
             }
 
-            public JmxRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxSearchRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                     throws MalformedObjectNameException {
                 return new JmxSearchRequest(requestMap,pParams);
             }

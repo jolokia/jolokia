@@ -17,7 +17,7 @@ package org.jolokia.backend;
  */
 
 import org.jolokia.request.JmxRequest;
-import org.jolokia.LogHandler;
+import org.jolokia.util.LogHandler;
 import org.jolokia.config.Config;
 import org.jolokia.config.DebugStore;
 import org.jolokia.config.Restrictor;

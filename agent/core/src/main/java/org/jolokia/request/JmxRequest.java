@@ -18,7 +18,7 @@ package org.jolokia.request;
 
 import java.util.*;
 
-import org.jolokia.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.PathUtil;
 import org.json.simple.JSONObject;
 
@@ -161,7 +161,7 @@ public abstract class JmxRequest {
      */
     protected String getInfo() {
         StringBuffer ret = new StringBuffer();
-        if (pathParts != null && pathParts.size() > 0) {
+        if (pathParts != null) {
             ret.append(", path=").append(pathParts);
         }
         if (targetConfig != null) {

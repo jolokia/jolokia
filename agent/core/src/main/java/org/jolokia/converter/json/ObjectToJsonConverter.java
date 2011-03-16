@@ -1,11 +1,11 @@
 package org.jolokia.converter.json;
 
 
-import org.jolokia.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.request.*;
 import org.jolokia.converter.StringToObjectConverter;
 
-import static org.jolokia.ConfigKey.*;
+import static org.jolokia.config.ConfigKey.*;
 
 import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
@@ -275,7 +275,7 @@ public final class ObjectToJsonConverter {
             return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
         }
         for (Extractor handler : handlers) {
-            if (handler.getType() != null && handler.getType().isAssignableFrom(clazz) && handler.canSetValue()) {
+            if (handler.getType() != null && handler.getType().isAssignableFrom(clazz)) {
                 return handler.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
             }
         }

@@ -16,9 +16,9 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.http.HttpRequestHandler;
-import org.jolokia.LogHandler;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 

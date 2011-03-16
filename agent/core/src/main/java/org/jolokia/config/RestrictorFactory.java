@@ -2,7 +2,7 @@ package org.jolokia.config;
 
 import java.io.InputStream;
 
-import org.jolokia.LogHandler;
+import org.jolokia.util.LogHandler;
 
 /*
  *  Copyright 2009-2010 Roland Huss

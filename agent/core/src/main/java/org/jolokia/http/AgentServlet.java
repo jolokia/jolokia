@@ -1,8 +1,8 @@
 package org.jolokia.http;
 
-import org.jolokia.*;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.ConfigKey;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 

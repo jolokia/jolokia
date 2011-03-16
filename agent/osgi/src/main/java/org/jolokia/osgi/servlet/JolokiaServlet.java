@@ -18,7 +18,7 @@ package org.jolokia.osgi.servlet;
 
 import javax.servlet.*;
 
-import org.jolokia.LogHandler;
+import org.jolokia.util.LogHandler;
 import org.jolokia.http.AgentServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;

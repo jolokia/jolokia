@@ -1,4 +1,4 @@
-package org.jolokia;
+package org.jolokia.config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,10 @@ import java.util.Map;
 
 
 /**
+ * Enumeration defining the various configuration constant names which
+ * can be used to configure the agent globally (e.g. in web.xml) or
+ * as proccessing parameters (e.g. as query params).
+ *
  * @author roland
  * @since Jan 1, 2010
  */
