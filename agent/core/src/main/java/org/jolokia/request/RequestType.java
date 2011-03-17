@@ -33,8 +33,7 @@ public enum RequestType {
 
     // Unsupported:
     REGNOTIF("regnotif"),
-    REMNOTIF("remnotif"),
-    CONFIG("config");
+    REMNOTIF("remnotif");
 
     private String name;
 

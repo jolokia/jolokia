@@ -17,6 +17,10 @@
 package org.jolokia.util;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.jolokia.request.RequestType;
 
 /**
  * Utility class for handling request pathes.
@@ -25,6 +29,9 @@ import java.util.*;
  * @since 15.03.11
  */
 public class PathUtil {
+
+    // Pattern for detecting escaped slashes in URL encoded requests
+    public static final Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("^\\^?-*\\+?$");
 
     private PathUtil() {}
 
@@ -80,4 +87,100 @@ public class PathUtil {
         return pPathPart.replaceAll("/","\\\\/");
     }
 
+    /*
+      We need to use this special treating for slashes (i.e. to escape with '/-/') because URI encoding doesnt work
+      well with HttpRequest.pathInfo() since in Tomcat/JBoss slash seems to be decoded to early so that it get messed up
+      and answers with a "HTTP/1.x 400 Invalid URI: noSlash" without returning any further indications
+
+      For the rest of unsafe chars, we use uri decoding (as anybody should do). It could be of course the case,
+      that the pathinfo has been already uri decoded (dont know by heart)
+    */
+    public static Stack<String> extractElementsFromPath(String pPath) {
+        // Strip leadings slahes
+        String cleanPath = pPath.replaceFirst("^/+", "");
+        String[] elements = cleanPath.split("/+");
+
+        Stack<String> ret = new Stack<String>();
+        Stack<String> elementStack = new Stack<String>();
+
+        for (int i=elements.length-1;i>=0;i--) {
+            elementStack.push(elements[i]);
+        }
+
+        extractElements(ret,elementStack,null);
+        if (ret.size() == 0) {
+            // If no request type (i.e. the agent is queried directly
+            // we return version and server meta information instead
+            ret.push(RequestType.VERSION.getName());
+        }
+
+        // Reverse stack
+        Collections.reverse(ret);
+
+        return ret;
+    }
+
+    public static void unescapeSlashes(String pCurrentElement, Stack<String> pRet,
+                                       Stack<String> pElementStack, StringBuffer pPreviousBuffer)  {
+        if (pRet.isEmpty()) {
+            return;
+        }
+        StringBuffer val;
+
+        // Special escape at the beginning indicates that this element belongs
+        // to the next one
+        if (pCurrentElement.substring(0,1).equals("^")) {
+            val = new StringBuffer();
+        } else if (pPreviousBuffer == null) {
+            val = new StringBuffer(pRet.pop());
+        } else {
+            val = pPreviousBuffer;
+        }
+        // Append appropriate nr of slashes
+        expandSlashes(val, pCurrentElement);
+
+        // Special escape at the end indicates that this is the last element in the path
+        if (!pCurrentElement.substring(pCurrentElement.length()-1, pCurrentElement.length()).equals("+")) {
+            if (!pElementStack.isEmpty()) {
+                val.append(decode(pElementStack.pop()));
+            }
+            extractElements(pRet,pElementStack,val);
+        } else {
+            pRet.push(decode(val.toString()));
+            extractElements(pRet,pElementStack,null);
+        }
+    }
+
+    private static void extractElements(Stack<String> pRet, Stack<String> pElementStack, StringBuffer pPreviousBuffer) {
+        if (pElementStack.isEmpty()) {
+            if (pPreviousBuffer != null && pPreviousBuffer.length() > 0) {
+                pRet.push(decode(pPreviousBuffer.toString()));
+            }
+            return;
+        }
+        String element = pElementStack.pop();
+        Matcher matcher = SLASH_ESCAPE_PATTERN.matcher(element);
+        if (matcher.matches()) {
+            unescapeSlashes(element, pRet, pElementStack, pPreviousBuffer);
+        } else {
+            if (pPreviousBuffer != null) {
+                pRet.push(decode(pPreviousBuffer.toString()));
+            }
+            pRet.push(decode(element));
+            extractElements(pRet,pElementStack,null);
+        }
+    }
+
+
+    private static void expandSlashes(StringBuffer pVal, String pElement) {
+        for (int j=0;j< pElement.length();j++) {
+            pVal.append("/");
+        }
+    }
+
+    private static String decode(String s) {
+        return s;
+        //return URLDecoder.decode(s,"UTF-8");
+
+    }
 }

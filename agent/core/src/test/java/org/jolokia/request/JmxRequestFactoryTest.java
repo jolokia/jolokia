@@ -16,9 +16,11 @@
 
 package org.jolokia.request;
 
-import java.util.List;
+import java.util.*;
 
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -32,6 +34,7 @@ public class JmxRequestFactoryTest {
         JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage",null);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
+        assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
         assert req.getPathParts() == null : "PathParts are null";
         assert req.getPath() == null : "Path is null";
     }
@@ -46,6 +49,50 @@ public class JmxRequestFactoryTest {
         assert parts.get(1).equals("value") : "Path part 1: " + parts.get(1) ;
         assert req.getPath().equals("[com.sun.management.jmxremote.port]/value");
     }
+
+    @Test
+    public void simpleGetWithEscapedAttribute() {
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/^/Heap/-/Memory/-/Usage/+/",null);
+        assertEquals(req.getAttributeName(),"/Heap/Memory/Usage/","Attribute properly parsed");
+    }
+
+    @Test
+    public void simpleGetWithEscapedPath() {
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used\\/bla/-/blub/bloe",null);
+        assertEquals(req.getPathParts().size(),2,"Size of path");
+        assertEquals(req.getPath(),"used\\/bla\\/blub/bloe","Path properly parsed");
+    }
+
+    @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})
+    public void illegalPath() {
+        JmxRequestFactory.createGetRequest("read",null);
+    }
+
+    @Test(expectedExceptionsMessageRegExp = ".*Invalid object name.*",expectedExceptions = {IllegalArgumentException.class})
+    public void invalidObjectName() {
+        JmxRequestFactory.createGetRequest("read/bla::blub",null);
+    }
+
+    @Test(expectedExceptions = {UnsupportedOperationException.class})
+    public void unsupportedType() {
+        JmxRequestFactory.createGetRequest("regnotif",null);
+    }
+
+    @Test
+    public void emptyRequest() {
+        JmxVersionRequest req = JmxRequestFactory.createGetRequest("",null);
+        req = JmxRequestFactory.createGetRequest(null,null);
+    }
+
+    @Test
+    public void simpleGetWithQueryPath() {
+        Map<String,String[]> params = new HashMap<String, String[]>();
+        params.put("p",new String[] { "list/java.lang/type=Memory" });
+        JmxListRequest req = JmxRequestFactory.createGetRequest(null,params);
+        assert req.getHttpMethod() == HttpMethod.GET : "GET by default";
+        assert req.getPath().equals("java.lang/type=Memory") : "Path extracted";
+    }
+
 
     @Test
     public void readWithPattern() {
