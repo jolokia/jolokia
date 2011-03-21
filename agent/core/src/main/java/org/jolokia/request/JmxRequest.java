@@ -201,7 +201,11 @@ public abstract class JmxRequest {
             ret.put("target", targetConfig.toJSON());
         }
         if (pathParts != null) {
-            ret.put("path",getPath());
+            try {
+                ret.put("path",getPath());
+            } catch (UnsupportedOperationException exp) {
+                // Happens when request doesnt support pathes
+            }
         }
         return ret;
     }

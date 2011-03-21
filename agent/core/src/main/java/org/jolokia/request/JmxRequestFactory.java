@@ -109,8 +109,7 @@ public final class JmxRequestFactory {
      * @return list with one or more {@link JmxRequest}
      * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
      */
-    public static List<JmxRequest> createPostRequests(List pJsonRequests, Map<String, String[]> pParameterMap)
-            throws MalformedObjectNameException {
+    public static List<JmxRequest> createPostRequests(List pJsonRequests, Map<String, String[]> pParameterMap) {
         List<JmxRequest> ret = new ArrayList<JmxRequest>();
         for (Object o : pJsonRequests) {
             if (!(o instanceof Map)) {
@@ -131,12 +130,15 @@ public final class JmxRequestFactory {
      * @return the created {@link JmxRequest}
      * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
      */
-    public static JmxRequest createPostRequest(Map<String, ?> pRequestMap, Map<String, String[]> pParameterMap)
-            throws MalformedObjectNameException {
-        Map<String,String> params = mergeMaps((Map<String,String>) pRequestMap.get("config"),
-                                              extractParameters(pParameterMap));
-        RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
-        return getProcessor(type).process(pRequestMap,params);
+    public static <R extends JmxRequest> R createPostRequest(Map<String, ?> pRequestMap, Map<String, String[]> pParameterMap) {
+        try {
+            Map<String,String> params = mergeMaps((Map<String,String>) pRequestMap.get("config"),
+                                                  extractParameters(pParameterMap));
+            RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
+            return (R) getProcessor(type).process(pRequestMap,params);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
+        }
     }
 
 

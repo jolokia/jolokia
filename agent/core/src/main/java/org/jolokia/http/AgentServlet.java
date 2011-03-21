@@ -130,14 +130,14 @@ public class AgentServlet extends HttpServlet {
 
     private interface ServletRequestHandler {
         JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                throws IOException, MalformedObjectNameException;
+                throws IOException;
     }
 
 
     private ServletRequestHandler newPostHttpRequestHandler() {
         return new ServletRequestHandler() {
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                    throws IOException, MalformedObjectNameException {
+                    throws IOException {
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
                 return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding,pReq.getParameterMap());

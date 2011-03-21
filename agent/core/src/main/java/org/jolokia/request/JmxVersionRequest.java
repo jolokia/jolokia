@@ -16,6 +16,7 @@
 
 package org.jolokia.request;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,5 +50,4 @@ public class JmxVersionRequest extends JmxRequest {
     public String toString() {
         return "JmxVersionRequest[]";
     }
-
 }

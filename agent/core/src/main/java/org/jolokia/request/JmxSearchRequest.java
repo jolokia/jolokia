@@ -36,7 +36,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
     JmxSearchRequest(String pObjectName, Map<String, String> pParams) throws MalformedObjectNameException {
-        super(RequestType.WRITE, pObjectName, null, pParams);
+        super(RequestType.SEARCH, pObjectName, null, pParams);
     }
 
     /**

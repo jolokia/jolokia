@@ -94,7 +94,7 @@ public class HttpRequestHandler {
      * @throws IOException if reading from the input stream fails
      */
     public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
-            throws MalformedObjectNameException, IOException {
+            throws IOException {
         if (backendManager.isDebug()) {
             logHandler.debug("URI: " + pUri);
         }

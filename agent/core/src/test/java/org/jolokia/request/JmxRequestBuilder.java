@@ -95,4 +95,12 @@ public class JmxRequestBuilder {
         request.put("arguments", Arrays.asList(pArguments));
         return this;
     }
+
+    static Map<String,Object> createMap(Object ... args) {
+        Map<String,Object> ret = new HashMap<String, Object>();
+        for (int i = 0; i<args.length; i+=2) {
+            ret.put((String) args[i],args[i+1]);
+        }
+        return ret;
+    }
 }

@@ -18,9 +18,12 @@ package org.jolokia.request;
 
 import java.util.*;
 
+import org.jolokia.config.ConfigKey;
+import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.jolokia.request.JmxRequestBuilder.createMap;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -31,12 +34,68 @@ public class JmxRequestFactoryTest {
 
     @Test
     public void simpleGet() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage", null);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
         assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
         assert req.getPathParts() == null : "PathParts are null";
         assert req.getPath() == null : "Path is null";
+    }
+
+    @Test
+    public void simplePost() {
+        Map<String,Object> reqMap = createMap(
+                "type","read",
+                "mbean","java.lang:type=Memory",
+                "attribute","HeapMemoryUsage");
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, null);
+        assert req.getType() == RequestType.READ : "Type is read";
+        assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
+        assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
+        assert req.getPathParts() == null : "PathParts are null";
+        assert req.getPath() == null : "Path is null";
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void simplePostWithMalformedObjectName() {
+        JmxRequestFactory.createPostRequest(createMap("type", "read", "mbean", "bal::blub", "attribute", "HeapMemoryUsage"), null);
+    }
+
+    @Test
+    public void simplePostWithMergedMaps() {
+        Map config = new HashMap();
+        config.put("maxDepth","10");
+        Map<String,Object> reqMap = createMap(
+                "type","read",
+                "mbean","java.lang:type=Memory",
+                "attribute","HeapMemoryUsage",
+                "config",config);
+        Map param = new HashMap();;
+        param.put("maxObjects",new String[] { "100" });
+        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,param);
+        assertEquals(req.getAttributeName(),"HeapMemoryUsage");
+        assertEquals(req.getProcessingConfig(ConfigKey.MAX_DEPTH),"10");
+        assertEquals(req.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS), new Integer(100));
+    }
+
+    @Test
+    public void multiPostRequests() {
+        Map<String,Object> req1Map = createMap(
+                "type","read",
+                "mbean","java.lang:type=Memory",
+                "attribute","HeapMemoryUsage");
+        Map<String,Object> req2Map = createMap(
+                "type","list");
+        List<JmxRequest> req = JmxRequestFactory.createPostRequests(Arrays.asList(req1Map, req2Map),null);
+        assertEquals(req.get(0).getType(), RequestType.READ);
+        assertEquals(req.get(1).getType(), RequestType.LIST);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void multiPostRequestsWithWrongArg() {
+        Map<String,Object> reqMap = createMap(
+                "type", "list");
+        JmxRequestFactory.createPostRequests(Arrays.asList(reqMap, "Wrong"),null);
     }
 
     @Test
@@ -65,7 +124,7 @@ public class JmxRequestFactoryTest {
 
     @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})
     public void illegalPath() {
-        JmxRequestFactory.createGetRequest("read",null);
+        JmxRequestFactory.createGetRequest("read", null);
     }
 
     @Test(expectedExceptionsMessageRegExp = ".*Invalid object name.*",expectedExceptions = {IllegalArgumentException.class})
@@ -123,4 +182,5 @@ public class JmxRequestFactoryTest {
     public void castException() {
         JmxReadRequest req = JmxRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc",null);
     }
+
 }
