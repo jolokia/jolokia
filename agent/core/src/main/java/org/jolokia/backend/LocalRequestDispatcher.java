@@ -16,8 +16,8 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
-import org.jolokia.JmxRequest;
-import org.jolokia.LogHandler;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.util.LogHandler;
 import org.jolokia.config.Config;
 import org.jolokia.config.DebugStore;
 import org.jolokia.config.Restrictor;

@@ -16,11 +16,11 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
-import org.jolokia.JmxRequest;
 import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.request.RequestType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +32,8 @@ import java.util.Map;
 public class RequestHandlerManager {
 
     // Map with all json request handlers
-    private static final Map<JmxRequest.Type, JsonRequestHandler> REQUEST_HANDLER_MAP =
-            new HashMap<JmxRequest.Type, JsonRequestHandler>();
+    private static final Map<RequestType, JsonRequestHandler> REQUEST_HANDLER_MAP =
+            new HashMap<RequestType, JsonRequestHandler>();
 
     public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
             StringToObjectConverter pStringToObjectConverter,
@@ -51,7 +51,7 @@ public class RequestHandlerManager {
         }
     }
 
-    public JsonRequestHandler getRequestHandler(JmxRequest.Type pType) {
+    public JsonRequestHandler getRequestHandler(RequestType pType) {
         JsonRequestHandler handler = REQUEST_HANDLER_MAP.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");

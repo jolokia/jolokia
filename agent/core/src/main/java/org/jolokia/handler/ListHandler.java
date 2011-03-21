@@ -1,7 +1,7 @@
 package org.jolokia.handler;
 
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.*;
 import org.jolokia.config.Restrictor;
 
 import javax.management.*;
@@ -41,7 +41,7 @@ import java.util.*;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ListHandler extends JsonRequestHandler {
+public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     // Properties for JSON answer
     private static final String KEY_DESCRIPTION = "desc";
@@ -56,8 +56,8 @@ public class ListHandler extends JsonRequestHandler {
     private static final String KEY_READ_WRITE = "rw";
     private static final String KEY_ATTRIBUTE = "attr";
 
-    public JmxRequest.Type getType() {
-        return JmxRequest.Type.LIST;
+    public RequestType getType() {
+        return RequestType.LIST;
     }
 
     public ListHandler(Restrictor pRestrictor) {
@@ -65,12 +65,12 @@ public class ListHandler extends JsonRequestHandler {
     }
 
     @Override
-    public boolean handleAllServersAtOnce(JmxRequest pRequest) {
+    public boolean handleAllServersAtOnce(JmxListRequest pRequest) {
         return true;
     }
 
     @Override
-    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxRequest request)
+    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest request)
             throws InstanceNotFoundException, IOException {
         try {
             Map<String /* domain */,
@@ -194,7 +194,7 @@ public class ListHandler extends JsonRequestHandler {
 
     // will not be called
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         return null;
     }
 

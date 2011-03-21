@@ -1,12 +1,12 @@
 package org.jolokia.backend;
 
-import org.jolokia.*;
 import org.jolokia.config.*;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
-import org.jolokia.LogHandler;
+import org.jolokia.util.LogHandler;
+import org.jolokia.request.JmxRequest;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.jolokia.ConfigKey.*;
+import static org.jolokia.config.ConfigKey.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -38,7 +38,7 @@ import static org.jolokia.ConfigKey.*;
 
 /**
  * Backendmanager for dispatching to various backends based on a given
- * {@link org.jolokia.JmxRequest}
+ * {@link JmxRequest}
  *
  * @author roland
  * @since Nov 11, 2009
@@ -151,7 +151,7 @@ public class BackendManager {
     public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
             ReflectionException, MBeanException, IOException {
 
-        boolean debug = isDebug() && !"debugInfo".equals(pJmxReq.getOperation());
+        boolean debug = isDebug();
 
         long time = 0;
         if (debug) {

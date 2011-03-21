@@ -20,14 +20,13 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.JmxRequest;
-import org.jolokia.JmxRequestBuilder;
+import org.jolokia.request.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.jolokia.JmxRequest.Type.*;
+import static org.jolokia.request.RequestType.*;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -40,6 +39,7 @@ import static org.testng.AssertJUnit.assertEquals;
  */
 public class HistoryStoreTest {
 
+    // History store to test against
     private HistoryStore store;
 
 
@@ -50,24 +50,7 @@ public class HistoryStoreTest {
 
     @Test
     public void invalidHistoryKey() throws MalformedObjectNameException {
-        JmxRequest req =
-                new JmxRequestBuilder(SEARCH,"test:type=search")
-                        .build();
-        try {
-            new HistoryKey(req);
-            fail("Invalid operation");
-        } catch (IllegalArgumentException exp) {
-            // expected
-        }
-
-        req = new JmxRequestBuilder(EXEC,"test:type=read")
-                .build();
-        try {
-            new HistoryKey(req);
-            fail("No operation name");
-        } catch (IllegalArgumentException exp) {}
-
-        req = new JmxRequestBuilder(READ,"test:type=bla")
+        JmxReadRequest req = new JmxRequestBuilder(READ,"test:type=bla")
                 .attributes("bla","bla2")
                 .build();
         try {
@@ -78,7 +61,7 @@ public class HistoryStoreTest {
 
     @Test(groups = "java6")
     public void invalidHistoryKeyWithPattern() throws MalformedObjectNameException {
-        JmxRequest req = new JmxRequestBuilder(READ,"test:type=*")
+        JmxReadRequest req = new JmxRequestBuilder(READ,"test:type=*")
                 .attribute("bla")
                 .build();
         try {
@@ -89,7 +72,7 @@ public class HistoryStoreTest {
 
     @Test
     public void configure() throws MalformedObjectNameException {
-        JmxRequest req =
+        JmxExecRequest req =
                 new JmxRequestBuilder(EXEC,"test:type=exec")
                         .operation("op")
                         .build();
@@ -113,7 +96,7 @@ public class HistoryStoreTest {
 
     @Test
     public void singleAttributeRead() throws Exception {
-        JmxRequest req =
+        JmxReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attribute("attr")
                         .build();
@@ -125,7 +108,7 @@ public class HistoryStoreTest {
 
     @Test
     public void singleAttributeWrite() throws Exception {
-        JmxRequest req =
+        JmxWriteRequest req =
                 new JmxRequestBuilder(WRITE,"test:type=write")
                         .attribute("attr")
                         .value("val1")
@@ -135,7 +118,7 @@ public class HistoryStoreTest {
     }
     @Test
     public void singleAttributeAsListRead() throws Exception {
-        JmxRequest req =
+        JmxReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attributes("attr")
                         .build();
@@ -149,7 +132,7 @@ public class HistoryStoreTest {
     @Test
     public void noAttributesRead() throws Exception {
         String mbean = "test:type=read";
-        JmxRequest req =
+        JmxReadRequest req =
                 new JmxRequestBuilder(READ,mbean)
                         .build();
         store.configure(new HistoryKey(mbean,"attr1",null,null),4);
@@ -165,7 +148,7 @@ public class HistoryStoreTest {
     @Test
     public void multipleAttributeRead() throws Exception {
         String mbean = "test:type=read";
-        JmxRequest req =
+        JmxReadRequest req =
                 new JmxRequestBuilder(READ,mbean)
                         .attributes("attr1","attr2")
                         .build();
@@ -183,7 +166,7 @@ public class HistoryStoreTest {
 
     @Test(groups = "java6")
     public void patternAttributeRead() throws Exception {
-        JmxRequest req =
+        JmxReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=*")
                         .attributes("attr1","attr2")
                         .build();

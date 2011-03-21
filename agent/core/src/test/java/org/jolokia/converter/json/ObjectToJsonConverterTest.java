@@ -1,7 +1,6 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.JmxRequest;
-import org.jolokia.JmxRequestBuilder;
+import org.jolokia.request.*;
 import org.jolokia.converter.StringToObjectConverter;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -104,7 +103,7 @@ public class ObjectToJsonConverterTest {
     @Test
     public void convertToJsonTest() throws MalformedObjectNameException, AttributeNotFoundException {
         JmxRequest req =
-                new JmxRequestBuilder(JmxRequest.Type.READ,"java.lang:type=Memory").
+                new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").
                         pathParts("name").build();
         File file = new File("myFile");
         JSONObject ret = converter.convertToJson(file,req,false);

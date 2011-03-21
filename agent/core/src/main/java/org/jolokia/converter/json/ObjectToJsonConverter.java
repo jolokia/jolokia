@@ -1,11 +1,11 @@
 package org.jolokia.converter.json;
 
 
-import org.jolokia.ConfigKey;
-import org.jolokia.JmxRequest;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.request.*;
 import org.jolokia.converter.StringToObjectConverter;
 
-import static org.jolokia.ConfigKey.*;
+import static org.jolokia.config.ConfigKey.*;
 
 import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
@@ -100,7 +100,7 @@ public final class ObjectToJsonConverter {
      */
     public JSONObject convertToJson(Object pValue, JmxRequest pRequest, boolean pUseValueWithPath)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pUseValueWithPath ? reversePath(pRequest) : new Stack<String>();
+        Stack<String> extraStack = pUseValueWithPath ? reversePath(pRequest.getPathParts()) : new Stack<String>();
 
         setupContext(pRequest);
 
@@ -123,6 +123,7 @@ public final class ObjectToJsonConverter {
      * new value is set via the path expression. The old value is the value of the object specified
      * by the given path.
      *
+     *
      * @param pType type of the outermost object to set as returned by an MBeanInfo structure.
      * @param pCurrentValue the object of the outermost object which can be null
      * @param pRequest the initial request
@@ -133,7 +134,7 @@ public final class ObjectToJsonConverter {
      * @throws IllegalAccessException if access to MBean fails
      * @throws InvocationTargetException reflection error when setting an object's attribute
      */
-    public Object[] getValues(String pType, Object pCurrentValue, JmxRequest pRequest)
+    public Object[] getValues(String pType, Object pCurrentValue, JmxWriteRequest pRequest)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         List<String> pathParts = pRequest.getPathParts();
 
@@ -144,7 +145,7 @@ public final class ObjectToJsonConverter {
             }
 
             String lastPathElement = pathParts.remove(pathParts.size()-1);
-            Stack<String> extraStack = reversePath(pRequest);
+            Stack<String> extraStack = reversePath(pathParts);
             // Get the object pointed to do with path-1
 
             try {
@@ -198,9 +199,8 @@ public final class ObjectToJsonConverter {
         return (ret != null && ret == 0) ? null : ret;
     }
 
-    private Stack<String> reversePath(JmxRequest pRequest) {
+    private Stack<String> reversePath(List<String> pathParts) {
         Stack<String> pathStack = new Stack<String>();
-        List<String> pathParts = pRequest.getPathParts();
         if (pathParts != null) {
             // Needs first extra argument at top of the stack
             for (int i = pathParts.size() - 1;i >=0;i--) {
@@ -275,7 +275,7 @@ public final class ObjectToJsonConverter {
             return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
         }
         for (Extractor handler : handlers) {
-            if (handler.getType() != null && handler.getType().isAssignableFrom(clazz) && handler.canSetValue()) {
+            if (handler.getType() != null && handler.getType().isAssignableFrom(clazz)) {
                 return handler.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
             }
         }
@@ -330,7 +330,7 @@ public final class ObjectToJsonConverter {
      *
      * @return the fault handler
      */
-    public JmxRequest.ValueFaultHandler getValueFaultHandler() {
+    public ValueFaultHandler getValueFaultHandler() {
         ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
         return ctx.getValueFaultHandler();
     }
@@ -354,7 +354,7 @@ public final class ObjectToJsonConverter {
     }
 
     void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,
-                      JmxRequest.ValueFaultHandler pValueFaultHandler) {
+                      ValueFaultHandler pValueFaultHandler) {
         StackContext stackContext = new StackContext(pMaxDepth,pMaxCollectionSize,pMaxObjects,pValueFaultHandler);
         stackContextLocal.set(stackContext);
     }
@@ -403,9 +403,9 @@ public final class ObjectToJsonConverter {
         private Integer maxObjects;
 
         private int objectCount = 0;
-        private JmxRequest.ValueFaultHandler valueFaultHandler;
+        private ValueFaultHandler valueFaultHandler;
 
-        public StackContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects, JmxRequest.ValueFaultHandler pValueFaultHandler) {
+        public StackContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects, ValueFaultHandler pValueFaultHandler) {
             maxDepth = pMaxDepth;
             maxCollectionSize = pMaxCollectionSize;
             maxObjects = pMaxObjects;
@@ -465,7 +465,7 @@ public final class ObjectToJsonConverter {
             return maxObjects;
         }
 
-        public JmxRequest.ValueFaultHandler getValueFaultHandler() {
+        public ValueFaultHandler getValueFaultHandler() {
             return valueFaultHandler;
         }
     }

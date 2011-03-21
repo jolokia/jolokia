@@ -10,7 +10,7 @@ import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
  */
 public class PolicyBasedRestrictor implements Restrictor {
 
-    private Set<JmxRequest.Type> typeSet;
+    private Set<RequestType> typeSet;
 
     private Set<String> httpMethodsSet;
 
@@ -81,27 +81,27 @@ public class PolicyBasedRestrictor implements Restrictor {
     // ===============================================================================
     // Lookup methods
 
-    public boolean isHttpMethodAllowed(JmxRequest.HttpMethod method) {
+    public boolean isHttpMethodAllowed(HttpMethod method) {
         return httpMethodsSet == null || httpMethodsSet.contains(method.getMethod());
     }
 
-    public boolean isTypeAllowed(JmxRequest.Type pType) {
+    public boolean isTypeAllowed(RequestType pType) {
         return typeSet == null || typeSet.contains(pType);
     }
 
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return check(JmxRequest.Type.READ,pName,pAttribute);
+        return check(RequestType.READ,pName,pAttribute);
     }
 
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
-        return check(JmxRequest.Type.WRITE,pName, pAttribute);
+        return check(RequestType.WRITE,pName, pAttribute);
     }
 
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
-        return check(JmxRequest.Type.EXEC,pName, pOperation);
+        return check(RequestType.EXEC,pName, pOperation);
     }
 
-    private boolean check(JmxRequest.Type pType, ObjectName pName, String pValue) {
+    private boolean check(RequestType pType, ObjectName pName, String pValue) {
         if (isTypeAllowed(pType)) {
             // Its allowed in general, so we only need to check
             // the denied section, whether its forbidded
@@ -134,7 +134,7 @@ public class PolicyBasedRestrictor implements Restrictor {
 
     // ===============================================================================
     // Lookup methods
-    private boolean matches(MBeanPolicyConfig pConfig, JmxRequest.Type pType, ObjectName pName, String pValue) {
+    private boolean matches(MBeanPolicyConfig pConfig, RequestType pType, ObjectName pName, String pValue) {
         Set<String> values = pConfig.getValues(pType,pName);
         if (values == null) {
             ObjectName pattern = pConfig.findMatchingMBeanPattern(pName);
@@ -162,7 +162,7 @@ public class PolicyBasedRestrictor implements Restrictor {
         NodeList nodes = pDoc.getElementsByTagName("commands");
         if (nodes.getLength() > 0) {
             // Leave typeSet null if no commands has been given...
-            typeSet = new HashSet<JmxRequest.Type>();
+            typeSet = new HashSet<RequestType>();
         }
         for (int i = 0;i<nodes.getLength();i++) {
             Node node = nodes.item(i);
@@ -174,7 +174,7 @@ public class PolicyBasedRestrictor implements Restrictor {
                 }
                 assertNodeName(commandNode,"command");
                 String typeName = commandNode.getTextContent().trim();
-                JmxRequest.Type type = JmxRequest.Type.valueOf(typeName.toUpperCase());
+                RequestType type = RequestType.valueOf(typeName.toUpperCase());
                 typeSet.add(type);
             }
         }
@@ -356,12 +356,12 @@ public class PolicyBasedRestrictor implements Restrictor {
             }
         }
 
-        Set<String> getValues(JmxRequest.Type pType, ObjectName pName) {
-            if (JmxRequest.Type.READ == pType) {
+        Set<String> getValues(RequestType pType, ObjectName pName) {
+            if (RequestType.READ == pType) {
                 return readAttributes.get(pName);
-            } else if (JmxRequest.Type.WRITE == pType) {
+            } else if (RequestType.WRITE == pType) {
                 return writeAttributes.get(pName);
-            } else if (JmxRequest.Type.EXEC == pType) {
+            } else if (RequestType.EXEC == pType) {
                 return operations.get(pName);
             } else {
                 throw new IllegalArgumentException("Invalid type " + pType);

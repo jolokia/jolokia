@@ -19,7 +19,7 @@ package org.jolokia.jvmagent.jdk6;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
-import org.jolokia.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

@@ -22,7 +22,7 @@ import java.util.Set;
 
 import javax.management.*;
 
-import org.jolokia.JmxRequest;
+import org.jolokia.request.JmxRequest;
 import org.json.simple.JSONObject;
 
 /**

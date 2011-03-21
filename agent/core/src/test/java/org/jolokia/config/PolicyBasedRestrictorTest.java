@@ -16,8 +16,7 @@ package org.jolokia.config;
  *  limitations under the License.
  */
 
-import org.jolokia.config.PolicyBasedRestrictor;
-import org.jolokia.JmxRequest;
+import org.jolokia.request.*;
 import org.testng.annotations.Test;
 
 import java.io.InputStream;
@@ -44,8 +43,8 @@ public class PolicyBasedRestrictorTest {
         assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Memory"),"gc"));
         assertFalse(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Threading"),"gc"));
-        assertTrue(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.POST));
-        assertFalse(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.GET));
+        assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.POST));
+        assertFalse(restrictor.isHttpMethodAllowed(HttpMethod.GET));
     }
 
     @Test
@@ -95,9 +94,9 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config,name=Bla"),"Debug"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("jolokia:type=Threading"),"gc"));
-        assertTrue(restrictor.isTypeAllowed(JmxRequest.Type.READ));
-        assertTrue(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.GET));
-        assertTrue(restrictor.isHttpMethodAllowed(JmxRequest.HttpMethod.POST));
+        assertTrue(restrictor.isTypeAllowed(RequestType.READ));
+        assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.GET));
+        assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.POST));
     }
 
 
