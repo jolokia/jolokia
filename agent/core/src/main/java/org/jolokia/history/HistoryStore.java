@@ -163,32 +163,38 @@ public class HistoryStore implements Serializable {
     private void initHistoryUpdaters() {
         historyUpdaters.put(RequestType.EXEC,
                             new HistoryUpdater<JmxExecRequest>() {
-                                public synchronized void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
-                                    HistoryEntry entry = historyStore.get(new HistoryKey(request));
-                                    if (entry != null) {
-                                        synchronized(entry) {
-                                            pJson.put(KEY_HISTORY,entry.jsonifyValues());
-                                            entry.add(pJson.get(KEY_VALUE),pTimestamp);
+                                public void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
+                                    synchronized (HistoryStore.this) {
+                                        HistoryEntry entry = historyStore.get(new HistoryKey(request));
+                                        if (entry != null) {
+                                            synchronized(entry) {
+                                                pJson.put(KEY_HISTORY,entry.jsonifyValues());
+                                                entry.add(pJson.get(KEY_VALUE),pTimestamp);
+                                            }
                                         }
                                     }
                                 }
                             });
         historyUpdaters.put(RequestType.WRITE,
                             new HistoryUpdater<JmxWriteRequest>() {
-                                public synchronized void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
-                                    HistoryEntry entry = historyStore.get(new HistoryKey(request));
-                                    if (entry != null) {
-                                        synchronized(entry) {
-                                            pJson.put(KEY_HISTORY,entry.jsonifyValues());
-                                            entry.add(request.getValue(),pTimestamp);
+                                public void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
+                                    synchronized (HistoryStore.this) {
+                                        HistoryEntry entry = historyStore.get(new HistoryKey(request));
+                                        if (entry != null) {
+                                            synchronized(entry) {
+                                                pJson.put(KEY_HISTORY,entry.jsonifyValues());
+                                                entry.add(request.getValue(),pTimestamp);
+                                            }
                                         }
                                     }
                                 }
                             });
         historyUpdaters.put(RequestType.READ,
                             new HistoryUpdater<JmxReadRequest>() {
-                                public synchronized void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
-                                    updateReadHistory(request,pJson,pTimestamp);
+                                public void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
+                                    synchronized (HistoryStore.this) {
+                                        updateReadHistory(request,pJson,pTimestamp);
+                                    }
                                 }
                             });
 

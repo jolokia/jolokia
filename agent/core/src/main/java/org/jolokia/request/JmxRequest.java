@@ -211,7 +211,7 @@ public abstract class JmxRequest {
     }
 
     // Init parameters and value fault handler
-    private final void initParameters(Map<String, String> pParams) {
+    private void initParameters(Map<String, String> pParams) {
         if (pParams != null) {
             for (Map.Entry<String,?> entry : pParams.entrySet()) {
                 ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
@@ -221,7 +221,7 @@ public abstract class JmxRequest {
                 }
             }
         }
-        String ignoreErrors = getProcessingConfig(ConfigKey.IGNORE_ERRORS);
+        String ignoreErrors = processingConfig.get(ConfigKey.IGNORE_ERRORS);
         if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
             valueFaultHandler = new IgnoringValueFaultHandler();
         } else {
