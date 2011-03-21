@@ -104,7 +104,6 @@ public class JmxExecRequest extends JmxObjectNameRequest {
     @Override
     public String toString() {
         StringBuffer ret = new StringBuffer("JmxExecRequest[");
-        RequestType type = getType();
         ret.append("operation=").append(getOperation());
         if (arguments != null && arguments.size() > 0) {
             ret.append(", arguments=").append(getArguments());

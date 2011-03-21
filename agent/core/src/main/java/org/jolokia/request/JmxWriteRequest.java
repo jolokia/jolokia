@@ -97,7 +97,6 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
     @Override
     public String toString() {
         StringBuffer ret = new StringBuffer("JmxWriteRequest[");
-        RequestType type = getType();
         ret.append("attribute=").append(getAttributeName())
                     .append(", value=").append(getValue());
         String baseInfo = getInfo();

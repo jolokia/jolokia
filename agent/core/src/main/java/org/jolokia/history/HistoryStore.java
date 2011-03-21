@@ -163,7 +163,7 @@ public class HistoryStore implements Serializable {
     private void initHistoryUpdaters() {
         historyUpdaters.put(RequestType.EXEC,
                             new HistoryUpdater<JmxExecRequest>() {
-                                public void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
+                                public synchronized void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
@@ -175,7 +175,7 @@ public class HistoryStore implements Serializable {
                             });
         historyUpdaters.put(RequestType.WRITE,
                             new HistoryUpdater<JmxWriteRequest>() {
-                                public void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
+                                public synchronized void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
@@ -187,7 +187,7 @@ public class HistoryStore implements Serializable {
                             });
         historyUpdaters.put(RequestType.READ,
                             new HistoryUpdater<JmxReadRequest>() {
-                                public void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
+                                public synchronized void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
                                     updateReadHistory(request,pJson,pTimestamp);
                                 }
                             });

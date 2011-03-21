@@ -53,9 +53,6 @@ public class HistoryKey implements Serializable {
             secondary = "(all)";
         }
         path = pJmxReq.getPath();
-        if (secondary == null) {
-            throw new IllegalArgumentException(type + " name must not be null");
-        }
     }
 
     HistoryKey(JmxWriteRequest pJmxReq) {

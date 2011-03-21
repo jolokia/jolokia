@@ -28,7 +28,7 @@ import org.jolokia.request.RequestType;
  * @author roland
  * @since 15.03.11
  */
-public class PathUtil {
+public final class PathUtil {
 
     // Pattern for detecting escaped slashes in URL encoded requests
     public static final Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("^\\^?-*\\+?$");

@@ -49,7 +49,7 @@ public abstract class JmxRequest {
     private HttpMethod method;
 
     // Path parts, which are used for selecting parts of the return value
-    protected List<String> pathParts;
+    private List<String> pathParts;
 
     /**
      * Constructor used for representing {@link HttpMethod#GET} requests.
@@ -211,7 +211,7 @@ public abstract class JmxRequest {
     }
 
     // Init parameters and value fault handler
-    private void initParameters(Map<String, String> pParams) {
+    private final void initParameters(Map<String, String> pParams) {
         if (pParams != null) {
             for (Map.Entry<String,?> entry : pParams.entrySet()) {
                 ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
@@ -223,18 +223,22 @@ public abstract class JmxRequest {
         }
         String ignoreErrors = getProcessingConfig(ConfigKey.IGNORE_ERRORS);
         if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
-            valueFaultHandler = new ValueFaultHandler() {
-                public <T extends Throwable> Object handleException(T exception) throws T {
-                    return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
-                }
-            };
+            valueFaultHandler = new IgnoringValueFaultHandler();
         } else {
-            valueFaultHandler = new ValueFaultHandler() {
-                public <T extends Throwable> Object handleException(T exception) throws T {
-                    // Dont handle exception on our own, we rethrow it
-                    throw exception;
-                }
-            };
+            valueFaultHandler = new ThrowingFaultHandler();
+        }
+    }
+
+    private static class IgnoringValueFaultHandler implements ValueFaultHandler {
+        public <T extends Throwable> Object handleException(T exception) throws T {
+            return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
+        }
+    }
+
+    private static class ThrowingFaultHandler implements ValueFaultHandler {
+        public <T extends Throwable> Object handleException(T exception) throws T {
+            // Dont handle exception on our own, we rethrow it
+            throw exception;
         }
     }
 }

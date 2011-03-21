@@ -114,7 +114,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
                 ret.put("attribute", attributeNames.get(0));
             }
         }
-        if (pathParts != null && pathParts.size() > 0) {
+        if (getPathParts() != null && getPathParts().size() > 0) {
             ret.put("path", getPath());
         }
         return ret;
