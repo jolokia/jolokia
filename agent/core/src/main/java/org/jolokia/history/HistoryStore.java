@@ -34,6 +34,7 @@ import static org.jolokia.request.RequestType.*;
  * @author roland
  * @since Jun 12, 2009
  */
+@SuppressWarnings("IS2_INCONSISTENT_SYNC") // FindBugs gets confused with inner classes accessing objects in the parent
 public class HistoryStore implements Serializable {
 
     private static final long serialVersionUID = 42L;
@@ -164,13 +165,11 @@ public class HistoryStore implements Serializable {
         historyUpdaters.put(RequestType.EXEC,
                             new HistoryUpdater<JmxExecRequest>() {
                                 public void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
-                                    synchronized (HistoryStore.this) {
-                                        HistoryEntry entry = historyStore.get(new HistoryKey(request));
-                                        if (entry != null) {
-                                            synchronized(entry) {
-                                                pJson.put(KEY_HISTORY,entry.jsonifyValues());
-                                                entry.add(pJson.get(KEY_VALUE),pTimestamp);
-                                            }
+                                    HistoryEntry entry = historyStore.get(new HistoryKey(request));
+                                    if (entry != null) {
+                                        synchronized(entry) {
+                                            pJson.put(KEY_HISTORY,entry.jsonifyValues());
+                                            entry.add(pJson.get(KEY_VALUE),pTimestamp);
                                         }
                                     }
                                 }
@@ -178,13 +177,11 @@ public class HistoryStore implements Serializable {
         historyUpdaters.put(RequestType.WRITE,
                             new HistoryUpdater<JmxWriteRequest>() {
                                 public void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
-                                    synchronized (HistoryStore.this) {
-                                        HistoryEntry entry = historyStore.get(new HistoryKey(request));
-                                        if (entry != null) {
-                                            synchronized(entry) {
-                                                pJson.put(KEY_HISTORY,entry.jsonifyValues());
-                                                entry.add(request.getValue(),pTimestamp);
-                                            }
+                                    HistoryEntry entry = historyStore.get(new HistoryKey(request));
+                                    if (entry != null) {
+                                        synchronized(entry) {
+                                            pJson.put(KEY_HISTORY,entry.jsonifyValues());
+                                            entry.add(request.getValue(),pTimestamp);
                                         }
                                     }
                                 }
@@ -192,9 +189,7 @@ public class HistoryStore implements Serializable {
         historyUpdaters.put(RequestType.READ,
                             new HistoryUpdater<JmxReadRequest>() {
                                 public void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
-                                    synchronized (HistoryStore.this) {
-                                        updateReadHistory(request,pJson,pTimestamp);
-                                    }
+                                    updateReadHistory(request,pJson,pTimestamp);
                                 }
                             });
 
