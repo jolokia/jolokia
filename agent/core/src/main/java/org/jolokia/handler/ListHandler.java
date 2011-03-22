@@ -2,7 +2,7 @@ package org.jolokia.handler;
 
 
 import org.jolokia.request.*;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 
 import javax.management.*;
 import java.io.IOException;

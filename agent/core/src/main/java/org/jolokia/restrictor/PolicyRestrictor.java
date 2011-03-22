@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.restrictor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.jolokia.request.*;
+import org.jolokia.util.IpChecker;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -37,7 +38,7 @@ import org.xml.sax.SAXException;
  * @author roland
  * @since Jul 28, 2009
  */
-public class PolicyBasedRestrictor implements Restrictor {
+public class PolicyRestrictor implements Restrictor {
 
     private Set<RequestType> typeSet;
 
@@ -54,7 +55,7 @@ public class PolicyBasedRestrictor implements Restrictor {
     private MBeanPolicyConfig allow;
     private MBeanPolicyConfig deny;
 
-    public PolicyBasedRestrictor(InputStream pInput) {
+    public PolicyRestrictor(InputStream pInput) {
         Exception exp = null;
         if (pInput == null) {
             throw new SecurityException("No policy file given");
@@ -85,7 +86,7 @@ public class PolicyBasedRestrictor implements Restrictor {
         return httpMethodsSet == null || httpMethodsSet.contains(method.getMethod());
     }
 
-    public boolean isTypeAllowed(RequestType pType) {
+    public boolean isTypeAllowed(String pType) {
         return typeSet == null || typeSet.contains(pType);
     }
 
@@ -102,7 +103,7 @@ public class PolicyBasedRestrictor implements Restrictor {
     }
 
     private boolean check(RequestType pType, ObjectName pName, String pValue) {
-        if (isTypeAllowed(pType)) {
+        if (isTypeAllowed(pType.getName())) {
             // Its allowed in general, so we only need to check
             // the denied section, whether its forbidded
             return deny == null || !matches(deny, pType, pName, pValue);
@@ -123,7 +124,7 @@ public class PolicyBasedRestrictor implements Restrictor {
             }
             if (allowedSubnetsSet != null && IP_PATTERN.matcher(addr).matches()) {
                 for (String subnet : allowedSubnetsSet) {
-                    if (IpChecker.matches(subnet,addr)) {
+                    if (IpChecker.matches(subnet, addr)) {
                         return true;
                     }
                 }

@@ -17,6 +17,8 @@ package org.jolokia.config;
  */
 
 import org.jolokia.request.*;
+import org.jolokia.restrictor.HttpMethod;
+import org.jolokia.restrictor.PolicyRestrictor;
 import org.testng.annotations.Test;
 
 import java.io.InputStream;
@@ -37,7 +39,7 @@ public class PolicyBasedRestrictorTest {
     @Test
     public void basics() throws MalformedObjectNameException {
         InputStream is = getClass().getResourceAsStream("/access-sample1.xml");
-        PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"Verbose"));
         assertFalse(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"),"Verbose"));
         assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
@@ -50,7 +52,7 @@ public class PolicyBasedRestrictorTest {
     @Test
     public void restrictIp() {
         InputStream is = getClass().getResourceAsStream("/access-sample1.xml");
-        PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
         String ips[][] = {
                 { "11.0.18.32", "true" },
@@ -75,7 +77,7 @@ public class PolicyBasedRestrictorTest {
     @Test
     public void patterns() throws MalformedObjectNameException {
         InputStream is = getClass().getResourceAsStream("/access-sample2.xml");
-        PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
         assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config,name=Bla"),"Debug"));
@@ -89,12 +91,12 @@ public class PolicyBasedRestrictorTest {
     @Test
     public void noRestrictions() throws MalformedObjectNameException {
         InputStream is = getClass().getResourceAsStream("/access-sample3.xml");
-        PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config,name=Bla"),"Debug"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("jolokia:type=Threading"),"gc"));
-        assertTrue(restrictor.isTypeAllowed(RequestType.READ));
+        assertTrue(restrictor.isTypeAllowed(RequestType.READ.getName()));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.GET));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.POST));
     }
@@ -103,7 +105,7 @@ public class PolicyBasedRestrictorTest {
     @Test
     public void deny() throws MalformedObjectNameException {
         InputStream is = getClass().getResourceAsStream("/access-sample4.xml");
-        PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
         assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
         assertFalse(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
         assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
@@ -119,7 +121,7 @@ public class PolicyBasedRestrictorTest {
     @Test
     public void allow() throws MalformedObjectNameException {
         InputStream is = getClass().getResourceAsStream("/access-sample5.xml");
-        PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
         assertTrue(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
@@ -136,14 +138,14 @@ public class PolicyBasedRestrictorTest {
     public void illegalXml() {
         InputStream is = getClass().getResourceAsStream("/illegal1.xml");
         try {
-            PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+            PolicyRestrictor restrictor = new PolicyRestrictor(is);
             fail("Could parse illegal file");
         } catch (SecurityException exp) {
             //ok
         }
 
         try {
-            new PolicyBasedRestrictor(null);
+            new PolicyRestrictor(null);
             fail("No file given");
         } catch (SecurityException exp) {
             // ok
@@ -154,7 +156,7 @@ public class PolicyBasedRestrictorTest {
     public void noName() {
         InputStream is = getClass().getResourceAsStream("/illegal2.xml");
         try {
-            PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+            PolicyRestrictor restrictor = new PolicyRestrictor(is);
             fail("Could parse illegal file");
         } catch (SecurityException exp) {
             assertTrue(exp.getMessage().contains("name"));
@@ -165,7 +167,7 @@ public class PolicyBasedRestrictorTest {
     public void invalidTag() {
         InputStream is = getClass().getResourceAsStream("/illegal3.xml");
         try {
-            PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+            PolicyRestrictor restrictor = new PolicyRestrictor(is);
             fail("Could parse illegal file");
         } catch (SecurityException exp) {
             assertTrue(exp.getMessage().contains("name"));
@@ -179,7 +181,7 @@ public class PolicyBasedRestrictorTest {
     public void doubleName() {
         InputStream is = getClass().getResourceAsStream("/illegal4.xml");
         try {
-            PolicyBasedRestrictor restrictor = new PolicyBasedRestrictor(is);
+            PolicyRestrictor restrictor = new PolicyRestrictor(is);
             fail("Could parse illegal file");
         } catch (SecurityException exp) {
             assertTrue(exp.getMessage().contains("name"));
@@ -191,7 +193,7 @@ public class PolicyBasedRestrictorTest {
     public void illegalHttpMethod() {
         InputStream is = getClass().getResourceAsStream("/illegal5.xml");
         try {
-            new PolicyBasedRestrictor(is);
+            new PolicyRestrictor(is);
             fail();
         } catch (SecurityException exp) {
             assertTrue(exp.getMessage().contains("bla"));
@@ -202,7 +204,7 @@ public class PolicyBasedRestrictorTest {
     public void illegalHttpMethodTag() {
         InputStream is = getClass().getResourceAsStream("/illegal6.xml");
         try {
-            new PolicyBasedRestrictor(is);
+            new PolicyRestrictor(is);
             fail();
         } catch (SecurityException exp) {
             assertTrue(exp.getMessage().contains("method"));

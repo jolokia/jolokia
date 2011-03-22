@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.request.*;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 
 /*

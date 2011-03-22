@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.restrictor;
 
 import org.jolokia.request.*;
 
@@ -43,10 +43,11 @@ public interface Restrictor {
     /**
      * Check whether the provided command type is allowed in principal
      *
+     *
      * @param pType type to check
      * @return true, if the type is allowed, false otherwise
      */
-    boolean isTypeAllowed(RequestType pType);
+    boolean isTypeAllowed(String pType);
 
     /**
      * Check whether reading of an attribute is allowed

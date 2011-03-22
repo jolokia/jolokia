@@ -77,6 +77,7 @@
             </Embed-Dependency>
             <Export-Package>
               org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
+              org.jolokia.restrictor;version="${project.version}"
             </Export-Package>
             <Import-Package>
               org.jolokia.osgi.servlet;version="${project.version}",

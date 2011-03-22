@@ -16,7 +16,7 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
@@ -26,14 +26,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A request handler manager is responsible for managing so called "request handlers" which
+ * are used to dispatch for all command types known to Jolokia
+ *
  * @author roland
  * @since Nov 13, 2009
  */
 public class RequestHandlerManager {
 
     // Map with all json request handlers
-    private static final Map<RequestType, JsonRequestHandler> REQUEST_HANDLER_MAP =
-            new HashMap<RequestType, JsonRequestHandler>();
+    private Map<RequestType, JsonRequestHandler> REQUEST_HANDLER_MAP = new HashMap<RequestType, JsonRequestHandler>();
 
     public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
             StringToObjectConverter pStringToObjectConverter,
@@ -51,6 +53,12 @@ public class RequestHandlerManager {
         }
     }
 
+    /**
+     * Get the request handler for the given type
+     *
+     * @param pType type of request
+     * @return handler which can handle requests of the given type
+     */
     public JsonRequestHandler getRequestHandler(RequestType pType) {
         JsonRequestHandler handler = REQUEST_HANDLER_MAP.get(pType);
         if (handler == null) {
@@ -58,6 +66,5 @@ public class RequestHandlerManager {
         }
         return handler;
     }
-
 
 }

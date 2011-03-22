@@ -55,6 +55,9 @@ public enum ConfigKey {
     // (but not for the servlet, this is done in web.xml)
     AGENT_CONTEXT("agentContext",true, false, "/jolokia"),
 
+    // Init parameter for the location of the policy file
+    POLICY_LOCATION("policyLocation",true,false,"classpath:/jolokia-access.xml"),
+
     // User and password for authentication purposes.
     USER("user", false, true),
     PASSWORD("password", false, true),

@@ -16,8 +16,13 @@
 
 package org.jolokia.osgi.servlet;
 
+import java.util.Map;
+
 import javax.servlet.*;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 import org.jolokia.http.AgentServlet;
 import org.osgi.framework.BundleContext;
@@ -46,6 +51,9 @@ public class JolokiaServlet extends AgentServlet {
     // Tracker to be used for the LogService
     private ServiceTracker logTracker;
 
+    // Restrictor for restricting access to MBeans
+    private Restrictor restrictor;
+
     // Thread-Locals which will be used for holding the bundle context and
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
@@ -55,16 +63,21 @@ public class JolokiaServlet extends AgentServlet {
     }
 
     public JolokiaServlet(BundleContext pContext) {
+        this (pContext,null);
+    }
+
+    public JolokiaServlet(BundleContext pContext,Restrictor pRestrictor) {
         bundleContext = pContext;
+        restrictor = pRestrictor;
     }
 
     @Override
-    public void init(ServletConfig pConfig) throws ServletException {
+    public void init(ServletConfig pServletConfig) throws ServletException {
         // If no bundle context was provided, we are looking up the servlet context
         // for the bundlect context, which will be available usually in servlet extender
         if (bundleContext == null) {
             // try to lookup bundle context from the servlet context
-            ServletContext servletContext = pConfig.getServletContext();
+            ServletContext servletContext = pServletConfig.getServletContext();
             bundleContext = (BundleContext) servletContext.getAttribute("osgi-bundlecontext");
         }
 
@@ -82,7 +95,7 @@ public class JolokiaServlet extends AgentServlet {
         // the Osgi-Environment
         BUNDLE_CONTEXT_THREAD_LOCAL.set(bundleContext);
         try {
-            super.init(pConfig);
+            super.init(pServletConfig);
         } finally {
             BUNDLE_CONTEXT_THREAD_LOCAL.remove();
         }
@@ -96,6 +109,27 @@ public class JolokiaServlet extends AgentServlet {
         }
         bundleContext = null;
         super.destroy();
+    }
+
+
+    /**
+     * Create a restrictor, preferably by the restrictor given during creation, or by the configuration
+     * as given. Falls back to an {@link AllowAllRestrictor} if neither a restrictor is given as constructor
+     * argument nor a configuration with key {@link ConfigKey#POLICY_LOCATION} is provided
+     *
+     * @param pConfig agent configuration
+     * @param pLogHandler a log handler which is used for sending out warnings e.g. when a fallback
+     *        restrictor is used
+     * @return restrictor to apply
+     */
+    @Override
+    protected Restrictor createRestrictor(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+        if (restrictor != null) {
+            pLogHandler.info("Using custom access restrictor " + restrictor);
+            return restrictor;
+        } else {
+            return super.createRestrictor(pConfig, pLogHandler);
+        }
     }
 
     /**

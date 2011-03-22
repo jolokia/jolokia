@@ -22,7 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.util.LogHandler;
