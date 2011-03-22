@@ -65,8 +65,13 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         bundleContext = pBundleContext;
 
         // Track HttpService
-        httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
-        httpServiceTracker.open();
+        if (Boolean.parseBoolean(getConfiguration(LISTEN_FOR_HTTP_SERVICE))) {
+            httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
+            httpServiceTracker.open();
+
+            // Register us as JolokiaContext
+            jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(),this,null);
+        }
 
         if (Boolean.parseBoolean(getConfiguration(USE_RESTRICTOR_SERVICE))) {
             // If no restrictor is set in the constructor and we are enabled to listen for a restrictor
@@ -74,26 +79,29 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             restrictor = new DelegatingRestrictor(bundleContext);
         }
 
-            // Register us as JolokiaContext
-        jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(),this,null);
     }
 
     public void stop(BundleContext pBundleContext) {
         assert pBundleContext.equals(bundleContext);
 
-        // Unregister from all services and close tracker
-        Object services[] = httpServiceTracker.getServices();
-        if (services != null) {
-            for (Object service : services) {
-                HttpService httpService = (HttpService) service;
-                httpService.unregister(getServletAlias());
+        if (httpServiceTracker != null) {
+            // Unregister from all services and close tracker
+            Object services[] = httpServiceTracker.getServices();
+            if (services != null) {
+                for (Object service : services) {
+                    HttpService httpService = (HttpService) service;
+                    httpService.unregister(getServletAlias());
+                }
             }
+            
+            httpServiceTracker.close();
+            httpServiceTracker = null;
         }
-        httpServiceTracker.close();
-        httpServiceTracker = null;
 
-        jolokiaServiceRegistration.unregister();
-        jolokiaServiceRegistration = null;
+        if (jolokiaServiceRegistration != null) {
+            jolokiaServiceRegistration.unregister();
+            jolokiaServiceRegistration = null;
+        }
 
         restrictor = null;
         bundleContext = null;
