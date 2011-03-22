@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
+import org.jolokia.restrictor.*;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
@@ -56,6 +57,10 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     // Registration object for this JolokiaContext
     private ServiceRegistration jolokiaServiceRegistration;
 
+    // Restrictor and associated service tracker when tracking restrictor
+    // services
+    private Restrictor restrictor = null;
+
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
 
@@ -63,23 +68,39 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
         httpServiceTracker.open();
 
-        // Register us as JolokiaContext
+        if (Boolean.parseBoolean(getConfiguration(USE_RESTRICTOR_SERVICE))) {
+            // If no restrictor is set in the constructor and we are enabled to listen for a restrictor
+            // service, a delegating restrictor is installed
+            restrictor = new DelegatingRestrictor(bundleContext);
+        }
+
+            // Register us as JolokiaContext
         jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(),this,null);
     }
 
     public void stop(BundleContext pBundleContext) {
         assert pBundleContext.equals(bundleContext);
 
+        // Unregister from all services and close tracker
+        Object services[] = httpServiceTracker.getServices();
+        if (services != null) {
+            for (Object service : services) {
+                HttpService httpService = (HttpService) service;
+                httpService.unregister(getServletAlias());
+            }
+        }
         httpServiceTracker.close();
         httpServiceTracker = null;
 
         jolokiaServiceRegistration.unregister();
         jolokiaServiceRegistration = null;
+
+        restrictor = null;
         bundleContext = null;
     }
 
     /**
-     * Get the security context for out servlet. Dependend on the configuration,
+     * Get the security context for out servlet. Dependent on the configuration,
      * this is either a no-op context or one which authenticates with a given user
      *
      * @return the HttpContext with which the agent servlet gets registered.
@@ -123,7 +144,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
     private String getConfiguration(ConfigKey pKey) {
         // TODO: Use fragments and/or configuration service if available.
-        String value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey);
+        String value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey.getKeyValue());
         if (value == null) {
             value = pKey.getDefaultValue();
         }
@@ -135,7 +156,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     private class HttpServiceCustomizer implements ServiceTrackerCustomizer {
         private final BundleContext context;
 
-        public HttpServiceCustomizer(BundleContext pContext) {
+        HttpServiceCustomizer(BundleContext pContext) {
             context = pContext;
         }
 
@@ -143,7 +164,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             HttpService service = (HttpService) context.getService(reference);
             try {
                 service.registerServlet(getServletAlias(),
-                                        new JolokiaServlet(context),
+                                        new JolokiaServlet(context,restrictor),
                                         getConfiguration(),
                                         getHttpContext());
             } catch (ServletException e) {

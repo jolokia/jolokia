@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.jolokia.request.*;
+import org.jolokia.request.RequestType;
 import org.jolokia.util.IpChecker;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;

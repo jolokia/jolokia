@@ -51,12 +51,16 @@ public class JolokiaServlet extends AgentServlet {
     // Tracker to be used for the LogService
     private ServiceTracker logTracker;
 
+    // Tracker for a restrictor
+    private ServiceTracker restrictorTracker;
+
     // Restrictor for restricting access to MBeans
     private Restrictor restrictor;
 
     // Thread-Locals which will be used for holding the bundle context and
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
+
 
     public JolokiaServlet() {
         this(null);
@@ -82,13 +86,14 @@ public class JolokiaServlet extends AgentServlet {
         }
 
         // If there is a bundle context available, set up a tracker for tracking the logging
-        // service
+        // service and optionally a restrictor service
         if (bundleContext != null) {
             // Track logging service
             logTracker = new ServiceTracker(bundleContext, LogService.class.getName(), null);
             logTracker.open();
             setLogHandler(new ActivatorLogHandler(logTracker));
         }
+
 
         // We are making the bundle context available here as a thread local
         // so that the server detector has access to the bundle in order to detect
