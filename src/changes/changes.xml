@@ -8,6 +8,33 @@
   </properties>
   <body>
     <release version="0.90" description="Release 0.90" date="">
+      <action dev="roland" type="add" date="2011-03-24">
+        Added a OSGi bundle property org.jolokia.listenForHttpService
+        which, if set to false, prevents the automatic registration of
+        a JolokiaServlet to an OSGi HttpService (default: true)
+      </action>
+      <action dev="roland" type="add" date="2011-03-24">
+        The activator in jolokia-osgi and jolokia-osgi-bundle can now
+        use an OSGi restrictor service implementing
+        org.jolokia.restrictor.Restrictor when bundle property 
+        org.jolokia.useRestrictorService is set to true.
+      </action>
+      <action dev="roland" type="add" date="2011-03-24">
+        Added a servlet init parameter "policyLocation" for specifying
+        the location of the policy file. This can be an URL or an
+        string with prefix "classpath:". Default:
+        "classpath:/jolokia-access.xml" 
+      </action>
+      <action dev="roland" type="update" date="2011-03-24">
+        Refactored restrictor handling and exported
+        org.jolokia.restrictor in the OSGi bundles. JolokiaServlet can 
+        take now an Restrictor object as constructor parameter.
+      </action>
+      <action dev="roland" type="update" date="2011-03-24">
+        Lookup of policy file with the same classloader as used for
+        loading the jolokia classes if lookup failed with context
+        loader added.
+      </action>
       <action dev="roland" type="update" date="2011-03-16">
         jolokia.js: Works now with jQuery 1.5.1, too (but still doesn't use 
         the advanced Ajax features)
