@@ -54,9 +54,6 @@ public class JolokiaServlet extends AgentServlet {
     // Tracker for a restrictor
     private ServiceTracker restrictorTracker;
 
-    // Restrictor for restricting access to MBeans
-    private Restrictor restrictor;
-
     // Thread-Locals which will be used for holding the bundle context and
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
@@ -71,8 +68,8 @@ public class JolokiaServlet extends AgentServlet {
     }
 
     public JolokiaServlet(BundleContext pContext,Restrictor pRestrictor) {
+        super(pRestrictor);
         bundleContext = pContext;
-        restrictor = pRestrictor;
     }
 
     @Override
@@ -114,27 +111,6 @@ public class JolokiaServlet extends AgentServlet {
         }
         bundleContext = null;
         super.destroy();
-    }
-
-
-    /**
-     * Create a restrictor, preferably by the restrictor given during creation, or by the configuration
-     * as given. Falls back to an {@link AllowAllRestrictor} if neither a restrictor is given as constructor
-     * argument nor a configuration with key {@link ConfigKey#POLICY_LOCATION} is provided
-     *
-     * @param pConfig agent configuration
-     * @param pLogHandler a log handler which is used for sending out warnings e.g. when a fallback
-     *        restrictor is used
-     * @return restrictor to apply
-     */
-    @Override
-    protected Restrictor createRestrictor(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
-        if (restrictor != null) {
-            pLogHandler.info("Using custom access restrictor " + restrictor);
-            return restrictor;
-        } else {
-            return super.createRestrictor(pConfig, pLogHandler);
-        }
     }
 
     /**

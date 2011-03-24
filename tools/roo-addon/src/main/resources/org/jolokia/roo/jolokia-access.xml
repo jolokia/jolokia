@@ -45,6 +45,17 @@
   -->
 
   <!--
+  Access restriction based on the HTTP method with which an Jolokia request was received.
+  The following example allows only HTTP POST requests. If the section is missing, all 
+  HTTP requests methods are allowed.
+  -->
+  <!--
+  <http>
+    <method>post</method>
+  </http>
+  -->
+
+  <!--
   List of allowed commands.
 
   If this sections is present, it influence the following section.
@@ -52,7 +63,7 @@
   For each command type present, the principle behaviour is allow this command for all
   MBeans. To remove an MBean (attribute/operation), a <deny> section has to be added.
 
-  For each comman type missing, the command is disabled by default. For certain MBeans
+  For each command type missing, the command is disabled by default. For certain MBeans
   it can be selectively by enabled by using an <allow> section below
 
   Known types are:

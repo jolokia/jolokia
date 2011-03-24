@@ -63,6 +63,28 @@ public class AgentServlet extends HttpServlet {
     // Request handler for parsing request parameters and building up a response
     private HttpRequestHandler requestHandler;
 
+    // Restrictor to use as given in the constructor
+    private Restrictor restrictor;
+
+
+    /**
+     * No argument constructor, used e.g. by an servlet
+     * descriptor when creating the servlet out of web.xml
+     */
+    public AgentServlet() {
+        this(null);
+    }
+
+    /**
+     * Constructor taking a restrictor to use
+     *
+     * @param pRestrictor restrictor to use or <code>null</code> if the restrictor
+     *        should be created in the default way ({@link #createRestrictor(Map, LogHandler)})
+     */
+    public AgentServlet(Restrictor pRestrictor) {
+        restrictor = pRestrictor;
+    }
+
     /**
      * Set the log handler to use. This method must be called before
      * {@link #init(ServletConfig)} in order to have an effect, since
@@ -120,7 +142,12 @@ public class AgentServlet extends HttpServlet {
         httpPostHandler = newPostHttpRequestHandler();
 
         Map<ConfigKey,String> config = servletConfigAsMap(pServletConfig);
-        backendManager = new BackendManager(config,logHandler, createRestrictor(config,logHandler));
+        if (restrictor == null) {
+            restrictor = createRestrictor(config,logHandler);
+        } else {
+            logHandler.info("Using custom access restriction provided by " + restrictor);
+        }
+        backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(backendManager,logHandler);
     }
 
