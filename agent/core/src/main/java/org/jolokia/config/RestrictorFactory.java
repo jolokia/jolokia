@@ -46,6 +46,9 @@ public final class RestrictorFactory {
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
             is =  Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+            if (is == null) {
+                is = RestrictorFactory.class.getResourceAsStream(path);
+            }
         } else {
             URL url = new URL(pLocation);
             is = url.openStream();
