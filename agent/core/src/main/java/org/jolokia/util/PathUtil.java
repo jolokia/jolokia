@@ -20,8 +20,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jolokia.request.RequestType;
-
 /**
  * Utility class for handling request pathes.
  *
@@ -108,11 +106,6 @@ public final class PathUtil {
         }
 
         extractElements(ret,elementStack,null);
-        if (ret.size() == 0) {
-            // If no request type (i.e. the agent is queried directly
-            // we return version and server meta information instead
-            ret.push(RequestType.VERSION.getName());
-        }
 
         // Reverse stack
         Collections.reverse(ret);

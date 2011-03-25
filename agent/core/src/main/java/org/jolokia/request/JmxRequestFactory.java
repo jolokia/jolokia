@@ -87,7 +87,9 @@ public final class JmxRequestFactory {
 
             // Get all path elements as a reverse stack
             Stack<String> elements = PathUtil.extractElementsFromPath(pathInfo);
-            type = RequestType.getTypeByName(elements.pop());
+
+            // Use version by default if no type is given
+            type = elements.size() != 0 ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
 
             // Parse request
             return (R) getProcessor(type).process(elements,extractParameters(pParameterMap));
