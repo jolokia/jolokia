@@ -1,11 +1,11 @@
 package org.jolokia.converter.json;
 
 
-import org.jolokia.config.ConfigKey;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.request.*;
 import org.jolokia.converter.StringToObjectConverter;
 
-import static org.jolokia.config.ConfigKey.*;
+import static org.jolokia.util.ConfigKey.*;
 
 import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;

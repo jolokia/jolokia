@@ -21,7 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.config.ConfigKey;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;

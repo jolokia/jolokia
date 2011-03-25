@@ -1,10 +1,8 @@
-package org.jolokia.config;
+package org.jolokia.restrictor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
-import org.jolokia.restrictor.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss

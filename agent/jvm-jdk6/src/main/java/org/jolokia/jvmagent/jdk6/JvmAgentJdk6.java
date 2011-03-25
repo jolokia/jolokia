@@ -4,7 +4,7 @@ import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
-import org.jolokia.config.ConfigKey;
+import org.jolokia.util.ConfigKey;
 
 import java.io.*;
 import java.net.InetAddress;

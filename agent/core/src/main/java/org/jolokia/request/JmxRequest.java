@@ -18,9 +18,8 @@ package org.jolokia.request;
 
 import java.util.*;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.HttpMethod;
-import org.jolokia.util.PathUtil;
+import org.jolokia.util.ConfigKey;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 
 /**

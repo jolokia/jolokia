@@ -1,9 +1,10 @@
-package org.jolokia.config;
+package org.jolokia.mbean;
 
 import java.io.*;
 
 import javax.management.*;
 
+import org.jolokia.util.DebugStore;
 import org.jolokia.history.HistoryKey;
 import org.jolokia.history.HistoryStore;
 

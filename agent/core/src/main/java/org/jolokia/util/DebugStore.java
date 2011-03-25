@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

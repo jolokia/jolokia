@@ -1,13 +1,11 @@
 package org.jolokia.history;
 
-import org.jolokia.request.*;
-
-import static org.jolokia.request.RequestType.*;
-
 import java.io.Serializable;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+
+import org.jolokia.request.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss

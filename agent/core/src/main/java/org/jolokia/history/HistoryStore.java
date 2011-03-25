@@ -9,8 +9,6 @@ import javax.management.ObjectName;
 import org.jolokia.request.*;
 import org.json.simple.JSONObject;
 
-import static org.jolokia.request.RequestType.*;
-
 /*
  *  Copyright 2009-2010 Roland Huss
  *

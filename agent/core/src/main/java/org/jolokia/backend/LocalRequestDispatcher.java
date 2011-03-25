@@ -18,8 +18,8 @@ package org.jolokia.backend;
 
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
-import org.jolokia.config.Config;
-import org.jolokia.config.DebugStore;
+import org.jolokia.mbean.Config;
+import org.jolokia.util.DebugStore;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;

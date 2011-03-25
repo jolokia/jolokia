@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.mbean;
 
 import java.io.IOException;
 
