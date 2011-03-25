@@ -2,14 +2,340 @@
 <chapter id="security">
     <title>Security</title>
 
-    <note>
+    <para>
       Security in JSR-160 remoting is an all-or-nothing option. Either
       all MBeans are accesible or none (except your application server
       uses a SecurityManager, but that is rarely the case). Jolokia on
-      the other hand alllows for fine grained security defined in a
-      security policy. It allows for access restrictions on MBean
-      names (or patterns), attributes, operation, source IP address
-      (or a subnet) and type of Jolokia operation. This chapter will
-      talk about this.
-    </note>
+      the other hand alllows for fine grained security defined in an
+      XML security policy file. It allows for access restrictions on
+      MBean names (or patterns), attributes, operation, source IP
+      address (or a subnet) and type of Jolokia operation.
+    </para>
+
+    <section id="security-policy">
+      <title>Policy based security</title>
+      <para>
+        Access to MBean and to the Jolokia agents in general can be
+        restricted with an XML policy file. This policy can be configured
+        for various parameters and is divided into several sections. 
+      </para>
+      <section>
+        <title>IP based restrictions</title>
+        <para>
+          Overall access can be granted based on the IP adress of an
+          client sending a HTTP request. These restrictions a
+          specified within an <literal>&lt;remote&gt;</literal> section,
+          which contains one or more <literal>&lt;host&gt;</literal>
+          elements. The source can be given either as an IP address,
+          an host name or a netmask given in CIDR format
+          (e.g. "10.0.0.0/16" for all clients coming from the 10.0
+          network). The following allows access from localhost and all
+          clients whose IP address starts with "10.0". For all other
+          IP adresses, the access if forbidden.
+        </para>
+        <programlisting language="xml"><![CDATA[
+<remote>
+  <host>localhost</host>
+  <host>10.0.0.0/16</host>
+</remote>
+]]></programlisting>        
+      </section>
+      <section>
+        <title>Commands</title>
+        <para>
+          This section specifies the Jolokia commands for which access
+          is granted generally. Each command in the list, access can
+          be further restricted within the
+          <literal>&lt;deny&gt;</literal> part and each command
+          missing in the list, which is forbidden globally, can be
+          selectively enabled for certain MBeans in the
+          <literal>&lt;allow&gt;</literal> section. If the
+          <literal>&lt;commands&gt;</literal> section is missin
+          completely, access to all commands is allowed. 
+        </para>
+        <para>
+          All Jolokia commands a described in <xref
+          linkend="protocol"/> can be used in this section: 
+        </para>
+        <variablelist>
+          <varlistentry>
+            <term>read</term>
+            <listitem>
+              Reading of MBean attributes
+            </listitem>        
+          </varlistentry>
+          <varlistentry>
+            <term>write</term>
+            <listitem>
+             Setting of MBean attributes
+            </listitem>        
+          </varlistentry>   
+          <varlistentry>
+            <term>exec</term>
+            <listitem>
+              Execution of JMX operations
+            </listitem>        
+          </varlistentry>
+          <varlistentry>
+            <term>list</term>
+            <listitem>
+              List the available MBeans allong with their supported
+              attributes and operations. 
+            </listitem>        
+          </varlistentry>
+          <varlistentry>
+            <term>search</term>
+            <listitem>
+              Searching for MBeans
+            </listitem>        
+          </varlistentry>
+          <varlistentry>
+            <term>version</term>
+            <listitem>
+              Getting version and server information
+            </listitem>        
+          </varlistentry>          
+        </variablelist>
+        <para>
+          In the following example, access is granted to the
+          <literal>read</literal>, <literal>list</literal>,
+          <literal>search</literal> and <literal>version</literal> command, but
+          not to <literal>write</literal> and <literal>exec</literal>
+          operations. 
+        </para>
+        <programlisting language="xml"><![CDATA[
+<commands>
+  <command>read</command>
+  <command>list</command>
+  <command>version</command>
+  <command>search</command>
+</commands>
+]]></programlisting>
+
+      </section>
+      <section>
+        <title>Allow and deny access to certain MBeans</title>
+        <para>
+          Within an <literal>&lt;allow&gt;</literal> section, access
+          to MBean can be granted regardless independently of the
+          operations specified in the
+          <literal>&lt;commands&gt;</literal> section. The reverse is
+          true for the <literal>&lt;deny&gt;</literal> section: It
+          rejects access to the MBeans specified here. Both sections
+          contain one or more <literal>&lt;mbean&gt;</literal>
+          elements which has a format like:
+        </para>
+        <programlisting><![CDATA[
+<mbean>
+  <name>java.lang:type=Memory</name>
+  <attribute>*Memory*</attribute>
+  <attribute mode="read">Verbose</attribute>
+  <operation>gc</operation>
+</mbean>        
+]]></programlisting>
+        <para>
+          Within the <literal>&lt;name&gt;</literal> section the name
+          of the MBean is specified. This can bei either a complete
+          ObjectName or a MBean pattern containing wildcards. The
+          value given here must conform to the JMX specification for a
+          valid <classname>ObjectName</classname>. On this MBean (or
+          MBeans if <literal>name</literal> is a pattern), 
+          attributes are specified within one or more
+          <literal>&lt;attribute&gt;</literal> elements and operation
+          within one or more <literal>&lt;operation&gt;</literal>
+          elements. The content can be alaos patterns which uses a wildcard
+          <literal>*</literal>. E.g. <literal>&lt;attribute&gt;*&lt;/attribute&gt;</literal>
+          specifies all attributes on the given MBean. If for an
+          <literal>&lt;attribute&gt;</literal> element the XML
+          attribute <literal>mode="read"</literal> is given, then this
+          attribute can be accessed only read-only.
+        </para>
+      </section>
+      <section>
+        <title>HTTP method restrictions</title>
+        <para>
+          Finally, access can be restricted based on the HTTP method
+          with which an Jolokia request was received with the
+          <literal>&lt;http&gt;</literal> element. Method allowed
+          (<literal>post</literal> or <literal>get</literal>) are
+          specified with an <literal>&lt;method&gt;</literal> inner
+          element. The following example restricts the acces to POST
+          requests only:
+        </para>
+        <programlisting><![CDATA[
+<http>
+  <method>post</method>
+</http>        
+]]></programlisting>
+        <para>
+          It the <literal>&lt;http&gt;</literal> section is missing
+          completely, any HTTP method can be used.
+        </para>
+      </section>
+      <section>
+        <title>Example for a security policy</title>
+        <para>
+          The following complete example applies varios access
+          restrictions: 
+        </para>
+        <itemizedlist>
+          <listitem>
+            Access is only allowed for clients coming from localhost            
+          </listitem>
+          <listitem>
+            Only HTTP Post requests are allowed
+          </listitem>
+          <listitem>
+            By default, only <literal>read</literal> and
+            <literal>list</literal> requests are allowed.
+          </listitem>
+          <listitem>
+            A single <literal>exec</literal> request is allowed for
+            triggering a garbage collection.
+          </listitem>
+          <listitem>
+            Read access to the C3P0 connection pool is restricted to
+            forbid fetching the pool's properties, which in fact
+            contains the DB password as clear text. 
+          </listitem>
+        </itemizedlist>
+        <programlisting><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+
+<restrict>
+
+  <remote>
+    <host>127.0.0.1</host>
+  </remote>
+
+  <http>
+    <method>post</method>
+  </http>
+
+  <commands>
+    <command>read</command>
+    <command>list</command>
+  </commands>
+
+  <allow>
+    <mbean>
+      <name>java.lang:type=Memory</name>
+      <operation>gc</operation>
+    </mbean>
+  </allow>
+
+  <deny>
+    <mbean>
+      <name>com.mchange.v2.c3p0:type=PooledDataSource,*</name>
+      <attribute>properties</attribute>
+    </mbean>
+  </deny>
+
+</restrict>
+]]></programlisting>
+      </section>
+
+      <section>
+        <title>Policy location</title>
+        <sidebar>
+          <para>
+            A great tool which helps in repackaging an agent for
+            inclusion of a <literal>jolokia-access.xml</literal>
+            policy file
+            is the command line tool <ulink
+            url="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</ulink>
+            which comes with the <ulink
+            url="http://www.jmx4perl.org">jmx4perl</ulink> distribution. See
+            <xref linkend="tools"/> for an introduction.
+          </para>
+        </sidebar>
+        <para>
+          But how do the agents lookup the policy file ? By default,
+          the agents will lookup for a policy file top-level in the
+          classpath under the name
+          <filename>jolokia-access.html</filename>. Hence for the war
+          agent, the policy file must be packaged within the war at
+          <filename>WEB-INF/classes/jolokia-access.xml</filename>, for
+          all other agents at
+          <filename>/jolokia-access.xml</filename>. The location can
+          be overwritten with the configuration parameter
+          <literal>policyLocation</literal>, which has to be set
+          differently depending on the agent type. Please refer to
+          <xref linkend="agents"/> for more details. The value of this
+          init parameter can be any URL which can loaded by the JVM. A
+          special case is an URL with the scheme
+          <literal>classpath:</literal> which results in a lookup of
+          the policy file within the classpath. As stated above, the
+          default value of this parameter is
+          <literal>classpath:/jolokia-access.xml</literal>. If a
+          non-classpath URL is provided with this parameter, and the
+          target policy file could not be found then access is
+          completely denied. If a classpath lookup fails then access
+          is globally granted and a warning is given on standard
+          output.
+        </para>
+      </section>
+
+    </section>
+
+    <section id="security-restrictor">
+      <title>Jolokia Restrictors</title>
+      <para>
+        In order to provide fine grained security, Jolokia using the
+        abstract concept of an <emphasis>Restrictor</emphasis>. It is
+        represented by the Java interface
+        <classname>org.jolokia.restrictor.Restrictor</classname> and
+        comes with several implementations. The most prominent one is
+        the <classname>PolicyRestrictor</classname> which is described
+        in <xref linkend="security-policy"/>. This is also the 
+        restrictor which is active by default. For special needs, it is
+        possible to provide a custom implementation of this
+        interface for the WAR and OSGi agents. It is recommended to
+        subclass either
+        <classname>org.jolokia.restrictor.AllowAllRestrictor</classname>
+        or
+        <classname>org.jolokia.restrictor.DenyAllRestrictor</classname>. 
+      </para>
+      <para>
+        For the WAR agent (<xref linkend="agents-war"/>), a subclass
+        of <classname>org.jolokia.http.AgentServlet</classname> should
+        be created which overrides the
+        <methodname>createRestrictor()</methodname>
+      </para>
+      <programlisting language="java"><![CDATA[
+public class RestrictedAgentServlet extends AgentServlet {
+    
+    @Override
+    protected Restrictor createRestrictor(Map<ConfigKey, String> config, LogHandler logHandler) {
+        return new MyOwnRestrictor();
+    }
+}]]></programlisting>        
+      <para>
+        <literal>config</literal> contains the prepared init
+        parameters for the agent and <literal>logHandler</literal> can
+        be used for printing out diagnostic messages. This servlet can
+        then be easily configured in an custom
+        <filename>web.xml</filename> the same way as the Jolokia agent.
+      </para>
+      <para>
+        For programmatic usage there is even a simple way:
+        <classname>AgentServlet</classname> provides an constructor
+        which takes an restrictor as argument, so no sublcassing is
+        required in this case.
+      </para>
+      <para>
+        For an OSGi agent (<xref linkend="agents-osgi"/>),
+        <classname>org.jolokia.osgi.servlet.JolokiaServlet</classname>
+        is the proper extension point. It can be subclasses the same
+        way as above and allows a restrictor implementation as
+        constructor parameter, too. In contrast to
+        <classname>AgentServlet</classname> this class is also OSGi
+        exported and can be referenced from other
+        bundles. Additionally, the OSGi agent can also pickup a
+        restrictor as an OSGi service. See <xref
+        linkend="agents-osgi"/> for details. 
+      </para>
+
+    </section>
+
 </chapter>

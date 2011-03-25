@@ -1,7 +1,7 @@
 package org.jolokia.handler;
 
 import org.jolokia.request.*;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 
 import javax.management.*;
 import java.io.IOException;
@@ -92,7 +92,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @param pRequest request to check
      */
     protected void checkForRestriction(R pRequest) {
-        if (!restrictor.isTypeAllowed(getType())) {
+        if (!restrictor.isTypeAllowed(getType().getName())) {
             throw new SecurityException("Command type " +
                     getType() + " not allowed due to policy used");
         }

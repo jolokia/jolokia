@@ -5,6 +5,8 @@ import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 import org.jolokia.request.JmxRequest;
 import org.json.simple.JSONObject;
@@ -67,15 +69,32 @@ public class BackendManager {
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
 
+    /**
+     * Constrcuct a new backend manager with the given configuration and which allows
+     * every operation (no restrictor)
+     *
+     * @param pConfig configuration map used for tuning this handler's behaviour
+     * @param pLogHandler logger
+     */
     public BackendManager(Map<ConfigKey,String> pConfig, LogHandler pLogHandler) {
+        this(pConfig,pLogHandler,null);
+    }
 
+    /**
+     * Constrcuct a new backend manager with the given configuration.
+     *
+     * @param pConfig configuration map used for tuning this handler's behaviour
+     * @param pLogHandler logger
+     * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
+     */
+    public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
 
         // Central objects
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
         objectToJsonConverter = new ObjectToJsonConverter(stringToObjectConverter,pConfig);
 
         // Access restrictor
-        restrictor = RestrictorFactory.buildRestrictor(pLogHandler);
+        restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
 
         // Log handler for putting out debug
         logHandler = pLogHandler;

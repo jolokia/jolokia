@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
+package org.jolokia.restrictor;
 
 /**
  * Enumeration holding the method which

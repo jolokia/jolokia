@@ -18,13 +18,13 @@ package org.jolokia.jsr160;
 
 import org.jolokia.request.JmxRequest;
 import org.jolokia.backend.RequestDispatcher;
-import org.jolokia.config.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.request.ProxyTargetConfig;
+import org.jolokia.restrictor.Restrictor;
 
 import javax.management.*;
 import javax.management.remote.JMXConnector;
@@ -44,6 +44,14 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     private RequestHandlerManager requestHandlerManager;
 
+    /**
+     * Constructor
+     *
+     * @param objectToJsonConverter converter for creasting answerds (output)
+     * @param stringToObjectConverter converter for preparing arguments (input)
+     * @param serverInfo server info for dealing with version information
+     * @param restrictor restrictor for restricting access to certain MBeans
+     */
     public Jsr160RequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
                                    StringToObjectConverter stringToObjectConverter,
                                    ServerHandle serverInfo,

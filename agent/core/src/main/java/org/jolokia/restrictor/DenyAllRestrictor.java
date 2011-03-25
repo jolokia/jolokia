@@ -1,6 +1,4 @@
-package org.jolokia.config;
-
-import org.jolokia.request.*;
+package org.jolokia.restrictor;
 
 import javax.management.ObjectName;
 
@@ -22,34 +20,33 @@ import javax.management.ObjectName;
 
 
 /**
- * A restrictor which simply allows everything. Used, when no jolokia-access.xml is
- * present.
+ * A restrictor which denies every access.
  *
  * @author roland
  * @since Jul 28, 2009
  */
-public class AllowAllRestrictor implements Restrictor {
+public class DenyAllRestrictor implements Restrictor {
     public boolean isHttpMethodAllowed(HttpMethod pMethod) {
-        return true;
+        return false;
     }
 
-    public boolean isTypeAllowed(RequestType pType) {
-        return true;
+    public boolean isTypeAllowed(String pType) {
+        return false;
     }
 
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return true;
+        return false;
     }
 
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
-        return true;
+        return false;
     }
 
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
-        return true;
+        return false;
     }
 
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return true;
+        return false;
     }
 }

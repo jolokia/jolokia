@@ -1,5 +1,6 @@
 package org.jolokia.config;
 
+import org.jolokia.util.IpChecker;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.fail;
@@ -66,7 +67,7 @@ public class IpCheckerTest {
             fail("Invalid IP");
         } catch (IllegalArgumentException exp) {}
         try {
-            IpChecker.matches("A.0.16.27/24","10.0.16.8");
+            IpChecker.matches("A.0.16.27/24", "10.0.16.8");
             fail("Invalid IP");
         } catch (IllegalArgumentException exp) {}
 

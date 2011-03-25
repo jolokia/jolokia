@@ -202,6 +202,27 @@
           runtime via the Jolokia config MBean.
         </td>
       </tr>
+      <tr>
+        <td>org.jolokia.listenForHttpService</td>
+        <td>true</td>
+        <td>
+          If <literal>true</literal> the bundle listens for an OSGi
+          <literal>HttpService</literal> and if available registers an
+          agent servlet to it. 
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.useRestrictoService</td>
+        <td>false</td>
+        <td>
+          If <literal>true</literal> the Jolokia agent will use any
+          <classname>org.jolokia.restrictor.Restrictor</classname>
+          service for applying access restrictions. If this option is
+          <literal>false</literal> the standard way of looking up a
+          security policy file is used as described in <xref
+          linkend="security-policy"/>.
+        </td>
+      </tr>
     </table>
     <para>
       This bundle also exports a service
@@ -259,14 +280,18 @@
       <classname>org.jolokia.osgi.servlet</classname> which includes
       the servlet class <classname>JolokiaServlet</classname>. This
       class has two constructors: A default constructor without
-      arguments and one with a single
-      <classname>BundleContext</classname> argument. The later has
-      the advantage, that it will use an OSGi
-      <classname>LogService</classname> if available and adds
-      various OSGi server detectors which adds serverinformations
-      like product name and server version to the
-      <literal>version</literal> command. Refer <xref linkend="version"/> for
-      details about the server infos provided. 
+      arguments, one with a single
+      <classname>BundleContext</classname> argument and finally one
+      with an additional <classname>Restrictor</classname> (see <xref
+      linkend="security-restrictor"/> for details how access
+      restrictions can be applied). The constrcutros with a
+      <classname>BundleContext</classname> as argument have the
+      advantage, that they will use an OSGi
+      <classname>LogService</classname> if available and adds various
+      OSGi server detectors which adds serverinformations like product
+      name and server version to the <literal>version</literal>
+      command. Refer <xref linkend="version"/> for details about the
+      server infos provided.
     </para>
     <para>
       Please note that for this use case the bundle
@@ -275,7 +300,31 @@
       <emphasis>resolved</emphasis>. Otherwise, as soon as an OSGi
       HttpService registers, this bundle will try to add yet another
       agent servlet to this service which is probably not what you
-      want. 
+      want. Alternatively, the bundle property
+      <literal>org.jolokia.listenForHttpService</literal> can be set
+      to <literal>false</literal> in which case there will be never an
+      automatic servlet registration to an HttpService. 
+    </para>
+  </section>
+  <section>
+    <title>Restrictor service</title>
+    <para>
+      As described in <xref linkend="security-restrictor"/>, the
+      Jolokia agent can use custom restrictors implementing the
+      interface
+      <classname>org.jolokia.restrictor.Restrictor</classname>. If the
+      bundle property
+      <literal>org.jolokia.useRestrictorService</literal> is set to
+      true and no restrictor is configured by other means, the agent
+      will use one or more OSGi service which register under the name
+      <classname>org.jolokia.restrictor.Restrictor</classname>. If no
+      such service is available, access to the agent is always
+      denied. If one such restrictor service is available, the access
+      decision is delegated to this service. When more than one
+      restrictor service is available, access is ony granted if all of
+      them individuallt grant access. A sample restrictor service as a
+      maven project can be found in the Jolokia source at
+      <filename>agent/osgi/restrictor-sample</filename>. 
     </para>
   </section>
 </section>

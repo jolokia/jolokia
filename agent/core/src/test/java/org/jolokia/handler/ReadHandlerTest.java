@@ -17,8 +17,8 @@ package org.jolokia.handler;
  */
 
 import org.jolokia.request.*;
-import org.jolokia.config.AllowAllRestrictor;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.testng.annotations.*;
 
 import javax.management.*;

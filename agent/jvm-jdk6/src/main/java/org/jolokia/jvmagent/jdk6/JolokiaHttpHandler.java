@@ -17,7 +17,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.RestrictorFactory;
 import org.jolokia.http.HttpRequestHandler;
+import org.jolokia.restrictor.*;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
@@ -65,8 +67,27 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         if (!context.endsWith("/")) {
             context += "/";
         }
-        backendManager = new BackendManager(pConfig,this);
+
+        backendManager = new BackendManager(pConfig,this, createRestrictor(pConfig));
         requestHandler = new HttpRequestHandler(backendManager,this);
+    }
+
+    private Restrictor createRestrictor(Map<ConfigKey, String> pConfig) {
+        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
+        try {
+            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
+            if (ret != null) {
+                info("Using access restrictor " + location);
+                return ret;
+            } else {
+                info("No access restrictor found, access to all MBean is alloweder");
+                return new AllowAllRestrictor();
+            }
+        } catch (IOException e) {
+            error("Error while accessing access restrictor at " + location +
+                          ". Denying all access to MBeans for security reasons. Exception: " + e,e);
+            return new DenyAllRestrictor();
+        }
     }
 
     @Override

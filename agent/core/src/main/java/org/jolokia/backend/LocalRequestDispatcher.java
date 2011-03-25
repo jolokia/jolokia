@@ -20,7 +20,7 @@ import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
 import org.jolokia.config.Config;
 import org.jolokia.config.DebugStore;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;

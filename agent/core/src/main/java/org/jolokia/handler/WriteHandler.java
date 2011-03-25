@@ -1,7 +1,7 @@
 package org.jolokia.handler;
 
 import org.jolokia.request.*;
-import org.jolokia.config.Restrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 
 import javax.management.*;

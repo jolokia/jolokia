@@ -2,13 +2,14 @@ package org.jolokia.http;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.RestrictorFactory;
+import org.jolokia.restrictor.*;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,13 +63,74 @@ public class AgentServlet extends HttpServlet {
     // Request handler for parsing request parameters and building up a response
     private HttpRequestHandler requestHandler;
 
+    // Restrictor to use as given in the constructor
+    private Restrictor restrictor;
+
+
+    /**
+     * No argument constructor, used e.g. by an servlet
+     * descriptor when creating the servlet out of web.xml
+     */
+    public AgentServlet() {
+        this(null);
+    }
+
+    /**
+     * Constructor taking a restrictor to use
+     *
+     * @param pRestrictor restrictor to use or <code>null</code> if the restrictor
+     *        should be created in the default way ({@link #createRestrictor(Map, LogHandler)})
+     */
+    public AgentServlet(Restrictor pRestrictor) {
+        restrictor = pRestrictor;
+    }
+
+    /**
+     * Set the log handler to use. This method must be called before
+     * {@link #init(ServletConfig)} in order to have an effect, since
+     * this log handler is used within init for initializing the subsytems
+     * accordingly. Preferable this method is used in an overridden init method
+     * in a sub class.
+     *
+     * @param pLogHandler log handler to use
+     */
     protected void setLogHandler(LogHandler pLogHandler) {
         logHandler = pLogHandler;
     }
 
+    /**
+     * Create a restrictor restrictor to use. By default, a policy file
+     * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
+     * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
+     * used by default. This method is called during the {@link #init(ServletConfig)} when initializing
+     * the subsystems and can be overridden for custom restrictor creation.
+     *
+     * @param pConfig agent configuration
+     * @param pLogHandler a log handler which is used for sending out warnings e.g. when a fallback
+     *        restrictor is used
+     * @return the restrictor to use.
+     */
+    protected Restrictor createRestrictor(Map<ConfigKey, String> pConfig,LogHandler pLogHandler) {
+        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
+        try {
+            Restrictor restrictor = RestrictorFactory.lookupPolicyRestrictor(location);
+            if (restrictor != null) {
+                pLogHandler.info("Using access restrictor " + location);
+                return restrictor;
+            } else {
+                pLogHandler.info("No access restrictor found at " + location + ", access to all MBeans is allowed");
+                return new AllowAllRestrictor();
+            }
+        } catch (IOException e) {
+            pLogHandler.error("Error while accessing access restrictor at " + location +
+                                      ". Denying all access to MBeans for security reasons. Exception: " + e,e);
+            return new DenyAllRestrictor();
+        }
+    }
+
     @Override
-    public void init(ServletConfig pConfig) throws ServletException {
-        super.init(pConfig);
+    public void init(ServletConfig pServletConfig) throws ServletException {
+        super.init(pServletConfig);
 
         // Initialize a loghandler if not given already
         if (logHandler == null) {
@@ -79,7 +141,13 @@ public class AgentServlet extends HttpServlet {
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
 
-        backendManager = new BackendManager(servletConfigAsMap(pConfig),logHandler);
+        Map<ConfigKey,String> config = servletConfigAsMap(pServletConfig);
+        if (restrictor == null) {
+            restrictor = createRestrictor(config,logHandler);
+        } else {
+            logHandler.info("Using custom access restriction provided by " + restrictor);
+        }
+        backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(backendManager,logHandler);
     }
 

@@ -1,8 +1,10 @@
 package org.jolokia.config;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
-import org.jolokia.util.LogHandler;
+import org.jolokia.restrictor.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -22,7 +24,7 @@ import org.jolokia.util.LogHandler;
 
 
 /**
- * Factory for obtaining the proper {@link org.jolokia.config.Restrictor}
+ * Factory for obtaining the proper {@link Restrictor}
  *
  * @author roland
  * @since Jul 28, 2009
@@ -32,22 +34,25 @@ public final class RestrictorFactory {
     private RestrictorFactory() { }
 
     /**
-     * Get the installed restrictor or the {@link org.jolokia.config.AllowAllRestrictor}
-     * is no restrictions are in effect.
+     * Lookup a restrictor based on an URL
      *
-     * @param pLogHandler log handler for printing out whether access restrictions are used or not
-     * @return the restrictor
+     * @param pLocation classpath or URL representing the location of the policy restrictor
+     *
+     * @return the restrictor created or <code>null</code> if none could be found.
+     * @throws IOException if reading of the policy stream failed
      */
-    public static Restrictor buildRestrictor(LogHandler pLogHandler) {
-
-        InputStream is =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("/jolokia-access.xml");
-        if (is != null) {
-            pLogHandler.info("jolokia: Using security policy from 'jolokia-access.xml'");
-            return new PolicyBasedRestrictor(is);
+    public static PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
+        InputStream is = null;
+        if (pLocation.startsWith("classpath:")) {
+            String path = pLocation.substring("classpath:".length());
+            is =  Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+            if (is == null) {
+                is = RestrictorFactory.class.getResourceAsStream(path);
+            }
         } else {
-            pLogHandler.info("jolokia: No security policy installed. Access to any MBean attribute and operation is permitted.");
-            return new AllowAllRestrictor();
+            URL url = new URL(pLocation);
+            is = url.openStream();
         }
+        return is != null ? new PolicyRestrictor(is) : null;
     }
 }

@@ -29,48 +29,97 @@ import java.util.Map;
  */
 public enum ConfigKey {
 
-    // Maximum number of history entries to keep
+    /**
+     * Maximum number of history entries to keep
+     */
     HISTORY_MAX_ENTRIES("historyMaxEntries",true, false, "10"),
 
-    // Whether debug is switched on or not
+    /**
+     * Whether debug is switched on or not
+     */
     DEBUG("debug",true, false, "false"),
 
-    // Maximum number of debug entries to hold
+    /**
+     * Maximum number of debug entries to hold
+     */
     DEBUG_MAX_ENTRIES("debugMaxEntries",true, false, "100"),
 
-    // Dispatcher to use
+    /**
+     * Request Dispatcher to use in addition to the local dispatcher.
+     */
     DISPATCHER_CLASSES("dispatcherClasses", true, false),
 
-    // Maximum traversal depth for serialization of complex objects.
+    /**
+     * Maximum traversal depth for serialization of complex objects.
+     */
     MAX_DEPTH("maxDepth",true, true, null),
 
-    // Maximum size of collections returned during serialization.
-    // If larger, the collection is truncated
+    /**
+     * Maximum size of collections returned during serialization.
+     * If larger, the collection is truncated
+     */
     MAX_COLLECTION_SIZE("maxCollectionSize",true, true, null),
 
-    // Maximum number of objects returned by serialization
+    /**
+     * Maximum number of objects returned by serialization
+     */
     MAX_OBJECTS("maxObjects",true, true, null),
 
-    // Context used for agent, used e.g. in the OSGi activator
-    // (but not for the servlet, this is done in web.xml)
-    AGENT_CONTEXT("agentContext",true, false, "/jolokia"),
+    /**
+     * Init parameter for the location of the policy file
+     */
+    POLICY_LOCATION("policyLocation",true,false,"classpath:/jolokia-access.xml"),
 
-    // User and password for authentication purposes.
-    USER("user", false, true),
-    PASSWORD("password", false, true),
-
-    // Runtime configuration (i.e. must come in with a request)
-    // for ignoring errors during JMX operations and JSON serialization.
-    // This works only for certain operations like pattern reads.
+    /**
+     * Runtime configuration (i.e. must come in with a request)
+     * for ignoring errors during JMX operations and JSON serialization.
+     * This works only for certain operations like pattern reads.
+     */
     IGNORE_ERRORS("ignoreErrors", false, true),
 
-    // Optional domain name for registering own MBeans
+    /**
+     * Optional domain name for registering own MBeans
+     */
     MBEAN_QUALIFIER("mbeanQualifier", true, false),
 
-    // Option which can be given to a request to speficy a JSONP callback.
-    // The generated answer will be of type text/javascript and it will
-    // contain a JSON function to be called.
-    CALLBACK("callback", false, true);
+    /**
+     * Option which can be given to a request to speficy a JSONP callback.
+     * The generated answer will be of type text/javascript and it will
+     * contain a JSON function to be called.
+     */
+    CALLBACK("callback", false, true),
+
+    // ================================================================================
+    // Configuration relevant for OSGI container
+
+    /**
+     *  User for authentication purposes. Used by OSGi and JDK agent.
+     */
+    USER("user", false, true),
+
+    /**
+     *  Password for authentication purposes. Used by OSGi and JDK agent
+     */
+    PASSWORD("password", false, true),
+
+    /**
+     * Context used for agent, used e.g. in the OSGi activator
+     * (but not for the servlet, this is done in web.xml)
+     */
+    AGENT_CONTEXT("agentContext",true, false, "/jolokia"),
+
+    /**
+     * For OSGi, if set to true, the agent uses a restrictor service when it kicks in,
+     * but denies access otherwise.
+     */
+    USE_RESTRICTOR_SERVICE("useRestrictorService",true,false,"false"),
+
+    /**
+     * By default, the OSGi Agent listens for an OSGi HttpService to which it will register
+     * an agent servlet. Set this to false if you want to instantiate the
+     * servlet on your own (either declaratively within another war or programmatically)
+     */
+    LISTEN_FOR_HTTP_SERVICE("listenForHttpService",true,false,"true");
 
     private String key;
     private String defaultValue;
