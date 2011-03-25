@@ -35,7 +35,7 @@ import java.util.Map;
 public class RequestHandlerManager {
 
     // Map with all json request handlers
-    private final Map<RequestType, JsonRequestHandler> REQUEST_HANDLER_MAP = new HashMap<RequestType, JsonRequestHandler>();
+    private final Map<RequestType, JsonRequestHandler> requestHandlerMap = new HashMap<RequestType, JsonRequestHandler>();
 
     public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
             StringToObjectConverter pStringToObjectConverter,
@@ -49,7 +49,7 @@ public class RequestHandlerManager {
                 new SearchHandler(pRestrictor)
         };
         for (JsonRequestHandler handler : handlers) {
-            REQUEST_HANDLER_MAP.put(handler.getType(),handler);
+            requestHandlerMap.put(handler.getType(),handler);
         }
     }
 
@@ -60,7 +60,7 @@ public class RequestHandlerManager {
      * @return handler which can handle requests of the given type
      */
     public JsonRequestHandler getRequestHandler(RequestType pType) {
-        JsonRequestHandler handler = REQUEST_HANDLER_MAP.get(pType);
+        JsonRequestHandler handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");
         }
