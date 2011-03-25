@@ -10,8 +10,8 @@ import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jolokia.request.*;
 import org.jolokia.request.RequestType;
+import org.jolokia.util.HttpMethod;
 import org.jolokia.util.IpChecker;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
@@ -88,7 +88,7 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     public boolean isTypeAllowed(String pType) {
-        return typeSet == null || typeSet.contains(pType);
+        return typeSet == null || typeSet.contains(RequestType.getTypeByName(pType));
     }
 
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
@@ -176,7 +176,7 @@ public class PolicyRestrictor implements Restrictor {
                 }
                 assertNodeName(commandNode,"command");
                 String typeName = commandNode.getTextContent().trim();
-                RequestType type = RequestType.valueOf(typeName.toUpperCase());
+                RequestType type = RequestType.getTypeByName(typeName);
                 typeSet.add(type);
             }
         }

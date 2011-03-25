@@ -1,6 +1,6 @@
 package org.jolokia.restrictor;
 
-import org.jolokia.request.*;
+import org.jolokia.util.HttpMethod;
 
 import javax.management.ObjectName;
 

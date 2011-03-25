@@ -17,7 +17,7 @@ package org.jolokia.config;
  */
 
 import org.jolokia.request.*;
-import org.jolokia.restrictor.HttpMethod;
+import org.jolokia.util.HttpMethod;
 import org.jolokia.restrictor.PolicyRestrictor;
 import org.testng.annotations.Test;
 

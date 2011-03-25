@@ -163,19 +163,19 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    public void debug(String message) {
+    public final void debug(String message) {
         System.err.println("DEBUG: " + message);
     }
 
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    public void info(String message) {
+    public final void info(String message) {
         System.err.println("INFO: " + message);
     }
 
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    public void error(String message, Throwable t) {
+    public final void error(String message, Throwable t) {
         System.err.println("ERROR: " + message);
     }
 }

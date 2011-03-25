@@ -35,7 +35,7 @@ import java.util.Map;
 public class RequestHandlerManager {
 
     // Map with all json request handlers
-    private Map<RequestType, JsonRequestHandler> REQUEST_HANDLER_MAP = new HashMap<RequestType, JsonRequestHandler>();
+    private final Map<RequestType, JsonRequestHandler> REQUEST_HANDLER_MAP = new HashMap<RequestType, JsonRequestHandler>();
 
     public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
             StringToObjectConverter pStringToObjectConverter,

@@ -16,15 +16,11 @@
 
 package org.jolokia.osgi.servlet;
 
-import java.util.Map;
-
 import javax.servlet.*;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
-import org.jolokia.http.AgentServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -51,13 +47,9 @@ public class JolokiaServlet extends AgentServlet {
     // Tracker to be used for the LogService
     private ServiceTracker logTracker;
 
-    // Tracker for a restrictor
-    private ServiceTracker restrictorTracker;
-
     // Thread-Locals which will be used for holding the bundle context and
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
-
 
     public JolokiaServlet() {
         this(null);

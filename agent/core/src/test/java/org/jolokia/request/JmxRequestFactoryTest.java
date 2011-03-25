@@ -19,7 +19,7 @@ package org.jolokia.request;
 import java.util.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.restrictor.HttpMethod;
+import org.jolokia.util.HttpMethod;
 import org.testng.annotations.Test;
 
 import static org.jolokia.request.JmxRequestBuilder.createMap;

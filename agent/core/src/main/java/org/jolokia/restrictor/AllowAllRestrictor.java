@@ -2,6 +2,8 @@ package org.jolokia.restrictor;
 
 import javax.management.ObjectName;
 
+import org.jolokia.util.HttpMethod;
+
 /*
  *  Copyright 2009-2010 Roland Huss
  *

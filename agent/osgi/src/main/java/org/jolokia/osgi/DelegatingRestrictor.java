@@ -3,15 +3,15 @@ package org.jolokia.osgi;
 import javax.management.ObjectName;
 
 import org.jolokia.restrictor.*;
+import org.jolokia.util.HttpMethod;
 import org.osgi.framework.*;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * A restrictor which delegate to a RestrictorService if available or denies access
  * if none is available. If multiple services are available, it will grant access
  * only if all restrictors allow
  */
-class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
+class DelegatingRestrictor extends DenyAllRestrictor {
 
     private BundleContext bundleContext;
 
@@ -45,13 +45,13 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
             }
         } catch (InvalidSyntaxException e) {
             // Will not happen, since we dont use a filter here
-            throw new IllegalArgumentException("Impossible exception (we don't use a filter for fetching the services)");
+            throw new IllegalArgumentException("Impossible exception (we don't use a filter for fetching the services)",e);
         }
     }
 
     // ====================================================================
 
-    private static final RestrictorCheck httpMethodCheck = new RestrictorCheck() {
+    private static final RestrictorCheck HTTP_METHOD_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isHttpMethodAllowed((HttpMethod) args[0]);
         }
@@ -59,12 +59,12 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
 
     @Override
     public boolean isHttpMethodAllowed(HttpMethod pMethod) {
-        return checkRestrictorService(httpMethodCheck,pMethod);
+        return checkRestrictorService(HTTP_METHOD_CHECK,pMethod);
     }
 
     // ====================================================================
 
-    private static final RestrictorCheck typeCheck = new RestrictorCheck() {
+    private static final RestrictorCheck TYPE_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isTypeAllowed((String) args[0]);
         }
@@ -72,12 +72,12 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
 
     @Override
     public boolean isTypeAllowed(String pType) {
-        return checkRestrictorService(typeCheck, pType);
+        return checkRestrictorService(TYPE_CHECK, pType);
     }
 
     // ====================================================================
 
-    private static final RestrictorCheck attributeReadCheck = new RestrictorCheck() {
+    private static final RestrictorCheck ATTRIBUTE_READ_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isAttributeReadAllowed((ObjectName) args[0], (String) args[1]);
         }
@@ -85,12 +85,12 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
 
     @Override
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return checkRestrictorService(attributeReadCheck,pName,pAttribute);
+        return checkRestrictorService(ATTRIBUTE_READ_CHECK,pName,pAttribute);
     }
 
     // ====================================================================
 
-    private static final RestrictorCheck attributeWriteCheck = new RestrictorCheck() {
+    private static final RestrictorCheck ATTRIBUTE_WRITE_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isAttributeWriteAllowed((ObjectName) args[0], (String) args[1]);
         }
@@ -98,12 +98,12 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
 
     @Override
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
-        return checkRestrictorService(attributeWriteCheck,pName,pAttribute);
+        return checkRestrictorService(ATTRIBUTE_WRITE_CHECK,pName,pAttribute);
     }
 
     // ====================================================================
 
-    private static final RestrictorCheck operationCheck = new RestrictorCheck() {
+    private static final RestrictorCheck OPERATION_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isOperationAllowed((ObjectName) args[0], (String) args[1]);
         }
@@ -111,12 +111,12 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
 
     @Override
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
-        return checkRestrictorService(operationCheck,pName,pOperation);
+        return checkRestrictorService(OPERATION_CHECK,pName,pOperation);
     }
 
     // ====================================================================
 
-    private static final RestrictorCheck remoteCheck = new RestrictorCheck() {
+    private static final RestrictorCheck REMOTE_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
             String[] argsS = new String[args.length];
             for (int i = 0; i < args.length; i++) {
@@ -128,7 +128,7 @@ class DelegatingRestrictor extends DenyAllRestrictor implements Restrictor {
 
     @Override
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return checkRestrictorService(remoteCheck,pHostOrAddress);
+        return checkRestrictorService(REMOTE_CHECK,pHostOrAddress);
     }
 
     // =======================================================================================================

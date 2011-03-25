@@ -113,10 +113,10 @@ public class AgentServlet extends HttpServlet {
     protected Restrictor createRestrictor(Map<ConfigKey, String> pConfig,LogHandler pLogHandler) {
         String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
         try {
-            Restrictor restrictor = RestrictorFactory.lookupPolicyRestrictor(location);
-            if (restrictor != null) {
+            Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(location);
+            if (newRestrictor != null) {
                 pLogHandler.info("Using access restrictor " + location);
-                return restrictor;
+                return newRestrictor;
             } else {
                 pLogHandler.info("No access restrictor found at " + location + ", access to all MBeans is allowed");
                 return new AllowAllRestrictor();

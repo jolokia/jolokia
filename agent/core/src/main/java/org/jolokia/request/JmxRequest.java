@@ -19,7 +19,7 @@ package org.jolokia.request;
 import java.util.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.restrictor.HttpMethod;
+import org.jolokia.util.HttpMethod;
 import org.jolokia.util.PathUtil;
 import org.json.simple.JSONObject;
 
@@ -61,7 +61,7 @@ public abstract class JmxRequest {
      *                    to influence the processing.
      */
     protected JmxRequest(RequestType pType, List<String> pPathParts, Map<String, String> pInitParams) {
-        this(pType,HttpMethod.GET, pPathParts, pInitParams);
+        this(pType, HttpMethod.GET, pPathParts, pInitParams);
     }
 
     /**
