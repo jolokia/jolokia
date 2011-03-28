@@ -8,6 +8,12 @@
   </properties>
   <body>
     <release version="0.90" description="Release 0.90" date="">
+      <action dev="roland" type="update" date="2011-03-26">
+        A search request will now return an empty list, not an error
+        response with a 404 status code. A null result of a search
+        query is considered to be a valid result, not an error
+        condition.
+      </action>
       <action dev="roland" type="add" date="2011-03-24">
         Added a OSGi bundle property org.jolokia.listenForHttpService
         which, if set to false, prevents the automatic registration of

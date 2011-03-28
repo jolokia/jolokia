@@ -133,6 +133,12 @@ $(document).ready(function() {
             });
         });
 
+        test("search (no result, sync)", function() {
+            var value = j4p.search("bla:notype=*");
+            ok($.isArray(value),"Return value from search must be an array");
+            equals(value.length,0,"List must be empty");
+        });
+
         asyncTest("search (sync with error)", function() {
             var value = j4p.search("jolokia.it:type=*=a*", { error : function(resp) {
                 ok(resp.error != null, "Error occured");

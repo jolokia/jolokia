@@ -16,7 +16,6 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.management.MalformedObjectNameException;
@@ -82,10 +81,7 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
         List<String> parts = super.getRequestParts();
         parts.add(attribute);
         parts.add(serializeArgumentToRequestPart(value));
-        if (path != null) {
-            // Split up path
-            parts.addAll(Arrays.asList(path.split("/")));
-        }
+        addPath(parts,path);
         return parts;
     }
 

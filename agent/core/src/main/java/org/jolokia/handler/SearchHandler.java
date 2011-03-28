@@ -49,9 +49,6 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
     public Object doHandleRequest(MBeanServerConnection server, JmxSearchRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, MBeanException, IOException {
         Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
-        if (names == null || names.size() == 0) {
-            throw new InstanceNotFoundException("No MBean with pattern " + request.getObjectNameAsString() + " found");
-        }
         List<String> ret = new ArrayList<String>();
         for (ObjectName name : names) {
 

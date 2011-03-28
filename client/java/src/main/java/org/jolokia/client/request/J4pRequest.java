@@ -16,9 +16,10 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 
 /**
  * Request object abstracting a request to a j4p agent.
@@ -75,5 +76,131 @@ public abstract class J4pRequest {
 
     public void setPreferredHttpMethod(String pPreferredHttpMethod) {
         preferredHttpMethod = pPreferredHttpMethod;
+    }
+
+    protected List<String> splitPath(String pPath) {
+        return Arrays.asList(pPath.split("/"));
+    }
+
+    protected void addPath(List<String> pParts, String pPath) {
+        if (pPath != null) {
+            // Split up path
+            pParts.addAll(splitPath(pPath));
+        }
+    }
+
+    /**
+     * Serialize an object to a string which can be uses as URL part in a GET request
+     * when object should be transmitted <em>to</em> the agent. The serialization is
+     * rather limited: If it is an array, the array's member's string representation are used
+     * in a comma separated list (without escaping so far, so the strings must not contain any
+     * commas themselves). If it is not an array, the string representation ist used (<code>Object.toString()</code>)
+     * Any <code>null</code> value is transformed in the special marker <code>[null]</code> which on the
+     * agent side is converted back into a <code>null</code>.
+     * <p>
+     * You should consider using POST requests when you need a more sophisticated JSON serialization.
+     * </p>
+     * @param pArg the argument to serialize for an GET request
+     * @return the string representation
+     */
+    protected String serializeArgumentToRequestPart(Object pArg) {
+        if (pArg != null) {
+            if (pArg.getClass().isArray()) {
+                return getArrayForArgument((Object[]) pArg);
+            } else if (List.class.isAssignableFrom(pArg.getClass())) {
+                List list = (List) pArg;
+                Object[] args = new Object[list.size()];
+                int i = 0;
+                for (Object e : list) {
+                    args[i++] = e;
+                }
+                return getArrayForArgument(args);
+            }
+        }
+        return nullEscape(pArg);
+    }
+
+    /**
+     * Serialize an object to an string or JSON structure for write/exec POST requests.
+     * Serialization is up to now rather limited:
+     * <ul>
+     *    <li>
+     *      If the argument is <code>null</code> null is returned.
+     *    </li>
+     *    <li>
+     *      If the argument is of type {@see org.json.simple.JSONAware}, the it is used directly for inclusion
+     *      in the POST request.
+     *    </li>
+     *    <li>
+     *      If the argument is an array, this array's content is put into
+     *      an {@see org.json.simple.JSONArray}, where each array member is serialized recursively.
+     *    </li>
+     *    <li>
+     *      If the argument is a map, it is transformed into a {@see org.json.simple.JSONObject} with the keys taken
+     *      directly from the map and the values recursively serialized to their JSON representation.
+     *      So it is only save fto use or a simple map with string keys.
+     *    </li>
+     *    <li>
+     *      If the argument is a {@link Collection}, it is transformed into a {@see JSONArray} with
+     *      the values recursively serialized to their JSON representaion.
+     *    </li>
+     *    <li>
+     *      Otherwise the object is used directly.
+     *    </li>
+     * </ul>
+     *
+     * Future version of this lib will probably provide a more sophisticated serialization mechanism.
+     * <em>This is how it is supposed to be for the next release, currently a simplified serialization is in place</em>
+     *
+     * @param pArg the object to serialize
+     * @return a JSON serialized object
+     */
+    protected Object serializeArgumentToJson(Object pArg) {
+        if (pArg == null) {
+            return null;
+        } else if (pArg instanceof JSONAware) {
+            return pArg;
+        } else if (pArg.getClass().isArray()) {
+            JSONArray innerArray = new JSONArray();
+            for (int i = 0; i < Array.getLength(pArg); i++ ) {
+                innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
+            }
+            return innerArray;
+        } else if (pArg instanceof Map) {
+            JSONObject map  = new JSONObject();
+            for (Map.Entry<Object,Object> entry : ((Map<Object,Object>) pArg).entrySet()) {
+                map.put(entry.getKey(),serializeArgumentToJson(entry.getValue()));
+            }
+            return map;
+        } else if (pArg instanceof Collection) {
+            JSONArray array = new JSONArray();
+            for (Object value : ((Collection) pArg)) {
+                array.add(serializeArgumentToJson(value));
+            }
+            return array;
+        } else {
+            return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
+        }
+    }
+
+    private String getArrayForArgument(Object[] pArg) {
+        StringBuilder inner = new StringBuilder();
+        for (int i = 0; i< pArg.length; i++) {
+            inner.append(nullEscape(pArg[i]));
+            if (i < pArg.length - 1) {
+                inner.append(",");
+            }
+        }
+        return inner.toString();
+    }
+
+    private String nullEscape(Object pArg) {
+        if (pArg == null) {
+            return "[null]";
+        } else if (pArg instanceof String && ((String) pArg).length() == 0) {
+            return "\"\"";
+        } else {
+            return pArg.toString();
+        }
     }
 }

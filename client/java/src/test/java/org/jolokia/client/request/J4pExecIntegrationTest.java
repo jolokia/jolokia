@@ -222,12 +222,16 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         arr.add("fcb");
         arr.add("svw");
         map.put("zwei",arr);
+        map.put("drei",10L);
+        map.put("vier",true);
 
         request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",map);
         resp = j4pClient.execute(request,"POST");
         Map res = resp.getValue();
         assertEquals(res.get("eins"),"fcn");
         assertEquals(((List) res.get("zwei")).get(1),"svw");
+        assertEquals(res.get("drei"),10L);
+        assertEquals(res.get("vier"),true);
 
         request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",null);
         resp = j4pClient.execute(request,"POST");

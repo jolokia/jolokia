@@ -66,7 +66,6 @@ public class AgentServlet extends HttpServlet {
     // Restrictor to use as given in the constructor
     private Restrictor restrictor;
 
-
     /**
      * No argument constructor, used e.g. by an servlet
      * descriptor when creating the servlet out of web.xml
