@@ -52,7 +52,6 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
         super(RequestType.WRITE, pObjectName, pPathParts, pInitParams);
         attributeName = pAttribute;
         value = pValue;
-        validate();
     }
 
     /**
@@ -66,13 +65,6 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
         super(pRequestMap, pParams);
         value = pRequestMap.get("value");
         attributeName = (String) pRequestMap.get("attribute");
-        validate();
-    }
-
-    private void validate() {
-        if (attributeName == null) {
-            throw new IllegalArgumentException("No attribute name given");
-        }
     }
 
     /**

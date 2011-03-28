@@ -53,7 +53,6 @@ public class JmxExecRequest extends JmxObjectNameRequest {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams);
         operation = pOperation;
         arguments = pArguments;
-        validate();
     }
 
     /**
@@ -67,7 +66,6 @@ public class JmxExecRequest extends JmxObjectNameRequest {
         super(pRequestMap, pParams);
         arguments = (List) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
-        validate();
     }
 
     /**
@@ -115,14 +113,4 @@ public class JmxExecRequest extends JmxObjectNameRequest {
         ret.append("]");
         return ret.toString();
     }
-
-
-    // Validate this request.
-    private void validate() {
-        if (operation == null || operation.length() == 0) {
-            throw new IllegalArgumentException("Operation name must not be null");
-        }
-    }
-
-
 }

@@ -94,11 +94,8 @@ public class Config implements ConfigMBean,MBeanRegistration {
         debugStore.setMaxDebugEntries(pNumber);
     }
 
-    public int getHistorySize() throws IOException {
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
-        oOut.writeObject(historyStore);
-        return bOut.size();
+    public int getHistorySize() {
+        return historyStore.getSize();
     }
 
     public String getObjectName() {

@@ -37,7 +37,8 @@ var Jolokia = (function($) {
     var POST_AJAX_PARAMS = {
         type: "POST",
         processData: false,
-        dataType: "json"
+        dataType: "json",
+        contentType: "text/json"
     };
 
     // Processing parameters which are added to the

@@ -1,6 +1,6 @@
 package org.jolokia.history;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -49,7 +49,6 @@ public class HistoryStore implements Serializable {
     private static final String KEY_TIMESTAMP = "timestamp";
 
     private Map<RequestType,HistoryUpdater> historyUpdaters = new HashMap<RequestType, HistoryUpdater>();
-
 
     /**
      * Constructor for a history store
@@ -150,6 +149,22 @@ public class HistoryStore implements Serializable {
         }
     }
 
+    /**
+     * Get the size of this history store in bytes
+     *
+     * @return size in bytes
+     */
+    public synchronized int getSize() {
+        try {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            ObjectOutputStream oOut = null;
+            oOut = new ObjectOutputStream(bOut);
+            oOut.writeObject(historyStore);
+            return bOut.size();
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot serialize internal store: " + e,e);
+        }
+    }
 
     // =======================================================================================================
 

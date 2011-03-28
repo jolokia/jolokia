@@ -8,6 +8,10 @@
   </properties>
   <body>
     <release version="0.90" description="Release 0.90" date="">
+      <action dev="roland" type="fix" date="2011-03-28">
+        Fixed content-type in javascript library to "text/json" for requests
+        (was "application/x-www-form-urlencoded")
+      </action>
       <action dev="roland" type="update" date="2011-03-26">
         A search request will now return an empty list, not an error
         response with a 404 status code. A null result of a search
