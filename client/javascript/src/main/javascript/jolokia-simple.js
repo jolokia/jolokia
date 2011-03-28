@@ -50,9 +50,7 @@ if (Jolokia) {
                 path = null;
             }
             var req = { type: "read", mbean: mbean, attribute: attribute };
-            if (path != null) {
-                req.path = path;
-            }
+            addPath(req,path);
             return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
         }
 
@@ -73,9 +71,7 @@ if (Jolokia) {
                 path = null;
             }
             var req = { type: "write", mbean: mbean, attribute: attribute, value: value };
-            if (path != null) {
-                req.path = path;
-            }
+            addPath(req,path);
             return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
         }
 
@@ -214,14 +210,18 @@ if (Jolokia) {
                 path = null;
             }
             var req = { type: "list" };
-            if (path != null) {
-                req.path = path;
-            }
+            addPath(req,path);
             return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
         }
 
         // =======================================================================
         // Private methods:
+
+        function addPath(req,path) {
+            if (path != null) {
+                req.path = path;
+            }
+        }
 
         function extractValue(response,opts) {
             if (response == null) {
