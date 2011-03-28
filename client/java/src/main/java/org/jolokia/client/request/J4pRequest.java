@@ -194,6 +194,7 @@ public abstract class J4pRequest {
         return inner.toString();
     }
 
+    // null escape used for GET requests
     private String nullEscape(Object pArg) {
         if (pArg == null) {
             return "[null]";
