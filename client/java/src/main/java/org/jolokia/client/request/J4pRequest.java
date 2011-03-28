@@ -161,26 +161,38 @@ public abstract class J4pRequest {
         } else if (pArg instanceof JSONAware) {
             return pArg;
         } else if (pArg.getClass().isArray()) {
-            JSONArray innerArray = new JSONArray();
-            for (int i = 0; i < Array.getLength(pArg); i++ ) {
-                innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
-            }
-            return innerArray;
+            return serializeArray(pArg);
         } else if (pArg instanceof Map) {
-            JSONObject map  = new JSONObject();
-            for (Map.Entry<Object,Object> entry : ((Map<Object,Object>) pArg).entrySet()) {
-                map.put(entry.getKey(),serializeArgumentToJson(entry.getValue()));
-            }
-            return map;
+            return serializeMap((Map) pArg);
         } else if (pArg instanceof Collection) {
-            JSONArray array = new JSONArray();
-            for (Object value : ((Collection) pArg)) {
-                array.add(serializeArgumentToJson(value));
-            }
-            return array;
+            return serializeCollection((Collection) pArg);
         } else {
             return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
         }
+    }
+
+    private Object serializeCollection(Collection pArg) {
+        JSONArray array = new JSONArray();
+        for (Object value : ((Collection) pArg)) {
+            array.add(serializeArgumentToJson(value));
+        }
+        return array;
+    }
+
+    private Object serializeMap(Map pArg) {
+        JSONObject map  = new JSONObject();
+        for (Map.Entry<Object,Object> entry : ((Map<Object,Object>) pArg).entrySet()) {
+            map.put(entry.getKey(),serializeArgumentToJson(entry.getValue()));
+        }
+        return map;
+    }
+
+    private Object serializeArray(Object pArg) {
+        JSONArray innerArray = new JSONArray();
+        for (int i = 0; i < Array.getLength(pArg); i++ ) {
+            innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
+        }
+        return innerArray;
     }
 
     private String getArrayForArgument(Object[] pArg) {

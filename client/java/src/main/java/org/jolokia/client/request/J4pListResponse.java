@@ -16,12 +16,6 @@
 
 package org.jolokia.client.request;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.json.simple.JSONObject;
 
 /**

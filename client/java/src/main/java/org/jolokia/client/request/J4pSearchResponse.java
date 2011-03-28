@@ -51,7 +51,7 @@ public final class J4pSearchResponse extends J4pResponse<J4pSearchRequest> {
             } catch (MalformedObjectNameException e) {
                 // Should never happen since the names returned by the server must
                 // be valid ObjectNames for sure
-                throw new RuntimeException("Cannot convert search result '" + name + "' to an ObjectName",e);
+                throw new IllegalStateException("Cannot convert search result '" + name + "' to an ObjectName",e);
             }
         }
         return ret;
