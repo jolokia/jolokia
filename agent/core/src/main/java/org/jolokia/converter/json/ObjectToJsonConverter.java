@@ -1,13 +1,12 @@
 package org.jolokia.converter.json;
 
 
-import org.jolokia.util.ConfigKey;
+import org.jolokia.util.*;
 import org.jolokia.request.*;
 import org.jolokia.converter.StringToObjectConverter;
 
 import static org.jolokia.util.ConfigKey.*;
 
-import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
 import javax.management.AttributeNotFoundException;
 
@@ -100,7 +99,7 @@ public final class ObjectToJsonConverter {
      */
     public JSONObject convertToJson(Object pValue, JmxRequest pRequest, boolean pUseValueWithPath)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pUseValueWithPath ? reversePath(pRequest.getPathParts()) : new Stack<String>();
+        Stack<String> extraStack = pUseValueWithPath ? PathUtil.reversePath(pRequest.getPathParts()) : new Stack<String>();
 
         setupContext(pRequest);
 
@@ -145,7 +144,7 @@ public final class ObjectToJsonConverter {
             }
 
             String lastPathElement = pathParts.remove(pathParts.size()-1);
-            Stack<String> extraStack = reversePath(pathParts);
+            Stack<String> extraStack = PathUtil.reversePath(pathParts);
             // Get the object pointed to do with path-1
 
             try {
@@ -197,17 +196,6 @@ public final class ObjectToJsonConverter {
         Integer ret = pValue != null ? Integer.parseInt(pValue) : null;
         // "0" is interpreted as no limit
         return (ret != null && ret == 0) ? null : ret;
-    }
-
-    private Stack<String> reversePath(List<String> pathParts) {
-        Stack<String> pathStack = new Stack<String>();
-        if (pathParts != null) {
-            // Needs first extra argument at top of the stack
-            for (int i = pathParts.size() - 1;i >=0;i--) {
-                pathStack.push(pathParts.get(i));
-            }
-        }
-        return pathStack;
     }
 
 

@@ -113,6 +113,24 @@ public final class PathUtil {
         return ret;
     }
 
+    /**
+     * Reverse path and return as a stack. First path element is on top
+     * of the stack.
+     *
+     * @param pathParts path to reverse
+     * @return reversed path or an empty stack if no path parts are given. Never return null.
+     */
+    public static Stack<String> reversePath(List<String> pathParts) {
+        Stack<String> pathStack = new Stack<String>();
+        if (pathParts != null) {
+            // Needs first extra argument at top of the stack
+            for (int i = pathParts.size() - 1;i >=0;i--) {
+                pathStack.push(pathParts.get(i));
+            }
+        }
+        return pathStack;
+    }
+
     public static void unescapeSlashes(String pCurrentElement, Stack<String> pRet,
                                        Stack<String> pElementStack, StringBuffer pPreviousBuffer)  {
         if (pRet.isEmpty()) {
@@ -176,4 +194,6 @@ public final class PathUtil {
         //return URLDecoder.decode(s,"UTF-8");
 
     }
+
+
 }
