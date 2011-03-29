@@ -98,30 +98,36 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
+     * Get the installed log handler
+     *
+     * @return loghandler used for logging.
+     */
+    protected LogHandler getLogHandler() {
+        return logHandler;
+    }
+
+    /**
      * Create a restrictor restrictor to use. By default, a policy file
      * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
      * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
      * used by default. This method is called during the {@link #init(ServletConfig)} when initializing
      * the subsystems and can be overridden for custom restrictor creation.
      *
-     * @param pConfig agent configuration
-     * @param pLogHandler a log handler which is used for sending out warnings e.g. when a fallback
-     *        restrictor is used
+     * @param pLocation location to lookup the restrictor
      * @return the restrictor to use.
      */
-    protected Restrictor createRestrictor(Map<ConfigKey, String> pConfig,LogHandler pLogHandler) {
-        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
+    protected Restrictor createRestrictor(String pLocation) {
         try {
-            Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(location);
+            Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
             if (newRestrictor != null) {
-                pLogHandler.info("Using access restrictor " + location);
+                logHandler.info("Using access restrictor " + pLocation);
                 return newRestrictor;
             } else {
-                pLogHandler.info("No access restrictor found at " + location + ", access to all MBeans is allowed");
+                logHandler.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            pLogHandler.error("Error while accessing access restrictor at " + location +
+            logHandler.error("Error while accessing access restrictor at " + pLocation +
                                       ". Denying all access to MBeans for security reasons. Exception: " + e,e);
             return new DenyAllRestrictor();
         }
@@ -142,7 +148,7 @@ public class AgentServlet extends HttpServlet {
 
         Map<ConfigKey,String> config = servletConfigAsMap(pServletConfig);
         if (restrictor == null) {
-            restrictor = createRestrictor(config,logHandler);
+            restrictor = createRestrictor(ConfigKey.POLICY_LOCATION.getValue(config));
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }

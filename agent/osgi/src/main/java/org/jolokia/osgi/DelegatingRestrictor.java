@@ -4,6 +4,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.restrictor.*;
 import org.jolokia.util.HttpMethod;
+import org.jolokia.util.RequestType;
 import org.osgi.framework.*;
 
 /**
@@ -66,12 +67,12 @@ class DelegatingRestrictor extends DenyAllRestrictor {
 
     private static final RestrictorCheck TYPE_CHECK = new RestrictorCheck() {
         public boolean check(Restrictor restrictor,Object ... args) {
-            return restrictor.isTypeAllowed((String) args[0]);
+            return restrictor.isTypeAllowed((RequestType) args[0]);
         }
     };
 
     @Override
-    public boolean isTypeAllowed(String pType) {
+    public boolean isTypeAllowed(RequestType pType) {
         return checkRestrictorService(TYPE_CHECK, pType);
     }
 

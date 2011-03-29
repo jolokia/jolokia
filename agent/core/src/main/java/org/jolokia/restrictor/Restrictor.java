@@ -1,6 +1,7 @@
 package org.jolokia.restrictor;
 
 import org.jolokia.util.HttpMethod;
+import org.jolokia.util.RequestType;
 
 import javax.management.ObjectName;
 
@@ -44,10 +45,11 @@ public interface Restrictor {
      * Check whether the provided command type is allowed in principal
      *
      *
+     *
      * @param pType type to check
      * @return true, if the type is allowed, false otherwise
      */
-    boolean isTypeAllowed(String pType);
+    boolean isTypeAllowed(RequestType pType);
 
     /**
      * Check whether reading of an attribute is allowed

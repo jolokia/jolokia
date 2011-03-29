@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.request.RequestType.READ;
+import static org.jolokia.util.RequestType.READ;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 

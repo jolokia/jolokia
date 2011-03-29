@@ -3,6 +3,7 @@ package org.jolokia.restrictor;
 import javax.management.ObjectName;
 
 import org.jolokia.util.HttpMethod;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -33,7 +34,7 @@ public class AllowAllRestrictor implements Restrictor {
         return true;
     }
 
-    public boolean isTypeAllowed(String pType) {
+    public boolean isTypeAllowed(RequestType pType) {
         return true;
     }
 

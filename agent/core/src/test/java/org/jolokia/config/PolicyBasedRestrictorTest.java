@@ -16,9 +16,9 @@ package org.jolokia.config;
  *  limitations under the License.
  */
 
-import org.jolokia.request.*;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.restrictor.PolicyRestrictor;
+import org.jolokia.util.RequestType;
 import org.testng.annotations.Test;
 
 import java.io.InputStream;
@@ -96,7 +96,7 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config,name=Bla"),"Debug"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("jolokia:type=Threading"),"gc"));
-        assertTrue(restrictor.isTypeAllowed(RequestType.READ.getName()));
+        assertTrue(restrictor.isTypeAllowed(RequestType.READ));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.GET));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.POST));
     }

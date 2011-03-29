@@ -18,6 +18,8 @@ package org.jolokia.request;
 
 import java.util.Map;
 
+import org.jolokia.util.RequestType;
+
 /**
  * A JMX request for a <code>version</code> request.
  *

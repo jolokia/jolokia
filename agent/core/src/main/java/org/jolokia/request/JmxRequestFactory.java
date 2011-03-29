@@ -6,6 +6,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.util.PathUtil;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss

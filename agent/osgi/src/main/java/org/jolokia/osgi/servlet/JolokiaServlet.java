@@ -16,10 +16,13 @@
 
 package org.jolokia.osgi.servlet;
 
+import java.util.Map;
+
 import javax.servlet.*;
 
 import org.jolokia.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -93,6 +96,11 @@ public class JolokiaServlet extends AgentServlet {
         } finally {
             BUNDLE_CONTEXT_THREAD_LOCAL.remove();
         }
+    }
+
+    @Override
+    protected Restrictor createRestrictor(String pLocation) {
+        return super.createRestrictor(pLocation);
     }
 
     @Override

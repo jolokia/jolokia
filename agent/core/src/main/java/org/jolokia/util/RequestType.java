@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
+package org.jolokia.util;
 
 import java.util.HashMap;
 import java.util.Map;

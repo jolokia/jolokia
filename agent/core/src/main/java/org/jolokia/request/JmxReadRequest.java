@@ -18,6 +18,8 @@ package org.jolokia.request;
 
 import java.util.*;
 import javax.management.MalformedObjectNameException;
+
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**

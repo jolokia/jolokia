@@ -22,6 +22,7 @@ import javax.management.ObjectName;
 import java.util.*;
 
 import org.jolokia.util.PathUtil;
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**

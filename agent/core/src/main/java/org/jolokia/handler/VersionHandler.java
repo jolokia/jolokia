@@ -7,6 +7,7 @@ import org.jolokia.request.*;
 import org.jolokia.Version;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 import javax.management.*;

@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.jolokia.request.RequestType.*;
+import static org.jolokia.util.RequestType.*;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 

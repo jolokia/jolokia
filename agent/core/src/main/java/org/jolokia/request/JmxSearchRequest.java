@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.util.RequestType;
+
 /**
  * A JMX request for a <code>search</code> operation, i.e. for searching MBeans.
  *

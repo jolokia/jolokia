@@ -96,6 +96,7 @@
             <Export-Package>
               org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
+              org.jolokia.util;version="${project.version}",
               org.osgi.service.http;uses:="javax.servlet.http,javax.servlet";-split-package:="merge-last";version="1.2.1",
               org.osgi.service.log;version="1.3",
               javax.servlet.resources;version="2.5",

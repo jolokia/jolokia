@@ -22,6 +22,7 @@ import java.util.List;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.util.PathUtil;
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
@@ -130,7 +131,7 @@ public class JmxRequestTest {
                 (JmxListRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "list", "path", "java.lang:type=Memory"),null)
         }) {
-            assertEquals(req.getType(),RequestType.LIST);
+            assertEquals(req.getType(), RequestType.LIST);
             assertEquals(req.getPath(),"java.lang:type=Memory");
 
             verify(req,"type","list");

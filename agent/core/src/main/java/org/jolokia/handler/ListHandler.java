@@ -3,6 +3,7 @@ package org.jolokia.handler;
 
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.RequestType;
 
 import javax.management.*;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                                     List<String /* names */>>>> ret =
                     new HashMap<String, Map<String, Map<String, List<String>>>>();
             for (MBeanServerConnection server : pServers) {
-                for (Object nameObject : server.queryNames((ObjectName) null,(QueryExp) null)) {
+                for (Object nameObject : server.queryNames((ObjectName) null, (QueryExp) null)) {
                     ObjectName name = (ObjectName) nameObject;
                     Map mBeansMap = getOrCreateMap(ret,name.getDomain());
                     Map mBeanMap = getOrCreateMap(mBeansMap,name.getCanonicalKeyPropertyListString());

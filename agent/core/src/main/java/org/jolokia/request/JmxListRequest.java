@@ -19,6 +19,8 @@ package org.jolokia.request;
 import java.util.List;
 import java.util.Map;
 
+import org.jolokia.util.RequestType;
+
 /**
  * A JMX request for <code>list</code> operations, i.e. for listing JMX metadata
  *

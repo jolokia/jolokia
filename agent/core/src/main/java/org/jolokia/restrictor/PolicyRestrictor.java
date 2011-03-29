@@ -10,7 +10,7 @@ import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jolokia.request.RequestType;
+import org.jolokia.util.RequestType;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.IpChecker;
 import org.w3c.dom.*;
@@ -87,8 +87,8 @@ public class PolicyRestrictor implements Restrictor {
         return httpMethodsSet == null || httpMethodsSet.contains(method.getMethod());
     }
 
-    public boolean isTypeAllowed(String pType) {
-        return typeSet == null || typeSet.contains(RequestType.getTypeByName(pType));
+    public boolean isTypeAllowed(RequestType pType) {
+        return typeSet == null || typeSet.contains(pType);
     }
 
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
@@ -104,7 +104,7 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     private boolean check(RequestType pType, ObjectName pName, String pValue) {
-        if (isTypeAllowed(pType.getName())) {
+        if (isTypeAllowed(pType)) {
             // Its allowed in general, so we only need to check
             // the denied section, whether its forbidded
             return deny == null || !matches(deny, pType, pName, pValue);

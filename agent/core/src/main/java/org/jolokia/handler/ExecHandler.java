@@ -10,6 +10,7 @@ import javax.management.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss

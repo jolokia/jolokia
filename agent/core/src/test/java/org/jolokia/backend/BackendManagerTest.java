@@ -21,11 +21,10 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.util.ConfigKey;
+import org.jolokia.util.*;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.util.LogHandler;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.*;
 import org.json.simple.JSONObject;

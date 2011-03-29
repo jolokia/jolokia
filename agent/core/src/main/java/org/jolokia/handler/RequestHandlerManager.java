@@ -20,7 +20,7 @@ import org.jolokia.restrictor.Restrictor;
 import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.RequestType;
+import org.jolokia.util.RequestType;
 
 import java.util.HashMap;
 import java.util.Map;
