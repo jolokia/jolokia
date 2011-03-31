@@ -39,6 +39,7 @@ public interface ConfigMBean {
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> is null
      * history tracking is switched off.
+     * 
      * @param pMBean MBean object name
      * @param pAttribute attribute name
      * @param pPath inner path (optional)
