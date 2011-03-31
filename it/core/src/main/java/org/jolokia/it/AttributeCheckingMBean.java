@@ -39,6 +39,10 @@ public interface AttributeCheckingMBean {
 
     long getBytes();
 
+    long getMemoryUsed();
+
+    long getMemoryMax();
+    
     float getLongSeconds();
 
     double getSmallMinutes();

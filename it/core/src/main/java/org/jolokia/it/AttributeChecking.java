@@ -102,6 +102,15 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         return 3 * 1024 * 1024 +  1024 * 512;
     }
 
+    public long getMemoryUsed() {
+        return (long) (1017.24 * 1024 * 1024);
+    }
+
+    // For https://github.com/rhuss/jmx4perl/issues/#issue/7
+    public long getMemoryMax() {
+        return (long) (1.99 * 1024 * 1024 * 1024);
+    }
+
     public float getLongSeconds() {
         // 2 days
         return 60*60*24*2;
