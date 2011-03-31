@@ -1,4 +1,267 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="agents-war">
   <title>JEE Agent (WAR)</title>
+  
+  <section id="war-agent">
+    <title>War Agent</title>
+    <section id="war-agent-installation">
+      <title>Installation and Configuration</title>
+      <para>
+        The WAR agent is the most popular variant which can be deployed
+        as any other JEE web application in a servlet container.<sidebar>
+        <title>Tomcat example</title>
+          A simple example for deploying the agent on Tomcat can be found
+          in the Jolokia <ulink
+          url="http://www.jolokia.org/quickstart">quickstart</ulink> 
+        </sidebar>    
+        Often, installation is simply a matter of copying the agent WAR in
+        a deployment directory. On other platforms a administrative Web
+        GUI or a command line tool need to be used for
+        deployment. Detailed installation instructions for every servlet
+        container are out of scope for this document.
+      </para>
+      <para>
+        The servlet itself can be configured with a bunch of
+        <literal>init-param</literal> declaration within the servlet
+        definition contained in
+        <filename>WEB-INF/web.xml</filename>. The known parameters are
+        described in <xref linkend="agent-war-init-params"/>. The stock
+        agent needs to be repackaged, though, in order to modify the
+        internal <filename>web.xml</filename>. 
+      </para>
+      <table id="agent-war-init-params">
+        <title>Servlet init parameters</title>
+        <thead>
+          <tr>
+            <td>Parameter</td>
+            <td>Description</td>
+            <td>Default</td>
+            <td>Example</td>
+          </tr>        
+        </thead>
+        <tr>
+          <td><constant>dispatcherClasses</constant></td>
+          <td>
+            Classnames (comma separated) of <constant>RequestDispatcher</constant> used in addition
+            to the
+            <constant>LocalRequestDispatcher</constant>. Dispatchers are
+            a tecnique used by the JSR-160 proxy to dispatch (or
+            'route') a request to a different destination.
+          </td>
+          <td>
+            ---
+          </td>
+          <td>
+            <literal>org.jolokia.jsr160.Jsr160RequestDispatcher</literal>
+            (this is the dispatcher for the JSR-160 proxy)
+          </td>
+        </tr>
+        <tr>
+          <td><constant>policyLocation</constant></td>
+          <td>
+            Location of the policy file to use. This is either a URL
+            which can read from (like a <literal>file:</literal> or
+            <literal>http:</literal> URL) or with the special protocol
+            <literal>classpath:</literal> which is used for looking up
+            the policy file in the web application's classpath. See
+            <xref linkend="security-policy"/> for details about this
+            parameter. 
+          </td>
+          <td>
+            <filename>classpath:/jolokia-access.xml</filename>
+          </td>
+          <td>
+            <filename>file:///home/jolokia/jolokia-access.xml</filename>
+            for a file based access to the policy file.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>debug</constant></td>
+          <td>
+            Debugging state after startup. Can be changed via
+            the config MBean during runtime.
+          </td>
+          <td>
+            <constant>false</constant>
+          </td>
+          <td/>
+        </tr>
+        <tr>
+          <td><constant>historyMaxEntries</constant></td>
+          <td>
+            Entries to keep in the history. Can be changed during
+            runtime via the config MBean.
+          </td>
+          <td>
+            <constant>10</constant>
+          </td>
+          <td/>
+        </tr>
+        <tr>
+          <td><constant>debugMaxEntries</constant></td>
+          <td>
+            Maximum number of entries to keed in the local
+            debug history if switched on. Can be change via
+            the config MBean during runtime.
+          </td>
+          <td>
+            <constant>100</constant>
+          </td>
+          <td/>
+        </tr>
+        <tr>
+          <td><constant>maxDepth</constant></td>
+          <td>
+            Maximum depth when traversion bean properties.
+            If set to 0, depth checking is disabled
+          </td>
+          <td>
+            <constant>15</constant>
+          </td>
+          <td/>
+        </tr>
+        <tr>
+          <td><constant>maxCollectionSize</constant></td>
+          <td>
+            Maximum size of collections returned when
+            serializing to JSON. When set to 0, not
+            collections are truncated.
+          </td>
+          <td>
+            <constant>1000</constant>
+          </td>
+          <td/>
+        </tr>
+        <tr>
+          <td><constant>maxObjects</constant></td>
+          <td>
+            Maximum number of objects which is traversed
+            when serializing a single response. Use this
+            as airbag to avoid boosting your memory and
+            network traffic. Nevertheless, when set to 0
+            not limit is used.
+          </td>
+          <td>
+            <constant>0</constant>
+          </td>
+          <td/>
+        </tr>
+      </table>      
+    </section>
+    <section id="agent-war-security">
+      <title>Security Setup</title>
+      <para>
+        In order use JEE security within the war, some extrat
+        configuration steps are required within
+        <filename>web.xml</filename>.<sidebar>
+          <title>Use jmx4perl's <literal>jolokia</literal> tool</title>
+          <ulink url="http://www.jmx4perl.org">jmx4perl</ulink> comes
+          with a nice command line utility called <ulink
+          url="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</ulink>
+          which allows for an easy setup of security within a given
+          <filename>jolokia.war</filename>. See <xref linkend="tools-jmx4perl"/> for
+          more details.
+        </sidebar>
+        There is commented out section
+        which can serve as an example. All current client libraries
+        are able to use BASIC HTTP authentication with user and
+        password. So, the <literal>&lt;login-config&gt;</literal>
+        should be set accordingly. The
+        <literal>&lt;security-constraint&gt;</literal> specifies the
+        the URL pattern (which is in the default setup specify all
+        resources provided by the Jolokia servlet) and a role name
+        which is used to find the proper authentication credentials.
+        This role must be referenced outside the agent WAR within the
+        servlet container, e.g. for Tomcat the role definition can be
+        found in <filename>$TOMCAT/config/tomcat-users.xml</filename>.        
+      </para>
+    </section>
+    
+    <section id="agent-war-programmatic">
+      <title>Programmatic usage of the Jolokia agent servlet</title>
+      <para>
+        The Jolokia agent servlet can be integrated into own
+        web-applications as well. For this simply add a servlet with
+        the servlet class
+        <classname>org.jolokia.http.AgentServlet</classname> to your
+        own <filename>web.xml</filename>. The following example maps
+        the agent to the context <literal>/jolokia</literal>. 
+      </para>
+      <programlisting language="xml"><![CDATA[
+ <servlet>
+   <servlet-name>jolokia-agent</servlet-name>
+   <servlet-class>org.jolokia.http.AgentServlet</servlet-class>
+   <load-on-startup>1</load-on-startup>
+ </servlet>
+
+ <servlet-mapping>
+   <servlet-name>jolokia-agent</servlet-name>
+   <url-pattern>/jolokia/*</url-pattern>
+ </servlet-mapping>
+]]></programlisting>
+      <para>
+        Of course, any init parameter as described in <xref
+        linkend="agent-war-init-params"/> can be used here as well. 
+      </para>
+      <para>
+        In order for this servlet definition to find the referenced
+        Java class, the JAR <filename>jolokia-core.jar</filename> must
+        be included. This jar can be found in Jolokia's <ulink
+        url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core">maven
+        resository</ulink>. Maven users will simply declare a
+        dependency on this jar artifact:
+      </para>
+      <programlisting language="xml"><![CDATA[
+<project>
+  <!-- ....  --> 
+  <dependencies>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+      <version>0.90</version>
+    </dependency>
+  </dependencies>
+
+  <!-- Maven repository hosting Jolokia -->
+  <repositories>
+    <repository>
+      <id>labs-consol-release</id>
+      <name>ConSol* Labs Repository (Releases)</name>
+      <url>http://labs.consol.de/maven/repository</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
+</project>]]></programlisting>
+      <para>
+        The <classname>org.jolokia.http.Agent</classname> can be
+        subclassed, too in order to provide a custom restrictor used
+        for fine granular security on MBean level. See <xref
+        linkend="security-restrictor"/> for details.<footnote>
+        <para>
+          Replace
+          <classname>org.jolokia.osgi.http.AgentServlet</classname> with
+          <classname>org.jolokia.http.AgentServlet</classname> for using
+          the servlet in an non OSGi environment.        
+        </para>
+        </footnote>
+      </para>
+      <para>
+         Also, multiple Jolokia agents can be deployed in the same JVM
+         without problem. However, since the agent deploys some
+         Jolokia specific MBeans on the single
+         <literal>PlatformMBeansServer</literal>, for multi agents
+         deployments it is important to use the
+         <constant>mbeanQualifier</constant> init parameter to
+         distinguish multiple Jolokia MBeans by adding an extra
+         propery to those MBean's name. This needs to be done also if
+         multiple webapps containing Jolokia agents are deployed on
+         the same JEE server. 
+      </para>
+  </section>
+
 </section>

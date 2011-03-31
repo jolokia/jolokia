@@ -235,8 +235,8 @@
 ]]></programlisting>
       </section>
 
-      <section>
-        <title>Policy location</title>
+      <section id="security-policy">
+        <title>Policy Location</title>
         <sidebar>
           <para>
             A great tool which helps in repackaging an agent for
