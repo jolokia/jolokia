@@ -124,13 +124,13 @@ public class AgentServlet extends HttpServlet {
     @Override
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler()}
+     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig)}
      */
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
         // Create a log handler early in the lifecycle, but not too early
-        logHandler = createLogHandler();
+        logHandler = createLogHandler(pServletConfig);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -153,8 +153,9 @@ public class AgentServlet extends HttpServlet {
      * can already be used when building up the restrictor.
      *
      * @return a default log handlera
+     * @param pServletConfig
      */
-    protected LogHandler createLogHandler() {
+    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
         return new LogHandler() {
             public void debug(String message) {
                 log(message);
