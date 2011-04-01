@@ -63,7 +63,6 @@
       </mediaobject>
     </figure>
 
-
     <para>
       But there is more. Specialized agents are able to use an OSGi
       HttPService or come with an embedded Jetty-Server in case of the
@@ -104,13 +103,23 @@
       a perfect choice for this kind of setup. 
     </para>
     <para>
-      Figure ... describes  a typical setup for the proxy mode. A
+      Figure <xref linkend="fig-architecture-proxy"/> describes  a typical setup for the proxy mode. A
       client sends a usual Jolokia request containing an extra section
       for specifying the target which should be queried. All routing
       information is contained in the request itself so that the proxy
       can act universally without the need of a specific
       configuration. 
     </para>
+
+    <figure id="fig-architecture-proxy">
+      <title>Jolokia as JMX Proxy</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="proxy.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
 
     <para>
       Said all this, the proxy mode has some limitations which are
