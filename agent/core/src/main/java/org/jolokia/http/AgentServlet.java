@@ -104,26 +104,32 @@ public class AgentServlet extends HttpServlet {
      * @return the restrictor to use.
      */
     protected Restrictor createRestrictor(String pLocation) {
+        LogHandler log = getLogHandler();
         try {
             Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
             if (newRestrictor != null) {
-                getLogHandler().info("Using access restrictor " + pLocation);
+                log.info("Using access restrictor " + pLocation);
                 return newRestrictor;
             } else {
-                getLogHandler().info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
+                log.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            getLogHandler().error("Error while accessing access restrictor at " + pLocation +
-                                          ". Denying all access to MBeans for security reasons. Exception: " + e, e);
+            log.error("Error while accessing access restrictor at " + pLocation +
+                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
     }
 
     @Override
+    /**
+     * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
+     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler()}
+     */
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
+        // Create a log handler early in the lifecycle, but not too early
         logHandler = createLogHandler();
 
         // Different HTTP request handlers
@@ -143,7 +149,8 @@ public class AgentServlet extends HttpServlet {
 
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
-     * to provide a custom log handler
+     * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
+     * can already be used when building up the restrictor.
      *
      * @return a default log handlera
      */
