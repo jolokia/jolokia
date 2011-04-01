@@ -74,16 +74,6 @@ public class JolokiaServlet extends AgentServlet {
             bundleContext = (BundleContext) servletContext.getAttribute("osgi-bundlecontext");
         }
 
-        // If there is a bundle context available, set up a tracker for tracking the logging
-        // service and optionally a restrictor service
-        if (bundleContext != null) {
-            // Track logging service
-            logTracker = new ServiceTracker(bundleContext, LogService.class.getName(), null);
-            logTracker.open();
-            setLogHandler(new ActivatorLogHandler(logTracker));
-        }
-
-
         // We are making the bundle context available here as a thread local
         // so that the server detector has access to the bundle in order to detect
         // the Osgi-Environment
@@ -92,6 +82,25 @@ public class JolokiaServlet extends AgentServlet {
             super.init(pServletConfig);
         } finally {
             BUNDLE_CONTEXT_THREAD_LOCAL.remove();
+        }
+    }
+
+    /**
+     * Create a log handler which tracks a {@link LogService} and, if available, use the log service
+     * for logging, in the other time uses the servlet's default logging facility
+     */
+    @Override
+    protected LogHandler createLogHandler() {
+        // If there is a bundle context available, set up a tracker for tracking the logging
+        // service and optionally a restrictor service
+        if (bundleContext != null) {
+            // Track logging service
+            logTracker = new ServiceTracker(bundleContext, LogService.class.getName(), null);
+            logTracker.open();
+            return new ActivatorLogHandler(logTracker);
+        } else {
+            // Use default log handler
+            return super.createLogHandler();
         }
     }
 

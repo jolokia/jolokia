@@ -78,23 +78,10 @@ public class AgentServlet extends HttpServlet {
      * Constructor taking a restrictor to use
      *
      * @param pRestrictor restrictor to use or <code>null</code> if the restrictor
-     *        should be created in the default way ({@link #createRestrictor(Map, LogHandler)})
+     *        should be created in the default way ({@link #createRestrictor(String)})
      */
     public AgentServlet(Restrictor pRestrictor) {
         restrictor = pRestrictor;
-    }
-
-    /**
-     * Set the log handler to use. This method must be called before
-     * {@link #init(ServletConfig)} in order to have an effect, since
-     * this log handler is used within init for initializing the subsytems
-     * accordingly. Preferable this method is used in an overridden init method
-     * in a sub class.
-     *
-     * @param pLogHandler log handler to use
-     */
-    protected void setLogHandler(LogHandler pLogHandler) {
-        logHandler = pLogHandler;
     }
 
     /**
@@ -120,15 +107,15 @@ public class AgentServlet extends HttpServlet {
         try {
             Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
             if (newRestrictor != null) {
-                logHandler.info("Using access restrictor " + pLocation);
+                getLogHandler().info("Using access restrictor " + pLocation);
                 return newRestrictor;
             } else {
-                logHandler.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
+                getLogHandler().info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            logHandler.error("Error while accessing access restrictor at " + pLocation +
-                                      ". Denying all access to MBeans for security reasons. Exception: " + e,e);
+            getLogHandler().error("Error while accessing access restrictor at " + pLocation +
+                                          ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
     }
@@ -137,10 +124,7 @@ public class AgentServlet extends HttpServlet {
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
-        // Initialize a loghandler if not given already
-        if (logHandler == null) {
-            logHandler = getDefaultLogHandler();
-        }
+        logHandler = createLogHandler();
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -154,6 +138,29 @@ public class AgentServlet extends HttpServlet {
         }
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(backendManager,logHandler);
+    }
+
+
+    /**
+     * Create a log handler using this servlet's logging facility for logging. This method can be overridden
+     * to provide a custom log handler
+     *
+     * @return a default log handlera
+     */
+    protected LogHandler createLogHandler() {
+        return new LogHandler() {
+            public void debug(String message) {
+                log(message);
+            }
+
+            public void info(String message) {
+                log(message);
+            }
+
+            public void error(String message, Throwable t) {
+                log(message,t);
+            }
+        };
     }
 
     @Override
@@ -253,22 +260,4 @@ public class AgentServlet extends HttpServlet {
         writer.write(pJsonTxt);
     }
 
-
-
-    // Default log handler using this servlet's logging facility for logging
-    private LogHandler getDefaultLogHandler() {
-        return new LogHandler() {
-            public void debug(String message) {
-                log(message);
-            }
-
-            public void info(String message) {
-                log(message);
-            }
-
-            public void error(String message, Throwable t) {
-                log(message,t);
-            }
-        };
-    }
 }
