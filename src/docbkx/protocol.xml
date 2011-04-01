@@ -796,7 +796,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">4.0</emphasis>
+        protocol version <emphasis role="bold">4.2</emphasis>
       </para>
       <variablelist>
         <varlistentry>

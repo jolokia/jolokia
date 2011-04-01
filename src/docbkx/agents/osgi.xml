@@ -212,7 +212,7 @@
         </td>
       </tr>
       <tr>
-        <td>org.jolokia.useRestrictoService</td>
+        <td>org.jolokia.useRestrictorService</td>
         <td>false</td>
         <td>
           If <literal>true</literal> the Jolokia agent will use any

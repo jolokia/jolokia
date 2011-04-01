@@ -32,33 +32,38 @@
     door for all enviroments which are not Java (or better, JVM)
     aware. Jolokia uses a typeless approach, where some sort of
     lightweight serialization to JSON is used (in both directions, but
-    a bit <link>asymmetrically</link> in its capabilities). Of course
+    a bit <emphasis>asymmetrically</emphasis> in its capabilities). Of course
     this approach has some drawbacks, too, but also quite some
     advantages. At least it is unique in the JMX world ;-).
   </para>
-  <note>
-    Overview of Jolokia's architecture, its differences to
-    JSR-160. Depending on the setup, Jolokia can operate in a
-    standalone mode or in an proxy mode, which allows for agentless
-    operation on the target server.
-  </note>
-  
+
   <section id="agent-mode">
     <title>Agent mode</title>
     <para>
-      Figure ... sketches the enviroment in which Jolokia
-      operates. The heart of Jolokia is the <link>agent</link>, which
-      exports on the frontside a JSON based protocol over HTTP that
-      get bridged to invocation of local JMX MBeans. It lives outside
-      the JSR-160 space and hence requires a different setup. For
-      exporting its protocol via HTTP various techniques are
-      available. The most prominent one is to put the agent into a
+      <xref linkend="fig-architecture-overview"/> sketches the
+      enviroment in which Jolokia operates. The heart of Jolokia is
+      the agent, which exports on the frontside a JSON based protocol
+      over HTTP that get bridged to invocation of local JMX MBeans. It
+      lives outside the JSR-160 space and hence requires a different
+      setup. For exporting its protocol via HTTP various techniques
+      are available. The most prominent one is to put the agent into a
       servlet container. This can be a lightweight one like Tomcat or
       Jetty or a full blown JEE Server. Since it acts like a usual
       Web-application the deployment of the agent is well understood
       and should pose no entry barrier for any developer who ever
       dealt with Java web applications.
     </para>
+
+    <figure id="fig-architecture-overview">
+      <title>Jolokia architecture</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="architecture.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+
     <para>
       But there is more. Specialized agents are able to use an OSGi
       HttPService or come with an embedded Jetty-Server in case of the
@@ -69,7 +74,7 @@
     </para>
     <para>
       Beside these prefatored agents, Jolokia can be also integrated
-      into own applications very easily. The <link>joloki-core</link>
+      into own applications very easily. The <literal>joloki-core</literal>
       library (which comes bundled as a jar), includes the servlet
       which can be easily added to a custom application. <xref
       linkend="agent-war-programmatic"/> contains more information

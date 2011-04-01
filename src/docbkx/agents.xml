@@ -35,7 +35,7 @@
     <varlistentry>
       <term><emphasis role="bold">OSGi agent</emphasis></term>
       <listitem>
-        <ulink url="">OSGi</ulink> is a middleware specification
+        <ulink url="http://www.osgi.org">OSGi</ulink> is a middleware specification
         focussing on modularity and a well defined dynamic lifecycle
         <footnote>
           <para>
@@ -45,7 +45,7 @@
           </para>
         </footnote>.  The Jolokia OSGi agent bundles comes in two
         flavors: One minimal one with the dependency on a running
-        <ulink url="">OSGi HttpService</ulink>, and a all-in-one
+        <ulink url="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi HttpService</ulink>, and a all-in-one
         bundle including an embedded
         <emphasis>reallyHttpService</emphasis> (which is exported,
         too). The former is the recommended, puristic solution, the
@@ -57,7 +57,7 @@
     <varlistentry>
       <term><emphasis role="bold">Mule agent</emphasis></term>
       <listitem>
-        <ulink url="">Mule</ulink> is one of the leading Open Source
+        <ulink url="http://www.mulesoft.org/">Mule</ulink> is one of the leading Open Source
         Enterprise Service Bus (ESB). It provides a management API
         into which a dedicated Jolokia agent plugs in nicely. This
         agent includes an embedded Jetty for providing JMX HTTP
