@@ -59,7 +59,7 @@
   </para>
   <note>
     <para>
-      This reference manual is a work in progress. In fact, most of the
+      This reference manual is a work in progress. In fact, some of the
       chapters are still to be filled in. The most complete chapter is
       on the <link linkend="protocol">protocol</link>, so you can
       already start to play around implementing own client

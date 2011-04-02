@@ -1,6 +1,8 @@
 package org.jolokia.mbean;
 
 import java.io.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 
 import javax.management.*;
 
@@ -26,11 +28,15 @@ import org.jolokia.history.HistoryStore;
 
 
 /**
+ * MBean for exporting various configuration tuning opportunities
+ * to the outside world. 
+ *
  * @author roland
  * @since Jun 12, 2009
  */
 public class Config implements ConfigMBean,MBeanRegistration {
 
+    // Stores for various informations
     private HistoryStore historyStore;
     private DebugStore debugStore;
 

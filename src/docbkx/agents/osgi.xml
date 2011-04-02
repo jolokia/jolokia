@@ -45,7 +45,7 @@
       installing <filename>jolokia-osgi.jar</filename>.
     </para>
     <table id="table-agents-osgi-deps">
-      <title>Package Imports of jolokia-osgi.jar</title>
+      <title>Package Imports of jolokia-osgi.jar (SB: exported by sytem bundle)</title>
       <thead>
         <tr>
           <td>Package</td>
@@ -85,6 +85,16 @@
         <td>X</td>
         <td>javax.xml.parsers</td>
         <td>X</td>
+        <td>javax.management.remote</td>
+        <td>X</td>
+      </tr>
+      <tr>
+        <td>org.osgi.util.tracker</td>
+        <td>X</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
         <td></td>
         <td></td>
       </tr>
@@ -212,7 +222,7 @@
         </td>
       </tr>
       <tr>
-        <td>org.jolokia.useRestrictoService</td>
+        <td>org.jolokia.useRestrictorService</td>
         <td>false</td>
         <td>
           If <literal>true</literal> the Jolokia agent will use any
@@ -265,8 +275,7 @@
       <literal>org.osgi.service.http.port=9090</literal> needs to be
       set. This might be useful, if this bundle is used within
       containers which already occupy the default port (Glassfish,
-      Eclipse Virgo) but don't expose an OSGi HttpService which could
-      be consumed.
+      Eclipse Virgo) but don't expose an OSGi HttpService.
     </para>
   </section>
   <section id="agents-osgi-servlet">
@@ -279,7 +288,7 @@
       bundle exports the package
       <classname>org.jolokia.osgi.servlet</classname> which includes
       the servlet class <classname>JolokiaServlet</classname>. This
-      class has two constructors: A default constructor without
+      class has three constructors: A default constructor without
       arguments, one with a single
       <classname>BundleContext</classname> argument and finally one
       with an additional <classname>Restrictor</classname> (see <xref

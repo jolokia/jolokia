@@ -1,12 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="agents" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Agents</title>
- 
-  <note>
-    Work in progress. This chapter will introduce the various kinds of
-    agents available, along with installation and configuration hints.
-  </note>
-
+  
+  <para>
+    Jolokia is an agent based approach to JMX, which requires to
+    install an extra piece of software, the
+    <emphasis>agent</emphasis>. This software either needs to be
+    deployed on the target server which should be accessed via remote
+    JMX (<xref linkend="agent-mode"/>). Or it can be installed on a
+    dedicated proxy server (<xref linkend="proxy-mode"/>). For both
+    operational modes, there exist four different kind of
+    agents<footnote>
+      <para>
+        Although the proxy mode is available for all four agents, you
+        are normally free to setup the proxy environment. The
+        recommendation here is the war-agent for which very
+        lightweight servlet container exists. Tomcat or Jetty are both
+        a perfect choice for a Jolokia proxy server.
+      </para>
+    </footnote>.    
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term><emphasis role="bold">Webarchive (War) agent</emphasis></term>
+      <listitem>
+        This agent is packaged as a JEE Webarchive (War). It is the
+        standard installation artifact for Java webapplicaton and
+        problem one of the best known deployment format. Jolokia ships
+        with an war-agent, which can be deployed like any other web
+        application. This agent has been tested on a wealth of JEE
+        servers, well known market leaders and more seldom species.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">OSGi agent</emphasis></term>
+      <listitem>
+        <ulink url="http://www.osgi.org">OSGi</ulink> is a middleware specification
+        focussing on modularity and a well defined dynamic lifecycle
+        <footnote>
+          <para>
+            Of course, there is much more on OSGi, a platform and
+            programing model which I <emphasis>really</emphasis>
+            like. So to say, this is my personal pet agent ;-).
+          </para>
+        </footnote>.  The Jolokia OSGi agent bundles comes in two
+        flavors: One minimal one with the dependency on a running
+        <ulink
+        url="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi
+        HttpService</ulink>, and a all-in-one bundle including an
+        embedded <emphasis>HttpService</emphasis> implementation
+        (which is exported, too). The former is the recommended,
+        puristic solution, the later is provided for a quick startup
+        for initial testing the OSGi agent (but should be replaced
+        with the minimal bundle for production setups).
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">Mule agent</emphasis></term>
+      <listitem>
+        <ulink url="http://www.mulesoft.org/">Mule</ulink> is one of the leading Open Source
+        Enterprise Service Bus (ESB). It provides a management API
+        into which a dedicated Jolokia agent plugs in nicely. This
+        agent includes an embedded Jetty for providing JMX HTTP
+        access.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">JVM JDK6 agent</emphasis></term>
+      <listitem>
+        Starting with Java 6 the JDK provided by Oracle contains a
+        lightweight HTTP-Server which is used e.g. for the reference
+        WebService stack implementation included in Java 6. Using 
+        the Java-agent API (normally used by profilers and other
+        development tools requiring the instrumentation during the
+        class loading phase), the JVM 6 Jolokia agent is the most
+        generic one. It is able to instrument <emphasis>any</emphasis>
+        Java application running on a Oracle JDK 6<footnote>
+        <para>
+          You could even instrument a JEE application server this way,
+          however this is not recommended.
+        </para>
+        </footnote>.
+        This Jolokia agent variant is fully featured, however tends to
+        be a bit slow since the 
+        provided HTTP-Server is not optimized for performance. However
+        it is useful for servers like Hadoop or Teracotta which does
+        not provide a convenient hook for an HTTP exporting agent on
+        their own.
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+    
   <xi:include href='agents/war.xml'/>
   <xi:include href='agents/osgi.xml'/>
   <xi:include href='agents/mule.xml'/>

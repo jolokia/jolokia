@@ -190,3 +190,7 @@ h3 {
 .book .chapter {
     margin-top: 4em;
 }
+
+div.mediaobject {
+  text-align: center;
+}

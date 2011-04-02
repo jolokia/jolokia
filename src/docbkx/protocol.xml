@@ -719,11 +719,28 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           <varlistentry>
             <term><emphasis role="bold">setHistoryEntriesForOperation</emphasis></term>
             <listitem>              
+                JMX operation for switching on tracking of the execution of
+                JMX operations. It takes four arguments: The MBean and
+                operation name, an optional target URL when the agent
+                is used in proxy mode and the number of maximal
+                entries to track. If the target URL is given, than
+                request for this specific target are tracked,
+                otherwise, if the URL is null, requests to this
+                operation on the local agent are tracked.  The return
+                value of calling this operations is stored in an 
+                buffer with the specified length, where the oldest
+                elements will shift out in case of an overflow. 
             </listitem>
           </varlistentry>
           <varlistentry>
             <term><emphasis role="bold">setHistoryEntriesForAttribute</emphasis></term>
             <listitem>              
+              JMX operation for switching on tracking of an JMX
+              attribute's value. It takes five arguments: The MBean
+              and attribute name, an  optional path and target URL and
+              the maximal number of entries to remember. As above, the
+              target URL is only used for proxy requests. The path can
+              be used to store only read request with the given path. 
             </listitem>
           </varlistentry>
         </variablelist>
@@ -734,7 +751,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
         tracking</emphasis> is switched on. A certain JMX
         operation on an Jolokia specific MBean has to be executed
         to turn history tracking on. See <xref linkend="history"/>
-        for details. If this is the case,
+        for details . If this is the case,
         <constant>history</constant> contains an array of json
         objects which have two attributes: <constant>value</constant>
         containing the historical value (which can be as complex
@@ -743,6 +760,34 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
       </para>
     </section>
 
+    <section id="protocol-proxy">
+      <title>Proxy requests</title>
+      <para>
+        For proxy requests, POST must be used as HTTP method so that
+        the given JSON request can contain an extra section for the
+        target which should be finally reached via this proxy
+        request. A typical proxy request looks like
+      </para>
+      <programlisting><![CDATA[
+  {
+    "type" : "read",
+    "mbean" : "java.lang:type=Memory",
+    "attribute" : "HeapMemoryUsage",
+    "target" : { 
+         "url" : "service:jmx:rmi:///jndi/rmi://targethost:9999/jmxrmi",
+         "user" : "jolokia",
+         "password" : "s!cr!t"
+    } 
+  }]]></programlisting>
+      <para>
+        <literal>url</literal> within the <literal>target</literal>
+        section is a JSR-160 service URL for the target server
+        reachable from within the proxy agent. <literal>user</literal>
+        and <literal>password</literal> are optional credential used
+        for the JSR-160 communication.
+      </para>
+    </section>
+    
     <section id="versions">
       <title>Jolokia protocol versions</title>
       <para>
@@ -751,7 +796,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">4.0</emphasis>
+        protocol version <emphasis role="bold">4.2</emphasis>
       </para>
       <variablelist>
         <varlistentry>
