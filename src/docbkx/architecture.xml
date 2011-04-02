@@ -8,7 +8,7 @@
     objects.
   </para>
   <para>
-    JSR-160, released in ..., has a different design goal than
+    JSR-160, released in 2003, has a different design goal than
     Jolokia. It is a specification, where a client can transparently
     invoke MBean calls, regardless whether the MBean resides within a
     local MBeanServer or in a remote one. This provides quite some
@@ -43,13 +43,13 @@
       <xref linkend="fig-architecture-overview"/> sketches the
       enviroment in which Jolokia operates. The heart of Jolokia is
       the agent, which exports on the frontside a JSON based protocol
-      over HTTP that get bridged to invocation of local JMX MBeans. It
+      over HTTP that gets bridged to invocation of local JMX MBeans. It
       lives outside the JSR-160 space and hence requires a different
       setup. For exporting its protocol via HTTP various techniques
       are available. The most prominent one is to put the agent into a
       servlet container. This can be a lightweight one like Tomcat or
       Jetty or a full blown JEE Server. Since it acts like a usual
-      Web-application the deployment of the agent is well understood
+      web application the deployment of the agent is well understood
       and should pose no entry barrier for any developer who ever
       dealt with Java web applications.
     </para>
@@ -65,14 +65,14 @@
 
     <para>
       But there is more. Specialized agents are able to use an OSGi
-      HttPService or come with an embedded Jetty-Server in case of the
+      HttpService or come with an embedded Jetty-Server in case of the
       Mule agent. The JVM JDK6 agent uses the HTTP-Server included
-      with every Sun/Oracle JVM 6 (although this server has not the
+      with every Oracle JVM 6 (although this server has not the
       best performance footprint). Agent are described in detail in
       <xref linkend="agents"/>.
     </para>
     <para>
-      Beside these prefatored agents, Jolokia can be also integrated
+      Beside these prefactored agents, Jolokia can be also integrated
       into own applications very easily. The <literal>joloki-core</literal>
       library (which comes bundled as a jar), includes the servlet
       which can be easily added to a custom application. <xref
@@ -85,14 +85,14 @@
     <title>Proxy Mode</title>
     <para>
       The proxy mode is the solution, when it is impossible to deploy
-      the Jolokia agent on the target platform. The only prerequisite
-      for accessing the target server is, that it exports its MBeans
-      via a JSR-160 connector. Most of the time, this happens for
-      political reason, where it is simply not allowed to deploy an
-      extra piece of software or where it takes a lengthy process for
-      making this happen. Another reason could be, that the target
-      servers already export JMX via JSR-160 and you want to avoid the
-      extra step of deploying the agent.
+      the Jolokia agent on the target platform. For this mode, the
+      only prerequisite for accessing the target server is, that it
+      exports its MBeans via a JSR-160 connector. Most of the time,
+      this happens for political reason, where it is simply not
+      allowed to deploy an extra piece of software or where it takes a
+      lengthy process for making this happen. Another reason could be,
+      that the target server already exports JMX via JSR-160 and you
+      want to avoid the extra step of deploying the agent.
     </para>
 
     <para>

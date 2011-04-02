@@ -10,7 +10,7 @@
       <title>Tomcat example</title>
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <ulink
-      url="http://www.jolokia.org/tutorial.html">quickstart</ulink> 
+      url="http://www.jolokia.org/tutorial.html">quickstart</ulink>.
     </sidebar>    
     Often, installation is simply a matter of copying the agent WAR in
     a deployment directory. On other platforms a administrative Web
@@ -20,12 +20,12 @@
     </para>
     <para>
       The servlet itself can be configured with a bunch of
-      <literal>init-param</literal> declaration within the servlet
-      definition contained in
-      <filename>WEB-INF/web.xml</filename>. The known parameters are
-      described in <xref linkend="agent-war-init-params"/>. The stock
-      agent needs to be repackaged, though, in order to modify the
-      internal <filename>web.xml</filename>. 
+      <literal>init-param</literal> declarations within the servlet
+      definition in <filename>WEB-INF/web.xml</filename>. The known
+      parameters are described in <xref
+      linkend="agent-war-init-params"/>. The stock agent needs to be
+      repackaged, though, in order to modify the internal
+      <filename>web.xml</filename>.
     </para>
     <table id="agent-war-init-params">
       <title>Servlet init parameters</title>
@@ -140,7 +140,7 @@
       In order use JEE security within the war, some extrat
       configuration steps are required within
       <filename>web.xml</filename>.<sidebar>
-      <title>Use jmx4perl's <literal>jolokia</literal> tool</title>
+      <title>Using jmx4perl's <literal>jolokia</literal> tool</title>
       <ulink url="http://www.jmx4perl.org">jmx4perl</ulink> comes
       with a nice command line utility called <ulink
       url="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</ulink>
@@ -148,18 +148,17 @@
       <filename>jolokia.war</filename>. See <xref linkend="tools-jmx4perl"/> for
       more details.
     </sidebar>
-    There is commented out section
-    which can serve as an example. All current client libraries
-    are able to use BASIC HTTP authentication with user and
-    password. So, the <literal>&lt;login-config&gt;</literal>
-    should be set accordingly. The
-    <literal>&lt;security-constraint&gt;</literal> specifies the
-    the URL pattern (which is in the default setup specify all
-    resources provided by the Jolokia servlet) and a role name
-    which is used to find the proper authentication credentials.
-    This role must be referenced outside the agent WAR within the
-    servlet container, e.g. for Tomcat the role definition can be
-    found in <filename>$TOMCAT/config/tomcat-users.xml</filename>.        
+    There is a commented section which can serve as an example. All
+    current client libraries are able to use BASIC HTTP authentication
+    with user and password. The
+    <literal>&lt;login-config&gt;</literal> should be set
+    accordingly. The <literal>&lt;security-constraint&gt;</literal>
+    specifies the URL pattern (which is in the default setup specify
+    all resources provided by the Jolokia servlet) and a role name
+    which is used to find the proper authentication credentials.  This
+    role must be referenced outside the agent WAR within the servlet
+    container, e.g. for Tomcat the role definition can be found in
+    <filename>$TOMCAT/config/tomcat-users.xml</filename>.
     </para>
   </section>
   
@@ -167,11 +166,11 @@
     <title>Programmatic usage of the Jolokia agent servlet</title>
     <para>
       The Jolokia agent servlet can be integrated into own
-      web-applications as well. For this simply add a servlet with
+      web-applications as well. Simply add a servlet with
       the servlet class
       <classname>org.jolokia.http.AgentServlet</classname> to your
       own <filename>web.xml</filename>. The following example maps
-      the agent to the context <literal>/jolokia</literal>. 
+      the agent to the context <literal>/jolokia</literal>:
     </para>
     <programlisting language="xml"><![CDATA[
     <servlet>
@@ -194,7 +193,7 @@
       Java class, the JAR <filename>jolokia-core.jar</filename> must
       be included. This jar can be found in Jolokia's <ulink
       url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core">maven
-      resository</ulink>. Maven users will simply declare a
+      resository</ulink>. Maven users will can declare a
       dependency on this jar artifact:
     </para>
     <programlisting language="xml"><![CDATA[
@@ -214,20 +213,14 @@
           <id>labs-consol-release</id>
           <name>ConSol* Labs Repository (Releases)</name>
           <url>http://labs.consol.de/maven/repository</url>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
         </repository>
       </repositories>
     </project>]]></programlisting>
     <para>
       The <classname>org.jolokia.http.Agent</classname> can be
-      subclassed, too in order to provide a custom restrictor used
-      for fine granular security on MBean level. See <xref
-      linkend="security-restrictor"/> for details.<footnote>
+      subclassed, too in order to provide a custom restrictor or a
+      custom log handler. See <xref linkend="security-restrictor"/>
+      for details.<footnote>
       <para>
         Replace
         <classname>org.jolokia.osgi.http.AgentServlet</classname> with

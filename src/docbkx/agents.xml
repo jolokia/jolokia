@@ -45,13 +45,14 @@
           </para>
         </footnote>.  The Jolokia OSGi agent bundles comes in two
         flavors: One minimal one with the dependency on a running
-        <ulink url="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi HttpService</ulink>, and a all-in-one
-        bundle including an embedded
-        <emphasis>reallyHttpService</emphasis> (which is exported,
-        too). The former is the recommended, puristic solution, the
-        later is provided for a quick startup for initial testing the
-        OSGi agent (but should be replaced with the minimal bundle for
-        production setups).
+        <ulink
+        url="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi
+        HttpService</ulink>, and a all-in-one bundle including an
+        embedded <emphasis>HttpService</emphasis> implementation
+        (which is exported, too). The former is the recommended,
+        puristic solution, the later is provided for a quick startup
+        for initial testing the OSGi agent (but should be replaced
+        with the minimal bundle for production setups).
       </listitem>
     </varlistentry>
     <varlistentry>
@@ -67,9 +68,9 @@
     <varlistentry>
       <term><emphasis role="bold">JVM JDK6 agent</emphasis></term>
       <listitem>
-        Starting with Java 6 the JDK provided Oracle contains a
+        Starting with Java 6 the JDK provided by Oracle contains a
         lightweight HTTP-Server which is used e.g. for the reference
-        WebService stack implementation included in Java 6. Using with
+        WebService stack implementation included in Java 6. Using 
         the Java-agent API (normally used by profilers and other
         development tools requiring the instrumentation during the
         class loading phase), the JVM 6 Jolokia agent is the most
@@ -80,7 +81,7 @@
           however this is not recommended.
         </para>
         </footnote>.
-        This Jolokia agent variant is fully feature, however tends to
+        This Jolokia agent variant is fully featured, however tends to
         be a bit slow since the 
         provided HTTP-Server is not optimized for performance. However
         it is useful for servers like Hadoop or Teracotta which does

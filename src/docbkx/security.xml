@@ -5,7 +5,7 @@
     <para>
       Security in JSR-160 remoting is an all-or-nothing option. Either
       all MBeans are accesible or none (except your application server
-      uses a SecurityManager, but that is rarely the case). Jolokia on
+      uses a SecurityManager, but that is not often the case). Jolokia on
       the other hand alllows for fine grained security defined in an
       XML security policy file. It allows for access restrictions on
       MBean names (or patterns), attributes, operation, source IP
@@ -306,16 +306,18 @@
 public class RestrictedAgentServlet extends AgentServlet {
     
     @Override
-    protected Restrictor createRestrictor(Map<ConfigKey, String> config, LogHandler logHandler) {
+    protected Restrictor createRestrictor(String policyLocation) {
         return new MyOwnRestrictor();
     }
 }]]></programlisting>        
       <para>
-        <literal>config</literal> contains the prepared init
-        parameters for the agent and <literal>logHandler</literal> can
-        be used for printing out diagnostic messages. This servlet can
-        then be easily configured in an custom
-        <filename>web.xml</filename> the same way as the Jolokia agent.
+        <literal>policyLocation</literal> is an URL pointing to the
+        policy file, which is either the default value
+        <filename>classpath:/jolokia-access.xml</filename> or the
+        value specified with the init parameter
+        <literal>policyLocation</literal>. This servlet can then be
+        easily configured in an custom <filename>web.xml</filename>
+        the same way as the Jolokia agent.
       </para>
       <para>
         For programmatic usage there is even a simple way:
