@@ -46,36 +46,47 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
     }
 
     @Override
-    @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(MBeanServerConnection server, JmxSearchRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, MBeanException, IOException {
-        Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
-        List<String> ret = new ArrayList<String>();
-        for (ObjectName name : names) {
+    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxSearchRequest request)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        Set<String> ret = new HashSet<String>();
 
-            // Check whether the property-list values needs to be escaped:
-            Map<String,String> props = name.getKeyPropertyList();
-            // We need a hashtable since ObjectName requires one.
-            Hashtable<String,String> escapedProps = new Hashtable<String, String>();
-            boolean needsEscape = false;
-            for (Map.Entry<String,String> entry : props.entrySet()) {
-                String value = entry.getValue();
-                if (INVALID_CHARS_PATTERN.matcher(entry.getValue()).find()) {
-                    value = ObjectName.quote(value);
-                    needsEscape = true;
+        for (MBeanServerConnection server : servers) {
+            Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
+            for (ObjectName name : names) {
+                // Check whether the property-list values needs to be escaped:
+                Map<String,String> props = name.getKeyPropertyList();
+                // We need a hashtable since ObjectName requires one.
+                Hashtable<String,String> escapedProps = new Hashtable<String, String>();
+                boolean needsEscape = false;
+                for (Map.Entry<String,String> entry : props.entrySet()) {
+                    String value = entry.getValue();
+                    if (INVALID_CHARS_PATTERN.matcher(entry.getValue()).find()) {
+                        value = ObjectName.quote(value);
+                        needsEscape = true;
+                    }
+                    escapedProps.put(entry.getKey(),value);
                 }
-                escapedProps.put(entry.getKey(),value);
-            }
-            if (needsEscape) {
-                try {
-                    ret.add(new ObjectName(name.getDomain(),escapedProps).getCanonicalName());
-                } catch (MalformedObjectNameException e) {
-                    throw new MBeanException(e,"Cannot properly escape " + name.getCanonicalName());
+                if (needsEscape) {
+                    try {
+                        ret.add(new ObjectName(name.getDomain(),escapedProps).getCanonicalName());
+                    } catch (MalformedObjectNameException e) {
+                        throw new MBeanException(e,"Cannot properly escape " + name.getCanonicalName());
+                    }
+                } else {
+                    ret.add(name.getCanonicalName());
                 }
-            } else {
-                ret.add(name.getCanonicalName());
             }
         }
-        return ret;
+        return new ArrayList<String>(ret);
+    }
+
+    @Override
+    public boolean handleAllServersAtOnce(JmxSearchRequest pRequest) {
+        return true;
+    }
+
+    @Override
+    protected Object doHandleRequest(MBeanServerConnection server, JmxSearchRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        throw new IllegalArgumentException("Internal: Should not be called, instead variant with all MBeanServers in the signature must be called");
     }
 }
