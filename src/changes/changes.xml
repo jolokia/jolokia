@@ -8,6 +8,9 @@
   </properties>
   <body>
     <release version="0.90" description="Release 0.90" date="">
+      <action dev="roland" type="add" date="2011-04-04">
+        Added a Knopflerfish detector and tested Jolokia with Knopflerfish 3.1
+      </action>
       <action dev="roland" type="fix" date="2011-03-28">
         Fixed content-type in javascript library to "text/json" for requests
         (was "application/x-www-form-urlencoded")

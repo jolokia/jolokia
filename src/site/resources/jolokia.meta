@@ -2,12 +2,15 @@
    "repositories" : [
       "http://labs.consol.de/maven/repository"
    ],
+   "snapshots-repositories" : [
+      "http://labs.consol.de/maven/snapshots-repository"
+   ],
    "versions" : {
+      "0.90" : {
+         "jmx4perl" : "[0.90,1.0)",
+      },
       "0.83" : {
          "jmx4perl" : "[0.73,1.0)",
-         "templates" : {
-            "jolokia-access.xml" : "http://www.jolokia.org/templates/jolokia-access.xml"
-         }
       },
       "0.82" : {
          "jmx4perl" : "[0.73,1.0)"

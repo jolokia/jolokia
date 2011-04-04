@@ -50,6 +50,50 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia 0.90 has landed">
+        <div class="news-date">2011-04-04</div>
+        <p>
+          This release starts the final round before 1.0 (expected
+          late this summer). It concentrates on polishing and
+          improvement of existing features and minor changes to the
+          JSON protocol.
+        </p>
+        <p>
+          The OSGi agent has been revisited again for better
+          subclassing hooks and the possibility to lookup a Restrictor
+          service. Knopflerfish 3.1 has been added to the list of
+          tested platforms.
+        </p>
+        <p>
+          The JSON protocol has been changed to support native numbers
+          and booleans instead of using them as strings only. The
+          upstream serialization to the agent has been extended to
+          better support arrays and maps with JSON data types
+          (strings, numbers, booleans).
+        </p>
+        <p>
+          Policy file can now be looked up in several places, which
+          must be loadable with an URL. Own restrictors can be plugged
+          in easily in the agent's servlet. 
+        </p>
+        <p>
+          The reference manual has some more section on the <a
+          href="reference/html/architecture.html">architecture</a>, a
+          chapter about Jolokia <a
+          href="reference/html/security.html">security</a> and the <a
+          href="reference/html/agents.html#agents-war">war
+          agent</a>. It still needs some proof reading, though.
+        </p>
+        <p>
+          As always, these and more changes are listed in the <a
+          href="changes-report.html">change log</a>. Please expect for
+          the 0.9x series some minor (hopefully backwards compatible)
+          changes in the protocol and internal package structure (also
+          to keep <a
+          href="http://labs.consol.de/sonar/dashboard/index/946">Sonar</a>
+          happy ;-).
+        </p>
+      </subsection>
       <subsection name="Jolokia 0.83 released">
         <div class="news-date">2011-02-19</div>
         <p>
@@ -113,35 +157,6 @@
           Java client API and a server detection facility for the
           "version" command. All changes are summarized <a
           href="changes-report.html">here</a>.
-        </p>
-      </subsection>
-      <subsection name="Meet us at Devoxx !">
-        <div class="news-date">2010-11-08</div>
-        <p>
-          We will be hanging around in Antwerp at the very fine <a
-          href="http://www.devoxx.com">Devoxx</a> from 15th to 19th
-          November. Leave me a mail at devoxx@jolokia.org or follow us
-          on Twitter (<a
-          href="http://www.twitter.com/jolokia_jmx">@jolokia_jmx</a>)
-          if you are interested in Jolokia's current state and its
-          future roadmap. Or if you simply want to go for a beer and
-          have some JMX talk ;-)
-        </p>
-      </subsection>
-      <subsection name="www.jolokia.org launched">
-        <div class="news-date">2010-10-17</div>
-        <p>
-          Finally, <a href="index.html">www.jolokia.org</a> has
-          arrived. It provides many pieces of useful information about
-          Jolokia, but is not completely finished yet. The <a
-          href="reference/html/index.html">reference manual</a> needs
-          still some work as well as some other pages.  Hopefully you
-          enjoy it nevertheless. <a href="forum.html">Feedback</a> is
-          highly appreciated.
-        </p>
-        <p>
-          <em>Release soon, release often</em>. That's what they told
-          me. 
         </p>
       </subsection>
   </section>
