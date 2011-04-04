@@ -100,14 +100,7 @@ public class ItSetup {
             }
 
             // Other MBeans
-            boolean isWebsphere;
-            try {
-                Class.forName("com.ibm.websphere.management.AdminServiceFactory");
-                isWebsphere = true;
-
-            } catch (ClassNotFoundException exp) {
-                isWebsphere = false;
-            }
+            boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
             for (String domain : domains) {
                 registerMBean(new OperationChecking(domain),isWebsphere ? null : domain + ":type=operation");
                 registerMBean(new AttributeChecking(domain),isWebsphere ? null : domain + ":type=attribute");
@@ -143,7 +136,9 @@ public class ItSetup {
     private void registerMBean(Object pObject,String pName)
             throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        ObjectName registeredName = server.registerMBean(pObject, new ObjectName(pName)).getObjectName();
+        ObjectName registeredName = pName != null ?
+                server.registerMBean(pObject, new ObjectName(pName)).getObjectName() :
+                server.registerMBean(pObject,null).getObjectName();
         System.out.println("Registered " + registeredName);
         registeredMBeans.add(registeredName);
     }
@@ -155,4 +150,22 @@ public class ItSetup {
     public List<String> getEscapedNames() {
         return escapedNames;
     }
+
+    private boolean checkForClass(String pClassName) {
+        return getClass(pClassName) != null;
+    }
+
+    private Class getClass(String pClassName) {
+        try {
+            ClassLoader loader = getClassLoader();
+            return Class.forName(pClassName,false, loader);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    private ClassLoader getClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
 }
