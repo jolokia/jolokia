@@ -493,5 +493,12 @@
         </pluginManagement>
       </build>
     </profile>
+
+    <profile>
+      <id>roo</id>
+      <modules>
+        <module>tools/roo-addon</module>
+      </modules>
+    </profile>
   </profiles>
 </project>

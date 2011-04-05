@@ -15,15 +15,15 @@
     comfort for Java clients of this API, but it is also dangerous
     <emphasis>because</emphasis> it hides the remoteness of JMX
     calls. There a quite some subtle issues, performance related are
-    being one of them. (Es ist eben nicht egal), whether a call is
-    invoked locally or remotely. A caller should be at least aware
-    what happens and what are the consequences. On the other side,
-    there are message passing models, which include remoting
+    being one of them. It <emphasis>does</emphasis> matter, whether a
+    call is invoked locally or remotely. A caller should be at least
+    aware what happens and what are the consequences. On the other
+    side, there are message passing models, which include remoting
     explicitely, so that the caller <emphasis>knows</emphasis> from
     the programming model that she is calling a potentially expensive
     remote call. This is probably one of the reasons why RMI (the
     default protocol stack of JSR-160 connectors) lost importance in
-    favor of more explicite remote protocols. 
+    favor of more explicite remote protocols.
   </para>
   <para>
     One problem with JSR-160 is it implicite reliance on RMI and its

@@ -1,5 +1,7 @@
-* mvn clean install
-* Check integration tests (with jmx4perl/it/it.pl)
+mvn clean install
+
+# Check integration tests (with jmx4perl/it/it.pl)
+# Check Javascript tests
 
 # =======================================================================
 # Increase Version Numbers:
@@ -10,13 +12,14 @@ vi agent/core/src/main/java/org/jolokia/Version.java
 vi pom.xml
 --> <currentStableVersion>0.82</currentStableVersion>
     <currentSnapshotVersion>0.83-SNAPSHOT</currentSnapshotVersion>
+    include roo-addon 
 
 # ========================================================================
 # Build release
 git clone git@github.com:rhuss/jolokia.git
 cd jolokia
-mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs release:prepare
-mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs release:perform
+mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:prepare
+mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:perform
 cd target/checkout/target
 
 # Copy assembly to labs:
@@ -50,7 +53,8 @@ git rebase master
 cd tools/site-plugin; mvn clean intall;
 mvn -Pdist-labs site site:deploy
 
-# Roo-Plugin
-# Adapt uri in root-repository.xml to use a httpgpg URL
+# Roo-Plugin:
+# Adapt uri in root-repository.xml to use a httpgpg URL instead of a relative http 
+# URL
 
 
