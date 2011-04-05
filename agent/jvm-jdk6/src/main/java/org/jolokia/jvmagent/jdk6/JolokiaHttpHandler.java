@@ -1,8 +1,6 @@
 package org.jolokia.jvmagent.jdk6;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Map;
@@ -12,14 +10,11 @@ import java.util.regex.Pattern;
 import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.util.ConfigKey;
-import org.jolokia.restrictor.RestrictorFactory;
-import org.jolokia.http.HttpRequestHandler;
+import org.jolokia.protocol.classic.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;

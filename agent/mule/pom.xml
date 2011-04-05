@@ -23,6 +23,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-protocol-classic</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.mule</groupId>
       <artifactId>mule-core</artifactId>
       <version>2.2.1</version>

@@ -18,7 +18,7 @@ package org.jolokia.osgi.servlet;
 
 import javax.servlet.*;
 
-import org.jolokia.http.AgentServlet;
+import org.jolokia.protocol.classic.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 import org.osgi.framework.BundleContext;

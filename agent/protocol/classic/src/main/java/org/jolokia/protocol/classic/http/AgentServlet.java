@@ -1,9 +1,8 @@
-package org.jolokia.http;
+package org.jolokia.protocol.classic.http;
 
 import org.jolokia.backend.BackendManager;
-import org.jolokia.util.ConfigKey;
-import org.jolokia.restrictor.RestrictorFactory;
 import org.jolokia.restrictor.*;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;

@@ -4,8 +4,7 @@ import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
-import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.restrictor.*;
 import org.jolokia.util.*;
 import org.jolokia.request.JmxRequest;
 import org.json.simple.JSONObject;
@@ -38,8 +37,39 @@ import static org.jolokia.util.ConfigKey.*;
 
 
 /**
- * Backendmanager for dispatching to various backends based on a given
- * {@link JmxRequest}
+ * <p>
+ *   Backendmanager for dispatching to various backends based on a given
+ *   {@link JmxRequest}. This is the entry class for protocol stack handler, which
+ *   take a Jolokia request in some format, creates {@link JmxRequest} objects from
+ *   the input, calls this backend manager and returns its answer in an appropriate format.
+ * </p>
+ * <p>
+ *   A client of this class needs to provide the following input for the constructor:
+ * </p>
+ * <ul>
+ *   <li>
+ *     A configuration described in a map with {@link ConfigKey} enumeration values as keys and strings
+ *     a values. {@link ConfigKey} described all possible value which can influence the operation of
+ *     this backend manager. The client is responsible to extract request options ({@link ConfigKey#isRequestConfig()} == true)
+ *     and pass them in via this Map.
+ *   </li>
+ *   <li>
+ *     An implementation of a {@link LogHandler} used for logging within this BackendManager
+ *   </li>
+ *   <li>
+ *     An optional {@link Restrictor} implementation for restricting access. If given, this manager will
+ *     thrown an {@link SecurityException} if the request doesn't pass the restrictor. For restriction on
+ *     the IP address and the HTTP method used the client of this class is responsible itself, since the backend
+ *     manager is agnostic to the transport protocol. See {@link PolicyRestrictor} for an implementation
+ *     of a restrictor which uses a policy file.
+ *   </li>
+ * </ul>
+ * <p>
+ *   The single entry point of this backend manager is {@link #handleRequest(JmxRequest)} which takes a prepared
+ *   {@link JmxRequest} and returns a typeless JSONObject which can be directly used as return value for JSON based
+ *   protocol stacks. A usage example for this class can be found in <code>HttpHandler</code> in the module
+ *   <code>jolokia-protocol-classic</code. 
+ * </p>
  *
  * @author roland
  * @since Nov 11, 2009
@@ -69,8 +99,8 @@ public class BackendManager {
     private List<RequestDispatcher> requestDispatchers;
 
     /**
-     * Constrcuct a new backend manager with the given configuration and which allows
-     * every operation (no restrictor)
+     * Construct a new backend manager with the given configuration and which allows
+     * every operation (i.e. no restrictor applies)
      *
      * @param pConfig configuration map used for tuning this handler's behaviour
      * @param pLogHandler logger
@@ -80,11 +110,12 @@ public class BackendManager {
     }
 
     /**
-     * Constrcuct a new backend manager with the given configuration.
+     * Construct a new backend manager with the given configuration.
      *
      * @param pConfig configuration map used for tuning this handler's behaviour
      * @param pLogHandler logger
-     * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
+     * @param pRestrictor a restrictor for limiting access. Can be <code>null</code> in which case
+     *        every operation is allowed
      */
     public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
 
@@ -112,6 +143,56 @@ public class BackendManager {
         // Backendstore for remembering agent state
         initStores(pConfig);
     }
+
+    /**
+     * <p>
+     *   Handle a single JMXRequest. It takes a {@link JmxRequest} object as input, performs
+     *   the requested operation on the backend (e.g. on the local MBeanServer or via a proxy),
+     *   and returns the answer in a typeless Map. The format of this response is different for
+     *   different types od requests and is defined in the
+     *   <a href="http://www.jolokia.org/">Jolokia reference manual</a>.
+     * </p>
+     * <p>
+     *   The response status is set to 200 if the request was successful, error handling has to
+     *   be done outside this backend manager by catching the appropriate exceptions and
+     *   converting them to the proper answer.
+     * </p>
+     * <p>
+     *   The classic Jolokia protocol handler calls this method for bulk requests multiple times
+     *   and creates error messages as described in the <a href="">reference manual</a>, too. The resulting
+     *   object is returned directly to the client.
+     * </p>
+     *
+     * @param pJmxReq request to perform
+     * @return the response as a map.
+     * @throws InstanceNotFoundException if a referenced MBean could not be found
+     * @throws AttributeNotFoundException if a referenced attribute doesnot exist on the target MBean
+     * @throws ReflectionException if something failed during reflection based serialization of the object
+     * @throws MBeanException general exception occured during JMX operation
+     */
+    public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
+            ReflectionException, MBeanException, IOException {
+
+        boolean debug = isDebug();
+
+        long time = 0;
+        if (debug) {
+            time = System.currentTimeMillis();
+        }
+        JSONObject json = callRequestDispatcher(pJmxReq);
+
+        // Update global history store
+        historyStore.updateAndAdd(pJmxReq,json);
+        if (debug) {
+            debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
+            debug("Response: " + json);
+        }
+        // Ok, we did it ...
+        json.put("status",200 /* success */);
+        return json;
+    }
+
+    // =========================================================================================================
 
     // Construct configured dispatchers by reflection. Returns always
     // a list, an empty one if no request dispatcher should be created
@@ -153,39 +234,6 @@ public class BackendManager {
         } catch (InstantiationException e) {
             throw new IllegalArgumentException(pDispatcherClass + " couldn't be instantiated: " + e,e);
         }
-    }
-
-    /**
-     * Handle a single JMXRequest. The response status is set to 200 if the request
-     * was successful
-     *
-     * @param pJmxReq request to perform
-     * @return the already converted answer.
-     * @throws InstanceNotFoundException
-     * @throws AttributeNotFoundException
-     * @throws ReflectionException
-     * @throws MBeanException
-     */
-    public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
-            ReflectionException, MBeanException, IOException {
-
-        boolean debug = isDebug();
-
-        long time = 0;
-        if (debug) {
-            time = System.currentTimeMillis();
-        }
-        JSONObject json = callRequestDispatcher(pJmxReq);
-
-        // Update global history store
-        historyStore.updateAndAdd(pJmxReq,json);
-        if (debug) {
-            debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
-            debug("Response: " + json);
-        }
-        // Ok, we did it ...
-        json.put("status",200 /* success */);
-        return json;
     }
 
     // call the an appropriate request dispatcher

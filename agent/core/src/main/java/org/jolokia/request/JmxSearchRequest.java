@@ -37,7 +37,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxSearchRequest(String pObjectName, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxSearchRequest(String pObjectName, Map<String, String> pParams) throws MalformedObjectNameException {
         super(RequestType.SEARCH, pObjectName, null, pParams);
     }
 
@@ -48,7 +48,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxSearchRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxSearchRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
     }
 

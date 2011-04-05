@@ -47,8 +47,8 @@ public class JmxReadRequest extends JmxObjectNameRequest {
      * @param pInitParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name.
      */
-    JmxReadRequest(String pObjectName,String pAttribute,List<String> pPathParts,
-                   Map<String, String> pInitParams) throws MalformedObjectNameException {
+    public JmxReadRequest(String pObjectName, String pAttribute, List<String> pPathParts,
+                          Map<String, String> pInitParams) throws MalformedObjectNameException {
         super(RequestType.READ, pObjectName, pPathParts, pInitParams);
         initAttribute(pAttribute);
     }
@@ -60,7 +60,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name extracted is not a proper object name.
      */
-    JmxReadRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxReadRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         initAttribute(pRequestMap.get("attribute"));
     }

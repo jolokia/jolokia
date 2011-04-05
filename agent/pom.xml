@@ -18,8 +18,9 @@
 
   <packaging>pom</packaging>
 
-  <modules>
+  <modules>    
     <module>core</module>
+    <module>protocol/classic</module>
     <module>war</module>
     <module>jsr160</module>
     <module>mule</module>

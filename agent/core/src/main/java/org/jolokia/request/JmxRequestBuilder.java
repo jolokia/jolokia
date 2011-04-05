@@ -26,7 +26,7 @@ import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**
- * Helper class for unit testing
+ * Builder for JmxRequests
  *
  * @author roland
  * @since Mar 6, 2010
@@ -95,13 +95,5 @@ public class JmxRequestBuilder {
     public JmxRequestBuilder arguments(Object ... pArguments) {
         request.put("arguments", Arrays.asList(pArguments));
         return this;
-    }
-
-    static Map<String,Object> createMap(Object ... args) {
-        Map<String,Object> ret = new HashMap<String, Object>();
-        for (int i = 0; i<args.length; i+=2) {
-            ret.put((String) args[i],args[i+1]);
-        }
-        return ret;
     }
 }

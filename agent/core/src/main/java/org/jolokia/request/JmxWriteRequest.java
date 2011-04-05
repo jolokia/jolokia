@@ -48,8 +48,8 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
      * @param pInitParams optional processing parameter
      * @throws MalformedObjectNameException if the object name is not well formed.
      */
-    JmxWriteRequest(String pObjectName,String pAttribute,Object pValue,List<String> pPathParts,
-                    Map<String, String> pInitParams) throws MalformedObjectNameException {
+    public JmxWriteRequest(String pObjectName, String pAttribute, Object pValue, List<String> pPathParts,
+                           Map<String, String> pInitParams) throws MalformedObjectNameException {
         super(RequestType.WRITE, pObjectName, pPathParts, pInitParams);
         attributeName = pAttribute;
         value = pValue;
@@ -62,7 +62,7 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxWriteRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxWriteRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         value = pRequestMap.get("value");
         attributeName = (String) pRequestMap.get("attribute");

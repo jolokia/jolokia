@@ -24,6 +24,11 @@
         <artifactId>jolokia-core</artifactId>
         <version>${jolokia.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-protocol-classic</artifactId>
+        <version>${jolokia.version}</version>
+      </dependency>
     </dependencies>
     <repositories>
       <repository>

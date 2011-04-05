@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
+package org.jolokia.protocol.classic.http;
 
 import java.util.*;
 
+import org.jolokia.request.*;
 import org.jolokia.util.*;
 import org.testng.annotations.Test;
 
-import static org.jolokia.request.JmxRequestBuilder.createMap;
 import static org.testng.Assert.*;
 
 /**
@@ -36,7 +36,7 @@ public class JmxRequestFactoryTest {
         JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage", null);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
-        assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
+        assertEquals(req.getAttributeName(), "HeapMemoryUsage", "Attribute parsed properly");
         assert req.getPathParts() == null : "PathParts are null";
         assert req.getPath() == null : "Path is null";
     }
@@ -44,13 +44,13 @@ public class JmxRequestFactoryTest {
     @Test
     public void simplePost() {
         Map<String,Object> reqMap = createMap(
-                "type","read",
-                "mbean","java.lang:type=Memory",
-                "attribute","HeapMemoryUsage");
+                "type", "read",
+                "mbean", "java.lang:type=Memory",
+                "attribute", "HeapMemoryUsage");
         JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, null);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
-        assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
+        assertEquals(req.getAttributeName(), "HeapMemoryUsage", "Attribute parsed properly");
         assert req.getPathParts() == null : "PathParts are null";
         assert req.getPath() == null : "Path is null";
     }
@@ -65,26 +65,26 @@ public class JmxRequestFactoryTest {
         Map config = new HashMap();
         config.put("maxDepth","10");
         Map<String,Object> reqMap = createMap(
-                "type","read",
-                "mbean","java.lang:type=Memory",
-                "attribute","HeapMemoryUsage",
-                "config",config);
+                "type", "read",
+                "mbean", "java.lang:type=Memory",
+                "attribute", "HeapMemoryUsage",
+                "config", config);
         Map param = new HashMap();;
         param.put("maxObjects",new String[] { "100" });
         JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,param);
-        assertEquals(req.getAttributeName(),"HeapMemoryUsage");
-        assertEquals(req.getProcessingConfig(ConfigKey.MAX_DEPTH),"10");
+        assertEquals(req.getAttributeName(), "HeapMemoryUsage");
+        assertEquals(req.getProcessingConfig(ConfigKey.MAX_DEPTH), "10");
         assertEquals(req.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS), new Integer(100));
     }
 
     @Test
     public void multiPostRequests() {
         Map<String,Object> req1Map = createMap(
-                "type","read",
-                "mbean","java.lang:type=Memory",
-                "attribute","HeapMemoryUsage");
+                "type", "read",
+                "mbean", "java.lang:type=Memory",
+                "attribute", "HeapMemoryUsage");
         Map<String,Object> req2Map = createMap(
-                "type","list");
+                "type", "list");
         List<JmxRequest> req = JmxRequestFactory.createPostRequests(Arrays.asList(req1Map, req2Map),null);
         assertEquals(req.get(0).getType(), RequestType.READ);
         assertEquals(req.get(1).getType(), RequestType.LIST);
@@ -111,14 +111,14 @@ public class JmxRequestFactoryTest {
     @Test
     public void simpleGetWithEscapedAttribute() {
         JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/^/Heap/-/Memory/-/Usage/+/",null);
-        assertEquals(req.getAttributeName(),"/Heap/Memory/Usage/","Attribute properly parsed");
+        assertEquals(req.getAttributeName(), "/Heap/Memory/Usage/", "Attribute properly parsed");
     }
 
     @Test
     public void simpleGetWithEscapedPath() {
         JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used\\/bla/-/blub/bloe",null);
-        assertEquals(req.getPathParts().size(),2,"Size of path");
-        assertEquals(req.getPath(),"used\\/bla\\/blub/bloe","Path properly parsed");
+        assertEquals(req.getPathParts().size(), 2, "Size of path");
+        assertEquals(req.getPath(), "used\\/bla\\/blub/bloe", "Path properly parsed");
     }
 
     @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})
@@ -180,6 +180,14 @@ public class JmxRequestFactoryTest {
     @Test(expectedExceptions = { ClassCastException.class } )
     public void castException() {
         JmxReadRequest req = JmxRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc",null);
+    }
+
+    static Map<String,Object> createMap(Object ... args) {
+        Map<String,Object> ret = new HashMap<String, Object>();
+        for (int i = 0; i<args.length; i+=2) {
+            ret.put((String) args[i],args[i+1]);
+        }
+        return ret;
     }
 
 }

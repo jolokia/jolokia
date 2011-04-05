@@ -49,7 +49,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
      * @param pParams optional params used for processing the request.
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JmxExecRequest(String pObjectName,String pOperation,List pArguments,
+    public JmxExecRequest(String pObjectName,String pOperation,List pArguments,
                    Map<String, String> pParams) throws MalformedObjectNameException {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams);
         operation = pOperation;
@@ -63,7 +63,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JmxExecRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxExecRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         arguments = (List) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");

@@ -1,10 +1,11 @@
-package org.jolokia.request;
+package org.jolokia.protocol.classic.http;
 
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.request.*;
 import org.jolokia.util.PathUtil;
 import org.jolokia.util.RequestType;
 
@@ -26,7 +27,7 @@ import org.jolokia.util.RequestType;
 
 
 /**
- * Factory for creating {@link JmxRequest}s
+ * Factory for creating {@link JmxRequest}s for the classic Jolokia protocol.
  *
  * @author roland
  * @since Oct 29, 2009

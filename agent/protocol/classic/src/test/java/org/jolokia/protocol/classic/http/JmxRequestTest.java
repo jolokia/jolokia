@@ -1,4 +1,4 @@
-package org.jolokia.request;
+package org.jolokia.protocol.classic.http;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -16,17 +16,16 @@ package org.jolokia.request;
  *  limitations under the License.
  */
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.request.*;
 import org.jolokia.util.PathUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.jolokia.request.JmxRequestBuilder.createMap;
 import static org.testng.Assert.*;
 import static org.testng.Assert.assertTrue;
 
@@ -211,5 +210,12 @@ public class JmxRequestTest {
         }
     }
 
+    static Map<String,Object> createMap(Object ... args) {
+        Map<String,Object> ret = new HashMap<String, Object>();
+        for (int i = 0; i<args.length; i+=2) {
+            ret.put((String) args[i],args[i+1]);
+        }
+        return ret;
+    }
 
 }

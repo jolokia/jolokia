@@ -14,7 +14,8 @@
   <modules>
     <module>agent</module>
     <module>it</module>
-    <module>client</module>  </modules>
+    <module>client</module>  
+  </modules>
 
   <build>
     <plugins>

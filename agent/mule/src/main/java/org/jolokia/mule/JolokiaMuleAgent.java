@@ -1,6 +1,6 @@
 package org.jolokia.mule;
 
-import org.jolokia.http.AgentServlet;
+import org.jolokia.protocol.classic.http.AgentServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.Server;
