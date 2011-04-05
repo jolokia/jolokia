@@ -62,7 +62,7 @@ var Jolokia = (function($) {
         }
 
         // Jolokia Javascript Client version
-        this.CLIENT_VERSION = "0.90";
+        this.CLIENT_VERSION = "0.91-SNAPSHOT";
 
         // Allow a single URL parameter as well
         if (typeof param === "string") {
