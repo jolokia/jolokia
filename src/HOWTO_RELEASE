@@ -54,7 +54,7 @@ cd tools/site-plugin; mvn clean intall;
 mvn -Pdist-labs site site:deploy
 
 # Roo-Plugin:
-# Adapt uri in root-repository.xml to use a httpgpg URL instead of a relative http 
+# Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 
 # URL
 
 
