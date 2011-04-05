@@ -3,11 +3,8 @@ package org.jolokia.handler;
 
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
-<<<<<<< HEAD
 import org.jolokia.util.RequestType;
-=======
 import org.jolokia.util.PathUtil;
->>>>>>> refactored ListHandler for path handling
 
 import javax.management.*;
 import java.io.IOException;
@@ -170,7 +167,9 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     private Set<ObjectName> queryMBeans(MBeanServerConnection pServer, ObjectName pName) throws IOException {
-        if (pName.isPattern()) {
+        if (pName == null) {
+            return pServer.queryNames(null,null);
+        } else if (pName.isPattern()) {
             return pServer.queryNames(pName,(QueryExp) null);
         } else {
             return new HashSet<ObjectName>(Arrays.asList(pName));
