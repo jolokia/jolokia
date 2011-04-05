@@ -72,10 +72,10 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     @Override
-    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest request)
+    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest pRequest)
             throws InstanceNotFoundException, IOException {
         try {
-            Stack<String> pathStack = PathUtil.reversePath(request.getPathParts());
+            Stack<String> pathStack = PathUtil.reversePath(pRequest.getPathParts());
             int stackSize = pathStack.size();               
             ObjectName oName = objectNameFromPath(pathStack);
 
@@ -94,9 +94,9 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                             addOperations(mBeanMap, mBeanInfo);
                             addNotifications(mBeanMap, mBeanInfo);
                         } else {
-                            addPartialMBeanInfo(request, pathStack, mBeanMap, mBeanInfo);
+                            addPartialMBeanInfo(pRequest, pathStack, mBeanMap, mBeanInfo);
                         }
-                        // Trim if needed
+                        // Trim if required
                         if (mBeanMap.size() == 0) {
                             mBeansMap.remove(name.getCanonicalKeyPropertyListString());
                             if (mBeansMap.size() == 0) {
@@ -123,7 +123,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         } catch (IntrospectionException e) {
             throw new IllegalStateException("Internal error while retrieving list: " + e,e);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + request.getPath() + ")");
+            throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")");
         }
 
     }
@@ -273,11 +273,15 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     // will not be called
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
-        return null;
+    public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 
     @Override
+    // Path handling is done directly within this handler to avoid
+    // excessive memory consumption by building up the whole list
+    // into memory only for extracting a part from it
     public boolean useReturnValueWithPath() {
         return false;
     }

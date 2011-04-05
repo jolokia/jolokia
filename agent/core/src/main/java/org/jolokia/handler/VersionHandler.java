@@ -68,7 +68,7 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
     @Override
     // Wont be called
     public Object doHandleRequest(MBeanServerConnection server, JmxVersionRequest request) {
-        return null;
+        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 
 }

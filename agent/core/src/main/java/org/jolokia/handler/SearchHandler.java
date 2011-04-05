@@ -88,6 +88,6 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
 
     @Override
     protected Object doHandleRequest(MBeanServerConnection server, JmxSearchRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
-        throw new IllegalArgumentException("Internal: Should not be called, instead variant with all MBeanServers in the signature must be called");
+        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 }
