@@ -800,7 +800,17 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
       </para>
       <variablelist>
         <varlistentry>
-          <term><emphasis role="bold">4.2</emphasis> (4.3.2011)</term>
+          <term><emphasis role="bold">4.3</emphasis>(Jolokia version 0.91)</term>
+          <listitem>
+            <para>
+              The <literal>list</literal> operation supports a
+              <literal>maxDepth</literal> option for truncating the
+              answer. 
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="bold">4.2</emphasis> (Jolokia vesion 0.90)</term>
           <listitem>
             <para>
               Response values are returned in the native JSON

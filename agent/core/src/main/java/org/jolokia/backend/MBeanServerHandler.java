@@ -39,7 +39,6 @@ import org.jolokia.util.ServiceObjectFactory;
 public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistration {
 
     // The MBeanServers to use
-    // TODO: Dont cache them here ! Important for OSGi usage ...
     private Set<MBeanServer> mBeanServers;
     private Set<MBeanServerConnection> mBeanServerConnections;
 

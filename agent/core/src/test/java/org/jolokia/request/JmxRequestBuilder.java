@@ -21,8 +21,7 @@ import javax.management.ObjectName;
 
 import java.util.*;
 
-import org.jolokia.util.PathUtil;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 
 /**
@@ -35,9 +34,17 @@ public class JmxRequestBuilder {
 
     private JSONObject request = new JSONObject();
 
+    private Map<String,String> procConfig = new HashMap<String,String>();
+
+    public JmxRequestBuilder(RequestType pType) throws MalformedObjectNameException {
+        this(pType,(String) null);
+    }
+
     public JmxRequestBuilder(RequestType pType, String pObjectName) throws MalformedObjectNameException {
         request.put("type",pType.getName());
-        request.put("mbean", pObjectName);
+        if (pObjectName != null) {
+            request.put("mbean", pObjectName);
+        }
     }
 
     public JmxRequestBuilder(RequestType pType, ObjectName pMBean) throws MalformedObjectNameException {
@@ -47,12 +54,12 @@ public class JmxRequestBuilder {
     public <R extends JmxRequest> R build() throws MalformedObjectNameException {
         RequestType type = RequestType.getTypeByName((String) request.get("type"));
         switch (type) {
-            case READ: return (R) new JmxReadRequest(request,null);
-            case WRITE: return (R) new JmxWriteRequest(request,null);
-            case EXEC: return (R) new JmxExecRequest(request,null);
-            case VERSION: return (R) new JmxVersionRequest(request,null);
-            case SEARCH: return (R) new JmxSearchRequest(request,null);
-            case LIST: return (R) new JmxListRequest(request,null);
+            case READ: return (R) new JmxReadRequest(request,procConfig);
+            case WRITE: return (R) new JmxWriteRequest(request,procConfig);
+            case EXEC: return (R) new JmxExecRequest(request,procConfig);
+            case VERSION: return (R) new JmxVersionRequest(request,procConfig);
+            case SEARCH: return (R) new JmxSearchRequest(request,procConfig);
+            case LIST: return (R) new JmxListRequest(request,procConfig);
         }
         throw new IllegalArgumentException("Unknown type " + type);
     }
@@ -94,6 +101,12 @@ public class JmxRequestBuilder {
 
     public JmxRequestBuilder arguments(Object ... pArguments) {
         request.put("arguments", Arrays.asList(pArguments));
+        return this;
+    }
+
+    public JmxRequestBuilder option(ConfigKey pKey, String pValue) {
+        assert pKey.isRequestConfig();
+        procConfig.put(pKey.getKeyValue(),pValue);
         return this;
     }
 

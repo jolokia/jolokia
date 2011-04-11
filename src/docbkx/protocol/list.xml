@@ -125,7 +125,7 @@
       path. E.g a path of <literal>domain/prop-list</literal> would return the value for a single
       bean only. For example, a request 
       <informalexample>
-        <literallayout class="monospaced"><![CDATA[http://localhost:8080/j4p/list/java.lang/type=Memory]]></literallayout>
+        <literallayout class="monospaced"><![CDATA[http://localhost:8080/jolokia/list/java.lang/type=Memory]]></literallayout>
       </informalexample>
       results in an answer
     </para>
@@ -179,4 +179,17 @@
  }]]></programlisting>      
   </section>
 
+  <section>
+    <title>Restrict depth of depth</title>
+    <para>
+      The optional parameter <literal>maxDepth</literal> can be used
+      to restrict the depth of the return tree. Two value are
+      possible: A <literal>maxDepth</literal> of 1 restricts the
+      return value to a map with the JMX domains as keys, a
+      <literal>maxDepth</literal> of 2 truncates the map returned to
+      the domain names (first level) and the MBean's properties
+      (second level). The final values of the maps don't have any
+      meaning ander are dummy values.
+    </para>
+  </section>
 </section>
