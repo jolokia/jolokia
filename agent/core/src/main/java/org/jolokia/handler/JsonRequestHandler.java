@@ -125,6 +125,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws AttributeNotFoundException
      * @throws ReflectionException
      * @throws MBeanException
+     * @throws IOException
      */
     protected abstract Object doHandleRequest(MBeanServerConnection server, R request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
@@ -137,6 +138,11 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @param servers all MBeans servers detected
      * @param request request to process
      * @return the object found
+     * @throws IOException
+     * @throws AttributeNotFoundException
+     * @throws InstanceNotFoundException
+     * @throws MBeanException
+     * @throws ReflectionException
      */
     public Object handleRequest(Set<MBeanServerConnection> servers, R request)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
@@ -151,6 +157,11 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @param servers all MBean servers found in this JVM
      * @param request the original request
      * @return the result of the the request.
+     * @throws IOException
+     * @throws AttributeNotFoundException
+     * @throws InstanceNotFoundException
+     * @throws MBeanException
+     * @throws ReflectionException
      */
     public Object doHandleRequest(Set<MBeanServerConnection> servers, R request)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {

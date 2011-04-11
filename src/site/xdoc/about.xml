@@ -70,7 +70,7 @@
         <a href="http://labs.consol.de/maven/repository/org/jmx4perl/j4p-agent/0.16/j4p-agent-0.16.war">38kb</a> in size.
       </p>
       <p>
-        The jmx4perl agent is now ~ 150kb 'large' with many more
+        The jmx4perl agent is now ~ 200kb 'large' with many more
         features (search, bulk requests, security, ....) but I still call it
         lighweight ;-). The perl part consists now of a powerful
         Nagios plugin called <a
@@ -103,7 +103,7 @@
         chilis as much as JMX. That's the main reason.
       </p>
       <p>        
-        The other reasion is, that a chili is a good metaphore for a
+        The other reason is, that a chili is a good metaphore for a
         hot, new approach for JMX remoting. Especially when it is the
         hottest one ;-)
       </p>
