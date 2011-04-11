@@ -1,14 +1,10 @@
 package org.jolokia.mbean;
 
-import java.io.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-
 import javax.management.*;
 
-import org.jolokia.util.DebugStore;
 import org.jolokia.history.HistoryKey;
 import org.jolokia.history.HistoryStore;
+import org.jolokia.util.DebugStore;
 
 /*
  *  Copyright 2009-2010 Roland Huss
