@@ -19,6 +19,8 @@ package org.jolokia.client.request;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.ObjectName;
+
 import org.json.simple.JSONObject;
 
 /**
@@ -31,13 +33,33 @@ public class J4pListRequest extends J4pRequest {
 
     private String path;
 
+    /**
+     * Default constructor to be used when all meta information should
+     * be fetched.
+     */
     protected J4pListRequest() {
-        this(null);
+        this((String) null);
     }
 
+    /**
+     * Constructor using a path to restrict the information
+     * returned by the list command
+     *
+     * @param pPath path into the JSON response
+     */
     public J4pListRequest(String pPath) {
         super(J4pType.LIST);
         path = pPath;
+    }
+
+    /**
+     * Constructor for fetching the meta data of a specific MBean
+     *
+     * @param pObjectName name of MBean for which to fetch the meta data
+     */
+    public J4pListRequest(ObjectName pObjectName) {
+        super(J4pType.LIST);
+        path = pObjectName.getDomain() + "/" + pObjectName.getCanonicalKeyPropertyListString();
     }
 
     @Override

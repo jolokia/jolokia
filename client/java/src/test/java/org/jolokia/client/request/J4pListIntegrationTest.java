@@ -17,6 +17,7 @@
 package org.jolokia.client.request;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -40,4 +41,13 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         assertNotNull(resp);
     }
 
+    @Test
+    public void mbeanMeta() throws J4pException, MalformedObjectNameException {
+        J4pListRequest req = new J4pListRequest(new ObjectName("java.lang:type=Memory"));
+        J4pListResponse resp = j4pClient.execute(req);
+        Map val = resp.getValue();
+        assertTrue(val.containsKey("desc"));
+        assertTrue(val.containsKey("op"));
+        assertTrue(val.containsKey("attr"));
+    }
 }
