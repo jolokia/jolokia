@@ -7,7 +7,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.90" description="Release 0.90" date="">
+    <release version="0.90" description="Release 0.91" date="">
+      <action dev="roland" type="add" date="2011-04-04">
+        Added constructor to J4pListRequest() which takes an
+        ObjectName as argument for fetching the meta data for a single
+        MBean only.
+      </action>
+    </release>
+    <release version="0.90" description="Release 0.90" date="2011-04-04">
       <action dev="roland" type="add" date="2011-04-04">
         Added a Knopflerfish detector and tested Jolokia with Knopflerfish 3.1
       </action>
