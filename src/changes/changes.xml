@@ -13,6 +13,15 @@
         ObjectName as argument for fetching the meta data for a single
         MBean only.
       </action>
+      <action dev="roland" type="update" date="2011-04-14">
+        Reworked "list" handling. It's no much faster when used with
+        pathes since it doesn't slurp in the whole meta and truncate
+        it afterwards but does the right thing directly to only fetch
+        the required information. The list handler respect now a
+        'maxDepth' request option for truncating the data from top
+        down. 'maxDepth' works with pathes, too. Comprehensive unit
+        tests has been added as well.
+      </action>
     </release>
     <release version="0.90" description="Release 0.90" date="2011-04-04">
       <action dev="roland" type="add" date="2011-04-04">
