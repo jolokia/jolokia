@@ -25,12 +25,9 @@ import javax.management.*;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.ConfigKey;
-import org.jolokia.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.util.*;
 import org.testng.annotations.*;
 
-import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
 import static org.testng.Assert.assertEquals;
 
@@ -47,55 +44,10 @@ public class ListHandlerTest {
         handler = new ListHandler(new AllowAllRestrictor());
     }
 
-    @Test(expectedExceptions = { UnsupportedOperationException.class })
-    public void wrongMethod() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
-
-        // Should always return true in order to be able to merge lists
-        assertTrue(handler.handleAllServersAtOnce(request));
-        // Path value handling is done internally
-        assertFalse(handler.useReturnValueWithPath());
-
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        replay(connection);
-        Object res = handler.handleRequest(connection,request);
-    }
-
-    @Test
-    public void plainTest() throws Exception {
-
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
-
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        Set<ObjectName> nameSet = new HashSet<ObjectName>();
-        for (String name : new String[] { "java.lang:type=Memory", "java.lang:type=Runtime" }) {
-            ObjectName oName = new ObjectName(name);
-            nameSet.add(oName);
-            expect(connection.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
-
-        }
-        expect(connection.queryNames(null, null)).andReturn(nameSet);
-        replay(connection);
-        Map res = (Map) handler.handleRequest(asSet(connection),request);
-        assertTrue(res.containsKey("java.lang"));
-        Map inner = (Map) res.get("java.lang");
-        assertTrue(inner.containsKey("type=Memory"));
-        assertTrue(inner.containsKey("type=Runtime"));
-        assertEquals(inner.size(), 2);
-        inner = (Map) inner.get("type=Memory");
-        for (String k : new String[] { "desc", "op", "attr"}) {
-            assertTrue(inner.containsKey(k));
-        }
-        assertEquals(inner.size(), 3);
-        System.out.println(inner);
-        verify(connection);
-    }
-
     @Test
     public void domainPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = execute(request);
         assertTrue(res.containsKey("type=Memory"));
         assertTrue(res.get("type=Memory") instanceof Map);
     }
@@ -103,8 +55,7 @@ public class ListHandlerTest {
     @Test
     public void propertiesPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = execute(request);
         for (String k : new String[] { "desc", "op", "attr"}) {
             assertTrue(res.containsKey(k));
         }
@@ -114,8 +65,7 @@ public class ListHandlerTest {
     @Test
     public void attrPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","attr").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = execute(request);
         assertTrue(res.containsKey("HeapMemoryUsage"));
     }
 
@@ -123,23 +73,32 @@ public class ListHandlerTest {
     public void descPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        String res = (String) handler.handleRequest(asSet(conn),request);
+        String res = (String) handler.handleRequest(MBeanConnectionUtils.asSet(conn), request);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void descPathWithDepth() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang","type=Memory","desc")
+                .option(ConfigKey.MAX_DEPTH,"4")
+                .build();
+        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
+        String res = (String) handler.handleRequest(MBeanConnectionUtils.asSet(conn), request);
         assertNotNull(res);
     }
 
     @Test
     public void opPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","op").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = execute(request);
         assertTrue(res.containsKey("gc"));
     }
 
     @Test
     public void maxDepth1() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"1").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = execute(request);
         assertTrue(res.containsKey("java.lang"));
         assertFalse(res.get("java.lang") instanceof Map);
     }
@@ -147,8 +106,7 @@ public class ListHandlerTest {
     @Test
     public void maxDepth2() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"2").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = execute(request);
         assertTrue(res.containsKey("java.lang"));
         Map inner = (Map) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
@@ -158,24 +116,82 @@ public class ListHandlerTest {
 
     @Test
     public void maxDepthAndPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory").option(ConfigKey.MAX_DEPTH,"1").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Object res = (Object) handler.handleRequest(asSet(conn),request);
-        System.out.println(res);
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
+                .option(ConfigKey.MAX_DEPTH, "3").build();
+        Map res =  execute(request);
+        assertEquals(res.size(), 3);
+        Map ops = (Map) res.get("op");
+        assertTrue(ops.containsKey("gc"));
+        assertTrue(ops.get("gc") instanceof Map);
+        Map attrs = (Map) res.get("attr");
+        assertEquals(attrs.size(),4);
+        assertTrue(attrs.get("HeapMemoryUsage") instanceof Map);
+        assertTrue(res.get("desc") instanceof String);
     }
 
 
-
-    private Set<MBeanServerConnection> asSet(MBeanServerConnection ... pConnections) {
-        Set<MBeanServerConnection> ret = new HashSet<MBeanServerConnection>();
-        for (MBeanServerConnection conn : pConnections) {
-            ret.add(conn);
-        }
-        return ret;
+    @Test
+    public void truncatedList() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
+        Map res = execute(request);
+        assertFalse(res.containsKey("op"));
+        assertEquals(res.size(),2);
     }
 
-    private MBeanInfo getRealMBeanInfo(ObjectName oName) throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void invalidPath() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=Memory", "attr", "unknownAttribute")
+                .build();
+        execute(request);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void invalidPath2() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=Runtime", "op", "bla")
+                .option(ConfigKey.MAX_DEPTH,"3")
+                .build();
+        execute(request);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void invalidPath3() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=Runtime", "bla")
+                .option(ConfigKey.MAX_DEPTH,"3")
+                .build();
+        execute(request);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void invalidPath4() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=*")
+                .build();
+        execute(request);
+    }
+
+    private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        return conn.getMBeanInfo(oName);
+        return (Map) handler.handleRequest(MBeanConnectionUtils.asSet(conn), pRequest);
+    }
+
+
+    @Test
+    public void emptyMaps() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=Runtime", "op")
+                .build();
+        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
+        Map res = (Map) handler.handleRequest(MBeanConnectionUtils.asSet(conn),request);
+        assertEquals(res.size(),0);
+
+        request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=Runtime", "not")
+                .build();
+        conn = ManagementFactory.getPlatformMBeanServer();
+        res = (Map) handler.handleRequest(MBeanConnectionUtils.asSet(conn),request);
+        assertEquals(res.size(),0);
     }
 }

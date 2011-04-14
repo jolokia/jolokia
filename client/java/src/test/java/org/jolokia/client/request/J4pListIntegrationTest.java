@@ -49,4 +49,5 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         assertTrue(val.containsKey("op"));
         assertTrue(val.containsKey("attr"));
     }
+
 }

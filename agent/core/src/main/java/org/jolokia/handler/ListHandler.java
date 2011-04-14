@@ -88,7 +88,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 // Prepare an objectname patttern from a path (or "*:*" if no pattern is given)
                 ObjectName oName = objectNameFromPath(pathStack);
 
-
                 for (Object nameObject : queryMBeans(server, oName)) {
                     ObjectName name = (ObjectName) nameObject;
 
@@ -96,7 +95,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                         // Only add domain names with a dummy value if max depth is restricted to 1
                         // But only when used without path
                         infoMap.put(name.getDomain(),1);
-
                     } else if (maxDepth == 2 && stackSize == 0) {
                         // Add domain an object name into the map, final value is a dummy value
                         Map mBeansMap = getOrCreateMap(infoMap, name.getDomain());
@@ -124,19 +122,19 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                         } catch (IOException exp) {
                             // In case of a remote call, IOException can occur e.g. for
                             // NonSerializableExceptions
-                            if (stackSize <= 2) {
+                             if (stackSize <= 2) {
                                 // There are more MBean infos included
                                 mBeanMap.put(KEY_ERROR, exp);
                             } else {
                                 // Happens for a deeper request, hence we throw immediately
                                 // an error here
-
+                                 throw exp;
                             }
                         }
                     }
                 }
             }
-            return trunkAccordingToPath(infoMap, originalPathStack.size(), maxDepth);
+            return truncateAccordingToPath(infoMap, originalPathStack.size(), maxDepth);
         } catch (ReflectionException e) {
             throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         } catch (IntrospectionException e) {
@@ -147,12 +145,44 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     }
 
-    private Object trunkAccordingToPath(Map pInfoMap, int pStackSize, int pMaxDepth) {
+    private Object truncateAccordingToPath(Map pInfoMap, int pStackSize, final int pMaxDepth) {
+        Object value = navigatePath(pInfoMap,pStackSize);
+        if (pMaxDepth == 0) {
+            return value;
+        }
+        if (! (value instanceof Map)) {
+            return value;
+        } else {
+            // Truncate all levels below
+            return truncateMap((Map) value,pMaxDepth);
+        }
+    }
+
+    private Object truncateMap(Map pValue, int pMaxDepth) {
+        if (pMaxDepth == 0) {
+            return 1;
+        }
+        Map ret = new HashMap();
+        Set<Map.Entry> entries = pValue.entrySet();
+        for (Map.Entry entry : entries) {
+            Object value = entry.getValue();
+            Object key = entry.getKey();
+            if (value instanceof Map) {
+                ret.put(key,truncateMap((Map) value,pMaxDepth - 1));
+            } else {
+                ret.put(key,value);
+            }
+        }
+        return ret;
+    }
+
+    private Object navigatePath(Map pInfoMap,int pStackSize) {
         Map ret = pInfoMap;
-        int maxDepth = pMaxDepth - 1;
         while (pStackSize > 0) {
             Collection vals = ret.values();
-            if (vals.size() != 1) {
+            if (vals.size() == 0) {
+                return ret;
+            } else if (vals.size() != 1) {
                 throw new IllegalStateException("Internal: More than one key found when extracting with path: " + vals);
             }
             Object value = vals.iterator().next();
@@ -166,17 +196,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 throw new IllegalStateException("Internal: Value within path extraction must be a Map, not " + value.getClass());
             }
             ret = (Map) value;
-            // Truncate the level below
-            if (maxDepth == 0) {
-                Map trunc = new HashMap();
-                for (Object key : ret.keySet()) {
-                    trunc.put(key,1);
-                }
-                return trunc;
-            }
-
             --pStackSize;
-            --maxDepth;
         }
         return ret;
     }
@@ -234,9 +254,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 map.put(KEY_TYPES, notInfo.getNotifTypes());
             }
         }
-        if (notMap.size() > 0) {
-            pMBeanMap.put(KEY_NOTIFICATION, notMap);
-        }
+        updateMapConsideringPathError(KEY_NOTIFICATION,pMBeanMap, notMap, what);
     }
 
     private void addOperations(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
@@ -280,9 +298,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 }
             }
         }
-        if (opMap.size() > 0) {
-            pMBeanMap.put(KEY_OPERATION, opMap);
-        }
+        updateMapConsideringPathError(KEY_OPERATION,pMBeanMap, opMap, what);
     }
 
     private void addAttributes(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
@@ -298,8 +314,15 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 attrMap.put(attrInfo.getName(), map);
             }
         }
-        if (attrMap.size() > 0) {
-            pMBeanMap.put(KEY_ATTRIBUTE, attrMap);
+        updateMapConsideringPathError(KEY_ATTRIBUTE,pMBeanMap, attrMap, what);
+    }
+
+    // Add a map, but also check when a path is given, and the map is empty, then trow an error
+    private void updateMapConsideringPathError(String pType,Map pMap, Map pToAdd, String pPathPart) {
+        if (pToAdd.size() > 0) {
+            pMap.put(pType, pToAdd);
+        } else if (pPathPart != null) {
+            throw new IllegalArgumentException("Invalid attribute path provided (element '" + pPathPart + "' not found)");
         }
     }
 
