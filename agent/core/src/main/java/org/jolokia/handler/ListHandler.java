@@ -1,14 +1,14 @@
 package org.jolokia.handler;
 
 
-import org.jolokia.request.*;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
+import java.io.IOException;
+import java.util.*;
 
 import javax.management.*;
 
-import java.io.IOException;
-import java.util.*;
+import org.jolokia.request.JmxListRequest;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -76,8 +76,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             throws InstanceNotFoundException, IOException {
         Stack<String> originalPathStack = PathUtil.reversePath(pRequest.getPathParts());
 
-        Integer maxDepthI = pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
-        int maxDepth = maxDepthI == null ? 0 : maxDepthI;
+        int maxDepth = getMaxDepth(pRequest);
 
         try {
             Map infoMap = new HashMap();
@@ -100,37 +99,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                         Map mBeansMap = getOrCreateMap(infoMap, name.getDomain());
                         mBeansMap.put(name.getCanonicalKeyPropertyListString(),1);
                     } else {
-                        Map mBeansMap = getOrCreateMap(infoMap, name.getDomain());
-                        Map mBeanMap = getOrCreateMap(mBeansMap, name.getCanonicalKeyPropertyListString());
-                        try {
-                            MBeanInfo mBeanInfo = server.getMBeanInfo(name);
-                            if (pathStack.empty()) {
-                                mBeanMap.put(KEY_DESCRIPTION, mBeanInfo.getDescription());
-                                addAttributes(mBeanMap, mBeanInfo, pathStack);
-                                addOperations(mBeanMap, mBeanInfo, pathStack);
-                                addNotifications(mBeanMap, mBeanInfo, pathStack);
-                            } else {
-                                addPartialMBeanInfo(pRequest, pathStack, mBeanMap, mBeanInfo);
-                            }
-                            // Trim if required
-                            if (mBeanMap.size() == 0) {
-                                mBeansMap.remove(name.getCanonicalKeyPropertyListString());
-                                if (mBeansMap.size() == 0) {
-                                    infoMap.remove(name.getDomain());
-                                }
-                            }
-                        } catch (IOException exp) {
-                            // In case of a remote call, IOException can occur e.g. for
-                            // NonSerializableExceptions
-                             if (stackSize <= 2) {
-                                // There are more MBean infos included
-                                mBeanMap.put(KEY_ERROR, exp);
-                            } else {
-                                // Happens for a deeper request, hence we throw immediately
-                                // an error here
-                                 throw exp;
-                            }
-                        }
+                        addMBeanInfo(server, infoMap, name, pathStack);
                     }
                 }
             }
@@ -140,9 +109,73 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         } catch (IntrospectionException e) {
             throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")");
+            throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         }
 
+    }
+
+    // will not be called
+    @Override
+    public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
+    }
+
+    @Override
+    // Path handling is done directly within this handler to avoid
+    // excessive memory consumption by building up the whole list
+    // into memory only for extracting a part from it
+    public boolean useReturnValueWithPath() {
+        return false;
+    }
+
+    // ==========================================================================================================
+
+    // Extract MBean infos for a given MBean and add results to pResult.
+    private void addMBeanInfo(MBeanServerConnection server, Map pResult, ObjectName pName, Stack<String> pPathStack)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+        int stackSize = pPathStack.size();
+        Map mBeansMap = getOrCreateMap(pResult, pName.getDomain());
+        Map mBeanMap = getOrCreateMap(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        try {
+            MBeanInfo mBeanInfo = server.getMBeanInfo(pName);
+            if (pPathStack.empty()) {
+                addFullMBeanInfo(mBeanMap, mBeanInfo);
+            } else {
+                addPartialMBeanInfo(mBeanMap, mBeanInfo, pPathStack);
+            }
+            // Trim if required
+            if (mBeanMap.size() == 0) {
+                mBeansMap.remove(pName.getCanonicalKeyPropertyListString());
+                if (mBeansMap.size() == 0) {
+                    pResult.remove(pName.getDomain());
+                }
+            }
+        } catch (IOException exp) {
+            // In case of a remote call, IOException can occur e.g. for
+            // NonSerializableExceptions
+             if (stackSize == 0) {
+                // There are more MBean infos included
+                mBeanMap.put(KEY_ERROR, exp);
+            } else {
+                 // Happens for a deeper request, i.e with a path pointing directly into an MBean,
+                 // Hence we throw immediately an error here since there will be only this exception
+                 // and no extra info
+                 throw exp;
+            }
+        }
+    }
+
+    private void addFullMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo) {
+        pMBeanMap.put(KEY_DESCRIPTION, pMBeanInfo.getDescription());
+        addAttributes(pMBeanMap, pMBeanInfo, null);
+        addOperations(pMBeanMap, pMBeanInfo, null);
+        addNotifications(pMBeanMap, pMBeanInfo, null);
+    }
+
+    private int getMaxDepth(JmxListRequest pRequest) {
+        Integer maxDepthI = pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
+        return maxDepthI == null ? 0 : maxDepthI;
     }
 
     private Object truncateAccordingToPath(Map pInfoMap, int pStackSize, final int pMaxDepth) {
@@ -178,7 +211,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     private Object navigatePath(Map pInfoMap,int pStackSize) {
         Map ret = pInfoMap;
-        while (pStackSize > 0) {
+        int size = pStackSize;
+        while (size > 0) {
             Collection vals = ret.values();
             if (vals.size() == 0) {
                 return ret;
@@ -188,7 +222,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             Object value = vals.iterator().next();
 
             // End leaf, return it ....
-            if (pStackSize == 1) {
+            if (size == 1) {
                 return value;
             }
             // Dive in deeper ...
@@ -196,23 +230,23 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 throw new IllegalStateException("Internal: Value within path extraction must be a Map, not " + value.getClass());
             }
             ret = (Map) value;
-            --pStackSize;
+            --size;
         }
         return ret;
     }
 
-    private void addPartialMBeanInfo(JmxListRequest request, Stack<String> pPathStack, Map pMBeanMap, MBeanInfo pMBeanInfo) {
+    private void addPartialMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
         String what = pPathStack.empty() ? null : pPathStack.pop();
         if (KEY_DESCRIPTION.equals(what)) {
             pMBeanMap.put(KEY_DESCRIPTION, pMBeanInfo.getDescription());
         } else if (KEY_ATTRIBUTE.equals(what)) {
-            addAttributes(pMBeanMap, pMBeanInfo, pPathStack);
+            addAttributes(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
         } else if (KEY_OPERATION.equals(what)) {
-            addOperations(pMBeanMap, pMBeanInfo, pPathStack);
+            addOperations(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
         } else if (KEY_NOTIFICATION.equals(what)) {
-            addNotifications(pMBeanMap, pMBeanInfo, pPathStack);
+            addNotifications(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
         } else {
-            throw new IllegalArgumentException("Illegal path element " + what + " within path " + request.getPath());
+            throw new IllegalArgumentException("Illegal path element " + what);
         }
     }
 
@@ -242,28 +276,26 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         return mbean;
     }
 
-    private void addNotifications(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
-        String what = pPathStack.empty() ? null : pPathStack.pop();
-
-        Map notMap = new HashMap();
-        for (MBeanNotificationInfo notInfo : pMBeanInfo.getNotifications()) {
-            if (what == null || notInfo.getName().equals(what)) {
+    private void addAttributes(Map pMBeanMap, MBeanInfo pMBeanInfo, String pAttributeFilter) {
+        // Extract attributes
+        Map attrMap = new HashMap();
+        for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {
+            if (pAttributeFilter == null || attrInfo.getName().equals(pAttributeFilter)) {
                 Map map = new HashMap();
-                map.put(KEY_NAME, notInfo.getName());
-                map.put(KEY_DESCRIPTION, notInfo.getDescription());
-                map.put(KEY_TYPES, notInfo.getNotifTypes());
+                map.put(KEY_TYPE, attrInfo.getType());
+                map.put(KEY_DESCRIPTION, attrInfo.getDescription());
+                map.put(KEY_READ_WRITE, Boolean.valueOf(attrInfo.isWritable() && attrInfo.isReadable()));
+                attrMap.put(attrInfo.getName(), map);
             }
         }
-        updateMapConsideringPathError(KEY_NOTIFICATION,pMBeanMap, notMap, what);
+        updateMapConsideringPathError(KEY_ATTRIBUTE,pMBeanMap, attrMap, pAttributeFilter);
     }
 
-    private void addOperations(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
-        String what = pPathStack.empty() ? null : pPathStack.pop();
-
+    private void addOperations(Map pMBeanMap, MBeanInfo pMBeanInfo, String pOperationFilter) {
         // Extract operations
         Map opMap = new HashMap();
         for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {
-            if (what == null || opInfo.getName().equals(what)) {
+            if (pOperationFilter == null || opInfo.getName().equals(pOperationFilter)) {
                 Map map = new HashMap();
                 List argList = new ArrayList();
                 for (MBeanParameterInfo paramInfo : opInfo.getSignature()) {
@@ -298,24 +330,23 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 }
             }
         }
-        updateMapConsideringPathError(KEY_OPERATION,pMBeanMap, opMap, what);
+        updateMapConsideringPathError(KEY_OPERATION,pMBeanMap, opMap, pOperationFilter);
     }
 
-    private void addAttributes(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
-        // Extract attributes
-        Map attrMap = new HashMap();
-        String what = pPathStack.empty() ? null : pPathStack.pop();
-        for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {
-            if (what == null || attrInfo.equals(what)) {
+    private void addNotifications(Map pMBeanMap, MBeanInfo pMBeanInfo, String pNotificationFilter) {
+        Map notMap = new HashMap();
+        for (MBeanNotificationInfo notInfo : pMBeanInfo.getNotifications()) {
+            if (pNotificationFilter == null || notInfo.getName().equals(pNotificationFilter)) {
                 Map map = new HashMap();
-                map.put(KEY_TYPE, attrInfo.getType());
-                map.put(KEY_DESCRIPTION, attrInfo.getDescription());
-                map.put(KEY_READ_WRITE, Boolean.valueOf(attrInfo.isWritable() && attrInfo.isReadable()));
-                attrMap.put(attrInfo.getName(), map);
+                map.put(KEY_NAME, notInfo.getName());
+                map.put(KEY_DESCRIPTION, notInfo.getDescription());
+                map.put(KEY_TYPES, notInfo.getNotifTypes());
             }
         }
-        updateMapConsideringPathError(KEY_ATTRIBUTE,pMBeanMap, attrMap, what);
+        updateMapConsideringPathError(KEY_NOTIFICATION,pMBeanMap, notMap, pNotificationFilter);
     }
+
+
 
     // Add a map, but also check when a path is given, and the map is empty, then trow an error
     private void updateMapConsideringPathError(String pType,Map pMap, Map pToAdd, String pPathPart) {
@@ -335,18 +366,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         return nMap;
     }
 
-    // will not be called
-    @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
-        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
+    private String popOrNull(Stack<String> pPathStack) {
+        return pPathStack.empty() ? null : pPathStack.pop();
     }
 
-    @Override
-    // Path handling is done directly within this handler to avoid
-    // excessive memory consumption by building up the whole list
-    // into memory only for extracting a part from it
-    public boolean useReturnValueWithPath() {
-        return false;
-    }
 }
