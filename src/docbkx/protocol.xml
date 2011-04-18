@@ -554,8 +554,9 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
               the URL as String.
             </listitem>
             <listitem>
-              <classname>java.util.Date</classname> is represented by
-              its string form.
+              <classname>java.util.Date</classname> is represented in
+              an ISO-8601 format. When used with a path 'time' the
+              milliseconds since 1.1.1970 00:00 UTC are returned.               
             </listitem>
           </itemizedlist>
         </para>
@@ -650,11 +651,14 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
               <listitem>Double / double</listitem>
               <listitem>char</listitem>
               <listitem>Boolean / boolean</listitem>
+              <listitem>Date</listitem>
             </itemizedlist>
           </para>
           <para>
             The serialized value is simply the string representation of
-            those types. Arrays of the given types are supported,
+            those types. Dates can be set either by an long value
+            (epoch milliseconds) or with a string value (ISO-8601
+            format). Arrays of the given types are supported,
             too. These are serialized as a comma separated list.
           </para>
           <note>

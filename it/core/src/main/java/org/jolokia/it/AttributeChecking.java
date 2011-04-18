@@ -47,6 +47,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private Map map;
     private Object bean;
     private String domain;
+    private Date date = new Date();
 
     public AttributeChecking(String pDomain) {
         domain = pDomain;
@@ -183,6 +184,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public void setBean(Object object) {
         bean = object;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date pDate) {
+        date = pDate;
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {

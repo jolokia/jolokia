@@ -3,9 +3,9 @@ package org.jolokia.converter;
 import java.lang.reflect.Array;
 import java.util.*;
 
+import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /*
@@ -32,30 +32,31 @@ import org.json.simple.parser.ParseException;
 public class StringToObjectConverter {
 
 
-    private static final Map<String,Extractor> EXTRACTOR_MAP = new HashMap<String,Extractor>();
+    private static final Map<String,Parser> PARSER_MAP = new HashMap<String,Parser>();
     private static final Map<String,Class> TYPE_SIGNATURE_MAP = new HashMap<String, Class>();
 
     static {
-        EXTRACTOR_MAP.put(Byte.class.getName(),new ByteExtractor());
-        EXTRACTOR_MAP.put("byte",new ByteExtractor());
-        EXTRACTOR_MAP.put(Integer.class.getName(),new IntExtractor());
-        EXTRACTOR_MAP.put("int",new IntExtractor());
-        EXTRACTOR_MAP.put(Long.class.getName(),new LongExtractor());
-        EXTRACTOR_MAP.put("long",new LongExtractor());
-        EXTRACTOR_MAP.put(Short.class.getName(),new ShortExtractor());
-        EXTRACTOR_MAP.put("short",new ShortExtractor());
-        EXTRACTOR_MAP.put(Double.class.getName(),new DoubleExtractor());
-        EXTRACTOR_MAP.put("double",new DoubleExtractor());
-        EXTRACTOR_MAP.put(Float.class.getName(),new FloatExtractor());
-        EXTRACTOR_MAP.put("float",new FloatExtractor());
-        EXTRACTOR_MAP.put(Boolean.class.getName(),new BooleanExtractor());
-        EXTRACTOR_MAP.put("boolean",new BooleanExtractor());
-        EXTRACTOR_MAP.put("char",new CharExtractor());
-        EXTRACTOR_MAP.put(String.class.getName(),new StringExtractor());
+        PARSER_MAP.put(Byte.class.getName(),new ByteParser());
+        PARSER_MAP.put("byte",new ByteParser());
+        PARSER_MAP.put(Integer.class.getName(),new IntParser());
+        PARSER_MAP.put("int",new IntParser());
+        PARSER_MAP.put(Long.class.getName(),new LongParser());
+        PARSER_MAP.put("long",new LongParser());
+        PARSER_MAP.put(Short.class.getName(),new ShortParser());
+        PARSER_MAP.put("short",new ShortParser());
+        PARSER_MAP.put(Double.class.getName(),new DoubleParser());
+        PARSER_MAP.put("double",new DoubleParser());
+        PARSER_MAP.put(Float.class.getName(),new FloatParser());
+        PARSER_MAP.put("float",new FloatParser());
+        PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
+        PARSER_MAP.put("boolean",new BooleanParser());
+        PARSER_MAP.put("char",new CharParser());
+        PARSER_MAP.put(String.class.getName(),new StringParser());
+        PARSER_MAP.put(Date.class.getName(),new DateParser());
 
-        JSONExtractor jsonExtractor = new JSONExtractor();
-        EXTRACTOR_MAP.put(JSONObject.class.getName(), jsonExtractor);
-        EXTRACTOR_MAP.put(JSONArray.class.getName(), jsonExtractor);
+        JSONParser jsonExtractor = new JSONParser();
+        PARSER_MAP.put(JSONObject.class.getName(), jsonExtractor);
+        PARSER_MAP.put(JSONArray.class.getName(), jsonExtractor);
 
         TYPE_SIGNATURE_MAP.put("Z",boolean.class);
         TYPE_SIGNATURE_MAP.put("B",byte.class);
@@ -166,13 +167,13 @@ public class StringToObjectConverter {
             return convertToArray(pType, value);
         }
 
-        Extractor extractor = EXTRACTOR_MAP.get(pType);
-        if (extractor == null) {
+        Parser parser = PARSER_MAP.get(pType);
+        if (parser == null) {
             throw new IllegalArgumentException(
                     "Cannot convert string " + value + " to type " +
                             pType + " because no converter could be found");
         }
-        return extractor.extract(value);
+        return parser.extract(value);
     }
 
 
@@ -213,45 +214,63 @@ public class StringToObjectConverter {
 
     // ===========================================================================
     // Extractor interface
-    private interface Extractor {
+    private interface Parser {
         Object extract(String pValue);
     }
 
-    private static class StringExtractor implements Extractor {
+    private static class StringParser implements Parser {
         public Object extract(String pValue) { return pValue; }
     }
-    private static class IntExtractor implements Extractor {
+    private static class IntParser implements Parser {
         public Object extract(String pValue) { return Integer.parseInt(pValue); }
     }
-    private static class LongExtractor implements Extractor {
+    private static class LongParser implements Parser {
         public Object extract(String pValue) { return Long.parseLong(pValue); }
     }
-    private static class BooleanExtractor implements Extractor {
+    private static class BooleanParser implements Parser {
         public Object extract(String pValue) { return Boolean.parseBoolean(pValue); }
     }
-    private static class DoubleExtractor implements Extractor {
+    private static class DoubleParser implements Parser {
         public Object extract(String pValue) { return Double.parseDouble(pValue); }
     }
-    private static class FloatExtractor implements Extractor {
+    private static class FloatParser implements Parser {
         public Object extract(String pValue) { return Float.parseFloat(pValue); }
     }
-    private static class ByteExtractor implements Extractor {
+    private static class ByteParser implements Parser {
         public Object extract(String pValue) { return Byte.parseByte(pValue); }
     }
-    private static class CharExtractor implements Extractor {
+    private static class CharParser implements Parser {
         public Object extract(String pValue) { return pValue.charAt(0); }
     }
-    private static class ShortExtractor implements Extractor {
+    private static class ShortParser implements Parser {
         public Object extract(String pValue) { return Short.parseShort(pValue); }
     }
 
-    private static class JSONExtractor implements Extractor {
+    private static class DateParser implements Parser {
+        public Object extract(String pValue) {
+            long time;
+            try {
+                time = Long.parseLong(pValue);
+                return new Date(time);
+            } catch (NumberFormatException exp) {
+                try {
+                    return DateUtil.fromISO8601(pValue);
+                } catch (IllegalArgumentException exp2) {
+                    throw new IllegalArgumentException("String-to-Date conversion supports only time given in epoch seconds or as an ISO-8601 string");
+                }
+            }
+        }
+    }
+
+
+    private static class JSONParser implements Parser {
         public Object extract(String pValue) {
             try {
-                return new JSONParser().parse(pValue);
+                return new org.json.simple.parser.JSONParser().parse(pValue);
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             }
         }
     }
+
 }

@@ -1,8 +1,7 @@
 package org.jolokia.it;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.ObjectName;
 
@@ -79,5 +78,7 @@ public interface AttributeCheckingMBean {
 
     void setBean(Object object);
 
+    Date getDate();
 
+    void setDate(Date pDate);
 }

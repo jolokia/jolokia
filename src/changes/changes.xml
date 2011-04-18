@@ -8,10 +8,15 @@
   </properties>
   <body>
     <release version="0.90" description="Release 0.91" date="">
-      <action dev="roland" type="add" date="2011-04-04">
-        Added constructor to J4pListRequest() which takes an
-        ObjectName as argument for fetching the meta data for a single
-        MBean only.
+      <action dev="roland" type="fix" date="2011-04-18">
+        Fixed date handling when an MBean exports an attribute as
+        date. It is now returned as an ISO-8601 formatted string, when
+        used with a path "time" the epoch milliseconds are
+        returned. Setting of date values and using dates as arguments
+        for JMX operations is now also supported, the value can be
+        given either in epoch milliseconds or as an ISO-86-1 formatted
+        string. With a path "time" a given date value can be even
+        updated for a write operation.
       </action>
       <action dev="roland" type="update" date="2011-04-14">
         Reworked "list" handling. It's no much faster when used with
@@ -21,6 +26,11 @@
         'maxDepth' request option for truncating the data from top
         down. 'maxDepth' works with pathes, too. Comprehensive unit
         tests has been added as well.
+      </action>
+      <action dev="roland" type="add" date="2011-04-04">
+        Added constructor to J4pListRequest() which takes an
+        ObjectName as argument for fetching the meta data for a single
+        MBean only.
       </action>
     </release>
     <release version="0.90" description="Release 0.90" date="2011-04-04">

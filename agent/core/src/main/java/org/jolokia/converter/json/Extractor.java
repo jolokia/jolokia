@@ -42,7 +42,7 @@ public interface Extractor {
     /**
      * Extract an object from pValue. In the simplest case, this is the value itself.
      * For more complex data types, it is converted into a JSON structure if possible
-     * (and if 'jsonify' is true). pExtraArgs is not nul, this returns only a substructure,
+     * (and if 'jsonify' is true). pExtraArgs is not null, this returns only a substructure,
      * specified by the path represented by this stack
      *
      * @param pConverter the global converter in order to be able do dispatch for

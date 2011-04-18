@@ -45,8 +45,7 @@ public class BeanExtractor implements Extractor {
             Long.class,
             Short.class,
             Integer.class,
-            Boolean.class,
-            Date.class
+            Boolean.class
     ));
 
     private static final Set<String> IGNORE_METHODS = new HashSet<String>(Arrays.asList(

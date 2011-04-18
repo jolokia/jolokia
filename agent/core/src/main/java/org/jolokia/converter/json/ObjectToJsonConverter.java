@@ -75,6 +75,7 @@ public final class ObjectToJsonConverter {
         // Special, well known objects
         addSimplifiers(pSimplifyHandlers);
 
+        handlers.add(new DateExtractor());
         handlers.add(new CompositeDataExtractor());
         handlers.add(new TabularDataExtractor());
 
@@ -263,7 +264,7 @@ public final class ObjectToJsonConverter {
             return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
         }
         for (Extractor handler : handlers) {
-            if (handler.getType() != null && handler.getType().isAssignableFrom(clazz)) {
+            if (handler.canSetValue() && handler.getType() != null && handler.getType().isAssignableFrom(clazz)) {
                 return handler.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
             }
         }
