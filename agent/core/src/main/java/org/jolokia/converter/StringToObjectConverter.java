@@ -68,6 +68,15 @@ public class StringToObjectConverter {
         TYPE_SIGNATURE_MAP.put("D",double.class);
     }
 
+    /**
+     * Prepare a value from a either a given object or its string representation.
+     * If the value is already assignable to the given class name it is returned directly.
+     *
+     *
+     * @param pExpectedClassName type name of the expected type
+     * @param pValue value to either take directly or to convert from its string representation.
+     * @return the prepared / converted object
+     */
     public Object prepareValue(String pExpectedClassName, Object pValue) {
         if (pValue == null) {
             return null;
@@ -120,28 +129,7 @@ public class StringToObjectConverter {
             Class expectedClass = Class.forName(pExpectedClassName,true,Thread.currentThread().getContextClassLoader());
             Class givenClass = pArgument.getClass();
             if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
-                List argAsList = (List) pArgument;
-                Class valueType = expectedClass.getComponentType();
-                Object ret = Array.newInstance(valueType, argAsList.size());
-                int i = 0;
-                for (Object value : argAsList) {
-                    if (value == null) {
-                        if (!valueType.isPrimitive()) {
-                            Array.set(ret,i++,null);
-                        } else {
-                            throw new IllegalArgumentException("Cannot use a null value in an array of type " + valueType.getSimpleName());
-                        }
-                    } else {
-                        if (valueType.isAssignableFrom(value.getClass())) {
-                            // Can be set directly
-                            Array.set(ret,i++,value);
-                        } else {
-                            // Try to convert from string
-                            Array.set(ret,i++,convertFromString(valueType.getCanonicalName(), value.toString()));
-                        }
-                    }
-                }
-                return ret;
+                return convertListToArray(expectedClass, (List) pArgument);
             } else {
                 return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
             }
@@ -175,8 +163,7 @@ public class StringToObjectConverter {
         }
         return parser.extract(value);
     }
-
-
+    
     // Convert an array
     private Object convertToArray(String pType, String pValue) {
         // It's an array
@@ -204,6 +191,33 @@ public class StringToObjectConverter {
         }
         return ret;
     }
+
+    // Convert a list to an array of the given type
+    private Object convertListToArray(Class pType, List pList) {
+        List argAsList = (List) pList;
+        Class valueType = pType.getComponentType();
+        Object ret = Array.newInstance(valueType, argAsList.size());
+        int i = 0;
+        for (Object value : argAsList) {
+            if (value == null) {
+                if (!valueType.isPrimitive()) {
+                    Array.set(ret,i++,null);
+                } else {
+                    throw new IllegalArgumentException("Cannot use a null value in an array of type " + valueType.getSimpleName());
+                }
+            } else {
+                if (valueType.isAssignableFrom(value.getClass())) {
+                    // Can be set directly
+                    Array.set(ret,i++,value);
+                } else {
+                    // Try to convert from string
+                    Array.set(ret,i++,convertFromString(valueType.getCanonicalName(), value.toString()));
+                }
+            }
+        }
+        return ret;
+    }
+
 
     private String[] split(String pValue) {
         // For now, split simply on ','. This is very simplistic

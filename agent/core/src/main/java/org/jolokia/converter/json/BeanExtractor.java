@@ -228,7 +228,7 @@ public class BeanExtractor implements Extractor {
             oldValue = null;
         }
         AccessController.doPrivileged(new SetMethodAccessibleAction(found));
-        found.invoke(pInner,pConverter.prepareValue(params[0].getName(),pValue));
+        found.invoke(pInner,pConverter.prepareValue(params[0].getName(), pValue));
         return oldValue;
     }
 

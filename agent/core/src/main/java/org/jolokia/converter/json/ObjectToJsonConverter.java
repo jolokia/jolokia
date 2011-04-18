@@ -168,7 +168,7 @@ public final class ObjectToJsonConverter {
         } else {
             // Return the objectified value
             return new Object[] {
-                    stringToObjectConverter.prepareValue(pType,pRequest.getValue()),
+                    stringToObjectConverter.prepareValue(pType, pRequest.getValue()),
                     pCurrentValue
             };
         }

@@ -1,5 +1,8 @@
 package org.jolokia.converter;
 
+import java.util.Date;
+
+import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeTest;
@@ -95,6 +98,15 @@ public class StringToObjectConverterTest {
 
         object = converter.convertFromString(JSONArray.class.getName(),array.toString());
         assertEquals(array,object);
+    }
+
+    @Test
+    public void dateConversion() {
+        Date date = (Date) converter.convertFromString(Date.class.getName(),"0");
+        assertEquals(date.getTime(),0);
+        Date now = new Date();
+        date = (Date) converter.convertFromString(Date.class.getName(), DateUtil.toISO8601(now));
+        assertEquals(date.getTime() / 1000,now.getTime() / 1000);
     }
 
     @Test
