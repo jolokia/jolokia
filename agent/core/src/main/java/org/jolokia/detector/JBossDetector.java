@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.jolokia.request.JmxObjectNameRequest;
 import org.jolokia.request.JmxRequest;
+import org.jolokia.util.ClassUtil;
 
 /**
  * @author roland
@@ -34,7 +35,7 @@ import org.jolokia.request.JmxRequest;
 public class JBossDetector extends AbstractServerDetector {
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        if (checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
+        if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JR77 call
             String version = getVersionFromJsr77(pMbeanServers);
             if (version != null) {

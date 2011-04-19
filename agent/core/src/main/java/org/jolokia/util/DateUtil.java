@@ -41,7 +41,7 @@ public class DateUtil {
      * @throws IllegalArgumentException if the provided string does not conform to ISO-8601
      */
     public static Date fromISO8601(String pDateString) {
-        if (datatypeFactory == null) {
+        if (datatypeFactory != null) {
             return datatypeFactory.newXMLGregorianCalendar(pDateString.trim()).toGregorianCalendar().getTime();
         } else {
             try {

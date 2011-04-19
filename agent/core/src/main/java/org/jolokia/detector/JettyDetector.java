@@ -21,6 +21,8 @@ import javax.management.MBeanServer;
 import java.lang.reflect.*;
 import java.util.Set;
 
+import org.jolokia.util.ClassUtil;
+
 /**
  * A detector for jetty
  *
@@ -32,11 +34,11 @@ public class JettyDetector extends AbstractServerDetector {
 
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        Class serverClass = getClass("org.mortbay.jetty.Server");
+        Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
         if (serverClass != null) {
             return new ServerHandle("Mortbay", "jetty", getVersion(serverClass), null, null);
         }
-        serverClass = getClass("org.eclipse.jetty.server.Server");
+        serverClass = ClassUtil.classForName("org.eclipse.jetty.server.Server",false);
         if (serverClass != null) {
             return new ServerHandle("Eclipse", "jetty", getVersion(serverClass), null, null);
         }
@@ -60,18 +62,4 @@ public class JettyDetector extends AbstractServerDetector {
         }
         return null;
     }
-
-    // Go up the classloader stack to eventually find the server class. The WebAppClassLoader
-    // hide the the server classes loader by the parent class loader.
-    protected Class getClass(String pClassName) {
-        ClassLoader loader = getClassLoader();
-        do {
-            try {
-                return Class.forName(pClassName,false, loader);
-            } catch (ClassNotFoundException e) {}
-            loader = loader.getParent();
-        } while (loader != null);
-        return null;
-    }
-
 }

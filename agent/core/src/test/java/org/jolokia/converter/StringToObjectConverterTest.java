@@ -1,14 +1,16 @@
 package org.jolokia.converter;
 
-import java.util.Date;
+import java.util.*;
 
+import com.sun.tools.corba.se.idl.toJavaPortable.StringGen;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 
@@ -98,6 +100,13 @@ public class StringToObjectConverterTest {
 
         object = converter.convertFromString(JSONArray.class.getName(),array.toString());
         assertEquals(array,object);
+
+        try {
+            converter.convertFromString(JSONObject.class.getName(),"{bla:blub{");
+            fail();
+        } catch (IllegalArgumentException exp) {
+
+        }
     }
 
     @Test
@@ -107,6 +116,11 @@ public class StringToObjectConverterTest {
         Date now = new Date();
         date = (Date) converter.convertFromString(Date.class.getName(), DateUtil.toISO8601(now));
         assertEquals(date.getTime() / 1000,now.getTime() / 1000);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class})
+    public void dateConversionFailed() {
+        converter.prepareValue(Date.class.getName(),"illegal-date-format");
     }
 
     @Test
@@ -155,5 +169,51 @@ public class StringToObjectConverterTest {
             Object obj = converter.convertFromString(this.getClass().getName(),"bla");
             fail("Unknown extractor");
         } catch (IllegalArgumentException exp) {};
+    }
+
+    @Test
+    public void prepareValue() {
+        assertNull(converter.prepareValue("java.lang.String", null));
+        assertEquals(converter.prepareValue("java.lang.Long", 10L), 10L);
+        assertEquals(converter.prepareValue("java.lang.Long", "10"), 10L);
+        Map<String,String> map = new HashMap<String, String>();
+        map.put("euro","fcn");
+        assertTrue(converter.prepareValue("java.util.Map", map) == map);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void prepareValueInvalidClass() {
+        converter.prepareValue("blubber.bla.hello",10L);
+    }
+    @Test
+    public void prepareValueListConversion1() {
+        List<Boolean> list = new ArrayList<Boolean>();
+        list.add(true);
+        list.add(false);
+        boolean[] res = (boolean[]) converter.prepareValue("[Z",list);
+        assertTrue(res[0]);
+        assertFalse(res[1]);
+        Assert.assertEquals(res.length,2);
+    }
+
+    @Test
+    public void prepareValueListConversion2() {
+        List<Boolean> list = new ArrayList<Boolean>();
+        list.add(true);
+        list.add(false);
+        list.add(null);
+        Boolean[] res = (Boolean[]) converter.prepareValue("[Ljava.lang.Boolean;",list);
+        assertTrue(res[0]);
+        assertFalse(res[1]);
+        assertNull(res[2]);
+        Assert.assertEquals(res.length,3);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void prepareValueWithException() {
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(10);
+        list.add(null);
+        converter.prepareValue("[I",list);
     }
 }

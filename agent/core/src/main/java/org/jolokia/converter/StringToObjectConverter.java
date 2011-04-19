@@ -3,6 +3,7 @@ package org.jolokia.converter;
 import java.lang.reflect.Array;
 import java.util.*;
 
+import org.jolokia.util.ClassUtil;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -125,16 +126,15 @@ public class StringToObjectConverter {
     // Check whether an argument can be used directly or whether it needs some sort
     // of conversion
     private Object prepareForDirectUsage(String pExpectedClassName, Object pArgument) {
-        try {
-            Class expectedClass = Class.forName(pExpectedClassName,true,Thread.currentThread().getContextClassLoader());
-            Class givenClass = pArgument.getClass();
-            if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
-                return convertListToArray(expectedClass, (List) pArgument);
-            } else {
-                return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
-            }
-        } catch (ClassNotFoundException e) {
-            return null;
+        Class expectedClass = ClassUtil.classForName(pExpectedClassName);
+        if (expectedClass == null) {
+            throw new IllegalArgumentException("Cannot lookup class " + pExpectedClassName);
+        }
+        Class givenClass = pArgument.getClass();
+        if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
+            return convertListToArray(expectedClass, (List) pArgument);
+        } else {
+            return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
         }
     }
 
@@ -172,10 +172,9 @@ public class StringToObjectConverter {
         if (t.equals("L")) {
             // It's an object-type
             String oType = pType.substring(2,pType.length()-1).replace('/','.');
-            try {
-                valueType = Class.forName(oType,true,Thread.currentThread().getContextClassLoader());
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("No class of type " + oType + "found: " + e,e);
+            valueType = ClassUtil.classForName(oType);
+            if (valueType == null) {
+                throw new IllegalArgumentException("No class of type " + oType + "found");
             }
         } else {
             valueType = TYPE_SIGNATURE_MAP.get(t);

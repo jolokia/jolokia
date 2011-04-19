@@ -21,6 +21,8 @@ import javax.management.*;
 import java.io.IOException;
 import java.util.*;
 
+import org.jolokia.util.ClassUtil;
+
 /**
  * Base class for server detectors
  * 
@@ -28,32 +30,6 @@ import java.util.*;
  * @since 05.11.10
  */
 public abstract class AbstractServerDetector implements ServerDetector {
-
-    /**
-     * Check for the existence of a given class
-     *
-     * @param pClassName class name to check
-     * @return true if the class could be loaded by the thread's conext class loader, false otherwise
-     */
-    protected boolean checkForClass(String pClassName) {
-        return getClass(pClassName) != null;
-    }
-
-    /**
-     * Load a certain class from the thread context class loader
-     *
-     * @param pClassName class name to load
-     * @return the class
-     * @throws ClassNotFoundException if the class could not be found
-     */
-    protected Class getClass(String pClassName) {
-        try {
-            ClassLoader loader = getClassLoader();
-            return Class.forName(pClassName,false, loader);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
 
     /**
      * Check for the existence of a certain MBean. All known MBeanServers are queried
@@ -184,9 +160,5 @@ public abstract class AbstractServerDetector implements ServerDetector {
     public void addMBeanServers(Set<MBeanServer> pServers) {}
 
     // ===========================================================================
-
-    protected ClassLoader getClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
 
 }

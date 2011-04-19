@@ -16,6 +16,7 @@
 
 package org.jolokia.detector;
 
+import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 
 import javax.management.*;
@@ -41,8 +42,8 @@ public class WebsphereDetector extends AbstractServerDetector {
                     Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     // Whether running under Websphere
-    private boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
-    private boolean isWebsphere7 = checkForClass("com.ibm.websphere.management.AdminContext");
+    private boolean isWebsphere = ClassUtil.checkForClass("com.ibm.websphere.management.AdminServiceFactory");
+    private boolean isWebsphere7 = ClassUtil.checkForClass("com.ibm.websphere.management.AdminContext");
     private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
