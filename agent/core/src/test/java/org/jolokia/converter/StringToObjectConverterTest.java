@@ -2,7 +2,6 @@ package org.jolokia.converter;
 
 import java.util.*;
 
-import com.sun.tools.corba.se.idl.toJavaPortable.StringGen;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -10,7 +9,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNull;
 
