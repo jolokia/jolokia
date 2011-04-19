@@ -128,7 +128,8 @@ public class StringToObjectConverter {
     private Object prepareForDirectUsage(String pExpectedClassName, Object pArgument) {
         Class expectedClass = ClassUtil.classForName(pExpectedClassName);
         if (expectedClass == null) {
-            throw new IllegalArgumentException("Cannot lookup class " + pExpectedClassName);
+            return null;
+            //throw new IllegalArgumentException("Cannot lookup class " + pExpectedClassName);
         }
         Class givenClass = pArgument.getClass();
         if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {

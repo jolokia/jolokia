@@ -73,8 +73,8 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         int nrParams = types.paramClasses.length;
         Object[] params = new Object[nrParams];
         List<Object> args = request.getArguments();
-        if (nrParams > 0 && (args == null || args.size() != types.paramClasses.length)) {
-            throw new IllegalArgumentException("Invalid operation parameters. Operation " +
+        if ( (nrParams > 0 && args == null) || (args != null && args.size() != nrParams)) {
+            throw new IllegalArgumentException("Invalid number of operation arguments. Operation " +
                     request.getOperation() + " on " + request.getObjectName() + " requires " + types.paramClasses.length +
                     " parameters, not " + (args == null ? 0 : args.size()) + " as given");
         }
