@@ -13,10 +13,10 @@ import javax.xml.datatype.DatatypeFactory;
  * @author roland
  * @since 17.04.11
  */
-public class DateUtil {
+public final class DateUtil {
 
     // Dateformat for output
-    private final static SimpleDateFormat ISO8601_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final SimpleDateFormat ISO8601_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     // factory used for conversion
     private static DatatypeFactory datatypeFactory;

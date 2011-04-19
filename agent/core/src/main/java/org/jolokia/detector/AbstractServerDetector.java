@@ -16,12 +16,11 @@
 
 package org.jolokia.detector;
 
-import javax.management.*;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.jolokia.util.ClassUtil;
+import javax.management.*;
 
 /**
  * Base class for server detectors

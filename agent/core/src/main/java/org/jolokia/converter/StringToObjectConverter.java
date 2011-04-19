@@ -267,11 +267,7 @@ public class StringToObjectConverter {
                 time = Long.parseLong(pValue);
                 return new Date(time);
             } catch (NumberFormatException exp) {
-                try {
-                    return DateUtil.fromISO8601(pValue);
-                } catch (IllegalArgumentException exp2) {
-                    throw new IllegalArgumentException("String-to-Date conversion supports only time given in epoch seconds or as an ISO-8601 string");
-                }
+                return DateUtil.fromISO8601(pValue);
             }
         }
     }

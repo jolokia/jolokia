@@ -25,7 +25,7 @@ import java.util.Set;
  * @author roland
  * @since 19.04.11
  */
-public class ClassUtil {
+public final class ClassUtil {
 
     private ClassUtil() {}
 
