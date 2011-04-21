@@ -18,18 +18,18 @@ package org.jolokia.handler;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.*;
 
 import javax.management.*;
 
 import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.request.JmxExecRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.jolokia.util.RequestType.EXEC;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -53,7 +53,6 @@ public class ExecHandlerTest {
 ;
         MBeanServerConnection conn = getMBeanServer();
         conn.createMBean(ExecData.class.getName(),oName);
-        System.out.println("Registering");
     }
 
 
@@ -61,7 +60,6 @@ public class ExecHandlerTest {
     public void unregisterMBean() throws InstanceNotFoundException, MBeanRegistrationException, IOException {
         MBeanServerConnection conn = getMBeanServer();
         conn.unregisterMBean(oName);
-        System.out.println("Unregistering");
     }
 
     @Test
@@ -69,7 +67,7 @@ public class ExecHandlerTest {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("simple").
                 build();
-
+        assertEquals(handler.getType(), EXEC);
         Object res = handler.handleRequest(getMBeanServer(),request);
         assertNull(res);
     }
@@ -79,6 +77,76 @@ public class ExecHandlerTest {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("simple").
                 arguments("blub","bla").
+                build();
+        handler.handleRequest(getMBeanServer(),request);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).build();
+        handler.handleRequest(getMBeanServer(),request);
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).operation("koan titel").build();
+        handler.handleRequest(getMBeanServer(),request);
+    }
+
+
+    @Test
+    public void execWithArgumentsAndReturn() throws Exception {
+        List list = new ArrayList();
+        list.add("wollscheid");
+
+        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+                operation("withArgs").
+                arguments(10L,list,Boolean.TRUE)
+                .build();
+        Map result = (Map) handler.handleRequest(getMBeanServer(),request);
+        assertEquals(result.get("long"),10L);
+        assertTrue(result.get("list") instanceof List);
+        assertEquals(((List) result.get("list")).get(0), "wollscheid");
+        assertTrue((Boolean) result.get("boolean"));
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+                operation("overloaded").
+                build();
+        handler.handleRequest(getMBeanServer(),request);
+    }
+
+    @Test
+    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+                operation("overloaded(int)").
+                arguments(10).
+                build();
+        Integer res = (Integer) handler.handleRequest(getMBeanServer(),request);
+        assertEquals(res,Integer.valueOf(1));
+
+        request = new JmxRequestBuilder(EXEC,oName).
+                operation("overloaded(int,java.lang.String)").
+                arguments(10,"bla").
+                build();
+        res = (Integer) handler.handleRequest(getMBeanServer(),request);
+        assertEquals(res,Integer.valueOf(2));
+
+        request = new JmxRequestBuilder(EXEC,oName).
+                operation("overloaded(boolean)").
+                arguments(true).
+                build();
+        res = (Integer) handler.handleRequest(getMBeanServer(),request);
+        assertEquals(res,Integer.valueOf(3));
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class })
+    public void overloadedWrongSignature() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+                operation("overloaded(java.lang.Integer)").
+                arguments(1).
                 build();
         handler.handleRequest(getMBeanServer(),request);
     }

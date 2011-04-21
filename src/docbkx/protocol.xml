@@ -664,7 +664,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           <note>
             The array support is somewhat limited since it makes a
             native split on commas. It does not yet take into account
-            any quoting or escaping. For a much saver way to transport
+            any quoting or escaping. For a much safer way to transport
             arrays to the agent, please consider using POST requests.
           </note>
           <para>

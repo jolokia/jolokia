@@ -16,7 +16,7 @@
 
 package org.jolokia.handler;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * @author roland
@@ -27,4 +27,13 @@ public interface ExecDataMBean {
     void simple();
 
     Date simpleWithArguments(String p);
+
+    Map withArgs(long p1,List p2,boolean p3);
+
+    public int overloaded(int p1);
+
+    public int overloaded(int p1, String p2);
+
+    public int overloaded(boolean p1);
+
 }

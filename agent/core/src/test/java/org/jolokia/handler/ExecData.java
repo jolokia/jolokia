@@ -16,9 +16,10 @@
 
 package org.jolokia.handler;
 
-import java.util.Date;
+import java.util.*;
 
 import org.jolokia.util.DateUtil;
+import org.json.simple.JSONObject;
 
 /**
  * @author roland
@@ -30,4 +31,25 @@ public class ExecData implements ExecDataMBean {
     public Date simpleWithArguments(String p1) {
         return DateUtil.fromISO8601(p1);
     }
+
+    public Map withArgs(long p1, List p2, boolean p3) {
+        JSONObject ret = new JSONObject();
+        ret.put("long",p1);
+        ret.put("list",p2);
+        ret.put("boolean",p3);
+        return ret;
+    }
+
+    public int overloaded(int p1) {
+        return 1;
+    }
+
+    public int overloaded(int p1, String p2) {
+        return 2;
+    }
+
+    public int overloaded(boolean p1) {
+        return 3;
+    }
+
 }
