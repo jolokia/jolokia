@@ -45,7 +45,7 @@ public class ReadHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         handler = new ReadHandler(new AllowAllRestrictor());
-        testBeanName = new ObjectName("jolokiaå:type=test");
+        testBeanName = new ObjectName("jolokia:type=test");
     }
 
     @Test

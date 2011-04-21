@@ -88,10 +88,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
                 break;
             }
         }
-        if (aInfo == null) {
-            throw new AttributeNotFoundException("No attribute " + request.getAttributeName() +
-                    " found for MBean " + request.getObjectNameAsString());
-        }
+        // aInfo is != null otherwise getAttribute() would have already thrown an ArgumentNotFoundException
         String type = aInfo.getType();
         Object[] values = objectToJsonConverter.getValues(type,oldValue,request);
         Attribute attribute = new Attribute(request.getAttributeName(),values[0]);

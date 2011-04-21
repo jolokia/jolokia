@@ -1,9 +1,6 @@
 package org.jolokia.jvmagent.jdk6;
 
-import com.sun.net.httpserver.Authenticator;
-import com.sun.net.httpserver.BasicAuthenticator;
-import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.*;
 import org.jolokia.util.ConfigKey;
 
 import java.io.*;

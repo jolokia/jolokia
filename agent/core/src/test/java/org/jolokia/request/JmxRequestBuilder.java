@@ -84,7 +84,7 @@ public class JmxRequestBuilder {
         return this;
     }
 
-    public JmxRequestBuilder value(String pValue) {
+    public JmxRequestBuilder value(Object pValue) {
         request.put("value", pValue);
         return this;
     }
