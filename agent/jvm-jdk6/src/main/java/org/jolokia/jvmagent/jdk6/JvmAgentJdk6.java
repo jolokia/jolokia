@@ -265,9 +265,15 @@ public final class JvmAgentJdk6 {
             // initialise the keystore
             char[] password = getKeystorePassword(pConfig);
             KeyStore ks = KeyStore.getInstance ("JKS");
-            FileInputStream fis = new FileInputStream (getKeystore(pConfig));
-            ks.load(fis, password);
-
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream (getKeystore(pConfig));
+                ks.load(fis, password);
+            } finally {
+                if (fis != null) {
+                    fis.close();
+                }
+            }
             // setup the key manager factory
             KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
             kmf.init(ks, password);
