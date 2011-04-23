@@ -6,11 +6,15 @@ import org.jolokia.util.ConfigKey;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import javax.net.ssl.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -62,6 +66,7 @@ public final class JvmAgentJdk6 {
     private static final int DEFAULT_PORT = 8778;
     private static final int DEFAULT_BACKLOG = 10;
     private static final String JOLOKIA_CONTEXT = "/jolokia/";
+    private static final String DEFAULT_PROTOCOL = "http";
 
     private JvmAgentJdk6() {}
 
@@ -103,15 +108,27 @@ public final class JvmAgentJdk6 {
         } else {
             address = InetAddress.getLocalHost();
         }
+        if (!pConfig.containsKey(ConfigKey.AGENT_CONTEXT.getKeyValue())) {
+            pConfig.put(ConfigKey.AGENT_CONTEXT.getKeyValue(), JOLOKIA_CONTEXT);
+        }
+        String protocol = DEFAULT_PROTOCOL;
+        if (pConfig.get("protocol") != null) {
+            protocol = pConfig.get("protocol");
+        }
+        InetSocketAddress socketAddress = new InetSocketAddress(address,port);
+        if (protocol.equalsIgnoreCase("https")) {
+            return createHttpsServer(socketAddress, pConfig);
+        } else {
+            return HttpServer.create(socketAddress,getBacklog(pConfig));
+        }
+    }
+
+    private static int getBacklog(Map<String, String> pConfig) {
         int backLog = DEFAULT_BACKLOG;
         if (pConfig.get("backlog") != null) {
             backLog = Integer.parseInt(pConfig.get("backlog"));
         }
-        if (!pConfig.containsKey(ConfigKey.AGENT_CONTEXT.getKeyValue())) {
-            pConfig.put(ConfigKey.AGENT_CONTEXT.getKeyValue(), JOLOKIA_CONTEXT);
-        }
-        InetSocketAddress socketAddress = new InetSocketAddress(address,port);
-        return HttpServer.create(socketAddress,backLog);
+        return backLog;
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
@@ -239,5 +256,69 @@ public final class JvmAgentJdk6 {
                 return user.equals(pUserGiven) && password.equals(pPasswordGiven);
             }
         };
+    }
+
+        private static HttpServer createHttpsServer(InetSocketAddress pSocketAddress, Map<String,String> pConfig) {
+        // initialise the HTTPS server
+        HttpsServer server = null;
+        try {
+            server = HttpsServer.create(pSocketAddress, getBacklog(pConfig));
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+
+            // initialise the keystore
+            char[] password = getKeystorePassword(pConfig);
+            KeyStore ks = KeyStore.getInstance ("JKS");
+            FileInputStream fis = new FileInputStream (getKeystore(pConfig));
+            ks.load(fis, password);
+
+            // setup the key manager factory
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance ("SunX509");
+            kmf.init(ks, password);
+
+            // setup the trust manager factory
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance ("SunX509");
+            tmf.init(ks);
+
+            // setup the HTTPS context and parameters
+            sslContext.init (kmf.getKeyManagers(),tmf.getTrustManagers(), null);
+            server.setHttpsConfigurator (new HttpsConfigurator(sslContext) {
+                public void configure(HttpsParameters params) {
+                    try {
+                        // initialise the SSL context
+                        SSLContext c = null;
+                        c = SSLContext.getDefault();
+                        SSLEngine engine = c.createSSLEngine();
+                        params.setNeedClientAuth(false);
+                        params.setCipherSuites(engine.getEnabledCipherSuites());
+                        params.setProtocols(engine.getEnabledProtocols());
+
+                        // get the default parameters
+                        SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+                        params.setSSLParameters(defaultSSLParameters);
+                    } catch (NoSuchAlgorithmException e) {
+                        System.err.println("jolokia: Exception while configuring SSL context: " + e);
+                    }
+                }
+            });
+            return server;
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
+        }
+    }
+
+    private static String getKeystore(Map<String, String> pConfig) {
+        String keystore = pConfig.get("keystore");
+        if (keystore == null) {
+            throw new IllegalArgumentException("No keystore defined for HTTPS protocol. " +
+                                                       "Please use the 'keystore' option to point to a valid keystore");
+        }
+        return keystore;
+    }
+
+    private static char[] getKeystorePassword(Map<String, String> pConfig) {
+       String password = pConfig.get("keystorePassword");
+        return password != null ? password.toCharArray() : new char[0];
     }
 }
