@@ -1,20 +1,17 @@
 package org.jolokia.jvmagent.jdk6;
 
-import com.sun.net.httpserver.*;
-import org.jolokia.util.ConfigKey;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.net.ssl.*;
+
+import com.sun.net.httpserver.*;
+import org.jolokia.util.ConfigKey;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -84,7 +81,7 @@ public final class JvmAgentJdk6 {
             final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(agentConfig);
             final String contextPath = getContextPath(jolokiaConfig);
 
-            HttpContext context = server.createContext(contextPath,new JolokiaHttpHandler(jolokiaConfig));
+            HttpContext context = server.createContext(contextPath, new JolokiaHttpHandler(jolokiaConfig));
             if (jolokiaConfig.containsKey(ConfigKey.USER)) {
                 context.setAuthenticator(getAuthentiator(jolokiaConfig));
             }
@@ -258,11 +255,11 @@ public final class JvmAgentJdk6 {
         };
     }
 
-        private static HttpServer createHttpsServer(InetSocketAddress pSocketAddress, Map<String,String> pConfig) {
+    @SuppressWarnings("PMD.SystemPrintln")
+    private static HttpServer createHttpsServer(InetSocketAddress pSocketAddress, final Map<String,String> pConfig) {
         // initialise the HTTPS server
-        HttpsServer server = null;
         try {
-            server = HttpsServer.create(pSocketAddress, getBacklog(pConfig));
+            HttpsServer server = HttpsServer.create(pSocketAddress, getBacklog(pConfig));
             SSLContext sslContext = SSLContext.getInstance("TLS");
 
             // initialise the keystore
@@ -285,16 +282,15 @@ public final class JvmAgentJdk6 {
                 public void configure(HttpsParameters params) {
                     try {
                         // initialise the SSL context
-                        SSLContext c = null;
-                        c = SSLContext.getDefault();
-                        SSLEngine engine = c.createSSLEngine();
-                        params.setNeedClientAuth(false);
+                        SSLContext context = SSLContext.getDefault();
+                        SSLEngine engine = context.createSSLEngine();
+                        // TODO: Allow client authentication via configuration
+                        params.setNeedClientAuth(getClientSslAuthentication(pConfig));
                         params.setCipherSuites(engine.getEnabledCipherSuites());
                         params.setProtocols(engine.getEnabledProtocols());
 
                         // get the default parameters
-                        SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
-                        params.setSSLParameters(defaultSSLParameters);
+                        params.setSSLParameters(context.getDefaultSSLParameters());
                     } catch (NoSuchAlgorithmException e) {
                         System.err.println("jolokia: Exception while configuring SSL context: " + e);
                     }
@@ -306,6 +302,11 @@ public final class JvmAgentJdk6 {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
         }
+    }
+
+    private static boolean getClientSslAuthentication(Map<String, String> pConfig) {
+        String auth = pConfig.get("useSslClientAuthentication");
+        return auth != null && Boolean.getBoolean(auth);
     }
 
     private static String getKeystore(Map<String, String> pConfig) {
