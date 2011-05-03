@@ -54,4 +54,6 @@ public interface OperationCheckingMBean {
     int intArguments(int arg1, Integer arg2);
 
     double doubleArguments(double arg1, Double arg2);
+
+    public int sleep(int seconds) throws InterruptedException;
 }

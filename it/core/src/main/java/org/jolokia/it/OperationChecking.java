@@ -130,4 +130,11 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
 
     public void postDeregister() {
     }
+
+    public int sleep(int seconds) throws InterruptedException {
+        synchronized(this) {
+            this.wait(seconds * 1000);
+        }
+        return seconds;
+    }
 }
