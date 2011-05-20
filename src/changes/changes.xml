@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.90" description="Release 0.91" date="">
+    <release version="0.91" description="Release 0.91" date="">
       <action dev="roland" type="add" date="2011-04-23">
         Added HTTPS support for the JVM-JDK6 agent. In order to switch
         it on, the property "protocol=https" must be set and
