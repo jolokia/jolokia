@@ -102,7 +102,12 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         String operation = opArgs.get(0);
         List<String> types;
         if (opArgs.size() > 1) {
-            types = opArgs.subList(1,opArgs.size());
+            if (opArgs.size() == 2 && opArgs.get(1) == null) {
+                // Empty signature requested
+                types = Collections.emptyList();
+            } else {
+                types = opArgs.subList(1,opArgs.size());
+            }
         } else {
             List<MBeanParameterInfo[]> paramInfos = extractMBeanParameterInfos(pServer, pRequest, operation);
             if (paramInfos.size() == 1) {
@@ -165,6 +170,10 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
     private boolean hasMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
         OUTER:
         for (MBeanParameterInfo[]  infos : pParamInfos) {
+            if (infos.length == 0 && pTypes.size() == 0) {
+                // No-arg argument
+                return true;
+            }
             if (pTypes.size() != infos.length) {
                 // Number of arguments dont match
                 continue OUTER;
@@ -189,8 +198,13 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         Matcher m = p.matcher(pOperation);
         if (m.matches()) {
             ret.add(m.group(1));
-            String[] args = m.group(2).split("\\s*,\\s*");
-            ret.addAll(Arrays.asList(args));
+            if (m.group(2).length() > 0) {
+                String[] args = m.group(2).split("\\s*,\\s*");
+                ret.addAll(Arrays.asList(args));
+            } else {
+                // It's "()" which means a no-arg method
+                ret.add(null);
+            }
         } else {
             ret.add(pOperation);
         }
@@ -200,7 +214,7 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
     private String getErrorMessageForMissingSignature(JmxExecRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
         StringBuffer msg = new StringBuffer("Operation ");
         msg.append(pOperation).
-                append(" on MBEan ").
+                append(" on MBean ").
                 append(pRequest.getObjectNameAsString()).
                 append(" is overloaded. Signatures found: ");
         msg.append(signatureToString(pParamInfos));

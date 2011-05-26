@@ -105,6 +105,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
         return arg1 + arg2;
     }
 
+    public int overloadedMethod() {
+        return 0;
+    }
+
     public int overloadedMethod(String arg) {
         return 1;
     }
