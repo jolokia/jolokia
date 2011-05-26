@@ -1,4 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="agents-jvmjdk6">
   <title>JVM JDK 1.6 Agent</title>
+
+  <section id="jvmjdk6-installation">
+    <title>Installation</title>
+    <para>
+      The JVM JDK6 uses the <ulink url="">JVM Agent interface</ulink>
+      for linking into any JVM. It uses an HTTP-Server (), which is
+      available from every Oracle/Sun JVM. This HTTP-Server is not the
+      fastes one (it used for e.g. the JAXWS reference implementation,
+      but it is sufficient for our needs. In order to get this agent
+      running, the startup options for the JVM must be extended. 
+    </para>
+    <programlisting language="xml"><![CDATA[
+java -javaagent:agent.jar=port=7777,host=localhost
+    ]]></programlisting>
+    <para>
+      <filename>agent.jar</filename> is the filename of the Jolokia
+      JVM agent in this case, where several options are appended as a
+      comma separated list. The available options are the same as
+      described in <xref linkend="agent-war-init-params"/> plus the
+      one described in table <xref linkend="agent-jvm-config"/>.
+    </para>
+    <table id="agent-jvm-config">
+      <title>JVM agent configuration options</title>
+      <thead>
+        <tr>
+          <td>Parameter</td>
+          <td>Description</td>
+          <td>Example</td>
+        </tr>        
+      </thead>
+      <tr>
+        <td><constant>agentContext</constant></td>
+        <td>
+          Context under which the agent is reachable
+        </td>        
+        <td>
+          <constant>/jolokia</constant>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>host</constant></td>
+        <td>
+        </td>        
+        <td>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>port</constant></td>
+        <td>
+        </td>        
+      </tr>
+      <tr>
+        <td><constant>protocol</constant></td>
+        <td>
+        </td>        
+        <td>
+          <constant>https</constant>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>backlog</constant></td>
+        <td>
+        </td>        
+        <td>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>config</constant></td>
+        <td>
+        </td>        
+        <td>
+        </td>
+      </tr>
+
+    </table>      
+  </section>
+  
 </section>
