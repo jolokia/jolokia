@@ -80,7 +80,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
                 info("Using access restrictor " + location);
                 return ret;
             } else {
-                info("No access restrictor found, access to all MBean is alloweder");
+                info("No access restrictor found, access to all MBean is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
