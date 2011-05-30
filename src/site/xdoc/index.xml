@@ -50,6 +50,32 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia 0.91 brings it on">
+        <div class="news-date">2011-05-30</div>        
+        <p>
+          Jolokia 0.91 brings some fixes related to date handling and
+          overloaded JMX operations and a performance boost for the
+          <code>list</code> operation, especially when used with
+          <code>pathes</code>. It is now also possible to provide a
+          <code>maxDepth</code> query parameter which restricts
+          further the meta data object tree returned by the list
+          command. With this features qeurying meta data was never
+          easier, even with a simpl GET URL. More on the
+          <code>list</code> command can be found in the <a
+          href="reference/html/protocol.html#list">reference
+          manual</a> 
+        </p>
+        <p>
+          The JVM JDK Agent was enhanced for SSL so that it is now
+          also possible to export JMX via SSL only via the embedded
+          HTTP server. 
+        </p>
+        <p>
+          All changes are summarized in the <a
+          href="changes-report.html">change log</a> as always.
+        </p>
+
+      </subsection>
       <subsection name="Jolokia 0.90 has landed">
         <div class="news-date">2011-04-04</div>
         <p>
