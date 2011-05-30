@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.91" description="Release 0.91" date="">
+    <release version="0.91" description="Release 0.91" date="2011-05-30">
       <action dev="roland" type="fix" date="2011-5-26">
         Fixed issue with overloaded methods where one variant takes no
         arguments. This no-arg variant can be specified with the

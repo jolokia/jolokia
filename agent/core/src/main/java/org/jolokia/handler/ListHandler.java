@@ -77,7 +77,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         Stack<String> originalPathStack = PathUtil.reversePath(pRequest.getPathParts());
 
         int maxDepth = getMaxDepth(pRequest);
-
+        ObjectName oName = null;
         try {
             Map infoMap = new HashMap();
             for (MBeanServerConnection server : pServers) {
@@ -85,7 +85,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 int stackSize = pathStack.size();
 
                 // Prepare an objectname patttern from a path (or "*:*" if no pattern is given)
-                ObjectName oName = objectNameFromPath(pathStack);
+                oName = objectNameFromPath(pathStack);
 
                 for (Object nameObject : queryMBeans(server, oName)) {
                     ObjectName name = (ObjectName) nameObject;
@@ -110,6 +110,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
+        } catch (InstanceNotFoundException e) {
+            throw new IllegalArgumentException("Invalid object name '" + oName + "': Instance not found",e);
         }
 
     }

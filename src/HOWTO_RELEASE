@@ -7,7 +7,7 @@ mvn clean install
 # Increase Version Numbers:
 
 vi src/docbkx/index.xml
-vi client/javascript/src/javascript/jolokia.js
+vi client/javascript/src/main/javascript/jolokia.js
 vi agent/core/src/main/java/org/jolokia/Version.java
 vi pom.xml
 --> <currentStableVersion>0.82</currentStableVersion>
@@ -18,8 +18,8 @@ vi pom.xml
 # Build release
 git clone git@github.com:rhuss/jolokia.git
 cd jolokia
-mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:prepare
-mvn -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:perform
+mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:prepare
+mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:perform
 cd target/checkout/target
 
 # Copy assembly to labs:
