@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-client-javascript-test-app</artifactId>
-  <version>0.91</version>
+  <version>0.92-SNAPSHOT</version>
   <name>jolokia-client-javascript-test-app</name>
   <packaging>war</packaging>
   <description>Test application for Jolokia's JavaScript client library</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-client-parent</artifactId>
-    <version>0.91</version>
+    <version>0.92-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   
