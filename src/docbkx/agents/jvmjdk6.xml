@@ -5,7 +5,7 @@
   <section id="jvmjdk6-installation">
     <title>Installation</title>
     <para>
-      The JVM JDK6 uses the <ulink url="">JVM Agent interface</ulink>
+      The JVM JDK6 uses the <ulink url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM Agent interface</ulink>
       for linking into any JVM. It uses an HTTP-Server (), which is
       available from every Oracle/Sun JVM. This HTTP-Server is not the
       fastes one (it used for e.g. the JAXWS reference implementation,
@@ -13,8 +13,7 @@
       running, the startup options for the JVM must be extended. 
     </para>
     <programlisting language="xml"><![CDATA[
-java -javaagent:agent.jar=port=7777,host=localhost
-    ]]></programlisting>
+java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
     <para>
       <filename>agent.jar</filename> is the filename of the Jolokia
       JVM agent in this case, where several options are appended as a
