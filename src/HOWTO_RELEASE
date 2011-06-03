@@ -20,10 +20,14 @@ git clone git@github.com:rhuss/jolokia.git
 cd jolokia
 mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:prepare
 mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:perform
-cd target/checkout/target
+
+# Push tags and changes to github
+git push 
+git push --tags
 
 # Copy assembly to labs:
 # at jolokia@labs.consol.de: mkdir -p www/dist/0.84/js
+cd target/checkout/target
 scp *gz *zip jolokia@labs.consol.de:www/dist/0.84/
 cd ../client/javascript/target 
 scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/0.84/js/
