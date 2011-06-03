@@ -32,7 +32,7 @@
         updated for a write operation.
       </action>
       <action dev="roland" type="update" date="2011-04-14">
-        Reworked "list" handling. It's no much faster when used with
+        Reworked "list" handling. It's now much faster when used with
         pathes since it doesn't slurp in the whole meta and truncate
         it afterwards but does the right thing directly to only fetch
         the required information. The list handler respect now a
