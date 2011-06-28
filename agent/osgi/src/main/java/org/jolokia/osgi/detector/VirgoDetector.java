@@ -33,7 +33,12 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String version = getBundleVersion("org.eclipse.virgo.kernel.userregion");
         if (version != null) {
-            String type = getBundleVersion("org.eclipse.gemini.web.core") != null ? "gemini" : "kernel";
+            String type = "kernel";
+            if (getBundleVersion("org.eclipse.gemini.web.core") != null) {
+                type = "tomcat";
+            } else if (getBundleVersion("org.eclipse.jetty.osgi.boot") != null) {
+                type = "jetty";
+            }
             Map<String,String> extraInfo = new HashMap<String,String>();
             extraInfo.put("type",type);
             return new ServerHandle("Eclipse","Virgo",version,null,extraInfo);
