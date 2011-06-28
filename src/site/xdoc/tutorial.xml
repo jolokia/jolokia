@@ -156,7 +156,11 @@ $ java Jolokia
           </li>
           <li>
             <strong>check_jmx4perl</strong> is a feature reach Nagios
-            plugin for connecting the Jolokia agent with Nagios
+            plugin for connecting the Jolokia agent with Nagios.
+          </li>
+          <li>
+            <strong>jolokia</strong> is a supporting script for easy 
+            download and configuration of the Jolokia agents.
           </li>
         </ul>
         <p>
@@ -172,10 +176,33 @@ ReadLine support available (maybe install Bundle::CPAN or Bundle::CPANxxl?)
 
 cpan[1]> install JMX::Jmx4Perl
 ...
-...]]></pre>
+...
+jmx4perl
+========
+
+jmx4perl is a command line utility for accessing Jolokia agents
+(www.jolokia.org). It can be used for script based exploration 
+and easy inspection of the JMX space.
+
+Install 'jmx4perl' ? (y/n) [y ]
+....
+]]></pre>
         <p>
-         You will be asked for quite some dependencies, please install
-         them all. 
+          You will be asked for each featured script whether it should
+          be installed in addition to the core Perl modules. Each of
+          the scripts (jmx4perl, j4psh, jolokia, check_jmx4perl) will
+          introduce a set of new depedencies on Perl modules which in
+          turn might depend on other Perl modules or system
+          libraries. Perl modules are resolved and installed
+          automatically. The agent management script
+          <code>jolokia</code> depends on <code>XML::LibXML</code>
+          which requires a development version of <code>libxml</code>
+          installed locally. It is recommended to install
+          <code>libxml2-dev</code> with the package management tool of
+          your OS (e.g. <code>apt-get install libxml2-dev</code>
+          ). Alternatively, the OS package for XML::LibXML could be
+          installed, too (e.g. <code>libxml-libxml-perl</code> for
+          Ubuntu)
         </p>
         <p>
           When jmx4perl is installed, try out jmx4perl:
@@ -187,32 +214,20 @@ $ jmx4perl http://localhost:8080/jolokia read java.lang:type=Memory HeapMemoryUs
 $ jmx4perl --help
 $ man jmx4perl]]></pre>
         <p>
-          Next, I recommend to install <code>j4psh</code>. It is is
-          already installed with the previous install, however, some
-          prerequisites are still missing. So please fire up again
-          <code>cpan</code> and install the following modules:
-        </p>
-        <pre><![CDATA[
-$ perl -MCPAN -e shell
-...
-cpan[1]> install Term::ShellUI
-....
-cpan[2]> install Term::Size
-....
-cpan[3]> install Config::General
-....
-cpan[4]> install Term::Clui
-...]]></pre>
-        <p>
-          For getting the best readline experience, it is recommended
-          to also install <code>Term::ReadLine::Gnu</code>, but this
-          is optional. Now, fire up j4psh and let the fun begin:
+          Next, I recommend to try out <code>j4psh</code>.  For
+          getting the best readline experience, it is recommended to
+          also install <code>Term::ReadLine::Gnu</code> (which in turn
+          requires the package <code>libreadline-dev</code> to be
+          installed), but this is optional. Now, fire up j4psh and let
+          the fun begin:
         </p>
         <div align="center">
           <img src="images/j4psh_screenshot.png" alt="j4psh screenshot"/>
         </div>
         <p>
-          Don't forget to try out TAB triggered command and argument completion !
+          Don't forget to try out TAB triggered command and argument
+          completion as demonstrated in this <a
+          href="http://vimeo.com/20215477">screencast</a>.
         </p>
       </subsection>
       <subsection name="Summary">
