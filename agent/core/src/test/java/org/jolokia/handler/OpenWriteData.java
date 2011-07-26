@@ -1,6 +1,8 @@
 package org.jolokia.handler;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class OpenWriteData {
 	private int intField;
@@ -8,6 +10,8 @@ public class OpenWriteData {
 	private Nested nestedClass;
 	private String[] array;
 	private List<String> list;
+	private Map<String, String> map;
+	private Set<String> set;
 	
 	public OpenWriteData() {
 	}
@@ -51,8 +55,24 @@ public class OpenWriteData {
 	public void setList(List<String> list) {
 		this.list = list;
 	}
-
 	
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+	
+	public Set<String> getSet() {
+		return set;
+	}
+
+	public void setSet(Set<String> set) {
+		this.set = set;
+	}
+	
+
 	public static class Nested {
 		private String nestedField;
 

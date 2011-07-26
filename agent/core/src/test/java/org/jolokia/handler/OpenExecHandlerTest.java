@@ -16,6 +16,7 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.json.TabularDataExtractor;
 import org.jolokia.request.JmxExecRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -127,6 +128,24 @@ public class OpenExecHandlerTest {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"list\":[\"one\", \"two\"] }").
+        		build();
+        handler.handleRequest(getMBeanServer(),request);    	
+    }
+        
+    @Test
+    public void compositeWithMapField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+        		operation("compositeData").
+        		arguments("{ \"map\":{\"key1\":\"value1\", \"key2\":\"value2\"} }").
+        		build();
+        handler.handleRequest(getMBeanServer(),request);    	
+    }
+        
+    @Test
+    public void compositeWithSetField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+        		operation("compositeData").
+        		arguments("{ \"set\": [\"value1\",\"value2\"] }").
         		build();
         handler.handleRequest(getMBeanServer(),request);    	
     }

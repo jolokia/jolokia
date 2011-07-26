@@ -15,12 +15,15 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 
 import org.jolokia.util.ClassUtil;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -142,7 +145,6 @@ public class StringToObjectConverter {
 						"Cannot convert string " + pValue + " to type " +
 	                    openType + " because unsupported JSON object type: " + jsonValue);				
 			}
-
 			
 		} else if (openType instanceof CompositeType) {
 			// break down the composite type to its field and recurse for converting each field
@@ -198,6 +200,45 @@ public class StringToObjectConverter {
 						"Cannot convert string " + pValue + " to type " +
 	                    openType + " because unsupported JSON object type: " + jsonValue);				
 			}
+			
+		} else if (openType instanceof TabularType) {
+			TabularType tType = (TabularType) openType;
+			CompositeType rowType = tType.getRowType();
+			if (rowType.keySet().size() != 2 || !rowType.containsKey("key") || !rowType.containsKey("value")) {
+				throw new IllegalArgumentException(
+						"Cannot convert string " + pValue + " to type " +
+	                    openType + " because the TabularData can't be converted: " + tType);				
+			}
+			
+			TabularDataSupport tabularData = new TabularDataSupport(tType);
+			
+			Object jsonValue = prepareValue(JSONObject.class.getName(), pValue);
+			if (jsonValue instanceof JSONObject) {
+				@SuppressWarnings("unchecked")
+				Map<String, String> jsonObj = (Map<String,String>) jsonValue;
+				
+				for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("key", entry.getKey());
+					map.put("value", entry.getValue());
+
+					try {
+						CompositeData compositeData = new CompositeDataSupport(rowType, map);
+						tabularData.put(compositeData);
+						
+					} catch (OpenDataException e) {					
+						throw new IllegalArgumentException(e.getMessage());
+					}
+				}				
+				
+				return tabularData;
+				
+			} else {
+				throw new IllegalArgumentException(						
+						"Cannot convert string " + pValue + " to type " +
+	                    openType + " because the JSON data doesn't represent a list: " + jsonValue);				
+			}
+			
 			
 		} else {
 			throw new IllegalArgumentException(
