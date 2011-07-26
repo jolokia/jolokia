@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -123,9 +124,10 @@ public class StringToObjectConverter {
 			
 			Object jsonValue = prepareValue(JSONObject.class.getName(), pValue);
 			if (jsonValue instanceof JSONArray) {
-				OpenType<?> elementOpenType = aType.getElementOpenType();
 				Collection<?> jsonArray = (Collection<?>) jsonValue;
-				Object[] valueArray = new Object[jsonArray.size()];
+				OpenType<?> elementOpenType = aType.getElementOpenType();
+				Object[] valueArray = createTargetArray(aType, jsonArray.size());
+				
 				Iterator<?> it = jsonArray.iterator();
 				for (int i = 0; i < valueArray.length ; ++i) {
 					Object element = it.next();
@@ -341,6 +343,31 @@ public class StringToObjectConverter {
         return pValue.split("\\s*,\\s*");
     }
 
+    
+    private Object[] createTargetArray(ArrayType<?> aType, int length) {
+		OpenType<?> elementOpenType = aType.getElementOpenType();
+		Object[] valueArray;
+		if (elementOpenType instanceof SimpleType) {
+			SimpleType<?> sElementType = (SimpleType<?>) elementOpenType;
+			Class<?> elementClass;
+			try {
+				elementClass = Class.forName(sElementType.getClassName());
+				valueArray = (Object[]) Array.newInstance(elementClass, length);
+
+			} catch (ClassNotFoundException e) {
+				throw new IllegalArgumentException("Can't instantiate array: " + e.getMessage());
+			}
+			
+		} else if (elementOpenType instanceof CompositeType) {
+			valueArray = new CompositeData[length];
+			
+		} else {
+			throw new IllegalArgumentException("Unsupported array element type: " + elementOpenType);
+		}
+
+		return valueArray;
+    }
+    
     // ===========================================================================
     // Extractor interface
     private interface Parser {

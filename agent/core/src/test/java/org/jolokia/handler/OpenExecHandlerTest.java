@@ -85,7 +85,6 @@ public class OpenExecHandlerTest {
      */
     @Test
     public void arrayOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
-    	// set a value just for stringField, leave out intField
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("arrayData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -98,13 +97,31 @@ public class OpenExecHandlerTest {
      */
     @Test
     public void listOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
-    	// set a value just for stringField, leave out intField
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("listData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
                 build();
         handler.handleRequest(getMBeanServer(),request);
     }
+    
+    @Test
+    public void nested() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+				operation("compositeData").
+				arguments("{ \"nestedClass\":{\"nestedField\":\"aString\"} }").
+				build();
+        handler.handleRequest(getMBeanServer(),request);    	    	
+    }
+    
+    @Test
+    public void compositeWithArrayField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+        		operation("compositeData").
+        		arguments("{ \"array\":[\"one\", \"two\"] }").
+        		build();
+        handler.handleRequest(getMBeanServer(),request);    	
+    }
+    
 
 
     private MBeanServerConnection getMBeanServer() {
