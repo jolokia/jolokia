@@ -373,6 +373,7 @@ public class StringToObjectConverter {
     public static class DefaultValues {
         private static boolean DEFAULT_BOOLEAN;
         private static byte DEFAULT_BYTE;
+        private static byte DEFAULT_CHAR;
         private static short DEFAULT_SHORT;
         private static int DEFAULT_INT;
         private static long DEFAULT_LONG;
@@ -385,6 +386,7 @@ public class StringToObjectConverter {
         	defaultValues = new HashMap<String, Object>();
             defaultValues.put(Boolean.class.getName(), new Boolean(DEFAULT_BOOLEAN));
             defaultValues.put(Byte.class.getName(), new Byte(DEFAULT_BYTE));
+            defaultValues.put(Character.class.getName(), new Short(DEFAULT_CHAR));
             defaultValues.put(Short.class.getName(), new Short(DEFAULT_SHORT));
             defaultValues.put(Integer.class.getName(), new Integer(DEFAULT_INT));
             defaultValues.put(Long.class.getName(), new Long(DEFAULT_LONG));
