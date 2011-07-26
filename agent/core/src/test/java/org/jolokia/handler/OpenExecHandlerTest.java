@@ -79,7 +79,33 @@ public class OpenExecHandlerTest {
         		build();
         handler.handleRequest(getMBeanServer(),request);    	
     }
-    
+
+    /**
+     * If a field in the argument is not set it will be set to its default value
+     */
+    @Test
+    public void arrayOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    	// set a value just for stringField, leave out intField
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+                operation("arrayData").
+                arguments("[ { \"stringField\":\"aString\" } ]").
+                build();
+        handler.handleRequest(getMBeanServer(),request);
+    }
+
+    /**
+     * If a field in the argument is not set it will be set to its default value
+     */
+    @Test
+    public void listOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    	// set a value just for stringField, leave out intField
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+                operation("listData").
+                arguments("[ { \"stringField\":\"aString\" } ]").
+                build();
+        handler.handleRequest(getMBeanServer(),request);
+    }
+
 
     private MBeanServerConnection getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();

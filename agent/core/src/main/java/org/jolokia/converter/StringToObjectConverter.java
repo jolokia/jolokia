@@ -1,8 +1,14 @@
 package org.jolokia.converter;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -110,6 +116,31 @@ public class StringToObjectConverter {
 			SimpleType<?> sType = (SimpleType<?>) openType;
 			String className = sType.getClassName();
 			return prepareValue(className, pValue);
+			
+		} else if (openType instanceof ArrayType<?>) {
+			ArrayType<?> aType = (ArrayType<?>) openType;
+			// prepare each value in the array and then process the array of values
+			
+			Object jsonValue = prepareValue(JSONObject.class.getName(), pValue);
+			if (jsonValue instanceof JSONArray) {
+				OpenType<?> elementOpenType = aType.getElementOpenType();
+				Collection<?> jsonArray = (Collection<?>) jsonValue;
+				Object[] valueArray = new Object[jsonArray.size()];
+				Iterator<?> it = jsonArray.iterator();
+				for (int i = 0; i < valueArray.length ; ++i) {
+					Object element = it.next();
+					Object elementValue = prepareValue(elementOpenType, element.toString());
+					valueArray[i] = elementValue;
+				}
+				
+				return valueArray;
+				
+			} else {
+				throw new IllegalArgumentException(
+						"Cannot convert string " + pValue + " to type " +
+	                    openType + " because unsupported JSON object type: " + jsonValue);				
+			}
+
 			
 		} else if (openType instanceof CompositeType) {
 			// break down the composite type to its field and recurse for converting each field
