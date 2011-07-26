@@ -68,12 +68,27 @@ public final class JvmAgentJdk6 {
     private JvmAgentJdk6() {}
 
     /**
-     * Entry point for the agent
+     * Entry point for the agent, using command line attach
+     * (that is via -javagent command line argument)
      *
      * @param agentArgs arguments as given on the command line
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     public static void premain(String agentArgs) {
+        initialiseAgent(agentArgs);
+    }
+
+    /**
+     * Entry point for the agent, using dynamic attach
+     * (this is post VM initialisation attachment, via com.sun.attach)
+     *
+     * @param agentArgs arguments as given on the command line
+     */
+    public static void agentmain(String agentArgs) {
+        initialiseAgent(agentArgs);
+    }
+
+    @SuppressWarnings("PMD.SystemPrintln")
+    private static void initialiseAgent(String agentArgs) {
         try {
             Map<String,String> agentConfig = parseArgs(agentArgs);
             final HttpServer server = createServer(agentConfig);

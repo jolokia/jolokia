@@ -61,6 +61,10 @@
           <archive>
             <manifestEntries>
               <Premain-Class>org.jolokia.jvmagent.jdk6.JvmAgentJdk6</Premain-Class>
+              <Agent-Class>org.jolokia.jvmagent.jdk6.JvmAgentJdk6</Agent-Class>
+              <Can-Redefine-Classes>false</Can-Redefine-Classes>
+              <Can-Retransform-Classes>false</Can-Retransform-Classes>
+              <Can-Set-Native-Method-Prefix>false</Can-Set-Native-Method-Prefix>
             </manifestEntries>
           </archive>
         </configuration>
