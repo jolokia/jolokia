@@ -9,8 +9,8 @@ public class OpenWriteData {
 	private String stringField;
 	private Nested nestedClass;
 	private String[] array;
-	private List<String> list;
-	private Map<String, String> map;
+	private List<Integer> list;
+	private Map<Integer, Nested> map;
 	private Set<String> set;
 	
 	public OpenWriteData() {
@@ -48,19 +48,19 @@ public class OpenWriteData {
 		this.array = array;
 	}
 
-	public List<String> getList() {
+	public List<Integer> getList() {
 		return list;
 	}
 
-	public void setList(List<String> list) {
+	public void setList(List<Integer> list) {
 		this.list = list;
 	}
 	
-	public Map<String, String> getMap() {
+	public Map<Integer, Nested> getMap() {
 		return map;
 	}
 
-	public void setMap(Map<String, String> map) {
+	public void setMap(Map<Integer, Nested> map) {
 		this.map = map;
 	}
 	

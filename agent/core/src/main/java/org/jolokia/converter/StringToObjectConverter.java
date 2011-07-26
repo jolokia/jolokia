@@ -219,8 +219,11 @@ public class StringToObjectConverter {
 				
 				for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
 					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("key", entry.getKey());
-					map.put("value", entry.getValue());
+					Object key = prepareValue(rowType.getType("key"), entry.getKey());
+					map.put("key", key);
+					
+					Object value = prepareValue(rowType.getType("value"), entry.getValue());
+					map.put("value", value);
 
 					try {
 						CompositeData compositeData = new CompositeDataSupport(rowType, map);

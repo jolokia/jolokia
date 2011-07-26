@@ -1,6 +1,8 @@
 package org.jolokia.handler;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class OpenExecData implements OpenExecDataMXBean {
@@ -12,6 +14,12 @@ public class OpenExecData implements OpenExecDataMXBean {
 	}
 
 	public void listData(List<OpenWriteData> data) {
+	}
+
+	public void mapData(Map<String, OpenWriteData> data) {
+	}
+
+	public void opSetData(Set<OpenWriteData> data) {
 	}
 	
 }
