@@ -122,7 +122,15 @@ public class OpenExecHandlerTest {
         handler.handleRequest(getMBeanServer(),request);    	
     }
     
-
+    @Test
+    public void compositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+        		operation("compositeData").
+        		arguments("{ \"list\":[\"one\", \"two\"] }").
+        		build();
+        handler.handleRequest(getMBeanServer(),request);    	
+    }
+        
 
     private MBeanServerConnection getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();
