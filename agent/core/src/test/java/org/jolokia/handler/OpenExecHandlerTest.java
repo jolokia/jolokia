@@ -36,7 +36,7 @@ public class OpenExecHandlerTest {
 
     @BeforeTest
     public void registerMbean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        oName = new ObjectName("jolokia:test=exec");
+        oName = new ObjectName("jolokia:test=openExec");
 
         MBeanServerConnection conn = getMBeanServer();
         conn.createMBean(OpenExecData.class.getName(),oName);        
