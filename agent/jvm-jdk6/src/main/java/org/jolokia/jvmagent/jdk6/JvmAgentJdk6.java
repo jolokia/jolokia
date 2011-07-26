@@ -74,7 +74,11 @@ public final class JvmAgentJdk6 {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        initialiseAgent(agentArgs);
+        try {
+            initialiseAgent(agentArgs);
+        } catch(IOException ioe) {
+            System.err.println("jolokia: Cannot create HTTP-Server: " + ioe);
+        }
     }
 
     /**
@@ -84,29 +88,29 @@ public final class JvmAgentJdk6 {
      * @param agentArgs arguments as given on the command line
      */
     public static void agentmain(String agentArgs) {
-        initialiseAgent(agentArgs);
+        try {
+            initialiseAgent(agentArgs);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error attaching agent", ioe);
+        }
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private static void initialiseAgent(String agentArgs) {
-        try {
-            Map<String,String> agentConfig = parseArgs(agentArgs);
-            final HttpServer server = createServer(agentConfig);
+    private static void initialiseAgent(String agentArgs) throws IOException {
+        Map<String,String> agentConfig = parseArgs(agentArgs);
+        final HttpServer server = createServer(agentConfig);
 
-            final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(agentConfig);
-            final String contextPath = getContextPath(jolokiaConfig);
+        final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(agentConfig);
+        final String contextPath = getContextPath(jolokiaConfig);
 
-            HttpContext context = server.createContext(contextPath, new JolokiaHttpHandler(jolokiaConfig));
-            if (jolokiaConfig.containsKey(ConfigKey.USER)) {
-                context.setAuthenticator(getAuthentiator(jolokiaConfig));
-            }
-            if (agentConfig.containsKey("executor")) {
-                server.setExecutor(getExecutor(agentConfig));
-            }
-            startServer(server, contextPath);
-        } catch (IOException e) {
-            System.err.println("jolokia: Cannot create HTTP-Server: " + e);
+        HttpContext context = server.createContext(contextPath, new JolokiaHttpHandler(jolokiaConfig));
+        if (jolokiaConfig.containsKey(ConfigKey.USER)) {
+            context.setAuthenticator(getAuthentiator(jolokiaConfig));
         }
+        if (agentConfig.containsKey("executor")) {
+            server.setExecutor(getExecutor(agentConfig));
+        }
+        startServer(server, contextPath);
     }
 
     private static HttpServer createServer(Map<String, String> pConfig) throws IOException {
@@ -120,6 +124,7 @@ public final class JvmAgentJdk6 {
         } else {
             address = InetAddress.getLocalHost();
         }
+
         if (!pConfig.containsKey(ConfigKey.AGENT_CONTEXT.getKeyValue())) {
             pConfig.put(ConfigKey.AGENT_CONTEXT.getKeyValue(), JOLOKIA_CONTEXT);
         }
@@ -128,11 +133,23 @@ public final class JvmAgentJdk6 {
             protocol = pConfig.get("protocol");
         }
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
+
+        HttpServer toReturn = null;
         if (protocol.equalsIgnoreCase("https")) {
-            return createHttpsServer(socketAddress, pConfig);
+            toReturn = createHttpsServer(socketAddress, pConfig);
         } else {
-            return HttpServer.create(socketAddress,getBacklog(pConfig));
+            toReturn = HttpServer.create(socketAddress,getBacklog(pConfig));
         }
+
+        String url = String.format("%s://%s:%d%s",
+            "https".equalsIgnoreCase(protocol) ? "https" : "http",
+            address.getCanonicalHostName(), port,
+            pConfig.get(ConfigKey.AGENT_CONTEXT.getKeyValue()));
+
+        System.setProperty("jolokia.agent_url", url);
+        System.out.println("jolokia: Agent URL " + url);
+
+        return toReturn;
     }
 
     private static int getBacklog(Map<String, String> pConfig) {
@@ -153,10 +170,6 @@ public final class JvmAgentJdk6 {
             @Override
             public void run() {
                 pServer.start();
-                InetSocketAddress addr = pServer.getAddress();
-                System.out.println("jolokia: Agent URL http://" + addr.getAddress().getCanonicalHostName() + ":" +
-                        addr.getPort() + pContextPath);
-
             }
         });
         starterThread.start();
