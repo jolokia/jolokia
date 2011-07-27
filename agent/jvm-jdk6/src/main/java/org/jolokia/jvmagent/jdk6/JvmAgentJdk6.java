@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import com.sun.tools.attach.VirtualMachine;
 import org.jolokia.util.ConfigKey;
 
 /*
@@ -355,5 +356,36 @@ public final class JvmAgentJdk6 {
     private static char[] getKeystorePassword(Map<String, String> pConfig) {
        String password = pConfig.get("keystorePassword");
         return password != null ? password.toCharArray() : new char[0];
+    }
+
+    public static void main(String... args) {
+        if (args.length != 2) {
+            System.out.println("Usage: <program> jvmPid agentArguments");
+            System.exit(0);
+        }
+
+        try {
+            VirtualMachine vm = VirtualMachine.attach(args[0]);
+            try {
+                String agentUrl = (String) vm.getSystemProperties().get("jolokia.agent_url");
+                if (agentUrl == null) {
+                    String agent = new File(JvmAgentJdk6.class
+                        .getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .toURI()).getAbsolutePath();
+                    vm.loadAgent(agent, args[1]);
+                    System.out.println("Attached Jolokia to: " + args[0]);
+                } else {
+                    System.out.println("Jolokia already exists with URL:" + agentUrl);
+                }
+            } finally {
+                vm.detach();
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to attach jolokia to the target VM !, error was");
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

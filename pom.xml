@@ -319,6 +319,14 @@
       </dependency>
 
       <dependency>
+        <groupId>com.sun</groupId>
+        <artifactId>tools</artifactId>
+        <version>1.6</version>
+        <scope>system</scope>
+        <systemPath>${java.home}/../lib/tools.jar</systemPath>
+      </dependency>
+
+      <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
         <version>5.12.1</version>
