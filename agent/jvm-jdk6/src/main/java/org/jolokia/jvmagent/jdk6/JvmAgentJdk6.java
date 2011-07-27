@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import com.sun.tools.attach.VirtualMachine;
 import org.jolokia.util.ConfigKey;
 
 /*
@@ -68,30 +69,49 @@ public final class JvmAgentJdk6 {
     private JvmAgentJdk6() {}
 
     /**
-     * Entry point for the agent
+     * Entry point for the agent, using command line attach
+     * (that is via -javagent command line argument)
      *
      * @param agentArgs arguments as given on the command line
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     public static void premain(String agentArgs) {
         try {
-            Map<String,String> agentConfig = parseArgs(agentArgs);
-            final HttpServer server = createServer(agentConfig);
-
-            final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(agentConfig);
-            final String contextPath = getContextPath(jolokiaConfig);
-
-            HttpContext context = server.createContext(contextPath, new JolokiaHttpHandler(jolokiaConfig));
-            if (jolokiaConfig.containsKey(ConfigKey.USER)) {
-                context.setAuthenticator(getAuthentiator(jolokiaConfig));
-            }
-            if (agentConfig.containsKey("executor")) {
-                server.setExecutor(getExecutor(agentConfig));
-            }
-            startServer(server, contextPath);
-        } catch (IOException e) {
-            System.err.println("jolokia: Cannot create HTTP-Server: " + e);
+            initialiseAgent(agentArgs);
+        } catch(IOException ioe) {
+            System.err.println("jolokia: Cannot create HTTP-Server: " + ioe);
         }
+    }
+
+    /**
+     * Entry point for the agent, using dynamic attach
+     * (this is post VM initialisation attachment, via com.sun.attach)
+     *
+     * @param agentArgs arguments as given on the command line
+     */
+    public static void agentmain(String agentArgs) {
+        try {
+            initialiseAgent(agentArgs);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error attaching agent", ioe);
+        }
+    }
+
+    @SuppressWarnings("PMD.SystemPrintln")
+    private static void initialiseAgent(String agentArgs) throws IOException {
+        Map<String,String> agentConfig = parseArgs(agentArgs);
+        final HttpServer server = createServer(agentConfig);
+
+        final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(agentConfig);
+        final String contextPath = getContextPath(jolokiaConfig);
+
+        HttpContext context = server.createContext(contextPath, new JolokiaHttpHandler(jolokiaConfig));
+        if (jolokiaConfig.containsKey(ConfigKey.USER)) {
+            context.setAuthenticator(getAuthentiator(jolokiaConfig));
+        }
+        if (agentConfig.containsKey("executor")) {
+            server.setExecutor(getExecutor(agentConfig));
+        }
+        startServer(server, contextPath);
     }
 
     private static HttpServer createServer(Map<String, String> pConfig) throws IOException {
@@ -105,6 +125,7 @@ public final class JvmAgentJdk6 {
         } else {
             address = InetAddress.getLocalHost();
         }
+
         if (!pConfig.containsKey(ConfigKey.AGENT_CONTEXT.getKeyValue())) {
             pConfig.put(ConfigKey.AGENT_CONTEXT.getKeyValue(), JOLOKIA_CONTEXT);
         }
@@ -113,11 +134,23 @@ public final class JvmAgentJdk6 {
             protocol = pConfig.get("protocol");
         }
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
+
+        HttpServer toReturn = null;
         if (protocol.equalsIgnoreCase("https")) {
-            return createHttpsServer(socketAddress, pConfig);
+            toReturn = createHttpsServer(socketAddress, pConfig);
         } else {
-            return HttpServer.create(socketAddress,getBacklog(pConfig));
+            toReturn = HttpServer.create(socketAddress,getBacklog(pConfig));
         }
+
+        String url = String.format("%s://%s:%d%s",
+            "https".equalsIgnoreCase(protocol) ? "https" : "http",
+            address.getCanonicalHostName(), port,
+            pConfig.get(ConfigKey.AGENT_CONTEXT.getKeyValue()));
+
+        System.setProperty("jolokia.agent_url", url);
+        System.out.println("jolokia: Agent URL " + url);
+
+        return toReturn;
     }
 
     private static int getBacklog(Map<String, String> pConfig) {
@@ -138,10 +171,6 @@ public final class JvmAgentJdk6 {
             @Override
             public void run() {
                 pServer.start();
-                InetSocketAddress addr = pServer.getAddress();
-                System.out.println("jolokia: Agent URL http://" + addr.getAddress().getCanonicalHostName() + ":" +
-                        addr.getPort() + pContextPath);
-
             }
         });
         starterThread.start();
@@ -327,5 +356,36 @@ public final class JvmAgentJdk6 {
     private static char[] getKeystorePassword(Map<String, String> pConfig) {
        String password = pConfig.get("keystorePassword");
         return password != null ? password.toCharArray() : new char[0];
+    }
+
+    public static void main(String... args) {
+        if (args.length != 2) {
+            System.out.println("Usage: <program> jvmPid agentArguments");
+            System.exit(0);
+        }
+
+        try {
+            VirtualMachine vm = VirtualMachine.attach(args[0]);
+            try {
+                String agentUrl = (String) vm.getSystemProperties().get("jolokia.agent_url");
+                if (agentUrl == null) {
+                    String agent = new File(JvmAgentJdk6.class
+                        .getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .toURI()).getAbsolutePath();
+                    vm.loadAgent(agent, args[1]);
+                    System.out.println("Attached Jolokia to: " + args[0]);
+                } else {
+                    System.out.println("Jolokia already exists with URL:" + agentUrl);
+                }
+            } finally {
+                vm.detach();
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to attach jolokia to the target VM !, error was");
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }
