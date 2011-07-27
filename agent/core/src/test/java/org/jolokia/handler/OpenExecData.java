@@ -22,4 +22,13 @@ public class OpenExecData implements OpenExecDataMXBean {
 	public void opSetData(Set<OpenWriteData> data) {
 	}
 	
+	public void overloaded(OpenWriteData data) {
+		
+	}
+
+	public void overloaded(String data) {
+		
+	}
+	
+
 }

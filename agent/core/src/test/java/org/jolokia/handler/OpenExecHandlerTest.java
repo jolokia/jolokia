@@ -200,6 +200,16 @@ public class OpenExecHandlerTest {
         		build();
         handler.handleRequest(getMBeanServer(),request);    	
     }
+    
+    
+    @Test
+    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+				operation("overloaded(javax.management.openmbean.CompositeData)").
+				arguments("{ \"stringField\": \"aString\" }").
+				build();
+        handler.handleRequest(getMBeanServer(),request);    	    	
+    }
         
 
     private MBeanServerConnection getMBeanServer() {

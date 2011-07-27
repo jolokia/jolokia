@@ -126,12 +126,13 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         }
 
         List<MBeanParameterInfo[]> paramInfos = extractMBeanParameterInfos(pServer, pRequest, operation);
-        if (!hasMatchingSignature(types, paramInfos)) {
+        MBeanParameterInfo[] matchingSignature = getMatchingSignature(types, paramInfos);
+        if (matchingSignature == null) {
             throw new IllegalArgumentException(
                     "No operation " + pRequest.getOperation() + " on MBean " + pRequest.getObjectNameAsString() + " exists. " +
                             "Known signatures: " + signatureToString(paramInfos));
         }
-        return new OperationAndParamType(operation,types);
+        return new OperationAndParamType(operation, matchingSignature);
     }
 
     /**
@@ -171,14 +172,14 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
      *
      * @param pTypes types to match agains. These are full qualified class names in string representation
      * @param pParamInfos list of parameter infos
-     * @return a string
+     * @return the matched signature MBeanParamaterInfo[]
      */
-    private boolean hasMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
+    private MBeanParameterInfo[] getMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
         OUTER:
         for (MBeanParameterInfo[]  infos : pParamInfos) {
             if (infos.length == 0 && pTypes.size() == 0) {
                 // No-arg argument
-                return true;
+                return infos;
             }
             if (pTypes.size() != infos.length) {
                 // Number of arguments dont match
@@ -192,9 +193,9 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
                 }
             }
             // If we did it until here, we are finished.
-            return true;
+            return infos;
         }
-        return false;
+        return null;
     }
 
     // Extract operation and optional type parameters

@@ -10,4 +10,6 @@ public interface OpenExecDataMXBean {
 	public void listData(List<OpenWriteData> data);
 	public void mapData(Map<String, OpenWriteData> data);
 	public void opSetData(Set<OpenWriteData> data);
+	public void overloaded(OpenWriteData data);
+	public void overloaded(String data);
 }
