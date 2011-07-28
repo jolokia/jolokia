@@ -24,12 +24,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sun</groupId>
-      <artifactId>tools</artifactId>
-      <scope>system</scope>
-    </dependency>
-
-    <dependency>
         <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
@@ -68,7 +62,7 @@
             <manifestEntries>
               <Premain-Class>org.jolokia.jvmagent.jdk6.JvmAgentJdk6</Premain-Class>
               <Agent-Class>org.jolokia.jvmagent.jdk6.JvmAgentJdk6</Agent-Class>
-              <Main-Class>org.jolokia.jvmagent.jdk6.JvmAgentJdk6</Main-Class>
+              <Main-Class>org.jolokia.jvmagent.jdk6.AgentLauncher</Main-Class>
               <Can-Redefine-Classes>false</Can-Redefine-Classes>
               <Can-Retransform-Classes>false</Can-Retransform-Classes>
               <Can-Set-Native-Method-Prefix>false</Can-Set-Native-Method-Prefix>
@@ -104,4 +98,25 @@
     </plugins>
   </reporting>
 
+  <profiles>
+    <profile>
+      <id>default-tools.jar</id>
+      <activation>
+        <property>
+          <name>java.vendor</name>
+          <value>Sun Microsystems Inc.</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.sun</groupId>
+          <artifactId>tools</artifactId>
+          <version>1.6</version>
+          <scope>system</scope>
+          <systemPath>${java.home}/../lib/tools.jar</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+  
 </project>

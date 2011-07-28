@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
-import com.sun.tools.attach.VirtualMachine;
 import org.jolokia.util.ConfigKey;
 
 /*
@@ -61,10 +60,12 @@ import org.jolokia.util.ConfigKey;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class JvmAgentJdk6 {
 
-    private static final int DEFAULT_PORT = 8778;
-    private static final int DEFAULT_BACKLOG = 10;
-    private static final String JOLOKIA_CONTEXT = "/jolokia/";
-    private static final String DEFAULT_PROTOCOL = "http";
+    public static final int DEFAULT_PORT = 8778;
+    public static final int DEFAULT_BACKLOG = 10;
+    public static final String JOLOKIA_CONTEXT = "/jolokia/";
+    public static final String DEFAULT_PROTOCOL = "http";
+    private static CleanUpThread cleaner = null;
+    public static final String JOLOKIA_AGENT_URL = "jolokia.agent";
 
     private JvmAgentJdk6() {}
 
@@ -76,7 +77,7 @@ public final class JvmAgentJdk6 {
      */
     public static void premain(String agentArgs) {
         try {
-            initialiseAgent(agentArgs);
+            startAgent(parseArgs(agentArgs));
         } catch(IOException ioe) {
             System.err.println("jolokia: Cannot create HTTP-Server: " + ioe);
         }
@@ -90,15 +91,21 @@ public final class JvmAgentJdk6 {
      */
     public static void agentmain(String agentArgs) {
         try {
-            initialiseAgent(agentArgs);
+            Map<String,String> agentConfig = parseArgs(agentArgs);
+            if ("stop".equals(agentConfig.get("mode"))) {
+                System.clearProperty(JOLOKIA_AGENT_URL);
+                System.out.println("Jolokia: Agent stopped");
+                stopAgent();
+            } else {
+                startAgent(agentConfig);
+            }
         } catch (IOException ioe) {
             throw new RuntimeException("Error attaching agent", ioe);
         }
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private static void initialiseAgent(String agentArgs) throws IOException {
-        Map<String,String> agentConfig = parseArgs(agentArgs);
+    private static void startAgent(Map<String, String> agentConfig) throws IOException {
         final HttpServer server = createServer(agentConfig);
 
         final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(agentConfig);
@@ -111,7 +118,7 @@ public final class JvmAgentJdk6 {
         if (agentConfig.containsKey("executor")) {
             server.setExecutor(getExecutor(agentConfig));
         }
-        startServer(server, contextPath);
+        startServer(server);
     }
 
     private static HttpServer createServer(Map<String, String> pConfig) throws IOException {
@@ -147,8 +154,8 @@ public final class JvmAgentJdk6 {
             address.getCanonicalHostName(), port,
             pConfig.get(ConfigKey.AGENT_CONTEXT.getKeyValue()));
 
-        System.setProperty("jolokia.agent_url", url);
-        System.out.println("jolokia: Agent URL " + url);
+        System.setProperty(JOLOKIA_AGENT_URL, url);
+        System.out.println("Jolokia: Agent started with URL " + url);
 
         return toReturn;
     }
@@ -162,7 +169,7 @@ public final class JvmAgentJdk6 {
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private static void startServer(final HttpServer pServer, final String pContextPath) {
+    private static void startServer(final HttpServer pServer) {
         ThreadGroup threadGroup = new ThreadGroup("jolokia");
         threadGroup.setDaemon(false);
         // Starting server in an own thread group with a fixed name
@@ -174,8 +181,15 @@ public final class JvmAgentJdk6 {
             }
         });
         starterThread.start();
-        Thread cleaner = new CleanUpThread(pServer,threadGroup);
+        cleaner = new CleanUpThread(pServer,threadGroup);
         cleaner.start();
+    }
+
+    private static void stopAgent() {
+        if (cleaner != null) {
+            // Instructs cleaner thread to finish and stop the server
+            cleaner.stopServer();
+        }
     }
 
     private static String getContextPath(Map<ConfigKey, String> pJolokiaConfig) {
@@ -358,34 +372,6 @@ public final class JvmAgentJdk6 {
         return password != null ? password.toCharArray() : new char[0];
     }
 
-    public static void main(String... args) {
-        if (args.length != 2) {
-            System.out.println("Usage: <program> jvmPid agentArguments");
-            System.exit(0);
-        }
 
-        try {
-            VirtualMachine vm = VirtualMachine.attach(args[0]);
-            try {
-                String agentUrl = (String) vm.getSystemProperties().get("jolokia.agent_url");
-                if (agentUrl == null) {
-                    String agent = new File(JvmAgentJdk6.class
-                        .getProtectionDomain()
-                        .getCodeSource()
-                        .getLocation()
-                        .toURI()).getAbsolutePath();
-                    vm.loadAgent(agent, args[1]);
-                    System.out.println("Attached Jolokia to: " + args[0]);
-                } else {
-                    System.out.println("Jolokia already exists with URL:" + agentUrl);
-                }
-            } finally {
-                vm.detach();
-            }
-        } catch (Exception e) {
-            System.out.println("Unable to attach jolokia to the target VM !, error was");
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
+
 }

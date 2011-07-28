@@ -17,6 +17,7 @@ package org.jolokia.jvmagent.jdk6;
  */
 
 import com.sun.net.httpserver.HttpServer;
+import org.omg.PortableInterceptor.ACTIVE;
 
 /**
  * Thread for stopping the HttpServer as soon as every non-daemon
@@ -31,9 +32,10 @@ class CleanUpThread extends Thread {
 
     private HttpServer server;
     private ThreadGroup threadGroup;
+    private boolean active = true;
 
     CleanUpThread(HttpServer pServer,ThreadGroup pThreadGroup) {
-        super("J4P Agent Cleanup Thread");
+        super("Jolokia Agent Cleanup Thread");
         server = pServer;
         threadGroup = pThreadGroup;
         setDaemon(true);
@@ -43,10 +45,10 @@ class CleanUpThread extends Thread {
     public void run() {
         try {
             boolean retry = true;
-            while(retry) {
+            while(retry && active) {
                 // Get all threads, wait for 'foreign' (== not our own threads)
                 // and when all finished, finish as well. This is in order to avoid
-                // hanging endless because the HTTP Serer thread cant be set into
+                // hanging endless because the HTTP Server thread cant be set into
                 // daemon mode
                 Thread threads[] = enumerateThreads();
                 retry = joinThreads(threads);
@@ -100,6 +102,11 @@ class CleanUpThread extends Thread {
         }
         // All 'foreign' threads has finished, hence we are prepared to stop
         return false;
+    }
+
+    public void stopServer() {
+        active = false;
+        interrupt();
     }
 }
 
