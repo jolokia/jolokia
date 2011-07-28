@@ -8,7 +8,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.servicetag.SystemEnvironment;
+
 /**
+ * Launcher for attaching/detaching a Jolokia agent dynamically to an already
+ * running Java process.
+ *
+ * This launcher tries hard to detect the required classes from tools.jar dynamically. For Mac OSX
+ * these classes are already included, for other they are looked up within JAVA_HOME
+ * (pointed to by the system property java.home)
+ *
  * @author roland
  * @since 28.07.11
  */
@@ -34,6 +43,9 @@ public class AgentLauncher {
         }
 
         Object vm = getVirtualMachine(options);
+        if (vm == null) {
+            System.exit(1);
+        }
         int exitCode = 0;
         try {
             if ("start".equals(options.command)) {
@@ -58,6 +70,9 @@ public class AgentLauncher {
         }
         System.exit(exitCode);
     }
+
+    // ========================================================================
+    // Commands
 
     private static int commandStart(Object pVm, OptionsAndArgs pOptions) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
@@ -120,6 +135,110 @@ public class AgentLauncher {
         return systemProperties.getProperty(JvmAgentJdk6.JOLOKIA_AGENT_URL);
     }
 
+    // Lookup the JAR File from where this class is loaded
+    private static File getJarFile() {
+        try {
+            return new File(JvmAgentJdk6.class
+                                    .getProtectionDomain()
+                                    .getCodeSource()
+                                    .getLocation()
+                                    .toURI());
+        } catch (URISyntaxException e) {
+            System.err.println("Error: Cannot lookup jar for this class: " + e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void detachAgent(Object pVm) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Class clazz = pVm.getClass();
+        Method method = clazz.getMethod("detach");
+        method.invoke(pVm);
+    }
+
+    private static void loadAgent(Object pVm, String pAgent, String pPid) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class clazz = pVm.getClass();
+        Method method = clazz.getMethod("loadAgent",String.class, String.class);
+        method.invoke(pVm,pAgent,pPid);
+    }
+
+    private static Properties getAgentSystemProperties(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class clazz = pVm.getClass();
+        Method method = clazz.getMethod("getSystemProperties");
+        return (Properties) method.invoke(pVm);
+    }
+
+    private static Object getVirtualMachine(OptionsAndArgs pOptions)  {
+        Class vmClass;
+        try {
+            String vmClassName = "com.sun.tools.attach.VirtualMachine";
+            try {
+                vmClass = Class.forName(vmClassName);
+            } catch (ClassNotFoundException exp) {
+                vmClass = lookupInToolsJar(vmClassName);
+            }
+        } catch (Exception exp) {
+            virtualMachineLookupFailed(pOptions, exp);
+            return null;
+        }
+
+        Exception storedExp;
+        String errMsg;
+        try {
+            Method method = vmClass.getMethod("attach",String.class);
+            return method.invoke(null,pOptions.pid);
+        } catch (NoSuchMethodException e) {
+            errMsg = "Internal: No method 'attach' found on " + vmClass;
+            storedExp = e;
+        } catch (InvocationTargetException e) {
+            errMsg = "InvocationTarget: " + e.getCause().getMessage();
+            storedExp = e;
+        } catch (IllegalAccessException e) {
+            errMsg = "IllegalAccess: " + e.getCause().getMessage();
+            storedExp = e;
+        }
+        printException(errMsg, storedExp, pOptions);
+        return null;
+    }
+
+    private static void virtualMachineLookupFailed(OptionsAndArgs pOptions, Exception exp) {
+        if (!pOptions.quiet) {
+            System.err.println(
+"Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
+"essential classes for attaching to a running JVM could locate the necessary jar file.\n" +
+"\n" +
+"Please call this launcher with a qualified classpath on the command line like\n" +
+"\n" +
+"   java -cp path/to/tools.jar:" + getJarFile().getName() + " " + AgentLauncher.class.getName() + " [options] <command> <ppid>\n"                                                            );
+        }
+        if (pOptions.verbose) {
+            System.err.println("Stacktrace: ");
+            exp.printStackTrace();
+        }
+    }
+
+    private static Class lookupInToolsJar(String pVmClassName) throws MalformedURLException, ClassNotFoundException {
+        // Try to look up tools.jar within $java.home, otherwise give up
+        String javaHome = System.getProperty("java.home");
+        if (javaHome != null) {
+            File[] toolsJars = new File[] {
+                    new File(javaHome + "/lib/tools.jar"),
+                    new File(javaHome + "/../lib/tools.jar"),
+            };
+            for (File toolsJar : toolsJars) {
+                if (toolsJar.exists()) {
+                    ClassLoader loader = new URLClassLoader(new URL[] {toolsJar.toURI().toURL() },AgentLauncher.class.getClassLoader());
+                    return loader.loadClass(pVmClassName);
+                }
+            }
+        } else {
+            System.out.println("No Java-Home set");
+        }
+        throw new RuntimeException("No tools.jar found");
+    }
+
+
+    // ===============================================================
+    // Command line handling
 
     private static OptionsAndArgs parseArgs(String[] pArgs) {
         Map<String,String> config = new HashMap<String, String>();
@@ -190,109 +309,6 @@ public class AgentLauncher {
         } else {
             throw new IllegalArgumentException("No option '" + pArg + "' quiet known");
         }
-    }
-
-    private static File getJarFile() {
-        try {
-            return new File(JvmAgentJdk6.class
-                                    .getProtectionDomain()
-                                    .getCodeSource()
-                                    .getLocation()
-                                    .toURI());
-        } catch (URISyntaxException e) {
-            System.err.println("Error: Cannot lookup jar for this class: " + e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void detachAgent(Object pVm) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("detach");
-        method.invoke(pVm);
-    }
-
-    private static void loadAgent(Object pVm, String pAgent, String pPid) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("loadAgent",String.class, String.class);
-        method.invoke(pVm,pAgent,pPid);
-    }
-
-    private static Properties getAgentSystemProperties(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("getSystemProperties");
-        return (Properties) method.invoke(pVm);
-    }
-
-    private static Object getVirtualMachine(OptionsAndArgs pOptions)  {
-        Class vmClass = null;
-        try {
-            String vmClassName = "com.sun.tools.attach.VirtualMachine";
-            try {
-                vmClass = Class.forName(vmClassName);
-            } catch (ClassNotFoundException exp) {
-                // Try to look up tools.jar within $java.home, otherwise give up
-                String javaHome = System.getProperty("java.home");
-                boolean found = false;
-                if (javaHome != null) {
-                    File[] toolsJars = new File[] {
-                            new File(javaHome + "/lib/tools.jar"),
-                            new File(javaHome + "/../lib/tools.jar"),
-                    };
-                    for (File toolsJar : toolsJars) {
-                        if (toolsJar.exists()) {
-                            ClassLoader loader = new URLClassLoader(new URL[] {toolsJar.toURI().toURL() },AgentLauncher.class.getClassLoader());
-                            vmClass = loader.loadClass(vmClassName);
-                            found = true;
-                        }
-                    }
-                } else {
-                    System.out.println("No Java-Home set");
-                }
-                if (!found) {
-                    throw new RuntimeException("No tools.jar found");
-                }
-            }
-        } catch (Exception exp) {
-            if (!pOptions.quiet) {
-                System.err.println(
-"Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
-"essential classes for attaching to a running JVM could locate the necessary jar file.\n" +
-"\n" +
-"Please call this launcher with a qualified classpath on the command line like\n" +
-"\n" +
-"   java -cp path/to/tools.jar:" + getJarFile().getName() + " " + AgentLauncher.class.getName() + " [options] <command> <ppid>\n"                                                            );
-            }
-            if (pOptions.verbose) {
-                System.err.println("Stacktrace: ");
-                exp.printStackTrace();
-            }
-            System.exit(1);
-            return null;
-        }
-
-        Exception storedExp;
-        String errMsg;
-        try {
-            Method method = vmClass.getMethod("attach",String.class);
-            return method.invoke(null,pOptions.pid);
-        } catch (NoSuchMethodException e) {
-            errMsg = "Internal: No method 'attach' found on " + vmClass;
-            storedExp = e;
-        } catch (InvocationTargetException e) {
-            errMsg = "InvocationTarget: " + e.getCause().getMessage();
-            storedExp = e;
-        } catch (IllegalAccessException e) {
-            errMsg = "IllegalAccess: " + e.getCause().getMessage();
-            storedExp = e;
-        }
-        if (!pOptions.quiet) {
-            System.err.println(errMsg);
-        }
-        if (pOptions.verbose) {
-            storedExp.printStackTrace(System.err);
-        }
-        System.exit(1);
-        return null;
     }
 
     private static void printException(String pMessage, Exception pException, OptionsAndArgs pOaa) {
