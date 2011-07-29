@@ -32,15 +32,30 @@ public class AgentLauncher {
         OptionsAndArgs options = null;
         try {
             options = parseArgs(args);
+            if (options.options.containsKey("help")) {
+                usage();
+                System.exit(0);
+            }
+            if ( (options.command == null && options.pid == null) ||
+                    "list".equals(options.command)) {
+                int exitCode = listProcesses(options);
+                System.exit(exitCode);
+            }
+
+            if (options.command == null) {
+                throw new IllegalArgumentException("No command given");
+            }
+            if (options.pid == null) {
+                throw new IllegalArgumentException("No process id (PID) given");
+            }
         } catch (IllegalArgumentException exp) {
             System.err.println("Error: " + exp.getMessage() + "\n");
+            if (options != null && options.verbose) {
+                exp.printStackTrace(System.err);
+                System.err.println("");
+            }
             usage();
             System.exit(1);
-        }
-
-        if (options.options.containsKey("help")) {
-            usage();
-            System.exit(0);
         }
 
         Object vm = getVirtualMachine(options);
@@ -55,6 +70,10 @@ public class AgentLauncher {
                 exitCode = commandStatus(vm,options);
             } else if ("stop".equals(options.command)) {
                 exitCode = commandStop(vm,options);
+            } else if ("toggle".equals(options.command)) {
+                exitCode = checkAgentUrl(vm) == null ?
+                        commandStart(vm,options) :
+                        commandStop(vm,options);
             } else {
                 throw new IllegalArgumentException("Unknown command '" + options.command + "'");
             }
@@ -70,6 +89,34 @@ public class AgentLauncher {
             }
         }
         System.exit(exitCode);
+    }
+
+    private static int listProcesses(OptionsAndArgs pOptions) {
+        Class vmClass = lookupVirtualMachineClass(pOptions);
+        if (vmClass == null) {
+            return 1;
+        }
+        try {
+            Method method = vmClass.getMethod("list");
+            List vmDescriptors = (List) method.invoke(null);
+            for (Object descriptor : vmDescriptors) {
+                Method idMethod = descriptor.getClass().getMethod("id");
+                String id = (String) idMethod.invoke(descriptor);
+                Method displayMethod = descriptor.getClass().getMethod("displayName");
+                String display = (String) displayMethod.invoke(descriptor);
+                System.out.println(new Formatter().format("%7.7s   %-100.100s",id,display));
+            }
+        } catch (NoSuchMethodException e) {
+            printException("Internal",e,pOptions);
+            return 1;
+        } catch (InvocationTargetException e) {
+            printException("InvocationTarget", e, pOptions);
+            return 1;
+        } catch (IllegalAccessException e) {
+            printException("IllegalAccess", e, pOptions);
+            return 1;
+        }
+        return 0;
     }
 
     // ========================================================================
@@ -95,12 +142,13 @@ public class AgentLauncher {
             loadAgent(pVm, agent, pOptions.toAgentArg());
             if (!quiet) {
                 System.out.println("Started Jolokia for PID " + pOptions.pid);
-                System.out.println("URL: " + checkAgentUrl(pVm));
+                System.out.println(checkAgentUrl(pVm));
             }
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("Jolokia already attached to " + pOptions.pid + " with URL " + agentUrl);
+                System.out.println("Jolokia already attached to " + pOptions.pid);
+                System.out.println(agentUrl);
             }
             return 1;
         }
@@ -156,12 +204,13 @@ public class AgentLauncher {
         boolean quiet = pOptions.options.containsKey("quiet");
         if (agentUrl != null) {
             if (!quiet) {
-                System.out.println("Jolokia started for PID " + pOptions.pid + " with URL " + agentUrl);
+                System.out.println("Jolokia started for PID " + pOptions.pid);
+                System.out.println(agentUrl);
             }
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("No Jolokia agent attached to " + pOptions.pid);
+                System.out.println("No Jolokia agent attached to PID " + pOptions.pid);
             }
             return 1;
         }
@@ -219,16 +268,8 @@ public class AgentLauncher {
      * @return the create virtual machine of <code>null</code> if none could be created
      */
     private static Object getVirtualMachine(OptionsAndArgs pOptions)  {
-        Class vmClass;
-        try {
-            String vmClassName = "com.sun.tools.attach.VirtualMachine";
-            try {
-                vmClass = Class.forName(vmClassName);
-            } catch (ClassNotFoundException exp) {
-                vmClass = lookupInToolsJar(vmClassName);
-            }
-        } catch (Exception exp) {
-            virtualMachineLookupFailed(pOptions, exp);
+        Class vmClass = lookupVirtualMachineClass(pOptions);
+        if (vmClass == null) {
             return null;
         }
 
@@ -241,7 +282,7 @@ public class AgentLauncher {
             errMsg = "Internal: No method 'attach' found on " + vmClass;
             storedExp = e;
         } catch (InvocationTargetException e) {
-            errMsg = "InvocationTarget: " + e.getCause().getMessage();
+            errMsg = e.getTargetException().getMessage();
             storedExp = e;
         } catch (IllegalAccessException e) {
             errMsg = "IllegalAccess: " + e.getCause().getMessage();
@@ -249,6 +290,20 @@ public class AgentLauncher {
         }
         printException(errMsg, storedExp, pOptions);
         return null;
+    }
+
+    private static Class lookupVirtualMachineClass(OptionsAndArgs pOptions) {
+        try {
+            String vmClassName = "com.sun.tools.attach.VirtualMachine";
+            try {
+                return Class.forName(vmClassName);
+            } catch (ClassNotFoundException exp) {
+                return lookupInToolsJar(vmClassName);
+            }
+        } catch (Exception exp) {
+            virtualMachineLookupFailed(pOptions, exp);
+            return null;
+        }
     }
 
     private static void virtualMachineLookupFailed(OptionsAndArgs pOptions, Exception exp) {
@@ -306,7 +361,6 @@ public class AgentLauncher {
      */
     private static OptionsAndArgs parseArgs(String[] pArgs) {
         Map<String,String> config = new HashMap<String, String>();
-        String command,pid;
 
         List<String> arguments = new ArrayList<String>();
         for (int i = 0; i < pArgs.length; i++) {
@@ -321,20 +375,13 @@ public class AgentLauncher {
                 arguments.add(arg);
             }
         }
-
-        if (arguments.size() != 2) {
-            throw new IllegalArgumentException("Command and process id (PID) must be provided as arguments");
+        String command = arguments.size() > 0 ? arguments.get(0) : null;
+        String pid = arguments.size() > 1 ? arguments.get(1) : null;
+        if (command != null && pid == null && command.matches("^[0-9]+$")) {
+            pid = command;
+            command = "toggle";
         }
-        command = arguments.get(0);
-        if (command == null) {
-            throw new IllegalArgumentException("No command given");
-        }
-        pid = arguments.get(1);
-        if (pid == null) {
-            throw new IllegalArgumentException("No process id (PID) given");
-        }
-
-        return new OptionsAndArgs(command, pid, config);
+        return new OptionsAndArgs(command,pid,config);
     }
 
     private static final Pattern ARGUMENT_PATTERN_WITH_EQUAL = Pattern.compile("([^=]+)=(.*)");
@@ -396,30 +443,39 @@ public class AgentLauncher {
 "    start     -- Start a Jolokia agent for the given process id\n" +
 "    stop      -- Stop a Jolokia agent for the given process id\n" +
 "    status    -- Show status of an (potentially) attached agent\n" +
+"    toggle    -- Toggle between start/stop (default when no command is given)\n" +
+"    list      -- List all attachable Java processes (default when no argument is given)\n" +
 "\n" +
 "[options] are used for providing runtime information for attaching the agent:\n" +
 "\n" +
-"    --host <host>                Hostname or IP address to which to bind on (default: InetAddress.getLocalHost())\n" +
-"    --port <port>                Port to listen on (default: " + JvmAgentJdk6.DEFAULT_PORT + ")\n" +
-"    --agentContext <context>     HTTP Context under which the agent is reachable (default: " + JvmAgentJdk6.JOLOKIA_CONTEXT + ")\n" +
-"    --user <user>                User used for Basic-Authentication\n" +
-"    --password <password>        Password used for Basic-Authentication\n" +
-"    --quiet                      No output. \"status\" will exit with code 0 if the agent is running, 1 otherwise\n" +
-"    --verbose                    Verbose output\n" +
-"    --executor <executor>        Executor policy for HTTP Threads to use (default: single)\n" +
-"                                 \"fixed\"    Thread pool with a fixed number of threads (default: 5)\n" +
-"                                 \"cached\"   Cached Thread Pool, creates threads on demand\n" +
-"                                 \"single\"   Single Thread\n" +
-"    --threadNr <nr threads>      Number of fixed threads if \"fixed\" is used as executor\n" +
-"    --backlog <backlog>          How many request to keep in the backlog (default: 10)\n" +
-"    --protocol <http|https>      Protocol which must be either \"http\" or \"https\" (default: http)\n" +
-"    --keystore <keystore>        Path to keystore (https only)\n" +
-"    --keystorePassword <pwd>     Password to the keystore (https only)\n" +
-"    --useSslClientAuthentication Use client certificate authentication (https only)\n" +
-"    --config <configfile>        Path to a property file from where to read the configuration\n" +
-"    --help                       This help documentation\n" +
+"    --host <host>                 Hostname or IP address to which to bind on\n" +
+"                                  (default: InetAddress.getLocalHost())\n" +
+"    --port <port>                 Port to listen on (default: " + JvmAgentJdk6.DEFAULT_PORT + ")\n" +
+"    --agentContext <context>      HTTP Context under which the agent is reachable (default: " + JvmAgentJdk6.JOLOKIA_CONTEXT + ")\n" +
+"    --user <user>                 User used for Basic-Authentication\n" +
+"    --password <password>         Password used for Basic-Authentication\n" +
+"    --quiet                       No output. \"status\" will exit with code 0 if the agent is running, 1 otherwise\n" +
+"    --verbose                     Verbose output\n" +
+"    --executor <executor>         Executor policy for HTTP Threads to use (default: single)\n" +
+"                                  \"fixed\"  -- Thread pool with a fixed number of threads (default: 5)\n" +
+"                                  \"cached\" -- Cached Thread Pool, creates threads on demand\n" +
+"                                  \"single\" -- Single Thread\n" +
+"    --threadNr <nr threads>       Number of fixed threads if \"fixed\" is used as executor\n" +
+"    --backlog <backlog>           How many request to keep in the backlog (default: 10)\n" +
+"    --protocol <http|https>       Protocol which must be either \"http\" or \"https\" (default: http)\n" +
+"    --keystore <keystore>         Path to keystore (https only)\n" +
+"    --keystorePassword <pwd>      Password to the keystore (https only)\n" +
+"    --useSslClientAuthentication  Use client certificate authentication (https only)\n" +
+"    --config <configfile>         Path to a property file from where to read the configuration\n" +
+"    --help                        This help documentation\n" +
 "\n" +
-"For more information refer to www.jolokia.org"
+"If no <command> is given but only a <pid> the state of the Agent will be toggled\n" +
+"between \"start\" and \"stop\"\n" +
+"\n" +
+"If neither <command> nor <pid> is given, a list of Java processes along with their IDs\n" +
+"is printed\n" +
+"\n" +
+"For more information please visit www.jolokia.org"
                           );
     }
 
@@ -481,7 +537,7 @@ public class AgentLauncher {
 
     static {
         String short_opts_def[] = {
-            "h", "host",
+            "h", "help",
             "u", "user",
             "p", "password",
             "c", "agentContext",
