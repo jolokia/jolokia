@@ -8,23 +8,24 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sun.servicetag.SystemEnvironment;
-
 /**
  * Launcher for attaching/detaching a Jolokia agent dynamically to an already
  * running Java process.
  *
  * This launcher tries hard to detect the required classes from tools.jar dynamically. For Mac OSX
  * these classes are already included, for other they are looked up within JAVA_HOME
- * (pointed to by the system property java.home)
+ * (pointed to by the system property java.home). Classes from tools.jar are never
+ * referenced directly but looked up via reflection.
  *
- * @author roland
+ * @author roland, Greg Bowyer
  * @since 28.07.11
  */
 public class AgentLauncher {
 
     /**
-     * Main method for attaching agent to a running JVM program
+     * Main method for attaching agent to a running JVM program. Use '--help' for a usage
+     * explanation.
+     *
      * @param args command line arguments
      */
     public static void main(String... args) {
@@ -74,6 +75,18 @@ public class AgentLauncher {
     // ========================================================================
     // Commands
 
+    /**
+     * Load a Jolokia Agent and start it. Whether an agent is started is decided by the existence of the
+     * system property {@see JvmAgentJdk6#JOLOKIA_AGENT_URL}.
+     *
+     * @param pVm the virtual machine
+     * @param pOptions options as given on the command line
+     * @return the exit code (0: success, 1: error)
+     * @throws IllegalAccessException if call via reflection fails
+     * @throws NoSuchMethodException should not happen since we use well known methods
+     * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
+     *         the stdout of the instrumented process as well for error messages.
+     */
     private static int commandStart(Object pVm, OptionsAndArgs pOptions) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -93,6 +106,19 @@ public class AgentLauncher {
         }
     }
 
+    /**
+     * Stop a Jolokia Agent, but only if it is already running (started with 'start').
+     * Whether an agent is started is decided by the existence of the
+     * system property {@see JvmAgentJdk6#JOLOKIA_AGENT_URL}.
+     *
+     * @param pVm the virtual machine
+     * @param pOptions options as given on the command line
+     * @return the exit code (0: success, 1: error)
+     * @throws IllegalAccessException if call via reflection fails
+     * @throws NoSuchMethodException should not happen since we use well known methods
+     * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
+     *         the stdout of the instrumented process as well for error messages.
+     */
     private static int commandStop(Object pVm, OptionsAndArgs pOptions) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -113,23 +139,37 @@ public class AgentLauncher {
 
     }
 
-    private static int commandStatus(Object pVm, OptionsAndArgs pOaa) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    /**
+     * Check the status of an agent on the target process.  Prints out the information
+     * to standard out, except if the '--quiet' is given.
+     *
+     * @param pVm the virtual machine
+     * @param pOptions options as given on the command line
+     * @return the exit code (0: agent is attached, 1: agent is not attached.)
+     * @throws IllegalAccessException if call via reflection fails
+     * @throws NoSuchMethodException should not happen since we use well known methods
+     * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
+     *         the stdout of the instrumented process as well for error messages.
+     */
+    private static int commandStatus(Object pVm, OptionsAndArgs pOptions) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
-        boolean quiet = pOaa.options.containsKey("quiet");
+        boolean quiet = pOptions.options.containsKey("quiet");
         if (agentUrl != null) {
             if (!quiet) {
-                System.out.println("Jolokia started for PID " + pOaa.pid + " with URL " + agentUrl);
+                System.out.println("Jolokia started for PID " + pOptions.pid + " with URL " + agentUrl);
             }
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("No Jolokia agent attached to " + pOaa.pid);
+                System.out.println("No Jolokia agent attached to " + pOptions.pid);
             }
             return 1;
         }
     }
 
+    // ===============================================================================================
 
+    // Check whether an agent is registered by checking the existance of a system property
     private static String checkAgentUrl(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Properties systemProperties = getAgentSystemProperties(pVm);
         return systemProperties.getProperty(JvmAgentJdk6.JOLOKIA_AGENT_URL);
@@ -167,6 +207,17 @@ public class AgentLauncher {
         return (Properties) method.invoke(pVm);
     }
 
+    /**
+     * Lookup and create a {@link com.sun.tools.attach.VirtualMachine} via reflection. First, a direct
+     * lookup via {@link Class#forName(String)} is done, which will succeed for JVM on OS X, since tools.jar
+     * is bundled there together with classes.zip. Next, tools.jar is tried to be found (by examine <code>java.home</code>)
+     * and an own classloader is created for looking up the VirtualMachine.
+     *
+     * If lookup fails, a message is printed out (except when '--quiet' is provided)
+     *
+     * @param pOptions parsed command line options
+     * @return the create virtual machine of <code>null</code> if none could be created
+     */
     private static Object getVirtualMachine(OptionsAndArgs pOptions)  {
         Class vmClass;
         try {
@@ -219,10 +270,12 @@ public class AgentLauncher {
     private static Class lookupInToolsJar(String pVmClassName) throws MalformedURLException, ClassNotFoundException {
         // Try to look up tools.jar within $java.home, otherwise give up
         String javaHome = System.getProperty("java.home");
+        String extraInfo;
         if (javaHome != null) {
+            extraInfo = "JAVA_HOME is " + javaHome;
             File[] toolsJars = new File[] {
-                    new File(javaHome + "/lib/tools.jar"),
                     new File(javaHome + "/../lib/tools.jar"),
+                    new File(javaHome + "/lib/tools.jar")
             };
             for (File toolsJar : toolsJars) {
                 if (toolsJar.exists()) {
@@ -231,15 +284,26 @@ public class AgentLauncher {
                 }
             }
         } else {
-            System.out.println("No Java-Home set");
+            extraInfo = "No JAVA_HOME set";
         }
-        throw new RuntimeException("No tools.jar found");
+        throw new RuntimeException("No tools.jar found (" + extraInfo + ")");
     }
 
 
     // ===============================================================
     // Command line handling
 
+    /**
+     * Parse a list of arguments. Options start with '--' (long form) or '-' (short form) and are
+     * defined in {@see OPTIONS} and {@see SHORT_OPTS}. For options with arguments, the argument can
+     * bei either provided in the form '--option=value' or '--option value'. Everything which is
+     * not an option is considered to be an argument. Exactly two arguments are allowed: The command
+     * (first) and the PID (second).
+     *
+     * @param pArgs arguments as given on the command line
+     * @return parse structure
+     * @throws IllegalArgumentException if parsing fails
+     */
     private static OptionsAndArgs parseArgs(String[] pArgs) {
         Map<String,String> config = new HashMap<String, String>();
         String command,pid;
@@ -266,9 +330,9 @@ public class AgentLauncher {
             throw new IllegalArgumentException("No command given");
         }
         pid = arguments.get(1);
-            if (pid == null) {
-                throw new IllegalArgumentException("No process id (PID) given");
-            }
+        if (pid == null) {
+            throw new IllegalArgumentException("No process id (PID) given");
+        }
 
         return new OptionsAndArgs(command, pid, config);
     }
