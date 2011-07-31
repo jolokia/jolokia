@@ -57,7 +57,7 @@ import org.jolokia.util.ConfigKey;
  * @author roland
  * @since Mar 3, 2010
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings("PMD.SystemPrintln" )
 public final class JvmAgentJdk6 {
 
     public static final int DEFAULT_PORT = 8778;
@@ -75,7 +75,6 @@ public final class JvmAgentJdk6 {
      *
      * @param agentArgs arguments as given on the command line
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     public static void premain(String agentArgs) {
         try {
             startAgent(parseArgs(agentArgs));
@@ -90,7 +89,6 @@ public final class JvmAgentJdk6 {
      *
      * @param agentArgs arguments as given on the command line
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     public static void agentmain(String agentArgs) {
         try {
             Map<String,String> agentConfig = parseArgs(agentArgs);
@@ -106,7 +104,6 @@ public final class JvmAgentJdk6 {
         }
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static void startAgent(Map<String, String> agentConfig) throws IOException {
         final HttpServer server = createServer(agentConfig);
 
@@ -170,7 +167,6 @@ public final class JvmAgentJdk6 {
         return backLog;
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static void startServer(final HttpServer pServer) {
         ThreadGroup threadGroup = new ThreadGroup("jolokia");
         threadGroup.setDaemon(false);
@@ -205,7 +201,6 @@ public final class JvmAgentJdk6 {
         return context;
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static Map<String, String> parseArgs(String pAgentArgs) {
         Map<String,String> ret = new HashMap<String, String>();
         if (pAgentArgs != null && pAgentArgs.length() > 0) {
@@ -230,7 +225,6 @@ public final class JvmAgentJdk6 {
         }
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static Map<String, String> readConfig(String pFilename) {
         File file = new File(pFilename);
         try {
@@ -248,7 +242,6 @@ public final class JvmAgentJdk6 {
         return readPropertiesFromInputStream(is,"jolokia-agent.properties");
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static Map<String, String> readPropertiesFromInputStream(InputStream pIs,String pLabel) {
         Map ret = new HashMap<String, String>();
         if (pIs == null) {
@@ -264,7 +257,6 @@ public final class JvmAgentJdk6 {
         return ret;
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static Executor getExecutor(Map<String,String> pConfig) {
         String executor = pConfig.get("executor");
         if ("fixed".equalsIgnoreCase(executor)) {
@@ -300,7 +292,6 @@ public final class JvmAgentJdk6 {
         };
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static HttpServer createHttpsServer(InetSocketAddress pSocketAddress, final Map<String,String> pConfig) {
         // initialise the HTTPS server
         try {

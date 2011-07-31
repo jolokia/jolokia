@@ -8,8 +8,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import sun.tools.java.ClassNotFound;
-
 /**
  * Launcher for attaching/detaching a Jolokia agent dynamically to an already
  * running Java process.
@@ -34,58 +32,40 @@ public final class AgentLauncher {
      * @param args command line arguments
      */
     public static void main(String... args) {
+
+        // Get options first
         OptionsAndArgs options = null;
         try {
             options = parseArgs(args);
-            if (options.options.containsKey("help")) {
-                usage();
-                System.exit(0);
-            }
-            if ( (options.command == null && options.pid == null) ||
-                    "list".equals(options.command)) {
-                int exitCode = listProcesses(options);
-                System.exit(exitCode);
-            }
-
-            if (options.command == null) {
-                throw new IllegalArgumentException("No command given");
-            }
-            if (options.pid == null) {
-                throw new IllegalArgumentException("No process id (PID) given");
-            }
-        } catch (IllegalArgumentException exp) {
-            System.err.println("Error: " + exp.getMessage() + "\n");
+        } catch (IllegalArgumentException exp1) {
+            System.err.println("Error: " + exp1.getMessage() + "\n");
             if (options != null && options.verbose) {
-                exp.printStackTrace(System.err);
+                exp1.printStackTrace(System.err);
                 System.err.println("");
             }
-            usage();
+            commandHelp();
             System.exit(1);
         }
 
-        Object vm = getVirtualMachine(options);
-        if (vm == null) {
-            System.exit(1);
-        }
-        int exitCode = 0;
-        try {
-            if ("start".equals(options.command)) {
-                exitCode = commandStart(vm, options);
-            } else if ("status".equals(options.command)) {
-                exitCode = commandStatus(vm,options);
-            } else if ("stop".equals(options.command)) {
-                exitCode = commandStop(vm,options);
-            } else if ("toggle".equals(options.command)) {
-                exitCode = checkAgentUrl(vm) == null ?
-                        commandStart(vm,options) :
-                        commandStop(vm,options);
-            } else {
-                throw new IllegalArgumentException("Unknown command '" + options.command + "'");
+        // Attach a VirtualMachine to a given PID (if PID is given)
+        Object vm = null;
+        if (options.pid != null) {
+            vm = attachVirtualMachine(options);
+            if (vm == null) {
+                System.exit(1);
             }
-        } catch (Exception exp) {
-            printException("Error while processing command '" + options.command + "'",exp,options);
-            exitCode = 1;
-        }  finally {
+        }
+
+        // Dispatch command
+        int exitCode = 0;
+        Exception exception = null;
+        try {
+            exitCode = dispatchCommand(options, vm);
+        } catch (RuntimeException e) {
+            exception = e;
+        } catch (Exception e) {
+            exception = e;
+        } finally {
             try {
                 detachAgent(vm);
             } catch (Exception e) {
@@ -93,10 +73,37 @@ public final class AgentLauncher {
                 exitCode = 1;
             }
         }
-        System.exit(exitCode);
+        if (exception != null) {
+            printException("Error while processing command '" + options.command + "'",exception,options);
+            System.exit(1);
+        } else {
+            System.exit(exitCode);
+        }
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
+    private static int dispatchCommand(OptionsAndArgs pOptions, Object pVm)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        String command = pOptions.command;
+
+        if ("help".equals(command)) {
+            return commandHelp();
+        } else if ("start".equals(command)) {
+            return commandStart(pVm, pOptions);
+        } else if ("status".equals(command)) {
+            return commandStatus(pVm, pOptions);
+        } else if ("stop".equals(command)) {
+            return commandStop(pVm, pOptions);
+        } else if ("toggle".equals(command)) {
+            return checkAgentUrl(pVm) == null ?
+                    commandStart(pVm, pOptions) :
+                    commandStop(pVm, pOptions);
+        } else if ("list".equals(command)) {
+            return listProcesses(pOptions);
+        } else {
+            throw new IllegalArgumentException("Unknown command '" + command + "'");
+        }
+    }
+
     private static int listProcesses(OptionsAndArgs pOptions) {
         Class vmClass = lookupVirtualMachineClass(pOptions);
         if (vmClass == null) {
@@ -140,7 +147,6 @@ public final class AgentLauncher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     private static int commandStart(Object pVm, OptionsAndArgs pOptions) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -174,7 +180,6 @@ public final class AgentLauncher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     private static int commandStop(Object pVm, OptionsAndArgs pOptions) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -207,7 +212,6 @@ public final class AgentLauncher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     private static int commandStatus(Object pVm, OptionsAndArgs pOptions) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -234,7 +238,6 @@ public final class AgentLauncher {
     }
 
     // Lookup the JAR File from where this class is loaded
-    @SuppressWarnings("PMD.SystemPrintln")
     private static File getJarFile() {
         try {
             return new File(JvmAgentJdk6.class
@@ -249,9 +252,11 @@ public final class AgentLauncher {
     }
 
     private static void detachAgent(Object pVm) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("detach");
-        method.invoke(pVm);
+        if (pVm != null) {
+            Class clazz = pVm.getClass();
+            Method method = clazz.getMethod("detach");
+            method.invoke(pVm);
+        }
     }
 
     private static void loadAgent(Object pVm, String pAgent, String pPid) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -277,7 +282,7 @@ public final class AgentLauncher {
      * @param pOptions parsed command line options
      * @return the create virtual machine of <code>null</code> if none could be created
      */
-    private static Object getVirtualMachine(OptionsAndArgs pOptions)  {
+    private static Object attachVirtualMachine(OptionsAndArgs pOptions)  {
         Class vmClass = lookupVirtualMachineClass(pOptions);
         if (vmClass == null) {
             return null;
@@ -316,7 +321,6 @@ public final class AgentLauncher {
         }
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static void virtualMachineLookupFailed(OptionsAndArgs pOptions, Exception exp) {
         if (!pOptions.quiet) {
             System.err.println(
@@ -388,9 +392,23 @@ public final class AgentLauncher {
         }
         String command = arguments.size() > 0 ? arguments.get(0) : null;
         String pid = arguments.size() > 1 ? arguments.get(1) : null;
-        if (command != null && pid == null && command.matches("^[0-9]+$")) {
+
+        // Special cases first
+        if (config.containsKey("help")) {
+            command = "help";
+        } else if (command != null && pid == null && command.matches("^[0-9]+$")) {
             pid = command;
             command = "toggle";
+        } else  if (command == null && pid == null) {
+            command = "list";
+        } else {
+            // Ok, from here on "command" and "pid" are required
+            if (command == null) {
+                throw new IllegalArgumentException("No command given");
+            }
+            if (pid == null) {
+                throw new IllegalArgumentException("No process id (PID) given");
+            }
         }
         return new OptionsAndArgs(command,pid,config);
     }
@@ -433,7 +451,6 @@ public final class AgentLauncher {
         }
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
     private static void printException(String pMessage, Exception pException, OptionsAndArgs pOaa) {
         if (!pOaa.quiet) {
             System.err.println(pMessage + ": " + pException);
@@ -443,8 +460,7 @@ public final class AgentLauncher {
         }
     }
 
-    @SuppressWarnings("PMD.SystemPrintln")
-    private static void usage() {
+    private static int commandHelp() {
         String jar = getJarFile().getName();
         System.out.println(
 "Jolokia Agent Launcher\n" +
@@ -490,6 +506,7 @@ public final class AgentLauncher {
 "\n" +
 "For more information please visit www.jolokia.org"
                           );
+        return 0;
     }
 
     // -------------------------------------------------------------------------------------------------

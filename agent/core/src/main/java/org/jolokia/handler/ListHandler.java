@@ -102,16 +102,13 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 }
             }
             return truncateAccordingToPath(infoMap, originalPathStack.size(), maxDepth);
-        } catch (ReflectionException e) {
-            throw new IllegalStateException("Internal error while retrieving list: " + e, e);
-        } catch (IntrospectionException e) {
-            throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         } catch (InstanceNotFoundException e) {
             throw new IllegalArgumentException("Invalid object name '" + oName + "': Instance not found",e);
+         } catch (JMException e) {
+            throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         }
-
     }
 
     // will not be called
