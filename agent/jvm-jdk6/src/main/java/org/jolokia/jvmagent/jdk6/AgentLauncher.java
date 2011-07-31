@@ -37,12 +37,8 @@ public final class AgentLauncher {
         OptionsAndArgs options = null;
         try {
             options = parseArgs(args);
-        } catch (IllegalArgumentException exp1) {
-            System.err.println("Error: " + exp1.getMessage() + "\n");
-            if (options != null && options.verbose) {
-                exp1.printStackTrace(System.err);
-                System.err.println("");
-            }
+        } catch (IllegalArgumentException exp) {
+            System.err.println("Error: " + exp.getMessage() + "\n");
             commandHelp();
             System.exit(1);
         }
@@ -73,6 +69,8 @@ public final class AgentLauncher {
                 exitCode = 1;
             }
         }
+
+        // Exit
         if (exception != null) {
             printException("Error while processing command '" + options.command + "'",exception,options);
             System.exit(1);
@@ -377,6 +375,7 @@ public final class AgentLauncher {
     private static OptionsAndArgs parseArgs(String[] pArgs) {
         Map<String,String> config = new HashMap<String, String>();
 
+        // Parse options
         List<String> arguments = new ArrayList<String>();
         for (int i = 0; i < pArgs.length; i++) {
             String arg = pArgs[i];
@@ -393,23 +392,6 @@ public final class AgentLauncher {
         String command = arguments.size() > 0 ? arguments.get(0) : null;
         String pid = arguments.size() > 1 ? arguments.get(1) : null;
 
-        // Special cases first
-        if (config.containsKey("help")) {
-            command = "help";
-        } else if (command != null && pid == null && command.matches("^[0-9]+$")) {
-            pid = command;
-            command = "toggle";
-        } else  if (command == null && pid == null) {
-            command = "list";
-        } else {
-            // Ok, from here on "command" and "pid" are required
-            if (command == null) {
-                throw new IllegalArgumentException("No command given");
-            }
-            if (pid == null) {
-                throw new IllegalArgumentException("No process id (PID) given");
-            }
-        }
         return new OptionsAndArgs(command,pid,config);
     }
 
@@ -527,6 +509,24 @@ public final class AgentLauncher {
             options = pOptions;
             quiet = options.containsKey("quiet");
             verbose = options.containsKey("verbose");
+
+            // Special cases first
+            if (options.containsKey("help")) {
+                command = "help";
+            } else if (command != null && pid == null && command.matches("^[0-9]+$")) {
+                pid = command;
+                command = "toggle";
+            } else  if (command == null && pid == null) {
+                command = "list";
+            } else {
+                // Ok, from here on "command" and "pid" are required
+                if (command == null) {
+                    throw new IllegalArgumentException("No command given");
+                }
+                if (pid == null) {
+                    throw new IllegalArgumentException("No process id (PID) given");
+                }
+            }
         }
 
         public String toAgentArg() {
