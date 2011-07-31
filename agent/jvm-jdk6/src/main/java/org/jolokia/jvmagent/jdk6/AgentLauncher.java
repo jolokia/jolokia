@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import sun.tools.java.ClassNotFound;
+
 /**
  * Launcher for attaching/detaching a Jolokia agent dynamically to an already
  * running Java process.
@@ -22,12 +24,15 @@ import java.util.regex.Pattern;
  */
 public class AgentLauncher {
 
+    private AgentLauncher() { }
+
     /**
      * Main method for attaching agent to a running JVM program. Use '--help' for a usage
      * explanation.
      *
      * @param args command line arguments
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     public static void main(String... args) {
         OptionsAndArgs options = null;
         try {
@@ -91,6 +96,7 @@ public class AgentLauncher {
         System.exit(exitCode);
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     private static int listProcesses(OptionsAndArgs pOptions) {
         Class vmClass = lookupVirtualMachineClass(pOptions);
         if (vmClass == null) {
@@ -134,6 +140,7 @@ public class AgentLauncher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     private static int commandStart(Object pVm, OptionsAndArgs pOptions) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -167,6 +174,7 @@ public class AgentLauncher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     private static int commandStop(Object pVm, OptionsAndArgs pOptions) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -199,6 +207,7 @@ public class AgentLauncher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     private static int commandStatus(Object pVm, OptionsAndArgs pOptions) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOptions.options.containsKey("quiet");
@@ -225,6 +234,7 @@ public class AgentLauncher {
     }
 
     // Lookup the JAR File from where this class is loaded
+    @SuppressWarnings("PMD.SystemPrintln")
     private static File getJarFile() {
         try {
             return new File(JvmAgentJdk6.class
@@ -234,7 +244,7 @@ public class AgentLauncher {
                                     .toURI());
         } catch (URISyntaxException e) {
             System.err.println("Error: Cannot lookup jar for this class: " + e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -306,6 +316,7 @@ public class AgentLauncher {
         }
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     private static void virtualMachineLookupFailed(OptionsAndArgs pOptions, Exception exp) {
         if (!pOptions.quiet) {
             System.err.println(
@@ -318,7 +329,7 @@ public class AgentLauncher {
         }
         if (pOptions.verbose) {
             System.err.println("Stacktrace: ");
-            exp.printStackTrace();
+            exp.printStackTrace(System.err);
         }
     }
 
@@ -341,7 +352,7 @@ public class AgentLauncher {
         } else {
             extraInfo = "No JAVA_HOME set";
         }
-        throw new RuntimeException("No tools.jar found (" + extraInfo + ")");
+        throw new ClassNotFoundException("No tools.jar found (" + extraInfo + ")");
     }
 
 
@@ -422,6 +433,7 @@ public class AgentLauncher {
         }
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     private static void printException(String pMessage, Exception pException, OptionsAndArgs pOaa) {
         if (!pOaa.quiet) {
             System.err.println(pMessage + ": " + pException);
@@ -431,6 +443,7 @@ public class AgentLauncher {
         }
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     private static void usage() {
         String jar = getJarFile().getName();
         System.out.println(
@@ -483,10 +496,10 @@ public class AgentLauncher {
     // Helper classes
 
     // Options and arguments
-    private static class OptionsAndArgs {
-        String command;
-        String pid;
-        Map<String,String> options;
+    private static final class OptionsAndArgs {
+        private String command;
+        private String pid;
+        private Map<String,String> options;
 
         boolean quiet;
         boolean verbose;
@@ -511,10 +524,10 @@ public class AgentLauncher {
     }
 
     // A parsed argument
-    private static class ArgParsed {
-        boolean skipNext;
-        String  option;
-        String  value;
+    private static final class ArgParsed {
+        private boolean skipNext;
+        private String  option;
+        private String  value;
 
         private ArgParsed(String pOption, String pValue, boolean pSkipNext) {
             skipNext = pSkipNext;
@@ -527,7 +540,7 @@ public class AgentLauncher {
     // ===================================================================================
     // Available options
 
-    private static Map<String,String> SHORT_OPTS = new HashMap<String, String>();
+    private static final Map<String,String> SHORT_OPTS = new HashMap<String, String>();
     private static final Set<String> OPTIONS = new HashSet<String>(Arrays.asList(
                 "host", "port", "agentContext", "user", "password",
                 "quiet!", "verbose!", "executor", "threadNr",
@@ -536,7 +549,7 @@ public class AgentLauncher {
                 "config", "help!"));
 
     static {
-        String short_opts_def[] = {
+        String shortOptsDef[] = {
             "h", "help",
             "u", "user",
             "p", "password",
@@ -545,8 +558,8 @@ public class AgentLauncher {
             "q", "quiet"
         };
 
-        for (int i = 0; i < short_opts_def.length; i += 2) {
-            SHORT_OPTS.put(short_opts_def[i],short_opts_def[i+1]);
+        for (int i = 0; i < shortOptsDef.length; i += 2) {
+            SHORT_OPTS.put(shortOptsDef[i],shortOptsDef[i+1]);
         }
     }
 

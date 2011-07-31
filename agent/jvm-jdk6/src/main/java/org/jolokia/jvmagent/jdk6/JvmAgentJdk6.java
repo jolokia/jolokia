@@ -79,7 +79,7 @@ public final class JvmAgentJdk6 {
         try {
             startAgent(parseArgs(agentArgs));
         } catch(IOException ioe) {
-            System.err.println("jolokia: Cannot create HTTP-Server: " + ioe);
+            System.err.println("Jolokia: Cannot create HTTP-Server: " + ioe);
         }
     }
 
@@ -100,7 +100,7 @@ public final class JvmAgentJdk6 {
                 startAgent(agentConfig);
             }
         } catch (IOException ioe) {
-            throw new RuntimeException("Error attaching agent", ioe);
+            System.err.println("Jolokia: Error starting agent: " + ioe);
         }
     }
 

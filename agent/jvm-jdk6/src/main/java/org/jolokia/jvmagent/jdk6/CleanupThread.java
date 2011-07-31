@@ -17,7 +17,6 @@ package org.jolokia.jvmagent.jdk6;
  */
 
 import com.sun.net.httpserver.HttpServer;
-import org.omg.PortableInterceptor.ACTIVE;
 
 /**
  * Thread for stopping the HttpServer as soon as every non-daemon
