@@ -75,6 +75,7 @@ public final class JvmAgentJdk6 {
      *
      * @param agentArgs arguments as given on the command line
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     public static void premain(String agentArgs) {
         try {
             startAgent(parseArgs(agentArgs));
@@ -89,6 +90,7 @@ public final class JvmAgentJdk6 {
      *
      * @param agentArgs arguments as given on the command line
      */
+    @SuppressWarnings("PMD.SystemPrintln")
     public static void agentmain(String agentArgs) {
         try {
             Map<String,String> agentConfig = parseArgs(agentArgs);

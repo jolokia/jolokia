@@ -22,7 +22,8 @@ import sun.tools.java.ClassNotFound;
  * @author roland, Greg Bowyer
  * @since 28.07.11
  */
-public class AgentLauncher {
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals","PMD.SystemPrintln"})
+public final class AgentLauncher {
 
     private AgentLauncher() { }
 
@@ -32,7 +33,6 @@ public class AgentLauncher {
      *
      * @param args command line arguments
      */
-    @SuppressWarnings("PMD.SystemPrintln")
     public static void main(String... args) {
         OptionsAndArgs options = null;
         try {
@@ -501,8 +501,8 @@ public class AgentLauncher {
         private String pid;
         private Map<String,String> options;
 
-        boolean quiet;
-        boolean verbose;
+        private boolean quiet;
+        private boolean verbose;
 
         private OptionsAndArgs(String pCommand, String pPid, Map<String, String> pOptions) {
             command = pCommand;
