@@ -83,7 +83,7 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         }
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = converters.getToOpenTypeConverter().prepareOpenTypeValue(types.paramOpenTypes[i], args.get(i));
+        		params[i] = converters.getToOpenTypeConverter().convertToObject(types.paramOpenTypes[i], args.get(i));
         	} else { 
         		params[i] = converters.getToObjectConverter().prepareValue(types.paramClasses[i], args.get(i));
         	}

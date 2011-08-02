@@ -5,11 +5,13 @@ import java.util.*;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 
 /**
- * @author roland
+ * Converter which converts an string or JSON representation to
+ * an object represented by an {@link OpenType}.
+ *
+ * @author Assaf Berg, roland
  * @since 02.08.11
  */
 public class StringToOpenTypeConverter {
@@ -17,18 +19,24 @@ public class StringToOpenTypeConverter {
     private StringToObjectConverter stringToObjectConverter;
 
 
+    /**
+     * Constructor
+     *
+     * @param pStringToObjectConverter converter for the 'leaf' values.
+     */
     public StringToOpenTypeConverter(StringToObjectConverter pStringToObjectConverter) {
         stringToObjectConverter = pStringToObjectConverter;
     }
 
     /**
-     * Handle conversion for OpenTypes. The value is expected to be in JSON.
+     * Handle conversion for OpenTypes. The value is expected to be in JSON (either
+     * an {@link JSONAware} object or its string representation
      *
-     * @param openType
-     * @param pValue
-     * @return
+     * @param openType target type
+     * @param pValue value to convert from
+     * @return the value converted
      */
-	public Object prepareOpenTypeValue(OpenType<?> openType, Object pValue) {
+	public Object convertToObject(OpenType<?> openType, Object pValue) {
 		if (openType instanceof SimpleType) {
 			// convert the simple type using prepareValue
 			SimpleType<?> sType = (SimpleType<?>) openType;
@@ -47,7 +55,7 @@ public class StringToOpenTypeConverter {
 				Iterator<?> it = jsonArray.iterator();
 				for (int i = 0; i < valueArray.length ; ++i) {
 					Object element = it.next();
-                    Object elementValue = prepareOpenTypeValue(elementOpenType, element);
+                    Object elementValue = convertToObject(elementOpenType, element);
 					valueArray[i] = elementValue;
 				}
 
@@ -77,7 +85,7 @@ public class StringToOpenTypeConverter {
 					if (itemValue != null) {
 						OpenType<?> itemType = cType.getType(itemName);
 
-						Object convertedValue = prepareOpenTypeValue(itemType, itemValue);
+						Object convertedValue = convertToObject(itemType, itemValue);
 						itemValues.put(itemName, convertedValue);
 					}
 				}
@@ -131,10 +139,10 @@ public class StringToOpenTypeConverter {
 
 				for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
 					Map<String, Object> map = new HashMap<String, Object>();
-					Object key = prepareOpenTypeValue(rowType.getType("key"), entry.getKey());
+					Object key = convertToObject(rowType.getType("key"), entry.getKey());
 					map.put("key", key);
 
-					Object value = prepareOpenTypeValue(rowType.getType("value"), entry.getValue());
+					Object value = convertToObject(rowType.getType("value"), entry.getValue());
 					map.put("value", value);
 
 					try {
@@ -200,14 +208,14 @@ public class StringToOpenTypeConverter {
 
         static {
         	defaultValues = new HashMap<String, Object>();
-            defaultValues.put(Boolean.class.getName(), new Boolean(DEFAULT_BOOLEAN));
-            defaultValues.put(Byte.class.getName(), new Byte(DEFAULT_BYTE));
-            defaultValues.put(Character.class.getName(), new Short(DEFAULT_CHAR));
-            defaultValues.put(Short.class.getName(), new Short(DEFAULT_SHORT));
-            defaultValues.put(Integer.class.getName(), new Integer(DEFAULT_INT));
-            defaultValues.put(Long.class.getName(), new Long(DEFAULT_LONG));
-            defaultValues.put(Float.class.getName(), new Float(DEFAULT_FLOAT));
-            defaultValues.put(Double.class.getName(), new Double(DEFAULT_DOUBLE));
+            defaultValues.put(Boolean.class.getName(), DEFAULT_BOOLEAN);
+            defaultValues.put(Byte.class.getName(), DEFAULT_BYTE);
+            defaultValues.put(Character.class.getName(), (short) DEFAULT_CHAR);
+            defaultValues.put(Short.class.getName(), DEFAULT_SHORT);
+            defaultValues.put(Integer.class.getName(), DEFAULT_INT);
+            defaultValues.put(Long.class.getName(), DEFAULT_LONG);
+            defaultValues.put(Float.class.getName(), DEFAULT_FLOAT);
+            defaultValues.put(Double.class.getName(), DEFAULT_DOUBLE);
         }
 
         public static Object getDefaultValue(String className) {
