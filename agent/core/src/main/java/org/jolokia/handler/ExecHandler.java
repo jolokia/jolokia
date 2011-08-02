@@ -247,11 +247,6 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
     // ==================================================================================
     // Used for parsing
     private static final class OperationAndParamType {
-        private OperationAndParamType(String pOperationName, List<String> pParamClazzes) {
-            operationName = pOperationName;
-            paramClasses = new ArrayList<String>(pParamClazzes).toArray(new String[pParamClazzes.size()]);
-        }
-
         private OperationAndParamType(String pOperationName, MBeanParameterInfo[] pParameterInfos) {
             operationName = pOperationName;
             paramClasses = new String[pParameterInfos.length];

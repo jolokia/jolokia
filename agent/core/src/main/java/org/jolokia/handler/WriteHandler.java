@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Stack;
 
 import javax.management.*;
+import javax.management.openmbean.OpenMBeanAttributeInfo;
 
 import org.jolokia.converter.*;
 import org.jolokia.converter.json.ObjectToJsonConverter;
@@ -96,9 +97,13 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
                 break;
             }
         }
-        // aInfo is != null otherwise getAttribute() would have already thrown an ArgumentNotFoundException
-        String type = aInfo.getType();
-        Object[] values = getValues(type, oldValue, request);
+        Object values[];
+        if (aInfo instanceof OpenMBeanAttributeInfo) {
+            values = getValues((OpenMBeanAttributeInfo) aInfo, oldValue, request);
+        } else {
+            // aInfo is != null otherwise getAttribute() would have already thrown an ArgumentNotFoundException
+            values = getValues(aInfo.getType(), oldValue, request);
+        }
         Attribute attribute = new Attribute(request.getAttributeName(),values[0]);
         server.setAttribute(request.getObjectName(),attribute);
         return values[1];
@@ -152,7 +157,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
             Stack<String> extraStack = PathUtil.reversePath(pathParts);
             // Get the object pointed to do with path-1
 
-            Object inner = toJsonConverter.handleValue(pRequest, pCurrentValue, extraStack, false);
+            Object inner = toJsonConverter.extractObjectWithContext(pRequest, pCurrentValue, extraStack, false);
 
             // Set the attribute pointed to by the path elements
             // (depending of the parent object's type)
@@ -173,5 +178,19 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
         }
     }
 
+    private Object[] getValues(OpenMBeanAttributeInfo pOpenTypeInfo, Object pCurrentValue, JmxWriteRequest pRequest) {
+        // TODO: What to do when path is not null ? Simplest: Throw exception. Advanced: Extract other values and create
+        // a new CompositeData with old values and the new value.
+        // However, since this is probably out of scope, we will simply throw an exception if the path is not empty.
+        List<String> pathParts = pRequest.getPathParts();
+        if (pathParts != null && pathParts.size() > 0) {
+            throw new IllegalArgumentException("Cannot set value for OpenType " + pOpenTypeInfo.getOpenType() + " with inner path " +
+                                               pRequest.getPath() + " since OpenTypes are immutable");
+        }
+        return new Object[] {
+                converters.getToOpenTypeConverter().convertToObject(pOpenTypeInfo.getOpenType(), pRequest.getValue()),
+                pCurrentValue
+        };
+    }
 }
 

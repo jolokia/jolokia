@@ -102,7 +102,7 @@ public final class ObjectToJsonConverter {
             throws AttributeNotFoundException {
         Stack<String> extraStack = pUseValueWithPath ? PathUtil.reversePath(pRequest.getPathParts()) : new Stack<String>();
 
-        Object jsonResult = handleValue(pRequest, pValue, extraStack, true);
+        Object jsonResult = extractObjectWithContext(pRequest, pValue, extraStack, true);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);
@@ -125,7 +125,7 @@ public final class ObjectToJsonConverter {
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
-    public Object handleValue(JmxRequest pRequest, Object pValue, Stack<String> pExtraStack, boolean pJsonify)
+    public Object extractObjectWithContext(JmxRequest pRequest, Object pValue, Stack<String> pExtraStack, boolean pJsonify)
             throws AttributeNotFoundException {
         Object jsonResult;
         setupContext(pRequest);
@@ -139,7 +139,7 @@ public final class ObjectToJsonConverter {
 
 
     /**
-     * Related to {@link #handleValue(JmxRequest, Object, Stack, boolean)} except that
+     * Related to {@link #extractObjectWithContext(JmxRequest, Object, Stack, boolean)} except that
      * it does not setup a context. This method is used from the
      * various extractors for recursively continuing the extraction
      *
