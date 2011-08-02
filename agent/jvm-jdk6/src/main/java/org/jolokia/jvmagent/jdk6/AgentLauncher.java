@@ -48,6 +48,7 @@ public final class AgentLauncher {
         if (options.pid != null) {
             vm = attachVirtualMachine(options);
             if (vm == null) {
+                // Error message has been alread printed
                 System.exit(1);
             }
         }
