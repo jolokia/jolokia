@@ -21,10 +21,9 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.converter.Converters;
 import org.jolokia.util.*;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.*;
 import org.json.simple.JSONObject;
@@ -94,9 +93,8 @@ public class BackendManagerTest implements LogHandler {
 
         static boolean called = false;
 
-        public RequestDispatcherTest(ObjectToJsonConverter pObjectToJsonConverter,StringToObjectConverter pStringConverter,ServerHandle pServerHandle,Restrictor pRestrictor) {
-            assertNotNull(pObjectToJsonConverter);
-            assertNotNull(pStringConverter);
+        public RequestDispatcherTest(Converters pConverters,ServerHandle pServerHandle,Restrictor pRestrictor) {
+            assertNotNull(pConverters);
             assertNotNull(pRestrictor);
         }
 

@@ -9,9 +9,9 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
+import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.util.RequestType;
 
 /*
@@ -36,11 +36,12 @@ import org.jolokia.util.RequestType;
  * @since Jun 12, 2009
  */
 public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
-    private StringToObjectConverter stringToObjectConverter;
 
-    public ExecHandler(Restrictor pRestrictor,StringToObjectConverter pStringToObjectConverter) {
+    private Converters converters;
+
+    public ExecHandler(Restrictor pRestrictor, Converters pConverters) {
         super(pRestrictor);
-        stringToObjectConverter = pStringToObjectConverter;
+        converters = pConverters;
     }
 
     @Override
@@ -82,9 +83,9 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         }
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = stringToObjectConverter.prepareValue(types.paramOpenTypes[i], args.get(i));
+        		params[i] = converters.getToOpenTypeConverter().prepareOpenTypeValue(types.paramOpenTypes[i], args.get(i));
         	} else { 
-        		params[i] = stringToObjectConverter.prepareValue(types.paramClasses[i], args.get(i));
+        		params[i] = converters.getToObjectConverter().prepareValue(types.paramClasses[i], args.get(i));
         	}
         }
 

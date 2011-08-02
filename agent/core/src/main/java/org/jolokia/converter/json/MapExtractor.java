@@ -47,7 +47,7 @@ public class MapExtractor implements Extractor {
                 // are potentially object but we have to deal with string
                 // representations
                 if(decodedKey.equals(entry.getKey().toString())) {
-                    return pConverter.extractObject(entry.getValue(),pExtraArgs,jsonify);
+                    return pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify);
                 }
             }
             throw new IllegalArgumentException("Map key '" + decodedKey +
@@ -58,7 +58,7 @@ public class MapExtractor implements Extractor {
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
                     ret.put(entry.getKey(),
-                            pConverter.extractObject(entry.getValue(),pExtraArgs,jsonify));
+                            pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify));
                     i++;
                     if (i > length) {
                         break;

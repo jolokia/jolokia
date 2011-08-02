@@ -47,12 +47,12 @@ public class TabularDataExtractor implements Extractor {
             String index = pExtraArgs.pop();
             int idx = Integer.valueOf(index).intValue();
             CompositeData cd = getRow(idx, td.values().iterator());
-            return pConverter.extractObject(cd,pExtraArgs,jsonify);
+            return pConverter.extractObject(cd, pExtraArgs, jsonify);
         } else {
             if (jsonify) {
                 JSONArray ret = new JSONArray();
                 for (CompositeData cd : (Collection <CompositeData>) td.values()) {
-                    ret.add(pConverter.extractObject(cd,pExtraArgs,jsonify));
+                    ret.add(pConverter.extractObject(cd, pExtraArgs, jsonify));
                 }
                 return ret;
             } else {

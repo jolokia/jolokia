@@ -56,14 +56,14 @@ public class ObjectToJsonConverterTest {
 
     @Test
     public void basics() throws AttributeNotFoundException {
-        Map result = (Map) converter.extractObject(new SelfRefBean1(),new Stack<String>(),true);
+        Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
         assertNotNull("Bean2 is set",result.get("bean2"));
         assertNotNull("Binary attribute is set",result.get("strong"));
     }
 
     @Test
     public void checkDeadLockDetection() throws AttributeNotFoundException {
-        Map result = (Map) converter.extractObject(new SelfRefBean1(),new Stack<String>(),true);
+        Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
         assertNotNull("Bean 2 is set",result.get("bean2"));
         assertNotNull("Bean2:Bean1 is set",((Map)result.get("bean2")).get("bean1"));
         assertEquals("Reference breackage",((Map)result.get("bean2")).get("bean1").getClass(),String.class);
@@ -74,7 +74,7 @@ public class ObjectToJsonConverterTest {
     public void maxDepth() throws AttributeNotFoundException {
         ObjectToJsonConverter.StackContext ctx = converter.getStackContextLocal().get();
         ctx.setMaxDepth(1);
-        Map result = (Map) converter.extractObject(new SelfRefBean1(),new Stack<String>(),true);
+        Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
         String c = (String) ((Map) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));
     }
@@ -82,20 +82,20 @@ public class ObjectToJsonConverterTest {
     @Test
     public void customSimplifier() throws AttributeNotFoundException {
         Date date = new Date();
-        Map result = (Map) converter.extractObject(date,new Stack<String>(),true);
+        Map result = (Map) converter.extractObject(date, new Stack<String>(), true);
         assertEquals(date.getTime(),result.get("millis"));
     }
 
     @Test
     public void fileSimplifier() throws AttributeNotFoundException {
-        Map result = (Map) converter.extractObject(new File("/tmp"),new Stack<String>(),true);
+        Map result = (Map) converter.extractObject(new File("/tmp"), new Stack<String>(), true);
         assertNull(result.get("parent"));
     }
 
     @Test
     public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
-        Map result = (Map) converter.extractObject(name,new Stack<String>(),true);
+        Map result = (Map) converter.extractObject(name, new Stack<String>(), true);
         // Since we removed the objectname simplifier from the list of simplifiers
         // explicitely, the converter should return the full blown object;
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));

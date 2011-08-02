@@ -1,13 +1,18 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.*;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.util.RequestType;
-
-import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Stack;
+
+import javax.management.*;
+
+import org.jolokia.converter.*;
+import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.request.JmxWriteRequest;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.PathUtil;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -34,11 +39,12 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
 
-    private ObjectToJsonConverter objectToJsonConverter;
 
-    public WriteHandler(Restrictor pRestrictor, ObjectToJsonConverter pObjectToJsonConverter) {
+    private Converters converters;
+
+    public WriteHandler(Restrictor pRestrictor, Converters pConverters) {
         super(pRestrictor);
-        objectToJsonConverter = pObjectToJsonConverter;
+        converters = pConverters;
     }
 
     @Override
@@ -92,7 +98,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
         }
         // aInfo is != null otherwise getAttribute() would have already thrown an ArgumentNotFoundException
         String type = aInfo.getType();
-        Object[] values = objectToJsonConverter.getValues(type,oldValue,request);
+        Object[] values = getValues(type, oldValue, request);
         Attribute attribute = new Attribute(request.getAttributeName(),values[0]);
         server.setAttribute(request.getObjectName(),attribute);
         return values[1];
@@ -108,5 +114,64 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
     public boolean useReturnValueWithPath() {
         return false;
     }
+
+
+
+    /**
+     * Get values for a write request. This method returns an array with two objects.
+     * If no path is given (<code>pRequest.getExtraArgs() == null</code>), the returned values
+     * are the new value and the old value. However, if a path is set, the returned new value
+     * is the outer value (which can be set by an corresponding JMX set operation) where the
+     * new value is set via the path expression. The old value is the value of the object specified
+     * by the given path.
+     *
+     *
+     * @param pType type of the outermost object to set as returned by an MBeanInfo structure.
+     * @param pCurrentValue the object of the outermost object which can be null
+     * @param pRequest the initial request
+     * @return object array with two elements, element 0 is the value to set (see above), element 1
+     *         is the old value.
+     *
+     * @throws AttributeNotFoundException if no such attribute exists (as specified in the request)
+     * @throws IllegalAccessException if access to MBean fails
+     * @throws InvocationTargetException reflection error when setting an object's attribute
+     */
+    private Object[] getValues(String pType, Object pCurrentValue, JmxWriteRequest pRequest)
+            throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+        List<String> pathParts = pRequest.getPathParts();
+
+        ObjectToJsonConverter toJsonConverter = converters.getToJsonConverter();
+
+        if (pathParts != null && pathParts.size() > 0) {
+            if (pCurrentValue == null ) {
+                throw new IllegalArgumentException(
+                        "Cannot set value with path when parent object is not set");
+            }
+
+            String lastPathElement = pathParts.remove(pathParts.size()-1);
+            Stack<String> extraStack = PathUtil.reversePath(pathParts);
+            // Get the object pointed to do with path-1
+
+            Object inner = toJsonConverter.handleValue(pRequest, pCurrentValue, extraStack, false);
+
+            // Set the attribute pointed to by the path elements
+            // (depending of the parent object's type)
+            Object oldValue = toJsonConverter.setObjectValue(inner, lastPathElement, pRequest.getValue());
+
+            // We set an inner value, hence we have to return provided value itself.
+            return new Object[] {
+                    pCurrentValue,
+                    oldValue
+            };
+
+        } else {
+            // Return the objectified value
+            return new Object[] {
+                    converters.getToObjectConverter().prepareValue(pType, pRequest.getValue()),
+                    pCurrentValue
+            };
+        }
+    }
+
 }
 
