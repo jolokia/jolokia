@@ -1,6 +1,6 @@
 package org.jolokia.converter.json.simplifier;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.converter.json.Extractor;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.json.simple.JSONObject;

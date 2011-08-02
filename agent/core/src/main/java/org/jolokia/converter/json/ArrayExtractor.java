@@ -1,6 +1,6 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.json.simple.JSONArray;
 
 import javax.management.AttributeNotFoundException;

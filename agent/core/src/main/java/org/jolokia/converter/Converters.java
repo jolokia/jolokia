@@ -2,12 +2,10 @@ package org.jolokia.converter;
 
 import java.util.Map;
 
-import javax.management.AttributeNotFoundException;
-
 import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.converter.object.StringToOpenTypeConverter;
 import org.jolokia.util.ConfigKey;
-import org.json.simple.JSONObject;
 
 /**
  * @author roland

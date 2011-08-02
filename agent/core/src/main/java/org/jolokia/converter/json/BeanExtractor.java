@@ -1,6 +1,6 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.request.ValueFaultHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;

@@ -1,7 +1,7 @@
 package org.jolokia.converter.json;
 
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.request.*;
-import org.jolokia.converter.StringToObjectConverter;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;

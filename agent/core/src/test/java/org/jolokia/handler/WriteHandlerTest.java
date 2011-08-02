@@ -25,6 +25,8 @@ import javax.management.*;
 
 import org.jolokia.converter.*;
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.converter.object.StringToOpenTypeConverter;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.testng.annotations.BeforeTest;

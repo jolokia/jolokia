@@ -6,7 +6,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.request.*;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;

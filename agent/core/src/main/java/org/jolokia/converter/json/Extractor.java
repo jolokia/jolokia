@@ -21,7 +21,7 @@ import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 
 /**
  * Interface for extractor serializing an object to a JSON representation.

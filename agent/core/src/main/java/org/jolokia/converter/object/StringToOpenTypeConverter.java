@@ -1,4 +1,4 @@
-package org.jolokia.converter;
+package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
 import java.util.*;
