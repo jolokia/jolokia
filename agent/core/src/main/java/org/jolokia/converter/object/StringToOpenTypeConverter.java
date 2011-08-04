@@ -88,7 +88,7 @@ public class StringToOpenTypeConverter {
 
         JSONArray jsonArray = (JSONArray) pValue;
         OpenType elementOpenType = pType.getElementOpenType();
-        Object[] valueArray = createTargetArray(elementOpenType, pType.getDimension());
+        Object[] valueArray = createTargetArray(elementOpenType, jsonArray.size());
 
         int i = 0;
         for (Object element : jsonArray) {

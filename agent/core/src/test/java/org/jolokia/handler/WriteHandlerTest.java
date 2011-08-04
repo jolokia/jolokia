@@ -50,11 +50,6 @@ public class WriteHandlerTest {
 
     @BeforeTest
     public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        StringToObjectConverter stringConverter = new StringToObjectConverter();
-        StringToOpenTypeConverter typeConverter = new StringToOpenTypeConverter(stringConverter);
-        ObjectToJsonConverter converter = new ObjectToJsonConverter(stringConverter,null);
-
-
         handler = new WriteHandler(new AllowAllRestrictor(),new Converters(null));
 
         oName = new ObjectName("jolokia:test=write");

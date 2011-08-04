@@ -7,28 +7,34 @@ import java.util.Set;
 
 public class OpenExecData implements OpenExecDataMXBean {
 
-	public void compositeData(OpenWriteData data) {
-	}
+	public OpenWriteData compositeData(OpenWriteData data) {
+        return data;
+    }
 
-	public void arrayData(OpenWriteData[] data) {
-	}
+	public OpenWriteData[] arrayData(OpenWriteData[] data) {
+        return data;
+    }
 
-	public void listData(List<OpenWriteData> data) {
-	}
+	public List listData(List<OpenWriteData> data) {
+        return data;
+    }
 
-	public void mapData(Map<String, OpenWriteData> data) {
-	}
+	public Map mapData(Map<String, OpenWriteData> data) {
+        return data;
+    }
 
-	public void opSetData(Set<OpenWriteData> data) {
-	}
+	public Set opSetData(Set<OpenWriteData> data) {
+        return data;
+    }
 	
-	public void overloaded(OpenWriteData data) {
-		
-	}
+	public OpenWriteData overloaded(OpenWriteData data) {
 
-	public void overloaded(String data) {
-		
-	}
+        return data;
+    }
+
+	public String overloaded(String data) {
+        return data;
+    }
 	
 
 }

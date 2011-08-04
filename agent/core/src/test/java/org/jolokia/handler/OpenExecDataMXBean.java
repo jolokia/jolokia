@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.Set;
 
 public interface OpenExecDataMXBean {
-	public void compositeData(OpenWriteData data);
-	public void arrayData(OpenWriteData[] data);
-	public void listData(List<OpenWriteData> data);
-	public void mapData(Map<String, OpenWriteData> data);
-	public void opSetData(Set<OpenWriteData> data);
-	public void overloaded(OpenWriteData data);
-	public void overloaded(String data);
+	public OpenWriteData compositeData(OpenWriteData data);
+	public OpenWriteData[] arrayData(OpenWriteData[] data);
+	public List listData(List<OpenWriteData> data);
+	public Map mapData(Map<String, OpenWriteData> data);
+	public Set opSetData(Set<OpenWriteData> data);
+	public OpenWriteData overloaded(OpenWriteData data);
+	public String overloaded(String data);
 }

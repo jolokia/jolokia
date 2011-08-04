@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 
 import javax.management.*;
+import javax.management.openmbean.CompositeData;
 
 import org.jolokia.converter.*;
 import org.jolokia.request.JmxExecRequest;
@@ -12,6 +13,7 @@ import org.jolokia.restrictor.AllowAllRestrictor;
 import org.testng.annotations.*;
 
 import static org.jolokia.util.RequestType.EXEC;
+import static org.testng.Assert.*;
 
 public class OpenExecHandlerTest {
     private ExecHandler handler;
@@ -24,13 +26,19 @@ public class OpenExecHandlerTest {
     }
 
     @BeforeTest
-    public void registerMbean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
+    public void registerMBean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=openExec");
 
         MBeanServerConnection conn = getMBeanServer();
         conn.createMBean(OpenExecData.class.getName(),oName);        
     }
-    
+
+    @AfterTest
+    public void unregisterMBean() throws InstanceNotFoundException, MBeanRegistrationException, IOException {
+        MBeanServerConnection conn = getMBeanServer();
+        conn.unregisterMBean(oName);
+    }
+
     /**
      * If a field in the argument is not set it will be set to its default value
      */
@@ -41,7 +49,10 @@ public class OpenExecHandlerTest {
                 operation("compositeData").
                 arguments("{ \"stringField\":\"aString\" }").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        CompositeData data  = (CompositeData) handler.handleRequest(getMBeanServer(),request);
+        assertEquals(data.get("stringField"),"aString");
+        assertNull(data.get("map"));
+        assertEquals(data.get("intField"), 0);
     }
 
     /**
