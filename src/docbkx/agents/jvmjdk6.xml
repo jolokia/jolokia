@@ -2,79 +2,194 @@
 <section id="agents-jvmjdk6">
   <title>JVM JDK 1.6 Agent</title>
 
-  <section id="jvmjdk6-installation">
-    <title>Installation</title>
+  <para>
+    The JVM JDK6 agent is right agent when it comes to instrument an
+    arbitrary Java application which is not covered by the other
+    agents. This agent can be started by any Java program by
+    providing certain startup options to the JVM. Or it can be
+    dynamically attached (and detached) to an already running Java
+    process. This universal agent uses the <ulink
+    url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
+    agent API</ulink> and is available for every Sun/Oracle JVM 1.6
+    and later. 
+  </para>
+
+  <section id="jvmjdk6-agent">
     <para>
-      The JVM JDK6 uses the <ulink url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM Agent interface</ulink>
-      for linking into any JVM. It uses an HTTP-Server (), which is
-      available from every Oracle/Sun JVM. This HTTP-Server is not the
-      fastes one (it used for e.g. the JAXWS reference implementation,
-      but it is sufficient for our needs. In order to get this agent
-      running, the startup options for the JVM must be extended. 
+      The JVM JDK6 agent uses the <ulink
+      url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
+      Agent interface</ulink> for linking into any JVM. Under the
+      hood it uses an HTTP-Server, which is available on every
+      Oracle/Sun JVM from verion 1.6 upwards.
     </para>
-    <programlisting language="xml"><![CDATA[
+    <sidebar>
+      The JDK embedded HTTP-Server is not the fastest one (it is used
+      e.g. for the JAXWS reference implementation), but for our
+      monitoring needs the performance is sufficient. it is
+      sufficient for our needs. There are several configuration
+      options for tuning the HTTP server's performance. See below for
+      details. 
+    </sidebar>
+    <section id="jvmjdk6-agent-installation">
+      <title>Installation</title>
+      <para>
+        This agent gets installed by providing a single startup option
+        <const>-javaagent</const> when starting the Java process. 
+      </para>
+      <programlisting language="xml"><![CDATA[
 java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
-    <para>
-      <filename>agent.jar</filename> is the filename of the Jolokia
-      JVM agent in this case, where several options are appended as a
-      comma separated list. The available options are the same as
-      described in <xref linkend="agent-war-init-params"/> plus the
-      one described in table <xref linkend="agent-jvm-config"/>.
-    </para>
-    <table id="agent-jvm-config">
-      <title>JVM agent configuration options</title>
-      <thead>
+      <para>
+        <filename>agent.jar</filename> is the filename of the Jolokia
+        JVM agent. Options can be appended as a comma separated
+        list. The available options are the same as described in <xref
+        linkend="agent-war-init-params"/> plus the one described in
+        table <xref linkend="agent-jvm-config"/>.
+      </para>
+      <table id="agent-jvm-config">
+        <title>JVM agent configuration options</title>
+        <thead>
+          <tr>
+            <td>Parameter</td>
+            <td>Description</td>
+            <td>Example</td>
+          </tr>        
+        </thead>
         <tr>
-          <td>Parameter</td>
-          <td>Description</td>
-          <td>Example</td>
-        </tr>        
-      </thead>
-      <tr>
-        <td><constant>agentContext</constant></td>
-        <td>
-          Context under which the agent is reachable
-        </td>        
-        <td>
-          <constant>/jolokia</constant>
-        </td>
-      </tr>
-      <tr>
+          <td><constant>agentContext</constant></td>
+          <td>
+            Context under which the agent is deployed. The full URL
+            will be <const>protocol://host:port/agentContext</const>
+          </td>        
+          <td>
+            <constant>/jolokia</constant>
+          </td>
+        </tr>
+        <tr>
         <td><constant>host</constant></td>
         <td>
+          Hostname to the HTTP server should bind to. 
         </td>        
         <td>
+          <constant>InetAddress.getLocalHost()</constant>
         </td>
-      </tr>
-      <tr>
-        <td><constant>port</constant></td>
-        <td>
-        </td>        
-      </tr>
-      <tr>
-        <td><constant>protocol</constant></td>
-        <td>
-        </td>        
-        <td>
-          <constant>https</constant>
+        </tr>
+        <tr>
+          <td><constant>port</constant></td>
+          <td>
+            Port the HTTP server should listen to 
+          </td>        
+          <td>
+            <constant>8778</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>protocol</constant></td>
+          <td>
+            HTTP protocol to use. Should be either <const>http</const>
+            or <const>https</const>. For the SSL stack there are various
+            additional configuration options. 
+          </td>        
+          <td>
+            <constant>http</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>backlog</constant></td>
+          <td>
+            Size of request backlog before requests get discarded. 
+          </td>        
+          <td>
+            <constant>10</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>executor</constant></td>
+          <td>
+            Threading model of the HTTP server:
+            <ul>
+              <li><strong>fixed</strong> - Thread pool with a fixed
+              number of threads (see also
+              <constant>threadNr</constant>)</li> 
+              <li><strong>cached</strong> - Cached thred pool which
+              creates threads on demand</li>
+              <li><strong>single</strong> - A single thread only</li>
+            </ul>
+          </td>        
+          <td>
+            <constant>single</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>threadNr</constant></td>
+          <td>
+            Number of threads to be used when the
+            <constant>fixed</constant> execution model is chosen. 
+          </td>        
+          <td>
+            <constant>5</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>keystore</constant></td>
+          <td>
+            Path to the SSL keystore to use (https only)
+          </td>        
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>keystorePassword</constant></td>
+          <td>
+            Keystore password (https only)
+          </td>        
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>useSslClientAuthentication</constant></td>
+          <td>
+            Whether client certificates should be used for
+            authentication (https only). (<const>true</const> or
+            <const>false</const>). 
+          </td>        
+          <td>
+            <constant>false</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>config</constant></td>
+          <td>
+            Path to a properties file from where the configuration
+            options should be read. Such a property file can contain
+            the configuration options as described here as key value
+            pairs (except for the <constant>config</constant> property
+            of course :)
+          </td>        
+          <td>
         </td>
-      </tr>
-      <tr>
-        <td><constant>backlog</constant></td>
-        <td>
-        </td>        
-        <td>
-        </td>
-      </tr>
-      <tr>
-        <td><constant>config</constant></td>
-        <td>
-        </td>        
-        <td>
-        </td>
-      </tr>
-
-    </table>      
+        </tr>
+      </table>      
+      <para>
+        Upon sucessful startup the agent will print out a success
+        message with the full URL which can be used by clients for
+        contacting the agent. 
+      </para>
+    </section>
+    <section id="jvmjdk6-attach">
+      <para>
+        A Jolokia can be attached to any running Java process as long
+        as the user has sufficient access privileges for the process. 
+        This agent uses the <ulink url="">Java attach API</ulink> for
+        dynamically attaching and detaching. It works similar to
+        JConsole connecting to a local process. The Jolokia advantage
+        is, that after the agent is started, it can be reached
+        over the network. 
+      </para>
+      <para>
+        - client options
+        - sample
+        - shell sample for parsing url. 
+      </para>
+    </section>
+    
   </section>
-  
-</section>
