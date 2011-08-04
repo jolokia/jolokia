@@ -158,6 +158,13 @@ public class StringToOpenTypeConverter {
 
     private TabularData convertToTabularType(TabularType pType, JSONAware pValue) {
         CompositeType rowType = pType.getRowType();
+        if (rowType.containsKey("key") && rowType.containsKey("value") && rowType.keySet().size() == 2) {
+            return convertToTabularTypeFromMap(pType, pValue, rowType);
+        }
+
+        // =====================================================================================
+        // Its a plain TabularData, which is converted from an array of maps
+
         if (!(pValue instanceof JSONArray)) {
             throw new IllegalArgumentException(
                     "Cannot convert " + pValue + " to type " +
@@ -173,6 +180,35 @@ public class StringToOpenTypeConverter {
             }
             tabularData.put(convertCompositeType(rowType, (JSONObject) element));
         }
+        return tabularData;
+    }
+
+    private TabularData convertToTabularTypeFromMap(TabularType pType, JSONAware pValue, CompositeType pRowType) {
+        // A TabularData is requested for mapping a map for the call to an MXBean
+        // as described in http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html
+        // This means, we will convert a JSONObject to the required format
+        TabularDataSupport tabularData = new TabularDataSupport(pType);
+        if (!(pValue instanceof JSONObject)) {
+            throw new IllegalArgumentException(
+                    "Cannot convert " + pValue + " to a TabularData type for an MXBean's map representation. " +
+                    "This must be a JSONObject / Map" );
+
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, String> jsonObj = (Map<String,String>) pValue;
+        for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("key", convertToObject(pRowType.getType("key"),entry.getKey()));
+            map.put("value", convertToObject(pRowType.getType("value"),entry.getValue()));
+
+            try {
+                CompositeData compositeData = new CompositeDataSupport(pRowType, map);
+                tabularData.put(compositeData);
+            } catch (OpenDataException e) {
+                throw new IllegalArgumentException(e.getMessage(),e);
+            }
+        }
+
         return tabularData;
     }
 

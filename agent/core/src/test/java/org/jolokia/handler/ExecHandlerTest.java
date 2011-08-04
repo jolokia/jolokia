@@ -46,7 +46,7 @@ public class ExecHandlerTest {
     }
 
     @BeforeTest
-    public void registerMbean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
+    public void registerMBean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=exec");
 
         MBeanServerConnection conn = getMBeanServer();
