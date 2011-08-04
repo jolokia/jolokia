@@ -295,7 +295,6 @@ public class StringToObjectConverter {
         }
     }
 
-
     private static class JSONParser implements Parser {
         public Object extract(String pValue) {
             try {
