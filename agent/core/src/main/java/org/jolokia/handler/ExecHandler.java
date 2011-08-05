@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.management.*;
+import javax.management.openmbean.OpenMBeanParameterInfo;
+import javax.management.openmbean.OpenType;
 
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
@@ -79,7 +81,11 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
                     " parameters, not " + (args == null ? 0 : args.size()) + " as given");
         }
         for (int i = 0;i < nrParams; i++) {
-            params[i] = stringToObjectConverter.prepareValue(types.paramClasses[i], args.get(i));
+        	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
+        		params[i] = stringToObjectConverter.prepareValue(types.paramOpenTypes[i], args.get(i));
+        	} else { 
+        		params[i] = stringToObjectConverter.prepareValue(types.paramClasses[i], args.get(i));
+        	}
         }
 
         // TODO: Maybe allow for a path as well which could be applied on the return value ...
@@ -120,12 +126,13 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         }
 
         List<MBeanParameterInfo[]> paramInfos = extractMBeanParameterInfos(pServer, pRequest, operation);
-        if (!hasMatchingSignature(types, paramInfos)) {
+        MBeanParameterInfo[] matchingSignature = getMatchingSignature(types, paramInfos);
+        if (matchingSignature == null) {
             throw new IllegalArgumentException(
                     "No operation " + pRequest.getOperation() + " on MBean " + pRequest.getObjectNameAsString() + " exists. " +
                             "Known signatures: " + signatureToString(paramInfos));
         }
-        return new OperationAndParamType(operation,types);
+        return new OperationAndParamType(operation, matchingSignature);
     }
 
     /**
@@ -165,14 +172,14 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
      *
      * @param pTypes types to match agains. These are full qualified class names in string representation
      * @param pParamInfos list of parameter infos
-     * @return a string
+     * @return the matched signature MBeanParamaterInfo[]
      */
-    private boolean hasMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
+    private MBeanParameterInfo[] getMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
         OUTER:
         for (MBeanParameterInfo[]  infos : pParamInfos) {
             if (infos.length == 0 && pTypes.size() == 0) {
                 // No-arg argument
-                return true;
+                return infos;
             }
             if (pTypes.size() != infos.length) {
                 // Number of arguments dont match
@@ -186,9 +193,9 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
                 }
             }
             // If we did it until here, we are finished.
-            return true;
+            return infos;
         }
-        return false;
+        return null;
     }
 
     // Extract operation and optional type parameters
@@ -247,13 +254,19 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         private OperationAndParamType(String pOperationName, MBeanParameterInfo[] pParameterInfos) {
             operationName = pOperationName;
             paramClasses = new String[pParameterInfos.length];
+            paramOpenTypes = new OpenType<?>[pParameterInfos.length];
             int i=0;
             for (MBeanParameterInfo info : pParameterInfos) {
-                paramClasses[i++] = info.getType();
+            	if (info instanceof OpenMBeanParameterInfo) {
+            		OpenMBeanParameterInfo openTypeInfo = (OpenMBeanParameterInfo) info;
+            		paramOpenTypes[i] = openTypeInfo.getOpenType();
+            	}
+           		paramClasses[i++] = info.getType();
             }
         }
 
         private String operationName;
         private String paramClasses[];
+        private OpenType<?> paramOpenTypes[];
     }
 }
