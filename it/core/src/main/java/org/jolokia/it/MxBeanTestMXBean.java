@@ -1,8 +1,4 @@
-package org.jolokia.handler;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package org.jolokia.it;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -20,12 +16,21 @@ import java.util.Set;
  *  limitations under the License.
  */
 
-public interface OpenExecDataMXBean {
-	public OpenWriteData compositeData(OpenWriteData data);
-	public OpenWriteData[] arrayData(OpenWriteData[] data);
-	public List listData(List<OpenWriteData> data);
-	public Map mapData(Map<String, OpenWriteData> data);
-	public Set opSetData(Set<OpenWriteData> data);
-	public OpenWriteData overloaded(OpenWriteData data);
-	public String overloaded(String data);
+/**
+ * Test bean for MXBean
+ *
+ * @author roland
+ * @since 07.08.11
+ */
+public interface MxBeanTestMXBean {
+
+    int[] getNumbers();
+    void setNumbers(int[] pNumbers);
+
+    ComplexTestData getComplexTestData();
+    void setComplextTestData(ComplexTestData testData);
+
+
+    int exec(long arg);
+    int exec(ComplexTestData arg);
 }
