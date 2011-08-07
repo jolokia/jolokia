@@ -7,11 +7,19 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="0.91" description="Release 0.92" date="">
+    <release version="0.92" description="Release 0.92" date="">
       <action dev="roland" type="add" date="2011-7-29">
         Added a dynamical attach mode for the JVM-JDK6 launcher (patch by Greg Bowyer).
         The agent now includes also a client for dynamically starting/stoping an agent on
         already running Java process. See the reference manual for more information.
+      </action>
+      <action dev="roland" type="add" date="2011-8-7">
+        Support for upstream serialization of open type, i.e. CompositeData and TabularData.
+        This allows for easy access to MXBeans, which provide support of transparent
+        translation between plain Java objects and collections, which follow some restrictions,
+        to open type data. Jolokia knows how to deal with the fixed format used by this MXBean
+        translation of Maps and transparentrly dispatch this to a JSON map. Initial patch provided
+        by asssaf.
       </action>
     </release>
     <release version="0.91" description="Release 0.91" date="2011-05-30">

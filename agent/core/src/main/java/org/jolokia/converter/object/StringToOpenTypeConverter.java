@@ -80,7 +80,7 @@ public class StringToOpenTypeConverter {
         // prepare each value in the array and then process the array of values
         if (!(pValue instanceof JSONArray)) {
             throw new IllegalArgumentException(
-                    "Cannot convert " + pValue + " to type " +
+                    "Can not convert " + pValue + " to type " +
                     pType + " because JSON object type " + pValue.getClass() + " is not a JSONArray");
 
         }
@@ -127,7 +127,7 @@ public class StringToOpenTypeConverter {
 
             if (!pType.containsKey(key)) {
                 throw new IllegalArgumentException(
-                        "Conversio to CompositeType failed because " + key + " is not known as composite attribute key.");
+                        "Conversion to CompositeType failed because " + key + " is not known as composite attribute key.");
             }
             if (value != null) {
                 Object convertedValue = convertToObject(pType.getType(key),value);
