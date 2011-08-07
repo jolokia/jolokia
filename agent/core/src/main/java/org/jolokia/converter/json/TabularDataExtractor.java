@@ -76,27 +76,33 @@ public class TabularDataExtractor implements Extractor {
      *  </pre>
      * </p>
      * <p>
-     *   Accessing {@link TabularData} with a path is only supported for single valued keys up to now.
+     *   Accessing {@link TabularData} with a path is only supported for string keys, i.e. each index name must point
+     *   to a string value. As many path elements must be provided as index names for the tabular type exists
+     *   (i.e. <code>pExtraArgs.size() >= pValue.getTabularType().getIndexNames().size()</code>)
+     *
+     *   For TabularData representing maps, a path access with the single "key" value will
+     *   return the content of the "value" value. For all other TabularData, the complete row to which the path points
+     *   is returned.
      * </p>
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert
      * @param pExtraArgs extra arguments which contain e.g. a path
-     * @param jsonify whether to convert to a JSON object/list or whether the plain object
+     * @param pJsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
-     * @return
+     * @return the extracted object
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+                         Stack<String> pExtraArgs,boolean pJsonify) throws AttributeNotFoundException {
         TabularData td = (TabularData) pValue;
         if (!pExtraArgs.isEmpty()) {
             CompositeData cd = extractCompositeDataFromPath(td, pExtraArgs);
             return pConverter.extractObject(
                             checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
-                            pExtraArgs, jsonify);
+                            pExtraArgs, pJsonify);
         } else {
-            if (jsonify) {
+            if (pJsonify) {
                 return checkForMxBeanMap(td.getTabularType()) ?
                         convertMxBeanMapToJson(td,pExtraArgs,pConverter) :
                         convertTabularDataToJson(td, pExtraArgs, pConverter);
