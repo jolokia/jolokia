@@ -1,6 +1,6 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.request.ValueFaultHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
@@ -67,7 +67,7 @@ public class BeanExtractor implements Extractor {
             // Still some path elements available, so dive deeper
             String attribute = pExtraArgs.pop();
             Object attributeValue = extractBeanPropertyValue(pValue,attribute,faultHandler);
-            return pConverter.extractObject(attributeValue,pExtraArgs,jsonify);
+            return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
         } else {
             if (jsonify) {
                 // We need the jsonfied value from here on.
@@ -113,7 +113,7 @@ public class BeanExtractor implements Extractor {
             return "[this]";
         } else {
             // Call into the converted recursively for any object known.
-            return pConverter.extractObject(value,pExtraArgs,true /* jsonify */);
+            return pConverter.extractObject(value, pExtraArgs, true /* jsonify */);
         }
     }
 

@@ -104,11 +104,25 @@ public class ItSetup {
             for (String domain : domains) {
                 registerMBean(new OperationChecking(domain),isWebsphere ? null : domain + ":type=operation");
                 registerMBean(new AttributeChecking(domain),isWebsphere ? null : domain + ":type=attribute");
+                // MXBean
+                if (hasMxBeanSupport()) {
+                    registerMBean(new MxBeanTest(),isWebsphere ? null : domain + ":type=mxbean");
+                }
             }
+
         } catch (RuntimeException e) {
             throw new RuntimeException("Error",e);
         } catch (Exception exp) {
             throw new RuntimeException("Error",exp);
+        }
+    }
+
+    private boolean hasMxBeanSupport() {
+        try {
+            Class.forName("javax.management.MXBean");
+            return true;
+        } catch (ClassNotFoundException exp) {
+            return false;
         }
     }
 

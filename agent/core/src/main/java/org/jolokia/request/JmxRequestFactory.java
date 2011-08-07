@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.PathUtil;
 import org.jolokia.util.RequestType;
 

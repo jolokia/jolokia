@@ -22,12 +22,11 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.testng.annotations.*;
 
-import static org.easymock.EasyMock.*;
 import static org.jolokia.util.RequestType.EXEC;
 import static org.testng.Assert.*;
 
@@ -43,12 +42,11 @@ public class ExecHandlerTest {
 
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        StringToObjectConverter converter = new StringToObjectConverter();
-        handler = new ExecHandler(new AllowAllRestrictor(),converter);
+        handler = new ExecHandler(new AllowAllRestrictor(),new Converters(null));
     }
 
     @BeforeTest
-    public void registerMbean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
+    public void registerMBean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=exec");
 
         MBeanServerConnection conn = getMBeanServer();

@@ -16,10 +16,9 @@ package org.jolokia.jsr160;
  *  limitations under the License.
  */
 
+import org.jolokia.converter.*;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.backend.RequestDispatcher;
-import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
@@ -47,17 +46,14 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     /**
      * Constructor
      *
-     * @param objectToJsonConverter converter for creasting answerds (output)
-     * @param stringToObjectConverter converter for preparing arguments (input)
+     * @param pConverters object/string converters
      * @param serverInfo server info for dealing with version information
      * @param restrictor restrictor for restricting access to certain MBeans
      */
-    public Jsr160RequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
-                                   StringToObjectConverter stringToObjectConverter,
+    public Jsr160RequestDispatcher(Converters pConverters,
                                    ServerHandle serverInfo,
                                    Restrictor restrictor) {
-        requestHandlerManager = new RequestHandlerManager(
-                objectToJsonConverter, stringToObjectConverter, serverInfo, restrictor);
+        requestHandlerManager = new RequestHandlerManager(pConverters, serverInfo, restrictor);
     }
 
     /**

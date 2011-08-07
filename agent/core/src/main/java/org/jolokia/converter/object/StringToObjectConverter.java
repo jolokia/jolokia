@@ -1,13 +1,17 @@
-package org.jolokia.converter;
+package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jolokia.util.ClassUtil;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -70,6 +74,21 @@ public class StringToObjectConverter {
     }
 
     /**
+     * Prepare a value from a either a given object or its string representation. "Preparation" here
+     * mean conversion to a real object which can be used in set or exec operations.
+     *
+     * If the value is already assignable to the given class name it is returned directly.
+     *
+     * @param pExpectedClass expected type
+     * @param pValue value to either take directly or to convert from its string representation.
+     * @return the prepared / converted object
+     */
+    public Object prepareValue(Class pExpectedClass, Object pValue) {
+        return prepareValue(pExpectedClass.getName(),pValue);
+    }
+
+
+    /**
      * Prepare a value from a either a given object or its string representation.
      * If the value is already assignable to the given class name it is returned directly.
      *
@@ -90,6 +109,7 @@ public class StringToObjectConverter {
             return param;
         }
     }
+
 
     /**
      * For GET requests, where operation arguments and values to write are given in
@@ -228,6 +248,7 @@ public class StringToObjectConverter {
         return pValue.split("\\s*,\\s*");
     }
 
+    
     // ===========================================================================
     // Extractor interface
     private interface Parser {
@@ -274,7 +295,6 @@ public class StringToObjectConverter {
         }
     }
 
-
     private static class JSONParser implements Parser {
         public Object extract(String pValue) {
             try {
@@ -284,5 +304,5 @@ public class StringToObjectConverter {
             }
         }
     }
-
+    
 }

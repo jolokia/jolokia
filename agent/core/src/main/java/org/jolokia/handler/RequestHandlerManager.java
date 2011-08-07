@@ -16,9 +16,8 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
+import org.jolokia.converter.*;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.util.RequestType;
 
@@ -37,13 +36,19 @@ public class RequestHandlerManager {
     // Map with all json request handlers
     private final Map<RequestType, JsonRequestHandler> requestHandlerMap = new HashMap<RequestType, JsonRequestHandler>();
 
-    public RequestHandlerManager(ObjectToJsonConverter pObjectToJsonConverter,
-            StringToObjectConverter pStringToObjectConverter,
-            ServerHandle pServerHandle, Restrictor pRestrictor) {
+
+    /**
+     * Manager and dispatcher for incoming requests
+     *
+     * @param pConverters string/object converters
+     * @param pServerHandle server handle for obtaining MBeanServer
+     * @param pRestrictor handler for access restrictions
+     */
+    public RequestHandlerManager(Converters pConverters,ServerHandle pServerHandle, Restrictor pRestrictor) {
         JsonRequestHandler handlers[] = {
                 new ReadHandler(pRestrictor),
-                new WriteHandler(pRestrictor, pObjectToJsonConverter),
-                new ExecHandler(pRestrictor, pStringToObjectConverter),
+                new WriteHandler(pRestrictor, pConverters),
+                new ExecHandler(pRestrictor, pConverters),
                 new ListHandler(pRestrictor),
                 new VersionHandler(pRestrictor, pServerHandle),
                 new SearchHandler(pRestrictor)

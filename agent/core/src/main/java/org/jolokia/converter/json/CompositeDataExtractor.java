@@ -1,6 +1,6 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.json.simple.JSONObject;
 
 import javax.management.AttributeNotFoundException;
@@ -45,7 +45,7 @@ public class CompositeDataExtractor implements Extractor {
         if (!pExtraArgs.isEmpty()) {
             String key = pExtraArgs.pop();
             try {
-                return pConverter.extractObject(cd.get(key),pExtraArgs,jsonify);
+                return pConverter.extractObject(cd.get(key), pExtraArgs, jsonify);
             }  catch (InvalidKeyException exp) {
                 throw new AttributeNotFoundException("Invalid path '" + key + "'");
             }
@@ -53,7 +53,7 @@ public class CompositeDataExtractor implements Extractor {
             if (jsonify) {
                 JSONObject ret = new JSONObject();
                 for (String key : (Set<String>) cd.getCompositeType().keySet()) {
-                    ret.put(key,pConverter.extractObject(cd.get(key),pExtraArgs,jsonify));
+                    ret.put(key,pConverter.extractObject(cd.get(key), pExtraArgs, jsonify));
                 }
                 return ret;
             } else {

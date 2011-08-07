@@ -23,8 +23,10 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.*;
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.converter.object.StringToOpenTypeConverter;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.testng.annotations.BeforeTest;
@@ -48,9 +50,7 @@ public class WriteHandlerTest {
 
     @BeforeTest
     public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        ObjectToJsonConverter converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
-
-        handler = new WriteHandler(new AllowAllRestrictor(),converter);
+        handler = new WriteHandler(new AllowAllRestrictor(),new Converters(null));
 
         oName = new ObjectName("jolokia:test=write");
 

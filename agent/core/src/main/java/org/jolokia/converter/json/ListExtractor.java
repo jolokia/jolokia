@@ -1,6 +1,6 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.json.simple.JSONArray;
 
 import javax.management.AttributeNotFoundException;
@@ -44,13 +44,13 @@ public class ListExtractor implements Extractor {
         Iterator it = list.iterator();
         if (!pExtraArgs.isEmpty()) {
             int idx = Integer.parseInt(pExtraArgs.pop());
-            return pConverter.extractObject(list.get(idx),pExtraArgs,jsonify);
+            return pConverter.extractObject(list.get(idx), pExtraArgs, jsonify);
         } else {
             if (jsonify) {
                 ret = new JSONArray();
                 for (int i = 0;i < length; i++) {
                     Object val = it.next();
-                    ret.add(pConverter.extractObject(val,pExtraArgs,jsonify));
+                    ret.add(pConverter.extractObject(val, pExtraArgs, jsonify));
                 }
                 return ret;
             } else {

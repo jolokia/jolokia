@@ -16,13 +16,12 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
+import org.jolokia.converter.*;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
 import org.jolokia.mbean.Config;
 import org.jolokia.util.DebugStore;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.*;
 import org.jolokia.history.HistoryStore;
@@ -48,15 +47,12 @@ public class LocalRequestDispatcher implements RequestDispatcher {
     /**
      * Create a new local dispatcher which accesses local MBeans.
      *
-     * @param objectToJsonConverter a serializer to JSON
-     * @param stringToObjectConverter a de-serializer for arguments
-     * @param restrictor restrictor which checks the access for various operations
+     * @param pConverters object/string converters
+     * @param pRestrictor restrictor which checks the access for various operations
      * @param pQualifier optional qualifier for registering own MBean to allow for multiple J4P instances in the VM
      * @param pLogHandler local handler used for logging out errors and warnings
      */
-    public LocalRequestDispatcher(ObjectToJsonConverter objectToJsonConverter,
-                                  StringToObjectConverter stringToObjectConverter,
-                                  Restrictor restrictor, String pQualifier, LogHandler pLogHandler) {
+    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, String pQualifier, LogHandler pLogHandler) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
         mBeanServerHandler = new MBeanServerHandler(pQualifier,pLogHandler);
@@ -64,7 +60,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
         // Request handling manager 
         requestHandlerManager =
-                new RequestHandlerManager(objectToJsonConverter,stringToObjectConverter,mBeanServerHandler.getServerHandle(),restrictor);
+                new RequestHandlerManager(pConverters,mBeanServerHandler.getServerHandle(),pRestrictor);
     }
 
 

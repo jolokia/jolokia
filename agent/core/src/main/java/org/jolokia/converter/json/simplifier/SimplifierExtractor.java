@@ -1,6 +1,6 @@
 package org.jolokia.converter.json.simplifier;
 
-import org.jolokia.converter.StringToObjectConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.converter.json.Extractor;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.json.simple.JSONObject;
@@ -60,7 +60,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
             Object attributeValue = null;
             try {
                 attributeValue = extractor.extract((T) pValue);
-                return pConverter.extractObject(attributeValue,pExtraArgs,jsonify);
+                return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
             } catch (SkipAttributeException e) {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue,e);
             }
@@ -76,7 +76,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
                         continue;
                     }
                     ret.put(entry.getKey(),
-                            pConverter.extractObject(value,pExtraArgs,jsonify));
+                            pConverter.extractObject(value, pExtraArgs, jsonify));
                 }
                 return ret;
             } else {

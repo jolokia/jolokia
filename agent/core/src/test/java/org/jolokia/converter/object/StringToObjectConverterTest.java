@@ -1,7 +1,8 @@
-package org.jolokia.converter;
+package org.jolokia.converter.object;
 
 import java.util.*;
 
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

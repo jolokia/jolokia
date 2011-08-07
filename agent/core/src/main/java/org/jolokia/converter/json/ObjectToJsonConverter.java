@@ -1,17 +1,17 @@
 package org.jolokia.converter.json;
 
 
-import org.jolokia.util.*;
-import org.jolokia.request.*;
-import org.jolokia.converter.StringToObjectConverter;
-
-import static org.jolokia.util.ConfigKey.*;
-
-import org.json.simple.JSONObject;
-import javax.management.AttributeNotFoundException;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.request.*;
+import org.jolokia.util.*;
+import org.json.simple.JSONObject;
+
+import static org.jolokia.util.ConfigKey.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -102,79 +102,111 @@ public final class ObjectToJsonConverter {
             throws AttributeNotFoundException {
         Stack<String> extraStack = pUseValueWithPath ? PathUtil.reversePath(pRequest.getPathParts()) : new Stack<String>();
 
-        setupContext(pRequest);
+        Object jsonResult = extractObjectWithContext(pRequest, pValue, extraStack, true);
 
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("value",jsonResult);
+        jsonObject.put("request",pRequest.toJSON());
+        return jsonObject;
+    }
+
+
+    /**
+     * Handle a value which means to dive into the internal of a complex object
+     * (if <code>pExtraArgs</code> is not null) and/or to convert
+     * it to JSON (if <code>pJsonify</code> is true).
+     *
+     * @param pRequest request from which various processing
+     *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
+     *        into context in order to influence the object traversal.
+     * @param pValue value to extract from
+     * @param pExtraArgs stack used for diving in to the value
+     * @param pJsonify whether the result should be returned as an JSON object
+     * @return extracted value, either natively or as JSON
+     * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
+     */
+    public Object extractObjectWithContext(JmxRequest pRequest, Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
+            throws AttributeNotFoundException {
+        Object jsonResult;
+        setupContext(pRequest);
         try {
-            Object jsonResult = extractObject(pValue,extraStack,true);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("value",jsonResult);
-            jsonObject.put("request",pRequest.toJSON());
-            return jsonObject;
+            jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
         } finally {
             clearContext();
         }
+        return jsonResult;
     }
 
     /**
-     * Get values for a write request. This method returns an array with two objects.
-     * If no path is given (<code>pRequest.getExtraArgs() == null</code>), the returned values
-     * are the new value and the old value. However, if a path is set, the returned new value
-     * is the outer value (which can be set by an corresponding JMX set operation) where the
-     * new value is set via the path expression. The old value is the value of the object specified
-     * by the given path.
+     * Related to {@link #extractObjectWithContext(JmxRequest, Object, Stack, boolean)} except that
+     * it does not setup a context. This method is used from the
+     * various extractors for recursively continuing the extraction
      *
-     *
-     * @param pType type of the outermost object to set as returned by an MBeanInfo structure.
-     * @param pCurrentValue the object of the outermost object which can be null
-     * @param pRequest the initial request
-     * @return object array with two elements, element 0 is the value to set (see above), element 1
-     *         is the old value.
-     *
-     * @throws AttributeNotFoundException if no such attribute exists (as specified in the request)
-     * @throws IllegalAccessException if access to MBean fails
-     * @throws InvocationTargetException reflection error when setting an object's attribute
+     * @param pValue value to extract from
+     * @param pExtraArgs stack for diving into the object
+     * @param pJsonify whether a JSON representation {@link JSONObject}
+     * @return extracted object either in native format or as {@link JSONObject}
+     * @throws AttributeNotFoundException if an attribute is not found during traversal
      */
-    public Object[] getValues(String pType, Object pCurrentValue, JmxWriteRequest pRequest)
-            throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
-        List<String> pathParts = pRequest.getPathParts();
+    public Object extractObject(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
+            throws AttributeNotFoundException {
+        StackContext stackContext = stackContextLocal.get();
+        String limitReached = checkForLimits(pValue,stackContext);
+        Stack<String> pathStack = pExtraArgs != null ? pExtraArgs : new Stack<String>();
+        if (limitReached != null) {
+            return limitReached;
+        }
+        try {
+            stackContext.push(pValue);
+            stackContext.incObjectCount();
 
-        if (pathParts != null && pathParts.size() > 0) {
-            if (pCurrentValue == null ) {
-                throw new IllegalArgumentException(
-                        "Cannot set value with path when parent object is not set");
+            if (pValue == null) {
+                return null;
             }
 
-            String lastPathElement = pathParts.remove(pathParts.size()-1);
-            Stack<String> extraStack = PathUtil.reversePath(pathParts);
-            // Get the object pointed to do with path-1
-
-            try {
-                setupContext(pRequest);
-
-                Object inner = extractObject(pCurrentValue,extraStack,false);
-                // Set the attribute pointed to by the path elements
-                // (depending of the parent object's type)
-                Object oldValue = setObjectValue(inner,lastPathElement,pRequest.getValue());
-
-                // We set an inner value, hence we have to return provided value itself.
-                return new Object[] {
-                        pCurrentValue,
-                        oldValue
-                };
-            } finally {
-                clearContext();
+            if (pValue.getClass().isArray()) {
+                // Special handling for arrays
+                return arrayExtractor.extractObject(this,pValue,pathStack,pJsonify);
             }
-
-        } else {
-            // Return the objectified value
-            return new Object[] {
-                    stringToObjectConverter.prepareValue(pType, pRequest.getValue()),
-                    pCurrentValue
-            };
+            return callHandler(pValue, pathStack, pJsonify);
+        } finally {
+            stackContext.pop();
         }
     }
 
+    // returns the old value
+    public Object setObjectValue(Object pInner, String pAttribute, Object pValue)
+            throws IllegalAccessException, InvocationTargetException {
+
+        // Call various handlers depending on the type of the inner object, as is extract Object
+
+        Class clazz = pInner.getClass();
+        if (clazz.isArray()) {
+            return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
+        }
+        Extractor handler = getExtractor(clazz);
+
+        if (handler != null) {
+            return handler.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
+        } else {
+            throw new IllegalStateException(
+                    "Internal error: No handler found for class " + clazz + " for setting object value." +
+                    " (object: " + pInner + ", attribute: " + pAttribute + ", value: " + pValue + ")");
+        }
+    }
     // =================================================================================
+
+
+    // Get the extractor for a certain class
+    private Extractor getExtractor(Class pClazz) {
+        for (Extractor handler : handlers) {
+            if (handler.canSetValue() && handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
+                return handler;
+            }
+        }
+        return null;
+    }
+
 
     private void initLimits(Map<ConfigKey, String> pConfig) {
         // Max traversal depth
@@ -199,31 +231,6 @@ public final class ObjectToJsonConverter {
         return (ret != null && ret == 0) ? null : ret;
     }
 
-
-    public Object extractObject(Object pValue,Stack<String> pExtraArgs,boolean pJsonify)
-            throws AttributeNotFoundException {
-        StackContext stackContext = stackContextLocal.get();
-        String limitReached = checkForLimits(pValue,stackContext);
-        if (limitReached != null) {
-            return limitReached;
-        }
-        try {
-            stackContext.push(pValue);
-            stackContext.incObjectCount();
-
-            if (pValue == null) {
-                return null;
-            }
-
-            if (pValue.getClass().isArray()) {
-                // Special handling for arrays
-                return arrayExtractor.extractObject(this,pValue,pExtraArgs,pJsonify);
-            }
-            return callHandler(pValue, pExtraArgs, pJsonify);
-        } finally {
-            stackContext.pop();
-        }
-    }
 
     private String checkForLimits(Object pValue, StackContext pStackContext) {
         Integer maxDepth = pStackContext.getMaxDepth();
@@ -253,28 +260,7 @@ public final class ObjectToJsonConverter {
                     " (object: " + pValue + ", extraArgs: " + pExtraArgs + ")");
     }
 
-    // returns the old value
-    private Object setObjectValue(Object pInner, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
 
-        // Call various handlers depending on the type of the inner object, as is extract Object
-
-        Class clazz = pInner.getClass();
-        if (clazz.isArray()) {
-            return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
-        }
-        for (Extractor handler : handlers) {
-            if (handler.canSetValue() && handler.getType() != null && handler.getType().isAssignableFrom(clazz)) {
-                return handler.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
-            }
-        }
-
-        throw new IllegalStateException(
-                "Internal error: No handler found for class " + clazz + " for setting object value." +
-                        " (object: " + pInner + ", attribute: " + pAttribute + ", value: " + pValue + ")");
-
-
-       }
 
     // Used for testing only. Hence final and package local
     ThreadLocal<StackContext> getStackContextLocal() {
@@ -334,12 +320,21 @@ public final class ObjectToJsonConverter {
         stackContextLocal.remove();
     }
 
-    void setupContext(JmxRequest pRequest) {
-        Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
-        Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
-        Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
+    void setupContext() {
+        setupContext(null);
+    }
 
-        setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
+    void setupContext(JmxRequest pRequest) {
+        if (pRequest != null) {
+            Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
+            Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
+            Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
+
+            setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
+        } else {
+            // Use defaults:
+            setupContext(hardMaxDepth,hardMaxCollectionSize,hardMaxObjects,JmxRequest.THROWING_VALUE_FAULT_HANDLER);
+        }
     }
 
     void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,

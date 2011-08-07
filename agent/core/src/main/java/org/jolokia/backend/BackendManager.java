@@ -1,7 +1,6 @@
 package org.jolokia.backend;
 
-import org.jolokia.converter.StringToObjectConverter;
-import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.*;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -51,7 +50,7 @@ public class BackendManager {
 
     // Converter for converting various attribute object types
     // a JSON representation
-    private ObjectToJsonConverter objectToJsonConverter;
+    private Converters converters;
 
     // Handling access restrictions
     private Restrictor restrictor;
@@ -89,8 +88,7 @@ public class BackendManager {
     public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
 
         // Central objects
-        StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
-        objectToJsonConverter = new ObjectToJsonConverter(stringToObjectConverter,pConfig);
+        converters = new Converters(pConfig);
 
         // Access restrictor
         restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
@@ -99,14 +97,13 @@ public class BackendManager {
         logHandler = pLogHandler;
 
         // Create and remember request dispatchers
-        localDispatcher = new LocalRequestDispatcher(objectToJsonConverter,
-                                                     stringToObjectConverter,
+        localDispatcher = new LocalRequestDispatcher(converters,
                                                      restrictor,
                                                      pConfig.get(ConfigKey.MBEAN_QUALIFIER),
                                                      logHandler);
         ServerHandle serverHandle = localDispatcher.getServerInfo();
         requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
-                                                      objectToJsonConverter,stringToObjectConverter, serverHandle,restrictor);
+                                                      converters,serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);
 
         // Backendstore for remembering agent state
@@ -116,30 +113,30 @@ public class BackendManager {
     // Construct configured dispatchers by reflection. Returns always
     // a list, an empty one if no request dispatcher should be created
     private List<RequestDispatcher> createRequestDispatchers(String pClasses,
-                                                             ObjectToJsonConverter pObjectToJsonConverter,
-                                                             StringToObjectConverter pStringToObjectConverter,
-                                                             ServerHandle pServerHandle, Restrictor pRestrictor) {
+                                                             Converters pConverters,
+                                                             ServerHandle pServerHandle,
+                                                             Restrictor pRestrictor) {
         List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
         if (pClasses != null && pClasses.length() > 0) {
             String[] names = pClasses.split("\\s*,\\s*");
             for (String name : names) {
-                ret.add(createDispatcher(name, pObjectToJsonConverter, pStringToObjectConverter, pServerHandle, pRestrictor));
+                ret.add(createDispatcher(name, pConverters, pServerHandle, pRestrictor));
             }
         }
         return ret;
     }
 
     // Create a single dispatcher
-    private RequestDispatcher createDispatcher(String pDispatcherClass, ObjectToJsonConverter pObjectToJsonConverter, StringToObjectConverter pStringToObjectConverter, ServerHandle pServerHandle, Restrictor pRestrictor) {
+    private RequestDispatcher createDispatcher(String pDispatcherClass,
+                                               Converters pConverters,
+                                               ServerHandle pServerHandle, Restrictor pRestrictor) {
         try {
             Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
-            Constructor constructor = clazz.getConstructor(ObjectToJsonConverter.class,
-                                                           StringToObjectConverter.class,
+            Constructor constructor = clazz.getConstructor(Converters.class,
                                                            ServerHandle.class,
                                                            Restrictor.class);
             return (RequestDispatcher)
-                    constructor.newInstance(pObjectToJsonConverter,
-                                            pStringToObjectConverter,
+                    constructor.newInstance(pConverters,
                                             pServerHandle,
                                             pRestrictor);
         } catch (ClassNotFoundException e) {
@@ -205,7 +202,7 @@ public class BackendManager {
         if (!found) {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }
-        return objectToJsonConverter.convertToJson(retValue,pJmxReq,useValueWithPath);
+        return converters.getToJsonConverter().convertToJson(retValue, pJmxReq, useValueWithPath);
     }
 
     // init various application wide stores for handling history and debug output.
