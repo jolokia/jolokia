@@ -103,8 +103,8 @@ public class StringToOpenTypeConverter {
         // break down the composite type to its field and recurse for converting each field
         if (!(pValue instanceof JSONObject)) {
             throw new IllegalArgumentException(
-                    "Cannot convert " + pValue + " to " +
-                    pType + " because provided JSON type " + pValue.getClass() + " is not a JSONObject");
+                    "Conversion of " + pValue + " to " +
+                    pType + " failed because provided JSON type " + pValue.getClass() + " is not a JSONObject");
         }
 
         Map<String, Object> givenValues = (JSONObject) pValue;
@@ -127,7 +127,7 @@ public class StringToOpenTypeConverter {
 
             if (!pType.containsKey(key)) {
                 throw new IllegalArgumentException(
-                        "Cannot convert to CompositeType because " + key + " is not known as composite attribute key.");
+                        "Conversio to CompositeType failed because " + key + " is not known as composite attribute key.");
             }
             if (value != null) {
                 Object convertedValue = convertToObject(pType.getType(key),value);
