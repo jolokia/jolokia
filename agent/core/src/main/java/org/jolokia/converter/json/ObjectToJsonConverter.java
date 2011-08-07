@@ -113,30 +113,29 @@ public final class ObjectToJsonConverter {
 
     /**
      * Handle a value which means to dive into the internal of a complex object
-     * (if <code>pExtraStack</code> is not null) and/or to convert
+     * (if <code>pExtraArgs</code> is not null) and/or to convert
      * it to JSON (if <code>pJsonify</code> is true).
      *
      * @param pRequest request from which various processing
      *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
      *        into context in order to influence the object traversal.
      * @param pValue value to extract from
-     * @param pExtraStack stack used for diving in to the value
+     * @param pExtraArgs stack used for diving in to the value
      * @param pJsonify whether the result should be returned as an JSON object
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
-    public Object extractObjectWithContext(JmxRequest pRequest, Object pValue, Stack<String> pExtraStack, boolean pJsonify)
+    public Object extractObjectWithContext(JmxRequest pRequest, Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
             throws AttributeNotFoundException {
         Object jsonResult;
         setupContext(pRequest);
         try {
-            jsonResult = extractObject(pValue, pExtraStack, pJsonify);
+            jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
         } finally {
             clearContext();
         }
         return jsonResult;
     }
-
 
     /**
      * Related to {@link #extractObjectWithContext(JmxRequest, Object, Stack, boolean)} except that
@@ -153,6 +152,7 @@ public final class ObjectToJsonConverter {
             throws AttributeNotFoundException {
         StackContext stackContext = stackContextLocal.get();
         String limitReached = checkForLimits(pValue,stackContext);
+        Stack<String> pathStack = pExtraArgs != null ? pExtraArgs : new Stack<String>();
         if (limitReached != null) {
             return limitReached;
         }
@@ -166,9 +166,9 @@ public final class ObjectToJsonConverter {
 
             if (pValue.getClass().isArray()) {
                 // Special handling for arrays
-                return arrayExtractor.extractObject(this,pValue,pExtraArgs,pJsonify);
+                return arrayExtractor.extractObject(this,pValue,pathStack,pJsonify);
             }
-            return callHandler(pValue, pExtraArgs, pJsonify);
+            return callHandler(pValue, pathStack, pJsonify);
         } finally {
             stackContext.pop();
         }
@@ -320,12 +320,21 @@ public final class ObjectToJsonConverter {
         stackContextLocal.remove();
     }
 
-    void setupContext(JmxRequest pRequest) {
-        Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
-        Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
-        Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
+    void setupContext() {
+        setupContext(null);
+    }
 
-        setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
+    void setupContext(JmxRequest pRequest) {
+        if (pRequest != null) {
+            Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
+            Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
+            Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
+
+            setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
+        } else {
+            // Use defaults:
+            setupContext(hardMaxDepth,hardMaxCollectionSize,hardMaxObjects,JmxRequest.THROWING_VALUE_FAULT_HANDLER);
+        }
     }
 
     void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,

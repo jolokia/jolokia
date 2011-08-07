@@ -1,22 +1,15 @@
 package org.jolokia.converter.object;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.*;
-import javax.naming.event.NamingExceptionEvent;
 
-import com.sun.jdi.NativeMethodException;
-import com.sun.tools.corba.se.idl.toJavaPortable.StringGen;
 import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.converter.util.CompositeTypeAndJson;
+import org.jolokia.converter.util.TabularTypeAndJson;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import sun.net.idn.StringPrep;
 
 import static javax.management.openmbean.SimpleType.*;
 import static org.testng.Assert.*;
@@ -47,6 +40,7 @@ public class StringToOpenTypeConverterTest {
     private StringToOpenTypeConverter converter;
 
     private ObjectToJsonConverter toJsonConverter;
+
 
     @BeforeTest
     public void setup() {
@@ -102,8 +96,8 @@ public class StringToOpenTypeConverterTest {
         );
         CompositeData[] result =
                 (CompositeData[]) converter.convertToObject(new ArrayType(2,taj.getType()),"[" + taj.getJsonAsString() + "]");
-        assertEquals(result[0].get("verein"),"FCN");
-        assertNull(result[1]);
+        assertEquals(result[0].get("verein"), "FCN");
+        assertEquals(result.length,1);
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class,expectedExceptionsMessageRegExp = ".*Unsupported.*")
@@ -183,6 +177,65 @@ public class StringToOpenTypeConverterTest {
         assertEquals(data.get(new String[] { "fcb" }).get("absteiger"),true);
     }
 
+    @Test
+    public void tabularTypeForMXBeanMaps() throws OpenDataException {
+        TabularTypeAndJson taj = getSampleTabularTypeForMXBeanMap();
+
+        String json = "{ \"keyOne\" : \"valueOne\", \"keyTwo\" : \"valueTwo\"}";
+        TabularData data = (TabularData) converter.convertToObject(taj.getType(),json);
+        CompositeData col1 = data.get(new String[] { "keyOne" });
+        assertEquals(col1.get("key"),"keyOne");
+        assertEquals(col1.get("value"),"valueOne");
+        CompositeData col2 = data.get(new String[] { "keyTwo" });
+        assertEquals(col2.get("key"),"keyTwo");
+        assertEquals(col2.get("value"),"valueTwo");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONObject.*")
+    public void tabularTypeForMXBeanMapsFail() throws OpenDataException {
+        TabularTypeAndJson taj = getSampleTabularTypeForMXBeanMap();
+
+        converter.convertToObject(taj.getType(), "[ { \"keyOne\" : \"valueOne\" } ]");
+    }
+
+
+    @Test
+    public void tabularTypeForMXBeanMapsComplext() throws OpenDataException {
+        TabularTypeAndJson inner = getSampleTabularTypeForMXBeanMap();
+        TabularTypeAndJson taj = new TabularTypeAndJson(
+                new String[]{"key"},
+                new CompositeTypeAndJson(
+                        STRING, "key", null,
+                        inner.getType(), "value", null
+                )
+        );
+
+        String json = "{ \"keyOne\" : { \"innerKeyOne\" : \"valueOne\" }, \"keyTwo\" : { \"innerKeyTwo\" : \"valueTwo\"}}";
+        TabularData data = (TabularData) converter.convertToObject(taj.getType(),json);
+        CompositeData col1 = data.get(new String[] { "keyOne" });
+        assertEquals(col1.get("key"),"keyOne");
+        TabularData innerCol1 = (TabularData) col1.get("value");
+        CompositeData col1inner = innerCol1.get(new String[]{"innerKeyOne"});
+        assertEquals(col1inner.get("key"),"innerKeyOne");
+        assertEquals(col1inner.get("value"),"valueOne");
+    }
+
+
+
+
+    private TabularTypeAndJson getSampleTabularTypeForMXBeanMap() throws OpenDataException {
+        return new TabularTypeAndJson(
+                    new String[] { "key" },
+                    new CompositeTypeAndJson(
+                            STRING,"key","dummy",
+                            STRING,"value", "dummy"
+                    )
+            );
+    }
+
+
+
+
     private TabularTypeAndJson getSampleTabularType() throws OpenDataException {
         return new TabularTypeAndJson(
                     new String[] { "verein" },
@@ -207,84 +260,4 @@ public class StringToOpenTypeConverterTest {
 
     // ============================================================================================================
 
-    private static class CompositeTypeAndJson {
-        JSONObject json;
-        CompositeType type;
-        String keys[];
-
-        private CompositeTypeAndJson(Object... elements) throws OpenDataException {
-            keys = new String[elements.length / 3];
-            OpenType types[] = new OpenType[elements.length / 3];
-            Object values[] = new Object[elements.length / 3];
-            int j = 0;
-            for (int i = 0; i < elements.length; i+=3) {
-                types[j] = (OpenType) elements[i];
-                keys[j] = (String) elements[i+1];
-                values[j] = elements[i+2];
-                j++;
-            }
-            type = new CompositeType(
-                    "testType",
-                    "Type for testing",
-                    keys,
-                    keys,
-                    types
-                    );
-            json = new JSONObject();
-            for (int i=0; i<keys.length;i++) {
-                if (values[i] != null) {
-                    json.put(keys[i],values[i]);
-                }
-            }
-        }
-
-        public String getKey(int idx) {
-            return keys[idx];
-        }
-
-        public JSONObject getJson() {
-            return json;
-        }
-
-        public CompositeType getType() {
-            return type;
-        }
-
-        public String getJsonAsString() {
-            return json.toJSONString();
-        }
-    }
-
-    private class TabularTypeAndJson {
-        TabularType type;
-        JSONArray json;
-
-        public TabularTypeAndJson(String[] index, CompositeTypeAndJson taj,Object ... rowVals) throws OpenDataException {
-            CompositeType cType = taj.getType();
-            json = new JSONArray();
-            json.add(taj.getJson());
-            int nrCols = cType.keySet().size();
-            for (int i = 0 ; i < rowVals.length; i += nrCols) {
-                JSONObject row = new JSONObject();
-                for (int j = 0; j < nrCols; j++) {
-                    row.put(taj.getKey(j),rowVals[i+j]);
-                }
-                json.add(row);
-            }
-            System.out.println(json.toJSONString());
-            type = new TabularType("test","test",cType,index);
-        }
-
-        public TabularType getType() {
-            return type;
-        }
-
-        public JSONArray getJson() {
-            return json;
-        }
-
-        public String getJsonAsString() {
-            return json.toJSONString();
-        }
-    }
 }

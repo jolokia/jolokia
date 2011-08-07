@@ -51,6 +51,7 @@ public abstract class JmxRequest {
     // Path parts, which are used for selecting parts of the return value
     private List<String> pathParts;
 
+
     /**
      * Constructor used for representing {@link HttpMethod#GET} requests.
      *
@@ -223,22 +224,28 @@ public abstract class JmxRequest {
         }
         String ignoreErrors = processingConfig.get(ConfigKey.IGNORE_ERRORS);
         if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
-            valueFaultHandler = new IgnoringValueFaultHandler();
+            valueFaultHandler = IGNORING_VALUE_FAULT_HANDLER;
         } else {
-            valueFaultHandler = new ThrowingFaultHandler();
+            valueFaultHandler = THROWING_VALUE_FAULT_HANDLER;
         }
     }
 
-    private static class IgnoringValueFaultHandler implements ValueFaultHandler {
+    // =================================================================================================
+    // Available fault handlers
+
+    public static final ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
         public <T extends Throwable> Object handleException(T exception) throws T {
             return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
         }
-    }
+    };
 
-    private static class ThrowingFaultHandler implements ValueFaultHandler {
+    public static final ValueFaultHandler THROWING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
         public <T extends Throwable> Object handleException(T exception) throws T {
             // Dont handle exception on our own, we rethrow it
             throw exception;
         }
-    }
+    };
+
+
+
 }
