@@ -1,14 +1,13 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
-
-import javax.management.AttributeNotFoundException;
-import javax.management.MXBean;
-import javax.management.openmbean.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
+import javax.management.AttributeNotFoundException;
+import javax.management.openmbean.*;
+
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -40,7 +39,7 @@ public class TabularDataExtractor implements Extractor {
     /**
      * <p>
      *  Extract a {@link TabularData}. The JSON representation of a tabular data is different,
-     *  dependening on whether it represets a map for an {@link MXBean} or is a regular data.
+     *  dependening on whether it represets a map for an {@link javax.management.MXBean} or is a regular data.
      * </p>
      * <p>
      *  I.e. for an tabular data which have a row type with two column "key" and "value", then
@@ -116,7 +115,7 @@ public class TabularDataExtractor implements Extractor {
 
     /**
      * Check whether the given tabular type represents a MXBean map. See the
-     * {@link MXBean} specification for
+     * {@link javax.management.MXBean} specification for
      * details how a map is converted to {@link TabularData} by the MXBean framework.
      *
      * @param pType type of tabular data to convert

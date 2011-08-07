@@ -69,10 +69,9 @@ public class StringToOpenTypeConverter {
         } else if (openType instanceof TabularType) {
             return convertToTabularType((TabularType) openType, toJSON(pValue));
 		} else {
-			throw new IllegalArgumentException(
-					"Cannot convert string " + pValue + " to type " +
-                    openType + " because no converter could be found");
-		}
+            throw new IllegalArgumentException(
+                    "Cannot convert " + pValue + " to " + openType + ": " + "No converter could be found");
+        }
 	}
 
     // =======================================================================================================
@@ -81,7 +80,7 @@ public class StringToOpenTypeConverter {
         // prepare each value in the array and then process the array of values
         if (!(pValue instanceof JSONArray)) {
             throw new IllegalArgumentException(
-                    "Cannot convert string " + pValue + " to type " +
+                    "Cannot convert " + pValue + " to type " +
                     pType + " because JSON object type " + pValue.getClass() + " is not a JSONArray");
 
         }
@@ -104,7 +103,7 @@ public class StringToOpenTypeConverter {
         // break down the composite type to its field and recurse for converting each field
         if (!(pValue instanceof JSONObject)) {
             throw new IllegalArgumentException(
-                    "Cannot convert " + pValue + " to type " +
+                    "Cannot convert " + pValue + " to " +
                     pType + " because provided JSON type " + pValue.getClass() + " is not a JSONObject");
         }
 
@@ -117,7 +116,7 @@ public class StringToOpenTypeConverter {
         try {
             return new CompositeDataSupport(pType, compositeValues);
         } catch (OpenDataException e) {
-            throw new IllegalArgumentException("Internal error: " + e.getMessage());
+            throw new IllegalArgumentException("Internal error: " + e.getMessage(),e);
         }
     }
 
@@ -199,7 +198,7 @@ public class StringToOpenTypeConverter {
         for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("key", convertToObject(pRowType.getType("key"),entry.getKey()));
-            map.put("value", convertToObject(pRowType.getType("value"),entry.getValue()));
+            map.put("value", convertToObject(pRowType.getType("value"), entry.getValue()));
 
             try {
                 CompositeData compositeData = new CompositeDataSupport(pRowType, map);
@@ -223,7 +222,7 @@ public class StringToOpenTypeConverter {
 
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Can't find class " + pElementType.getClassName() +
-                                                   " for instantiating array: " + e.getMessage());
+                                                   " for instantiating array: " + e.getMessage(),e);
             }
         } else if (pElementType instanceof CompositeType) {
             return new CompositeData[pLength];
@@ -248,8 +247,7 @@ public class StringToOpenTypeConverter {
         }
     }
 
-
-    private final static Map<String, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<String, Object>();;
+    private static final Map<String, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<String, Object>();;
 
     static {
         DEFAULT_PRIMITIVE_VALUES.put(Boolean.class.getName(), false);
