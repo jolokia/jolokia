@@ -106,7 +106,7 @@ public class ItSetup {
                 registerMBean(new AttributeChecking(domain),isWebsphere ? null : domain + ":type=attribute");
                 // MXBean
                 if (hasMxBeanSupport()) {
-                    registerMBean(new MxBeanTest(),isWebsphere ? null : domain + ":type=mxbean");
+                    registerMBean(new MxBeanSample(),isWebsphere ? null : domain + ":type=mxbean");
                 }
             }
 

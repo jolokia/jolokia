@@ -23,7 +23,9 @@ import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.it.ComplexTestData;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -124,14 +126,63 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         assertEquals(req.getType(),J4pType.WRITE);
     }
 
+
+    @Test
+    public void mxNumbers() throws MalformedObjectNameException, J4pException {
+        final Integer input[] = { 1,2 };
+        checkMxWrite("Numbers",null,input,new ResponseAssertion() {
+            public void assertResponse(J4pResponse resp) {
+                JSONArray val = (JSONArray) resp.getValue();
+                assertEquals(val.size(), input.length);
+                for (int i = 0; i < input.length; i++) {
+                    assertEquals(val.get(i),(long) input[i]);
+                }
+            }
+        });
+    }
+
+    @Test
+    public void mxMap() throws MalformedObjectNameException, J4pException {
+        ComplexTestData data =  new ComplexTestData();
+        final Map<String,Boolean> input = new HashMap<String,Boolean>();
+        input.put("roland",true);
+        input.put("heino",false);
+        checkMxWrite("Map", null, input, new ResponseAssertion() {
+            public void assertResponse(J4pResponse resp) {
+                JSONObject val = (JSONObject)resp.getValue();
+                assertEquals(val.size(), input.size());
+                for (String key : input.keySet()) {
+                    assertEquals(val.get(key), input.get(key));
+                }
+            }
+        });
+    }
+
+
+    // ==========================================================================================================
+
     private void checkWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        checkWrite(new String[] { "GET", "POST" },pAttribute,pPath,pValue,pFinalAssert);
+        checkWrite(new String[]{"GET", "POST"}, pAttribute, pPath, pValue, pFinalAssert);
+    }
+
+    private void checkMxWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+        checkMxWrite(new String[]{"GET", "POST"}, pAttribute, pPath, pValue, pFinalAssert);
     }
 
     private void checkWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+        checkWrite("jolokia.it:type=attribute",methods,pAttribute,pPath,pValue,pFinalAssert);
+    }
+
+    private void checkMxWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+        if (hasMxBeanSupport()) {
+            checkWrite("jolokia.it:type=mxbean",methods,pAttribute,pPath,pValue,pFinalAssert);
+        }
+    }
+
+    private void checkWrite(String mBean,String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
         for (String method : methods) {
             reset();
-            J4pReadRequest readReq = new J4pReadRequest("jolokia.it:type=attribute",pAttribute);
+            J4pReadRequest readReq = new J4pReadRequest(mBean,pAttribute);
             if (pPath != null) {
                 readReq.setPath(pPath);
             }
@@ -139,7 +190,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
             Object oldValue = readResp.getValue();
             assertNotNull("Old value must not be null",oldValue);
 
-            J4pWriteRequest req = new J4pWriteRequest("jolokia.it:type=attribute",pAttribute,pValue,pPath);
+            J4pWriteRequest req = new J4pWriteRequest(mBean,pAttribute,pValue,pPath);
             J4pWriteResponse resp = j4pClient.execute(req,method);
             assertEquals("Old value should be returned",oldValue,resp.getValue());
 
@@ -158,5 +209,15 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     private interface ResponseAssertion {
         void assertResponse(J4pResponse resp);
+    }
+
+
+    private boolean hasMxBeanSupport() {
+        try {
+            Class.forName("javax.management.MXBean");
+            return true;
+        } catch (ClassNotFoundException exp) {
+            return false;
+        }
     }
 }

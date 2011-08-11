@@ -16,36 +16,28 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
+import java.util.Map;
+
+import com.sun.tools.jdi.LongValueImpl;
+
 /**
+ * Test bean for MXBean
+ *
  * @author roland
  * @since 07.08.11
  */
-public class MxBeanTest implements MxBeanTestMXBean {
+public interface MxBeanSampleMXBean {
 
-    int[] numbers;
-    private ComplexTestData complex;
+    int[] getNumbers();
+    void setNumbers(int[] pNumbers);
 
-    public int[] getNumbers() {
-        return numbers;
-    }
+    ComplexTestData getComplexTestData();
+    void setComplextTestData(ComplexTestData testData);
 
-    public void setNumbers(int[] pNumbers) {
-        numbers = pNumbers;
-    }
+    Map<String,Long> getMap();
+    void setMap(Map<String,Long> pMap);
 
-    public ComplexTestData getComplexTestData() {
-        return complex;
-    }
 
-    public void setComplextTestData(ComplexTestData testData) {
-        complex = testData;
-    }
-
-    public int exec(long arg) {
-        return 0;
-    }
-
-    public int exec(ComplexTestData arg) {
-        return 1;
-    }
+    int exec(long arg);
+    int exec(ComplexTestData arg);
 }

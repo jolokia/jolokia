@@ -50,6 +50,48 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Summer break is over and 0.92 is here">
+        <div class="news-date">2011-08-14</div>        
+        <p>
+          The summer break is over and Jolokia is one step closer to
+          1.0. Germans might reasonably argue, 'ehm, what summer do
+          you talk about ?' but at least 0.92 is a fact and introduces
+          two new features. Very cool features, IMO.
+        </p>
+        <p>
+          The Jolokia <a href="">JDK6 JVM Agent</a> is now able to use
+          the <a href="">Java Attach API</a> so that it is possible to
+          dynamically attach and detach a Jolokia agent to a running
+          Java process, much like <a href="">jconsole</a>. It is a
+          really exciting and powerful feature, because it allows for
+          HTTP/JSON access without (permanently) instrumenting a Java
+          process by deploying an agent or modifying startup options,
+          which is a major obstacle for quite some users. The nice
+          advantage over <code>jconsole</code> is that it attaches
+          <em>locally</em> but export the data
+          <em>remotely</em>. Perfect for headless server
+          installations. 
+        </p>
+        <p>
+          The second addition is the support for upstream
+          serialization of all <a href="">OpenType</a> types so that
+          JMX operations and write requests can be used with
+          <code>OpenTypes</code>, too. For <a href="">MXBeans</a>
+          special support has been added, so that e.g. a JSON map gets
+          properly translated to an MXBean's Map attribute (which in
+          between gets translated to a <a href="">TabularData</a> with
+          a fixed format). Since MXBeans are so easy to declare,
+          implement and to register, this missing piece really adds to
+          our <em>JMX on Capsaicin</em> mantra.
+        </p>
+        <p>
+          Both features arrived via GitHub <a href="">pull
+          requests</a> and are veric nice proofs for the relevance of
+          the social coding model introduced by GitHub. Big
+          acknowlegdments go out to <a href="">asssaf</a> and <a
+          href="">GregBowyer</a>.
+        </p>
+      </subsection>
       <subsection name="Jolokia 0.91 brings it on">
         <div class="news-date">2011-05-30</div>        
         <p>
@@ -74,7 +116,6 @@
           All changes are summarized in the <a
           href="changes-report.html">change log</a> as always.
         </p>
-
       </subsection>
       <subsection name="Jolokia 0.90 has landed">
         <div class="news-date">2011-04-04</div>
