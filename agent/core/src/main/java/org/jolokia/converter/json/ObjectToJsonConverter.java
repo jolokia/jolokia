@@ -68,16 +68,20 @@ public final class ObjectToJsonConverter {
 
         handlers = new ArrayList<Extractor>();
 
+        // TabularDataExtractor must be before MapExtractor
+        // since TabularDataSupport isa Map
+        handlers.add(new TabularDataExtractor());
+        handlers.add(new CompositeDataExtractor());
+
         // Collection handlers
         handlers.add(new ListExtractor());
         handlers.add(new MapExtractor());
 
         // Special, well known objects
-        addSimplifiers(pSimplifyHandlers);
+        addSimplifiers(handlers,pSimplifyHandlers);
 
+        // Special date handling
         handlers.add(new DateExtractor());
-        handlers.add(new CompositeDataExtractor());
-        handlers.add(new TabularDataExtractor());
 
         // Must be last in handlers, used default algorithm
         handlers.add(new BeanExtractor());
@@ -356,12 +360,12 @@ public final class ObjectToJsonConverter {
 
 
     // Simplifiers are added either explicitely or by reflection from a subpackage
-    private void addSimplifiers(Extractor[] pSimplifyHandlers) {
+    private void addSimplifiers(List<Extractor> pHandlers, Extractor[] pSimplifyHandlers) {
         if (pSimplifyHandlers != null && pSimplifyHandlers.length > 0) {
-            handlers.addAll(Arrays.asList(pSimplifyHandlers));
+            pHandlers.addAll(Arrays.asList(pSimplifyHandlers));
         } else {
             // Add all
-            handlers.addAll(ServiceObjectFactory.<Extractor>createServiceObjects(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
+            pHandlers.addAll(ServiceObjectFactory.<Extractor>createServiceObjects(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
         }
     }
 

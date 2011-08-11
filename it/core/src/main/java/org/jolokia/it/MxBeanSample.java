@@ -16,6 +16,7 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,6 +28,11 @@ public class MxBeanSample implements MxBeanSampleMXBean {
     int[] numbers = new int[] { 47, 11} ;
     private ComplexTestData complex;
     private Map<String, Long> map;
+
+    public MxBeanSample() {
+        map = new HashMap<String, Long>();
+        map.put("magic",42L);
+    }
 
     public int[] getNumbers() {
         return numbers;

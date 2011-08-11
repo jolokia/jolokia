@@ -212,6 +212,8 @@ public abstract class J4pRequest {
             return "[null]";
         } else if (pArg instanceof String && ((String) pArg).length() == 0) {
             return "\"\"";
+        } else if (pArg instanceof JSONAware) {
+            return ((JSONAware) pArg).toJSONString();
         } else {
             return pArg.toString();
         }

@@ -10,6 +10,9 @@ import org.jolokia.util.DateUtil;
 
 
 /**
+ * Extractor for sophisticated date handling which support virtual
+ * path handling (i.e for converting to epoch time or an ISO-8601 format)
+ *
  * @author roland
  * @since 17.04.11
  */

@@ -143,16 +143,15 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mxMap() throws MalformedObjectNameException, J4pException {
-        ComplexTestData data =  new ComplexTestData();
-        final Map<String,Boolean> input = new HashMap<String,Boolean>();
-        input.put("roland",true);
-        input.put("heino",false);
-        checkMxWrite("Map", null, input, new ResponseAssertion() {
+        final Map<String,Long> input = new HashMap<String,Long>();
+        input.put("roland",13L);
+        input.put("heino",19L);
+        checkMxWrite(new String[] { "POST"},"Map", null, input, new ResponseAssertion() {
             public void assertResponse(J4pResponse resp) {
                 JSONObject val = (JSONObject)resp.getValue();
                 assertEquals(val.size(), input.size());
                 for (String key : input.keySet()) {
-                    assertEquals(val.get(key), input.get(key));
+                    assertEquals(input.get(key),val.get(key));
                 }
             }
         });
