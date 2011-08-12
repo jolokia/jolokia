@@ -36,13 +36,17 @@ import org.jolokia.util.ConfigKey;
  * @author roland
  * @since 12.08.11
  */
+@SuppressWarnings("PMD.SystemPrintln" )
 public class JolokiaServer {
 
     public static final int DEFAULT_PORT = 8778;
     public static final int DEFAULT_BACKLOG = 10;
     public static final String DEFAULT_PROTOCOL = "http";
 
-    private Map<String,String> config;
+    // Jolokia configuration is used for general jolokia config, the untyped configuration
+    // is used for this agent only
+    private Map<String,String> agentConfig;
+    private Map<ConfigKey,String> jolokiaConfig;
 
     private CleanupThread cleaner = null;
 
@@ -51,7 +55,9 @@ public class JolokiaServer {
     private String url;
 
     public JolokiaServer(Map<String, String> pConfig) throws IOException {
-        this.config = pConfig;
+        this.agentConfig = pConfig;
+        jolokiaConfig = ConfigKey.extractConfig(agentConfig);
+
         initServer();
     }
 
@@ -86,9 +92,6 @@ public class JolokiaServer {
     // =========================================================================================
 
     private void initServer() throws IOException {
-        // Jolokia configuration is used for general jolokia config, the untype configuration
-        // is used for this agent only
-        final Map<ConfigKey,String> jolokiaConfig = ConfigKey.extractConfig(config);
 
         int port = getPort();
         InetAddress address = getLocalAddress();
@@ -96,14 +99,14 @@ public class JolokiaServer {
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
         if (protocol.equalsIgnoreCase("https")) {
-            httpServer = createHttpsServer(socketAddress, config);
+            httpServer = createHttpsServer(socketAddress);
         } else {
-            httpServer = HttpServer.create(socketAddress,getBacklog(config));
+            httpServer = HttpServer.create(socketAddress,getBacklog());
         }
 
 
         // Create proper context along with handler
-        final String contextPath = getContextPath(jolokiaConfig);
+        final String contextPath = getContextPath();
         HttpContext context = httpServer.createContext(contextPath, new JolokiaHttpHandler(jolokiaConfig));
 
         // Special customizations
@@ -118,23 +121,17 @@ public class JolokiaServer {
     private void addAuthenticatorIfNeeded(final String user, final String password, HttpContext pContext) {
         if (user != null) {
             if (password == null) {
-                throw new SecurityException("No user and/or password given: user = " + user +
-                                            ", password = " + (password != null ? "(set)" : "null"));
+                throw new SecurityException("No password given for user " + user);
             }
-            pContext.setAuthenticator(new BasicAuthenticator("jolokia") {
-                @Override
-                public boolean checkCredentials(String pUserGiven, String pPasswordGiven) {
-                    return user.equals(pUserGiven) && password.equals(pPasswordGiven);
-                }
-            });
+            pContext.setAuthenticator(new JolokiaAuthenticator(user,password));
         }
     }
 
     private void initializeExecutor() {
         Executor result;
-        String executor = config.get("executor");
+        String executor = agentConfig.get("executor");
         if ("fixed".equalsIgnoreCase(executor)) {
-            String nrS = config.get("threadNr");
+            String nrS = agentConfig.get("threadNr");
             int threads = 5;
             if (nrS != null) {
                 threads = Integer.parseInt(nrS);
@@ -152,7 +149,7 @@ public class JolokiaServer {
     }
 
     private String getProtocol() {
-        if ("https".equals(config.get("protocol"))) {
+        if ("https".equals(agentConfig.get("protocol"))) {
             return "https";
         } else {
             return DEFAULT_PROTOCOL;
@@ -160,24 +157,31 @@ public class JolokiaServer {
     }
 
     private InetAddress getLocalAddress() throws UnknownHostException {
-        if (config.get("host") != null) {
-            return InetAddress.getByName(config.get("host"));
+        if (agentConfig.get("host") != null) {
+            return InetAddress.getByName(agentConfig.get("host"));
         } else {
             return InetAddress.getLocalHost();
         }
     }
 
     private int getPort() {
-        if (config.get("port") != null) {
-            return Integer.parseInt(config.get("port"));
+        if (agentConfig.get("port") != null) {
+            return Integer.parseInt(agentConfig.get("port"));
         } else {
             return DEFAULT_PORT;
         }
     }
 
+    private int getBacklog() {
+        if (agentConfig.get("backlog") != null) {
+            return Integer.parseInt(agentConfig.get("backlog"));
+        } else {
+            return DEFAULT_BACKLOG;
+        }
+    }
 
-    private String getContextPath(Map<ConfigKey, String> pConfig) {
-        String context = pConfig.get(ConfigKey.AGENT_CONTEXT);
+    private String getContextPath() {
+        String context = jolokiaConfig.get(ConfigKey.AGENT_CONTEXT);
         if (context == null) {
             context = ConfigKey.AGENT_CONTEXT.getDefaultValue();
         }
@@ -187,22 +191,27 @@ public class JolokiaServer {
         return context;
     }
 
+    private boolean useClientAuthentication() {
+        String auth = agentConfig.get("useSslClientAuthentication");
+        return auth != null && Boolean.getBoolean(auth);
+    }
+
 
     // =========================================================================================================
     // HTTPS handling
 
-    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress, final Map<String,String> pConfig) {
+    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress) {
         // initialise the HTTPS server
         try {
-            HttpsServer server = HttpsServer.create(pSocketAddress, getBacklog(pConfig));
+            HttpsServer server = HttpsServer.create(pSocketAddress, getBacklog());
             SSLContext sslContext = SSLContext.getInstance("TLS");
 
             // initialise the keystore
-            char[] password = getKeystorePassword(pConfig);
+            char[] password = getKeystorePassword(agentConfig);
             KeyStore ks = KeyStore.getInstance ("JKS");
             FileInputStream fis = null;
             try {
-                fis = new FileInputStream (getKeystore(pConfig));
+                fis = new FileInputStream (getKeystore(agentConfig));
                 ks.load(fis, password);
             } finally {
                 if (fis != null) {
@@ -218,25 +227,8 @@ public class JolokiaServer {
             tmf.init(ks);
 
             // setup the HTTPS context and parameters
-            sslContext.init (kmf.getKeyManagers(),tmf.getTrustManagers(), null);
-            server.setHttpsConfigurator (new HttpsConfigurator(sslContext) {
-                public void configure(HttpsParameters params) {
-                    try {
-                        // initialise the SSL context
-                        SSLContext context = SSLContext.getDefault();
-                        SSLEngine engine = context.createSSLEngine();
-                        // TODO: Allow client authentication via configuration
-                        params.setNeedClientAuth(getClientSslAuthentication(pConfig));
-                        params.setCipherSuites(engine.getEnabledCipherSuites());
-                        params.setProtocols(engine.getEnabledProtocols());
-
-                        // get the default parameters
-                        params.setSSLParameters(context.getDefaultSSLParameters());
-                    } catch (NoSuchAlgorithmException e) {
-                        System.err.println("jolokia: Exception while configuring SSL context: " + e);
-                    }
-                }
-            });
+            sslContext.init(kmf.getKeyManagers(),tmf.getTrustManagers(), null);
+            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext,useClientAuthentication()));
             return server;
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
@@ -245,12 +237,7 @@ public class JolokiaServer {
         }
     }
 
-    private static boolean getClientSslAuthentication(Map<String, String> pConfig) {
-        String auth = pConfig.get("useSslClientAuthentication");
-        return auth != null && Boolean.getBoolean(auth);
-    }
-
-    private static String getKeystore(Map<String, String> pConfig) {
+    private String getKeystore(Map<String, String> pConfig) {
         String keystore = pConfig.get("keystore");
         if (keystore == null) {
             throw new IllegalArgumentException("No keystore defined for HTTPS protocol. " +
@@ -259,16 +246,53 @@ public class JolokiaServer {
         return keystore;
     }
 
-    private static char[] getKeystorePassword(Map<String, String> pConfig) {
-       String password = pConfig.get("keystorePassword");
+    private  char[] getKeystorePassword(Map<String, String> pConfig) {
+        String password = pConfig.get("keystorePassword");
         return password != null ? password.toCharArray() : new char[0];
     }
 
-    private static int getBacklog(Map<String, String> pConfig) {
-        int backLog = DEFAULT_BACKLOG;
-        if (pConfig.get("backlog") != null) {
-            backLog = Integer.parseInt(pConfig.get("backlog"));
+    // ======================================================================================
+    // Simple authenticator
+    private static class JolokiaAuthenticator extends BasicAuthenticator {
+        private String user;
+        private String password;
+
+        JolokiaAuthenticator(String pUser, String pPassword) {
+            super("jolokia");
+            user = pUser;
+            password = pPassword;
         }
-        return backLog;
+
+        public boolean checkCredentials(String pUserGiven, String pPasswordGiven) {
+            return user.equals(pUserGiven) && password.equals(pPasswordGiven);
+        }
+    }
+
+    // HTTPS configurator
+    private static class JolokiaHttpsConfigurator extends HttpsConfigurator {
+        private boolean useClientAuthentication;
+
+        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthenication) {
+            super(pSSLContext);
+            useClientAuthentication = pUseClientAuthenication;
+        }
+
+        public void configure(HttpsParameters params) {
+            try {
+                // initialise the SSL context
+                SSLContext context = SSLContext.getDefault();
+                SSLEngine engine = context.createSSLEngine();
+                // TODO: Allow client authentication via configuration
+                params.setNeedClientAuth(useClientAuthentication);
+                params.setCipherSuites(engine.getEnabledCipherSuites());
+                params.setProtocols(engine.getEnabledProtocols());
+
+                        // get the default parameters
+                params.setSSLParameters(context.getDefaultSSLParameters());
+            } catch (NoSuchAlgorithmException e) {
+                System.err.println("jolokia: Exception while configuring SSL context: " + e);
+            }
+        }
     }
 }
+

@@ -3,7 +3,6 @@ package org.jolokia.jvmagent.jdk6;
 import java.io.*;
 import java.util.*;
 
-import com.sun.net.httpserver.HttpsServer;
 import org.jolokia.util.ConfigKey;
 
 /*
