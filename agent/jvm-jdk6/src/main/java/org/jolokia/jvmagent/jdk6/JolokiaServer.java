@@ -44,7 +44,7 @@ public class JolokiaServer {
 
     private Map<String,String> config;
 
-    private CleanUpThread cleaner = null;
+    private CleanupThread cleaner = null;
 
     private HttpServer httpServer;
 
@@ -68,7 +68,7 @@ public class JolokiaServer {
             }
         });
         starterThread.start();
-        cleaner = new CleanUpThread(httpServer,threadGroup);
+        cleaner = new CleanupThread(httpServer,threadGroup);
         cleaner.start();
     }
 

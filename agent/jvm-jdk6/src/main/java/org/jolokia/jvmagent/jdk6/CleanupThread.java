@@ -27,13 +27,13 @@ import com.sun.net.httpserver.HttpServer;
  * @author roland
  * @since Mar 3, 2010
  */
-class CleanUpThread extends Thread {
+class CleanupThread extends Thread {
 
     private HttpServer server;
     private ThreadGroup threadGroup;
     private boolean active = true;
 
-    CleanUpThread(HttpServer pServer,ThreadGroup pThreadGroup) {
+    CleanupThread(HttpServer pServer, ThreadGroup pThreadGroup) {
         super("Jolokia Agent Cleanup Thread");
         server = pServer;
         threadGroup = pThreadGroup;
