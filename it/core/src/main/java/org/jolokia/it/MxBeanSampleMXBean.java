@@ -18,8 +18,6 @@ package org.jolokia.it;
 
 import java.util.Map;
 
-import com.sun.tools.jdi.LongValueImpl;
-
 /**
  * Test bean for MXBean
  *
