@@ -163,7 +163,7 @@ final class OptionsAndArgs {
             }
             if (OPTIONS.contains(opt)) {
                 // Option with argument
-                if (pNextArgument == null && value == null) {
+                if (value == null && (pNextArgument == null || pNextArgument.startsWith("-"))) {
                     throw new IllegalArgumentException("Option '" + opt + "' requires an argument");
                 }
                 return value != null ? new ArgParsed(opt, value, false) : new ArgParsed(opt,pNextArgument,true);
@@ -172,7 +172,7 @@ final class OptionsAndArgs {
             } else {
                 throw new IllegalArgumentException("Unknown option '" + opt + "'");
             }
-        } else if (pArg.startsWith("-")) {
+        } else {
             // Short option
             String opt = pArg.substring(1);
             String longOpt = SHORT_OPTS.get(opt);
@@ -180,8 +180,6 @@ final class OptionsAndArgs {
                 throw new IllegalArgumentException("No short option '" + opt + "' known");
             }
             return parseArgument("--" + longOpt,pNextArgument);
-        } else {
-            throw new IllegalArgumentException("No option '" + pArg + "' quiet known");
         }
     }
 
@@ -197,11 +195,12 @@ final class OptionsAndArgs {
             command = "list";
         } else {
             // Ok, from here on "command" and "pid" are required
-            if (command == null) {
-                throw new IllegalArgumentException("No command given");
-            }
+            // command == null and pid != null is never possible, hence command can not be null here
             if (pid == null) {
                 throw new IllegalArgumentException("No process id (PID) given");
+            }
+            if (!pid.matches("^[0-9]+$")) {
+                throw new IllegalArgumentException("Process id (PID) is not numeric");
             }
         }
     }
