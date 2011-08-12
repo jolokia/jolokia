@@ -16,7 +16,6 @@ package org.jolokia.jvmagent.jdk6.client;
  *  limitations under the License.
  */
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -24,9 +23,12 @@ import java.util.*;
 import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
 
 /**
+ * Dispatch for various attach commands
+ * 
  * @author roland
  * @since 12.08.11
  */
+@SuppressWarnings({"PMD.SystemPrintln"})
 public class CommandDispatcher {
 
     private VirtualMachineHandler vmHandler;
@@ -39,23 +41,31 @@ public class CommandDispatcher {
 
     public int dispatchCommand(Object pVm) {
         String command = options.getCommand();
-        int rc = 0;
-        if ("help".equals(command)) {
-            printHelp(options.getJarFileName());
-        } else if ("start".equals(command)) {
-            rc = commandStart(pVm);
-        } else if ("status".equals(command)) {
-            return commandStatus(pVm);
-        } else if ("stop".equals(command)) {
-            return commandStop(pVm);
-        } else if ("toggle".equals(command)) {
-            return commandToggle(pVm);
-        } else if ("list".equals(command)) {
-            listProcesses();
-        } else {
-            throw new IllegalArgumentException("Unknown command '" + command + "'");
+        try {
+            int rc = 0;
+            if ("help".equals(command)) {
+                printHelp(options.getJarFileName());
+            } else if ("start".equals(command)) {
+                rc = commandStart(pVm);
+            } else if ("status".equals(command)) {
+                return commandStatus(pVm);
+            } else if ("stop".equals(command)) {
+                return commandStop(pVm);
+            } else if ("toggle".equals(command)) {
+                return commandToggle(pVm);
+            } else if ("list".equals(command)) {
+                listProcesses();
+            } else {
+                throw new IllegalArgumentException("Unknown command '" + command + "'");
         }
-        return rc;
+            return rc;
+        } catch (InvocationTargetException e) {
+            throw new ProcessingException("InvocationTargetException for command '" + command + "'",e,options);
+        } catch (NoSuchMethodException e) {
+            throw new ProcessingException("Internal: NoSuchMethod for command '" + command + "'",e,options);
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException("IllegalAccess for command '" + command + "'",e,options);
+        }
     }
 
     // ========================================================================
@@ -64,20 +74,16 @@ public class CommandDispatcher {
     /**
      * List all available Java processes
      */
-    private void listProcesses() {
-        try {
-            Class vmClass = vmHandler.lookupVirtualMachineClass();
-            Method method = vmClass.getMethod("list");
-            List vmDescriptors = (List) method.invoke(null);
-            for (Object descriptor : vmDescriptors) {
-                Method idMethod = descriptor.getClass().getMethod("id");
-                String id = (String) idMethod.invoke(descriptor);
-                Method displayMethod = descriptor.getClass().getMethod("displayName");
-                String display = (String) displayMethod.invoke(descriptor);
-                System.out.println(new Formatter().format("%7.7s   %-100.100s",id,display));
-            }
-        } catch (Exception exp) {
-            throw new ProcessingException("Error while listing processes",exp,options);
+    private void listProcesses() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Class vmClass = vmHandler.lookupVirtualMachineClass();
+        Method method = vmClass.getMethod("list");
+        List vmDescriptors = (List) method.invoke(null);
+        for (Object descriptor : vmDescriptors) {
+            Method idMethod = descriptor.getClass().getMethod("id");
+            String id = (String) idMethod.invoke(descriptor);
+            Method displayMethod = descriptor.getClass().getMethod("displayName");
+            String display = (String) displayMethod.invoke(descriptor);
+            System.out.println(new Formatter().format("%7.7s   %-100.100s",id,display));
         }
     }
 
@@ -88,28 +94,24 @@ public class CommandDispatcher {
      * @param pVm the virtual machine
      * @return the exit code (0: success, 1: error)
      */
-    private int commandStart(Object pVm) {
-        try {
-            String agentUrl;
-            agentUrl = checkAgentUrl(pVm);
-            boolean quiet = options.isQuiet();
-            if (agentUrl == null) {
-                String agent = options.getJarFilePath();
-                loadAgent(pVm, agent, options.toAgentArg());
-                if (!quiet) {
-                    System.out.println("Started Jolokia for PID " + options.getPid());
-                    System.out.println(checkAgentUrl(pVm));
-                }
-                return 0;
-            } else {
-                if (!quiet) {
-                    System.out.println("Jolokia already attached to " + options.getPid());
-                    System.out.println(agentUrl);
-                }
-                return 1;
+    private int commandStart(Object pVm) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        String agentUrl;
+        agentUrl = checkAgentUrl(pVm);
+        boolean quiet = options.isQuiet();
+        if (agentUrl == null) {
+            String agent = options.getJarFilePath();
+            loadAgent(pVm, agent, options.toAgentArg());
+            if (!quiet) {
+                System.out.println("Started Jolokia for PID " + options.getPid());
+                System.out.println(checkAgentUrl(pVm));
             }
-        } catch (Exception e) {
-            throw new ProcessingException("Error while starting agent",e,options);
+            return 0;
+        } else {
+            if (!quiet) {
+                System.out.println("Jolokia already attached to " + options.getPid());
+                System.out.println(agentUrl);
+            }
+            return 1;
         }
     }
 
@@ -125,26 +127,22 @@ public class CommandDispatcher {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
      */
-    private int commandStop(Object pVm) {
-        try {
-            String agentUrl = checkAgentUrl(pVm);
-            boolean quiet = options.isQuiet();
-            if (agentUrl != null) {
-                String agent = options.getJarFilePath();
-                String agentOpts =  options.toAgentArg();
-                loadAgent(pVm, agent, agentOpts.length() != 0 ? agentOpts + ",mode=stop" : "mode=stop");
-                if (!quiet) {
-                    System.out.println("Stopped Jolokia for PID " + options.getPid());
-                }
-                return 0;
-            } else {
-                if (!quiet) {
-                    System.out.println("Jolokia is not attached to PID " + options.getPid());
-                }
-                return 1;
+    private int commandStop(Object pVm) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        String agentUrl = checkAgentUrl(pVm);
+        boolean quiet = options.isQuiet();
+        if (agentUrl != null) {
+            String agent = options.getJarFilePath();
+            String agentOpts =  options.toAgentArg();
+            loadAgent(pVm, agent, agentOpts.length() != 0 ? agentOpts + ",mode=stop" : "mode=stop");
+            if (!quiet) {
+                System.out.println("Stopped Jolokia for PID " + options.getPid());
             }
-        } catch (Exception e) {
-            throw new ProcessingException("Error while stopping agent",e,options);
+            return 0;
+        } else {
+            if (!quiet) {
+                System.out.println("Jolokia is not attached to PID " + options.getPid());
+            }
+            return 1;
         }
     }
 

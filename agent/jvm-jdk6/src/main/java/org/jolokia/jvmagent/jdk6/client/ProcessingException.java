@@ -30,6 +30,7 @@ public class ProcessingException extends RuntimeException {
         verbose = pOptions.isVerbose();
     }
 
+    @SuppressWarnings({"PMD.SystemPrintln"})
     public void printErrorMessage() {
         if (!quiet) {
             System.err.println(getMessage() + ": " + getCause());

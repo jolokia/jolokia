@@ -1,10 +1,5 @@
 package org.jolokia.jvmagent.jdk6.client;
 
-import java.io.File;
-import java.net.URISyntaxException;
-
-import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -45,7 +40,7 @@ public final class AgentLauncher {
      * @param args command line arguments
      */
     public static void main(String... args) {
-        OptionsAndArgs options = null;
+        OptionsAndArgs options;
         try {
             options = new OptionsAndArgs(args);
             VirtualMachineHandler vmHandler = new VirtualMachineHandler(options);

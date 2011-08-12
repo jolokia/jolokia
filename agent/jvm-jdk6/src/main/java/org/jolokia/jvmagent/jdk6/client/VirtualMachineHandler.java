@@ -82,8 +82,12 @@ public class VirtualMachineHandler {
                 Method method = clazz.getMethod("detach");
                 method.invoke(pVm);
             }
-        } catch (Exception exp) {
-            throw new ProcessingException("Error while detaching",exp, options);
+        } catch (InvocationTargetException e) {
+            throw new ProcessingException("Error while detaching",e, options);
+        } catch (NoSuchMethodException e) {
+            throw new ProcessingException("Error while detaching",e, options);
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException("Error while detaching",e, options);
         }
     }
     // ========================================================================================================

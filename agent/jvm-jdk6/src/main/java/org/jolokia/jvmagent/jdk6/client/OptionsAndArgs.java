@@ -216,8 +216,7 @@ final class OptionsAndArgs {
                                     .getLocation()
                                     .toURI());
         } catch (URISyntaxException e) {
-            System.err.println("Error: Cannot lookup jar for this class: " + e);
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Error: Cannot lookup jar for this class: " + e,e);
         }
     }
 
