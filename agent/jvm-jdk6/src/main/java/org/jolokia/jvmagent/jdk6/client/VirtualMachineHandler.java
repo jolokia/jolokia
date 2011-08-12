@@ -166,8 +166,8 @@ public class VirtualMachineHandler {
     // Process descriptions
 
     static class ProcessDesc {
-        String id;
-        String display;
+        private String id;
+        private String display;
 
         public ProcessDesc(String pId, String pDisplay) {
             id = pId;
