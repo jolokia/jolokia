@@ -20,7 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import org.jolokia.jvmagent.jdk6.JolokiaServer;
 import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
+import org.jolokia.util.ConfigKey;
 
 /**
  * Dispatch for various attach commands
@@ -216,8 +218,8 @@ public class CommandDispatcher {
 "\n" +
 "    --host <host>                 Hostname or IP address to which to bind on\n" +
 "                                  (default: InetAddress.getLocalHost())\n" +
-"    --port <port>                 Port to listen on (default: " + JvmAgentJdk6.DEFAULT_PORT + ")\n" +
-"    --agentContext <context>      HTTP Context under which the agent is reachable (default: " + JvmAgentJdk6.JOLOKIA_CONTEXT + ")\n" +
+"    --port <port>                 Port to listen on (default: " + JolokiaServer.DEFAULT_PORT + ")\n" +
+"    --agentContext <context>      HTTP Context under which the agent is reachable (default: " + ConfigKey.AGENT_CONTEXT.getDefaultValue() + ")\n" +
 "    --user <user>                 User used for Basic-Authentication\n" +
 "    --password <password>         Password used for Basic-Authentication\n" +
 "    --quiet                       No output. \"status\" will exit with code 0 if the agent is running, 1 otherwise\n" +
