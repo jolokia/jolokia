@@ -503,6 +503,25 @@
     </profile>
 
     <profile>
+      <id>java5</id>
+      <activation>
+        <jdk>1.5</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+                <excludedGroups>java6</excludedGroups>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
+    <profile>
       <id>roo</id>
       <modules>
         <module>tools/roo-addon</module>

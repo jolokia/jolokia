@@ -44,7 +44,7 @@ public final class AgentLauncher {
         try {
             options = new OptionsAndArgs(args);
             VirtualMachineHandler vmHandler = new VirtualMachineHandler(options);
-            CommandDispatcher dispatcher = new CommandDispatcher(vmHandler,options);
+            CommandDispatcher dispatcher = new CommandDispatcher(options);
 
             // Attach a VirtualMachine to a given PID (if PID is given)
             Object vm = vmHandler.attachVirtualMachine();
@@ -52,7 +52,7 @@ public final class AgentLauncher {
             // Dispatch command
             int exitCode = 0;
             try {
-                exitCode = dispatcher.dispatchCommand(vm);
+                exitCode = dispatcher.dispatchCommand(vm,vmHandler);
             } finally {
                 vmHandler.detachAgent(vm);
             }

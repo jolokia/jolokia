@@ -20,6 +20,8 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A handler for dealing with <code>VirtualMachine</code> without directly referencing internally
@@ -90,6 +92,29 @@ public class VirtualMachineHandler {
             throw new ProcessingException("Error while detaching",e, options);
         }
     }
+
+    /**
+     * Return a list of all Java processes
+     * @return list of java processes
+     * @throws NoSuchMethodException reflection error
+     * @throws InvocationTargetException reflection error
+     * @throws IllegalAccessException reflection error
+     */
+    public List<ProcessDesc> listProcesses() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        List<ProcessDesc> ret = new ArrayList<ProcessDesc>();
+        Class vmClass = lookupVirtualMachineClass();
+        Method method = vmClass.getMethod("list");
+        List vmDescriptors = (List) method.invoke(null);
+        for (Object descriptor : vmDescriptors) {
+            Method idMethod = descriptor.getClass().getMethod("id");
+            String id = (String) idMethod.invoke(descriptor);
+            Method displayMethod = descriptor.getClass().getMethod("displayName");
+            String display = (String) displayMethod.invoke(descriptor);
+            ret.add(new ProcessDesc(id, display));
+        }
+        return ret;
+    }
+
     // ========================================================================================================
 
     // Try hard to load the VirtualMachine class
@@ -137,5 +162,25 @@ public class VirtualMachineHandler {
     }
 
 
+    // =========================================================================================
+    // Process descriptions
+
+    static class ProcessDesc {
+        String id;
+        String display;
+
+        public ProcessDesc(String pId, String pDisplay) {
+            id = pId;
+            display = pDisplay;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getDisplay() {
+            return display;
+        }
+    }
 }
 

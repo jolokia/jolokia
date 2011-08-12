@@ -77,7 +77,7 @@ final class OptionsAndArgs {
      * @param pArgs arguments as given on the command line
      * @throws IllegalArgumentException if parsing fails
      */
-    public OptionsAndArgs(String[] pArgs) {
+    public OptionsAndArgs(String ... pArgs) {
         options = new HashMap<String, String>();
 
         // Parse options
@@ -196,11 +196,13 @@ final class OptionsAndArgs {
         } else {
             // Ok, from here on "command" and "pid" are required
             // command == null and pid != null is never possible, hence command can not be null here
-            if (pid == null) {
-                throw new IllegalArgumentException("No process id (PID) given");
-            }
-            if (!pid.matches("^[0-9]+$")) {
-                throw new IllegalArgumentException("Process id (PID) is not numeric");
+            if (!"list".equals(command)) {
+                if (pid == null) {
+                    throw new IllegalArgumentException("No process id (PID) given");
+                }
+                if (!pid.matches("^[0-9]+$")) {
+                    throw new IllegalArgumentException("Process id (PID) is not numeric");
+                }
             }
         }
     }

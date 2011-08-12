@@ -31,15 +31,13 @@ import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
 @SuppressWarnings({"PMD.SystemPrintln"})
 public class CommandDispatcher {
 
-    private VirtualMachineHandler vmHandler;
     private OptionsAndArgs options;
 
-    public CommandDispatcher(VirtualMachineHandler pVmHandler, OptionsAndArgs pOptions) {
-        vmHandler = pVmHandler;
+    CommandDispatcher(OptionsAndArgs pOptions) {
         options = pOptions;
     }
 
-    public int dispatchCommand(Object pVm) {
+    public int dispatchCommand(Object pVm,VirtualMachineHandler pHandler) {
         String command = options.getCommand();
         try {
             int rc = 0;
@@ -54,7 +52,7 @@ public class CommandDispatcher {
             } else if ("toggle".equals(command)) {
                 return commandToggle(pVm);
             } else if ("list".equals(command)) {
-                listProcesses();
+                listProcesses(pHandler);
             } else {
                 throw new IllegalArgumentException("Unknown command '" + command + "'");
         }
@@ -73,17 +71,15 @@ public class CommandDispatcher {
 
     /**
      * List all available Java processes
+     * @throws IllegalAccessException reflection error
+     * @throws NoSuchMethodException reflection error
+     * @throws InvocationTargetException reflection error
+     * @param pHandler
      */
-    private void listProcesses() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Class vmClass = vmHandler.lookupVirtualMachineClass();
-        Method method = vmClass.getMethod("list");
-        List vmDescriptors = (List) method.invoke(null);
-        for (Object descriptor : vmDescriptors) {
-            Method idMethod = descriptor.getClass().getMethod("id");
-            String id = (String) idMethod.invoke(descriptor);
-            Method displayMethod = descriptor.getClass().getMethod("displayName");
-            String display = (String) displayMethod.invoke(descriptor);
-            System.out.println(new Formatter().format("%7.7s   %-100.100s",id,display));
+    private void listProcesses(VirtualMachineHandler pHandler) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        List<VirtualMachineHandler.ProcessDesc> vmDescriptors = pHandler.listProcesses();
+        for (VirtualMachineHandler.ProcessDesc descriptor : vmDescriptors) {
+            System.out.println(new Formatter().format("%7.7s   %-100.100s",descriptor.getId(),descriptor.getDisplay()));
         }
     }
 
@@ -176,14 +172,10 @@ public class CommandDispatcher {
      * @param pVm virtual machine
      * @return 0 if toggling was successful, false otherwise
      */
-    private int commandToggle(Object pVm) {
-        try {
-            return checkAgentUrl(pVm) == null ?
-                    commandStart(pVm) :
-                    commandStop(pVm);
-        } catch (Exception exp) {
-            throw new ProcessingException("Error while toggling options",exp,options);
-        }
+    private int commandToggle(Object pVm) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        return checkAgentUrl(pVm) == null ?
+                commandStart(pVm) :
+                commandStop(pVm);
     }
 
     // =============================================================================================================
