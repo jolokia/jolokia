@@ -153,24 +153,20 @@ public class CommandDispatcher {
      * @param pVm the virtual machine
      * @return the exit code (0: agent is attached, 1: agent is not attached.)
      */
-    private int commandStatus(Object pVm){
-        try {
-            String agentUrl = checkAgentUrl(pVm);
-            boolean quiet = options.isQuiet();
-            if (agentUrl != null) {
-                if (!quiet) {
-                    System.out.println("Jolokia started for PID " + options.getPid());
-                    System.out.println(agentUrl);
-                }
-                return 0;
-            } else {
-                if (!quiet) {
-                    System.out.println("No Jolokia agent attached to PID " + options.getPid());
-                }
-                return 1;
+    private int commandStatus(Object pVm) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        String agentUrl = checkAgentUrl(pVm);
+        boolean quiet = options.isQuiet();
+        if (agentUrl != null) {
+            if (!quiet) {
+                System.out.println("Jolokia started for PID " + options.getPid());
+                System.out.println(agentUrl);
             }
-        } catch (Exception exp) {
-            throw new ProcessingException("Error while checking agent's status",exp,options);
+            return 0;
+        } else {
+            if (!quiet) {
+                System.out.println("No Jolokia agent attached to PID " + options.getPid());
+            }
+            return 1;
         }
     }
 
