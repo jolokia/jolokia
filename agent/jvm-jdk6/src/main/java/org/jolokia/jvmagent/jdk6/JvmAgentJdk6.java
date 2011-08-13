@@ -1,9 +1,7 @@
 package org.jolokia.jvmagent.jdk6;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
 
-import org.jolokia.util.ConfigKey;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -26,7 +24,7 @@ import org.jolokia.util.ConfigKey;
  * A JVM level agent using the JDK6 HTTP Server {@link com.sun.net.httpserver.HttpServer} or
  * its SSL variant {@link com.sun.net.httpserver.HttpsServer}.
  *
- * Beside the configuration defined in {@link ConfigKey}, this agent honors the following
+ * Beside the configuration defined in {@link org.jolokia.util.ConfigKey}, this agent honors the following
  * additional configuration keys:
  *
  * <ul>
@@ -67,11 +65,7 @@ public final class JvmAgentJdk6 {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        try {
-            startAgent(parseArgs(agentArgs));
-        } catch(IOException ioe) {
-            System.err.println("Jolokia: Cannot create HTTP-Server: " + ioe);
-        }
+        startAgent(new ServerConfig(agentArgs));
     }
 
     /**
@@ -81,91 +75,45 @@ public final class JvmAgentJdk6 {
      * @param agentArgs arguments as given on the command line
      */
     public static void agentmain(String agentArgs) {
-        try {
-            Map<String,String> agentConfig = parseArgs(agentArgs);
-            if ("stop".equals(agentConfig.get("mode"))) {
-                stopAgent();
-            } else {
-                startAgent(agentConfig);
-            }
-        } catch (IOException ioe) {
-            System.err.println("Jolokia: Error starting agent: " + ioe);
+        ServerConfig config = new ServerConfig(agentArgs);
+        if (!config.isModeStop()) {
+            startAgent(config);
+        } else {
+            stopAgent();
         }
     }
 
-    private static void startAgent(Map<String, String> agentConfig) throws IOException {
-        server = new JolokiaServer(agentConfig);
+    private static void startAgent(ServerConfig pConfig)  {
+        try {
+            server = new JolokiaServer(pConfig);
 
-        String url = server.getUrl();
-        System.setProperty(JOLOKIA_AGENT_URL, url);
-        System.out.println("Jolokia: Agent started with URL " + url);
+            server.start();
+            setStateMarker();
 
-        server.start();
+            System.out.println("Jolokia: Agent started with URL " + server.getUrl());
+        } catch (RuntimeException exp) {
+            System.err.println("Could not start Jolokia agent: " + exp);
+        } catch (IOException exp) {
+            System.err.println("Could not start Jolokia agent: " + exp);
+        }
     }
 
     private static void stopAgent() {
+        try {
+            server.stop();
+            clearStateMarker();
+        } catch (RuntimeException exp) {
+            System.err.println("Could not stop Jolokia agent: " + exp);
+        }
+    }
+
+    private static void setStateMarker() {
+        String url = server.getUrl();
+        System.setProperty(JOLOKIA_AGENT_URL, url);
+    }
+
+    private static void clearStateMarker() {
         System.clearProperty(JOLOKIA_AGENT_URL);
         System.out.println("Jolokia: Agent stopped");
-        server.stop();
     }
-
-    // ==============================================================================================
-
-    private static Map<String, String> parseArgs(String pAgentArgs) {
-        Map<String,String> ret = new HashMap<String, String>();
-        if (pAgentArgs != null && pAgentArgs.length() > 0) {
-            for (String arg : pAgentArgs.split(",")) {
-                String[] prop = arg.split("=");
-                if (prop == null || prop.length != 2) {
-                    System.err.println("jolokia: Invalid option '" + arg + "'. Ignoring");
-                } else {
-                    ret.put(prop[0],prop[1]);
-                }
-            }
-        }
-        Map<String,String> config = getDefaultConfig();
-        if (ret.containsKey("config")) {
-            Map<String,String> userConfig = readConfig(ret.get("config"));
-            config.putAll(userConfig);
-            config.putAll(ret);
-            return config;
-        } else {
-            config.putAll(ret);
-            return config;
-        }
-    }
-
-    private static Map<String, String> readConfig(String pFilename) {
-        File file = new File(pFilename);
-        try {
-            InputStream is = new FileInputStream(file);
-            return readPropertiesFromInputStream(is,pFilename);
-        } catch (FileNotFoundException e) {
-            System.err.println("jolokia: Configuration file " + pFilename + " does not exist");
-            return new HashMap<String, String>();
-        }
-    }
-
-    private static Map<String, String> getDefaultConfig() {
-        InputStream is =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("jolokia-agent.properties");
-        return readPropertiesFromInputStream(is,"jolokia-agent.properties");
-    }
-
-    private static Map<String, String> readPropertiesFromInputStream(InputStream pIs,String pLabel) {
-        Map ret = new HashMap<String, String>();
-        if (pIs == null) {
-            return ret;
-        }
-        Properties props = new Properties();
-        try {
-            props.load(pIs);
-            ret.putAll(props);
-        } catch (IOException e) {
-            System.err.println("jolokia: Cannot load default properties " + pLabel + " : " + e);
-        }
-        return ret;
-    }
-
-
 }

@@ -20,8 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import org.jolokia.jvmagent.jdk6.JolokiaServer;
-import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
+import org.jolokia.jvmagent.jdk6.*;
 import org.jolokia.util.ConfigKey;
 
 /**
@@ -218,7 +217,7 @@ public class CommandDispatcher {
 "\n" +
 "    --host <host>                 Hostname or IP address to which to bind on\n" +
 "                                  (default: InetAddress.getLocalHost())\n" +
-"    --port <port>                 Port to listen on (default: " + JolokiaServer.DEFAULT_PORT + ")\n" +
+"    --port <port>                 Port to listen on (default: 8778)\n" +
 "    --agentContext <context>      HTTP Context under which the agent is reachable (default: " + ConfigKey.AGENT_CONTEXT.getDefaultValue() + ")\n" +
 "    --user <user>                 User used for Basic-Authentication\n" +
 "    --password <password>         Password used for Basic-Authentication\n" +
