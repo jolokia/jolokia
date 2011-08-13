@@ -274,7 +274,7 @@ public class ServerConfig {
             for (String arg : pAgentArgs.split(",")) {
                 String[] prop = arg.split("=");
                 if (prop == null || prop.length != 2) {
-                    System.err.println("jolokia: Invalid option '" + arg + "'. Ignoring");
+                    throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'. Ignoring");
                 } else {
                     ret.put(prop[0],prop[1]);
                 }
@@ -318,7 +318,7 @@ public class ServerConfig {
             props.load(pIs);
             ret.putAll(props);
         } catch (IOException e) {
-            System.err.println("jolokia: Cannot load default properties " + pLabel + " : " + e);
+            throw new IllegalArgumentException("jolokia: Cannot load default properties " + pLabel + " : " + e,e);
         }
         return ret;
     }

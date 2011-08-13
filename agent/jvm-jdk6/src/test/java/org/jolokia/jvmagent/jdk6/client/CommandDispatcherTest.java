@@ -16,14 +16,14 @@ package org.jolokia.jvmagent.jdk6.client;
  *  limitations under the License.
  */
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import com.sun.tools.attach.*;
 import org.easymock.EasyMock;
 import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertEquals;
@@ -35,6 +35,8 @@ import static org.testng.Assert.assertEquals;
 @Test(groups = "java6")
 public class CommandDispatcherTest {
 
+    private PrintStream outBack, errBack;
+    private ByteArrayOutputStream outStream,errStream;
 
     @Test
     public void start() throws IOException, AgentInitializationException, AgentLoadException {
@@ -139,6 +141,32 @@ public class CommandDispatcherTest {
         return props;
     }
 
+
+    @BeforeMethod
+    void prepareOutputStreams() {
+        outBack = System.out;
+        errBack = System.err;
+
+        outStream = new ByteArrayOutputStream();
+        errStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outStream));
+        System.setErr(new PrintStream(errStream));
+    }
+
+    @AfterMethod
+    void restoreOutputStreams() {
+        System.setOut(outBack);
+        System.setErr(errBack);
+    }
+
+
+    String getError() {
+        return errStream.toString();
+    }
+
+    String getOut() {
+        return outStream.toString();
+    }
 
 
 

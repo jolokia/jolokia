@@ -35,7 +35,6 @@ import com.sun.net.httpserver.*;
  * @author roland
  * @since 12.08.11
  */
-@SuppressWarnings("PMD.SystemPrintln" )
 public class JolokiaServer {
 
 
@@ -194,7 +193,7 @@ public class JolokiaServer {
     }
 
     // HTTPS configurator
-    private final static class JolokiaHttpsConfigurator extends HttpsConfigurator {
+    private static final class JolokiaHttpsConfigurator extends HttpsConfigurator {
         private boolean useClientAuthentication;
 
         private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthenication) {

@@ -32,8 +32,6 @@ import static org.testng.Assert.*;
  */
 public class ServerConfigTest {
 
-    private PrintStream outBack, errBack;
-    private ByteArrayOutputStream outStream,errStream;
 
     @Test
     public void simple() {
@@ -74,17 +72,14 @@ public class ServerConfigTest {
         assertEquals(jolokiaConfig.get(ConfigKey.MAX_DEPTH),"42");
     }
 
-    @Test
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidOptions() {
-        prepareOutputStreams();
         new ServerConfig("port=a=1812");
-        restoreOutputStreams();
-        assertTrue(getError().contains("Invalid option"));
     }
 
     @Test
     public void readConfig() throws IOException {
-        String path = copyResourceToTemp("agent-test.properties");
+        String path = copyResourceToTemp("/agent-test.properties");
         ServerConfig config = new ServerConfig("config=" + path);
         assertEquals(config.getProtocol(), "https");
         assertEquals(config.getUser(),"roland");
@@ -121,41 +116,11 @@ public class ServerConfigTest {
         new ServerConfig("mode=blub");
     }
 
-
-
-
-
-
-
     // =======================================================================================
 
-    void prepareOutputStreams() {
-        outBack = System.out;
-        errBack = System.err;
-
-        outStream = new ByteArrayOutputStream();
-        errStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outStream));
-        System.setErr(new PrintStream(errStream));
-    }
-
-    void restoreOutputStreams() {
-        System.setOut(outBack);
-        System.setErr(errBack);
-    }
-
-
-    String getError() {
-        return errStream.toString();
-    }
-
-    String getOut() {
-        return outStream.toString();
-    }
-
     private String copyResourceToTemp(String pResource) throws IOException {
-        InputStream is =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(pResource);
+        InputStream is = this.getClass().getResourceAsStream(pResource);
+        assertNotNull(is,"Cannot find " + pResource);
         File out = File.createTempFile("prop",".properties");
         copy(is,new FileOutputStream(out));
         return out.getAbsolutePath();
@@ -171,7 +136,9 @@ public class ServerConfigTest {
             out.flush();
         }
         finally {
-            in.close();
+            if (in != null) {
+                in.close();
+            }
         }
     }
 }
