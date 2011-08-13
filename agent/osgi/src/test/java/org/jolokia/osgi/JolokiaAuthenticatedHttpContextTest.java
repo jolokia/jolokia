@@ -22,10 +22,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
+import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -46,6 +48,16 @@ public class JolokiaAuthenticatedHttpContextTest {
     }
 
     @Test
+    public void correctAuth() throws IOException {
+        expect(request.getHeader("Authorization")).andReturn("basic cm9sYW5kOnMhY3IhdA==");
+        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,"Basic");
+        request.setAttribute(HttpContext.REMOTE_USER, "roland");
+        replay(request,response);
+
+        assertTrue(context.handleSecurity(request,response));
+    }
+
+    @Test
     public void noAuth() throws IOException {
 
         expect(request.getHeader("Authorization")).andReturn(null);
@@ -53,7 +65,7 @@ public class JolokiaAuthenticatedHttpContextTest {
         response.sendError(401);
         replay(request, response);
 
-        context.handleSecurity(request,response);
+        assertFalse(context.handleSecurity(request, response));
     }
 
     @Test
@@ -64,7 +76,7 @@ public class JolokiaAuthenticatedHttpContextTest {
         response.sendError(401);
         replay(request, response);
 
-        context.handleSecurity(request,response);
+        assertFalse(context.handleSecurity(request,response));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*BasicAuthentication.*")
@@ -73,6 +85,44 @@ public class JolokiaAuthenticatedHttpContextTest {
         replay(request, response);
 
         context.handleSecurity(request,response);
+    }
+
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void decodeNull() {
+        context.decode(null);
+    }
+
+    @Test
+    public void decodeEmpty() {
+        assertEquals(context.decode("").length,0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void decodeToSmall() {
+        assertEquals(context.decode("abc").length,0);
+    }
+
+    @Test
+    public void decodeBig() {
+        byte[] res = context.decode("TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNldGV0dXIgc2FkaXBzY2luZyBlbGl0ciwg\n" +
+                                    "c2VkIGRpYW0gbm9udW15IGVpcm1vZCB0ZW1wb3IgaW52aWR1bnQgdXQgbGFib3JlIGV0IGRvbG9y\n" +
+                                    "ZSBtYWduYSBhbGlxdXlhbSBlcmF0LCBzZWQgZGlhbSB2b2x1cHR1YS4gQXQgdmVybyBlb3MgZXQg\n" +
+                                    "YWNjdXNhbSBldCBqdXN0byBkdW8gZG9sb3JlcyBldCBlYSByZWJ1bS4gU3RldCBjbGl0YSBrYXNk\n" +
+                                    "IGd1YmVyZ3Jlbiwgbm8gc2VhIHRha2ltYXRhIHNhbmN0dXMgZXN0IExvcmVtIGlwc3VtIGRvbG9y\n" +
+                                    "IHNpdCBhbWV0LiBMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldCwgY29uc2V0ZXR1ciBzYWRpcHNj\n" +
+                                    "aW5nIGVsaXRyLCBzZWQgZGlhbSBub251bXkgZWlybW9kIHRlbXBvciBpbnZpZHVudCB1dCBsYWJv\n" +
+                                    "cmUgZXQgZG9sb3JlIG1hZ25hIGFsaXF1eWFtIGVyYXQsIHNlZCBkaWFtIHZvbHVwdHVhLiBBdCB2\n" +
+                                    "ZXJvIGVvcyBldCBhY2N1c2FtIGV0IGp1c3RvIGR1byBkb2xvcmVzIGV0IGVhIHJlYnVtLiBTdGV0\n" +
+                                    "IGNsaXRhIGthc2QgZ3ViZXJncmVuLCBubyBzZWEgdGFraW1hdGEgc2FuY3R1cyBlc3QgTG9yZW0g\n" +
+                                    "aXBzdW0gZG9sb3Igc2l0IGFtZXQuIDEyMzQ1IS84Ly8vMzQ1KiY=");
+        assertEquals(new String(res),"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod " +
+                                     "tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero " +
+                                     "eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata " +
+                                     "sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing " +
+                                     "elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed " +
+                                     "diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd " +
+                                     "gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 12345!/8///345*&");
     }
 
 }
