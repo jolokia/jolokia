@@ -21,9 +21,9 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
-import com.sun.jdi.PrimitiveValue;
 import org.jolokia.converter.object.StringToObjectConverter;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 /**
  * @author roland
