@@ -214,7 +214,7 @@ public class JolokiaServer {
                 // get the default parameters
                 params.setSSLParameters(context.getDefaultSSLParameters());
             } catch (NoSuchAlgorithmException e) {
-                System.err.println("jolokia: Exception while configuring SSL context: " + e);
+                throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
             }
         }
     }
