@@ -40,7 +40,6 @@ public class FileSimplifier extends SimplifierExtractor<File> {
 
         Object[][] attrExtractors = {
                 { "name", new NameAttributeExtractor() },
-                { "modified", new ModifiedAttributeExtractor() },
                 { "length", new LengthAttributeExtractor() },
                 { "directory", new IsDirectoryAttributeExtractor() },
                 { "canonicalPath", new PathAttributeExtractor() },
@@ -56,15 +55,15 @@ public class FileSimplifier extends SimplifierExtractor<File> {
     private static class NameAttributeExtractor implements AttributeExtractor<File> {
         public Object extract(File file) { return file.getName(); }
     }
-    private static class ModifiedAttributeExtractor implements AttributeExtractor<File> {
-        public Object extract(File file) { return file.lastModified(); }
-    }
+
     private static class LengthAttributeExtractor implements AttributeExtractor<File> {
         public Object extract(File file) { return file.length(); }
     }
+
     private static class IsDirectoryAttributeExtractor implements AttributeExtractor<File> {
         public Object extract(File file) { return file.isDirectory(); }
     }
+
     private static class PathAttributeExtractor implements AttributeExtractor<File> {
         public Object extract(File file) {
             try {

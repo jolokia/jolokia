@@ -1,11 +1,15 @@
 package org.jolokia.converter.object;
 
+import java.util.Map;
+
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.*;
 
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.converter.util.CompositeTypeAndJson;
 import org.jolokia.converter.util.TabularTypeAndJson;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.BeforeTest;
@@ -109,10 +113,10 @@ public class StringToOpenTypeConverterTest {
                    BOOLEAN,"absteiger",false
                 )
         );
-        converter.convertToObject(new ArrayType(2, taj.getType()),taj.getJsonAsString());
+        JSONArray array = new JSONArray();
+        array.add(taj.getJson());
+        converter.convertToObject(new ArrayType(2, taj.getType()),array);
     }
-
-
 
     @Test
     public void compositeType() throws OpenDataException, AttributeNotFoundException, ParseException {
@@ -220,6 +224,29 @@ public class StringToOpenTypeConverterTest {
         assertEquals(col1inner.get("value"),"valueOne");
     }
 
+
+    @Test
+    public void multipleLevleTabularData() throws OpenDataException {
+        JSONObject map = new JSONObject();
+        JSONObject inner = new JSONObject();
+        map.put("fcn",inner);
+        JSONObject innerinner = new JSONObject();
+        inner.put("franconia",innerinner);
+        innerinner.put("verein","fcn");
+        innerinner.put("region","franconia");
+        innerinner.put("absteiger",false);
+
+        TabularType type = new TabularType("soccer","soccer",
+                                           new CompositeType("row","row",
+                                                             new String[] { "verein", "region", "absteiger" },
+                                                             new String[] { "verein","region","absteiger"},
+                                                             new OpenType[] { STRING, STRING, BOOLEAN}),
+                                           new String[] { "verein", "region" });
+        TabularData data = (TabularData) converter.convertToObject(type,map);
+        CompositeData row = data.get(new Object[] { "fcn", "franconia" });
+        assertNotNull(row);
+        assertFalse((Boolean) row.get("absteiger"));
+    }
 
 
 

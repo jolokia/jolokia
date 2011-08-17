@@ -29,7 +29,6 @@ import java.util.Map;
  */
 public class DomElementSimplifier extends SimplifierExtractor<Element> {
 
-
     public DomElementSimplifier() {
         super(Element.class);
     }

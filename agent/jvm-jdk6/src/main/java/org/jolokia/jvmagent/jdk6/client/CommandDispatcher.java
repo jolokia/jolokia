@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import org.jolokia.jvmagent.jdk6.*;
+import org.jolokia.jvmagent.jdk6.JvmAgentJdk6;
 import org.jolokia.util.ConfigKey;
 
 /**
@@ -233,6 +233,13 @@ public class CommandDispatcher {
 "    --keystore <keystore>         Path to keystore (https only)\n" +
 "    --keystorePassword <pwd>      Password to the keystore (https only)\n" +
 "    --useSslClientAuthentication  Use client certificate authentication (https only)\n" +
+"    --debug                       Switch on agent debugging\n" +
+"    --debugMaxEntries <nr>        Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
+"    --maxDepth <depth>            Maximum number of levels for serialization of beans (default: " + ConfigKey.MAX_DEPTH.getDefaultValue() + ")\n" +
+"    --maxCollectionSize <size>    Maximum number of element in collections to keep when serializing the response (default: " + ConfigKey.MAX_COLLECTION_SIZE.getDefaultValue() + ")\n" +
+"    --maxObjects <nr>             Maximum number of objects to consider for serialization (default: " + ConfigKey.MAX_OBJECTS + ")\n" +
+"    --policyLocation <url>        Location of a Jolokia policy file\n" +
+"    --mbeanQualifier <qualifier>  Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --config <configfile>         Path to a property file from where to read the configuration\n" +
 "    --help                        This help documentation\n" +
 "\n" +

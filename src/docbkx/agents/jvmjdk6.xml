@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="agents-jvmjdk6">
   <title>JVM JDK 1.6 Agent</title>
-
+  
   <para>
     The JVM JDK6 agent is right agent when it comes to instrument an
     arbitrary Java application which is not covered by the other
@@ -186,10 +186,11 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         over the network. 
       </para>
       <para>
-        - client options
-        - sample
+         - client options
+         - sample
         - shell sample for parsing url. 
       </para>
     </section>
     
   </section>
+</section>

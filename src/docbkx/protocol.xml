@@ -525,23 +525,34 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
             </listitem>
             <listitem>
               <classname>javax.management.openmbean.TabularData</classname>
-              is serialized into a JSON array, with the elements as
-              maps (this entries are of type
-              <classname>CompositeData</classname>). 
+              is serialized into one or multiple nested JSON objects
+              where the keys are derived from its
+              <methodname>TabularType.indexName()</methodname>. If
+              there is a single valued index, the index's value is the
+              key and a <classname>TabularData</classname>'s row
+              (which in turn is a
+              <classname>CompositeData</classname>) is a map. With
+              multi valued keys, the map is nested (first level: first
+              index's value, second level: second index's value and so
+              on). For the serialization of <classname>TabularData</classname> resulting
+              from a <classname><ulink
+              url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean</ulink></classname> translation for
+              maps, see <xref linkend="serialization-mxbean"/>
             </listitem>
             <listitem>
               <classname>java.lang.Class</classname> gets converted to
               a JSON object with keys <literal>name</literal> (the class
-              name> and <literal>interfaces</literal> (the implemented
+              name) and <literal>interfaces</literal> (the implemented
               interfaces, if any)
             </listitem>
             <listitem>
               <classname>java.io.File</classname> becomes a JSON
-              object with keys <literal>name</literal>,
-              <literal>modified</literal>, <literal>length</literal>,
-              <literal>directory</literal>,
-              <literal>canonicalPath</literal>,
-              <literal>exists</literal> and <literal>lastModified</literal>
+              object with keys <literal>name</literal> (file name),
+              <literal>modified</literal> (date of last modification),
+              <literal>length</literal> (file size in bytes),
+              <literal>directory</literal> (whether the file is a directory),
+              <literal>canonicalPath</literal> (the canonical path)
+              and <literal>exists</literal>.
             </listitem>
             <listitem>
               <classname>javax.management.ObjectName</classname> is
@@ -555,18 +566,28 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
             </listitem>
             <listitem>
               <classname>java.util.Date</classname> is represented in
-              an ISO-8601 format. When used with a path 'time' the
-              milliseconds since 1.1.1970 00:00 UTC are returned.               
+              an ISO-8601 format. When used with a path
+              <literal>time</literal> the milliseconds since 1.1.1970
+              00:00 UTC are returned.
+            </listitem>
+            <listitem>
+              <classname>org.w3c.dom.Element</classname> is translated
+              into a JSON object with the properties
+              <literal>name</literal>, <literal>value</literal> and
+              <literal>hasChildNodes</literal>.
             </listitem>
           </itemizedlist>
         </para>
         <para>
           Primitive and simple types (like String) are
-          directly converted into its string presentation. All other
-          objects of a complex type are serialized via reflection recursively.
+          directly converted into their string presentation. All
+          objects not covered by the list above are serialized in JSON
+          objects, where the keys are the public bean properties of
+          the object and the values are serialized (recursively) as
+          described.
         </para>
         <para>
-          Serialization can be influence by certain processing
+          Serialization can be influenced by certain processing
           parameters given with the request (see <xref
           linkend="processing-parameters"/>). I.e. the recursive
           process of JSON serialization can be stopped when the data
@@ -627,12 +648,25 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           for <constant>exec</constant> operations) differs from
           from the object serializaton as used as response values
           which is described in <xref
-          linkend="serialization-response"/>. The capabilities also
-          differ for POST and GET requests, where for GET requests
-          serialization is limited to basic types and simple
-          arrays. POST requests support a much more powerful
-          mechanism, including the serialization of
-          <constant>Maps</constant> and <constant>Lists</constant>.
+          linkend="serialization-response"/>. Not all types are
+          supported for upstream serialization <footnote id="upstream-serialization-comment">
+            <para>
+              Conversion from a typed system to an unptyped
+              representation is obviously much easier than vice
+              versa. Please note, that Jolokia does not replace a full
+              blown JSON object serialization framework like
+              Jackson. Nor does it use one in order to keep the agent small
+              and simple with a low dependency count.
+            </para>
+          </footnote>
+          and the capabilities differ also for POST and GET requests.
+          <literal>GET</literal> upstream serialization is limited to
+          basic types and simple arrays. POST requests on the other
+          support a much large set of types, including the
+          serialization of <constant>Maps</constant>, 
+          <constant>List</constant>s and all <ulink
+          url="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">Open
+          Types</ulink>. 
         </para>
         <section>
           <title>GET request values</title>
@@ -655,11 +689,11 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
             </itemizedlist>
           </para>
           <para>
-            The serialized value is simply the string representation of
-            those types. Dates can be set either by an long value
+            The serialized value is simply the string representation
+            of those types. Dates can be set either by an long value
             (epoch milliseconds) or with a string value (ISO-8601
-            format). Arrays of the given types are supported,
-            too. These are serialized as a comma separated list.
+            format). Arrays of the given types are serialized as a
+            comma separated list.
           </para>
           <note>
             The array support is somewhat limited since it makes a
@@ -668,10 +702,10 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
             arrays to the agent, please consider using POST requests.
           </note>
           <para>
-            Certain tag values are used to mark special values. 
-            A <constant>null</constant> value is serialized as
-            <literal>[null]</literal>, an empty String as
-            <literal>""</literal>. Tag values are not required for
+            Certain <em>tag values</em> are used to mark special
+            values.  A <constant>null</constant> value has to be
+            serialized as <literal>[null]</literal>, an empty String
+            as <literal>""</literal>. Tag values are not required for
             POST requests.
           </para>
         </section>
@@ -680,12 +714,12 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           <para>
             POST request take advantage of the JSON type of the value
             transfered. These are basic types for numbers
-            (<literal>42</literal> or <literal>23.5</literal>,
+            (<literal>42</literal> or <literal>23.5</literal>),
             booleans (<literal>true</literal> or
             <literal>false</literal>) and strings
             (<literal>"habanero"</literal>). Also, JSON knows about
             <constant>null</constant> values so no special 'tags' like
-            for GET requests are required. Since JSON supports
+            for GET requests are not required. Since JSON supports
             intrinsically key-value maps and array types, these can be
             used directly, too. I.e. if the JMX operation to execute
             takes a <constant>Map</constant> argument, the argument
@@ -701,8 +735,133 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
             (e.g. when trying to treat a long with a too large value
             as int), an exception is raised.
           </para>
+          <para>
+            Upstream serialization also supports <ulink
+            url="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">OpenType</ulink>s.
+            If the signature of JMX exec operation or the value type
+            of a JMX attribute is a <classname>OpenType</classname>,
+            they are serialized as follows:            
+          </para>
+          <itemizedlist>
+            <listitem>
+              <classname>SimpleType</classname>s are extracted from
+              their corresponding JSON type. 
+            </listitem>
+            <listitem>
+              <classname>ArrayType</classname> is extracted from a
+              <classname>JSONArray</classname> where the elements are
+              serialized recursively with this algorithms. Only
+              <classname>ArrayType</classname>s with element type
+              <classname>CompositeType</classname> or
+              <classname>SimpleType</classname> are supported. 
+            </listitem>
+            <listitem>
+              <classname>CompositeType</classname> is extracted
+              recursively from a <classname>JSONObject</classname>
+              where there the string keys must fit to the
+              <classname>CompositeType</classname>'s item names and
+              the values must be serializable as open types.
+            </listitem>
+            <listitem>
+              <para>
+                <classname>TabularType</classname> is converted from
+                <classname>JSONObject</classname>. If it is single index
+                (i.e. has only one single index name), the
+                <classname>JSONObject</classname> must have the index
+                values as string keys and the map values are other
+                <classname>JSONObject</classname>s representing the row
+                data. For <classname>TabularType</classname>s with more
+                than one index name, the incoming
+                <classname>JSONObjecct</classname> must be a nested
+                object with each index as an additional
+                layer. E.g. the following JSON object works for 
+                a <classname>TabularType</classname> with the two
+                index names <literal>lastname</literal> and
+                <literal>firstname</literal>:
+              </para>
+        <programlisting language="perl"><![CDATA[{ 
+  "Mann": {
+           "Thomas": {
+                      lastname: "Mann",
+                      firstname: "Thomas",
+                      birth: 1875
+                     },
+           "Heinrich": {
+                        lastname: "Mann",
+                        firstname: "Heinrich",
+                        birth: 1871
+                       }
+          }
+}]]></programlisting>
+              <para>
+                <classname>TabularType</classname> used by the MXBean
+                framework for serialization of Maps are translated
+                directly from maps. More details are explained in the
+                next section <xref linkend="serialization-mxbean"/>.
+              </para>
+            </listitem>
+          </itemizedlist>
+          
         </section>
       </section>
+
+      <section id="serialization-mxbean">
+        <title>Jolokia and MXBeans</title>
+        <para>
+          The <ulink url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean Framework</ulink> is availale in
+          the JRE since version 6 and allows for easy creation and
+          registration of own MBeans. MXBeans are some what the
+          successor for standard MBeans and support an annotation driven
+          as well as a naming convention driven programming model. The
+          most important difference to standard MBeans it the
+          restriction of MXBean to reference only open types.
+        </para>
+        <para>
+          Although to the outside only open types are exposed by the
+          MXBean framework, MXBean themselves can use more complex
+          data types. The framework will translate forth and back
+          between the custom and open types according to certain rules
+          as declared in the MXBean <ulink
+          url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">specification</ulink>. 
+          Most of the translations to open types fits naturally to
+          Jolokia's serialization, except for the translation of Map.
+        </para>
+        <para>
+          When an MXBean references a map, the MXBean framework
+          translates this map into a
+          <classname>TabularData</classname> with a fixed internal
+          structure, i.e. with an index <literal>key</literal> and
+          rows with keys <literal>key</literal> and
+          <literal>value</literal>. This leads direclty to a JSON
+          representation which is quite artificial. E.g a map with 
+          two keys <literal>kind</literal> and
+          <literal>hotness</literal> will be converted by the MXBean
+          framework to a TabularData object which in turn would be
+          translated by Jolokia to the following JSON struture
+        </para>
+      <programlisting><![CDATA[{
+  "kind" : { 
+             "key": "kind",
+             "value": "Habanero"
+           }, 
+  "hotness" : {
+                "key": "hotness",
+                "value": 10
+              }
+}]]></programlisting>
+      <para>
+        Since this representation of a simple map is unnecessarily
+        complicated, Jolokia treats TabularData of this kind (i.e. one
+        index <literal>key</literal> and rows with properties
+        <literal>key</literal> and <literal>value</literal>) specially
+        in order to translate it back (and forth) to
+      </para>
+      <programlisting><![CDATA[{
+  "kind" : "Habanero", 
+  "hotness" : 10
+}]]></programlisting>            
+      </section>
+      
     </section>
 
     <section id="history">
@@ -800,11 +959,42 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">4.2</emphasis>
+        protocol version <emphasis role="bold">5.0</emphasis>
       </para>
       <variablelist>
         <varlistentry>
-          <term><emphasis role="bold">4.3</emphasis>(Jolokia version 0.91)</term>
+          <term><emphasis role="bold">5.0</emphasis> (Jolokia version 0.92)</term>
+          <listitem>
+            <para>
+              <classname>javax.management.openmbean.TabularData</classname>
+              is serialized differently when generating the
+              response. In fact, the serialization as an array in
+              the former versions of this protocol is not correct,
+              since <classname>TabularData</classname> in fact is a
+              hash and not a list. It is now generated as map (or
+              multiple maps), dependening on the declared
+              <emphasis>index</emphasis>. Also, access via path is now
+              an access via key, not a list index. For the special
+              case of MXBean map serialization, where the returned
+              <classname>TabularData</classname> has a fixed format
+              (i.e. with <literal>key</literal> and
+              <literal>value</literal> columns), the
+              <classname>TabularData</classname> is transformed to an
+              appropriate map.. 
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Removed JSON property <literal>modified</literal> from
+              the serialized JSON representation of a File return
+              value since it duplicated the
+              <literal>lastModified</literal> property on the same
+              object. 
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="bold">4.3</emphasis> (Jolokia version 0.91)</term>
           <listitem>
             <para>
               The <literal>list</literal> operation supports a
@@ -814,7 +1004,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><emphasis role="bold">4.2</emphasis> (Jolokia vesion 0.90)</term>
+          <term><emphasis role="bold">4.2</emphasis> (Jolokia version 0.90)</term>
           <listitem>
             <para>
               Response values are returned in the native JSON

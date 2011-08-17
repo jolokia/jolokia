@@ -36,10 +36,16 @@ final class OptionsAndArgs {
 
     private static final Map<String,String> SHORT_OPTS = new HashMap<String, String>();
     private static final Set<String> OPTIONS = new HashSet<String>(Arrays.asList(
+                // JVM Agent options:
                 "host", "port", "agentContext", "user", "password",
                 "quiet!", "verbose!", "executor", "threadNr",
                 "backlog", "protocol", "keystore", "keystorePassword",
                 "useSslClientAuthentication!",
+                // Jolokia options:
+                "historyMaxEntries","debug!","debugMaxEntries",
+                "dispatcherClasses", "maxDepth", "maxCollectionSize",
+                "maxObjects", "policyLocation", "mbeanQualifier",
+                // Others:
                 "config", "help!"));
 
     static {

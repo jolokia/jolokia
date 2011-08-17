@@ -39,7 +39,7 @@
       <item name="JVM" href="../../agent/jvm.html"/>
       <item name="Mule" href="../../agent/mule.html"/>
     </menu>
-    <menu name="Clients" href="../../client.html">
+    <menu name="Clients">
       <item name="Java" href="../../client/java.html"/>
       <item name="Javascript" href="../../client/javascript.html"/>
       <item name="Perl" href="../../client/perl.html"/>

@@ -1,8 +1,7 @@
 package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.openmbean.*;
 
@@ -162,24 +161,32 @@ public class StringToOpenTypeConverter {
         }
 
         // =====================================================================================
-        // Its a plain TabularData, which is converted from an array of maps
+        // Its a plain TabularData, which is converted from a maps of maps
 
-        if (!(pValue instanceof JSONArray)) {
-            throw new IllegalArgumentException(
-                    "Cannot convert " + pValue + " to type " +
-                    pType + " because the data provided (" + pValue.getClass() + ") is not a JSONArray");
-        }
         TabularDataSupport tabularData = new TabularDataSupport(pType);
-        JSONArray givenValues = (JSONArray) pValue;
-
-        for (Object element : givenValues) {
-            if (!(element instanceof JSONObject)) {
-                throw new IllegalArgumentException(
-                        "Illegal structure for TabularData: Must be an array of maps, not an array of " + element.getClass());
-            }
-            tabularData.put(convertCompositeType(rowType, (JSONObject) element));
+        if (!(pValue instanceof JSONObject)) {
+            throw new IllegalArgumentException("Expected JSON type for a TabularData is JSONObject, not " + pValue.getClass());
         }
+        putRowsToTabularData(tabularData, (JSONObject) pValue, pType.getIndexNames().size());
+
         return tabularData;
+    }
+
+    private void putRowsToTabularData(TabularDataSupport pTabularData, JSONObject pValue, int pLevel) {
+        TabularType type = pTabularData.getTabularType();
+        for (Object value : pValue.values()) {
+            if (!(value instanceof JSONObject)) {
+                throw new IllegalArgumentException(
+                        "Cannot convert " + pValue + " to type " +
+                        type + " because the object values provided (" + value.getClass() + ") is not of the expected type JSONObject at level " + pLevel);
+            }
+            JSONObject jsonValue = (JSONObject) value;
+            if (pLevel > 1) {
+                putRowsToTabularData(pTabularData, jsonValue, pLevel - 1);
+            } else {
+                pTabularData.put(convertCompositeType(type.getRowType(),jsonValue));
+            }
+        }
     }
 
     private TabularData convertToTabularTypeFromMap(TabularType pType, JSONAware pValue, CompositeType pRowType) {
