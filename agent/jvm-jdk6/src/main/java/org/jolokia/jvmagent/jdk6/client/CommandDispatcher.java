@@ -199,6 +199,7 @@ public class CommandDispatcher {
         return (Properties) method.invoke(pVm);
     }
 
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     public static void printHelp(String jar) {
         System.out.println(
 "Jolokia Agent Launcher\n" +
