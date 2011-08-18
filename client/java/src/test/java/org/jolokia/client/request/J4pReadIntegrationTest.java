@@ -16,11 +16,9 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
+import java.awt.peer.LightweightPeer;
 import java.util.*;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.*;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -29,10 +27,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.*;
+import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.*;
 
 /**
  * Integration test for reading attributes
@@ -236,6 +234,41 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
+
+    @Test
+    public void mxBeanReadTest() throws MalformedObjectNameException, J4pException {
+        J4pReadRequest request = new J4pReadRequest("jolokia.it:type=mxbean","ComplexTestData");
+        J4pReadResponse response = j4pClient.execute(request);
+        JSONObject value = response.getValue();
+        assertEquals(value.get("number"),1968L);
+        assertEquals(value.get("string"),"late");
+
+        List set = (List) value.get("set");
+        assertEquals(set.size(),2);
+        assertTrue(set.contains(12L));
+        assertTrue(set.contains(14L));
+
+        Map map = (Map) value.get("map");
+        assertEquals(map.size(),2);
+        assertEquals(map.get("kill"), true);
+        assertEquals(map.get("bill"), false);
+
+        List array = (List) value.get("stringArray");
+        assertEquals(array.size(),2);
+        assertTrue(array.contains("toy"));
+        assertTrue(array.contains("story"));
+
+        List<Boolean> list = (List<Boolean>) value.get("list");
+        assertEquals(list.size(),3);
+        assertTrue(list.get(0));
+        assertFalse(list.get(1));
+        assertTrue(list.get(2));
+
+        Map complex = (Map) value.get("complex");
+        List innerList = (List) complex.get("hidden");
+        Map innerInnerMap = (Map) innerList.get(0);
+        assertEquals(innerInnerMap.get("deep"), "inside");
+    }
 
     private void checkNames(String pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
         for (int i = 0;i<pNames.length;i++) {

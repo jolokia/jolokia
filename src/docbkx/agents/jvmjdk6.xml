@@ -15,6 +15,7 @@
   </para>
 
   <section id="jvmjdk6-agent">
+    <title>Jolokia as JVM Agent</title>
     <para>
       The JVM JDK6 agent uses the <ulink
       url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
@@ -34,7 +35,7 @@
       <title>Installation</title>
       <para>
         This agent gets installed by providing a single startup option
-        <const>-javaagent</const> when starting the Java process. 
+        <literal>-javaagent</literal> when starting the Java process. 
       </para>
       <programlisting language="xml"><![CDATA[
 java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
@@ -58,7 +59,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>agentContext</constant></td>
           <td>
             Context under which the agent is deployed. The full URL
-            will be <const>protocol://host:port/agentContext</const>
+            will be <literal>protocol://host:port/agentContext</literal>
           </td>        
           <td>
             <constant>/jolokia</constant>
@@ -85,8 +86,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>protocol</constant></td>
           <td>
-            HTTP protocol to use. Should be either <const>http</const>
-            or <const>https</const>. For the SSL stack there are various
+            HTTP protocol to use. Should be either <literal>http</literal>
+            or <literal>https</literal>. For the SSL stack there are various
             additional configuration options. 
           </td>        
           <td>
@@ -106,14 +107,35 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>executor</constant></td>
           <td>
             Threading model of the HTTP server:
-            <ul>
-              <li><strong>fixed</strong> - Thread pool with a fixed
-              number of threads (see also
-              <constant>threadNr</constant>)</li> 
-              <li><strong>cached</strong> - Cached thred pool which
-              creates threads on demand</li>
-              <li><strong>single</strong> - A single thread only</li>
-            </ul>
+            <variablelist>
+              <varlistentry>
+                <term><literal>fixed</literal></term>
+                <listitem>
+                  <para>
+                    Thread pool with a fixed
+                    number of threads (see also
+                    <constant>threadNr</constant>)
+                  </para>
+                </listitem>
+              </varlistentry>    
+              <varlistentry>
+                <term><literal>cached</literal></term>
+                <listitem>
+                  <para>
+                    Cached thred pool which
+                    creates threads on demand
+                  </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><literal>fixed</literal></term>
+                <listitem>
+                  <para>
+                    A single thread only
+                  </para>
+                </listitem>
+              </varlistentry>    
+            </variablelist>
           </td>        
           <td>
             <constant>single</constant>
@@ -149,8 +171,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>useSslClientAuthentication</constant></td>
           <td>
             Whether client certificates should be used for
-            authentication (https only). (<const>true</const> or
-            <const>false</const>). 
+            authentication (https only). (<constant>true</constant> or
+            <constant>false</constant>). 
           </td>        
           <td>
             <constant>false</constant>
@@ -175,22 +197,188 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         contacting the agent. 
       </para>
     </section>
-    <section id="jvmjdk6-attach">
-      <para>
-        A Jolokia can be attached to any running Java process as long
-        as the user has sufficient access privileges for the process. 
-        This agent uses the <ulink url="">Java attach API</ulink> for
-        dynamically attaching and detaching. It works similar to
-        JConsole connecting to a local process. The Jolokia advantage
-        is, that after the agent is started, it can be reached
-        over the network. 
-      </para>
-      <para>
-         - client options
-         - sample
-        - shell sample for parsing url. 
-      </para>
-    </section>
-    
+  </section>
+  <section id="jvmjdk6-attach">
+    <title>Attaching a Jolokia agent on the fly</title>
+    <para>
+      A Jolokia agent can be attached to any running Java process as
+      long as the user has sufficient access privileges for
+      accessing the process.  This agent uses the <ulink
+      url="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html">Java 
+      attach API</ulink> for dynamically attaching and detaching to
+      and from the process. It works similar to JConsole connecting
+      to a local process. The Jolokia advantage is, that after the
+      start of the agent, it can be reached over the network.
+    </para>
+    <para>
+      The JAR containing the JVM JDK6 agent also contains a client
+      application which can be reached via the
+      <literal>-jar</literal> option. Call it with
+      <literal>--help</literal> to get a short usage information:
+    </para>
+    <programlisting><![CDATA[
+$ java -jar jolokia-jvm-jdk6-0.92-agent.jar --help
+
+Jolokia Agent Launcher
+======================
+
+Usage: java -jar jolokia-jvm-jdk6-0.92-SNAPSHOT-agent.jar [options] <command> <pid>
+
+where <command> is one of
+    start     -- Start a Jolokia agent for the given process id
+    stop      -- Stop a Jolokia agent for the given process id
+    status    -- Show status of an (potentially) attached agent
+    toggle    -- Toggle between start/stop (default when no command is given)
+    list      -- List all attachable Java processes (default when no argument is given)
+
+[options] are used for providing runtime information for attaching the agent:
+
+    --host <host>                 Hostname or IP address to which to bind on
+                                  (default: InetAddress.getLocalHost())
+    --port <port>                 Port to listen on (default: 8778)
+    --agentContext <context>      HTTP Context under which the agent is reachable (default: /jolokia)
+    --user <user>                 User used for Basic-Authentication
+    --password <password>         Password used for Basic-Authentication
+    --quiet                       No output. "status" will exit with code 0 if the agent is running, 
+                                  1 otherwise
+    --verbose                     Verbose output
+    --executor <executor>         Executor policy for HTTP Threads to use (default: single)
+                                  "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                  "cached" -- Cached Thread Pool, creates threads on demand
+                                  "single" -- Single Thread
+    --threadNr <nr threads>       Number of fixed threads if "fixed" is used as executor
+    --backlog <backlog>           How many request to keep in the backlog (default: 10)
+    --protocol <http|https>       Protocol which must be either "http" or "https" (default: http)
+    --keystore <keystore>         Path to keystore (https only)
+    --keystorePassword <pwd>      Password to the keystore (https only)
+    --useSslClientAuthentication  Use client certificate authentication (https only)
+    --debug                       Switch on agent debugging
+    --debugMaxEntries <nr>        Number of debug entries to keep in memory which can be fetched 
+                                  from the Jolokia MBean
+    --maxDepth <depth>            Maximum number of levels for serialization of beans (default: null)
+    --maxCollectionSize <size>    Maximum number of element in collections to keep when serializing the 
+                                  response (default: null)
+    --maxObjects <nr>             Maximum number of objects to consider for serialization 
+                                  (default: maxObjects)
+    --policyLocation <url>        Location of a Jolokia policy file
+    --mbeanQualifier <qualifier>  Qualifier to use when registering Jolokia internal MBeans
+    --config <configfile>         Path to a property file from where to read the configuration
+    --help                        This help documentation
+
+If no <command> is given but only a <pid> the state of the Agent will be toggled
+between "start" and "stop"
+
+If neither <command> nor <pid> is given, a list of Java processes along with their IDs
+is printed
+
+For more information please visit www.jolokia.org
+]]></programlisting>
+    <para>
+      Every option described in <xref linkend="agent-jvm-config"/>
+      is reflected by a command line option for the
+      launcher. Additionally, the option <literal>--quiet</literal>
+      can be used to keep the launcher silent and
+      <literal>--verbose</literal> for adding some extra logging. 
+    </para>
+    <para>
+      The launcher knows various operational modes, which needs to
+      be provided as a non-option argument and possibly require an
+      extra argument. 
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><literal>start</literal></term>
+        <listitem>
+          <para>
+            Use this to attach an agent to an already running, local
+            Java process. The additional argument is the
+            <emphasis>process id</emphasis> of the Java process to
+            attach to. The command will return with an return code
+            of 0 if an agent has been started. If the agent is
+            already running, nothing happens and the launcher
+            returns with 1. The URL of the Agent will be printed to
+            standard out on an extra line except when the
+            <literal>--quiet</literal> option is used. 
+          </para>
+        </listitem>
+      </varlistentry>    
+      <varlistentry>
+        <term><literal>stop</literal></term>
+        <listitem>
+          <para>
+              Command for stoping an running and dynamically attached
+              agent. The required argument is the Java process id of
+              to which the agent is attached. If the agent could be
+              stopped, the launcher exits with 0, it exits with 1 if
+              there was no agent running. 
+          </para>
+        </listitem>
+      </varlistentry>    
+      <varlistentry>
+        <term><literal>toggle</literal></term>
+        <listitem>
+          <para>
+            Starts or stops an dynamically attached agent,
+            dependening on its current state. The Java process ID is
+            required as an additional argument. If an agent is
+            running, <literal>toggle</literal> will stop it (and
+            vice versa). The launcer returns with an exit code of 0
+            except when the operation fails. When the agent is
+            started, the full agent's URL is printed to standard
+            out. <literal>toggle</literal> is the default command
+            when only a numeric process id is given as argument and
+            no explicit command.
+          </para>
+        </listitem>
+      </varlistentry>    
+      <varlistentry>
+        <term><literal>status</literal></term>
+        <listitem>
+          <para>
+            Command for showing the current agent status for a given
+            process. The process id is required. The launcer will
+            return with 0 when the agent is running, otherwise with
+            1.  
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>list</literal></term>
+        <listitem>
+          <para>
+            List all local Java processes in a table with the
+            process id and the description as columns. This is the
+            default command if no non-option argument is given at
+            all. <literal>list</literal> returns with 0 upon normal
+            operation and with 1 otherwise.
+          </para>
+        </listitem>
+      </varlistentry>    
+    </variablelist>
+    <para>
+      The launcher is especially suitable for
+      <emphasis>one-shot</emphasis>, <emphasis>local</emphasis>
+      queries. For example, a simple shell script for printing out
+      the memory usage of a local Java process, including
+      (temporarily) attaching an Jolokia agent looks simply like in
+      the following example. With a complete client library like <ulink
+      url="http://www.jmxp4perl.org">Jmx4Perl</ulink> even more one
+      shot scripts are possible<footnote id="rest-comment">
+      <para>And in fact, some support for launching this dynamic
+      agent is planned for a forthcoming release of jmx4perl.</para>
+      </footnote>.
+    </para>
+    <programlisting><![CDATA[
+#!/bin/sh
+
+url=`java -jar agent.jar start $1 | tail -1`
+
+memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
+used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+usage=$((${used}*100/${max}))
+echo "Memory Usage: $usage %"
+
+java -jar agent.jar --quiet stop $1]]></programlisting>
   </section>
 </section>

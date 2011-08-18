@@ -35,7 +35,6 @@ public interface MxBeanSampleMXBean {
     Map<String,Long> getMap();
     void setMap(Map<String,Long> pMap);
 
-
     int exec(long arg);
     int exec(ComplexTestData arg);
 }

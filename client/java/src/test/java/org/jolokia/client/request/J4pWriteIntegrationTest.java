@@ -21,15 +21,14 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
-import org.jolokia.it.ComplexTestData;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.*;
 
 /**
  * Integration test for writing attributes
@@ -38,6 +37,9 @@ import static org.testng.AssertJUnit.assertNotNull;
  * @since Jun 5, 2010
  */
 public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
+
+    public static final String IT_MXBEAN = "jolokia.it:type=mxbean";
+    public static final String IT_ATTRIBUTE_MBEAN = "jolokia.it:type=attribute";
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException {
@@ -70,6 +72,15 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         checkWrite(new String[]{"POST"}, "Map", null, map);
         checkWrite("Map","fcn","svw");
         checkWrite("Map","zahl",20L);
+
+        // Write an not yet known key
+        J4pWriteRequest wReq = new J4pWriteRequest(IT_ATTRIBUTE_MBEAN,"Map","hofstadter","douglas");
+        J4pWriteResponse wResp = j4pClient.execute(wReq);
+        assertNull(wResp.getValue());
+        J4pReadRequest  rReq = new J4pReadRequest(IT_ATTRIBUTE_MBEAN,"Map");
+        rReq.setPath("douglas");
+        J4pReadResponse rResp = j4pClient.execute(rReq);
+        assertEquals(rResp.<String>getValue(),"hofstadter");
     }
 
     private Map createTestMap() {
@@ -146,7 +157,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         final Map<String,Long> input = new HashMap<String,Long>();
         input.put("roland",13L);
         input.put("heino",19L);
-        checkMxWrite(new String[] { "POST"},"Map", null, input, new ResponseAssertion() {
+        checkMxWrite(new String[] {"POST"},"Map", null, input, new ResponseAssertion() {
             public void assertResponse(J4pResponse resp) {
                 JSONObject val = (JSONObject)resp.getValue();
                 assertEquals(val.size(), input.size());
@@ -157,6 +168,11 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         });
     }
 
+    @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*immutable.*")
+    public void mxMapWithPath() throws MalformedObjectNameException, J4pException {
+        J4pWriteRequest req = new J4pWriteRequest(IT_MXBEAN,"Map","hofstadter","douglas");
+        j4pClient.execute(req,"POST");
+    }
 
     // ==========================================================================================================
 
@@ -169,12 +185,12 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     private void checkWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        checkWrite("jolokia.it:type=attribute",methods,pAttribute,pPath,pValue,pFinalAssert);
+        checkWrite(IT_ATTRIBUTE_MBEAN,methods,pAttribute,pPath,pValue,pFinalAssert);
     }
 
     private void checkMxWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
         if (hasMxBeanSupport()) {
-            checkWrite("jolokia.it:type=mxbean",methods,pAttribute,pPath,pValue,pFinalAssert);
+            checkWrite(IT_MXBEAN,methods,pAttribute,pPath,pValue,pFinalAssert);
         }
     }
 

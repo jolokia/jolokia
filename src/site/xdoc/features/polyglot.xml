@@ -31,8 +31,8 @@
 #!/bin/bash
 base_url="http://localhost:8080/jolokia"
 memory_url="${base_url}/read/java.lang:type=Memory/HeapMemoryUsage"
-used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":"\([0-9]*\)".*$/\1/'`
-max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":"\([0-9]*\)".*$/\1/'`
+used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
 usage=$((${used}*100/${max}))
 if [ $usage -gt 90 ]; then 
   /etc/init.d/tomcat restart

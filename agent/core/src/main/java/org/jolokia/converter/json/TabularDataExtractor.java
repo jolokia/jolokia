@@ -98,7 +98,7 @@ public class TabularDataExtractor implements Extractor {
         if (!pExtraArgs.isEmpty()) {
             CompositeData cd = extractCompositeDataFromPath(td, pExtraArgs);
             return pConverter.extractObject(
-                            checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
+                            cd != null && checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
                             pExtraArgs, pJsonify);
         } else {
             if (pJsonify) {

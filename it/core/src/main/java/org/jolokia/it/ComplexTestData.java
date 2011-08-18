@@ -16,6 +16,7 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -32,6 +33,24 @@ public class ComplexTestData {
     private List<Boolean> list;
     private Map<String,List<Map<String,String>>> complex;
 
+    public ComplexTestData() {
+        number = 1968;
+        string = "late";
+        map = new HashMap<String, Boolean>();
+        map.put("kill",true);
+        map.put("bill",false);
+        set = new HashSet<Integer>();
+        set.add(12);
+        set.add(14);
+        stringArray = new String[] { "toy", "story" };
+        list = new ArrayList<Boolean>(Arrays.asList(true,false,true));
+        complex = new HashMap<String, List<Map<String, String>>>();
+        List<Map<String,String>> innerList = new ArrayList<Map<String, String>>();
+        Map<String,String> veryInner = new HashMap<String, String>();
+        veryInner.put("deep", "inside");
+        innerList.add(veryInner);
+        complex.put("hidden",innerList);
+    }
 
     public int getNumber() {
         return number;

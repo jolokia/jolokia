@@ -32,6 +32,7 @@ public class MxBeanSample implements MxBeanSampleMXBean {
     public MxBeanSample() {
         map = new HashMap<String, Long>();
         map.put("magic",42L);
+        complex = new ComplexTestData();
     }
 
     public int[] getNumbers() {
