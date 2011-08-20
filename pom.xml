@@ -352,8 +352,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>0.91</currentStableVersion>
-    <currentSnapshotVersion>0.92-SNAPSHOT</currentSnapshotVersion>
+    <currentStableVersion>0.95</currentStableVersion>
+    <currentSnapshotVersion>1.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
   </properties>
