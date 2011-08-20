@@ -6,7 +6,7 @@
   <skin> 
     <groupId>org.jolokia</groupId> 
     <artifactId>jolokia-site-skin</artifactId>
-    <version>0.95</version>
+    <version>1.0.0-SNAPSHOT</version>
   </skin>  
   
   <bannerLeft>
