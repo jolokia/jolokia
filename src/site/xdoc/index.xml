@@ -93,11 +93,11 @@
         <p>
           Both features arrived via GitHub <a
           href="https://github.com/rhuss/jolokia/pulls">pull
-          requests</a> and are veric nice proofs for the relevance of
-          the social coding model introduced by GitHub. Big
-          acknowlegdments go out to <a
-          href="https://github.com/asssaf">Assaf Berf</a> and <a
-          href="https://github.com/GregBowyer">Greg Bowyer</a>.
+          requests</a> and are proofs for the relevance of the social
+          coding model introduced by GitHub. Big acknowlegdments go
+          out to <a href="https://github.com/asssaf">Assaf Berg</a>
+          and <a href="https://github.com/GregBowyer">Greg Bowyer</a>
+          for providing patches which lead to these features.
         </p>
       </subsection>
       <subsection name="Jolokia 0.91 brings it on">

@@ -54,7 +54,7 @@ git commit -a
 # Adapted tracking code
 git co piwik
 git rebase master
-cd tools/site-plugin; mvn clean intall;
+cd tools/site-skin; mvn clean intall;
 mvn -Pdist-labs site site:deploy
 
 # Roo-Plugin:
