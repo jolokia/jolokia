@@ -26,11 +26,11 @@ git push
 git push --tags
 
 # Copy assembly to labs:
-# at jolokia@labs.consol.de: mkdir -p www/dist/0.84/js
+ssh jolokia@labs.consol.de mkdir -p www/dist/0.95/js
 cd target/checkout/target
-scp *gz *zip jolokia@labs.consol.de:www/dist/0.84/
+scp *gz *zip jolokia@labs.consol.de:www/dist/0.95/
 cd ../client/javascript/target 
-scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/0.84/js/
+scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/0.95/js/
 # ========================================================================
 # Adapte meta data
 
