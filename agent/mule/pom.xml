@@ -4,14 +4,14 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-mule</artifactId>
-  <version>0.92-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>jolokia-mule</name>
   <description>mule agent</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>0.92-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
