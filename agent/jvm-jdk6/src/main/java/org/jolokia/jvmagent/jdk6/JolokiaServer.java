@@ -51,6 +51,15 @@ public class JolokiaServer {
     // Agent URL
     private String url;
 
+    // Handler for jolokia requests
+    private JolokiaHttpHandler jolokiaHttpHandler;
+
+    /**
+     * Create the Jolokia server, i.e. the HttpServer for serving Jolokia requests.
+     *
+     * @param pConfig configuration for this server
+     * @throws IOException if initialization fails
+     */
     public JolokiaServer(ServerConfig pConfig) throws IOException {
         config = pConfig;
 
@@ -58,7 +67,12 @@ public class JolokiaServer {
     }
 
 
+    /**
+     * Start HttpServer
+     */
     public void start() {
+        jolokiaHttpHandler.start();
+
         ThreadGroup threadGroup = new ThreadGroup("jolokia");
         threadGroup.setDaemon(false);
         // Starting server in an own thread group with a fixed name
@@ -74,13 +88,23 @@ public class JolokiaServer {
         cleaner.start();
     }
 
+    /**
+     * Stop the HTTP server
+     */
     public void stop() {
+        jolokiaHttpHandler.stop();
+
         if (cleaner != null) {
             // Instructs cleaner thread to finish and stop the server
             cleaner.stopServer();
         }
     }
 
+    /**
+     * URL how this agent can be reached from the outsid.
+     *
+     * @return the agent URL
+     */
     public String getUrl() {
         return url;
     }
@@ -103,7 +127,8 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = config.getContextPath();
-        HttpContext context = httpServer.createContext(contextPath, new JolokiaHttpHandler(config.getJolokiaConfig()));
+        jolokiaHttpHandler = new JolokiaHttpHandler(config.getJolokiaConfig());
+        HttpContext context = httpServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Special customizations
         addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);

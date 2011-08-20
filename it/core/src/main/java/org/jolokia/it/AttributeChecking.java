@@ -194,6 +194,10 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         date = pDate;
     }
 
+    public void setWriteOnlyString(String pString) {
+        // nothing to be done
+    }
+
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         return new ObjectName(domain + ":type=attribute");
     }

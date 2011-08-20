@@ -61,38 +61,55 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     // Content type matching
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
+    // Configuration of this handler;
+    private Map<ConfigKey, String> configuration;
 
+
+    /**
+     * Create a new HttpHandler for processing HTTP request
+     *
+     * @param pConfig jolokia specific config tuning the processing behaviour
+     */
     public JolokiaHttpHandler(Map<ConfigKey,String> pConfig) {
+        configuration = pConfig;
         context = pConfig.get(ConfigKey.AGENT_CONTEXT);
         if (!context.endsWith("/")) {
             context += "/";
         }
 
-        backendManager = new BackendManager(pConfig,this, createRestrictor(pConfig));
+    }
+
+    /**
+     * Start the handler
+     */
+    public void start() {
+        backendManager = new BackendManager(configuration,this, createRestrictor(configuration));
         requestHandler = new HttpRequestHandler(backendManager,this);
     }
 
-    private Restrictor createRestrictor(Map<ConfigKey, String> pConfig) {
-        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
-        try {
-            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
-            if (ret != null) {
-                info("Using access restrictor " + location);
-                return ret;
-            } else {
-                info("No access restrictor found, access to all MBean is allowed");
-                return new AllowAllRestrictor();
-            }
-        } catch (IOException e) {
-            error("Error while accessing access restrictor at " + location +
-                          ". Denying all access to MBeans for security reasons. Exception: " + e,e);
-            return new DenyAllRestrictor();
-        }
+    /**
+     * Stop the handler
+     */
+    public void stop() {
+        backendManager.destroy();
+        backendManager = null;
+        requestHandler = null;
     }
 
+    /**
+     * Handler a request. If the handler is not yet started, an exception is thrown
+     *
+     * @param pExchange the request/response object
+     * @throws IOException if something fails during handling
+     * @throws IllegalStateException if the handler has not yet been started
+     */
     @Override
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     public void handle(HttpExchange pExchange) throws IOException {
+        if (requestHandler == null) {
+            throw new IllegalStateException("Handler not yet started");
+        }
+
         JSONAware json = null;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri,context);
@@ -121,6 +138,27 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             sendResponse(pExchange,parsedUri, json.toJSONString());
         }
     }
+
+
+
+    private Restrictor createRestrictor(Map<ConfigKey, String> pConfig) {
+        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
+        try {
+            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
+            if (ret != null) {
+                info("Using access restrictor " + location);
+                return ret;
+            } else {
+                info("No access restrictor found, access to all MBean is allowed");
+                return new AllowAllRestrictor();
+            }
+        } catch (IOException e) {
+            error("Error while accessing access restrictor at " + location +
+                          ". Denying all access to MBeans for security reasons. Exception: " + e,e);
+            return new DenyAllRestrictor();
+        }
+    }
+
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());

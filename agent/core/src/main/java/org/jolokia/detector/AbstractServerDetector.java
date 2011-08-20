@@ -149,7 +149,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
         Set<ObjectName> names = searchMBeans(pMbeanServers,"*:j2eeType=J2EEServer,*");
         // Take the first one
         if (names != null && names.size() > 0) {
-            return (String) getAttributeValue(pMbeanServers,names.iterator().next(),"serverVersion");
+            return getAttributeValue(pMbeanServers,names.iterator().next(),"serverVersion");
         }
         return null;
     }

@@ -47,7 +47,7 @@ public class ListHandlerMockTest {
         handler = new ListHandler(new AllowAllRestrictor());
     }
 
-        @Test(expectedExceptions = { UnsupportedOperationException.class })
+    @Test(expectedExceptions = { UnsupportedOperationException.class })
     public void wrongMethod() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
 
@@ -58,7 +58,7 @@ public class ListHandlerMockTest {
 
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         replay(connection);
-        Object res = handler.handleRequest(connection,request);
+        handler.handleRequest(connection,request);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ListHandlerMockTest {
         return connection;
     }
 
-        private MBeanInfo getRealMBeanInfo(ObjectName oName) throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {
+    private MBeanInfo getRealMBeanInfo(ObjectName oName) throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
         return conn.getMBeanInfo(oName);
     }

@@ -222,7 +222,9 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
             MBeanInfo mBeanInfo = getMBeanInfo(pServers, pObjectName);
             List<String> ret = new ArrayList<String>();
             for (MBeanAttributeInfo attrInfo : mBeanInfo.getAttributes()) {
-                ret.add(attrInfo.getName());
+                if (attrInfo.isReadable()) {
+                    ret.add(attrInfo.getName());
+                }
             }
             return ret;
         } catch (IntrospectionException e) {

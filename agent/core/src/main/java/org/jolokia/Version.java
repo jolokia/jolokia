@@ -18,15 +18,14 @@ package org.jolokia;
 
 
 /**
- * Class holding the version of this agent. This gets updated automatically
- * when jmx4perl is build.
+ * Class holding the version of this agent and the protocol.
  *
  * @author roland
  * @since Jun 11, 2009
  */
 public final class Version {
 
-    private static final String VERSION = "0.92";
+    private static final String VERSION = "0.95";
 
     // Major.Minor version of protocol
     private static final String PROTOCOL = "5.0";

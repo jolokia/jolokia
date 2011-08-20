@@ -66,9 +66,8 @@
   <section id="response-search">
     <title>Search response</title>
     <para>
-      The answer is a list of MBean names which matches the pattern. A
-      <literal>404</literal> Response will be returned in case no MBean
-      matches this name.
+      The answer is a list of MBean names which matches the pattern or an empty 
+      list if there was no match.
     </para>
     <para>
       For example, the request

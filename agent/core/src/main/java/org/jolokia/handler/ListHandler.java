@@ -78,28 +78,17 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         ObjectName oName = null;
         try {
             Map infoMap = new HashMap();
-            for (MBeanServerConnection server : pServers) {
-                Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
-                int stackSize = pathStack.size();
 
-                // Prepare an objectname patttern from a path (or "*:*" if no pattern is given)
-                oName = objectNameFromPath(pathStack);
+            Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
 
-                for (Object nameObject : queryMBeans(server, oName)) {
-                    ObjectName name = (ObjectName) nameObject;
-
-                    if (maxDepth == 1 && stackSize == 0) {
-                        // Only add domain names with a dummy value if max depth is restricted to 1
-                        // But only when used without path
-                        infoMap.put(name.getDomain(),1);
-                    } else if (maxDepth == 2 && stackSize == 0) {
-                        // Add domain an object name into the map, final value is a dummy value
-                        Map mBeansMap = getOrCreateMap(infoMap, name.getDomain());
-                        mBeansMap.put(name.getCanonicalKeyPropertyListString(),1);
-                    } else {
-                        addMBeanInfo(server, infoMap, name, pathStack);
-                    }
-                }
+            // Prepare an objectname patttern from a path (or "*:*" if no pattern is given)
+            oName = objectNameFromPath(pathStack);
+            if (oName != null && !oName.isPattern()) {
+                // Fixed name, which can only occur at a single MBeanServer
+                addSingleMBean(pServers, oName, infoMap, maxDepth, pathStack);
+            } else {
+                // MBean pattern for MBean occuring at multiple servers
+                addMBeansFromPattern(pServers, oName, infoMap, maxDepth, pathStack);
             }
             return truncateAccordingToPath(infoMap, originalPathStack.size(), maxDepth);
         } catch (MalformedObjectNameException e) {
@@ -127,6 +116,69 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // ==========================================================================================================
+
+    // Lookup MBeans from a pattern, and for each found extract the required information
+    private void addMBeansFromPattern(Set<MBeanServerConnection> pServers,
+                                      ObjectName pPattern,
+                                      Map pInfoMap,
+                                      int pMaxDepth,
+                                      Stack<String> pPathStack)
+            throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+        for (MBeanServerConnection server : pServers) {
+            for (Object nameObject : server.queryNames(pPattern,null)) {
+                ObjectName name = (ObjectName) nameObject;
+                if (!handleFirstOrSecondLevel(name, pInfoMap, pMaxDepth, pPathStack.size())) {
+                    addMBeanInfo(server, pInfoMap, name, pPathStack);
+                }
+            }
+        }
+    }
+
+    // Add a single named MBean's information to the given map
+    private void addSingleMBean(Set<MBeanServerConnection> pServers,
+                                ObjectName pName,
+                                Map pInfoMap,
+                                int pMaxDepth,
+                                Stack<String> pPathStack)
+            throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
+
+        if (!handleFirstOrSecondLevel(pName, pInfoMap, pMaxDepth, pPathStack.size())) {
+            InstanceNotFoundException instanceNotFound = null;
+            for (MBeanServerConnection server : pServers) {
+                Stack<String> pathStack = (Stack<String>) pPathStack.clone();
+                try {
+                    addMBeanInfo(server, pInfoMap, pName, pathStack);
+                    // Only the first MBeanServer holding the MBean wins
+                    return;
+                } catch (InstanceNotFoundException exp) {
+                    instanceNotFound = exp;
+                }
+            }
+            if (instanceNotFound != null) {
+                throw instanceNotFound;
+            }
+        }
+    }
+
+    // Check, whether a maxDepth dictates the extraction of only the first or second layer. If so, a special
+    // treatment is required
+    private boolean handleFirstOrSecondLevel(ObjectName pName, Map pInfoMap, int pMaxDepth, int pStackSize) {
+        if (pMaxDepth == 1 && pStackSize == 0) {
+            // Only add domain names with a dummy value if max depth is restricted to 1
+            // But only when used without path
+            pInfoMap.put(pName.getDomain(),1);
+            return true;
+        } else if (pMaxDepth == 2 && pStackSize == 0) {
+            // Add domain an object name into the map, final value is a dummy value
+            Map mBeansMap = getOrCreateMap(pInfoMap, pName.getDomain());
+            mBeansMap.put(pName.getCanonicalKeyPropertyListString(),1);
+            return true;
+        }
+        return false;
+    }
+
+
+
 
     // Extract MBean infos for a given MBean and add results to pResult.
     private void addMBeanInfo(MBeanServerConnection server, Map pResult, ObjectName pName, Stack<String> pPathStack)
@@ -247,15 +299,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         }
     }
 
-    private Set<ObjectName> queryMBeans(MBeanServerConnection pServer, ObjectName pName) throws IOException {
-        if (pName == null) {
-            return pServer.queryNames(null, null);
-        } else if (pName.isPattern()) {
-            return pServer.queryNames(pName, (QueryExp) null);
-        } else {
-            return new HashSet<ObjectName>(Arrays.asList(pName));
-        }
-    }
 
     private ObjectName objectNameFromPath(Stack<String> pPathStack) throws MalformedObjectNameException {
         if (pPathStack.empty()) {

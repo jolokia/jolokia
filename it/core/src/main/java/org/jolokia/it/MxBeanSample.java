@@ -47,7 +47,7 @@ public class MxBeanSample implements MxBeanSampleMXBean {
         return complex;
     }
 
-    public void setComplextTestData(ComplexTestData testData) {
+    public void setComplexTestData(ComplexTestData testData) {
         complex = testData;
     }
 

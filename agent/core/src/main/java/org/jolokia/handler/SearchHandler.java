@@ -48,7 +48,7 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
     public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxSearchRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+            throws MBeanException, IOException {
         Set<String> ret = new HashSet<String>();
 
         for (MBeanServerConnection server : servers) {

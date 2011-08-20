@@ -29,8 +29,6 @@ import javax.management.*;
  */
 public class ItSetup {
 
-    private static final long serialVersionUID = 42L;
-
     private String[] domains = new String[] { "jolokia.it","jmx4perl.it" } ;
 
     private String[] strangeNamesShort = {
@@ -118,12 +116,7 @@ public class ItSetup {
     }
 
     private boolean hasMxBeanSupport() {
-        try {
-            Class.forName("javax.management.MXBean");
-            return true;
-        } catch (ClassNotFoundException exp) {
-            return false;
-        }
+        return checkForClass("javax.management.MXBean") && ! checkForClass("org.jboss.mx.util.MBeanServerLocator");
     }
 
     public String getAttributeMBean() {

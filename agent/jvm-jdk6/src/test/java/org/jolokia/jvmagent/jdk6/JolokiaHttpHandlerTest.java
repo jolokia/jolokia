@@ -45,6 +45,7 @@ public class JolokiaHttpHandlerTest {
     @BeforeMethod
     public void setup() {
         handler = new JolokiaHttpHandler(getConfig());
+        handler.start();
     }
 
     @Test

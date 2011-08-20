@@ -81,4 +81,6 @@ public interface AttributeCheckingMBean {
     Date getDate();
 
     void setDate(Date pDate);
+
+    void setWriteOnlyString(String pString);
 }

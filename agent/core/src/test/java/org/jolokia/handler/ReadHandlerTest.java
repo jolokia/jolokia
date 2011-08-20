@@ -367,6 +367,7 @@ public class ReadHandlerTest {
         for (int i=0;i<pAttrs.length;i++) {
             infos[i] = createMock(MBeanAttributeInfo.class);
             expect(infos[i].getName()).andReturn(pAttrs[i]);
+            expect(infos[i].isReadable()).andReturn(true);
         }
         expect(mBeanInfo.getAttributes()).andReturn(infos);
         replay(mBeanInfo);

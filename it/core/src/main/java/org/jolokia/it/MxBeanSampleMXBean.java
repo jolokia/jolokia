@@ -30,7 +30,7 @@ public interface MxBeanSampleMXBean {
     void setNumbers(int[] pNumbers);
 
     ComplexTestData getComplexTestData();
-    void setComplextTestData(ComplexTestData testData);
+    void setComplexTestData(ComplexTestData testData);
 
     Map<String,Long> getMap();
     void setMap(Map<String,Long> pMap);
