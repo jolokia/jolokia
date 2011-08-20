@@ -55,6 +55,7 @@ git commit -a
 git co piwik
 git rebase master
 cd tools/site-skin; mvn clean intall;
+cd ../..
 mvn -Pdist-labs site site:deploy
 
 # Roo-Plugin:
