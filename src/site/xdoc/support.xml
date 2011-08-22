@@ -39,6 +39,13 @@
             hesitate to fill it up with your questions and
             suggestions.
           </dd>
+          <dt>IRC</dt>
+          <dd>
+            Feel free to join <a
+            href="http://freenode.net">freenode</a>, and discuss on
+            <strong><code>#jolokia</code></strong> about JMX and the
+            world.
+          </dd>
           <dt>Bug Reports</dt>
           <dd>
             Jolokia uses GitHub's <a
