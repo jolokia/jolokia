@@ -41,9 +41,10 @@ import java.util.Map;
  *
  * <p>
  * It uses a REST based approach which translates a GET Url into a
- * request. See the <a href="http://www.jolokia.org/reference/index.html>reference documentation</a>
+ * request. See the <a href="http://www.jolokia.org/reference/index.html">reference documentation</a>
  * for a detailed description of this servlet's features.
- *
+ * </p>
+ * 
  * @author roland@jolokia.org
  * @since Apr 18, 2009
  */
