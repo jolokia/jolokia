@@ -17,6 +17,9 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Collections;
+import java.lang.UnsupportedOperationException;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -41,7 +44,7 @@ import java.util.Map;
  *
  * <p>
  * It uses a REST based approach which translates a GET Url into a
- * request. See the <a href="http://www.jolokia.org/reference/index.html>reference documentation</a>
+ * request. See the <a href="http://www.jolokia.org/reference/index.html">reference documentation</a>
  * for a detailed description of this servlet's features.
  *
  * @author roland@jolokia.org
@@ -228,7 +231,11 @@ public class AgentServlet extends HttpServlet {
                     throws IOException {
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
-                return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding,pReq.getParameterMap());
+                try {
+                	return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, pReq.getParameterMap());
+                } catch (UnsupportedOperationException error) {
+                    return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, getParameterMap(pReq));
+                }
             }
         };
     }
@@ -236,10 +243,24 @@ public class AgentServlet extends HttpServlet {
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) {
-                return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(),pReq.getParameterMap());
+                try {
+                    return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), pReq.getParameterMap());
+                } catch (UnsupportedOperationException error) {
+                    return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
+                }
             }
         };
     }
+    
+    private Map<String, String[]> getParameterMap(HttpServletRequest pReq){
+        Map<String, String[]> parameters = new HashMap<String, String[]>();
+        List<String> requestParameterNames = Collections.list((Enumeration<String>)pReq.getParameterNames());
+        for (String parameterName:requestParameterNames){
+        	parameters.put(parameterName, pReq.getParameterValues(parameterName));
+        }
+        return parameters;
+    }
+    
     // =======================================================================
 
     private Map<ConfigKey, String> servletConfigAsMap(ServletConfig pConfig) {
@@ -261,6 +282,9 @@ public class AgentServlet extends HttpServlet {
             pResp.setContentType(pContentType);
         } catch (NoSuchMethodError error) {
             // For a Servlet 2.3 container, set the charset by hand
+            pResp.setContentType(pContentType + "; charset=utf-8");
+        } catch (UnsupportedOperationException error) {
+            // For an Equinox HTTP Service, set the charset by hand
             pResp.setContentType(pContentType + "; charset=utf-8");
         }
         pResp.setStatus(200);
