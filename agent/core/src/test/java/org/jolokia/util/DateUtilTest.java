@@ -18,6 +18,7 @@ package org.jolokia.util;
 
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.testng.annotations.Test;
 
@@ -42,10 +43,18 @@ public class DateUtilTest {
     }
 
     private void runTests() {
-        for (int i = 0; i < testData.length; i += 2) {
-            assertEquals(DateUtil.toISO8601((Date) testData[1]),testData[0]);
-            assertEquals(DateUtil.fromISO8601((String) testData[0]),testData[1]);
+        TimeZone defTz = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("MET"));
+
+        try {
+            for (int i = 0; i < testData.length; i += 2) {
+                assertEquals(DateUtil.toISO8601((Date) testData[1]),testData[0]);
+                assertEquals(DateUtil.fromISO8601((String) testData[0]),testData[1]);
+            }
+        } finally {
+            TimeZone.setDefault(defTz);
         }
+
     }
 
     @Test(expectedExceptions = {IllegalArgumentException.class})
