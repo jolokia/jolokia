@@ -30,8 +30,6 @@ import static org.testng.Assert.assertEquals;
  */
 public class DateUtilTest {
 
-
-
     @Test
     public void conversion() {
         runTests();
@@ -71,6 +69,7 @@ public class DateUtilTest {
     }
 
     // ====================================================
+
     private void runTests() {
 
         Date testDate = new Date(1303195711000L);
@@ -81,7 +80,7 @@ public class DateUtilTest {
         assertEquals(DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/London")),
                      "2011-04-19T07:48:31+01:00");
 
-        // Check parsing of dates
+        // Check date parsing
         String[] dateStrings = {
                 "2011-04-19T08:48:31+02:00",
                 "2011-04-19T06:48:31+00:00",
