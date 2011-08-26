@@ -15,9 +15,6 @@ import javax.xml.datatype.DatatypeFactory;
  */
 public final class DateUtil {
 
-    // Dateformat for output
-    private static final SimpleDateFormat ISO8601_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-
     // factory used for conversion
     private static DatatypeFactory datatypeFactory;
 
@@ -30,7 +27,6 @@ public final class DateUtil {
         } catch (DatatypeConfigurationException e) {
             datatypeFactory = null;
         }
-        ISO8601_FORMAT.setTimeZone(TimeZone.getDefault());
     }
 
     /**
@@ -48,7 +44,8 @@ public final class DateUtil {
                 // Try on our own, works for most cases
                 String date = pDateString.replaceFirst("\\+(0\\d)\\:(\\d{2})$", "+$1$2");
                 date = date.replaceFirst("Z$","+0000");
-                return ISO8601_FORMAT.parse(date);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                return dateFormat.parse(date);
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Cannot parse date '" + pDateString + "': " +e,e);
             }
@@ -57,14 +54,27 @@ public final class DateUtil {
 
     /**
      * Convert a given date to an ISO-8601 compliant string
-     * representation with the given timezone or the default timeszone
-     * if tz is null
+     * representation for the default timezone
      *
      * @param pDate date to convert
      * @return the ISO-8601 representation of the date
      */
     public static String toISO8601(Date pDate) {
-        String ret = ISO8601_FORMAT.format(pDate);
+        return toISO8601(pDate,TimeZone.getDefault());
+    }
+
+    /**
+     * Convert a given date to an ISO-8601 compliant string
+     * representation for a given timezone
+     *
+     * @param pDate date to convert
+     * @param pTimeZone timezone to use
+     * @return the ISO-8601 representation of the date
+     */
+    public static String toISO8601(Date pDate,TimeZone pTimeZone) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        dateFormat.setTimeZone(pTimeZone);
+        String ret = dateFormat.format(pDate);
         ret = ret.replaceAll("\\+0000$", "Z");
         return ret.replaceAll("(\\d\\d)$", ":$1");
     }

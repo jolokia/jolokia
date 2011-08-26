@@ -30,31 +30,9 @@ import static org.testng.Assert.assertEquals;
  */
 public class DateUtilTest {
 
-    static Object[] testData = {
-            "2011-04-19T08:48:31+02:00",new Date(1303195711000L),
-            "2011-04-19T10:48:31+00:00",new Date(1303195711000L),
-            "2011-04-19T10:48:31Z",new Date(1303195711000L),
-            "2011-04-19T10:18:31+00:30",new Date(1303195711000L)
-    };
-
     @Test
     public void conversion() {
         runTests();
-    }
-
-    private void runTests() {
-        TimeZone defTz = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("MET"));
-
-        try {
-            for (int i = 0; i < testData.length; i += 2) {
-                assertEquals(DateUtil.toISO8601((Date) testData[1]),testData[0]);
-                assertEquals(DateUtil.fromISO8601((String) testData[0]),testData[1]);
-            }
-        } finally {
-            TimeZone.setDefault(defTz);
-        }
-
     }
 
     @Test(expectedExceptions = {IllegalArgumentException.class})
@@ -88,5 +66,30 @@ public class DateUtilTest {
         Object oldValue = field.get(null);
         field.set(null,null);
         return oldValue;
+    }
+
+    // ====================================================
+
+    private void runTests() {
+
+        Date testDate = new Date(1303195711000L);
+
+        // Check date formatting
+        assertEquals(DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/Berlin")),
+                     "2011-04-19T08:48:31+02:00");
+        assertEquals(DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/London")),
+                     "2011-04-19T07:48:31+01:00");
+
+        // Check date parsing
+        String[] dateStrings = {
+                "2011-04-19T08:48:31+02:00",
+                "2011-04-19T06:48:31+00:00",
+                "2011-04-19T06:48:31Z",
+                "2011-04-19T07:18:31+00:30",
+        };
+        for (String toParse : dateStrings) {
+            Date date =  DateUtil.fromISO8601(toParse);
+            assertEquals(date, testDate);
+        }
     }
 }
