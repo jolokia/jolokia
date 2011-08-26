@@ -27,9 +27,12 @@
     xmlns:management="http://www.mulesoft.org/schema/mule/management"
     xmlns:spring="http://www.springframework.org/schema/beans" 
     xsi:schemaLocation="
-       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
-       http://www.mulesoft.org/schema/mule/management http://www.mulesoft.org/schema/mule/management/3.1/mule-management.xsd">
+       http://www.mulesoft.org/schema/mule/core 
+             http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+       http://www.springframework.org/schema/beans 
+             http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+       http://www.mulesoft.org/schema/mule/management 
+             http://www.mulesoft.org/schema/mule/management/3.1/mule-management.xsd">
 
    <!-- .... -->
    <custom-agent name="jolokia-agent" class="org.jolokia.mule.JolokiaMuleAgent">
