@@ -22,32 +22,40 @@
         section:
       </p>      
       <pre class="prettyprint"><![CDATA[
- <management:custom-agent name="jolokia-agent" class="org.jolokia.mule.J4pAgent">
-   <spring:property name="port" value="8899"/>
- </management:custom-agent>
- <management:jmx-server/>]]></pre>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:management="http://www.mulesoft.org/schema/mule/management"
+    xmlns:spring="http://www.springframework.org/schema/beans" 
+    xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+       http://www.mulesoft.org/schema/mule/management http://www.mulesoft.org/schema/mule/management/3.1/mule-management.xsd">
+
+   <!-- .... -->
+   <custom-agent name="jolokia-agent" class="org.jolokia.mule.JolokiaMuleAgent">
+      <spring:property name="port" value="8899"/>
+   </custom-agent>
+   <management:jmx-server/>
+</mule>]]></pre>
       <p>
         Starting up mule should yield a startup message like 
       </p>
       <pre><![CDATA[
- *********************************************************
- * Mule ESB and Integration Platform                     *
- * Version: 2.2.1 Build: 14422                           *
- * MuleSource, Inc.                                      *
- * For more information go to http://mule.mulesource.org *
- *                                                       *
- * Server started: 12/9/09 3:36 PM                       *
- * Server ID: myMule                                     *
- * JDK: 1.6.0_15 (mixed mode)                            *
- * OS encoding: MacRoman, Mule encoding: UTF-8           *
- * OS: Mac OS X (10.6.2, x86_64)                         *
- * Host: localhost (127.0.0.1)                           * 
- *                                                       *
- * Agents Running:                                       *
- *   Wrapper Manager: Mule PID #0, Wrapper PID #861      *
- *   Jolokia Agent: http://localhost:8899/jolokia        *
- *   JMX Agent                                           *
- *********************************************************]]></pre>
+**********************************************************************
+* Mule ESB and Integration Platform                                  *
+* Version: 3.1.2 Build: 21975                                        *
+* MuleSoft, Inc.                                                     *
+* For more information go to http://www.mulesoft.org                 *
+*                                                                    *
+* Server started: 8/26/11 11:26 PM                                   *
+* JDK: 1.6.0_26 (mixed mode)                                         *
+* OS: Mac OS X (10.6.8, x86_64)                                      *
+* Host: dev4.local (10.9.11.128)                                     *
+* Agents Running:                                                    *
+*   Wrapper Manager: Mule PID #0, Wrapper PID #861                   *
+*   Jolokia Agent: http://localhost:8899/jolokia                     *
+*   JMX Agent                                                        *
+**********************************************************************]]></pre>
       <p>
         Note the URL for the Jolokia agent which can be used by a client like <code>jmx4perl</code>,
         <code>check_jmx4perl</code> or <code>j4psh</code> like
@@ -90,10 +98,10 @@
         For enabling basic security the properties user and password can be set:
       </p>
       <pre class="prettyprint"><![CDATA[
- <management:custom-agent name="j4p-agent" class="org.jmx4perl.mule.J4pAgent">
+ <custom-agent name="jolokia-agent" class="org.jmx4perl.mule.JolokiaMuleAgent">
    <spring:property name="user" value="roland"/>
    <spring:property name="password" value="wtf"/>
- </management:custom-agent>
+ </custom-agent>
  <management:jmx-server/>]]></pre>
       <p>
         On the client side the options <code>--user</code> and <code>--password</code> can be

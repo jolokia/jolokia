@@ -90,7 +90,7 @@ public class JolokiaMuleAgent extends AbstractAgent {
         } catch (UnknownHostException e) {
             host = "localhost";
         }
-        return "jolokia Agent: http://" + host + ":" + getPort() + "/jolokia";
+        return "Jolokia Agent: http://" + host + ":" + getPort() + "/jolokia";
     }
 
     public void dispose() {
@@ -102,7 +102,6 @@ public class JolokiaMuleAgent extends AbstractAgent {
     public void unregistered() {
     }
 
-    @Override
     public void initialise() throws InitialisationException {
         server = getServer(getPort());
         Context root = getContext(server);
