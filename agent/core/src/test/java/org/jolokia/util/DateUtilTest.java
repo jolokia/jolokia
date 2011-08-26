@@ -43,18 +43,10 @@ public class DateUtilTest {
     }
 
     private void runTests() {
-        TimeZone defTz = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("MET"));
-
-        try {
-            for (int i = 0; i < testData.length; i += 2) {
-                assertEquals(DateUtil.toISO8601((Date) testData[1]),testData[0]);
-                assertEquals(DateUtil.fromISO8601((String) testData[0]),testData[1]);
-            }
-        } finally {
-            TimeZone.setDefault(defTz);
+        for (int i = 0; i < testData.length; i += 2) {
+            assertEquals(DateUtil.toISO8601((Date) testData[1],TimeZone.getTimeZone("MET")),testData[0]);
+            assertEquals(DateUtil.fromISO8601((String) testData[0]),testData[1]);
         }
-
     }
 
     @Test(expectedExceptions = {IllegalArgumentException.class})
