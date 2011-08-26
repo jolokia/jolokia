@@ -17,40 +17,44 @@
   
   <body>
     <links>
-      <item name="Home" href="http://www.jolokia.org/index.html"/>
-      <item name="Download" href="http://www.jolokia.org/download.html"/>
-      <item name="Features" href="http://www.jolokia.org/features-nb.html"/>
-      <item name="Documentation" href="http://www.jolokia.org/documentation.html"/>
-      <item name="Support" href="http://www.jolokia.org/support.html"/>
+      <item name="Home" href="index.html"/>
+      <item name="Download" href="download.html"/>
+      <item name="Features" href="features-nb.html"/>
+      <item name="Documentation" href="documentation.html"/>
+      <item name="Support" href="support.html"/>
       <item name="Blog" href="http://labs.consol.de/tags/jolokia"/>
       <item name="About" href="http://www.jolokia.org/about.html"/>
     </links>
 
-    <menu name="Jolokia">
-      <item name="Download" href="/download.html"/>
-      <item name="Features" href="/features-nb.html"/>
-      <item name="Support" href="/support.html"/>
-      <item name="Forum" href="/forum.html"/>
-      <item name="License" href="/license.html"/>
+    <menu name="Jolokia" inherit="top">
+      <item name="Download" href="download.html"/>
+      <item name="Features" href="features-nb.html"/>
+      <item name="Support" href="support.html"/>
+      <item name="Forum" href="forum.html"/>
+      <item name="IRC" href="irc.html"/>
+      <item name="License" href="license.html"/>
     </menu>
-    <menu name="Documentation">
-      <item name="Overview" href="/documentation.html"/>
-      <item name="Tutorial" href="/tutorial.html"/>
-      <item name="Reference Manual" href="/reference/html/index.html"/>
+
+    <menu name="Documentation" inherit="top">
+      <item name="Overview" href="documentation.html"/>
+      <item name="Tutorial" href="tutorial.html"/>
+      <item name="Reference Manual" href="reference/html/index.html"/>
     </menu>
-    <menu name="Agents">
+
+    <menu name="Agents" inherit="top">
       <item name="Overview" href="agent.html"/>
       <item name="Web Archive (war)" href="agent/war.html"/>
       <item name="Osgi" href="agent/osgi.html"/>
       <item name="JVM" href="agent/jvm.html"/>
       <item name="Mule" href="agent/mule.html"/>
     </menu>
-    <menu name="Clients">
+
+    <menu name="Clients" inherit="top">
       <item name="Java" href="client/java.html"/>
       <item name="Javascript" href="client/javascript.html"/>
       <item name="Perl" href="client/perl.html"/>
     </menu>
-    <menu name="Modules">
+    <menu name="Modules" inherit="top">
       <item name="Core" href="jolokia-agent-parent/jolokia-core/index.html"/>
       <item name="JSR-160 Proxy" href="jolokia-agent-parent/jolokia-jsr160/index.html"/>
       <item name="War" href="jolokia-agent-parent/jolokia-war/index.html"/>
@@ -62,6 +66,6 @@
       <item name="Javascript Client" href="jolokia-client-parent/jolokia-client-javascript/index.html"/>
       <item name="Integration Tests" href="jolokia-it-parent/jolokia-it-core/index.html"/>
     </menu>
-    <menu ref="reports"/>
+    <menu ref="reports" inherit="bottom"/>
   </body>  
 </project>
