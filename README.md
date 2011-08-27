@@ -13,7 +13,8 @@ Multiple agents are provided for different environments:
   all-in-one).
 * __Mule Agent__ for usage within a [Mule][3] ESB
 * __JVM JDK6 Agent__ which can be used with any Oracle/Sun JVM,
-  Version 6 
+  Version 6 and which is able to attach to a running Java process 
+  dynamically. 
 
 Features
 --------
