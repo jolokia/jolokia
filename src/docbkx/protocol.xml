@@ -963,7 +963,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
       </para>
       <variablelist>
         <varlistentry>
-          <term><emphasis role="bold">5.0</emphasis> (Jolokia version 0.92)</term>
+          <term><emphasis role="bold">5.0</emphasis> (since 0.95)</term>
           <listitem>
             <para>
               <classname>javax.management.openmbean.TabularData</classname>
@@ -994,7 +994,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><emphasis role="bold">4.3</emphasis> (Jolokia version 0.91)</term>
+          <term><emphasis role="bold">4.3</emphasis> (since 0.91)</term>
           <listitem>
             <para>
               The <literal>list</literal> operation supports a
@@ -1004,7 +1004,7 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><emphasis role="bold">4.2</emphasis> (Jolokia version 0.90)</term>
+          <term><emphasis role="bold">4.2</emphasis> (since 0.90)</term>
           <listitem>
             <para>
               Response values are returned in the native JSON
