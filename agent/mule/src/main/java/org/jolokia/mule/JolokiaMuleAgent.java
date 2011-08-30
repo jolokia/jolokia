@@ -1,24 +1,11 @@
 package org.jolokia.mule;
 
-import org.jolokia.http.AgentServlet;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.*;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mule.AbstractAgent;
-import org.mule.api.MuleException;
-import org.mule.api.lifecycle.InitialisationException;
-import org.mule.api.lifecycle.StartException;
-import org.mule.api.lifecycle.StopException;
-import org.mule.config.i18n.Message;
-
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.mule.AbstractAgent;
+import org.mule.api.MuleException;
+import org.mule.api.lifecycle.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -91,13 +78,15 @@ public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
      */
     @Override
     public String getDescription() {
-        String host;
+        String hostDescr = host;
         try {
-            host = Inet4Address.getLocalHost().getHostName();
+            if (hostDescr == null) {
+                hostDescr = Inet4Address.getLocalHost().getHostName();
+            }
         } catch (UnknownHostException e) {
-            host = "localhost";
+            hostDescr = "localhost";
         }
-        return "Jolokia Agent: http://" + host + ":" + getPort() + "/jolokia";
+        return "Jolokia Agent: http://" + hostDescr + ":" + getPort() + "/jolokia";
     }
 
     /**
