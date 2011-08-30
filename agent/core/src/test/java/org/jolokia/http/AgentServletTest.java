@@ -16,12 +16,16 @@ package org.jolokia.http;
  *  limitations under the License.
  */
 
-import java.util.Vector;
+import java.io.FileNotFoundException;
+import java.security.PrivilegedActionException;
+import java.util.*;
 
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
-import org.testng.annotations.Test;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.ConfigKey;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 
@@ -31,18 +35,80 @@ import static org.easymock.EasyMock.*;
  */
 public class AgentServletTest {
 
+    private ServletContext context;
+    private ServletConfig config;
+
+    private AgentServlet servlet;
+
     @Test
     public void simple() throws ServletException {
-        AgentServlet servlet = new AgentServlet();
-        ServletConfig config = createMock(ServletConfig.class);
-        Vector paramNames = new Vector();
+        servlet = new AgentServlet();
+        initMocks(null,"No access restrictor found",null);
+        replay(config, context);
 
-        expect(config.getInitParameterNames()).andReturn(paramNames.elements());
-        ServletContext ctx = createMock(ServletContext.class);
-        expect(config.getServletContext()).andReturn(ctx);
-        expect(config.getServletName()).andReturn("jolokia");
-        ctx.log(EasyMock.<String>anyObject());
-        replay(config, ctx);
         servlet.init(config);
+        servlet.destroy();
+    }
+
+    @Test
+    public void simpleWithAcessRestriction() throws ServletException {
+        servlet = new AgentServlet();
+        initMocks(new String[] { ConfigKey.POLICY_LOCATION.getKeyValue(),"classpath:/access-sample1.xml" },
+                  "Using access restrictor.*access-sample1.xml",null);
+        replay(config, context);
+
+        servlet.init(config);
+        servlet.destroy();
+    }
+
+    @Test
+    public void simpleWithInvalidPolicyFile() throws ServletException {
+        servlet = new AgentServlet();
+        initMocks(new String[] { ConfigKey.POLICY_LOCATION.getKeyValue(),"file:///blablub.xml" },
+                  "Error.*blablub.xml.*Denying", FileNotFoundException.class );
+        replay(config, context);
+
+        servlet.init(config);
+        servlet.destroy();
+    }
+
+    @Test
+    public void customAccessRestrictor() throws ServletException {
+        servlet = new AgentServlet(new AllowAllRestrictor());
+        initMocks(null,"custom access",null);
+        replay(config,context);
+
+        servlet.init(config);
+        servlet.destroy();
+    }
+
+
+    // ============================================================================================
+
+    private void initMocks(String[] pInitParams,String pLogRegexp,Class<? extends Exception> pExceptionClass) {
+        config = createMock(ServletConfig.class);
+
+
+        Map<String,String> configParams = new HashMap<String, String>();
+        if (pInitParams != null) {
+            for (int i = 0; i < pInitParams.length; i += 2) {
+                configParams.put(pInitParams[i],pInitParams[i+1]);
+            }
+            for (String key : configParams.keySet()) {
+                expect(config.getInitParameter(key)).andReturn(configParams.get(key)).anyTimes();
+            }
+        }
+        
+        Vector paramNames = new Vector(configParams.keySet());
+        expect(config.getInitParameterNames()).andReturn(paramNames.elements());
+
+        context = createMock(ServletContext.class);
+        expect(config.getServletContext()).andReturn(context).anyTimes();
+        expect(config.getServletName()).andReturn("jolokia").anyTimes();
+        if (pExceptionClass != null) {
+            context.log(find(pLogRegexp),isA(pExceptionClass));
+        } else {
+            context.log(find(pLogRegexp));
+        }
     }
 }
