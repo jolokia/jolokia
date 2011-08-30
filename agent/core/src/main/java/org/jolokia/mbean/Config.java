@@ -36,89 +36,102 @@ public class Config implements ConfigMBean,MBeanRegistration {
     private HistoryStore historyStore;
     private DebugStore debugStore;
 
-    // Optional domain to used fo registering this MBean
-    private String qualifier;
-
     // MBean Objectname under which this bean should be registered
     private String objectName;
 
-    public Config(HistoryStore pHistoryStore, DebugStore pDebugStore, String pQualifier, String pObjectName) {
+    /**
+     * Constructor with the configurable objects as parameters.
+     *
+     * @param pHistoryStore history store where to hold historical values
+     * @param pDebugStore debug store for holding debug messages
+     * @param pOName object name under which to register this MBean
+     */
+    public Config(HistoryStore pHistoryStore, DebugStore pDebugStore, String pOName) {
         historyStore = pHistoryStore;
         debugStore = pDebugStore;
-        qualifier = pQualifier;
-        objectName = pObjectName;
+        objectName = pOName;
     }
 
+    /** {@inheritDoc} */
     public void setHistoryEntriesForAttribute(String pMBean, String pAttribute, String pPath, String pTarget, int pMaxEntries)
             throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey(pMBean,pAttribute,pPath,pTarget);
         historyStore.configure(key,pMaxEntries);
     }
 
+    /** {@inheritDoc} */
     public void setHistoryEntriesForOperation(String pMBean, String pOperation, String pTarget, int pMaxEntries) throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey(pMBean,pOperation,pTarget);
         historyStore.configure(key,pMaxEntries);
     }
 
+    /** {@inheritDoc} */
     public void resetHistoryEntries() {
         historyStore.reset();
     }
 
+    /** {@inheritDoc} */
     public String debugInfo() {
         return debugStore.debugInfo();
     }
 
+    /** {@inheritDoc} */
     public void resetDebugInfo() {
         debugStore.resetDebugInfo();
     }
 
+    /** {@inheritDoc} */
     public int getHistoryMaxEntries() {
         return historyStore.getGlobalMaxEntries();
     }
 
+    /** {@inheritDoc} */
     public void setHistoryMaxEntries(int pLimit) {
         historyStore.setGlobalMaxEntries(pLimit);
     }
 
+    /** {@inheritDoc} */
     public boolean isDebug() {
         return debugStore.isDebug();
     }
 
+    /** {@inheritDoc} */
     public void setDebug(boolean pSwitch) {
         debugStore.setDebug(pSwitch);
     }
 
+    /** {@inheritDoc} */
     public int getMaxDebugEntries() {
         return debugStore.getMaxDebugEntries();
     }
 
+    /** {@inheritDoc} */
     public void setMaxDebugEntries(int pNumber) {
         debugStore.setMaxDebugEntries(pNumber);
     }
 
+    /** {@inheritDoc} */
     public int getHistorySize() {
         return historyStore.getSize();
     }
 
-    public String getObjectName() {
-        return objectName + (qualifier != null ? "," + qualifier : "");
-    }
-
-
     // ========================================================================
 
     // Provide our own name on registration
+    /** {@inheritDoc} */
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws MalformedObjectNameException {
-        return new ObjectName(getObjectName());
+        return new ObjectName(objectName);
     }
 
-
+    /** {@inheritDoc} */
     public void postRegister(Boolean registrationDone) {
     }
 
+    /** {@inheritDoc} */
     public void preDeregister() {
     }
 
+    /** {@inheritDoc} */
     public void postDeregister() {
     }
 }

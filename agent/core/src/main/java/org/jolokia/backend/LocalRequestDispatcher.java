@@ -86,14 +86,17 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         mBeanServerHandler.init();
 
         // Register the Config MBean
-        Config config = new Config(pHistoryStore,pDebugStore,qualifier,Config.OBJECT_NAME);
-        mBeanServerHandler.registerMBean(config,config.getObjectName());
+        String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
+        Config config = new Config(pHistoryStore,pDebugStore,oName);
+        mBeanServerHandler.registerMBean(config,oName);
 
         // Register another Config MBean (which dispatched to the stores anyway) for access by
         // jmx4perl version < 0.80
-        Config legacyConfig = new Config(pHistoryStore,pDebugStore,qualifier,Config.LEGACY_OBJECT_NAME);
-        mBeanServerHandler.registerMBean(legacyConfig,legacyConfig.getObjectName());
+        String legacyOName = createObjectNameWithQualifier(Config.LEGACY_OBJECT_NAME);
+        Config legacyConfig = new Config(pHistoryStore,pDebugStore,legacyOName);
+        mBeanServerHandler.registerMBean(legacyConfig,legacyOName);
     }
+
 
     public void destroy() throws JMException {
         mBeanServerHandler.unregisterMBeans();
@@ -101,5 +104,9 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
     public ServerHandle getServerInfo() {
         return mBeanServerHandler.getServerHandle();
+    }
+
+    private String createObjectNameWithQualifier(String pOName) {
+        return pOName + (qualifier != null ? "," + qualifier : "");
     }
 }
