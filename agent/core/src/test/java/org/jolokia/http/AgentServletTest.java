@@ -16,18 +16,19 @@ package org.jolokia.http;
  *  limitations under the License.
  */
 
-import java.io.FileNotFoundException;
-import java.security.PrivilegedActionException;
+import java.io.*;
 import java.util.*;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.easymock.EasyMock;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.ConfigKey;
-import org.testng.annotations.*;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -41,7 +42,7 @@ public class AgentServletTest {
     private AgentServlet servlet;
 
     @Test
-    public void simple() throws ServletException {
+    public void simpleInit() throws ServletException {
         servlet = new AgentServlet();
         initMocks(null,"No access restrictor found",null);
         replay(config, context);
@@ -51,7 +52,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void simpleWithAcessRestriction() throws ServletException {
+    public void initWithAcessRestriction() throws ServletException {
         servlet = new AgentServlet();
         initMocks(new String[] { ConfigKey.POLICY_LOCATION.getKeyValue(),"classpath:/access-sample1.xml" },
                   "Using access restrictor.*access-sample1.xml",null);
@@ -62,7 +63,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void simpleWithInvalidPolicyFile() throws ServletException {
+    public void initWithInvalidPolicyFile() throws ServletException {
         servlet = new AgentServlet();
         initMocks(new String[] { ConfigKey.POLICY_LOCATION.getKeyValue(),"file:///blablub.xml" },
                   "Error.*blablub.xml.*Denying", FileNotFoundException.class );
@@ -73,7 +74,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void customAccessRestrictor() throws ServletException {
+    public void initWithcustomAccessRestrictor() throws ServletException {
         servlet = new AgentServlet(new AllowAllRestrictor());
         initMocks(null,"custom access",null);
         replay(config,context);
@@ -81,6 +82,82 @@ public class AgentServletTest {
         servlet.init(config);
         servlet.destroy();
     }
+
+    @Test
+    public void simpleGet() throws ServletException, IOException {
+        servlet = new AgentServlet(new AllowAllRestrictor());
+        initMocks(null,"custom access",null);
+        replay(config, context);
+        servlet.init(config);
+
+        HttpServletRequest request = createMock(HttpServletRequest.class);
+        HttpServletResponse response = createMock(HttpServletResponse.class);
+
+        expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(null);
+        expect(request.getRemoteHost()).andReturn("localhost");
+        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+        expect(request.getRequestURI()).andReturn("/jolokia/");
+        expect(request.getPathInfo()).andReturn("/read/java.lang:type=Memory/HeapMemoryUsage");
+        expect(request.getParameterMap()).andReturn(null);
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("text/plain");
+        response.setStatus(200);
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
+        expect(response.getWriter()).andReturn(writer);
+
+        replay(request, response);
+
+        servlet.doGet(request,response);
+
+        assertTrue(sw.toString().contains("used"));
+        servlet.destroy();
+    }
+
+    @Test
+    public void simplePost() throws ServletException, IOException {
+        servlet = new AgentServlet(new AllowAllRestrictor());
+        initMocks(new String[] { "debug", "false" },"custom access",null);
+        replay(config, context);
+        servlet.init(config);
+
+        HttpServletRequest request = createMock(HttpServletRequest.class);
+        HttpServletResponse response = createMock(HttpServletResponse.class);
+
+        expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(null);
+        expect(request.getRemoteHost()).andReturn("localhost");
+        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+        expect(request.getRequestURI()).andReturn("/jolokia/");
+        expect(request.getCharacterEncoding()).andReturn("utf-8");
+        expect(request.getParameterMap()).andReturn(null);
+
+        final ByteArrayInputStream bis =
+                new ByteArrayInputStream("{ \"type\": \"read\",\"mbean\": \"java.lang:type=Memory\", \"attribute\": \"HeapMemoryUsage\"}".getBytes());
+        ServletInputStream is = new ServletInputStream() {
+            @Override
+            public int read() throws IOException {
+                return bis.read();
+            }
+        };
+        expect(request.getInputStream()).andReturn(is);
+
+
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("text/plain");
+        response.setStatus(200);
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
+        expect(response.getWriter()).andReturn(writer);
+
+        replay(request, response);
+
+        servlet.doPost(request, response);
+
+        assertTrue(sw.toString().contains("used"));
+        servlet.destroy();
+    }
+
+
 
 
     // ============================================================================================
