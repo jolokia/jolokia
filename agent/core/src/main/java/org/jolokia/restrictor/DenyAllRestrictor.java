@@ -29,26 +29,33 @@ import org.jolokia.util.RequestType;
  * @since Jul 28, 2009
  */
 public class DenyAllRestrictor implements Restrictor {
+
+    /** {@inheritDoc} */
     public boolean isHttpMethodAllowed(HttpMethod pMethod) {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean isTypeAllowed(RequestType pType) {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
         return false;
     }

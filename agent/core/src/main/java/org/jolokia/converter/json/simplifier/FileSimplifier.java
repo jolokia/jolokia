@@ -29,7 +29,9 @@ import java.util.Map;
  */
 public class FileSimplifier extends SimplifierExtractor<File> {
 
-
+    /**
+     * Empty constructor
+     */
     public FileSimplifier() {
         super(File.class);
     }
@@ -53,18 +55,22 @@ public class FileSimplifier extends SimplifierExtractor<File> {
     // ==========================================================================
     // Static inner classes as usage extractors
     private static class NameAttributeExtractor implements AttributeExtractor<File> {
+        /** {@inheritDoc} */
         public Object extract(File file) { return file.getName(); }
     }
 
     private static class LengthAttributeExtractor implements AttributeExtractor<File> {
+        /** {@inheritDoc} */
         public Object extract(File file) { return file.length(); }
     }
 
     private static class IsDirectoryAttributeExtractor implements AttributeExtractor<File> {
+        /** {@inheritDoc} */
         public Object extract(File file) { return file.isDirectory(); }
     }
 
     private static class PathAttributeExtractor implements AttributeExtractor<File> {
+        /** {@inheritDoc} */
         public Object extract(File file) {
             try {
                 return file.getCanonicalPath();
@@ -74,10 +80,12 @@ public class FileSimplifier extends SimplifierExtractor<File> {
         }
     }
     private static class ExistsAttributeExtractor implements AttributeExtractor<File> {
+        /** {@inheritDoc} */
         public Object extract(File file) { return file.exists(); }
     }
 
     private static class LastModifiedAttributeExtractor implements AttributeExtractor<File> {
+        /** {@inheritDoc} */
         public Object extract(File value) { return value.lastModified(); }
     }
 }

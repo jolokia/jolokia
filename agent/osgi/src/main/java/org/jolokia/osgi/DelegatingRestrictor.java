@@ -16,6 +16,11 @@ class DelegatingRestrictor extends DenyAllRestrictor {
 
     private BundleContext bundleContext;
 
+    /**
+     * Constructor remembering the bundle context
+     *
+     * @param pBundleContext bundle context to remember
+     */
     DelegatingRestrictor(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
     }
@@ -66,6 +71,7 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     // ====================================================================
 
     private static final RestrictorCheck TYPE_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isTypeAllowed((RequestType) args[0]);
         }
@@ -79,6 +85,7 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     // ====================================================================
 
     private static final RestrictorCheck ATTRIBUTE_READ_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isAttributeReadAllowed((ObjectName) args[0], (String) args[1]);
         }
@@ -92,6 +99,7 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     // ====================================================================
 
     private static final RestrictorCheck ATTRIBUTE_WRITE_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isAttributeWriteAllowed((ObjectName) args[0], (String) args[1]);
         }
@@ -105,6 +113,7 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     // ====================================================================
 
     private static final RestrictorCheck OPERATION_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isOperationAllowed((ObjectName) args[0], (String) args[1]);
         }
@@ -118,6 +127,7 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     // ====================================================================
 
     private static final RestrictorCheck REMOTE_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor,Object ... args) {
             String[] argsS = new String[args.length];
             for (int i = 0; i < args.length; i++) {

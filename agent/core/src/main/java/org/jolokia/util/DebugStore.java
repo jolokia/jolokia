@@ -35,11 +35,22 @@ public class DebugStore {
     private int maxDebugEntries;
     private boolean isDebug;
 
+    /**
+     * Create the debug store for holding debug messages
+     *
+     * @param pMaxDebugEntries how many messages to keep
+     * @param pDebug whether debug is switched on
+     */
     public DebugStore(int pMaxDebugEntries, boolean pDebug) {
         maxDebugEntries = pMaxDebugEntries;
         isDebug = pDebug;
     }
 
+    /**
+     * Store the given message in this store if debug is switched on
+     *
+     * @param pMessage message to store
+     */
     public void log(String pMessage) {
         if (!isDebug) {
             return;
@@ -47,10 +58,22 @@ public class DebugStore {
         add(System.currentTimeMillis() / 1000,pMessage);
     }
 
+
+    /**
+     * Store the given message in this store if debug is switched on
+     *
+     * @param pMessage message to store
+     * @param pThrowable exception to store
+     */
     public void log(String pMessage, Throwable pThrowable) {
         add(System.currentTimeMillis() / 1000,pMessage,pThrowable);
     }
 
+    /**
+     * Get back all previously logged and stored debug messages
+     *
+     * @return debug string
+     */
     public String debugInfo() {
         if (!isDebug) {
             return "";
@@ -68,10 +91,18 @@ public class DebugStore {
         return ret.toString();
     }
 
+    /**
+     * Reset debug info
+     */
     public void resetDebugInfo() {
         debugEntries.clear();
     }
 
+    /**
+     * Switch on/off debug
+     *
+     * @param pSwitch if <code>true</code> switch on debug
+     */
     public void setDebug(boolean pSwitch) {
         if (!pSwitch) {
             resetDebugInfo();
@@ -79,20 +110,35 @@ public class DebugStore {
         isDebug = pSwitch;
     }
 
+    /**
+     * Return <code>true</code> when debugging is switched on
+     *
+     * @return true if debugging is switched on
+     */
     public boolean isDebug() {
         return isDebug;
     }
 
+    /**
+     * Get the number of max debugging entries which can be stored
+     * @return number of maximum debug entries
+     */
     public int getMaxDebugEntries() {
         return maxDebugEntries;
     }
 
+    /**
+     * Set the number of maximum debuggin entries and trim the list of
+     * debug entries
+     *
+     * @param pNumber the maximal number of debug entries
+     */
     public void setMaxDebugEntries(int pNumber) {
         maxDebugEntries = pNumber;
         trim();
     }
 
-
+    // add a message along with a time stamp
     private void add(long pTime,String message) {
         debugEntries.addFirst(new Entry(pTime,message));
         trim();
@@ -103,6 +149,7 @@ public class DebugStore {
         trim();
     }
 
+    // trim list of debug entries
     public void trim() {
         while (debugEntries.size() > maxDebugEntries) {
             debugEntries.removeLast();
@@ -111,6 +158,7 @@ public class DebugStore {
 
     // ========================================================================
 
+    // a singel entry in the debug store
     private static final class Entry {
         private long timestamp;
         private String message;
