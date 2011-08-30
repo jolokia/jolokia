@@ -146,6 +146,7 @@ public enum ConfigKey {
         }
     }
 
+
     ConfigKey(String pValue,boolean pIsGlobalConfig,boolean pIsRequestConfig) {
         this(pValue,pIsGlobalConfig,pIsRequestConfig,null);
     }
@@ -158,39 +159,70 @@ public enum ConfigKey {
     }
 
     @Override
+    /** {@inheritDoc} */
     public String toString() {
         return key;
     }
 
-    public static ConfigKey getConfigKey(String pKeyS) {
-        return keyByName.get(pKeyS);
-    }
-
+    /**
+     * Get the configuration key for a global configuration
+     *
+     * @param pKeyS the key to lookup
+     * @return the key or null if the key is not known or is not a global key
+     */
     public static ConfigKey getGlobalConfigKey(String pKeyS) {
         return globalKeyByName.get(pKeyS);
     }
+
+    /**
+     * Get the configuration key for a request configuration
+     *
+     * @param pKeyS the key to lookup
+     * @return the key or null if the key is not known or is not a request key
+     */
     public static ConfigKey getRequestConfigKey(String pKeyS) {
         return requestKeyByName.get(pKeyS);
     }
 
+    /**
+     * Get the string value of a key
+     *
+     * @return string value of a key
+     */
     public String getKeyValue() {
         return key;
     }
 
+    /**
+     * Get the default value
+     *
+     * @return the default value of a key
+     */
     public String getDefaultValue() {
         return defaultValue;
     }
 
+    /**
+     * Whether this key is a global configuration key
+     * @return true if this is a global configuration key
+     */
     public boolean isGlobalConfig() {
         return globalConfig;
     }
 
+
+    /**
+     * Whether this key is a request configuration key
+     * @return true if this is a request configuration key
+     */
     public boolean isRequestConfig() {
         return requestConfig;
     }
 
-    // Extract value from map, including a default value if
-    // value is not set
+    /**
+     * Extract value from map, including a default value if
+     * value is not set
+     */
     public String getValue(Map<ConfigKey, String> pConfig) {
         String value = pConfig.get(this);
         if (value == null) {
@@ -199,7 +231,12 @@ public enum ConfigKey {
         return value;
     }
 
-    // Extract config options from a given map
+    /**
+     * Extract config options from a given map
+     *
+     * @param pMap map to extract the configuration from
+     * @return map with keys mapped to {@link ConfigKey}
+     */
     public static Map<ConfigKey,String> extractConfig(Map<String,String> pMap) {
         Map<ConfigKey,String> ret = new HashMap<ConfigKey, String>();
         for (ConfigKey c : ConfigKey.values()) {

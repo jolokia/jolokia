@@ -7,7 +7,8 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.request.*;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.ValueFaultHandler;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 
@@ -54,14 +55,19 @@ public final class ObjectToJsonConverter {
     // Used for converting string to objects when setting attributes
     private StringToObjectConverter stringToObjectConverter;
 
-
-
     private Integer hardMaxDepth,hardMaxCollectionSize,hardMaxObjects;
 
     // Definition of simplifiers
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/simplifiers-default";
     private static final String SIMPLIFIERS_DEF = "META-INF/simplifiers";
 
+    /**
+     * New object-to-json converter
+     *
+     * @param pStringToObjectConverter used when setting values
+     * @param pConfig configuration for setting limits
+     * @param pSimplifyHandlers a bunch of simplifiers used for mangling the conversion result
+     */
     public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter,
                                  Map<ConfigKey,String> pConfig, Extractor... pSimplifyHandlers) {
         initLimits(pConfig);
@@ -178,7 +184,16 @@ public final class ObjectToJsonConverter {
         }
     }
 
-    // returns the old value
+    /**
+     * Set an value of an inner object
+     *
+     * @param pInner the inner object
+     * @param pAttribute the attribute to set
+     * @param pValue the value to set
+     * @return the old value
+     * @throws IllegalAccessException if the reflection code fails during setting of the value
+     * @throws InvocationTargetException reflection error
+     */
     public Object setObjectValue(Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
 
@@ -198,8 +213,94 @@ public final class ObjectToJsonConverter {
                     " (object: " + pInner + ", attribute: " + pAttribute + ", value: " + pValue + ")");
         }
     }
+
     // =================================================================================
 
+    /**
+     * Get the length of an extracted collection, but not larger than the configured limit.
+     *
+     * @param originalLength the orginal length
+     * @return the original length if is smaller than then the configured maximum length. Otherwise the
+     *         maximum length is returned.
+     */
+    int getCollectionLength(int originalLength) {
+        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
+        Integer maxSize = ctx.getMaxCollectionSize();
+        if (maxSize != null && originalLength > maxSize) {
+            return maxSize;
+        } else {
+            return originalLength;
+        }
+    }
+
+    /**
+     * Get the fault handler used for dealing with exceptions during value extraction.
+     *
+     * @return the fault handler
+     */
+    public ValueFaultHandler getValueFaultHandler() {
+        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
+        return ctx.getValueFaultHandler();
+    }
+
+    /**
+     * Check whether the number of extracted objects exceeds the number of maximum objects to extract
+     *
+     * @return true if the number of extracted objects exceeds the maximum number of objects
+     */
+    boolean exceededMaxObjects() {
+        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
+        return ctx.getMaxObjects() != null && ctx.getObjectCount() > ctx.getMaxObjects();
+    }
+
+    /**
+     * Clear the context used for counting objects and limits
+     */
+    void clearContext() {
+        stackContextLocal.remove();
+    }
+
+    /**
+     * Setup the context with hard limits
+     */
+    void setupContext() {
+        setupContext(null);
+    }
+
+    /**
+     * Setup the context with the limits given in the request or with the default limits if not. In all cases,
+     * hard limits as defined in the servlet configuration are never exceeded.
+     *
+     * @param pRequest request from which to extract the limit parameters
+     */
+    void setupContext(JmxRequest pRequest) {
+        if (pRequest != null) {
+            Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
+            Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
+            Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
+
+            setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
+        } else {
+            // Use defaults:
+            setupContext(hardMaxDepth,hardMaxCollectionSize,hardMaxObjects,JmxRequest.THROWING_VALUE_FAULT_HANDLER);
+        }
+    }
+
+    /**
+     * Setup context with limits
+     *
+     * @param pMaxDepth maximum serialization level
+     * @param pMaxCollectionSize maximum collection size
+     * @param pMaxObjects maximum number of objects to serialize
+     * @param pValueFaultHandler a value fault handler used during extraction
+     */
+    void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,
+                      ValueFaultHandler pValueFaultHandler) {
+        StackContext stackContext = new StackContext(pMaxDepth,pMaxCollectionSize,pMaxObjects,pValueFaultHandler);
+        stackContextLocal.set(stackContext);
+    }
+
+    // =================================================================================
 
     // Get the extractor for a certain class
     private Extractor getExtractor(Class pClazz) {
@@ -272,81 +373,6 @@ public final class ObjectToJsonConverter {
     }
 
 
-
-    // Check whether JSR77 classes are available
-    // Not used for the moment, but left here for reference
-    /*
-    private boolean knowsAboutJsr77() {
-        try {
-            Class.forName("javax.management.j2ee.statistics.Stats");
-            // This is for Weblogic 9, which seems to have "Stats" but not the rest
-            Class.forName("javax.management.j2ee.statistics.JMSStats");
-            return true;
-        } catch (ClassNotFoundException exp) {
-            return false;
-        }
-    }
-    */
-
-    // =============================================================================
-    // Handler interface for dedicated handler for serializing/deserializing
-
-
-    // =============================================================================
-
-    int getCollectionLength(int originalLength) {
-        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
-        Integer maxSize = ctx.getMaxCollectionSize();
-        if (maxSize != null && originalLength > maxSize) {
-            return maxSize;
-        } else {
-            return originalLength;
-        }
-    }
-
-    /**
-     * Get the fault handler used for dealing with exceptions during value extraction.
-     *
-     * @return the fault handler
-     */
-    public ValueFaultHandler getValueFaultHandler() {
-        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
-        return ctx.getValueFaultHandler();
-    }
-
-
-    boolean exceededMaxObjects() {
-        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
-        return ctx.getMaxObjects() != null && ctx.getObjectCount() > ctx.getMaxObjects();
-    }
-
-    void clearContext() {
-        stackContextLocal.remove();
-    }
-
-    void setupContext() {
-        setupContext(null);
-    }
-
-    void setupContext(JmxRequest pRequest) {
-        if (pRequest != null) {
-            Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
-            Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
-            Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
-
-            setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
-        } else {
-            // Use defaults:
-            setupContext(hardMaxDepth,hardMaxCollectionSize,hardMaxObjects,JmxRequest.THROWING_VALUE_FAULT_HANDLER);
-        }
-    }
-
-    void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,
-                      ValueFaultHandler pValueFaultHandler) {
-        StackContext stackContext = new StackContext(pMaxDepth,pMaxCollectionSize,pMaxObjects,pValueFaultHandler);
-        stackContextLocal.set(stackContext);
-    }
-
     private Integer getLimit(Integer pReqValue, Integer pHardLimit) {
         if (pReqValue == null) {
             return pHardLimit;
@@ -382,6 +408,10 @@ public final class ObjectToJsonConverter {
             Date.class
     ));
 
+    /**
+     * Context class for holding and counting limits. It can also take care
+     * about cycles, i.e. the context knows when an object is visited the second time.
+     */
     static class StackContext {
 
         private Set objectsInCallStack = new HashSet();
@@ -393,7 +423,7 @@ public final class ObjectToJsonConverter {
         private int objectCount = 0;
         private ValueFaultHandler valueFaultHandler;
 
-        public StackContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects, ValueFaultHandler pValueFaultHandler) {
+        StackContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects, ValueFaultHandler pValueFaultHandler) {
             maxDepth = pMaxDepth;
             maxCollectionSize = pMaxCollectionSize;
             maxObjects = pMaxObjects;
@@ -418,10 +448,6 @@ public final class ObjectToJsonConverter {
 
         boolean alreadyVisited(Object object) {
             return objectsInCallStack.contains(object);
-        }
-
-        int stackLevel() {
-            return callStack.size();
         }
 
         public int size() {
