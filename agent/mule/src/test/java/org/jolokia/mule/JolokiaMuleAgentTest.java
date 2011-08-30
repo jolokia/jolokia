@@ -134,6 +134,7 @@ public class JolokiaMuleAgentTest {
             s.bind(new InetSocketAddress(address,port));
             return true;
         } catch (IOException exp) {
+            exp.printStackTrace();
             // next try ....
         } finally {
             if (s != null) {
