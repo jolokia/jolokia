@@ -127,7 +127,7 @@ public class JolokiaMuleAgentTest {
     }
 
     private boolean trySocket(int port) throws IOException {
-        InetAddress address = Inet4Address.getLocalHost();
+        InetAddress address = Inet4Address.getByName("localhost");
         ServerSocket s = null;
         try {
             s = new ServerSocket();
