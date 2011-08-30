@@ -122,11 +122,13 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    @Override
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
      * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig)}
+     *
+     * @param pServletConfig servlet configuration
      */
+    @Override
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
