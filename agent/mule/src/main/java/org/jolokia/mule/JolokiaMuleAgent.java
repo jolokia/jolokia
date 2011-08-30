@@ -13,6 +13,7 @@ import org.mule.api.MuleException;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.lifecycle.StartException;
 import org.mule.api.lifecycle.StopException;
+import org.mule.config.i18n.Message;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -37,51 +38,57 @@ import java.util.Map;
 
 
 /**
+ * Jolokia agent for the Mule ESB, which works with Mule's agent
+ * API for version 2 and 3.
+ *
  * @author roland
  * @since Dec 8, 2009
  */
-public class JolokiaMuleAgent extends AbstractAgent {
+public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
 
-    // Jetty server to use
-    private Server server;
-
-    // Default port
-    private int port = 8888;
-
-    // User/Password used for accessing the
-    // agent
-    private String user;
-    private String password;
-
-    // Initialisation parameter
-    private boolean debug = false;
-    private int historyMaxEntries = 10;
-    private int debugMaxEntries = 100;
-    private int maxDepth = 5;
-    private int maxCollectionSize = 0;
-    private int maxObjects = 10000;
+    // Internal HTTP-Server
+    private MuleAgentHttpServer server;
 
     protected JolokiaMuleAgent() {
         super("jolokia-agent");
-        server = null;
     }
 
-    public void stop() throws MuleException {
-        try {
-            server.stop();
-        } catch (Exception e) {
-            throw new StopException(e,this);
-        }
-    }
+    // =====================================================================================
+    // Lifecycle methods
 
+    /**
+     * Lifecycle method called by mule during startup
+     *
+     * @throws MuleException if something fails
+     */
     public void start() throws MuleException {
-        try {
-            server.start();
-        } catch (Exception e) {
-            throw new StartException(e,this);
+        if (server == null) {
+            throw new StartException(
+                    new IllegalStateException("Cannot start the HTTP server since this context is not initialized"),
+                    this);
         }
+        server.start();
     }
 
+    /**
+     * Lifecycle hook called by Mule while shuttding down the agent
+     *
+     * @throws MuleException if something fails
+     */
+    public void stop() throws MuleException {
+        if (server == null) {
+            throw new StopException(
+                    new IllegalStateException("Cannot stop the HTTP server since this context is not initialized"),
+                    this);
+        }
+        server.stop();
+    }
+
+    /**
+     * Description including agent URL
+     *
+     * @return agent url
+     */
     @Override
     public String getDescription() {
         String host;
@@ -93,83 +100,59 @@ public class JolokiaMuleAgent extends AbstractAgent {
         return "Jolokia Agent: http://" + host + ":" + getPort() + "/jolokia";
     }
 
+    /**
+     * Unused lifecycle hook
+     */
     public void dispose() {
     }
 
+    /**
+     * Lifecycle hook for Mule 2, unused
+     */
     public void registered() {
     }
 
+    /**
+     * Lifecycle hook for Mule 2, unused
+     */
     public void unregistered() {
     }
 
+    /**
+     * Initialise the agent and start up an internal jetty server
+     *
+     * @throws InitialisationException
+     */
     public void initialise() throws InitialisationException {
-        server = getServer(getPort());
-        Context root = getContext(server);
-        ServletHolder servletHolder = getServletHolder();
-        root.addServlet(servletHolder, "/*");
+        server = new MuleAgentHttpServer(this,this);
     }
 
-    private Server getServer(int pPort) {
-        Server newServer = new Server();
+    // ===============================================================================
+    // Configuration parameters
 
-        Connector connector = new SelectChannelConnector();
-        connector.setPort(pPort);
-        newServer.setConnectors(new Connector[]{connector});
+    // User/Password used for accessing the
+    // agent
+    private String user;
+    private String password;
 
-        return newServer;
+    // Port and Host to use
+    private String host = null;
+    private int port = 8888;
+
+    // Initialisation parameter
+    private boolean debug = false;
+    private int historyMaxEntries = 10;
+    private int debugMaxEntries = 100;
+    private int maxDepth = 5;
+    private int maxCollectionSize = 0;
+    private int maxObjects = 10000;
+
+    public String getHost() {
+        return host;
     }
 
-
-    private ServletHolder getServletHolder() {
-        ServletHolder holder = new ServletHolder(new AgentServlet());
-        holder.setInitParameters(getInitParameters());
-        holder.setInitOrder(1);
-        return holder;
-    }
-
-    private Context getContext(HandlerContainer pContainer) {
-        Context root = new Context(pContainer,"/jolokia",Context.SESSIONS);
-        if (getUser() != null && getPassword() != null) {
-            root.setSecurityHandler(getSecurityHandler(getUser(),getPassword(),"jolokia-role"));
-        }
-        return root;
-    }
-
-    private SecurityHandler getSecurityHandler(String pUser, String pPassword, String pRole) {
-        SecurityHandler securityHandler = new SecurityHandler();
-        securityHandler.setConstraintMappings(getConstraintMappings(pRole));
-        securityHandler.setUserRealm(getUserRealm(pUser, pPassword, pRole));
-        return securityHandler;
-    }
-
-    private UserRealm getUserRealm(String pUser, String pPassword, String pRole) {
-        HashUserRealm realm = new HashUserRealm("jolokia Realm");
-        realm.put(pUser,pPassword);
-        realm.addUserToRole(getUser(),pRole);
-        return realm;
-    }
-
-    private ConstraintMapping[] getConstraintMappings(String ... pRoles) {
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(pRoles);
-        constraint.setAuthenticate(true);
-
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
-        return new ConstraintMapping[] { cm };
-    }
-
-    private Map getInitParameters() {
-        Map ret = new HashMap();
-        ret.put("debugMaxEntries","" + getDebugMaxEntries());
-        ret.put("historyMaxEntries","" + getHistoryMaxEntries());
-        ret.put("maxCollectionsSize","" + getMaxCollectionSize());
-        ret.put("maxDepth","" + getMaxDepth());
-        ret.put("maxObjects","" + getMaxObjects());
-        ret.put("debug","" + isDebug());
-        return ret;
+    public void setHost(String pHost) {
+        host = pHost;
     }
 
     public int getPort() {
