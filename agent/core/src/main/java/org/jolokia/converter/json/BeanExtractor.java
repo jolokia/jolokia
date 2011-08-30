@@ -31,6 +31,8 @@ import java.util.*;
 
 
 /**
+ * Extractor for plain Java objects.
+ *
  * @author roland
  * @since Apr 19, 2009
  */
@@ -51,14 +53,17 @@ public class BeanExtractor implements Extractor {
     private static final Set<String> IGNORE_METHODS = new HashSet<String>(Arrays.asList(
             "getClass"
     ));
+
     private static final String[] GETTER_PREFIX = new String[] { "get", "is", "has"};
 
 
+    /** {@inheritDoc} */
     public Class getType() {
         return Object.class;
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
+    /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Stack<String> pExtraArgs,boolean jsonify)
             throws AttributeNotFoundException {
@@ -192,6 +197,7 @@ public class BeanExtractor implements Extractor {
     }
 
     // Using standard set semantics
+    /** {@inheritDoc} */
     public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
@@ -232,10 +238,12 @@ public class BeanExtractor implements Extractor {
         return oldValue;
     }
 
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return true;
     }
 
+    /** {@inheritDoc} */
     // Privileged action for setting the accesibility mode for a method to true
     private static class SetMethodAccessibleAction implements PrivilegedAction<Void> {
         private final Method getMethod;

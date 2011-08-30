@@ -52,19 +52,35 @@ public class JolokiaServlet extends AgentServlet {
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
 
+    /**
+     * Constructor with an empty context
+     */
     public JolokiaServlet() {
         this(null);
     }
 
+    /**
+     * Constructor which associates this servlet with a bundle context
+     *
+     * @param pContext bundle context to associate with
+     */
     public JolokiaServlet(BundleContext pContext) {
         this (pContext,null);
     }
 
+    /**
+     * Constructor with a bundle context and a given restrictor
+     *
+     * @param pContext associated bundle context
+     * @param pRestrictor restrictor to use or <code>null</code> if the default
+     *        lookup mechanism should be used
+     */
     public JolokiaServlet(BundleContext pContext,Restrictor pRestrictor) {
         super(pRestrictor);
         bundleContextGiven = pContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void init(ServletConfig pServletConfig) throws ServletException {
         // We are making the bundle context available here as a thread local
@@ -81,7 +97,8 @@ public class JolokiaServlet extends AgentServlet {
     /**
      * Create a log handler which tracks a {@link LogService} and, if available, use the log service
      * for logging, in the other time uses the servlet's default logging facility
-     * @param pServletConfig
+     *
+     * @param pServletConfig  servlet configuration
      */
     @Override
     protected LogHandler createLogHandler(ServletConfig pServletConfig) {
@@ -99,6 +116,7 @@ public class JolokiaServlet extends AgentServlet {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         if (logTracker != null) {
@@ -144,10 +162,12 @@ public class JolokiaServlet extends AgentServlet {
             logTracker = pLogTracker;
         }
 
+        /** {@inheritDoc} */
         public void debug(String message) {
             doLog(LogService.LOG_DEBUG, message);
         }
 
+        /** {@inheritDoc} */
         public void info(String message) {
             doLog(LogService.LOG_INFO, message);
         }
@@ -161,6 +181,7 @@ public class JolokiaServlet extends AgentServlet {
             }
         }
 
+        /** {@inheritDoc} */
         public void error(String message, Throwable t) {
             LogService logService = (LogService) logTracker.getService();
             if (logService != null) {
