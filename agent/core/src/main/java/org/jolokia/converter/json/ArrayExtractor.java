@@ -27,16 +27,35 @@ import java.util.Stack;
 
 
 /**
+ * Extractor for extracting arrays of any kind.
+ *
  * @author roland
  * @since Apr 19, 2009
  */
 public class ArrayExtractor implements Extractor {
 
+    /** {@inheritDoc} */
     public Class getType() {
         // Special handler, no specific Type
         return null;
     }
 
+
+    /**
+     * Extract an array and, if to be jsonified, put it into an {@link JSONArray}. An index can be used (on top of
+     * the extra args stack) in order to specify a single value within the array.
+     *
+     * @param pConverter the global converter in order to be able do dispatch for
+     *        serializing inner data types
+     * @param pValue the value to convert (must be an aary)
+     * @param pExtraArgs extra arguments stack, which is popped to get an index for extracting a single element
+     *                   of the array
+     * @param jsonify whether to convert to a JSON object/list or whether the plain object
+     *        should be returned. The later is required for writing an inner value
+     * @return the extracted object
+     * @throws AttributeNotFoundException
+     * @throws IndexOutOfBoundsException if an index is used which points outside the given list
+     */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
         int length = pConverter.getCollectionLength(Array.getLength(pValue));
         if (!pExtraArgs.isEmpty()) {
@@ -56,19 +75,32 @@ public class ArrayExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object  pValue)
+    /**
+     * Set a value in an array
+     *
+     * @param pConverter the global converter in order to be able do dispatch for
+     *        serializing inner data types
+     * @param pInner object on which to set the value (which must be a {@link List})
+     * @param pIndex index (as string) where to set the value within the array
+     * @param pValue the new value to set
+
+     * @return the old value at this index
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pIndex, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
         Class clazz = pInner.getClass();
         if (!clazz.isArray()) {
             throw new IllegalArgumentException("Not an array to set a value, but " + clazz +
-                    ". (index = " + pAttribute + ", value = " +  pValue + ")");
+                    ". (index = " + pIndex + ", value = " +  pValue + ")");
         }
         int idx;
         try {
-            idx = Integer.parseInt(pAttribute);
+            idx = Integer.parseInt(pIndex);
         } catch (NumberFormatException exp) {
             throw new IllegalArgumentException("Non-numeric index for accessing array " + pInner +
-                    ". (index = " + pAttribute + ", value to set = " +  pValue + ")",exp);
+                    ". (index = " + pIndex + ", value to set = " +  pValue + ")",exp);
         }
         Class type = clazz.getComponentType();
         Object value = pConverter.prepareValue(type.getName(), pValue);
@@ -77,6 +109,7 @@ public class ArrayExtractor implements Extractor {
         return oldValue;
     }
 
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return true;
     }

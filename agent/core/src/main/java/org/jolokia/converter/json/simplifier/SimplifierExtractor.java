@@ -106,12 +106,28 @@ abstract class SimplifierExtractor<T> implements Extractor {
 
 
     // ============================================================================
+
+    /**
+     * Helper interface for extracting and simplifying values
+     *
+     * @param <T> type to extract
+     */
     interface AttributeExtractor<T> {
+        /**
+         * Extract the real value from a given value
+         * @param value to extract from
+         * @return the extracted value
+         * @throws SkipAttributeException if this value which is about to be extracted
+         *                                should be omitted in the result
+         */
         Object extract(T value) throws SkipAttributeException;
     }
 
     static class SkipAttributeException extends Exception {}
 
-    // Add extractors to map
+    /**
+     * Add extractors to map
+     * @param pExtractorMap the map to add the extractors used within this simplifier
+     */
     abstract void init(Map<String, AttributeExtractor<T>> pExtractorMap);
 }

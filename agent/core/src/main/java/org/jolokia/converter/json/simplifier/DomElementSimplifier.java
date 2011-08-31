@@ -29,12 +29,16 @@ import java.util.Map;
  */
 public class DomElementSimplifier extends SimplifierExtractor<Element> {
 
+    /**
+     * Construct the simplifier for DOM elements
+     */
     public DomElementSimplifier() {
         super(Element.class);
     }
 
     // ==================================================================================
     @Override
+    /** {@inheritDoc} */
     void init(Map<String, AttributeExtractor<Element>> pExtractorMap) {
         Object[][] pAttrs = {
                 { "name", new NameAttributeExtractor() },
@@ -46,12 +50,15 @@ public class DomElementSimplifier extends SimplifierExtractor<Element> {
 
     // ==================================================================================
     private static class ValueAttributeExtractor implements AttributeExtractor<Element> {
+       /** {@inheritDoc} */
         public Object extract(Element element) { return element.getNodeValue(); }
     }
     private static class NameAttributeExtractor implements AttributeExtractor<Element> {
+        /** {@inheritDoc} */
         public Object extract(Element element) { return element.getNodeName(); }
     }
     private static class ChildAttributeExtractor implements AttributeExtractor<Element> {
+        /** {@inheritDoc} */
         public Object extract(Element element) { return element.hasChildNodes(); }
     }
 

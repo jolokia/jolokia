@@ -27,15 +27,33 @@ import java.util.Stack;
 
 
 /**
+ * Extract a {@link List}
+ *
  * @author roland
  * @since Apr 19, 2009
  */
 public class ListExtractor implements Extractor {
 
+    /** {@inheritDoc} */
     public Class getType() {
         return List.class;
     }
 
+    /**
+     * Extract a list and, if to be jsonified, put it into an {@link JSONArray}. An index can be used (on top of
+     * the extra args stack) in order to specify a single value within the list.
+     *
+     * @param pConverter the global converter in order to be able do dispatch for
+     *        serializing inner data types
+     * @param pValue the value to convert (must be a {@link List})
+     * @param pExtraArgs extra arguments stack, which is popped to get an index for extracting a single element
+     *                   of the list
+     * @param jsonify whether to convert to a JSON object/list or whether the plain object
+     *        should be returned. The later is required for writing an inner value
+     * @return the extracted object
+     * @throws AttributeNotFoundException
+     * @throws IndexOutOfBoundsException if an index is used which points outside the given list
+     */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs,boolean jsonify)
             throws AttributeNotFoundException {
         List list = (List) pValue;
@@ -59,15 +77,28 @@ public class ListExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object  pValue)
+    /**
+     * Set a value within a list
+     *
+     * @param pConverter the global converter in order to be able do dispatch for
+     *        serializing inner data types
+     * @param pInner object on which to set the value (which must be a {@link List})
+     * @param pIndex index (as string) where to set the value within the list
+     * @param pValue the new value to set
+
+     * @return the old value at this index
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pIndex, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
         List list = (List) pInner;
         int idx;
         try {
-            idx = Integer.parseInt(pAttribute);
+            idx = Integer.parseInt(pIndex);
         } catch (NumberFormatException exp) {
             throw new IllegalArgumentException("Non-numeric index for accessing collection " + pInner +
-                    ". (index = " + pAttribute + ", value to set = " +  pValue + ")",exp);
+                    ". (index = " + pIndex + ", value to set = " +  pValue + ")",exp);
         }
 
         // For a collection, we can infer the type within the collection. We are trying to fetch
@@ -81,6 +112,7 @@ public class ListExtractor implements Extractor {
         return oldValue;
     }
 
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return true;
     }

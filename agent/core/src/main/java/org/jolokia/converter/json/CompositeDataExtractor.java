@@ -28,16 +28,19 @@ import java.util.Stack;
 
 
 /**
+ * Extractor for {@link CompositeData}
+ *
  * @author roland
  * @since Apr 19, 2009
  */
-public class
-        CompositeDataExtractor implements Extractor {
+public class CompositeDataExtractor implements Extractor {
 
+    /** {@inheritDoc} */
     public Class getType() {
         return CompositeData.class;
     }
 
+    /** {@inheritDoc} */
     @SuppressWarnings("PMD.PreserveStackTrace")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                          Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
@@ -63,11 +66,13 @@ public class
         }
     }
 
+    /** {@inheritDoc} */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("CompositeData cannot be written to");
     }
 
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return false;
     }

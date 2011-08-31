@@ -1,12 +1,13 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
-
-import javax.management.AttributeNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Stack;
+
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -26,16 +27,33 @@ import java.util.Stack;
 
 
 /**
+ * Extractor for Maps (which turns {@link Map} into {@link JSONObject})
+ *
  * @author roland
  * @since Apr 19, 2009
  */
 public class MapExtractor implements Extractor {
     private static final int MAX_STRING_LENGTH = 400;
 
+    /** {@inheritDoc} */
     public Class getType() {
         return Map.class;
     }
 
+    /**
+     * Convert a Map to JSON (if <code>jsonify</code> is <code>true</code>). If a path is used, the
+     * path is interpreted as a key into the map. The key in the path is a string and is compared agains
+     * all keys in the map against their string representation.
+     *
+     * @param pConverter the global converter in order to be able do dispatch for
+     *        serializing inner data types
+     * @param pValue the value to convert which must be a {@link Map}
+     * @param pExtraArgs extra argument stack which on top must be a key into the map
+     * @param jsonify whether to convert to a JSON object/list or whether the plain object
+     *        should be returned. The later is required for writing an inner value
+     * @return the extracted object
+     * @throws AttributeNotFoundException
+     */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                          Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
         Map<Object,Object> map = (Map<Object,Object>) pValue;
@@ -71,16 +89,28 @@ public class MapExtractor implements Extractor {
         }
     }
 
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
+    /**
+     * Set the value within a map, where the attribute is taken as key into the map.
+     *
+     * @param pConverter the global converter in order to be able do dispatch for
+     *        serializing inner data types
+     * @param pMap map on which to set the value
+     * @param pKey key in the map where to put the value
+     * @param pValue the new value to set
+     * @return the old value or <code>null</code> if a new map entry was created/
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pMap, String pKey, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
-        Map<Object,Object> map = (Map<Object,Object>) pInner;
+        Map<Object,Object> map = (Map<Object,Object>) pMap;
         Object oldValue = null;
-        Object oldKey = pAttribute;
+        Object oldKey = pKey;
         for (Map.Entry entry : map.entrySet()) {
             // We dont access the map via a lookup since the key
             // are potentially object but we have to deal with string
             // representations
-            if(pAttribute.equals(entry.getKey().toString())) {
+            if(pKey.equals(entry.getKey().toString())) {
                 oldValue = entry.getValue();
                 oldKey = entry.getKey();
                 break;
@@ -94,6 +124,7 @@ public class MapExtractor implements Extractor {
         return oldValue;
     }
 
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return true;
     }
