@@ -31,7 +31,8 @@ import java.util.Stack;
  * @author roland
  * @since Apr 19, 2009
  */
-public class CompositeDataExtractor implements Extractor {
+public class
+        CompositeDataExtractor implements Extractor {
 
     public Class getType() {
         return CompositeData.class;

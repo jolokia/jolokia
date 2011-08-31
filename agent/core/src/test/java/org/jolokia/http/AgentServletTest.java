@@ -88,7 +88,7 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         StringWriter sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn("/read/java.lang:type=Memory/HeapMemoryUsage");
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
 
         replay(request, response);
 
@@ -105,7 +105,7 @@ public class AgentServletTest {
         StringWriter responseWriter = initRequestResponseMocks();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
 
-        preparePostRequest("{ \"type\": \"read\",\"mbean\": \"java.lang:type=Memory\", \"attribute\": \"HeapMemoryUsage\"}");
+        preparePostRequest(HttpTestUtil.HEAP_MEMORY_POST);
 
         replay(request, response);
 
@@ -129,7 +129,7 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getPathInfo()).andReturn("/read/java.lang:type=Memory/HeapMemoryUsage");
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
 
         replay(request, response);
 
@@ -153,7 +153,7 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getPathInfo()).andReturn("/read/java.lang:type=Memory/HeapMemoryUsage");
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
 
         replay(request, response);
 
@@ -198,7 +198,7 @@ public class AgentServletTest {
         servlet.init(config);
 
         StringWriter sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn("/read/java.lang:type=Memory/HeapMemoryUsage");
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
 
         replay(request, response);
 
@@ -266,14 +266,7 @@ public class AgentServletTest {
     }
 
     private void preparePostRequest(String pReq) throws IOException {
-        final ByteArrayInputStream bis =
-                new ByteArrayInputStream(pReq.getBytes());
-        ServletInputStream is = new ServletInputStream() {
-            @Override
-            public int read() throws IOException {
-                return bis.read();
-            }
-        };
+        ServletInputStream is = HttpTestUtil.createServletInputStream(pReq);
         expect(request.getInputStream()).andReturn(is);
     }
 

@@ -1,19 +1,18 @@
 package org.jolokia.http;
 
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+
+import javax.management.*;
+
 import org.jolokia.backend.BackendManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
 import org.jolokia.util.LogHandler;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import javax.management.*;
-import java.io.*;
-import java.util.List;
-import java.util.Map;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -99,8 +98,8 @@ public class HttpRequestHandler {
             logHandler.debug("URI: " + pUri);
         }
 
-        JSONAware jsonRequest = extractJsonRequest(pInputStream,pEncoding);
-        if (jsonRequest instanceof List) {
+        Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
+        if (jsonRequest instanceof JSONArray) {
             List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,pParameterMap);
 
             JSONArray responseList = new JSONArray();
@@ -113,15 +112,15 @@ public class HttpRequestHandler {
                 responseList.add(resp);
             }
             return responseList;
-        } else if (jsonRequest instanceof Map) {
+        } else if (jsonRequest instanceof JSONObject) {
             JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,pParameterMap);
             return executeRequest(jmxReq);
         } else {
-            throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest.toJSONString());
+            throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);
         }
     }
 
-    private JSONAware extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
+    private Object extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
         InputStreamReader reader = null;
         try {
             reader =
@@ -129,7 +128,7 @@ public class HttpRequestHandler {
                             new InputStreamReader(pInputStream, pEncoding) :
                             new InputStreamReader(pInputStream);
             JSONParser parser = new JSONParser();
-            return (JSONAware) parser.parse(reader);
+            return parser.parse(reader);
         } catch (ParseException exp) {
             throw new IllegalArgumentException("Invalid JSON request " + reader,exp);
         }
@@ -167,11 +166,10 @@ public class HttpRequestHandler {
             return getErrorJSON(403,new Exception(e.getMessage()));
         } catch (RuntimeMBeanException e) {
             // Use wrapped exception
-            Throwable cause = e.getCause();
-            int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
-            return getErrorJSON(code,cause);
+            return errorForUnwrappedException(e);
         }
     }
+
 
     /**
      * Utility method for handling single runtime exceptions and errors. This method is called
@@ -209,10 +207,9 @@ public class HttpRequestHandler {
      */
     public JSONObject getErrorJSON(int pErrorCode, Throwable pExp) {
         JSONObject jsonObject = new JSONObject();
-        Throwable unwrapped = unwrapException(pExp);
         jsonObject.put("status",pErrorCode);
-        jsonObject.put("error",getExceptionMessage(unwrapped));
-        jsonObject.put("error_type",unwrapped.getClass().getName());
+        jsonObject.put("error",getExceptionMessage(pExp));
+        jsonObject.put("error_type",pExp.getClass().getName());
         StringWriter writer = new StringWriter();
         pExp.printStackTrace(new PrintWriter(writer));
         jsonObject.put("stacktrace",writer.toString());
@@ -242,14 +239,11 @@ public class HttpRequestHandler {
     }
 
     // Unwrap an exception to get to the 'real' exception
-    // stripping any boilerplate exceptions
-    private Throwable unwrapException(Throwable pExp) {
-        if (pExp instanceof MBeanException) {
-            return ((MBeanException) pExp).getTargetException();
-        } else if (pExp instanceof RuntimeMBeanException) {
-            return pExp.getCause();
-        }
-        return pExp;
+    // and extract the error code accordingly
+    private JSONObject errorForUnwrappedException(Exception e) {
+        Throwable cause = e.getCause();
+        int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
+        return getErrorJSON(code,cause);
     }
 
 }

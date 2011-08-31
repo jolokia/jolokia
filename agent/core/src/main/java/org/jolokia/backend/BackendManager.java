@@ -295,7 +295,7 @@ public class BackendManager {
      * @param message message to log
      * @param t ecxeption occured
      */
-    public final void error(String message, Throwable t) {
+    public void error(String message, Throwable t) {
         logHandler.error(message, t);
         if (debugStore != null) {
             debugStore.log(message, t);
