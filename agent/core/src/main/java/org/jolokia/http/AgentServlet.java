@@ -204,9 +204,6 @@ public class AgentServlet extends HttpServlet {
 
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
-            if (backendManager.isDebug()) {
-                backendManager.debug("Response: " + json);
-            }
         } catch (Throwable exp) {
             JSONObject error = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
