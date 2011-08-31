@@ -48,6 +48,13 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // Information about the server environment
     private ServerHandle serverHandle;
 
+    /**
+     * Initialise this server handler and register as an MBean
+     *
+     * @throws MalformedObjectNameException if our name is wrong (cannot happen)
+     * @throws InstanceAlreadyExistsException if we already have been initialised
+     * @throws NotCompliantMBeanException if we are not compliant MBean (but we are)
+     */
     public void init() throws MalformedObjectNameException, InstanceAlreadyExistsException, NotCompliantMBeanException {
         registerMBean(this,getObjectName());
     }
@@ -288,6 +295,11 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // =====================================================================================
 
     // MBean exported debugging method
+
+    /**
+     * Get a description of all MBeanServers found
+     * @return a description of all MBeanServers along with their stored MBeans
+     */
     public String mBeanServersInfo() {
         StringBuffer ret = new StringBuffer();
         Set<MBeanServer> servers = getMBeanServers();
@@ -339,20 +351,25 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     // ==============================================================================================
     // Needed for providing the name for our MBean
+    /** {@inheritDoc} */
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws MalformedObjectNameException {
         return new ObjectName(getObjectName());
     }
 
+    /** {@inheritDoc} */
     public String getObjectName() {
         return OBJECT_NAME + (qualifier != null ? "," + qualifier : "");
     }
 
+    /** {@inheritDoc} */
     public void postRegister(Boolean registrationDone) {
     }
 
+    /** {@inheritDoc} */
     public void preDeregister() {
     }
 
+    /** {@inheritDoc} */
     public void postDeregister() {
     }
 

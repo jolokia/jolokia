@@ -16,17 +16,18 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
-import org.jolokia.converter.*;
-import org.jolokia.request.JmxRequest;
-import org.jolokia.util.LogHandler;
-import org.jolokia.mbean.Config;
-import org.jolokia.util.DebugStore;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.handler.*;
-import org.jolokia.history.HistoryStore;
-
 import javax.management.*;
+
+import org.jolokia.converter.Converters;
+import org.jolokia.detector.ServerHandle;
+import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.handler.RequestHandlerManager;
+import org.jolokia.history.HistoryStore;
+import org.jolokia.mbean.Config;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.DebugStore;
+import org.jolokia.util.LogHandler;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -63,43 +64,70 @@ public class LocalRequestDispatcher implements RequestDispatcher {
                 new RequestHandlerManager(pConverters,mBeanServerHandler.getServerHandle(),pRestrictor);
     }
 
-
-
     // Can handle any request
+    /** {@inheritDoc} */
     public boolean canHandle(JmxRequest pJmxRequest) {
         return true;
     }
 
+    /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
+    /** {@inheritDoc} */
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         return mBeanServerHandler.dispatchRequest(handler, pJmxReq);
     }
 
+    /**
+     * Initialise this reques dispatcher, which will register a {@link org.jolokia.mbean.ConfigMBean} for easy external
+     * access to the {@link HistoryStore} and {@link DebugStore}.
+     *
+     * @param pHistoryStore history store to be managed from within an MBean
+     * @param pDebugStore managed debug store
+     * @throws MalformedObjectNameException if our MBean's name is wrong (which cannot happen)
+     * @throws MBeanRegistrationException if registration fails
+     * @throws InstanceAlreadyExistsException if a config MBean is already present
+     * @throws NotCompliantMBeanException if we have a non compliant MBean (cannot happen, too)
+     */
     public void init(HistoryStore pHistoryStore, DebugStore pDebugStore)
             throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
         mBeanServerHandler.init();
 
         // Register the Config MBean
-        Config config = new Config(pHistoryStore,pDebugStore,qualifier,Config.OBJECT_NAME);
-        mBeanServerHandler.registerMBean(config,config.getObjectName());
+        String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
+        Config config = new Config(pHistoryStore,pDebugStore,oName);
+        mBeanServerHandler.registerMBean(config,oName);
 
         // Register another Config MBean (which dispatched to the stores anyway) for access by
         // jmx4perl version < 0.80
-        Config legacyConfig = new Config(pHistoryStore,pDebugStore,qualifier,Config.LEGACY_OBJECT_NAME);
-        mBeanServerHandler.registerMBean(legacyConfig,legacyConfig.getObjectName());
+        String legacyOName = createObjectNameWithQualifier(Config.LEGACY_OBJECT_NAME);
+        Config legacyConfig = new Config(pHistoryStore,pDebugStore,legacyOName);
+        mBeanServerHandler.registerMBean(legacyConfig,legacyOName);
     }
 
+    /**
+     * Unregister the config MBean
+     *
+     * @throws JMException is unregistration fails
+     */
     public void destroy() throws JMException {
         mBeanServerHandler.unregisterMBeans();
     }
 
+    /**
+     * Get information about the current server
+     * @return the server information
+     */
     public ServerHandle getServerInfo() {
         return mBeanServerHandler.getServerHandle();
+    }
+
+    private String createObjectNameWithQualifier(String pOName) {
+        return pOName + (qualifier != null ? "," + qualifier : "");
     }
 }

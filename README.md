@@ -13,7 +13,8 @@ Multiple agents are provided for different environments:
   all-in-one).
 * __Mule Agent__ for usage within a [Mule][3] ESB
 * __JVM JDK6 Agent__ which can be used with any Oracle/Sun JVM,
-  Version 6 
+  Version 6 and which is able to attach to a running Java process 
+  dynamically. 
 
 Features
 --------
@@ -72,7 +73,18 @@ JSR-160 connectors:
 Resources
 ---------
 
-More information on jolokia can be found at [www.jolokia.org][5].
+* The [Jolokia Forum][9] can be used for questions about Jolokia 
+  (and Jmx4perl).
+
+* For bug reports, please use the [Github Issue tracker][10].
+
+* Most of the time, I'm hanging around at [Freenode][11] in 
+  `#jolokia`, too.
+
+Even more information on Jolokia can be found at [www.jolokia.org][5], including
+a complete [reference manual][12].
+
+
 
  [1]: http://labs.consol.de/wp-content/uploads/2010/10/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
@@ -83,3 +95,6 @@ More information on jolokia can be found at [www.jolokia.org][5].
  [7]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
  [8]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
  [9]: http://forum.jolokia.org
+ [10]: https://github.com/rhuss/jolokia/issues
+ [11]: http://webchat.freenode.net/?channels=jolokia
+ [12]: http://www.jolokia.org/reference/html/index.html

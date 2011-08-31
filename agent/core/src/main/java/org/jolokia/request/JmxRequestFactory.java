@@ -233,12 +233,32 @@ public final class JmxRequestFactory {
         return processor;
     }
 
+    /**
+     * Interface describing a processor for HTTP requests.
+     *
+     * @param <R> the request type
+     */
     private interface Processor<R extends JmxRequest> {
-        // For GET requests
-        R process(Stack<String> e, Map<String, String> pParams)
+
+        /**
+         * Process a GET request
+         *
+         * @param pStack parsed and splitted GET url
+         * @param pParams optional query parameters
+         * @return the created request object
+         * @throws MalformedObjectNameException if an object name could not be created
+         */
+        R process(Stack<String> pStack, Map<String, String> pParams)
                 throws MalformedObjectNameException;
 
-        // For POST requests
+        /**
+         * Process a POST request
+         *
+         * @paam requestMap JSON representation of the request
+         * @param pParams optional query parameters
+         * @return the created request object
+         * @throws MalformedObjectNameException if an object name could not be created
+         */
         R process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException;
     }
@@ -267,12 +287,19 @@ public final class JmxRequestFactory {
     // Various processor for building up a request:
 
     private static class ExecProcessor implements Processor<JmxExecRequest> {
-        public JmxExecRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        /** {@inheritDoc} */
+        public JmxExecRequest process(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
             return new JmxExecRequest(
-                    e.pop(), // Object name
-                    e.pop(), // Operation name
-                    prepareArguments(e), // arguments
+                    pStack.pop(), // Object name
+                    pStack.pop(), // Operation name
+                    prepareArguments(pStack), // arguments
                     pParams);
+        }
+
+        /** {@inheritDoc} */
+        public JmxExecRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
+                throws MalformedObjectNameException {
+            return new JmxExecRequest(requestMap,pParams);
         }
 
         private List<String> prepareArguments(Stack<String> e) {
@@ -287,20 +314,17 @@ public final class JmxRequestFactory {
             return args;
         }
 
-
-        public JmxExecRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
-                throws MalformedObjectNameException {
-            return new JmxExecRequest(requestMap,pParams);
-        }
     }
 
     private static class ListProcessor implements Processor<JmxListRequest> {
-        public JmxListRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        /** {@inheritDoc} */
+        public JmxListRequest process(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
             return new JmxListRequest(
-                    prepareExtraArgs(e), // path
+                    prepareExtraArgs(pStack), // path
                     pParams);
         }
 
+        /** {@inheritDoc} */
         public JmxListRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException {
             return new JmxListRequest(requestMap,pParams);
@@ -308,15 +332,17 @@ public final class JmxRequestFactory {
     }
 
     private static class WriteProcessor implements Processor<JmxWriteRequest> {
-        public JmxWriteRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        /** {@inheritDoc} */
+        public JmxWriteRequest process(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
             return new JmxWriteRequest(
-                    e.pop(), // object name
-                    e.pop(), // attribute name
-                    StringToObjectConverter.convertSpecialStringTags(e.pop()), // value
-                    prepareExtraArgs(e), // path
+                    pStack.pop(), // object name
+                    pStack.pop(), // attribute name
+                    StringToObjectConverter.convertSpecialStringTags(pStack.pop()), // value
+                    prepareExtraArgs(pStack), // path
                     pParams);
         }
 
+        /** {@inheritDoc} */
         public JmxWriteRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException {
             return new JmxWriteRequest(requestMap,pParams);
@@ -325,14 +351,16 @@ public final class JmxRequestFactory {
 
     private static class ReadProcessor implements Processor<JmxReadRequest> {
 
-        public JmxReadRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        /** {@inheritDoc} */
+        public JmxReadRequest process(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
             return new JmxReadRequest(
-                    e.pop(),  // object name
-                    popOrNull(e), // attributes (can be null)
-                    prepareExtraArgs(e), // path
+                    pStack.pop(),  // object name
+                    popOrNull(pStack), // attributes (can be null)
+                    prepareExtraArgs(pStack), // path
                     pParams);
         }
 
+        /** {@inheritDoc} */
         public JmxReadRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException {
             return new JmxReadRequest(requestMap,pParams);
@@ -341,10 +369,12 @@ public final class JmxRequestFactory {
 
     private static class VersionProcessor implements Processor<JmxVersionRequest> {
 
-        public JmxVersionRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
+        /** {@inheritDoc} */
+        public JmxVersionRequest process(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
             return new JmxVersionRequest(pParams);
         }
 
+        /** {@inheritDoc} */
         public JmxVersionRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException {
             return new JmxVersionRequest(requestMap,pParams);
@@ -353,10 +383,12 @@ public final class JmxRequestFactory {
 
     private static class SearchProcessor implements Processor<JmxSearchRequest> {
 
-        public JmxSearchRequest process(Stack<String> e, Map<String, String> pParams) throws MalformedObjectNameException {
-            return new JmxSearchRequest(e.pop(),pParams);
+        /** {@inheritDoc} */
+        public JmxSearchRequest process(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+            return new JmxSearchRequest(pStack.pop(),pParams);
         }
 
+        /** {@inheritDoc} */
         public JmxSearchRequest process(Map<String, ?> requestMap, Map<String, String> pParams)
                 throws MalformedObjectNameException {
             return new JmxSearchRequest(requestMap,pParams);

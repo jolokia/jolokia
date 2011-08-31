@@ -207,7 +207,7 @@ public class BackendManager {
 
     // init various application wide stores for handling history and debug output.
     private void initStores(Map<ConfigKey, String> pConfig) {
-        int maxEntries = getIntConfigValue(pConfig,HISTORY_MAX_ENTRIES);
+        int maxEntries = getIntConfigValue(pConfig, HISTORY_MAX_ENTRIES);
         int maxDebugEntries = getIntConfigValue(pConfig,DEBUG_MAX_ENTRIES);
 
         String doDebug = DEBUG.getValue(pConfig);
@@ -243,7 +243,9 @@ public class BackendManager {
         return maxDebugEntries;
     }
 
-    // Remove MBeans again.
+    /**
+     * Remove MBeans
+     */
     public void destroy() {
         try {
             localDispatcher.destroy();
@@ -252,11 +254,22 @@ public class BackendManager {
         }
     }
 
-
+    /**
+     * Check whether remote access from the given client is allowed.
+     *
+     * @param pRemoteHost remote host to check against
+     * @param pRemoteAddr alternative IP address
+     * @return true if remote access is allowed
+     */
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
         return restrictor.isRemoteAccessAllowed(pRemoteHost,pRemoteAddr);
     }
 
+    /**
+     * Log at info level
+     *
+     * @param msg to log
+     */
     public void info(String msg) {
         logHandler.info(msg);
         if (debugStore != null) {
@@ -264,6 +277,11 @@ public class BackendManager {
         }
     }
 
+    /**
+     * Log at debug level
+     *
+     * @param msg message to log
+     */
     public void debug(String msg) {
         logHandler.debug(msg);
         if (debugStore != null) {
@@ -271,25 +289,25 @@ public class BackendManager {
         }
     }
 
+    /**
+     * Log at error level
+     *
+     * @param message message to log
+     * @param t ecxeption occured
+     */
     public final void error(String message, Throwable t) {
-        logHandler.error(message,t);
+        logHandler.error(message, t);
         if (debugStore != null) {
             debugStore.log(message, t);
         }
     }
 
+    /**
+     * Whether debug is switched on
+     *
+     * @return true if debug is switched on
+     */
     public boolean isDebug() {
         return debugStore != null && debugStore.isDebug();
     }
-
-    /**
-     * Set the log handler used for log handling
-     *
-     * @param pLogHandler log handler to use
-     */
-    public void setLogHandler(LogHandler pLogHandler) {
-        logHandler = pLogHandler;
-    }
-
-
 }

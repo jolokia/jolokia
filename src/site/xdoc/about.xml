@@ -96,16 +96,30 @@
     </section>
     <section name='Why it is named "Jolokia" ?'>
       <p>
-        Jolokia is the world most hottest chili with a Scoville rating
-        of at most <a
+        Jolokia is one of the world hottest chili pepper with a
+        Scoville rating of at most <a
         href="http://en.wikipedia.org/wiki/Scoville_scale#List_of_Scoville_ratings">1,075,000</a>. I'm
-        a chili head and grow chilis since 2006. I love 
-        chilis as much as JMX. That's the main reason.
+        a chili head and grow chilis since 2006. I love chilis as much
+        as JMX. That's the main reason.
       </p>
       <p>        
         The other reason is, that a chili is a good metaphore for a
         hot, new approach for JMX remoting. Especially when it is the
         hottest one ;-)
+      </p>
+    </section>
+    <section name="Who am I">
+      <p>
+        My name is <a href="http://github.com/rhuss">Roland Huss</a>
+        and during the last decades, I mainly acted as Java wizard,
+        transforming large XML documents into huge stacktraces. As
+        head of "Research &amp; Development" at the Munich based IT
+        consulting and softwarehouse <a
+        href="http://www.consol.com">ConSol*</a>, I'm particularly
+        active in the area of <a
+        href="http://www.consol.com/open-source-monitoring/">Open
+        Source Monitoring</a> especially when it comes to JEE
+        monitoring.
       </p>
     </section>
     <section name="Acknowledgments">

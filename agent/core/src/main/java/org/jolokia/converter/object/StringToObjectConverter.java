@@ -240,7 +240,6 @@ public class StringToObjectConverter {
         return ret;
     }
 
-
     private String[] split(String pValue) {
         // For now, split simply on ','. This is very simplistic
         // and will fail on complex strings containing commas as content.
@@ -256,34 +255,44 @@ public class StringToObjectConverter {
     }
 
     private static class StringParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return pValue; }
     }
     private static class IntParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Integer.parseInt(pValue); }
     }
     private static class LongParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Long.parseLong(pValue); }
     }
     private static class BooleanParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Boolean.parseBoolean(pValue); }
     }
     private static class DoubleParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Double.parseDouble(pValue); }
     }
     private static class FloatParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Float.parseFloat(pValue); }
     }
     private static class ByteParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Byte.parseByte(pValue); }
     }
     private static class CharParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return pValue.charAt(0); }
     }
     private static class ShortParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) { return Short.parseShort(pValue); }
     }
 
     private static class DateParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) {
             long time;
             try {
@@ -296,6 +305,7 @@ public class StringToObjectConverter {
     }
 
     private static class JSONParser implements Parser {
+        /** {@inheritDoc} */
         public Object extract(String pValue) {
             try {
                 return new org.json.simple.parser.JSONParser().parse(pValue);

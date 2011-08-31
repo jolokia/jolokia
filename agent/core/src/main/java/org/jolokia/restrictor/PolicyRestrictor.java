@@ -56,6 +56,11 @@ public class PolicyRestrictor implements Restrictor {
     private MBeanPolicyConfig allow;
     private MBeanPolicyConfig deny;
 
+    /**
+     * Construct a policy restrictor from an input stream
+     *
+     * @param pInput stream from where to fetch the policy data
+     */
     public PolicyRestrictor(InputStream pInput) {
         Exception exp = null;
         if (pInput == null) {
@@ -83,26 +88,32 @@ public class PolicyRestrictor implements Restrictor {
     // ===============================================================================
     // Lookup methods
 
+    /** {@inheritDoc} */
     public boolean isHttpMethodAllowed(HttpMethod method) {
         return httpMethodsSet == null || httpMethodsSet.contains(method.getMethod());
     }
 
+    /** {@inheritDoc} */
     public boolean isTypeAllowed(RequestType pType) {
         return typeSet == null || typeSet.contains(pType);
     }
 
+    /** {@inheritDoc} */
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
         return check(RequestType.READ,pName,pAttribute);
     }
 
+    /** {@inheritDoc} */
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
         return check(RequestType.WRITE,pName, pAttribute);
     }
 
+    /** {@inheritDoc} */
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         return check(RequestType.EXEC,pName, pOperation);
     }
 
+    /** {@inheritDoc} */
     private boolean check(RequestType pType, ObjectName pName, String pValue) {
         if (isTypeAllowed(pType)) {
             // Its allowed in general, so we only need to check
@@ -115,6 +126,7 @@ public class PolicyRestrictor implements Restrictor {
         }
     }
 
+    /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String ... pHostOrAddress) {
         if (allowedHostsSet == null) {
             return true;

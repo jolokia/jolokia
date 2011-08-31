@@ -5,10 +5,10 @@ import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
-import org.jolokia.util.ConfigKey;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
-import org.jolokia.restrictor.*;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.ConfigKey;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
@@ -61,6 +61,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     // services
     private Restrictor restrictor = null;
 
+    /** {@inheritDoc} */
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
 
@@ -81,6 +82,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
     }
 
+    /** {@inheritDoc} */
     public void stop(BundleContext pBundleContext) {
         assert pBundleContext.equals(bundleContext);
 
@@ -139,7 +141,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
     // Customizer for registering servlet at a HttpService
 
-    protected Dictionary<String,String> getConfiguration() {
+    private Dictionary<String,String> getConfiguration() {
         Dictionary<String,String> config = new Hashtable<String,String>();
         for (ConfigKey key : ConfigKey.values()) {
             String value = getConfiguration(key);
@@ -168,6 +170,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             context = pContext;
         }
 
+        /** {@inheritDoc} */
         public Object addingService(ServiceReference reference) {
             HttpService service = (HttpService) context.getService(reference);
             try {
@@ -183,9 +186,11 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             return service;
         }
 
+        /** {@inheritDoc} */
         public void modifiedService(ServiceReference reference, Object service) {
         }
 
+        /** {@inheritDoc} */
         public void removedService(ServiceReference reference, Object service) {
             HttpService httpService = (HttpService) service;
             httpService.unregister(getServletAlias());

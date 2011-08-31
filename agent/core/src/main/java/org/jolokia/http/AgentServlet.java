@@ -125,11 +125,13 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    @Override
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
      * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig)}
+     *
+     * @param pServletConfig servlet configuration
      */
+    @Override
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
@@ -175,18 +177,21 @@ public class AgentServlet extends HttpServlet {
         };
     }
 
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         backendManager.destroy();
         super.destroy();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         handle(httpGetHandler,req, resp);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -202,9 +207,6 @@ public class AgentServlet extends HttpServlet {
 
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
-            if (backendManager.isDebug()) {
-                backendManager.debug("Response: " + json);
-            }
         } catch (Throwable exp) {
             JSONObject error = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
@@ -221,6 +223,13 @@ public class AgentServlet extends HttpServlet {
     }
 
     private interface ServletRequestHandler {
+        /**
+         * Handle a request and return the answer as a JSON structure
+         * @param pReq request arrived
+         * @param pResp response to return
+         * @return the JSON representation for the answer
+         * @throws IOException if handling of an input or output stream failed
+         */
         JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                 throws IOException;
     }
@@ -228,7 +237,8 @@ public class AgentServlet extends HttpServlet {
 
     private ServletRequestHandler newPostHttpRequestHandler() {
         return new ServletRequestHandler() {
-            public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
+            /** {@inheritDoc} */
+             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                     throws IOException {
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
@@ -243,6 +253,7 @@ public class AgentServlet extends HttpServlet {
 
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
+            /** {@inheritDoc} */
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) {
                 try {
                     return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), pReq.getParameterMap());

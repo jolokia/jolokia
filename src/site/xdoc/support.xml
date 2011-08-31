@@ -34,17 +34,17 @@
         <dl>
           <dt>Forum</dt>
           <dd>
-            A <a href="./forum.html">forum</a> for Jolokia related
-            discussions is intended for usage questiones. Don't
-            hesitate to fill it up with your questions and
-            suggestions.
+            There's a <a href="./forum.html">forum</a> for Jolokia
+            related discussions. Don't hesitate to fill it up with
+            your questions and suggestions.
           </dd>
           <dt>IRC</dt>
           <dd>
-            Feel free to join <a
-            href="http://freenode.net">freenode</a>, and discuss on
+            Feel free to join us on <a
+            href="http://freenode.net">Freenode</a>, and discuss on
             <strong><code>#jolokia</code></strong> about JMX and the
-            world.
+            world. You can use this <a href="./irc.html">web chat</a> 
+            for a quick contact.
           </dd>
           <dt>Bug Reports</dt>
           <dd>
@@ -209,3 +209,4 @@
     </section>
   </body>
 </document>
+

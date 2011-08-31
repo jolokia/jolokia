@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>IRC #jolokia</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+
+  <body>
+    <section name="IRC #jolokia">
+      <!-- <iframe src="http://webchat.freenode.net?channels=jolokia&amp;uio&#61;OT10cnVlJjExPTIzNg6b" width="700" height="500"></iframe> -->
+      <iframe src="http://webchat.freenode.net?channels=jolokia&amp;uio&#61;OT10cnVlJjExPTQx30" width="700" height="500"></iframe>
+    </section>
+  </body>
+</document>
