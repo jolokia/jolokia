@@ -162,33 +162,41 @@ public class HttpRequestHandler {
             return getErrorJSON(500,e);
         } catch (IllegalArgumentException e) {
             return getErrorJSON(400,e);
+        } catch (SecurityException e) {
+            // Wipe out stacktrace
+            return getErrorJSON(403,new Exception(e.getMessage()));
+        } catch (RuntimeMBeanException e) {
+            // Use wrapped exception
+            Throwable cause = e.getCause();
+            int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
+            return getErrorJSON(code,cause);
         }
     }
 
     /**
-     * Utility method for handling single runtime exceptions and errors.
+     * Utility method for handling single runtime exceptions and errors. This method is called
+     * in addition to and after {@link #executeRequest(JmxRequest)} to catch additional errors.
+     * They are two different methods because of bulk requests, where each individual request can
+     * lead to an error. So, each individual request is wrapped with the error handling of
+     * {@link #executeRequest(JmxRequest)}
+     * whereas the overall handling is wrapped with this method. It is hence more coarse grained,
+     * leading typically to an status code of 500.
+     *
+     * Summary: This method should be used as last security belt is some exception should escape
+     * from a single request processing in {@link #executeRequest(JmxRequest)}.
      *
      * @param pThrowable exception to handle
      * @return its JSON representation
      */
     public JSONObject handleThrowable(Throwable pThrowable) {
-        JSONObject json;
-        Throwable exp = pThrowable;
-        if (exp instanceof RuntimeMBeanException) {
-            // Unwrap
-            exp = exp.getCause();
-        }
-        if (exp instanceof IllegalArgumentException) {
-            json = getErrorJSON(400,exp);
-        } else if (exp instanceof IllegalStateException) {
-            json = getErrorJSON(500,exp);
-        } else if (exp instanceof SecurityException) {
+        if (pThrowable instanceof IllegalArgumentException) {
+            return getErrorJSON(400,pThrowable);
+        } else if (pThrowable instanceof SecurityException) {
             // Wipe out stacktrace
-            json = getErrorJSON(403,new Exception(exp.getMessage()));
+            return getErrorJSON(403,new Exception(pThrowable.getMessage()));
         } else {
-            json = getErrorJSON(500,exp);
+            return getErrorJSON(500,pThrowable);
         }
-        return json;
     }
 
 
@@ -238,6 +246,8 @@ public class HttpRequestHandler {
     private Throwable unwrapException(Throwable pExp) {
         if (pExp instanceof MBeanException) {
             return ((MBeanException) pExp).getTargetException();
+        } else if (pExp instanceof RuntimeMBeanException) {
+            return pExp.getCause();
         }
         return pExp;
     }

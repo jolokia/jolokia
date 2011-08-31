@@ -74,21 +74,6 @@ public class StringToObjectConverter {
     }
 
     /**
-     * Prepare a value from a either a given object or its string representation. "Preparation" here
-     * mean conversion to a real object which can be used in set or exec operations.
-     *
-     * If the value is already assignable to the given class name it is returned directly.
-     *
-     * @param pExpectedClass expected type
-     * @param pValue value to either take directly or to convert from its string representation.
-     * @return the prepared / converted object
-     */
-    public Object prepareValue(Class pExpectedClass, Object pValue) {
-        return prepareValue(pExpectedClass.getName(),pValue);
-    }
-
-
-    /**
      * Prepare a value from a either a given object or its string representation.
      * If the value is already assignable to the given class name it is returned directly.
      *
