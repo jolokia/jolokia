@@ -28,7 +28,8 @@ import org.json.simple.JSONObject;
 
 
 /**
- * Store for remembering old values.
+ * Store for remembering values which has been fetched through a previous
+ * request.
  *
  * @author roland
  * @since Jun 12, 2009
@@ -65,15 +66,16 @@ public class HistoryStore implements Serializable {
     }
 
     /**
-     * Get the number
-     * @return
+     * Get the maximum number of entries stored.
+     *
+     * @return the maximum number of entris
      */
     public synchronized int getGlobalMaxEntries() {
         return globalMaxEntries;
     }
 
     /**
-     * Set the global maximum limit for history entries
+     * Set the global maximum limit for history entries.
      *
      * @param pGlobalMaxEntries limit
      */
@@ -88,7 +90,7 @@ public class HistoryStore implements Serializable {
 
     /**
      * Configure the history length for a specific entry. If the length
-     * is 0 disable history for this key
+     * is 0 disable history for this key.
      *
      * @param pKey history key
      * @param pMaxEntries number of maximal entries. If larger than globalMaxEntries,
@@ -170,7 +172,20 @@ public class HistoryStore implements Serializable {
     // =======================================================================================================
 
     // Interface for updating a history entry for a certain type
+
+    /**
+     * Internal interface used for updating this store
+     *
+     * @param <R> request type
+     */
     interface HistoryUpdater<R extends JmxRequest> {
+        /**
+         * Update history
+         *
+         * @param pJson the result of the request
+         * @param request request leading to the result
+         * @param pTimestamp timestamp when the request was executed
+         */
         void updateHistory(JSONObject pJson,R request,long pTimestamp);
     }
 

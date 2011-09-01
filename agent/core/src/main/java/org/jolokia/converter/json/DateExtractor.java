@@ -18,10 +18,12 @@ import org.jolokia.util.DateUtil;
  */
 public class DateExtractor implements Extractor {
 
+    /** {@inheritDoc} */
     public Class getType() {
         return Date.class;
     }
 
+    /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify) throws AttributeNotFoundException {
         if (!jsonify) {
             return pValue;
@@ -44,6 +46,7 @@ public class DateExtractor implements Extractor {
     // This method is called for changing an existing date object, i.e. when it is called with a path to
     // date. Contrast this to the case, where the date is set directly (without a path). For this,
     // the StringToObjectConverter is responsible (along with its date parser)
+    /** {@inheritDoc} */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         Date date = (Date) pInner;
@@ -69,6 +72,7 @@ public class DateExtractor implements Extractor {
 
 
     // For now, we only return dates;
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return true;
     }

@@ -29,6 +29,14 @@ import java.util.Stack;
 
 
 /**
+ * Base class for all simplifiers. A simplifier is a special {@link Extractor} which
+ * condense full blown Java beans (like {@link java.io.File}) to a more compact representation.
+ * Simplifier extractors cannot be written to and are only used for downstream serialization.
+ *
+ * Simplifier are registered by listing the classes in a <code>META-INF/simplifiers</code> plain text file and
+ * then picked up by the converter. The default simplifiers coming prepackaged are taken from
+ * <code>META-INF/simplifiers-default</code>
+ *
  * @author roland
  * @since Jul 27, 2009
  */
@@ -38,16 +46,23 @@ abstract class SimplifierExtractor<T> implements Extractor {
 
     private Class<T> type;
 
+    /**
+     * Super constructor taking the value type as argument
+     *
+     * @param pType type for which this extractor is responsible
+     */
     SimplifierExtractor(Class<T> pType) {
         extractorMap = new HashMap<String, AttributeExtractor<T>>();
         type = pType;
         init(extractorMap);
     }
 
+    /** {@inheritDoc} */
     public Class getType() {
         return type;
     }
 
+    /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify)
             throws AttributeNotFoundException {
         if (pExtraArgs.size() > 0) {
@@ -85,17 +100,28 @@ abstract class SimplifierExtractor<T> implements Extractor {
         }
     }
 
-    // No setting for simplifying handlers
+    /**
+     * No setting for simplifying extractors
+     * @return always <code>false</code>
+     */
     public boolean canSetValue() {
         return false;
     }
 
+    /**
+     * Throws always {@link IllegalArgumentException} since a simplifier cannot be written to
+     */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner,
                                  String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
         // never called
         throw new IllegalArgumentException("A simplify handler can't set a value");
     }
 
+    /**
+     * Add given extractors to the map. Should be called by a subclass from within init()
+     *
+     * @param pAttrExtractors extractors
+     */
     @SuppressWarnings("unchecked")
     protected void addExtractors(Object[][] pAttrExtractors) {
         for (int i = 0;i< pAttrExtractors.length; i++) {

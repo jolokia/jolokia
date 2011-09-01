@@ -32,6 +32,7 @@ import org.json.simple.JSONObject;
  */
 public class TabularDataExtractor implements Extractor {
 
+    /** {@inheritDoc} */
     public Class getType() {
         return TabularData.class;
     }
@@ -200,11 +201,15 @@ public class TabularDataExtractor implements Extractor {
         return ret;
     }
 
+    /**
+     * Throws always {@link IllegalArgumentException} since tabular data is immutable
+     */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("TabularData cannot be written to");
     }
 
+    /** {@inheritDoc} */
     public boolean canSetValue() {
         return false;
     }

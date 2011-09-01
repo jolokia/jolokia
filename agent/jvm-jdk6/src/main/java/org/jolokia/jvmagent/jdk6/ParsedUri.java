@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
 
+import com.sun.xml.internal.bind.annotation.OverrideAnnotationOf;
+
 /*
  *  Copyright 2009-2010 Roland Huss
  *
@@ -75,10 +77,22 @@ public class ParsedUri {
         return pathInfo;
     }
 
+    /**
+     * Get the complete URI which was parsed
+     *
+     * @return original URI
+     */
     public URI getUri() {
         return uri;
     }
 
+    /**
+     * Get a single parameter of the parsed URI
+     *
+     * @param name parameter name
+     * @return the value of the parameter or <code>null</code>
+     *         if no such parameter is stored
+     */
     public String getParameter(String name) {
         String[] values = parameters.get(name);
         if (values == null) {
@@ -91,18 +105,17 @@ public class ParsedUri {
         return values[0];
     }
 
-    public String[] getParameterValues(String name) {
-        return parameters.get(name);
-    }
-
-    public Set<String> getParameterNames() {
-        return Collections.unmodifiableSet(parameters.keySet());
-    }
-
+    /**
+     * Get the map with parsed parameters as key-value pairs, where the value is multi valued
+     * (array of value)
+     *
+     * @return the parameter map
+     */
     public Map<String, String[]> getParameterMap() {
         return parameters;
     }
 
+    // parse the query
     private Map<String, String[]> parseQuery(String qs) {
         Map<String, String[]> ret = new TreeMap<String, String[]>();
 
@@ -141,6 +154,7 @@ public class ParsedUri {
     }
 
     @Override
+    /** {@inheritDoc} */
     public String toString() {
         return uri.toString();
     }
