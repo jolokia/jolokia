@@ -97,6 +97,11 @@ public class JolokiaServerTest {
             }
         } finally {
             server.stop();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                
+            }
         }
     }
 

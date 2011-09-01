@@ -20,8 +20,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.util.ConfigKey;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -46,6 +45,11 @@ public class JolokiaHttpHandlerTest {
     public void setup() {
         handler = new JolokiaHttpHandler(getConfig());
         handler.start();
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        handler.stop();
     }
 
     @Test

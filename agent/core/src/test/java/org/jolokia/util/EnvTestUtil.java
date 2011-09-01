@@ -47,7 +47,8 @@ public class EnvTestUtil {
             s.bind(new InetSocketAddress(address,port));
             return true;
         } catch (IOException exp) {
-            exp.printStackTrace();
+            System.err.println("Port " + port + " already in use, tying next ...");
+            // exp.printStackTrace();
             // next try ....
         } finally {
             if (s != null) {
