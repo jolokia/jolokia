@@ -19,6 +19,7 @@ package org.jolokia.mule;
 import java.io.IOException;
 import java.net.*;
 
+import org.jolokia.util.EnvTestUtil;
 import org.mule.api.MuleException;
 import org.mule.api.lifecycle.*;
 import org.testng.annotations.BeforeMethod;
@@ -89,7 +90,7 @@ public class JolokiaMuleAgentTest {
 
     @Test
     public void startStop() throws MuleException, IOException {
-        agent.setPort(getFreePort());
+        agent.setPort(EnvTestUtil.getFreePort());
         agent.setUser("roland");
         agent.setPassword("s!cr!et");
         agent.initialise();
@@ -99,7 +100,7 @@ public class JolokiaMuleAgentTest {
 
     @Test(expectedExceptions = StartException.class)
     public void startFailed() throws IOException, MuleException {
-        int port = getFreePort();
+        int port = EnvTestUtil.getFreePort();
         // Block port now ...
         ServerSocket s = new ServerSocket();
         String host = "localhost";
@@ -117,32 +118,6 @@ public class JolokiaMuleAgentTest {
         }
     }
 
-    private int getFreePort() throws IOException {
-        for (int port = 22332; port < 22500;port++) {
-            if (trySocket(port)) {
-                return port;
-            }
-        }
-        throw new IllegalStateException("Cannot find a single free port");
-    }
-
-    private boolean trySocket(int port) throws IOException {
-        InetAddress address = Inet4Address.getByName("localhost");
-        ServerSocket s = null;
-        try {
-            s = new ServerSocket();
-            s.bind(new InetSocketAddress(address,port));
-            return true;
-        } catch (IOException exp) {
-            exp.printStackTrace();
-            // next try ....
-        } finally {
-            if (s != null) {
-                s.close();
-            }
-        }
-        return false;
-    }
 
     @Test
     public void stop() {

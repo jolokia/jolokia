@@ -24,6 +24,7 @@ import org.easymock.EasyMock;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
+import org.jolokia.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

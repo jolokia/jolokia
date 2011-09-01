@@ -231,7 +231,6 @@ public class JolokiaServer {
                 // initialise the SSL context
                 SSLContext context = SSLContext.getDefault();
                 SSLEngine engine = context.createSSLEngine();
-                // TODO: Allow client authentication via configuration
                 params.setNeedClientAuth(useClientAuthentication);
                 params.setCipherSuites(engine.getEnabledCipherSuites());
                 params.setProtocols(engine.getEnabledProtocols());

@@ -65,6 +65,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
 
+        if (Boolean.parseBoolean(getConfiguration(USE_RESTRICTOR_SERVICE))) {
+            // If no restrictor is set in the constructor and we are enabled to listen for a restrictor
+            // service, a delegating restrictor is installed
+            restrictor = new DelegatingRestrictor(bundleContext);
+        }
+
         // Track HttpService
         if (Boolean.parseBoolean(getConfiguration(LISTEN_FOR_HTTP_SERVICE))) {
             httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
@@ -74,11 +80,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(),this,null);
         }
 
-        if (Boolean.parseBoolean(getConfiguration(USE_RESTRICTOR_SERVICE))) {
-            // If no restrictor is set in the constructor and we are enabled to listen for a restrictor
-            // service, a delegating restrictor is installed
-            restrictor = new DelegatingRestrictor(bundleContext);
-        }
 
     }
 
@@ -87,15 +88,8 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         assert pBundleContext.equals(bundleContext);
 
         if (httpServiceTracker != null) {
-            // Unregister from all services and close tracker
-            Object services[] = httpServiceTracker.getServices();
-            if (services != null) {
-                for (Object service : services) {
-                    HttpService httpService = (HttpService) service;
-                    httpService.unregister(getServletAlias());
-                }
-            }
-            
+            // Closing the tracker will also call {@link HttpServiceCustomizer#removedService()}
+            // for every active service which in turn unregisters the servlet
             httpServiceTracker.close();
             httpServiceTracker = null;
         }

@@ -1,4 +1,4 @@
-package org.jolokia.http;
+package org.jolokia.util;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -18,6 +18,7 @@ package org.jolokia.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.*;
 
 import javax.servlet.ServletInputStream;
 
@@ -25,13 +26,13 @@ import javax.servlet.ServletInputStream;
  * @author roland
  * @since 31.08.11
  */
-class HttpTestUtil {
+public class HttpTestUtil {
 
     public static final String HEAP_MEMORY_POST =
             "{ \"type\": \"read\",\"mbean\": \"java.lang:type=Memory\", \"attribute\": \"HeapMemoryUsage\"}";
     public static final String HEAP_MEMORY_GET = "/read/java.lang:type=Memory/HeapMemoryUsage";
 
-    static ServletInputStream createServletInputStream(String pReq) {
+    public static ServletInputStream createServletInputStream(String pReq) {
         final ByteArrayInputStream bis =
                 new ByteArrayInputStream(pReq.getBytes());
         return new ServletInputStream() {
@@ -41,4 +42,5 @@ class HttpTestUtil {
             }
         };
     }
+
 }

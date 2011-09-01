@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.ConfigKey;
+import org.jolokia.util.HttpTestUtil;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
