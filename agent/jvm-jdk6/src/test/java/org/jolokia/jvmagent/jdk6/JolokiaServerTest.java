@@ -67,8 +67,10 @@ public class JolokiaServerTest {
     }
 
     //@Test(expectedExceptions = SecurityException.class,expectedExceptionsMessageRegExp = ".*No password.*")
-    public void invalidConfig() throws IOException {
-        new JolokiaServer(new ServerConfig("user=roland,port=" + EnvTestUtil.getFreePort()));
+    public void invalidConfig() throws IOException, InterruptedException {
+        ServerConfig cfg = new ServerConfig("user=roland,port=" + EnvTestUtil.getFreePort());
+        Thread.sleep(1000);
+        new JolokiaServer(cfg);
     }
 
     // ==================================================================

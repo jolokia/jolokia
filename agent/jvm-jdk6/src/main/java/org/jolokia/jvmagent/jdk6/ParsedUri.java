@@ -5,8 +5,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
 
-import com.sun.xml.internal.bind.annotation.OverrideAnnotationOf;
-
 /*
  *  Copyright 2009-2010 Roland Huss
  *
