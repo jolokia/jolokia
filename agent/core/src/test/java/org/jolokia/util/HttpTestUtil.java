@@ -19,8 +19,12 @@ package org.jolokia.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.*;
+import java.util.*;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletInputStream;
+
+import static org.easymock.EasyMock.expect;
 
 /**
  * @author roland
@@ -43,4 +47,18 @@ public class HttpTestUtil {
         };
     }
 
+    public static void prepareServletConfigMock(ServletConfig config,String ... pInitParams) {
+        Map<String,String> configParams = new HashMap<String, String>();
+        if (pInitParams != null) {
+            for (int i = 0; i < pInitParams.length; i += 2) {
+                configParams.put(pInitParams[i],pInitParams[i+1]);
+            }
+            for (String key : configParams.keySet()) {
+                expect(config.getInitParameter(key)).andReturn(configParams.get(key)).anyTimes();
+            }
+        }
+
+        Vector paramNames = new Vector(configParams.keySet());
+        expect(config.getInitParameterNames()).andReturn(paramNames.elements());
+    }
 }

@@ -192,11 +192,11 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
             if (exceptions.size() == 1) {
                 throw exceptions.get(0);
             } else if (exceptions.size() > 1) {
-                StringBuffer ret = new StringBuffer();
+                StringBuilder ret = new StringBuilder();
                 for (JMException e : exceptions) {
                     ret.append(e.getMessage()).append(", ");
                 }                
-                throw new JMException(ret.substring(0,ret.length()-2).toString());
+                throw new JMException(ret.substring(0, ret.length() - 2));
             }
         }
     }

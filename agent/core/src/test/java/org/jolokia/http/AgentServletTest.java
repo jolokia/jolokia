@@ -17,7 +17,6 @@ package org.jolokia.http;
  */
 
 import java.io.*;
-import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -219,18 +218,7 @@ public class AgentServletTest {
         config = createMock(ServletConfig.class);
 
 
-        Map<String,String> configParams = new HashMap<String, String>();
-        if (pInitParams != null) {
-            for (int i = 0; i < pInitParams.length; i += 2) {
-                configParams.put(pInitParams[i],pInitParams[i+1]);
-            }
-            for (String key : configParams.keySet()) {
-                expect(config.getInitParameter(key)).andReturn(configParams.get(key)).anyTimes();
-            }
-        }
-        
-        Vector paramNames = new Vector(configParams.keySet());
-        expect(config.getInitParameterNames()).andReturn(paramNames.elements());
+        HttpTestUtil.prepareServletConfigMock(config,pInitParams);
 
         context = createMock(ServletContext.class);
         expect(config.getServletContext()).andReturn(context).anyTimes();

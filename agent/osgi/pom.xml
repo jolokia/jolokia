@@ -25,6 +25,14 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-jsr160</artifactId>
       <version>${project.version}</version>
     </dependency>
