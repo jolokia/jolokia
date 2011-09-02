@@ -20,14 +20,22 @@ import java.util.Map;
 
 
 /**
+ * Simplifier for class objects. It adds a <code>name</code> vaue and a list of
+ * implementing interfaces under the <code>interfaces</code> key.
+ *
  * @author roland
  * @since Jul 27, 2009
  */
 public class ClassSimplifier extends SimplifierExtractor<Class> {
+
+    /**
+     * Empty constructor
+     */
     public ClassSimplifier() {
         super(Class.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     void init(Map<String, AttributeExtractor<Class>> pStringExtractorMap) {
         Object[][] pAttrs = {
@@ -38,11 +46,14 @@ public class ClassSimplifier extends SimplifierExtractor<Class> {
     }
 
     // ==================================================================================
+
     private static class NameAttributeExtractor implements AttributeExtractor<Class> {
+        /** {@inheritDoc} */
         public Object extract(Class pClass) { return pClass.getName(); }
     }
 
     private static class InterfaceAttributeExtractor implements AttributeExtractor<Class> {
+        /** {@inheritDoc} */
         public Object extract(Class value) throws SkipAttributeException {
             if (value.isInterface()) {
                 throw new SkipAttributeException();

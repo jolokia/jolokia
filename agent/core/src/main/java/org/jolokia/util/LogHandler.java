@@ -23,7 +23,24 @@ package org.jolokia.util;
  * @since Nov 11, 2009
  */
 public interface LogHandler {
+
+    /**
+     * Log a debug messages
+     * @param message debug message
+     */
     void debug(String message);
+
+    /**
+     * Log informal message
+     * @param message message to log
+     */
     void info(String message);
+
+    /**
+     * Log an error
+     *
+     * @param message error message
+     * @param t exception causing this error
+     * */
     void error(String message, Throwable t);
 }

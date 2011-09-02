@@ -160,14 +160,17 @@ public class AgentServlet extends HttpServlet {
      */
     protected LogHandler createLogHandler(ServletConfig pServletConfig) {
         return new LogHandler() {
+            /** {@inheritDoc} */
             public void debug(String message) {
                 log(message);
             }
 
+            /** {@inheritDoc} */
             public void info(String message) {
                 log(message);
             }
 
+            /** {@inheritDoc} */
             public void error(String message, Throwable t) {
                 log(message,t);
             }

@@ -24,9 +24,14 @@ import java.io.Serializable;
 
 
 /**
+ * Single entry in the call history of this agent. Used by {@link HistoryStore} for internally
+ * remembering ancient values. Each HistoryEntry represent a list of values which in the stored
+ * is keyed with the attribute/operation which was called. It has a maximum  number of values
+ * which are stored and truncates the oldest one if more values are added.
+ *
  * @author roland
-* @since Jun 12, 2009
-*/
+ * @since Jun 12, 2009
+ */
 class HistoryEntry implements Serializable {
 
     private static final long serialVersionUID = 42L;
@@ -36,12 +41,22 @@ class HistoryEntry implements Serializable {
     private LinkedList<ValueEntry> values;
     private int maxEntries;
 
+    /**
+     * Constructor
+     *
+     * @param pMaxEntries how many values to keep
+     */
     HistoryEntry(int pMaxEntries) {
         maxEntries = pMaxEntries;
         values = new LinkedList<ValueEntry>();
     }
 
-    public Object jsonifyValues() {
+    /**
+     * Get an JSON array with values (along with their timestamps)
+     *
+     * @return array of values
+     */
+    public JSONArray jsonifyValues() {
         JSONArray jValues = new JSONArray();
         for (ValueEntry vEntry : values) {
             JSONObject o = new JSONObject();
@@ -53,17 +68,29 @@ class HistoryEntry implements Serializable {
     }
 
 
+    /**
+     * Set the maximum number of entries and truncate if necessary
+     *
+     * @param pMaxEntries new maxium entries
+     */
     public void setMaxEntries(int pMaxEntries) {
         maxEntries = pMaxEntries;
+        trim();
     }
 
-
+    /**
+     * Add a new value with the given times stamp to the values list
+     *
+     * @param pObject object to add
+     * @param pTime timestamp
+     */
     public void add(Object pObject, long pTime) {
         values.addFirst(new ValueEntry(pObject,pTime));
         trim();
     }
 
-    public void trim() {
+    // Truncate list so that no more than max entries are stored in the list
+    private void trim() {
         // Trim
         while (values.size() > maxEntries) {
             values.removeLast();

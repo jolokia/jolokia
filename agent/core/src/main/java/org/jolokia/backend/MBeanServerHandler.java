@@ -261,10 +261,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         }
         mBeanServers.add(ManagementFactory.getPlatformMBeanServer());
 
-        if (mBeanServers.size() == 0) {
-			throw new IllegalStateException("Unable to locate any MBeanServer instance");
-		}
-
         // Copy over servers into connection set. Required for proper generic usage
         mBeanServerConnections = new LinkedHashSet<MBeanServerConnection>();
         for (MBeanServer server : mBeanServers) {

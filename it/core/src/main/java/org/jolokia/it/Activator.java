@@ -20,6 +20,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
+ * 
  * @author roland
  * @since Mar 27, 2010
  */

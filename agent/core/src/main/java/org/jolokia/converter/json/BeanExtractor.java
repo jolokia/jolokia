@@ -248,10 +248,16 @@ public class BeanExtractor implements Extractor {
     private static class SetMethodAccessibleAction implements PrivilegedAction<Void> {
         private final Method getMethod;
 
-        public SetMethodAccessibleAction(Method pGetMethod) {
-            getMethod = pGetMethod;
+        /**
+         * Which method to set accessible
+         *
+         * @param pMethod  method to set accessible
+         */
+        public SetMethodAccessibleAction(Method pMethod) {
+            getMethod = pMethod;
         }
 
+        /** {@inheritDoc} */
         public Void run() {
             getMethod.setAccessible(true);
             return null;

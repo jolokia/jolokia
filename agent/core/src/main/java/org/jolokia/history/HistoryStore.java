@@ -84,7 +84,6 @@ public class HistoryStore implements Serializable {
         // Refresh all entries
         for (HistoryEntry entry : historyStore.values()) {
             entry.setMaxEntries(globalMaxEntries);
-            entry.trim();
         }
     }
 
@@ -111,14 +110,12 @@ public class HistoryStore implements Serializable {
                 if (pKey.matches(key)) {
                     HistoryEntry entry = historyStore.get(key);
                     entry.setMaxEntries(maxEntries);
-                    entry.trim();
                 }
             }
         } else {
             HistoryEntry entry = historyStore.get(pKey);
             if (entry != null) {
                 entry.setMaxEntries(maxEntries);
-                entry.trim();
             } else {
                 entry = new HistoryEntry(maxEntries);
                 historyStore.put(pKey,entry);
