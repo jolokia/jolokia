@@ -22,13 +22,24 @@ import java.util.Map;
 import org.json.simple.JSONObject;
 
 /**
-* @author roland
-* @since 15.03.11
-*/
+ * Configuration for proxy mode
+ *
+ * @author roland
+ * @since 15.03.11
+ */
 public class ProxyTargetConfig {
     private String url;
     private Map<String,String> env;
 
+    /**
+     * Map which should contain the following keys
+     *
+     * <ul>
+     *     <li><code>url</code> -- JSR-160 Url of the target (mandatory)</li>
+     *     <li><code>user</code> and <code>password</code> -- user and password to use (optional)</li>
+     * </ul>
+     * @param pMap map containing configuration
+     */
     public ProxyTargetConfig(Map<String,String> pMap) {
         url = pMap.get("url");
         if (url == null) {
@@ -45,14 +56,29 @@ public class ProxyTargetConfig {
         }
     }
 
+    /**
+     * JSR-160 service URL
+     *
+     * @return Remote service URL of the target
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Env with user and password or empty map
+     *
+     * @return environment map
+     */
     public Map<String, String> getEnv() {
         return env;
     }
 
+    /**
+     * As JSON representation
+     *
+     * @return JSON object representing this proxy configuration
+     */
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("url", url);

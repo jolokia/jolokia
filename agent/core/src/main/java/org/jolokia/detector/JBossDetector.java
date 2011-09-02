@@ -29,11 +29,14 @@ import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ClassUtil;
 
 /**
+ * Detector for JBoss
+ *
  * @author roland
  * @since 06.11.10
  */
 public class JBossDetector extends AbstractServerDetector {
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JR77 call
@@ -60,6 +63,7 @@ public class JBossDetector extends AbstractServerDetector {
     }
 
     // Special handling for JBoss
+    /** {@inheritDoc} */
     @Override
     public void addMBeanServers(Set<MBeanServer> servers) {
         try {
@@ -76,10 +80,18 @@ public class JBossDetector extends AbstractServerDetector {
     // ========================================================================
     private static class JBossServerHandle extends ServerHandle {
 
+        /**
+         * JBoss server handle
+         *
+         * @param version JBoss version
+         * @param agentUrl URL to the agent
+         * @param extraInfo extra ifo to return
+         */
         public JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
             super("JBoss", "jboss", version, agentUrl, extraInfo);
         }
 
+        /** {@inheritDoc} */
         @Override
         public void preDispatch(Set<MBeanServer> pMBeanServers, JmxRequest pJmxReq) {
             if (pJmxReq instanceof JmxObjectNameRequest) {

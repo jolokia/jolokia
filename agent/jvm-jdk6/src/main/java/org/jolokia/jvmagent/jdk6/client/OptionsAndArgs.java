@@ -125,26 +125,55 @@ final class OptionsAndArgs {
         return arg.length() > 0 ? arg.substring(0,arg.length() - 1) : "";
     }
 
+    /**
+     * Pid as give as argument
+     *
+     * @return process id
+     */
     public String getPid() {
         return pid;
     }
 
+    /**
+     * The command given as argument
+     *
+     * @return command
+     */
     public String getCommand() {
         return command;
     }
 
+    /**
+     * Whether the program should be silent
+     * @return true if quiet mode is selected
+     */
     public boolean isQuiet() {
         return quiet;
     }
 
+    /**
+     * Verbose output if this is true
+     *
+     * @return true if verbose output is requested
+     */
     public boolean isVerbose() {
         return verbose;
     }
 
+    /**
+     * Path to this agents jar file
+     *
+     * @return full path to jar file
+     */
     public String getJarFilePath() {
         return jarFile.getAbsolutePath();
     }
 
+    /**
+     * Name of the agents jar file
+     *
+     * @return short name of jar file containing this agent.
+     */
     public String getJarFileName() {
         return jarFile.getName();
     }

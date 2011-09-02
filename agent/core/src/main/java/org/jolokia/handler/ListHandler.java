@@ -56,19 +56,31 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     private static final String KEY_READ_WRITE = "rw";
     private static final String KEY_ATTRIBUTE = "attr";
 
+    /** {@inheritDoc} */
     public RequestType getType() {
         return RequestType.LIST;
     }
 
+    /**
+     * Constructor
+     *
+     * @param pRestrictor restrictor to apply
+     */
     public ListHandler(Restrictor pRestrictor) {
         super(pRestrictor);
     }
 
+    /**
+     * Return true since a list handler needs to merge all information
+     *
+     * @return always true
+     */
     @Override
     public boolean handleAllServersAtOnce(JmxListRequest pRequest) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest pRequest)
             throws InstanceNotFoundException, IOException {
@@ -101,6 +113,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // will not be called
+    /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
@@ -108,9 +121,13 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     @Override
-    // Path handling is done directly within this handler to avoid
-    // excessive memory consumption by building up the whole list
-    // into memory only for extracting a part from it
+    /**
+     * Path handling is done directly within this handler to avoid
+     * excessive memory consumption by building up the whole list
+     * into memory only for extracting a part from it. So we return false here.
+     *
+     * @return always false
+     */
     public boolean useReturnValueWithPath() {
         return false;
     }

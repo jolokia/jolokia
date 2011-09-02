@@ -35,6 +35,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*GlassFish.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
     private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^\\s*GlassFish.*?\\sv?([.\\d]+)\\s.*$?");
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String version = null;
         boolean amxBooted = false;
@@ -67,7 +68,7 @@ public class GlassfishDetector extends AbstractServerDetector {
                 extraInfo = new HashMap<String,String>();
                 extraInfo.put("amxBooted",Boolean.toString(amxBooted));
             }
-            return new GlassfishServerHandle("Sun","glassfish",version,null,extraInfo);
+            return new GlassfishServerHandle(version,null,extraInfo);
         } else {
             return null;
         }
@@ -91,10 +92,18 @@ public class GlassfishDetector extends AbstractServerDetector {
 
     private class GlassfishServerHandle extends ServerHandle {
 
-        public GlassfishServerHandle(String vendor, String product, String version, URL agentUrl, Map<String, String> extraInfo) {
-            super(vendor, product, version, agentUrl, extraInfo);
+        /**
+         * Server handle for a glassfish server
+         *
+         * @param version Glassfish version
+         * @param agentUrl agent url
+         * @param extraInfo extra infos
+         */
+        public GlassfishServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
+            super("Sun", "glassfish", version, agentUrl, extraInfo);
         }
 
+        /** {@inheritDoc} */
         @Override
         public Map<String, String> getExtraInfo(Set<? extends MBeanServerConnection> pServers) {
             Map<String,String> extra = super.getExtraInfo(pServers);
