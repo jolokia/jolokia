@@ -206,12 +206,19 @@ public class JolokiaServer {
         private String user;
         private String password;
 
+        /**
+         * Authenticator which checks agains a given user and password
+         *
+         * @param pUser user to check again
+         * @param pPassword her password
+         */
         JolokiaAuthenticator(String pUser, String pPassword) {
             super("jolokia");
             user = pUser;
             password = pPassword;
         }
 
+        /** {@inheritDoc} */
         public boolean checkCredentials(String pUserGiven, String pPasswordGiven) {
             return user.equals(pUserGiven) && password.equals(pPasswordGiven);
         }
@@ -226,6 +233,7 @@ public class JolokiaServer {
             useClientAuthentication = pUseClientAuthenication;
         }
 
+        /** {@inheritDoc} */
         public void configure(HttpsParameters params) {
             try {
                 // initialise the SSL context

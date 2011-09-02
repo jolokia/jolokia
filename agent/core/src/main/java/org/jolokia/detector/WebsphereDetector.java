@@ -39,13 +39,15 @@ public class WebsphereDetector extends AbstractServerDetector {
 
     private static final Pattern SERVER_VERSION_PATTERN =
             Pattern.compile("^Version\\s+([0-9.]+)\\s*$.*?^Build Date\\s+([0-9/]+)\\s*$",
-                    Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                            Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    public static final  String  INTERNAL_ERROR_MSG     = "Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)";
 
     // Whether running under Websphere
     private boolean isWebsphere = ClassUtil.checkForClass("com.ibm.websphere.management.AdminServiceFactory");
     private boolean isWebsphere7 = ClassUtil.checkForClass("com.ibm.websphere.management.AdminContext");
     private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String platformName =
                 getSingleStringAttribute(pMbeanServers, "*:j2eeType=J2EEServer,type=Server,*", "platformName");
@@ -72,6 +74,7 @@ public class WebsphereDetector extends AbstractServerDetector {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void addMBeanServers(Set<MBeanServer> servers) {
         try {
@@ -89,24 +92,31 @@ public class WebsphereDetector extends AbstractServerDetector {
         }
         catch (InvocationTargetException ex) {
             // CNFE should be earlier
-            throw new IllegalArgumentException("Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)",ex);
+            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
         } catch (IllegalAccessException ex) {
-            throw new IllegalArgumentException("Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)",ex);
+            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
         } catch (NoSuchMethodException ex) {
-            throw new IllegalArgumentException("Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)",ex);
+            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
         }
     }
 
     // ==================================================================================
 
+    /**
+     * Server handle for Websphere platforms
+     */
     class WebsphereServerHandle extends ServerHandle {
 
+        /** {@inheritDoc} */
         public WebsphereServerHandle(String pVersion, URL pAgenturl, Map<String, String> pExtrainfo) {
             super("IBM","websphere", pVersion, pAgenturl, pExtrainfo);
         }
 
+        /** {@inheritDoc} */
         @Override
-        public ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName) throws MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException, MalformedObjectNameException {
+        public ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName)
+                throws MBeanRegistrationException, InstanceAlreadyExistsException,
+                       NotCompliantMBeanException, MalformedObjectNameException {
             // Websphere adds extra parts to the object name if registered explicitly, but
             // we need a defined name on the client side. So we register it with 'null' in websphere
             // and let the bean define its name.

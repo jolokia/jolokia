@@ -34,10 +34,23 @@ public class CommandDispatcher {
 
     private OptionsAndArgs options;
 
+    /**
+     * Dispatcher responsible for the execution of commands
+     *
+     * @param pOptions the parsed command line and options
+     */
     CommandDispatcher(OptionsAndArgs pOptions) {
         options = pOptions;
     }
 
+
+    /**
+     * Dispatch the command
+     *
+     * @param pVm the virtual machine to attach to (typeless in order avoid direct references to the sun classes)
+     * @param pHandler  handler for listing processes
+     * @return the return code (0 or 1)
+     */
     public int dispatchCommand(Object pVm,VirtualMachineHandler pHandler) {
         String command = options.getCommand();
         try {

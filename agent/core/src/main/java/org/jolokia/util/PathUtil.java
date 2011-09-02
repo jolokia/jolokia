@@ -28,7 +28,9 @@ import java.util.regex.Pattern;
  */
 public final class PathUtil {
 
-    // Pattern for detecting escaped slashes in URL encoded requests
+    /**
+     * Pattern for detecting escaped slashes in URL encoded requests
+     */
     public static final Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("^\\^?-*\\+?$");
 
     private PathUtil() {}
@@ -131,7 +133,7 @@ public final class PathUtil {
         return pathStack;
     }
 
-    public static void unescapeSlashes(String pCurrentElement, Stack<String> pRet,
+    private static void unescapeSlashes(String pCurrentElement, Stack<String> pRet,
                                        Stack<String> pElementStack, StringBuffer pPreviousBuffer)  {
         if (pRet.isEmpty()) {
             return;
