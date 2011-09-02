@@ -29,9 +29,9 @@ public interface ValueFaultHandler {
      * which can be used as a replacement for the real
      * value
      *
-     * @param exception exception to ignore
+     * @param exception exception to handle
      * @return replacement value or the exception is rethrown if this handler doesnt handle this exception
-     * @throws T if the handler doesnt handel the exception
+     * @throws T if the handler does not handle the exception
      */
     <T extends Throwable> Object handleException(T exception) throws T;
 }

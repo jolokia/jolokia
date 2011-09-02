@@ -223,15 +223,22 @@ public class BackendManager {
         try {
             localDispatcher.init(historyStore,debugStore);
         } catch (NotCompliantMBeanException e) {
-            error("Error registering config MBean: " + e,e);
+            intError("Error registering config MBean: " + e,e);
         } catch (MBeanRegistrationException e) {
-            error("Cannot register MBean: " + e,e);
+            intError("Cannot register MBean: " + e,e);
         } catch (MalformedObjectNameException e) {
-            error("Invalid name for config MBean: " + e,e);
+            intError("Invalid name for config MBean: " + e,e);
         } catch (InstanceAlreadyExistsException e) {
-            error("Config MBean already exists: " + e,e);
+            intError("Config MBean already exists: " + e,e);
         }
     }
+
+    // Final private error log for use in the constructor above
+    private void intError(String message,Throwable t) {
+        logHandler.error(message, t);
+        debugStore.log(message, t);
+    }
+
 
     private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {
         int maxDebugEntries;
@@ -290,11 +297,12 @@ public class BackendManager {
     }
 
     /**
-     * Log at error level
+     * Log at error level.
      *
      * @param message message to log
      * @param t ecxeption occured
      */
+    // Must not be final so that we can mock it in EasyMock for our tests
     public void error(String message, Throwable t) {
         logHandler.error(message, t);
         if (debugStore != null) {

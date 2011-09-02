@@ -68,7 +68,7 @@ public class HistoryStore implements Serializable {
     /**
      * Get the maximum number of entries stored.
      *
-     * @return the maximum number of entris
+     * @return the maximum number of entries
      */
     public synchronized int getGlobalMaxEntries() {
         return globalMaxEntries;
@@ -190,6 +190,7 @@ public class HistoryStore implements Serializable {
     private void initHistoryUpdaters() {
         historyUpdaters.put(RequestType.EXEC,
                             new HistoryUpdater<JmxExecRequest>() {
+                                /** {@inheritDoc} */
                                 public void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
@@ -202,6 +203,7 @@ public class HistoryStore implements Serializable {
                             });
         historyUpdaters.put(RequestType.WRITE,
                             new HistoryUpdater<JmxWriteRequest>() {
+                                /** {@inheritDoc} */
                                 public void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
@@ -214,6 +216,7 @@ public class HistoryStore implements Serializable {
                             });
         historyUpdaters.put(RequestType.READ,
                             new HistoryUpdater<JmxReadRequest>() {
+                                /** {@inheritDoc} */
                                 public void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
                                     updateReadHistory(request,pJson,pTimestamp);
                                 }

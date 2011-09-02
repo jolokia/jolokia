@@ -234,12 +234,25 @@ public abstract class JmxRequest {
     // Available fault handlers
 
     public static final ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
+        /**
+         * Ignores any exeception and records them as a string which can be used for business
+         *
+         * @param exception exception to ignore
+         * @return a descriptive string of the exception
+         */
         public <T extends Throwable> Object handleException(T exception) throws T {
             return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
         }
     };
 
     public static final ValueFaultHandler THROWING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
+
+        /**
+         * Ret-throws the given exception
+         * @param exception exception given
+         * @return nothing
+         * @throws T always
+         */
         public <T extends Throwable> Object handleException(T exception) throws T {
             // Dont handle exception on our own, we rethrow it
             throw exception;

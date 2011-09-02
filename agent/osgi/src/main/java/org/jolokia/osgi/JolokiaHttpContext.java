@@ -24,20 +24,36 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * Basic JolokiaHttpContextContext
+ * Basic JolokiaHttpContextContext, which does no authentication.
  *
  * @author roland
  * @since Jan 7, 2010
  */
 class JolokiaHttpContext implements HttpContext {
+
+    /**
+     * This metod always returns true and does not handle security
+     *
+     * {@inheritDoc}
+     */
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
         return true;
     }
 
+    /**
+     * Always return null.
+     *
+     * {@inheritDoc}
+     */
     public URL getResource(String name) {
         return null;
     }
 
+    /**
+     * Always return null
+     * {@inheritDoc}
+     *
+     */
     public String getMimeType(String name) {
         return null;
     }

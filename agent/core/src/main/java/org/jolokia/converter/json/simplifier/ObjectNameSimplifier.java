@@ -22,23 +22,35 @@ import javax.management.ObjectName;
 
 
 /**
- * Special deserialization for ObjectNames to their canonical format
+ * Special deserialization for ObjectNames to their canonical format. It represents an
+ * {@link ObjectName} as a JSON object with a single property, <code>objectName</code>, which
+ * contains the canonical name.
  *
  * @author roland
  * @since Jul 27, 2009
  */
 public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
 
+    /**
+     * Default constructor
+     */
     public ObjectNameSimplifier() {
         super(ObjectName.class);
     }
 
     // ==================================================================================
+
+    /**
+     * Prerpare for maps with the single key <code>objectName</code>
+     *
+     * {@inheritDoc}
+     */
     @Override
     void init(Map<String, AttributeExtractor<ObjectName>> pExtractorMap) {
         addExtractors(new Object[][] {{ "objectName", new ObjectNameAttributeExtractor() }});
     }
 
+    /** {@inheritDoc} */
     private static class ObjectNameAttributeExtractor implements AttributeExtractor<ObjectName> {
         public Object extract(ObjectName value) throws SkipAttributeException {
             return value.getCanonicalName();

@@ -114,6 +114,7 @@ public final class ServiceObjectFactory {
             }
         }
     }
+
     private static <T> void createOrRemoveService(Map<ServiceEntry, T> pExtractorMap, String pLine)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (pLine.length() > 0) {
@@ -157,12 +158,26 @@ public final class ServiceObjectFactory {
         private Integer order;
 
         private static ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<Integer>() {
+
+            /**
+             * Initialise with start value for entries without an explicite order. 100 in this case.
+             *
+             * @return 100
+             */
             @Override
             protected Integer initialValue() {
                 return Integer.valueOf(100);
             }
         };
 
+        /**
+         * Parse an entry in the service definition. This should be the full qualified classname
+         * of a service, optional prefixed with "<code>!</code>" in which case the service is removed
+         * from the defaul list. An order value can be appened after the classname with a comma for give a
+         * indication for the ordering of services. If not given, 100 is taken for the first entry, counting up.
+         *
+         * @param pLine line to parse
+         */
         public ServiceEntry(String pLine) {
             String[] parts = pLine.split(",");
             if (parts[0].startsWith("!")) {
@@ -222,6 +237,7 @@ public final class ServiceObjectFactory {
             return className.hashCode();
         }
 
+        /** {@inheritDoc} */
         public int compareTo(ServiceEntry o) {
             return order - o.order;
         }
