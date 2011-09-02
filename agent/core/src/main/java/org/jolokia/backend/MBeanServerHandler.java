@@ -76,6 +76,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
      *
      * @param pQualifier optional qualifier used for registering this object as an MBean (can be null)
+     * @param pLogHandler log handler used for logging purpooses
      */
     public MBeanServerHandler(String pQualifier,LogHandler pLogHandler) {
         List<ServerDetector> detectors = lookupDetectors();
@@ -193,9 +194,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
             } else if (exceptions.size() > 1) {
                 StringBuffer ret = new StringBuffer();
                 for (JMException e : exceptions) {
-                    ret.append(e.getMessage()).append("\n");
-                }
-                throw new JMException(ret.toString());
+                    ret.append(e.getMessage()).append(", ");
+                }                
+                throw new JMException(ret.substring(0,ret.length()-2).toString());
             }
         }
     }

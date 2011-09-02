@@ -16,16 +16,25 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Set;
 
 import javax.management.*;
 
+import org.easymock.EasyMock;
+import org.jolokia.detector.ServerHandle;
+import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.handler.RequestHandlerManager;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertTrue;
+import static org.easymock.EasyMock.*;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -33,13 +42,79 @@ import static org.testng.Assert.assertTrue;
  */
 public class MBeanServerHandlerTest {
 
+    private JmxRequest request;
 
     private MBeanServerHandler handler;
 
     @BeforeMethod
-    public void setup() {
+    public void setup() throws MalformedObjectNameException {
+        TestDetector.reset();
         handler = new MBeanServerHandler("qualifier=test",getEmptyLogHandler());
+        request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
+
+    @Test
+    public void dispatchRequest() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException {
+        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+
+        Object result = new Object();
+
+        expect(reqHandler.handleAllServersAtOnce(request)).andReturn(false);
+        expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
+        replay(reqHandler);
+        assertEquals(handler.dispatchRequest(reqHandler, request),result);
+    }
+
+
+    @Test(expectedExceptions = InstanceNotFoundException.class)
+    public void dispatchRequestInstanceNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException {
+        dispatchWithException(new InstanceNotFoundException());
+    }
+
+
+    @Test(expectedExceptions = AttributeNotFoundException.class)
+    public void dispatchRequestAttributeNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException {
+        dispatchWithException(new AttributeNotFoundException());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void dispatchRequestIOException() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException {
+        dispatchWithException(new IOException());
+    }
+
+    private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+
+        expect(reqHandler.handleAllServersAtOnce(request)).andReturn(false);
+        expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e);
+        replay(reqHandler);
+        handler.dispatchRequest(reqHandler, request);
+    }
+
+    @Test
+    public void dispatchAtOnce() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+
+        Object result = new Object();
+
+        expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
+        expect(reqHandler.handleRequest(isA(Set.class), eq(request))).andReturn(result);
+        replay(reqHandler);
+        assertEquals(handler.dispatchRequest(reqHandler, request),result);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
+    public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+
+        Object result = new Object();
+
+        expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
+        expect(reqHandler.handleRequest(isA(Set.class), eq(request))).andThrow(new IOException());
+        replay(reqHandler);
+        handler.dispatchRequest(reqHandler, request);
+    }
+
 
     @Test
     public void mbeanServers() {
@@ -53,15 +128,93 @@ public class MBeanServerHandlerTest {
     }
 
     @Test
-    public void mbeanRegistration() throws JMException, InstanceAlreadyExistsException, NotCompliantMBeanException {
+    public void mbeanRegistration() throws JMException {
         try {
             handler.init();
-            String oName = handler.getObjectName();
+            ObjectName oName = new ObjectName(handler.getObjectName());
+            Set<MBeanServer> servers = handler.getMBeanServers();
+            boolean found = false;
+            for (MBeanServer server : servers) {
+                if (server.isRegistered(oName)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found,"MBean not registered");
         } finally {
             handler.unregisterMBeans();
         }
     }
 
+    @Test
+    public void mbeanRegistrationWithFailingTestDetector() throws JMException {
+        TestDetector.setThrowAddException(true);
+        // New setup because detection happens at construction time
+        setup();
+        try {
+            handler.init();
+            ObjectName oName = new ObjectName(handler.getObjectName());
+            Set<MBeanServer> servers = handler.getMBeanServers();
+            boolean found = false;
+            for (MBeanServer server : servers) {
+                if (server.isRegistered(oName)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found,"MBean not registered");
+        } finally {
+            TestDetector.setThrowAddException(false);
+            handler.unregisterMBeans();
+        }
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not register.*")
+    public void mbeanRegistrationFailed() throws JMException {
+        TestDetector.setThrowAddException(true);
+        // New setup because detection happens at construction time
+        setup();
+        try {
+            handler.registerMBean(new Dummy(true,"test:type=dummy"));
+        } finally {
+            TestDetector.setThrowAddException(false);
+        }
+    }
+
+    @Test(expectedExceptions = InstanceNotFoundException.class)
+    public void mbeanUnregistrationFailed1() throws JMException {
+        handler.registerMBean(new Dummy(false,"test:type=dummy"));
+        ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy"));
+        handler.unregisterMBeans();
+    }
+
+    @Test(expectedExceptions = JMException.class,expectedExceptionsMessageRegExp = ".*(dummy[12].*){2}.*")
+    public void mbeanUnregistrationFailed2() throws JMException {
+        handler.registerMBean(new Dummy(false,"test:type=dummy1"));
+        handler.registerMBean(new Dummy(false,"test:type=dummy2"));
+        ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy1"));
+        ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy2"));
+        handler.unregisterMBeans();
+    }
+
+    @Test
+    public void serverHandle() {
+        ServerHandle handle = handler.getServerHandle();
+        assertNotNull(handle);
+    }
+
+
+    @Test
+    public void fallThrough() throws MalformedObjectNameException {
+        TestDetector.setFallThrough(true);
+        setup();
+        try {
+            ServerHandle handle = handler.getServerHandle();
+            assertNull(handle.getProduct());
+        } finally {
+            TestDetector.setFallThrough(false);
+        }
+    }
 
     // ===================================================================================================
 
@@ -77,5 +230,36 @@ public class MBeanServerHandlerTest {
             public void error(String message, Throwable t) {
             }
         };
+    }
+
+
+    interface DummyMBean {
+
+    }
+    private class Dummy implements DummyMBean,MBeanRegistration {
+
+        private boolean throwException;
+        private String name;
+
+        public Dummy(boolean b,String pName) {
+            throwException = b;
+            name = pName;
+        }
+
+        public ObjectName preRegister(MBeanServer server, ObjectName pName) throws Exception {
+            if (throwException) {
+                throw new RuntimeException();
+            }
+            return new ObjectName(name);
+        }
+
+        public void postRegister(Boolean registrationDone) {
+        }
+
+        public void preDeregister() throws Exception {
+        }
+
+        public void postDeregister() {
+        }
     }
 }
