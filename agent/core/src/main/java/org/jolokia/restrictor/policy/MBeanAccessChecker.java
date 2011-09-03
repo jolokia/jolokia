@@ -26,6 +26,30 @@ import org.jolokia.util.RequestType;
 import org.w3c.dom.*;
 
 /**
+ * Checker, which checks for specific MBean attributes or operations which can be either
+ * defined in an <code>&lt;allow&gt;</code> or <code>&lt;deny&gt;</code> seciton.
+ * <p/>
+ * MBean names can be specified either a full names or as patterns in which case the rule
+ * applies to all MBeans matching this pattern. For attribute and operations names, the wildcard
+ * <code>*</code> is allowed, too.
+ * <p/>
+ * Example:
+ * <pre>
+ * &lt;allow&gt;
+ *    &lt;mbean&gt;
+ *     &lt;name&gt;java.lang:type=Memory&lt;/name&gt;
+ *     &lt;operation&gt;gc&lt;/operation&gt;
+ *   &lt;/mbean&gt;
+ * &lt;/allow&gt;
+ *
+ * &lt;deny&gt;
+ *   &lt;mbean&gt;
+ *     &lt;name&gt;com.mchange.v2.c3p0:type=PooledDataSource,*&lt;/name&gt;
+ *     &lt;attribute&gt;properties&lt;/attribute&gt;
+ *   &lt;/mbean&gt;
+ * &lt;/deny&gt;
+ * </pre>
+ *
  * @author roland
  * @since 03.09.11
  */
@@ -35,6 +59,12 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
     private MBeanPolicyConfig allow;
     private MBeanPolicyConfig deny;
 
+    /**
+     * Constructor which extracts the information relevant for this checker from the given document.
+     *
+     * @param pDoc document to examine
+     * @throws MalformedObjectNameException if the configuration contains malformed object names.
+     */
     public MBeanAccessChecker(Document pDoc) throws MalformedObjectNameException {
         for (String tag : new String[] { "allow", "mbeans" }) {
             NodeList nodes = pDoc.getElementsByTagName(tag);
@@ -53,6 +83,7 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean check(Arg pArg) {
         if (pArg.isTypeAllowed()) {
@@ -158,12 +189,24 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
 
     // ===========================================================================================
 
+    /**
+     * Class encapsulation the arguments for the check command
+     */
     public static class Arg {
         private boolean isTypeAllowed;
         private RequestType type;
         private ObjectName name;
         private String value;
 
+        /**
+         * Constructor for this immutable object
+         *
+         * @param pIsTypeAllowed whether the type is allowed in principal (i.e. whether it is mentioned in
+         *        s <code>&lt;commands&gt;</code> section)
+         * @param pType the type to check
+         * @param pName the MBean name to check
+         * @param pValue attribute or operation to check
+         */
         public Arg(boolean pIsTypeAllowed,RequestType pType, ObjectName pName, String pValue) {
             isTypeAllowed = pIsTypeAllowed;
             type = pType;
@@ -171,18 +214,37 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
             value = pValue;
         }
 
+        /**
+         * Whethe the command type is allowed generally. 
+         * @return
+         */
         public boolean isTypeAllowed() {
             return isTypeAllowed;
         }
 
+        /**
+         * Get request type
+         *
+         * @return type
+         */
         public RequestType getType() {
             return type;
         }
 
+        /**
+         * MBean name
+         * @return name of MBean
+         */
         public ObjectName getName() {
             return name;
         }
 
+        /**
+         * Value which is interpreted as operation or attribute name,
+         * dependening on the type
+         *
+         * @return attribute/operation name
+         */
         public String getValue() {
             return value;
         }

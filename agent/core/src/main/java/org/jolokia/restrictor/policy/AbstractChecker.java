@@ -21,10 +21,12 @@ import org.w3c.dom.Node;
 /**
  * Base class for all checkers
  *
+ * @param <T> type used for checking the access
+ *
  * @author roland
  * @since 03.09.11
  */
-abstract public class AbstractChecker<T> {
+public abstract class AbstractChecker<T> {
 
     /**
      * Verify that a given node has one of a set of expected node names
@@ -33,7 +35,7 @@ abstract public class AbstractChecker<T> {
      * @param pExpected list of expected node names
      * @throws SecurityException if the node has none of the expected names
      */
-    protected void assertNodeName(Node pNode, String ... pExpected) throws SecurityException {
+    protected void assertNodeName(Node pNode, String ... pExpected)  {
         for (String expected : pExpected) {
             if (pNode.getNodeName().equals(expected)) {
                 return;
@@ -50,5 +52,11 @@ abstract public class AbstractChecker<T> {
                 "Expected element " + buffer.toString() + " but got " + pNode.getNodeName());
     }
 
-    abstract public boolean check(T pArg);
+    /**
+     * Check whether for the given argument access is allowed
+     *
+     * @param pArg argument (specific to each subclass)
+     * @return true if access is allowed, false otherwise
+     */
+    public abstract boolean check(T pArg);
 }

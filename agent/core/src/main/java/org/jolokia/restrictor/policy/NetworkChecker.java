@@ -25,8 +25,23 @@ import org.jolokia.util.IpChecker;
 import org.w3c.dom.*;
 
 /**
+ * Check whether a host is allowed to access the agent. The restriction
+ * can be specified in the policy file with the <code>&lt;remote&gt;</code>
+ * tag. Either plain host or subnet (in the CIDR notation) can be specified
+ * <br/>
+ * Example:
+ * <pre>
+ * &lt;remote&gt;
+ *   &lt;host&gt;planck&lt;/host&gt;
+ *   &lt;host&gt;10.0.11.125&lt;/host&gt;
+ *   &lt;host&gt;11.0.0.0/16&lt;/host&gt;
+ *   &lt;host&gt;192.168.15.3/255.255.255.0&lt;/host&gt;
+ * &lt;/remote&gt;
+ * </pre>
+ *
  * @author roland
  * @since 02.09.11
+ *
  */
 public class NetworkChecker extends AbstractChecker<String[]> {
 
@@ -37,6 +52,11 @@ public class NetworkChecker extends AbstractChecker<String[]> {
     private static final Pattern IP_PATTERN = Pattern.compile("^[\\d.]+$");
     private static final Pattern SUBNET_PATTERN = Pattern.compile("^[\\d.]+/[\\d.]+$");
 
+    /**
+     * Construct this checker from a given document
+     *
+     * @param pDoc document to examine for &lt;remote&gt; tags.
+     */
     public NetworkChecker(Document pDoc) {
         NodeList nodes = pDoc.getElementsByTagName("remote");
         if (nodes.getLength() == 0) {
@@ -68,9 +88,15 @@ public class NetworkChecker extends AbstractChecker<String[]> {
         }
     }
 
+    /**
+     * Check for one or more hosts.
+     *
+     * @param pHostOrAddresses array of host names or IP addresses
+     * @return true if one of the given name passes this checker.
+     */
     @Override
     public boolean check(String[] pHostOrAddresses) {
-                if (allowedHostsSet == null) {
+        if (allowedHostsSet == null) {
             return true;
         }
         for (String addr : pHostOrAddresses) {

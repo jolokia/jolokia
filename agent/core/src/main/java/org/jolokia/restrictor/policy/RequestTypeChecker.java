@@ -23,6 +23,19 @@ import org.jolokia.util.RequestType;
 import org.w3c.dom.*;
 
 /**
+ * Checks for a certain requst type which are specified within a <code>&lt;commands&gt;</code>
+ * section. If no such section is present, then all commands are allowed, otherwise only
+ * the given type is allowed by this checker.
+ * <p/>
+ * Allowed types are the names as defined in {@link RequestType}.
+ * <p/
+ * Example:
+ * <pre>
+ * &lt;commands&gt;
+ *   &lt;command&gt;read&lt;/command&gt;
+ *   &lt;command&gt;list&lt;/command&gt;
+ * &lt;/commands&gt;
+ * </pre>
  * @author roland
  * @since 02.09.11
  */
@@ -52,6 +65,13 @@ public class RequestTypeChecker extends AbstractChecker<RequestType> {
         }
     }
 
+    /**
+     * Return true if either no <code>&lt;commands&gt;</code> section was in the policy or
+     * the given type was mentioned as allowed command
+     *
+     * @param pType the type to check
+     * @return true if the condition above is true
+     */
     @Override
     public boolean check(RequestType pType) {
         return typeSet == null || typeSet.contains(pType);
