@@ -223,13 +223,13 @@ public class BackendManager {
         try {
             localDispatcher.init(historyStore,debugStore);
         } catch (NotCompliantMBeanException e) {
-            intError("Error registering config MBean: " + e,e);
+            intError("Error registering config MBean: " + e, e);
         } catch (MBeanRegistrationException e) {
-            intError("Cannot register MBean: " + e,e);
+            intError("Cannot register MBean: " + e, e);
         } catch (MalformedObjectNameException e) {
-            intError("Invalid name for config MBean: " + e,e);
+            intError("Invalid name for config MBean: " + e, e);
         } catch (InstanceAlreadyExistsException e) {
-            intError("Config MBean already exists: " + e,e);
+            intError("Config MBean already exists: " + e, e);
         }
     }
 
@@ -241,13 +241,13 @@ public class BackendManager {
 
 
     private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {
-        int maxDebugEntries;
+        int ret;
         try {
-            maxDebugEntries = Integer.parseInt(pKey.getValue(pConfig));
+            ret = Integer.parseInt(pKey.getValue(pConfig));
         } catch (NumberFormatException exp) {
-            maxDebugEntries = Integer.parseInt(pKey.getDefaultValue());
+            ret = Integer.parseInt(pKey.getDefaultValue());
         }
-        return maxDebugEntries;
+        return ret;
     }
 
     /**
