@@ -194,6 +194,8 @@ public class AgentServletTest {
         context.log(find("Request:"));
         context.log(find("time:"));
         context.log(find("Response:"));
+        context.log(find("TestDetector"),isA(RuntimeException.class));
+        expectLastCall().anyTimes();
         replay(config, context);
         servlet.init(config);
 

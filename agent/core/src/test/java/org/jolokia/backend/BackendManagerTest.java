@@ -39,13 +39,11 @@ import static org.testng.Assert.*;
  */
 public class BackendManagerTest implements LogHandler {
 
-    BackendManager backendManager;
-
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         Map config = new HashMap();
         config.put(ConfigKey.DEBUG,"true");
-        backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config, this);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -59,7 +57,7 @@ public class BackendManagerTest implements LogHandler {
     public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         config.put(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
-        backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config, this);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         backendManager.handleRequest(req);
         assertTrue(RequestDispatcherTest.called);
@@ -70,20 +68,20 @@ public class BackendManagerTest implements LogHandler {
     public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         config.put(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
-        backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,this);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
     public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         config.put(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
-        backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,this);
     }
 
     @Test
     public void debugging() {
         RecordingLogHandler lhandler = new RecordingLogHandler();
-        backendManager = new BackendManager(new HashMap(),lhandler);
+        BackendManager backendManager = new BackendManager(new HashMap(),lhandler);
         lhandler.error = 0;
         lhandler.debug = 0;
         lhandler.info = 0;
@@ -101,20 +99,21 @@ public class BackendManagerTest implements LogHandler {
     public void defaultConfig() {
         Map config = new HashMap();
         config.put(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
-        backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,this);
         backendManager.destroy();
     }
 
     @Test
     public void doubleInit() {
-        backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
-        backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
-        backendManager.destroy();
+        BackendManager b1 = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        BackendManager b2 = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        b2.destroy();
+        b1.destroy();
     }
 
     @Test
     public void remoteAccessCheck() {
-        backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        BackendManager backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
         assertTrue(backendManager.isRemoteAccessAllowed("localhost","127.0.0.1"));
         backendManager.destroy();
     }
