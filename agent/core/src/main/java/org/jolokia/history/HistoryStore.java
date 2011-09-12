@@ -157,9 +157,9 @@ public class HistoryStore implements Serializable {
     public synchronized int getSize() {
         try {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            ObjectOutputStream oOut = null;
-            oOut = new ObjectOutputStream(bOut);
+            ObjectOutputStream oOut = new ObjectOutputStream(bOut);
             oOut.writeObject(historyStore);
+            bOut.close();
             return bOut.size();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot serialize internal store: " + e,e);

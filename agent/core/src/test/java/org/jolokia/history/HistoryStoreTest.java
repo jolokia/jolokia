@@ -23,11 +23,12 @@ import javax.management.MalformedObjectNameException;
 import org.jolokia.request.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.jolokia.util.RequestType.*;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 
 
@@ -163,6 +164,55 @@ public class HistoryStoreTest {
         assertEquals("Attr2 has 4 entries",4,((List) history.get("attr2")).size());
     }
 
+
+    @Test
+    public void patternConfigure() throws MalformedObjectNameException {
+        store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null),10);
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 3);
+        JmxReadRequest req =
+                new JmxRequestBuilder(READ,"java.lang:type=Memory")
+                        .attribute("HeapMemoryUsage")
+                        .build();
+
+        JSONArray history = updateNTimesAsList(req, 5, 4711);
+        assertEquals(history.size(), 3);
+    }
+
+    @Test
+    public void patternRemoveEntries() throws MalformedObjectNameException {
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 3);
+        store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null),10);
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 0);
+
+                JmxReadRequest req =
+                new JmxRequestBuilder(READ,"java.lang:type=Memory")
+                        .attribute("HeapMemoryUsage")
+                        .build();
+
+        JSONArray history = updateNTimesAsList(req, 5, 4711);
+        assertNull(history);
+    }
+
+    @Test
+    public void patternGetEntries() throws MalformedObjectNameException {
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 3);
+
+        JmxReadRequest req =
+                new JmxRequestBuilder(READ,"java.lang:type=Memory")
+                        .attribute("HeapMemoryUsage")
+                        .build();
+
+        JSONArray history = updateNTimesAsList(req, 5, 4711);
+        assertEquals(history.size(), 3);
+    }
+
+
+    @Test
+    public void size() throws Exception {
+        assertTrue(store.getSize() < 100);
+        singleAttributeRead();
+        assertTrue(store.getSize() > 100);
+    }
 
     @Test(groups = "java6")
     public void patternAttributeRead() throws Exception {
