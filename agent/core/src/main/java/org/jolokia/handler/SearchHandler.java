@@ -33,9 +33,6 @@ import java.util.regex.Pattern;
  */
 public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
 
-    // Pattern for value in which case the value needs to be escaped
-    private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile(":\",=\\*?");
-
     public SearchHandler(Restrictor pRestrictor) {
         super(pRestrictor);
     }
@@ -54,28 +51,7 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         for (MBeanServerConnection server : servers) {
             Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
             for (ObjectName name : names) {
-                // Check whether the property-list values needs to be escaped:
-                Map<String,String> props = name.getKeyPropertyList();
-                // We need a hashtable since ObjectName requires one.
-                Hashtable<String,String> escapedProps = new Hashtable<String, String>();
-                boolean needsEscape = false;
-                for (Map.Entry<String,String> entry : props.entrySet()) {
-                    String value = entry.getValue();
-                    if (INVALID_CHARS_PATTERN.matcher(entry.getValue()).find()) {
-                        value = ObjectName.quote(value);
-                        needsEscape = true;
-                    }
-                    escapedProps.put(entry.getKey(),value);
-                }
-                if (needsEscape) {
-                    try {
-                        ret.add(new ObjectName(name.getDomain(),escapedProps).getCanonicalName());
-                    } catch (MalformedObjectNameException e) {
-                        throw new MBeanException(e,"Cannot properly escape " + name.getCanonicalName());
-                    }
-                } else {
                     ret.add(name.getCanonicalName());
-                }
             }
         }
         return new ArrayList<String>(ret);
