@@ -61,7 +61,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     // Content type matching
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
-    // Configuration of this handler;
+    // Configuration of this handler
     private Map<ConfigKey, String> configuration;
 
 

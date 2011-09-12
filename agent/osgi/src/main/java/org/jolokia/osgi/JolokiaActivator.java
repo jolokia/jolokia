@@ -134,7 +134,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     // ==================================================================================
 
     // Customizer for registering servlet at a HttpService
-
     private Dictionary<String,String> getConfiguration() {
         Dictionary<String,String> config = new Hashtable<String,String>();
         for (ConfigKey key : ConfigKey.values()) {

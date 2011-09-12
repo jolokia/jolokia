@@ -186,7 +186,6 @@ public final class JmxRequestFactory {
             return pathInfo;
         } else {
             return "";
-            //throw new IllegalArgumentException("No pathinfo given and no query parameter 'p'");
         }
     }
 
@@ -254,7 +253,7 @@ public final class JmxRequestFactory {
         /**
          * Process a POST request
          *
-         * @paam requestMap JSON representation of the request
+         * @param requestMap JSON representation of the request
          * @param pParams optional query parameters
          * @return the created request object
          * @throws MalformedObjectNameException if an object name could not be created

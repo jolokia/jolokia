@@ -53,7 +53,7 @@ public class ServerConfig {
     /**
      * Constructor which parser an agent argument string
      *
-     * @param pArgs argumnents glued together as provided on the commandline
+     * @param pArgs arguments glued together as provided on the commandline
      *        for an agent parameter
      */
     public ServerConfig(String pArgs) {
@@ -64,7 +64,7 @@ public class ServerConfig {
     }
 
     /**
-     * Get the Jolokia runtim configuration
+     * Get the Jolokia runtime configuration
      * @return jolokia configuration
      */
     public Map<ConfigKey, String> getJolokiaConfig() {
@@ -239,7 +239,7 @@ public class ServerConfig {
     }
 
     private void initThreadNr() {
-        // Thread-Nr;
+        // Thread-Nr
         String threadNrS =  agentConfig.get("threadNr");
         threadNr = threadNrS != null ? Integer.parseInt(threadNrS) : 5;
     }
@@ -266,7 +266,7 @@ public class ServerConfig {
 
 
     // ======================================================================================
-    // Parse argument;
+    // Parse argument
 
     private Map<String, String> parseArgs(String pAgentArgs) {
         Map<String,String> ret = new HashMap<String, String>();

@@ -42,7 +42,7 @@ public final class IpChecker {
         String[] parts = pExpected.split("/",2);
         if (parts.length == 1) {
             // No Net part given, check for equality ...
-            // Check for valid ips;
+            // Check for valid ips
             convertToIntTuple(pExpected);
             convertToIntTuple(pToCheck);
             return pExpected.equals(pToCheck);
