@@ -14,11 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Collections;
+import java.util.*;
 import java.lang.UnsupportedOperationException;
 
 /*
@@ -237,46 +233,49 @@ public class AgentServlet extends HttpServlet {
                 throws IOException;
     }
 
-
+    // factory method for POST request handler
     private ServletRequestHandler newPostHttpRequestHandler() {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
              public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                     throws IOException {
-                String encoding = pReq.getCharacterEncoding();
-                InputStream is = pReq.getInputStream();
-                try {
-                	return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, pReq.getParameterMap());
-                } catch (UnsupportedOperationException error) {
-                    return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, getParameterMap(pReq));
-                }
-            }
+                 String encoding = pReq.getCharacterEncoding();
+                 InputStream is = pReq.getInputStream();
+                 return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, getParameterMap(pReq));
+             }
         };
     }
-
+    
+    // factory method for GET request handler
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) {
-                try {
-                    return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), pReq.getParameterMap());
-                } catch (UnsupportedOperationException error) {
-                    return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
-                }
+                return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
             }
         };
     }
-    
-    private Map<String, String[]> getParameterMap(HttpServletRequest pReq){
-        Map<String, String[]> parameters = new HashMap<String, String[]>();
-        List<String> requestParameterNames = Collections.list((Enumeration<String>)pReq.getParameterNames());
-        for (String parameterName:requestParameterNames){
-        	parameters.put(parameterName, pReq.getParameterValues(parameterName));
-        }
-        return parameters;
-    }
-    
+
     // =======================================================================
+
+    // Get parameter map either directly from an Servlet 2.4 compliant implementation
+    // or by looking it up explictely (thanks to codewax for the patch)
+    private Map<String, String[]> getParameterMap(HttpServletRequest pReq){
+        try {
+            // Servlet 2.4 API
+            return pReq.getParameterMap();
+        } catch (UnsupportedOperationException exp) {
+            // Thrown by 'pseudo' 2.4 Servlet API implementations which fake a 2.4 API
+            // As a service for the parameter map is build up explicitely
+            Map<String, String[]> ret = new HashMap<String, String[]>();
+            Enumeration params = pReq.getParameterNames();
+            while (params.hasMoreElements()) {
+                String param = (String) params.nextElement();
+                ret.put(param, pReq.getParameterValues(param));
+            }
+            return ret;
+        }
+    }
 
     private Map<ConfigKey, String> servletConfigAsMap(ServletConfig pConfig) {
         Enumeration e = pConfig.getInitParameterNames();
@@ -292,19 +291,25 @@ public class AgentServlet extends HttpServlet {
     }
 
     private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {
-        try {
-            pResp.setCharacterEncoding("utf-8");
-            pResp.setContentType(pContentType);
-        } catch (NoSuchMethodError error) {
-            // For a Servlet 2.3 container, set the charset by hand
-            pResp.setContentType(pContentType + "; charset=utf-8");
-        } catch (UnsupportedOperationException error) {
-            // For an Equinox HTTP Service, set the charset by hand
-            pResp.setContentType(pContentType + "; charset=utf-8");
-        }
+        setContentType(pResp, pContentType);
         pResp.setStatus(200);
         PrintWriter writer = pResp.getWriter();
         writer.write(pJsonTxt);
+    }
+
+    private void setContentType(HttpServletResponse pResp, String pContentType) {
+        boolean encodingDone = false;
+        try {
+            pResp.setCharacterEncoding("utf-8");
+            pResp.setContentType(pContentType);
+            encodingDone = true;
+        }
+        catch (NoSuchMethodError error) { /* Servlet 2.3 */ }
+        catch (UnsupportedOperationException error) { /* Equinox HTTP Service */ }
+        if (!encodingDone) {
+            // For a Servlet 2.3 container or an Equinox HTTP Service, set the charset by hand
+            pResp.setContentType(pContentType + "; charset=utf-8");
+        }
     }
 
 }

@@ -16,17 +16,19 @@ package org.jolokia.http;
  *  limitations under the License.
  */
 
+import java.awt.geom.Line2D;
 import java.io.*;
+import java.util.Vector;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jolokia.backend.TestDetector;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.HttpTestUtil;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertTrue;
@@ -97,6 +99,31 @@ public class AgentServletTest {
         assertTrue(sw.toString().contains("used"));
         servlet.destroy();
     }
+
+    @Test
+    public void simpleGetWithUnsupportedGetParameterMapCall() throws ServletException, IOException {
+        prepareStandardInitialisation();
+        StringWriter sw = initRequestResponseMocks(
+                new Runnable() {
+                    public void run() {
+                        expect(request.getRemoteHost()).andReturn("localhost");
+                        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+                        expect(request.getRequestURI()).andReturn("/jolokia/");
+                        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
+                        expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
+                        Vector params = new Vector();
+                        params.add("debug");
+                        expect(request.getParameterNames()).andReturn(params.elements());
+                        expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
+                    }
+                },
+                getStandardResponseSetup());
+        replay(request,response);
+
+        servlet.doGet(request,response);
+        servlet.destroy();
+    }
+
 
     @Test
     public void simplePost() throws ServletException, IOException {
@@ -185,6 +212,7 @@ public class AgentServletTest {
         verify(config, context, request, response);
     }
 
+
     @Test
     public void debug() throws IOException, ServletException {
         servlet = new AgentServlet();
@@ -210,9 +238,15 @@ public class AgentServletTest {
         servlet.destroy();
     }
 
+
+    @BeforeMethod
+    void resetTestDetector() {
+        TestDetector.reset();
+    }
+    
     @AfterMethod
     public void verifyMocks() {
-        verify(config,context,request,response);
+        verify(config, context, request, response);
     }
     // ============================================================================================
 
@@ -230,6 +264,7 @@ public class AgentServletTest {
         } else {
             context.log(find(pLogRegexp));
         }
+        context.log(find("TestDetector"),isA(RuntimeException.class));
     }
 
     private StringWriter initRequestResponseMocks() throws IOException {
