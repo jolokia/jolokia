@@ -92,12 +92,19 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      *
      * @param pRequest request to check
      */
-    protected void checkForRestriction(R pRequest) {
+    abstract protected void checkForRestriction(R pRequest);
+
+
+    /**
+     * Check whether a command of the given type is allowed
+     */
+    protected void checkType() {
         if (!restrictor.isTypeAllowed(getType())) {
             throw new SecurityException("Command type " +
                     getType() + " not allowed due to policy used");
         }
     }
+
 
     /**
      * Check whether the HTTP method with which the request was sent is allowed according to the policy

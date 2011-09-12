@@ -49,6 +49,12 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
         return RequestType.VERSION;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    protected void checkForRestriction(JmxVersionRequest pRequest) {
+        checkType();
+    }
+
     @Override
     public boolean handleAllServersAtOnce(JmxVersionRequest pRequest) {
         return true;

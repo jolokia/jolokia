@@ -21,11 +21,14 @@ import java.util.Set;
 import javax.management.MBeanServer;
 
 /**
+ * Detector for the Geronimo JEE Server
+ * 
  * @author roland
  * @since 05.12.10
  */
 public class GeronimoDetector extends AbstractServerDetector {
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String version = getSingleStringAttribute(pMbeanServers,"geronimo:j2eeType=J2EEServer,*","serverVersion");
         if (version != null) {

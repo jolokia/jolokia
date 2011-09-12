@@ -40,7 +40,6 @@ import org.jolokia.util.RequestType;
  */
 public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
 
-
     private Converters converters;
 
     public WriteHandler(Restrictor pRestrictor, Converters pConverters) {

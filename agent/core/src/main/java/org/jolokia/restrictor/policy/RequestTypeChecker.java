@@ -43,6 +43,11 @@ public class RequestTypeChecker extends AbstractChecker<RequestType> {
 
     private Set<RequestType> typeSet;
 
+    /**
+     * Checker for requests types
+     *
+     * @param pDoc document to examine for declared restrictions
+     */
     public RequestTypeChecker(Document pDoc) {
         NodeList nodes = pDoc.getElementsByTagName("commands");
         if (nodes.getLength() > 0) {

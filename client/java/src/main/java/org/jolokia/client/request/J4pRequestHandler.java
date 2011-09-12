@@ -46,6 +46,11 @@ public class J4pRequestHandler {
     private static final Pattern SLASH_PATTERN = Pattern.compile("/+");
     private static final Pattern ESCAPED_SLASH_PATTERN = Pattern.compile("%2F");
 
+    /**
+     * Constructor
+     *
+     * @param pJ4pServerUrl URL to remote agent
+     */
     public J4pRequestHandler(String pJ4pServerUrl) {
         j4pServerUrl = pJ4pServerUrl;
     }

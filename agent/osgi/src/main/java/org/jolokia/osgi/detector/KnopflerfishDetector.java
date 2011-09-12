@@ -30,6 +30,7 @@ import org.jolokia.detector.ServerHandle;
  */
 public class KnopflerfishDetector extends AbstractOsgiServerDetector {
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         // Probably a bit unspecific, but that's kopflerfish's fault
         if (checkSystemBundleForSymbolicName("system.bundle")) {

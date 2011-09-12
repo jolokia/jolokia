@@ -107,6 +107,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
         return isMultiAttributeMode() || getAttributeName() != null;
     }
 
+    /** {@inheritDoc} */
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         if (attributeNames != null && attributeNames.size() > 0) {
@@ -122,6 +123,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
         return ret;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuffer ret = new StringBuffer("JmxReadRequest[");

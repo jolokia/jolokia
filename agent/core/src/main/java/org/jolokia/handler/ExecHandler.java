@@ -42,16 +42,23 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
 
     private Converters converters;
 
+    /**
+     * Constructor
+     * @param pRestrictor restrictor for checking access restrictions
+     * @param pConverters converters for serialization
+     */
     public ExecHandler(Restrictor pRestrictor, Converters pConverters) {
         super(pRestrictor);
         converters = pConverters;
     }
 
+    /** {@inheritDoc} */
     @Override
     public RequestType getType() {
         return RequestType.EXEC;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JmxExecRequest pRequest) {
         if (!getRestrictor().isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {

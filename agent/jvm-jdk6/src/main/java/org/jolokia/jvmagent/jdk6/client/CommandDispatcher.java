@@ -212,6 +212,11 @@ public class CommandDispatcher {
         return (Properties) method.invoke(pVm);
     }
 
+    /**
+     * Print out a usage message to standard out
+     *
+     * @param jar path to jar file where this class is contained in
+     */
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     public static void printHelp(String jar) {
         System.out.println(

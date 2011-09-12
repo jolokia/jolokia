@@ -82,6 +82,12 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     /** {@inheritDoc} */
     @Override
+    protected void checkForRestriction(JmxListRequest pRequest) {
+        checkType();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest pRequest)
             throws InstanceNotFoundException, IOException {
         Stack<String> originalPathStack = PathUtil.reversePath(pRequest.getPathParts());

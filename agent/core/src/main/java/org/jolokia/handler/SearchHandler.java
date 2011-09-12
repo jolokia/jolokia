@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -37,10 +38,16 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         super(pRestrictor);
     }
 
+    /** {@inheritDoc} */
     @Override
     public RequestType getType() {
-
         return RequestType.SEARCH;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void checkForRestriction(JmxSearchRequest pRequest) {
+        checkType();
     }
 
     @Override

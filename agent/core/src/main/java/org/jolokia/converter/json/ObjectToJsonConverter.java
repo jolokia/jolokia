@@ -356,7 +356,7 @@ public final class ObjectToJsonConverter {
 
 
     // Used for testing only. Hence final and package local
-    final ThreadLocal<ObjectSerializationContext> getStackContextLocal() {
+    ThreadLocal<ObjectSerializationContext> getStackContextLocal() {
         return stackContextLocal;
     }
 

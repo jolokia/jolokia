@@ -150,7 +150,7 @@ public class DebugStore {
     }
 
     // trim list of debug entries
-    public void trim() {
+    private void trim() {
         while (debugEntries.size() > maxDebugEntries) {
             debugEntries.removeLast();
         }

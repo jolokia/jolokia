@@ -28,6 +28,9 @@ import java.net.URL;
  */
 public class UrlSimplifier extends SimplifierExtractor<URL> {
 
+    /**
+     * No arg constructor as required for simplifiers
+     */
     public UrlSimplifier() {
         super(URL.class);
     }

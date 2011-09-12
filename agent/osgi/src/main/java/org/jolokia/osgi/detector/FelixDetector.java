@@ -30,6 +30,7 @@ import org.jolokia.detector.ServerHandle;
  */
 public class FelixDetector extends AbstractOsgiServerDetector {
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
             String version = getSystemBundleVersion();

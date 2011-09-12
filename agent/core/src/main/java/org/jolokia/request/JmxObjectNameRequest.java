@@ -64,6 +64,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
     }
 
 
+    /** {@inheritDoc} */
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

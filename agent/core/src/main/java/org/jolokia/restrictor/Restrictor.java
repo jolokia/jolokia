@@ -44,8 +44,6 @@ public interface Restrictor {
     /**
      * Check whether the provided command type is allowed in principal
      *
-     *
-     *
      * @param pType type to check
      * @return true, if the type is allowed, false otherwise
      */
