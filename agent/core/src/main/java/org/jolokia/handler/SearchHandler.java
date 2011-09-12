@@ -1,13 +1,13 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.*;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.RequestType;
-
-import javax.management.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Pattern;
+
+import javax.management.*;
+
+import org.jolokia.request.JmxSearchRequest;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -39,6 +39,7 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
 
     @Override
     public RequestType getType() {
+
         return RequestType.SEARCH;
     }
 
@@ -51,7 +52,7 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         for (MBeanServerConnection server : servers) {
             Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
             for (ObjectName name : names) {
-                    ret.add(name.getCanonicalName());
+                ret.add(name.getCanonicalName());
             }
         }
         return new ArrayList<String>(ret);
