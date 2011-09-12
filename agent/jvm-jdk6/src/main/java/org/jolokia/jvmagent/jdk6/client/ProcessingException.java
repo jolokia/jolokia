@@ -17,6 +17,8 @@ package org.jolokia.jvmagent.jdk6.client;
  */
 
 /**
+ * Exception indicating an error during operation of the agent launcher.
+ *
  * @author roland
  * @since 12.08.11
  */
@@ -24,12 +26,23 @@ public class ProcessingException extends RuntimeException {
     private boolean quiet;
     private boolean verbose;
 
+    /**
+     * Constructor  
+     *
+     * @param pErrMsg error message
+     * @param pStoredExp the original exception
+     * @param pOptions options from where to take the information how the error should be logged
+     */
     public ProcessingException(String pErrMsg, Exception pStoredExp, OptionsAndArgs pOptions) {
         super(pErrMsg,pStoredExp);
         quiet = pOptions.isQuiet();
         verbose = pOptions.isVerbose();
     }
 
+    /**
+     * Print this exception to standard error, but only if no <code>--quiet</code> is given. If
+     * <code>--verbose</code> is given, then an stacktrace is printed as well.
+     */
     @SuppressWarnings({"PMD.SystemPrintln"})
     public void printErrorMessage() {
         if (!quiet) {

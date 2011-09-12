@@ -25,6 +25,10 @@ import org.jolokia.request.*;
 
 
 /**
+ * Key used in the {@link HistoryStore} for indexing historical values. The key has
+ * a type reflecting the kind of JMX operataion (<code>attribute</code> or <code>operation</code>)
+ * and can be used in proxy mode for different targets.
+ *
  * @author roland
  * @since Jun 12, 2009
  */
@@ -38,21 +42,31 @@ public class HistoryKey implements Serializable {
     private String path;
     private String target;
 
-    HistoryKey(JmxReadRequest pJmxReq) {
-        init(pJmxReq);
+    /**
+     * Create a key from a read request from which all necessary information is extracted
+     *
+     * @param pJmxRequest read request
+     */
+    HistoryKey(JmxReadRequest pJmxRequest) {
+        init(pJmxRequest);
 
-        if (pJmxReq.getAttributeNames() != null && pJmxReq.getAttributeNames().size() > 1) {
+        if (pJmxRequest.getAttributeNames() != null && pJmxRequest.getAttributeNames().size() > 1) {
             throw new IllegalArgumentException("A key cannot contain more than one attribute");
         }
 
         type = "attribute";
-        secondary = pJmxReq.isMultiAttributeMode() ? pJmxReq.getAttributeNames().get(0) : pJmxReq.getAttributeName();
+        secondary = pJmxRequest.isMultiAttributeMode() ? pJmxRequest.getAttributeNames().get(0) : pJmxRequest.getAttributeName();
         if (secondary == null) {
             secondary = "(all)";
         }
-        path = pJmxReq.getPath();
+        path = pJmxRequest.getPath();
     }
 
+    /**
+     * Create a key from a write request from which all necessary information is extracted
+     *
+     * @param pJmxReq write request
+     */
     HistoryKey(JmxWriteRequest pJmxReq) {
         init(pJmxReq);
 
@@ -64,6 +78,11 @@ public class HistoryKey implements Serializable {
         }
     }
 
+    /**
+     * Create a key from an exec request from which all necessary information is extracted
+     *
+     * @param pJmxReq read request
+     */
     HistoryKey(JmxExecRequest pJmxReq) {
         init(pJmxReq);
 
@@ -91,6 +110,14 @@ public class HistoryKey implements Serializable {
     }
 
 
+    /**
+     * Constructor for type <code>operation</code>
+     *
+     * @param pMBean MBean name
+     * @param pOperation operation name
+     * @param pTarget optional target if used in proxy mode
+     * @throws MalformedObjectNameException if the mbean name is invalid
+     */
     public HistoryKey(String pMBean, String pOperation, String pTarget) throws MalformedObjectNameException {
         type = "operation";
         mBean = new ObjectName(pMBean);
@@ -99,6 +126,15 @@ public class HistoryKey implements Serializable {
         target = pTarget;
     }
 
+    /**
+     * Constructor for type <code>attribute</code>
+     *
+     * @param pMBean MBean name
+     * @param pAttribute attribute
+     * @param pPath optional path
+     * @param pTarget optional proxy target
+     * @throws MalformedObjectNameException if the mbean name is invalid
+     */
     public HistoryKey(String pMBean, String pAttribute, String pPath,String pTarget) throws MalformedObjectNameException {
         type = "attribute";
         mBean = new ObjectName(pMBean);
@@ -127,6 +163,7 @@ public class HistoryKey implements Serializable {
     }
 
     // CHECKSTYLE:OFF
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.IfStmtsMustUseBraces")
     public boolean equals(Object o) {
@@ -146,6 +183,7 @@ public class HistoryKey implements Serializable {
     }
     // CHECKSTYLE:ON
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         int result = type.hashCode();
@@ -156,6 +194,7 @@ public class HistoryKey implements Serializable {
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

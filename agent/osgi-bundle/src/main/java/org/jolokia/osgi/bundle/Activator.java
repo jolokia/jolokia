@@ -40,22 +40,22 @@ public class Activator implements BundleActivator {
     private JettyActivator felixHttpWebActivator;
 
     /**
-     * No-op constructor
+     * No-arg constructor
      */
     public Activator() {
         jolokiaActivator = new JolokiaActivator();
         felixHttpWebActivator = new JettyActivator();
     }
 
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     /** {@inheritDoc} */
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void start(BundleContext pContext) throws Exception {
         felixHttpWebActivator.start(pContext);
         jolokiaActivator.start(pContext);
     }
 
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     /** {@inheritDoc} */
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void stop(BundleContext pContext) throws Exception {
         jolokiaActivator.stop(pContext);
         felixHttpWebActivator.stop(pContext);

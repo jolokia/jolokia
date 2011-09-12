@@ -38,10 +38,19 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     // Operation arguments
     private List<Object> arguments;
 
+    /**
+     * New client request for executing a JMX operation
+     *
+     * @param pMBeanName name of the MBean to execute the request on
+     * @param pOperation operation to execute
+     * @param pArgs any arguments to pass (which must match the JMX operation's declared signature)
+     */
     public J4pExecRequest(ObjectName pMBeanName,String pOperation,Object ... pArgs) {
         super(J4pType.EXEC, pMBeanName);
         operation = pOperation;
         if (pArgs == null) {
+            // That's the case when a single, null argument is given (which is the only
+            // case that pArgs can be null)
             arguments = new ArrayList<Object>();
             arguments.add(null);
         } else {
@@ -49,24 +58,45 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
         }
     }
 
+    /**
+     * New client request for executing a JMX operation
+     *
+     * @param pMBeanName name of the MBean to execute the request on
+     * @param pOperation operation to execute
+     * @param pArgs any arguments to pass (which must match the JMX operation's declared signature)
+     *
+     * @throws MalformedObjectNameException if the given name is not an {@link ObjectName}
+     */
     public J4pExecRequest(String pMBeanName, String pOperation,Object ... pArgs)
             throws MalformedObjectNameException {
         this(new ObjectName(pMBeanName),pOperation,pArgs);
     }
 
+    /**
+     * Name of the operation to execute
+     *
+     * @return operation name
+     */
     public String getOperation() {
         return operation;
     }
 
+    /**
+     * List of arguments used for executing
+     *
+     * @return list of arguments or empty list if no argument are used
+     */
     public List<Object> getArguments() {
         return arguments;
     }
 
+    /** {@inheritDoc} */
     @Override
     J4pExecResponse createResponse(JSONObject pResponse) {
         return new J4pExecResponse(this,pResponse);
     }
 
+    /** {@inheritDoc} */
     @Override
     List<String> getRequestParts() {
         List<String> ret = super.getRequestParts();
@@ -79,6 +109,7 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
         return ret;
     }
 
+    /** {@inheritDoc} */
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
