@@ -30,6 +30,7 @@ import org.jolokia.detector.ServerHandle;
  */
 public class VirgoDetector extends AbstractOsgiServerDetector {
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String version = getBundleVersion("org.eclipse.virgo.kernel.userregion");
         if (version != null) {

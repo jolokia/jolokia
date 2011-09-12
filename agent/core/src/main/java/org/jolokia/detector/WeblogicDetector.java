@@ -29,6 +29,8 @@ import javax.naming.NamingException;
  * @since 05.12.10
  */
 public class WeblogicDetector extends AbstractServerDetector {
+
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String domainConfigMBean = getSingleStringAttribute(pMbeanServers,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
@@ -38,6 +40,10 @@ public class WeblogicDetector extends AbstractServerDetector {
         return null;
     }
 
+    /**
+     * Adde Weblogic specific runtime MBeanServer
+     * @param servers set to add own MBean servers
+     */
     @Override
     public void addMBeanServers(Set<MBeanServer> servers) {
         // Weblogic stores the MBeanServer in a JNDI context

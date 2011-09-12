@@ -33,6 +33,7 @@ public class TomcatDetector extends AbstractServerDetector {
     private static final Pattern SERVER_INFO_PATTERN = Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+)");
 
 
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         String serverInfo = getSingleStringAttribute(pMbeanServers, "*:type=Server", "serverInfo");
         if (serverInfo == null) {

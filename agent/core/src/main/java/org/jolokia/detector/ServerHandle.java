@@ -48,6 +48,15 @@ public class ServerHandle {
     // vendor name
     private String vendor;
 
+    /**
+     * Constructor
+     *
+     * @param vendor product vendor (like RedHat or Oracle)
+     * @param product name of the product
+     * @param version version
+     * @param agentUrl the URL under which the agent is reachable (or null if not detectable)
+     * @param extraInfo free form extra information
+     */
     public ServerHandle(String vendor, String product, String version, URL agentUrl, Map<String, String> extraInfo) {
         this.product = product;
         this.version = version;
@@ -160,6 +169,5 @@ public class ServerHandle {
             pRet.put(pKey,pValue);
         }
     }
-
 
 }

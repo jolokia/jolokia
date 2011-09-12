@@ -5,7 +5,6 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -34,6 +33,11 @@ import org.jolokia.util.RequestType;
  */
 public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
 
+    /**
+     * Create search handler
+     * 
+     * @param pRestrictor access restriction to apply
+     */
     public SearchHandler(Restrictor pRestrictor) {
         super(pRestrictor);
     }
@@ -50,6 +54,7 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         checkType();
     }
 
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
     public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxSearchRequest request)
@@ -65,11 +70,13 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         return new ArrayList<String>(ret);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean handleAllServersAtOnce(JmxSearchRequest pRequest) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Object doHandleRequest(MBeanServerConnection server, JmxSearchRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");

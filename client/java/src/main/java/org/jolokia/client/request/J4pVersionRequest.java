@@ -22,6 +22,8 @@ import java.util.List;
 import org.json.simple.JSONObject;
 
 /**
+ * Request for version and server information
+ *
  * @author roland
  * @since Apr 24, 2010
  */
@@ -31,11 +33,13 @@ public class J4pVersionRequest extends J4pRequest {
         super(J4pType.VERSION);
     }
 
+    /** {@inheritDoc} */
     @Override
     List<String> getRequestParts() {
         return Collections.emptyList();
     }
 
+    /** {@inheritDoc} */
     @Override
     J4pVersionResponse createResponse(JSONObject pResponse) {
         return new J4pVersionResponse(this,pResponse);

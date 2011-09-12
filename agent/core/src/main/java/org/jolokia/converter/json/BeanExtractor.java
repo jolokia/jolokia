@@ -56,7 +56,6 @@ public class BeanExtractor implements Extractor {
 
     private static final String[] GETTER_PREFIX = new String[] { "get", "is", "has"};
 
-
     /** {@inheritDoc} */
     public Class getType() {
         return Object.class;
@@ -83,6 +82,55 @@ public class BeanExtractor implements Extractor {
             }
         }
     }
+
+    // Using standard set semantics
+    /** {@inheritDoc} */
+    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
+            throws IllegalAccessException, InvocationTargetException {
+        // Move this to plain object handler
+        String rest = new StringBuffer(pAttribute.substring(0,1).toUpperCase())
+                .append(pAttribute.substring(1)).toString();
+        String setter = new StringBuffer("set").append(rest).toString();
+        String getter = new StringBuffer("get").append(rest).toString();
+
+        Class clazz = pInner.getClass();
+        Method found = null;
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().equals(setter)) {
+                found = method;
+                break;
+            }
+        }
+        if (found == null) {
+            throw new IllegalArgumentException(
+                    "No Method " + setter + " known for object of type " + clazz.getName());
+        }
+        Class params[] = found.getParameterTypes();
+        if (params.length != 1) {
+            throw new IllegalArgumentException(
+                    "Invalid parameter signature for " + setter + " known for object of type "
+                            + clazz.getName() + ". Setter must take exactly one parameter.");
+        }
+        Object oldValue;
+        try {
+            final Method getMethod = clazz.getMethod(getter);
+            AccessController.doPrivileged(new SetMethodAccessibleAction(getMethod));
+            oldValue = getMethod.invoke(pInner);
+        } catch (NoSuchMethodException exp) {
+            // Ignored, we simply dont return an old value
+            oldValue = null;
+        }
+        AccessController.doPrivileged(new SetMethodAccessibleAction(found));
+        found.invoke(pInner,pConverter.prepareValue(params[0].getName(), pValue));
+        return oldValue;
+    }
+
+    /** {@inheritDoc} */
+    public boolean canSetValue() {
+        return true;
+    }
+
+    // =====================================================================================================
 
     private Object exctractJsonifiedValue(Object pValue, Stack<String> pExtraArgs,
                                           ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
@@ -196,55 +244,9 @@ public class BeanExtractor implements Extractor {
         }
     }
 
-    // Using standard set semantics
-    /** {@inheritDoc} */
-    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
-        // Move this to plain object handler
-        String rest = new StringBuffer(pAttribute.substring(0,1).toUpperCase())
-                .append(pAttribute.substring(1)).toString();
-        String setter = new StringBuffer("set").append(rest).toString();
-        String getter = new StringBuffer("get").append(rest).toString();
-
-        Class clazz = pInner.getClass();
-        Method found = null;
-        for (Method method : clazz.getMethods()) {
-            if (method.getName().equals(setter)) {
-                found = method;
-                break;
-            }
-        }
-        if (found == null) {
-            throw new IllegalArgumentException(
-                    "No Method " + setter + " known for object of type " + clazz.getName());
-        }
-        Class params[] = found.getParameterTypes();
-        if (params.length != 1) {
-            throw new IllegalArgumentException(
-                    "Invalid parameter signature for " + setter + " known for object of type "
-                            + clazz.getName() + ". Setter must take exactly one parameter.");
-        }
-        Object oldValue;
-        try {
-            final Method getMethod = clazz.getMethod(getter);
-            AccessController.doPrivileged(new SetMethodAccessibleAction(getMethod));
-            oldValue = getMethod.invoke(pInner);
-        } catch (NoSuchMethodException exp) {
-            // Ignored, we simply dont return an old value
-            oldValue = null;
-        }
-        AccessController.doPrivileged(new SetMethodAccessibleAction(found));
-        found.invoke(pInner,pConverter.prepareValue(params[0].getName(), pValue));
-        return oldValue;
-    }
-
-    /** {@inheritDoc} */
-    public boolean canSetValue() {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    // Privileged action for setting the accesibility mode for a method to true
+    /**
+     * Privileged action for setting the accesibility mode for a method to true
+     */
     private static class SetMethodAccessibleAction implements PrivilegedAction<Void> {
         private final Method getMethod;
 

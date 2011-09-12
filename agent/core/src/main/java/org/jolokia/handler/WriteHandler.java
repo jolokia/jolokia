@@ -42,16 +42,24 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
 
     private Converters converters;
 
+    /**
+     * Constructor
+     *
+     * @param pRestrictor access restriction to apply
+     * @param pConverters converters used for serialization
+     */
     public WriteHandler(Restrictor pRestrictor, Converters pConverters) {
         super(pRestrictor);
         converters = pConverters;
     }
 
+    /** {@inheritDoc} */
     @Override
     public RequestType getType() {
         return RequestType.WRITE;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JmxWriteRequest pRequest) {
         if (!getRestrictor().isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
@@ -60,6 +68,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(MBeanServerConnection server, JmxWriteRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {

@@ -54,7 +54,6 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
         attributes = Arrays.asList(pAttribute);
     }
 
-
     /**
      * Create a READ request to request one or more attributes
      * from the remote j4p agent
@@ -91,6 +90,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
         return attributes.get(0);
     }
 
+    /** {@inheritDoc} */
     @Override
     List<String> getRequestParts() {
         if (hasSingleAttribute()) {
@@ -104,6 +104,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
@@ -120,11 +121,17 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
         return ret;
     }
 
+    /** {@inheritDoc} */
     @Override
     J4pReadResponse createResponse(JSONObject pResponse) {
         return new J4pReadResponse(this,pResponse);
     }
 
+    /**
+     * Whether this request represents a request for a single attribute
+     *
+     * @return true if the client request is for a single attribute
+     */
     public boolean hasSingleAttribute() {
         return attributes != null && attributes.size() == 1;
     }
@@ -145,6 +152,4 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
     public void setPath(String pPath) {
         path = pPath;
     }
-
-
 }

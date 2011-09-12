@@ -374,6 +374,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // Fallback server detector which matches always
 
     private static class FallbackServerDetector extends AbstractServerDetector {
+        /** {@inheritDoc} */
         public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
             return new ServerHandle(null,null,null,null,null);
         }

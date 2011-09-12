@@ -92,7 +92,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      *
      * @param pRequest request to check
      */
-    abstract protected void checkForRestriction(R pRequest);
+    protected abstract void checkForRestriction(R pRequest);
 
 
     /**

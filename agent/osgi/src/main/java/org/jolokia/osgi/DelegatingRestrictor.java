@@ -58,6 +58,7 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     // ====================================================================
 
     private static final RestrictorCheck HTTP_METHOD_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor,Object ... args) {
             return restrictor.isHttpMethodAllowed((HttpMethod) args[0]);
         }

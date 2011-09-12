@@ -26,6 +26,12 @@ import org.apache.http.conn.ConnectTimeoutException;
  */
 public class J4pTimeoutException extends J4pException {
 
+    /**
+     * Exception thrown when a timeout occured
+     *
+     * @param pMessage error message
+     * @param pException timeout exception
+     */
     public J4pTimeoutException(String pMessage, ConnectTimeoutException pException) {
         super(pMessage,pException);
     }
