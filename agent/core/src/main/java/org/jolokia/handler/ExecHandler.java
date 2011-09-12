@@ -33,6 +33,8 @@ import org.jolokia.util.RequestType;
 
 
 /**
+ * Handler for dealing with execute requests.
+ * 
  * @author roland
  * @since Jun 12, 2009
  */

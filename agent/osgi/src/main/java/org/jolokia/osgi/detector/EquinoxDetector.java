@@ -29,6 +29,8 @@ import org.jolokia.detector.ServerHandle;
  * @since 02.12.10
  */
 public class EquinoxDetector extends AbstractOsgiServerDetector {
+
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (checkSystemBundleForSymbolicName("org.eclipse.osgi")) {
             String version = getSystemBundleVersion();

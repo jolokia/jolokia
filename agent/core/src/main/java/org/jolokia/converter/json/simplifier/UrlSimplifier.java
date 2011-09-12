@@ -21,20 +21,25 @@ import java.net.URL;
 
 
 /**
+ * Simplifier for URLs which result in a map with a single key <code>url</code>
+ *
  * @author roland
  * @since Jul 27, 2009
  */
 public class UrlSimplifier extends SimplifierExtractor<URL> {
+
     public UrlSimplifier() {
         super(URL.class);
     }
 
+    /** {@inheritDoc} */
     @Override
     void init(Map<String, AttributeExtractor<URL>> pStringExtractorMap) {
         addExtractors(new Object[][] {{ "url", new UrlAttributeExtractor() }});
     }
 
     private static class UrlAttributeExtractor implements AttributeExtractor<URL> {
+        /** {@inheritDoc} */
         public Object extract(URL pUrl) { return pUrl.toExternalForm(); }
     }
 }
