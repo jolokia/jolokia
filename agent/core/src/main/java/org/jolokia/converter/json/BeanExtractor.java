@@ -61,8 +61,8 @@ public class BeanExtractor implements Extractor {
         return Object.class;
     }
 
-    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     /** {@inheritDoc} */
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Stack<String> pExtraArgs,boolean jsonify)
             throws AttributeNotFoundException {

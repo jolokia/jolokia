@@ -65,6 +65,13 @@ class CleanupThread extends Thread {
         }
     }
 
+    /**
+     * Stop the server.
+     */
+    public void stopServer() {
+        active = false;
+        interrupt();
+    }
 
     // Enumerate all active threads
     private Thread[] enumerateThreads() {
@@ -110,9 +117,5 @@ class CleanupThread extends Thread {
         return false;
     }
 
-    public void stopServer() {
-        active = false;
-        interrupt();
-    }
 }
 
