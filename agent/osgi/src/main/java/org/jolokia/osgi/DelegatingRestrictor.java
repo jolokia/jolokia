@@ -40,10 +40,10 @@ class DelegatingRestrictor extends DenyAllRestrictor {
                 boolean found = false;
                 for (ServiceReference serviceRef : serviceRefs) {
                     Restrictor restrictor = (Restrictor) bundleContext.getService(serviceRef);
-                if (restrictor != null) {
-                    ret = ret && pCheck.check(restrictor,args);
-                    found = true;
-                }
+                    if (restrictor != null) {
+                        ret = ret && pCheck.check(restrictor,args);
+                        found = true;
+                    }
                 }
                 return found && ret;
             } else {
