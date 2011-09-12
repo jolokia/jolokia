@@ -1,21 +1,19 @@
 package org.jolokia.http;
 
+import java.io.*;
+import java.util.*;
+
+import javax.management.RuntimeMBeanException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
+
 import org.jolokia.backend.BackendManager;
-import org.jolokia.util.ConfigKey;
-import org.jolokia.restrictor.RestrictorFactory;
 import org.jolokia.restrictor.*;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
-
-import javax.management.*;
-import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.*;
-import java.lang.UnsupportedOperationException;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -154,8 +152,8 @@ public class AgentServlet extends HttpServlet {
      * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
      * can already be used when building up the restrictor.
      *
-     * @return a default log handlera
-     * @param pServletConfig
+     * @return a default log handler
+     * @param pServletConfig servlet config from where to get information to build up the log handler
      */
     protected LogHandler createLogHandler(ServletConfig pServletConfig) {
         return new LogHandler() {
