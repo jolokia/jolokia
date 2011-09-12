@@ -9,6 +9,7 @@ import org.testng.annotations.*;
 import javax.management.*;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.*;
 
 import static org.testng.AssertJUnit.*;
@@ -71,9 +72,11 @@ public class ObjectToJsonConverterTest {
     }
 
     @Test
-    public void maxDepth() throws AttributeNotFoundException {
-        ObjectToJsonConverter.StackContext ctx = converter.getStackContextLocal().get();
-        ctx.setMaxDepth(1);
+    public void maxDepth() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException {
+        ObjectSerializationContext ctx = converter.getStackContextLocal().get();
+        Field field = ObjectSerializationContext.class.getDeclaredField("maxDepth");
+        field.setAccessible(true);
+        field.set(ctx, 1);
         Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
         String c = (String) ((Map) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));

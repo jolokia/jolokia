@@ -50,7 +50,7 @@ public final class ObjectToJsonConverter {
     private ArrayExtractor arrayExtractor;
 
     // Thread-Local set in order to prevent infinite recursions
-    private ThreadLocal<StackContext> stackContextLocal = new ThreadLocal<StackContext>();
+    private ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<ObjectSerializationContext>();
 
     // Used for converting string to objects when setting attributes
     private StringToObjectConverter stringToObjectConverter;
@@ -160,7 +160,7 @@ public final class ObjectToJsonConverter {
      */
     public Object extractObject(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
             throws AttributeNotFoundException {
-        StackContext stackContext = stackContextLocal.get();
+        ObjectSerializationContext stackContext = stackContextLocal.get();
         String limitReached = checkForLimits(pValue,stackContext);
         Stack<String> pathStack = pExtraArgs != null ? pExtraArgs : new Stack<String>();
         if (limitReached != null) {
@@ -168,7 +168,6 @@ public final class ObjectToJsonConverter {
         }
         try {
             stackContext.push(pValue);
-            stackContext.incObjectCount();
 
             if (pValue == null) {
                 return null;
@@ -224,7 +223,7 @@ public final class ObjectToJsonConverter {
      *         maximum length is returned.
      */
     int getCollectionLength(int originalLength) {
-        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
+        ObjectSerializationContext ctx = stackContextLocal.get();
         Integer maxSize = ctx.getMaxCollectionSize();
         if (maxSize != null && originalLength > maxSize) {
             return maxSize;
@@ -239,18 +238,8 @@ public final class ObjectToJsonConverter {
      * @return the fault handler
      */
     public ValueFaultHandler getValueFaultHandler() {
-        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
+        ObjectSerializationContext ctx = stackContextLocal.get();
         return ctx.getValueFaultHandler();
-    }
-
-    /**
-     * Check whether the number of extracted objects exceeds the number of maximum objects to extract
-     *
-     * @return true if the number of extracted objects exceeds the maximum number of objects
-     */
-    boolean exceededMaxObjects() {
-        ObjectToJsonConverter.StackContext ctx = stackContextLocal.get();
-        return ctx.getMaxObjects() != null && ctx.getObjectCount() > ctx.getMaxObjects();
     }
 
     /**
@@ -296,7 +285,7 @@ public final class ObjectToJsonConverter {
      */
     void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,
                       ValueFaultHandler pValueFaultHandler) {
-        StackContext stackContext = new StackContext(pMaxDepth,pMaxCollectionSize,pMaxObjects,pValueFaultHandler);
+        ObjectSerializationContext stackContext = new ObjectSerializationContext(pMaxDepth,pMaxCollectionSize,pMaxObjects,pValueFaultHandler);
         stackContextLocal.set(stackContext);
     }
 
@@ -337,16 +326,15 @@ public final class ObjectToJsonConverter {
     }
 
 
-    private String checkForLimits(Object pValue, StackContext pStackContext) {
-        Integer maxDepth = pStackContext.getMaxDepth();
-        if (maxDepth != null && pStackContext.size() > maxDepth) {
+    private String checkForLimits(Object pValue, ObjectSerializationContext pStackContext) {
+        if (pStackContext.exceededMaxDepth()) {
             // We use its string representation
             return pValue.toString();
         }
         if (pValue != null && pStackContext.alreadyVisited(pValue)) {
             return "[Reference " + pValue.getClass().getName() + "@" + Integer.toHexString(pValue.hashCode()) + "]";
         }
-        if (exceededMaxObjects()) {
+        if (pStackContext.exceededMaxObjects()) {
             return "[Object limit exceeded]";
         }
         return null;
@@ -368,7 +356,7 @@ public final class ObjectToJsonConverter {
 
 
     // Used for testing only. Hence final and package local
-    ThreadLocal<StackContext> getStackContextLocal() {
+    final ThreadLocal<ObjectSerializationContext> getStackContextLocal() {
         return stackContextLocal;
     }
 
@@ -394,96 +382,5 @@ public final class ObjectToJsonConverter {
             pHandlers.addAll(ServiceObjectFactory.<Extractor>createServiceObjects(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
         }
     }
-
-
-    // =============================================================================
-    // Context used for detecting call loops and the like
-
-    private static final Set<Class> SIMPLE_TYPES = new HashSet<Class>(Arrays.asList(
-            String.class,
-            Number.class,
-            Long.class,
-            Integer.class,
-            Boolean.class,
-            Date.class
-    ));
-
-    /**
-     * Context class for holding and counting limits. It can also take care
-     * about cycles, i.e. the context knows when an object is visited the second time.
-     */
-    static class StackContext {
-
-        private Set objectsInCallStack = new HashSet();
-        private Stack callStack = new Stack();
-        private Integer maxDepth;
-        private Integer maxCollectionSize;
-        private Integer maxObjects;
-
-        private int objectCount = 0;
-        private ValueFaultHandler valueFaultHandler;
-
-        StackContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects, ValueFaultHandler pValueFaultHandler) {
-            maxDepth = pMaxDepth;
-            maxCollectionSize = pMaxCollectionSize;
-            maxObjects = pMaxObjects;
-            valueFaultHandler = pValueFaultHandler;
-        }
-
-        void push(Object object) {
-            callStack.push(object);
-
-            if (object != null && !SIMPLE_TYPES.contains(object.getClass())) {
-                objectsInCallStack.add(object);
-            }
-        }
-
-        Object pop() {
-            Object ret = callStack.pop();
-            if (ret != null && !SIMPLE_TYPES.contains(ret.getClass())) {
-                objectsInCallStack.remove(ret);
-            }
-            return ret;
-        }
-
-        boolean alreadyVisited(Object object) {
-            return objectsInCallStack.contains(object);
-        }
-
-        public int size() {
-            return objectsInCallStack.size();
-        }
-
-        public void setMaxDepth(Integer pMaxDepth) {
-            maxDepth = pMaxDepth;
-        }
-
-        public Integer getMaxDepth() {
-            return maxDepth;
-        }
-
-
-        public Integer getMaxCollectionSize() {
-            return maxCollectionSize;
-        }
-
-        public void incObjectCount() {
-            objectCount++;
-        }
-
-        public int getObjectCount() {
-            return objectCount;
-        }
-
-        public Integer getMaxObjects() {
-            return maxObjects;
-        }
-
-        public ValueFaultHandler getValueFaultHandler() {
-            return valueFaultHandler;
-        }
-    }
-
-
 
 }
