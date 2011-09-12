@@ -31,20 +31,33 @@ public class ServiceObjectFactoryTest {
 
     @Test
     public void testOrder() {
-        List<TestService> service =
+        List<TestService> services =
                 ServiceObjectFactory.createServiceObjects("service/test-services-default", "service/test-services");
-        String[] orderExpected = new String[] { "three", "two", "five", "one" };
-        assertEquals(service.size(),4);
-        Iterator<TestService> it = service.iterator();
+        String[] orderExpected = new String[] { "three", "two", "five", "one"};
+        assertEquals(services.size(), 4);
+        Iterator<TestService> it = services.iterator();
         for (String val : orderExpected) {
             assertEquals(it.next().getName(),val);
         }
     }
 
-    interface TestService { String getName(); };
-    public static class Test1 implements TestService { public String getName() { return "one"; } };
-    public static class Test2 implements TestService { public String getName() { return "two"; } };
-    public static class Test3 implements TestService { public String getName() { return "three"; } };
-    public static class Test4 implements TestService { public String getName() { return "four"; } };
-    public static class Test5 implements TestService { public String getName() { return "five"; } };
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*bla\\.blub\\.NotExist.*")
+    public void errorHandling() {
+        List<TestService> service =
+                ServiceObjectFactory.createServiceObjects("service/error-services");
+    }
+
+    @Test(expectedExceptions = ClassCastException.class)
+    public void classCastException() {
+        List<String> services = ServiceObjectFactory.createServiceObjects("service/test-services");
+        String bla = services.get(0);
+    }
+
+
+    interface TestService { String getName(); }
+    public static class Test1 implements TestService { public String getName() { return "one"; } }
+    public static class Test2 implements TestService { public String getName() { return "two"; } }
+    public static class Test3 implements TestService { public String getName() { return "three"; } }
+    public static class Test4 implements TestService { public String getName() { return "four"; } }
+    public static class Test5 implements TestService { public String getName() { return "five"; } }
 }

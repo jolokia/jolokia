@@ -152,7 +152,7 @@ public final class ServiceObjectFactory {
 
     // =============================================================================
 
-    private static class ServiceEntry implements Comparable<ServiceEntry> {
+     static class ServiceEntry implements Comparable<ServiceEntry> {
         private String className;
         private boolean remove;
         private Integer order;
@@ -240,17 +240,6 @@ public final class ServiceObjectFactory {
         /** {@inheritDoc} */
         public int compareTo(ServiceEntry o) {
             return order - o.order;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("ServiceEntry");
-            sb.append("{className='").append(className).append('\'');
-            sb.append(", remove=").append(remove);
-            sb.append(", order=").append(order);
-            sb.append('}');
-            return sb.toString();
         }
     }
 }
