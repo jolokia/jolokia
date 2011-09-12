@@ -88,13 +88,21 @@ public final class PathUtil {
     }
 
     /*
-      We need to use this special treating for slashes (i.e. to escape with '/-/') because URI encoding doesnt work
-      well with HttpRequest.pathInfo() since in Tomcat/JBoss slash seems to be decoded to early so that it get messed up
-      and answers with a "HTTP/1.x 400 Invalid URI: noSlash" without returning any further indications
+      */
 
-      For the rest of unsafe chars, we use uri decoding (as anybody should do). It could be of course the case,
-      that the pathinfo has been already uri decoded (dont know by heart)
-    */
+    /**
+     * Extract element from an URL path and put them on a stack. Slashes are escaped with a special algorithm
+     * <p>
+     * We need to use this special treating for slashes (i.e. to escape with '/-/') because URI encoding doesnt work
+     * well with HttpRequest.pathInfo() since in Tomcat/JBoss slash seems to be decoded to early so that it get messed up
+     * and answers with a "HTTP/1.x 400 Invalid URI: noSlash" without returning any further indications
+     * <p>
+     * For the rest of unsafe chars, we use uri decoding (as anybody should do). It could be of course the case,
+     * that the pathinfo has been already uri decoded (dont know by heart).
+     *
+     * @param pPath path to split
+     * @return stack with splitted path
+     */
     public static Stack<String> extractElementsFromPath(String pPath) {
         // Strip leadings slahes
         String cleanPath = pPath.replaceFirst("^/+", "");
@@ -184,7 +192,6 @@ public final class PathUtil {
         }
     }
 
-
     private static void expandSlashes(StringBuffer pVal, String pElement) {
         for (int j=0;j< pElement.length();j++) {
             pVal.append("/");
@@ -194,8 +201,5 @@ public final class PathUtil {
     private static String decode(String s) {
         return s;
         //return URLDecoder.decode(s,"UTF-8");
-
     }
-
-
 }

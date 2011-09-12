@@ -32,7 +32,7 @@ import org.jolokia.util.ClassUtil;
 public class JettyDetector extends AbstractServerDetector {
 
 
-
+    /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
         if (serverClass != null) {

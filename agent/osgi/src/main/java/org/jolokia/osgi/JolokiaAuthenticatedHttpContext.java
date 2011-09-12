@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 /**
+ *Authentication context which uses a simple user/password credential pair
+ *
 * @author roland
 * @since Jan 7, 2010
 */
@@ -31,11 +33,18 @@ class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
     private final String user;
     private final String password;
 
+    /**
+     * Constructor
+     *
+     * @param pUser user to check against
+     * @param pPassword password to check against
+     */
     JolokiaAuthenticatedHttpContext(String pUser, String pPassword) {
         user = pUser;
         password = pPassword;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String auth = request.getHeader("Authorization");
@@ -73,11 +82,12 @@ class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
 
 
     // ========================================================================================================
-    // Base64 encoding methods of Authentication
-    // Taken from http://iharder.sourceforge.net/current/java/base64/ (public domain)
-    // and adapted for our needs here.
-
-    public byte[] decode(String s) {
+    /**
+     * Base64 encoding methods of Authentication
+     * Taken from http://iharder.sourceforge.net/current/java/base64/ (public domain)
+     * and adapted for our needs here.
+     */
+    byte[] decode(String s) {
 
         if( s == null ){
             throw new IllegalArgumentException("Input string was null.");

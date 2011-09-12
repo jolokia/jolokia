@@ -26,6 +26,12 @@ import java.net.ConnectException;
  */
 public class J4pConnectException extends J4pException {
 
+    /**
+     * Constructor
+     *
+     * @param pMessage error message
+     * @param pNestedException connect exception occured
+     */
     public J4pConnectException(String pMessage, ConnectException pNestedException) {
         super(pMessage,pNestedException);
     }

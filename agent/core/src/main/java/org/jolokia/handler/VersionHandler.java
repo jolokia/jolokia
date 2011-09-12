@@ -39,11 +39,18 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
 
     private ServerHandle serverHandle;
 
+    /**
+     * Constructor
+     *
+     * @param pRestrictor access restrions
+     * @param pServerHandle a server handle as obtained from a {@link org.jolokia.detector.ServerDetector}
+     */
     public VersionHandler(Restrictor pRestrictor, ServerHandle pServerHandle) {
         super(pRestrictor);
         serverHandle = pServerHandle;
     }
 
+    /** {@inheritDoc} */
     @Override
     public RequestType getType() {
         return RequestType.VERSION;
@@ -55,11 +62,13 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
         checkType();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean handleAllServersAtOnce(JmxVersionRequest pRequest) {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         JSONObject ret = new JSONObject();
@@ -71,6 +80,7 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
         return ret;
     }
 
+    /** {@inheritDoc} */
     @Override
     // Wont be called
     public Object doHandleRequest(MBeanServerConnection server, JmxVersionRequest request) {

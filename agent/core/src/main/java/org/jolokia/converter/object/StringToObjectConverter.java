@@ -31,6 +31,7 @@ import org.json.simple.parser.ParseException;
 
 
 /**
+ * Converter from a string representation to its Java object form
  * @author roland
  * @since Jun 11, 2009
  */
@@ -236,6 +237,11 @@ public class StringToObjectConverter {
     // ===========================================================================
     // Extractor interface
     private interface Parser {
+        /**
+         * Extract a particular string value
+         * @param pValue value to extract
+         * @return the extracted value
+         */
         Object extract(String pValue);
     }
 

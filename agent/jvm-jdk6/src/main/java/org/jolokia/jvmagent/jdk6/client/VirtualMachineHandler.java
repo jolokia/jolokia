@@ -163,21 +163,35 @@ public class VirtualMachineHandler {
 
 
     // =========================================================================================
-    // Process descriptions
-
+    /**
+     * Process descriptor, immutable
+     */
     static class ProcessDesc {
         private String id;
         private String display;
 
+        /**
+         * Constructor for process descriptor
+         * @param pId procuess id
+         * @param pDisplay process description
+         */
         public ProcessDesc(String pId, String pDisplay) {
             id = pId;
             display = pDisplay;
         }
 
+        /**
+         * Process id
+         * @return id
+         */
         public String getId() {
             return id;
         }
 
+        /**
+         * Process description
+         * @return description
+         */
         public String getDisplay() {
             return display;
         }

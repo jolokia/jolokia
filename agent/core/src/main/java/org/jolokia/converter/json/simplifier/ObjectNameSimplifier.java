@@ -41,7 +41,7 @@ public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
     // ==================================================================================
 
     /**
-     * Prerpare for maps with the single key <code>objectName</code>
+     * Prepare for maps with the single key <code>objectName</code>
      *
      * {@inheritDoc}
      */
@@ -52,6 +52,7 @@ public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
 
     /** {@inheritDoc} */
     private static class ObjectNameAttributeExtractor implements AttributeExtractor<ObjectName> {
+        /** {@inheritDoc} */
         public Object extract(ObjectName value) throws SkipAttributeException {
             return value.getCanonicalName();
         }

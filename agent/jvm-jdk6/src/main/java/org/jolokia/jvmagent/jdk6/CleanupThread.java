@@ -33,6 +33,12 @@ class CleanupThread extends Thread {
     private ThreadGroup threadGroup;
     private boolean active = true;
 
+    /**
+     * Constructor associating the clean up thread with an HTTP-Server
+     *
+     * @param pServer HTTP server to observate
+     * @param pThreadGroup thread group needed for proper cleanup
+     */
     CleanupThread(HttpServer pServer, ThreadGroup pThreadGroup) {
         super("Jolokia Agent Cleanup Thread");
         server = pServer;
@@ -40,6 +46,7 @@ class CleanupThread extends Thread {
         setDaemon(true);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void run() {
         try {

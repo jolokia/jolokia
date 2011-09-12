@@ -33,10 +33,16 @@ import java.util.*;
  */
 public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
+    /**
+     * Read handler constructor
+     *
+     * @param pRestrictor access restriction to apply
+     */
     public ReadHandler(Restrictor pRestrictor) {
         super(pRestrictor);
     }
 
+    /** {@inheritDoc} */
     @Override
     public RequestType getType() {
         return RequestType.READ;
@@ -73,6 +79,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
@@ -239,9 +246,11 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         }
     }
 
+    /**
+     * We override it here with a noop since we do a more fine grained
+     * check during processing of the request.
+     */
     @Override
-    // We override it here with a noop since we do a more fine grained
-    // check during processing of the request.
     protected void checkForRestriction(JmxReadRequest pRequest) {
 
     }

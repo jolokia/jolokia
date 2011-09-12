@@ -32,6 +32,11 @@ public class J4pBulkRemoteException extends J4pException {
     // request or a suceeded request;
     private List results;
 
+    /**
+     * Constructor
+     *
+     * @param pResults list of results which should be of type {@link J4pResponse}
+     */
     public J4pBulkRemoteException(List pResults) {
         super("Bulk request failed remotely");
         results = pResults;

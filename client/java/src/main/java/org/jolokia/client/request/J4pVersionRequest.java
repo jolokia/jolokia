@@ -29,6 +29,9 @@ import org.json.simple.JSONObject;
  */
 public class J4pVersionRequest extends J4pRequest {
 
+    /**
+     * Plain Constructor
+     */
     public J4pVersionRequest() {
         super(J4pType.VERSION);
     }
