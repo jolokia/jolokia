@@ -17,6 +17,9 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Collections;
+import java.lang.UnsupportedOperationException;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -242,7 +245,11 @@ public class AgentServlet extends HttpServlet {
                     throws IOException {
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
-                return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding,pReq.getParameterMap());
+                try {
+                	return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, pReq.getParameterMap());
+                } catch (UnsupportedOperationException error) {
+                    return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, getParameterMap(pReq));
+                }
             }
         };
     }
@@ -251,10 +258,24 @@ public class AgentServlet extends HttpServlet {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) {
-                return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(),pReq.getParameterMap());
+                try {
+                    return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), pReq.getParameterMap());
+                } catch (UnsupportedOperationException error) {
+                    return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
+                }
             }
         };
     }
+    
+    private Map<String, String[]> getParameterMap(HttpServletRequest pReq){
+        Map<String, String[]> parameters = new HashMap<String, String[]>();
+        List<String> requestParameterNames = Collections.list((Enumeration<String>)pReq.getParameterNames());
+        for (String parameterName:requestParameterNames){
+        	parameters.put(parameterName, pReq.getParameterValues(parameterName));
+        }
+        return parameters;
+    }
+    
     // =======================================================================
 
     private Map<ConfigKey, String> servletConfigAsMap(ServletConfig pConfig) {
@@ -276,6 +297,9 @@ public class AgentServlet extends HttpServlet {
             pResp.setContentType(pContentType);
         } catch (NoSuchMethodError error) {
             // For a Servlet 2.3 container, set the charset by hand
+            pResp.setContentType(pContentType + "; charset=utf-8");
+        } catch (UnsupportedOperationException error) {
+            // For an Equinox HTTP Service, set the charset by hand
             pResp.setContentType(pContentType + "; charset=utf-8");
         }
         pResp.setStatus(200);
