@@ -26,18 +26,35 @@ import javax.servlet.ServletInputStream;
 import org.easymock.EasyMock;
 
 /**
+ * Test utility methods for HTTP related tests
+ *
  * @author roland
  * @since 31.08.11
  */
 public class HttpTestUtil {
 
+    /**
+     * POST JSON sample request in string form
+     */
     public static final String HEAP_MEMORY_POST =
             "{ \"type\": \"read\",\"mbean\": \"java.lang:type=Memory\", \"attribute\": \"HeapMemoryUsage\"}";
+
+    /**
+     * GET sample request in string form
+     */
     public static final String HEAP_MEMORY_GET = "/read/java.lang:type=Memory/HeapMemoryUsage";
 
-    public static ServletInputStream createServletInputStream(String pReq) {
+    private HttpTestUtil() { }
+
+    /**
+     * Create a servlet input stream usable in tests
+     *
+     * @param pData data which should be returned on read of the stream
+     * @return the created servlet input stream
+     */
+    public static ServletInputStream createServletInputStream(String pData) {
         final ByteArrayInputStream bis =
-                new ByteArrayInputStream(pReq.getBytes());
+                new ByteArrayInputStream(pData.getBytes());
         return new ServletInputStream() {
             @Override
             public int read() throws IOException {
@@ -46,14 +63,21 @@ public class HttpTestUtil {
         };
     }
 
+    /**
+     * Prepare a servlet config Mock
+     *
+     * @param config configuration mock to prepare
+     * @param pInitParams init params to return on config.getInitParameter()
+     */
+    @SuppressWarnings("PMD.ReplaceVectorWithList")
     public static void prepareServletConfigMock(ServletConfig config,String ... pInitParams) {
         Map<String,String> configParams = new HashMap<String, String>();
         if (pInitParams != null) {
             for (int i = 0; i < pInitParams.length; i += 2) {
                 configParams.put(pInitParams[i],pInitParams[i+1]);
             }
-            for (String key : configParams.keySet()) {
-                EasyMock.expect(config.getInitParameter(key)).andReturn(configParams.get(key)).anyTimes();
+            for (Map.Entry<String,String> entry : configParams.entrySet()) {
+                EasyMock.expect(config.getInitParameter(entry.getKey())).andReturn(entry.getValue()).anyTimes();
             }
         }
 

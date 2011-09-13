@@ -26,7 +26,7 @@ import org.easymock.EasyMock;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.test.util.MBeanConnectionUtil;
+import static org.jolokia.test.util.EnvTestUtil.asSet;
 import org.jolokia.util.*;
 import org.testng.annotations.*;
 
@@ -77,7 +77,7 @@ public class ListHandlerTest {
     public void descPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        String res = (String) handler.handleRequest(MBeanConnectionUtil.asSet(conn), request);
+        String res = (String) handler.handleRequest(asSet(conn), request);
         assertNotNull(res);
     }
 
@@ -88,7 +88,7 @@ public class ListHandlerTest {
                 .option(ConfigKey.MAX_DEPTH,"4")
                 .build();
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        String res = (String) handler.handleRequest(MBeanConnectionUtil.asSet(conn), request);
+        String res = (String) handler.handleRequest(asSet(conn), request);
         assertNotNull(res);
     }
 
@@ -178,7 +178,7 @@ public class ListHandlerTest {
 
     private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        return (Map) handler.handleRequest(MBeanConnectionUtil.asSet(conn), pRequest);
+        return (Map) handler.handleRequest(asSet(conn), pRequest);
     }
 
 
@@ -188,14 +188,14 @@ public class ListHandlerTest {
                 .pathParts("java.lang", "type=Runtime", "op")
                 .build();
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(MBeanConnectionUtil.asSet(conn),request);
+        Map res = (Map) handler.handleRequest(asSet(conn),request);
         assertEquals(res.size(),0);
 
         request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "not")
                 .build();
         conn = ManagementFactory.getPlatformMBeanServer();
-        res = (Map) handler.handleRequest(MBeanConnectionUtil.asSet(conn),request);
+        res = (Map) handler.handleRequest(asSet(conn),request);
         assertEquals(res.size(),0);
     }
 

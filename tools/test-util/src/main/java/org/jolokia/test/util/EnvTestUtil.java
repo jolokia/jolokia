@@ -18,6 +18,10 @@ package org.jolokia.test.util;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.management.MBeanServerConnection;
 
 /**
  * Utility methods useful for unit tests when interacting with the
@@ -30,6 +34,12 @@ public class EnvTestUtil {
 
     private EnvTestUtil() {}
 
+    /**
+     * Get an arbitrary free port on the localhost
+     *
+     * @return free port
+     * @throws IllegalArgumentException if no free port could be found
+     */
     public static int getFreePort() throws IOException {
         for (int port = 22332; port < 22500;port++) {
             if (trySocket(port)) {
@@ -39,6 +49,13 @@ public class EnvTestUtil {
         throw new IllegalStateException("Cannot find a single free port");
     }
 
+    /**
+     * Try a given port on the localhost and check whether it is free
+     *
+     * @param port port to check
+     * @return true if the port is still free
+     */
+    @SuppressWarnings({"PMD.SystemPrintln"})
     public static boolean trySocket(int port) throws IOException {
         InetAddress address = Inet4Address.getByName("localhost");
         ServerSocket s = null;
@@ -58,6 +75,13 @@ public class EnvTestUtil {
         return false;
     }
 
+    /**
+     * Read an input stream into a plain string
+     *
+     * @param is input stream to read from
+     * @return string containing the content
+     * @throws IOException if something fails
+     */
     public static String readToString(InputStream is) throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         byte buffer[] = new byte[8192];
@@ -68,4 +92,19 @@ public class EnvTestUtil {
         }
         return new String(os.toByteArray());
     }
+
+    /**
+     * Return a var arg list of connections as set
+     *
+     * @param pConnections list of connections to return
+     * @return set of MBeanServerConnections
+     */
+    public static Set<MBeanServerConnection> asSet(MBeanServerConnection... pConnections) {
+        Set<MBeanServerConnection> ret = new HashSet<MBeanServerConnection>();
+        for (MBeanServerConnection conn : pConnections) {
+            ret.add(conn);
+        }
+        return ret;
+    }
+
 }

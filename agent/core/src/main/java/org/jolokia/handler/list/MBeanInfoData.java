@@ -95,7 +95,7 @@ public class MBeanInfoData {
     private JSONObject infoMap;
 
     // Initialise updaters
-    private final static Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
+    private static final Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
 
     static {
         for (DataUpdater updater : new DataUpdater[] {
