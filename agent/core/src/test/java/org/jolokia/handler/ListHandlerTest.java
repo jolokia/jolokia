@@ -176,6 +176,29 @@ public class ListHandlerTest {
         execute(request);
     }
 
+    @Test
+    public void invalidPath5() throws Exception {
+        for (String what : new String[] { "attr", "op", "not" }) {
+            try {
+                JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                        .pathParts("java.lang", "type=Memory", what, "HeapMemoryUsage", "bla")
+                        .build();
+                execute(request);
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("bla"));
+            }
+        }
+    }
+
+    @Test(expectedExceptions = { IllegalArgumentException.class }, expectedExceptionsMessageRegExp = ".*bla.*")
+    public void invalidPath8() throws Exception {
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang", "type=Memory", "desc", "bla")
+                .build();
+        execute(request);
+    }
+
     private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
         return (Map) handler.handleRequest(asSet(conn), pRequest);

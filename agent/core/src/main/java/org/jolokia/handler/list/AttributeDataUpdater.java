@@ -16,6 +16,8 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Stack;
+
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 
@@ -28,7 +30,7 @@ import static org.jolokia.handler.list.DataKeys.*;
  * @author roland
  * @since 13.09.11
  */
-public class AttributeDataUpdater extends DataUpdater {
+class AttributeDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
@@ -38,11 +40,11 @@ public class AttributeDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    public void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, String pFilter) {
-        // Extract attributes
+    protected JSONObject extractData(MBeanInfo pMBeanInfo, String attribute) {
         JSONObject attrMap = new JSONObject();
+
         for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {
-            if (pFilter == null || attrInfo.getName().equals(pFilter)) {
+            if (attribute == null || attrInfo.getName().equals(attribute)) {
                 JSONObject map = new JSONObject();
                 map.put(TYPE.getKey(), attrInfo.getType());
                 map.put(DESCRIPTION.getKey(), attrInfo.getDescription());
@@ -50,6 +52,6 @@ public class AttributeDataUpdater extends DataUpdater {
                 attrMap.put(attrInfo.getName(), map);
             }
         }
-        updateMapConsideringPathError(pJSONObject, attrMap, pFilter);
+        return attrMap;
     }
 }

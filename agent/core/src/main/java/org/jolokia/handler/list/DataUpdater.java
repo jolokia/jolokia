@@ -16,6 +16,8 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Stack;
+
 import javax.management.MBeanInfo;
 
 import org.json.simple.JSONObject;
@@ -41,25 +43,45 @@ abstract class DataUpdater {
      *
      * @param pJSONObject JSON object to update
      * @param pMBeanInfo info to extract from
-     * @param pFilter additional filter which should be used for further restricting the update
+     * @param pPathStack stack for further constraining the result
      */
-    abstract void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, String pFilter);
+    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+
+        boolean isPathEmpty = pPathStack == null || pPathStack.empty();
+        String filter = pPathStack != null && !pPathStack.empty() ? pPathStack.pop() : null;
+        verifyThatPathIsEmpty(pPathStack);
+
+        JSONObject attrMap = extractData(pMBeanInfo,filter);
+
+        if (attrMap.size() > 0) {
+            pJSONObject.put(getKey(), attrMap);
+        } else if (!isPathEmpty) {
+            throw new IllegalArgumentException("Path given but extracted value is empty");
+        }
+    }
+
+    /**
+     * Do the real work by extracting the data from the MBeanInfo. This method should be overridden,
+     * in its default implementation it returns an empty map
+     *
+     * @param pMBeanInfo the info object to examine
+     * @param pFilter any additional filter to apply
+     * @return the extracted data as an JSON object
+     */
+    protected JSONObject extractData(MBeanInfo pMBeanInfo,String pFilter) {
+        return new JSONObject();
+    }
 
     // ======================================================================================
 
     /**
-     * Add a map, but also check when a path is given, and the map is empty, then throw an error
+     * Check whether the given path is empty, if not, then throw an exception
      *
-     * @param pJSONObject object to update
-     * @param pToAdd the object to add
-     * @param pPathPart additional path part
+     * @param pPathStack path to check
      */
-    protected void updateMapConsideringPathError(JSONObject pJSONObject, JSONObject pToAdd, String pPathPart) {
-        if (pToAdd.size() > 0) {
-            pJSONObject.put(getKey(), pToAdd);
-        } else if (pPathPart != null) {
-            throw new IllegalArgumentException("Invalid attribute path provided (element '" + pPathPart + "' not found)");
+    protected void verifyThatPathIsEmpty(Stack<String> pPathStack) {
+        if (pPathStack != null && pPathStack.size() > 0) {
+            throw new IllegalArgumentException("Path contains extra elements not usable for a list request: " + pPathStack);
         }
     }
-
 }

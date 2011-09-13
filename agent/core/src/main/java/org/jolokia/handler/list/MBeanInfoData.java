@@ -235,7 +235,7 @@ public class MBeanInfoData {
         String what = pPathStack.empty() ? null : pPathStack.pop();
         DataUpdater updater = UPDATERS.get(what);
         if (updater != null) {
-            updater.update(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
+            updater.update(pMBeanMap, pMBeanInfo, pPathStack);
         } else {
             throw new IllegalArgumentException("Illegal path element " + what);
         }
@@ -248,10 +248,6 @@ public class MBeanInfoData {
             pMap.put(pKey, nMap);
         }
         return nMap;
-    }
-
-    private String popOrNull(Stack<String> pPathStack) {
-        return pPathStack.empty() ? null : pPathStack.pop();
     }
 
     private Object truncateJSONObject(JSONObject pValue, int pMaxDepth) {
@@ -290,6 +286,7 @@ public class MBeanInfoData {
     private Object navigatePath() {
         int size = pathStack.size();
         JSONObject innerMap = infoMap;
+
         while (size > 0) {
             Collection vals = innerMap.values();
             if (vals.size() == 0) {

@@ -16,8 +16,7 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.*;
 
@@ -31,7 +30,7 @@ import static org.jolokia.handler.list.DataKeys.*;
  * @author roland
  * @since 13.09.11
  */
-public class OperationDataUpdater extends DataUpdater {
+class OperationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
@@ -41,11 +40,11 @@ public class OperationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, String pFilter) {
-                // Extract operations
+    protected JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
         JSONObject opMap = new JSONObject();
+
         for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {
-            if (pFilter == null || opInfo.getName().equals(pFilter)) {
+            if (pOperation == null || opInfo.getName().equals(pOperation)) {
                 JSONObject map = new JSONObject();
                 JSONArray argList = new JSONArray();
                 for (MBeanParameterInfo paramInfo : opInfo.getSignature()) {
@@ -80,6 +79,6 @@ public class OperationDataUpdater extends DataUpdater {
                 }
             }
         }
-        updateMapConsideringPathError(pJSONObject, opMap, pFilter);
+        return opMap;
     }
 }

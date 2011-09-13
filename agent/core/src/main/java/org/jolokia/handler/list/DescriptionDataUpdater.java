@@ -16,6 +16,8 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Stack;
+
 import javax.management.MBeanInfo;
 
 import org.json.simple.JSONObject;
@@ -28,7 +30,7 @@ import static org.jolokia.handler.list.DataKeys.*;
  * @author roland
  * @since 13.09.11
  */
-public class DescriptionDataUpdater extends DataUpdater {
+class DescriptionDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
@@ -36,9 +38,15 @@ public class DescriptionDataUpdater extends DataUpdater {
         return DESCRIPTION.getKey();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, String pFilter) {
+    /** 
+     * The update method is overridden here directly since the usual extraction method
+     * is not needed
+     *
+     * {@inheritDoc}
+     * */
+     @Override
+    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+        verifyThatPathIsEmpty(pPathStack);
         pJSONObject.put(getKey(), pMBeanInfo.getDescription());
     }
 }

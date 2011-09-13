@@ -16,6 +16,8 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Stack;
+
 import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 
@@ -30,7 +32,7 @@ import static org.jolokia.handler.list.DataKeys.*;
  * @author roland
  * @since 13.09.11
  */
-public class NotificationDataUpdater extends DataUpdater {
+class NotificationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
@@ -40,10 +42,10 @@ public class NotificationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, String pNotificationFilter) {
+    protected JSONObject extractData(MBeanInfo pMBeanInfo, String pNotification) {
         JSONObject notMap = new JSONObject();
         for (MBeanNotificationInfo notInfo : pMBeanInfo.getNotifications()) {
-            if (pNotificationFilter == null || notInfo.getName().equals(pNotificationFilter)) {
+            if (pNotification == null || notInfo.getName().equals(pNotification)) {
                 JSONObject map = new JSONObject();
                 map.put(NAME.getKey(), notInfo.getName());
                 map.put(DESCRIPTION.getKey(), notInfo.getDescription());
@@ -55,6 +57,6 @@ public class NotificationDataUpdater extends DataUpdater {
                 map.put(TYPES.getKey(), tList);
             }
         }
-        updateMapConsideringPathError(pJSONObject, notMap, pNotificationFilter);
+        return notMap;
     }
 }
