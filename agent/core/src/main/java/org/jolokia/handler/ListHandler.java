@@ -6,7 +6,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.handler.list.MBeanInfoMap;
+import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.*;
@@ -85,7 +85,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         ObjectName oName = null;
         try {
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
-            MBeanInfoMap infoMap = new MBeanInfoMap(maxDepth,pathStack);
+            MBeanInfoData infoMap = new MBeanInfoData(maxDepth,pathStack);
 
             oName = objectNameFromPath(pathStack);
             if (oName == null || oName.isPattern()) {
@@ -128,7 +128,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     // ==========================================================================================================
 
     // Lookup MBeans from a pattern, and for each found extract the required information
-    private void addMBeansFromPattern(MBeanInfoMap pInfoMap,
+    private void addMBeansFromPattern(MBeanInfoData pInfoMap,
                                              Set<MBeanServerConnection> pServers,
                                              ObjectName pPattern)
             throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
@@ -144,7 +144,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
 
     // Add a single named MBean's information to the given map
-    private void addSingleMBean(MBeanInfoMap pInfomap,
+    private void addSingleMBean(MBeanInfoData pInfomap,
                                        Set<MBeanServerConnection> pServers,
                                        ObjectName pName)
             throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
@@ -167,7 +167,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // Extract MBean infos for a given MBean and add results to pResult.
-    private void addMBeanInfo(MBeanInfoMap pInfoMap, MBeanServerConnection  server, ObjectName pName)
+    private void addMBeanInfo(MBeanInfoData pInfoMap, MBeanServerConnection  server, ObjectName pName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         try {
             MBeanInfo mBeanInfo = server.getMBeanInfo(pName);

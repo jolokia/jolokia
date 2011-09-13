@@ -21,7 +21,6 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
@@ -84,7 +83,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 13.09.11
  */
-public class MBeanInfoMap {
+public class MBeanInfoData {
 
     // max depth for map to return
     private int maxDepth;
@@ -95,18 +94,19 @@ public class MBeanInfoMap {
     // Map holding information
     private JSONObject infoMap;
 
-    // Properties for JSON answer
-    private static final String KEY_DESCRIPTION = "desc";
-    private static final String KEY_ERROR = "error";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_TYPES = "types";
-    private static final String KEY_ARGS = "args";
-    private static final String KEY_RETURN = "ret";
-    private static final String KEY_OPERATION = "op";
-    private static final String KEY_TYPE = "type";
-    private static final String KEY_NOTIFICATION = "not";
-    private static final String KEY_READ_WRITE = "rw";
-    private static final String KEY_ATTRIBUTE = "attr";
+    // Initialise updaters
+    private final static Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
+
+    static {
+        for (DataUpdater updater : new DataUpdater[] {
+                new DescriptionDataUpdater(),
+                new AttributeDataUpdater(),
+                new OperationDataUpdater(),
+                new NotificationDataUpdater()
+        }) {
+            UPDATERS.put(updater.getKey(),updater);
+        }
+    }
 
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
@@ -116,7 +116,7 @@ public class MBeanInfoMap {
      * @param pMaxDepth max depth
      * @param pPathStack the stack for restricting the information to add
      */
-    public MBeanInfoMap(int pMaxDepth, Stack<String> pPathStack) {
+    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack) {
         maxDepth = pMaxDepth;
         pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<String>();
         infoMap = new JSONObject();
@@ -193,7 +193,7 @@ public class MBeanInfoMap {
              if (pathStack.size() == 0) {
                  JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
                  JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
-                 mBeanMap.put(KEY_ERROR, pExp);
+                 mBeanMap.put(DataKeys.ERROR.getKey(), pExp);
              } else {
                  // Happens for a deeper request, i.e with a path pointing directly into an MBean,
                  // Hence we throw immediately an error here since there will be only this exception
@@ -226,107 +226,18 @@ public class MBeanInfoMap {
     // =====================================================================================================
 
     private void addFullMBeanInfo(JSONObject pMBeanMap, MBeanInfo pMBeanInfo) {
-        addDescription(pMBeanMap, pMBeanInfo, null);
-        addAttributes(pMBeanMap, pMBeanInfo, null);
-        addOperations(pMBeanMap, pMBeanInfo, null);
-        addNotifications(pMBeanMap, pMBeanInfo, null);
+        for (DataUpdater updater : UPDATERS.values()) {
+            updater.update(pMBeanMap,pMBeanInfo,null);
+        }
     }
 
     private void addPartialMBeanInfo(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
         String what = pPathStack.empty() ? null : pPathStack.pop();
-        if (KEY_DESCRIPTION.equals(what)) {
-            addDescription(pMBeanMap, pMBeanInfo,popOrNull(pPathStack));
-        } else if (KEY_ATTRIBUTE.equals(what)) {
-            addAttributes(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
-        } else if (KEY_OPERATION.equals(what)) {
-            addOperations(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
-        } else if (KEY_NOTIFICATION.equals(what)) {
-            addNotifications(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
+        DataUpdater updater = UPDATERS.get(what);
+        if (updater != null) {
+            updater.update(pMBeanMap, pMBeanInfo, popOrNull(pPathStack));
         } else {
             throw new IllegalArgumentException("Illegal path element " + what);
-        }
-    }
-
-    private void addDescription(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, String pFilter) {
-        pMBeanMap.put(KEY_DESCRIPTION, pMBeanInfo.getDescription());
-    }
-
-    private void addAttributes(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, String pAttributeFilter) {
-        // Extract attributes
-        JSONObject attrMap = new JSONObject();
-        for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {
-            if (pAttributeFilter == null || attrInfo.getName().equals(pAttributeFilter)) {
-                JSONObject map = new JSONObject();
-                map.put(KEY_TYPE, attrInfo.getType());
-                map.put(KEY_DESCRIPTION, attrInfo.getDescription());
-                map.put(KEY_READ_WRITE, Boolean.valueOf(attrInfo.isWritable() && attrInfo.isReadable()));
-                attrMap.put(attrInfo.getName(), map);
-            }
-        }
-        updateMapConsideringPathError(KEY_ATTRIBUTE,pMBeanMap, attrMap, pAttributeFilter);
-    }
-
-    private void addOperations(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, String pOperationFilter) {
-        // Extract operations
-        JSONObject opMap = new JSONObject();
-        for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {
-            if (pOperationFilter == null || opInfo.getName().equals(pOperationFilter)) {
-                JSONObject map = new JSONObject();
-                JSONArray argList = new JSONArray();
-                for (MBeanParameterInfo paramInfo : opInfo.getSignature()) {
-                    JSONObject args = new JSONObject();
-                    args.put(KEY_DESCRIPTION, paramInfo.getDescription());
-                    args.put(KEY_NAME, paramInfo.getName());
-                    args.put(KEY_TYPE, paramInfo.getType());
-                    argList.add(args);
-                }
-                map.put(KEY_ARGS, argList);
-                map.put(KEY_RETURN, opInfo.getReturnType());
-                map.put(KEY_DESCRIPTION, opInfo.getDescription());
-                Object ops = opMap.get(opInfo.getName());
-                if (ops != null) {
-                    if (ops instanceof List) {
-                        // If it is already a list, simply add it to the end
-                        ((List) ops).add(map);
-                    } else if (ops instanceof Map) {
-                        // If it is a map, add a list with two elements
-                        // (the old one and the new one)
-                        JSONArray opList = new JSONArray();
-                        opList.add(ops);
-                        opList.add(map);
-                        opMap.put(opInfo.getName(), opList);
-                    } else {
-                        throw new IllegalArgumentException("Internal: list, addOperations: Expected Map or List, not "
-                                                           + ops.getClass());
-                    }
-                } else {
-                    // No value set yet, simply add the map as plain value
-                    opMap.put(opInfo.getName(), map);
-                }
-            }
-        }
-        updateMapConsideringPathError(KEY_OPERATION,pMBeanMap, opMap, pOperationFilter);
-    }
-
-    private void addNotifications(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, String pNotificationFilter) {
-        JSONObject notMap = new JSONObject();
-        for (MBeanNotificationInfo notInfo : pMBeanInfo.getNotifications()) {
-            if (pNotificationFilter == null || notInfo.getName().equals(pNotificationFilter)) {
-                JSONObject map = new JSONObject();
-                map.put(KEY_NAME, notInfo.getName());
-                map.put(KEY_DESCRIPTION, notInfo.getDescription());
-                map.put(KEY_TYPES, notInfo.getNotifTypes());
-            }
-        }
-        updateMapConsideringPathError(KEY_NOTIFICATION,pMBeanMap, notMap, pNotificationFilter);
-    }
-
-    // Add a map, but also check when a path is given, and the map is empty, then throw an error
-    private void updateMapConsideringPathError(String pType,JSONObject pMap, JSONObject pToAdd, String pPathPart) {
-        if (pToAdd.size() > 0) {
-            pMap.put(pType, pToAdd);
-        } else if (pPathPart != null) {
-            throw new IllegalArgumentException("Invalid attribute path provided (element '" + pPathPart + "' not found)");
         }
     }
 
@@ -375,6 +286,7 @@ public class MBeanInfoMap {
         }
     }
 
+    // Navigate to sub map or leaf value
     private Object navigatePath() {
         int size = pathStack.size();
         JSONObject innerMap = infoMap;
@@ -398,6 +310,6 @@ public class MBeanInfoMap {
             innerMap = (JSONObject) value;
             --size;
         }
-        return infoMap;
+        return innerMap;
     }
 }
