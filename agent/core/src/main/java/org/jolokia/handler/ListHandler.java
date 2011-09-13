@@ -6,6 +6,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.handler.list.MBeanInfoMap;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.*;

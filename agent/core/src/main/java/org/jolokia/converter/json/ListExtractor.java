@@ -64,7 +64,7 @@ public class ListExtractor implements Extractor {
             int idx = Integer.parseInt(pExtraArgs.pop());
             return pConverter.extractObject(list.get(idx), pExtraArgs, jsonify);
         } else {
-            if (jsonify) {
+            if (jsonify && !(list instanceof JSONArray)) {
                 ret = new JSONArray();
                 for (int i = 0;i < length; i++) {
                     Object val = it.next();

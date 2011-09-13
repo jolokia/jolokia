@@ -71,7 +71,7 @@ public class MapExtractor implements Extractor {
             throw new IllegalArgumentException("Map key '" + decodedKey +
                     "' is unknown for map " + trimString(pValue.toString()));
         } else {
-            if (jsonify) {
+            if (jsonify && !(map instanceof JSONObject)) {
                 JSONObject ret = new JSONObject();
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
