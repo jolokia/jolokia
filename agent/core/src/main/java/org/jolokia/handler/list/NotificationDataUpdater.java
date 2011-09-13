@@ -16,8 +16,6 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
-import java.util.Stack;
-
 import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 
