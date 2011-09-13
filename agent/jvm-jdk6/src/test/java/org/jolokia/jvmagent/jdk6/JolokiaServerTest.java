@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.jolokia.Version;
-import org.jolokia.util.EnvTestUtil;
+import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;

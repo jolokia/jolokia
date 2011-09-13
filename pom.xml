@@ -14,7 +14,9 @@
   <modules>
     <module>agent</module>
     <module>it</module>
-    <module>client</module>  </modules>
+    <module>client</module>  
+    <module>tools/test-util</module>
+  </modules>
 
   <build>
     <plugins>

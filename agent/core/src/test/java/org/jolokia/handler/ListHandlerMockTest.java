@@ -30,7 +30,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.util.MBeanConnectionUtils.asSet;
+import static org.jolokia.test.util.MBeanConnectionUtil.asSet;
 import static org.testng.Assert.*;
 import static org.testng.Assert.assertEquals;
 

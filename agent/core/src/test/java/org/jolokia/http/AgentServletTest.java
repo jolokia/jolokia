@@ -16,7 +16,6 @@ package org.jolokia.http;
  *  limitations under the License.
  */
 
-import java.awt.geom.Line2D;
 import java.io.*;
 import java.util.Vector;
 
@@ -26,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jolokia.backend.TestDetector;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.ConfigKey;
-import org.jolokia.util.HttpTestUtil;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;

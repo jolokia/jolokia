@@ -23,14 +23,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-      <version>${project.version}</version>
-    </dependency>
-    
-    <dependency>
       <groupId>org.mule</groupId>
       <artifactId>mule-core</artifactId>
       <version>3.1.2</version>
@@ -66,7 +58,13 @@
       <scope>test</scope>
     </dependency>
 
-
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-test-util</artifactId>
+      <scope>test</scope>
+      <version>${project.version}</version>
+    </dependency>
+        
   </dependencies>
 
   <build>

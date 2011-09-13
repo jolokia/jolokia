@@ -1,4 +1,4 @@
-package org.jolokia.util;
+package org.jolokia.test.util;
 
 /*
  * Copyright 2009-2011 Roland Huss

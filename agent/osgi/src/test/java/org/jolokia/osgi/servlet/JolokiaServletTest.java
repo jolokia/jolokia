@@ -16,12 +16,16 @@ package org.jolokia.osgi.servlet;
  *  limitations under the License.
  */
 
+import java.util.Set;
+
+import javax.management.MBeanServer;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.TestDetector;
+import org.jolokia.detector.ServerDetector;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.HttpTestUtil;
+import org.jolokia.test.util.HttpTestUtil;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;
 import org.osgi.service.log.LogService;
@@ -52,8 +56,6 @@ public class JolokiaServletTest {
 
         expect(config.getServletContext()).andReturn(servletContext).anyTimes();
         expect(config.getServletName()).andReturn("jolokia").anyTimes();
-
-        TestDetector.reset();
     }
 
     @Test
@@ -116,7 +118,19 @@ public class JolokiaServletTest {
     private void preparePlainLogging() {
         servletContext.log(EasyMock.<String>anyObject());
         expectLastCall().anyTimes();
-        servletContext.log(find("detector"), isA(RuntimeException.class));
-        expectLastCall().anyTimes();
     }
+
+    // ===========================================================================
+    // Detector to avoid checkup with every detector
+
+    public static class CatchAllDetector implements ServerDetector {
+
+        public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+            return new ServerHandle(null,null,null,null,null);
+        }
+
+        public void addMBeanServers(Set<MBeanServer> pMBeanServers) {
+        }
+    }
+
 }

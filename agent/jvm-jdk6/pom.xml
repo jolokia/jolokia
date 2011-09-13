@@ -22,14 +22,6 @@
       <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-      <version>${project.version}</version>
-    </dependency>
     
     <dependency>
         <groupId>com.googlecode.json-simple</groupId>
@@ -48,6 +40,11 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-test-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

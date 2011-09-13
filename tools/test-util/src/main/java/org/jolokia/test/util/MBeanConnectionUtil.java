@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.util;
+package org.jolokia.test.util;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +25,7 @@ import javax.management.MBeanServerConnection;
  * @author roland
  * @since 14.04.11
  */
-public class MBeanConnectionUtils {
+public class MBeanConnectionUtil {
 
 
     public static Set<MBeanServerConnection> asSet(MBeanServerConnection... pConnections) {

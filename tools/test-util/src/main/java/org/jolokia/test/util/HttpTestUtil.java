@@ -1,4 +1,4 @@
-package org.jolokia.util;
+package org.jolokia.test.util;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -18,13 +18,12 @@ package org.jolokia.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.*;
 import java.util.*;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletInputStream;
 
-import static org.easymock.EasyMock.expect;
+import org.easymock.EasyMock;
 
 /**
  * @author roland
@@ -54,11 +53,11 @@ public class HttpTestUtil {
                 configParams.put(pInitParams[i],pInitParams[i+1]);
             }
             for (String key : configParams.keySet()) {
-                expect(config.getInitParameter(key)).andReturn(configParams.get(key)).anyTimes();
+                EasyMock.expect(config.getInitParameter(key)).andReturn(configParams.get(key)).anyTimes();
             }
         }
 
         Vector paramNames = new Vector(configParams.keySet());
-        expect(config.getInitParameterNames()).andReturn(paramNames.elements());
+        EasyMock.expect(config.getInitParameterNames()).andReturn(paramNames.elements());
     }
 }
