@@ -64,6 +64,8 @@ public class VirtualMachineHandlerTest {
             try {
                 vm = h.attachVirtualMachine();
                 foundAtLeastOne = true;
+            } catch (Exception exp) {
+                // no-op
             } finally {
                 if (vm != null) {
                     h.detachAgent(vm);

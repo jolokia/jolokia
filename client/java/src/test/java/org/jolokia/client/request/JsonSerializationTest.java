@@ -84,8 +84,7 @@ public class JsonSerializationTest {
         Map arg = new HashMap();
         List inner = new ArrayList();
         inner.add(null);
-        File f = new File("/tmp");
-        inner.add(f);
+        inner.add(new File("tmp"));
         inner.add(10);
         inner.add(42.0);
         inner.add(false);
@@ -99,7 +98,7 @@ public class JsonSerializationTest {
         JSONArray arr = (JSONArray) res.get("second");
         assertEquals(arr.size(),5);
         assertNull(arr.get(0));
-        assertEquals(arr.get(1), filePath(f));
+        assertEquals(arr.get(1), "tmp");
         assertEquals(arr.get(2),10);
         assertEquals(arr.get(3),42.0);
         assertEquals(arr.get(4),false);
@@ -107,12 +106,9 @@ public class JsonSerializationTest {
         assertNotNull(json);
         JSONObject reparsed = (JSONObject) new JSONParser().parse(json);
         assertNotNull(reparsed);
-        assertEquals(((List) reparsed.get("second")).get(1),filePath(f));
+        assertEquals(((List) reparsed.get("second")).get(1),"tmp");
     }
 
-    private String filePath(File pFile) {
-        return pFile.getPath().replace("/", File.separator);
-    }
 
     // =====================================================================================================
 
