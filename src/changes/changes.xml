@@ -16,6 +16,11 @@
         0% duplications, 0% package tangle index ...). See http://labs.consol.de/sonar/dashboard/index/org.jolokia:jolokia
         for more informations about Jolokia's code metrics.
       </action>
+      <action dev="roland" type="fix" date="2011-9-14">
+        Fixed problem with URL encoding for GET request with the Java client library, which used to use URLEncoder.encode()
+        and switched now to URI. See http://stackoverflow.com/questions/724043/http-url-address-encoding-in-java for
+        details.
+      </action>
     </release>
     <release version="0.95" description="Release 0.95" date="2011-08-21">
       <action dev="roland" type="add" date="2011-7-29">
