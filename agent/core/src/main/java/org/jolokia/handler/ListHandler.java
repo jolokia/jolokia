@@ -90,10 +90,10 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             oName = objectNameFromPath(pathStack);
             if (oName == null || oName.isPattern()) {
                 // MBean pattern for MBean can match at multiple servers
-                addMBeansFromPattern(infoMap,pServers, oName);
+                addMBeansFromPattern(infoMap,pServers,oName);
             } else {
                 // Fixed name, which can only be registered at a single MBeanServer
-                addSingleMBean(infoMap,pServers, oName);
+                addSingleMBean(infoMap,pServers,oName);
             }
             return infoMap.truncate();
         } catch (MalformedObjectNameException e) {

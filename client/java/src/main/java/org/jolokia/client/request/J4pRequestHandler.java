@@ -17,7 +17,7 @@ package org.jolokia.client.request;
  */
 
 import java.io.*;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -40,7 +40,7 @@ import org.json.simple.parser.ParseException;
 public class J4pRequestHandler {
 
     // j4p agent URL for the agent server
-    private String j4pServerUrl;
+    private URI j4pServerUrl;
 
     // Escape patterns
     private static final Pattern SLASH_PATTERN = Pattern.compile("/+");
@@ -52,7 +52,11 @@ public class J4pRequestHandler {
      * @param pJ4pServerUrl URL to remote agent
      */
     public J4pRequestHandler(String pJ4pServerUrl) {
-        j4pServerUrl = pJ4pServerUrl;
+        try {
+            j4pServerUrl = new URI(pJ4pServerUrl);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URL " + pJ4pServerUrl);
+        }
     }
 
     /**
@@ -62,7 +66,7 @@ public class J4pRequestHandler {
      * @param pPreferredMethod HTTP method preferred
      * @return the request used with HttpClient to obtain the result.
      */
-    public HttpUriRequest getHttpRequest(J4pRequest pRequest,String pPreferredMethod) throws UnsupportedEncodingException {
+    public HttpUriRequest getHttpRequest(J4pRequest pRequest,String pPreferredMethod) throws UnsupportedEncodingException, URISyntaxException {
         String method = pPreferredMethod;
         if (method == null) {
             method = pRequest.getPreferredHttpMethod();
@@ -74,14 +78,26 @@ public class J4pRequestHandler {
             List<String> parts = pRequest.getRequestParts();
             // If parts == null the request decides, that POST *must* be used
             if (parts != null) {
-                StringBuilder requestPath = new StringBuilder();
+                String base = j4pServerUrl.getPath();
+                if (base == null) {
+                    base = "/";
+                } else if (!base.endsWith("/")) {
+                    base += "/";
+                }
+                StringBuilder requestPath = new StringBuilder(base);
                 requestPath.append(pRequest.getType().getValue());
                 for (String p : parts) {
                     requestPath.append("/");
                     requestPath.append(escape(p));
                 }
                 // TODO: Option handling, special escaping
-                return new HttpGet(j4pServerUrl + "/" + requestPath.toString());
+                URI uri = new URI(j4pServerUrl.getScheme(),
+                                  j4pServerUrl.getUserInfo(),
+                                  j4pServerUrl.getHost(),
+                                  j4pServerUrl.getPort(),
+                                  requestPath.toString(),
+                                  null,null);
+                return new HttpGet(uri);
             }
         }
 
@@ -115,11 +131,8 @@ public class J4pRequestHandler {
     /**
      * Extract the complete JSON response out of a HTTP response
      *
-     * @param pRequest the original J4p request
      * @param pHttpResponse the resulting http response
-     * @param <T> J4p Request
      * @return JSON content of the answer
-     * @throws J4pException when parsing of the answer fails
      */
     @SuppressWarnings("PMD.PreserveStackTrace")
     public JSONAware extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
@@ -167,7 +180,7 @@ public class J4pRequestHandler {
         if (index != pPart.length()) {
             ret.append(pPart.substring(index,pPart.length()));
         }
-        return uriEscape(ret);
+        return ret.toString();
     }
 
     private String escapeSlash(String pPart, Matcher pMatcher) {
@@ -197,7 +210,7 @@ public class J4pRequestHandler {
      * Get the J4p Server URL
      * @return the URL to the Jolokia agent on the server side
      */
-    public String getJ4pServerUrl() {
+    public URI getJ4pServerUrl() {
         return j4pServerUrl;
     }
 }

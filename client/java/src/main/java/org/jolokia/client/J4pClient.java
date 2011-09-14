@@ -17,7 +17,7 @@ package org.jolokia.client;
  */
 
 import java.io.IOException;
-import java.net.ConnectException;
+import java.net.*;
 import java.util.*;
 
 import org.apache.http.*;
@@ -116,6 +116,8 @@ public class J4pClient  {
         }
         catch (IOException e) {
             throw mapIOException(e);
+        } catch (URISyntaxException e) {
+            throw mapIOException(e);
         }
     }
 
@@ -200,7 +202,7 @@ public class J4pClient  {
     }
 
     // Map IO-Exceptions accordingly
-    private J4pException mapIOException(IOException pException) throws J4pException {
+    private J4pException mapIOException(Exception pException) throws J4pException {
         if (pException instanceof ConnectException) {
             return new J4pConnectException(
                     "Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
@@ -209,8 +211,13 @@ public class J4pClient  {
             return new J4pTimeoutException(
                     "Read timeout while request " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
                     (ConnectTimeoutException) pException);
-        } else {
+        } else if (pException instanceof IOException) {
             return new J4pException("IO-Error while contacting the server: " + pException,pException);
+        } else if (pException instanceof URISyntaxException) {
+            URISyntaxException sExp = (URISyntaxException) pException;
+            return new J4pException("Invalid URI " + sExp.getInput() + ": " + sExp.getReason(),pException);
+        } else {
+            return new J4pException("Exception " + pException,pException);
         }
     }
 

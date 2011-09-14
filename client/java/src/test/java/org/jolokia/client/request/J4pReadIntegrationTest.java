@@ -16,7 +16,6 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
-import java.awt.peer.LightweightPeer;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -30,7 +29,7 @@ import org.jolokia.client.exception.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.*;
+import static org.testng.Assert.*;
 
 /**
  * Integration test for reading attributes
@@ -108,8 +107,15 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
         if (barrier.await() == 0) {
             //System.err.println("Finished");
-            assertEquals("Concurrent calls should work", 0, errors.size());
+            assertEquals(0, errors.size(),"Concurrent calls should work");
         }
+    }
+
+    @Test
+    public void nameWithSpace() throws MalformedObjectNameException, J4pException {
+        J4pReadRequest req = new J4pReadRequest("jolokia.it:type=naming,name=name with space","Ok");
+        J4pReadResponse resp = j4pClient.execute(req);
+        assertNotNull(resp);
     }
 
     @Test

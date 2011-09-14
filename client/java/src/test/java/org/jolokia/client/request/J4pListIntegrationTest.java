@@ -50,4 +50,12 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         assertTrue(val.containsKey("attr"));
     }
 
+    @Test
+    public void withSpace() throws MalformedObjectNameException, J4pException {
+        J4pListRequest req = new J4pListRequest("jolokia.it/name=name with space,type=naming");
+        J4pListResponse resp = j4pClient.execute(req);
+        Map val = resp.getValue();
+        assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
+    }
+
 }
