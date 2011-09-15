@@ -32,6 +32,7 @@ public class ItSetup {
     private String[] domains = new String[] { "jolokia.it","jmx4perl.it" } ;
 
     private String[] strangeNamesShort = {
+            "\\/",
             "simple",
             "/slash-simple/",
             "/--/",
@@ -39,7 +40,7 @@ public class ItSetup {
             "//server/client",
             "service%3ajmx%3armi%3a///jndi/rmi%3a//bhut%3a9999/jmxrmi",
             "\"jdbc/testDB\"",
-            "name with space"
+            "name with space",
 //            "äöüßÄÖÜ"
     };
     private List<String> strangeNames = new ArrayList<String>();

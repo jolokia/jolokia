@@ -201,6 +201,7 @@ public class J4pClient  {
 
     // =====================================================================================================
 
+    @SuppressWarnings("PMD.PreserveStackTrace")
     private <T extends J4pRequest> JSONAware extractJsonResponse(T pRequest, HttpResponse pResponse) throws J4pException {
         try {
             return requestHandler.extractJsonResponse(pResponse);

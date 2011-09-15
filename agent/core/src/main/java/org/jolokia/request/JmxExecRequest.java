@@ -114,7 +114,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
                 return new JmxExecRequest(
                         pStack.pop(), // Object name
                         pStack.pop(), // Operation name
-                        prepareArguments(pStack), // arguments
+                        convertSpecialStringTags(prepareExtraArgs(pStack)), // arguments
                         pParams);
             }
 
@@ -123,20 +123,21 @@ public class JmxExecRequest extends JmxObjectNameRequest {
                     throws MalformedObjectNameException {
                 return new JmxExecRequest(requestMap,pParams);
             }
-
-            private List<String> prepareArguments(Stack<String> e) {
-                List<String> extraArgs = prepareExtraArgs(e);
-                if (extraArgs == null) {
-                    return null;
-                }
-                List<String> args = new ArrayList<String>();
-                for (String arg : extraArgs) {
-                    args.add(StringToObjectConverter.convertSpecialStringTags(arg));
-                }
-                return args;
-            }
         };
     }
+
+    // Conver string tags if required
+    private static List<String> convertSpecialStringTags(List<String> extraArgs) {
+        if (extraArgs == null) {
+            return null;
+        }
+        List<String> args = new ArrayList<String>();
+        for (String arg : extraArgs) {
+            args.add(StringToObjectConverter.convertSpecialStringTags(arg));
+        }
+        return args;
+    }
+
 
     @Override
     public String toString() {
