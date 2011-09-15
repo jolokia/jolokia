@@ -55,7 +55,7 @@ public class J4pRequestHandler {
         try {
             j4pServerUrl = new URI(pJ4pServerUrl);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid URL " + pJ4pServerUrl);
+            throw new IllegalArgumentException("Invalid URL " + pJ4pServerUrl,e);
         }
     }
 
@@ -197,13 +197,6 @@ public class J4pRequestHandler {
             }
         }
         return ret.toString();
-    }
-
-    private String uriEscape(StringBuilder pRet) throws UnsupportedEncodingException {
-        // URI Escape unsafe chars
-        String encodedRet = URLEncoder.encode(pRet.toString(),"utf-8");
-        // Translate all "/" back...
-        return ESCAPED_SLASH_PATTERN.matcher(encodedRet).replaceAll("/");
     }
 
     /**
