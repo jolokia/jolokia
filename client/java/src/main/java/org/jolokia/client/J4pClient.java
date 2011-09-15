@@ -133,7 +133,6 @@ public class J4pClient  {
      * @return response object
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
-    @SuppressWarnings("PMD.PreserveStackTrace")
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod,
                                                                      Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
@@ -184,7 +183,6 @@ public class J4pClient  {
      * @return list of responses, one response for each request
      * @throws J4pException when an communication error occurs
      */
-    @SuppressWarnings("PMD.PreserveStackTrace")
     public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
         try {
@@ -203,7 +201,6 @@ public class J4pClient  {
 
     // =====================================================================================================
 
-    @SuppressWarnings("PMD.PreserveStackTrace")
     private <T extends J4pRequest> JSONAware extractJsonResponse(T pRequest, HttpResponse pResponse) throws J4pException {
         try {
             return requestHandler.extractJsonResponse(pResponse);
@@ -222,7 +219,6 @@ public class J4pClient  {
 
 
     // Extract J4pResponses from a returned bulk JSON answer
-    @SuppressWarnings("PMD.PreserveStackTrace")
     private <R extends J4pResponse<T>, T extends J4pRequest> List<R> extractResponses(JSONAware pJsonResponse, List<T> pRequests) throws J4pException {
         JSONArray responseArray = (JSONArray) pJsonResponse;
         List<R> ret = new ArrayList<R>(responseArray.size());
