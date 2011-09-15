@@ -61,8 +61,10 @@ public class StringToObjectConverter {
         PARSER_MAP.put(Date.class.getName(),new DateParser());
 
         JSONParser jsonExtractor = new JSONParser();
-        PARSER_MAP.put(JSONObject.class.getName(), jsonExtractor);
-        PARSER_MAP.put(JSONArray.class.getName(), jsonExtractor);
+        for (Class type : new Class[] { Map.class, List.class,
+                                        JSONObject.class, JSONArray.class }) {
+            PARSER_MAP.put(type.getName(),jsonExtractor);
+        }
 
         TYPE_SIGNATURE_MAP.put("Z",boolean.class);
         TYPE_SIGNATURE_MAP.put("B",byte.class);
