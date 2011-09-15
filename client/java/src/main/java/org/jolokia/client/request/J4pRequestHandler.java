@@ -109,14 +109,16 @@ public class J4pRequestHandler {
 
 
     /**
-     * Get an HTTP Request for requesting multips requests at once
+     * Get an HTTP Request for requesting multiples requests at once
      *
      * @param pRequests requests to put into a HTTP request
      * @return HTTP request to send to the server
      */
-    public <T extends J4pRequest> HttpUriRequest getHttpRequest(List<T> pRequests) throws UnsupportedEncodingException {
+    public <T extends J4pRequest> HttpUriRequest getHttpRequest(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
+            throws UnsupportedEncodingException, URISyntaxException {
         JSONArray bulkRequest = new JSONArray();
-        HttpPost postReq = new HttpPost(j4pServerUrl);
+        String queryParams = prepareQueryParameters(pProcessingOptions);
+        HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         for (T request : pRequests) {
             JSONObject requestContent = request.toJson();
             bulkRequest.add(requestContent);

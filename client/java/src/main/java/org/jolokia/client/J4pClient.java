@@ -121,8 +121,6 @@ public class J4pClient  {
         return this.<R,T>execute(pRequest,pMethod,null);
     }
 
-
-
     /**
      * Execute a single J4pRequest which returns a single response.
      *
@@ -135,6 +133,7 @@ public class J4pClient  {
      * @return response object
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod,
                                                                      Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
@@ -153,9 +152,9 @@ public class J4pClient  {
             }
         }
         catch (IOException e) {
-            throw mapIOException(e);
+            throw mapException(e);
         } catch (URISyntaxException e) {
-            throw mapIOException(e);
+            throw mapException(e);
         }
     }
 
@@ -169,17 +168,36 @@ public class J4pClient  {
      * @return list of responses, one response for each request
      * @throws J4pException when an communication error occurs
      */
+    public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests)
+            throws J4pException {
+        return execute(pRequests,null);
+    }
+
+    /**
+     * Execute multiple requests at once. All given request will result in a single HTTP request where it gets
+     * dispatched on the agent side. The results are given back in the same order as the arguments provided.
+     *
+     * @param pRequests requests to execute
+     * @param pProcessingOptions processiong options to use
+     * @param <R> response type
+     * @param <T> request type
+     * @return list of responses, one response for each request
+     * @throws J4pException when an communication error occurs
+     */
     @SuppressWarnings("PMD.PreserveStackTrace")
-    public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests) throws J4pException {
+    public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
+            throws J4pException {
         try {
-            HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests));
+            HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests,pProcessingOptions));
             JSONAware jsonResponse = extractJsonResponse(null, response);
 
             verifyJsonResponse(jsonResponse);
 
             return extractResponses(jsonResponse, pRequests);
         } catch (IOException e) {
-            throw mapIOException(e);
+            throw mapException(e);
+        } catch (URISyntaxException e) {
+            throw mapException(e);
         }
     }
 
@@ -243,7 +261,7 @@ public class J4pClient  {
     }
 
     // Map IO-Exceptions accordingly
-    private J4pException mapIOException(Exception pException) throws J4pException {
+    private J4pException mapException(Exception pException) throws J4pException {
         if (pException instanceof ConnectException) {
             return new J4pConnectException(
                     "Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),

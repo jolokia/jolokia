@@ -49,7 +49,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     public void errorTest() throws MalformedObjectNameException, J4pException {
         J4pReadRequest req = new J4pReadRequest("no.domain:name=vacuum","oxygen");
         try {
-            J4pReadResponse resp = j4pClient.execute(req);
+            j4pClient.execute(req);
             fail();
         } catch (J4pRemoteException exp) {
             assertEquals(404,exp.getStatus());

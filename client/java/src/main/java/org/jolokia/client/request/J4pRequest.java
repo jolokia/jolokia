@@ -98,7 +98,7 @@ public abstract class J4pRequest {
      * Any <code>null</code> value is transformed in the special marker <code>[null]</code> which on the
      * agent side is converted back into a <code>null</code>.
      * <p>
-     * You should consider using POST requests when you need a more sophisticated JSON serialization.
+     * You should consider POST requests when you need a more sophisticated JSON serialization.
      * </p>
      * @param pArg the argument to serialize for an GET request
      * @return the string representation

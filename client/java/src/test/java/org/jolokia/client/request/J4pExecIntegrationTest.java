@@ -92,24 +92,28 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void collectionArg() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request;
         for (String type : new String[] { "GET", "POST" }) {
-            String args[] = new String[] { "roland","tanja","forever" };
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",args,"myExtra");
-            J4pExecResponse resp = j4pClient.execute(request,type);
-            assertEquals("roland",resp.getValue());
+            for (Object args : new Object[] {
+                    new String[] { "roland","tanja","forever" },
+                    Arrays.asList("roland", "tanja","forever")
+            }) {
+                request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",args,"myExtra");
+                J4pExecResponse resp = j4pClient.execute(request,type);
+                assertEquals("roland",resp.getValue());
 
-            // Check request params
-            assertEquals("arrayArguments",request.getOperation());
-            assertEquals(2,request.getArguments().size());
+                // Check request params
+                assertEquals("arrayArguments",request.getOperation());
+                assertEquals(2,request.getArguments().size());
 
-            // With null
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
-            resp = j4pClient.execute(request);
-            assertNull(resp.getValue());
+                // With null
+                request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
+                resp = j4pClient.execute(request);
+                assertNull(resp.getValue());
 
-            // With ints
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
-            resp = j4pClient.execute(request);
-            assertEquals("1",resp.getValue());
+                // With ints
+                request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
+                resp = j4pClient.execute(request);
+                assertEquals("1",resp.getValue());
+            }
         }
     }
 
@@ -226,12 +230,14 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         map.put("vier",true);
 
         request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",map);
-        resp = j4pClient.execute(request,"POST");
-        Map res = resp.getValue();
-        assertEquals(res.get("eins"),"fcn");
-        assertEquals(((List) res.get("zwei")).get(1),"svw");
-        assertEquals(res.get("drei"),10L);
-        assertEquals(res.get("vier"),true);
+        for (String method : new String[] { "GET", "POST" }) {
+            resp = j4pClient.execute(request,method);
+            Map res = resp.getValue();
+            assertEquals(res.get("eins"),"fcn");
+            assertEquals(((List) res.get("zwei")).get(1),"svw");
+            assertEquals(res.get("drei"),10L);
+            assertEquals(res.get("vier"),true);
+        }
 
         request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",null);
         resp = j4pClient.execute(request,"POST");
