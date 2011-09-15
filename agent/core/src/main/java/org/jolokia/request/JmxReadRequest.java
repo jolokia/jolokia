@@ -138,6 +138,31 @@ public class JmxReadRequest extends JmxObjectNameRequest {
 
     // =================================================================
 
+    /**
+     * Creator for {@link JmxReadRequest}s
+     *
+     * @return the creator implementation
+     */
+    static RequestCreator<JmxReadRequest> newCreator() {
+        return new RequestCreator<JmxReadRequest>() {
+            /** {@inheritDoc} */
+            public JmxReadRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+                return new JmxReadRequest(
+                        pStack.pop(),  // object name
+                        popOrNull(pStack), // attributes (can be null)
+                        prepareExtraArgs(pStack), // path
+                        pParams);
+            }
+
+            /** {@inheritDoc} */
+            public JmxReadRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+                    throws MalformedObjectNameException {
+                return new JmxReadRequest(requestMap,pParams);
+            }
+        };
+    }
+
+    // =================================================================
 
     private void appendReadParameters(StringBuffer pRet) {
         if (attributeNames != null && attributeNames.size() > 1) {

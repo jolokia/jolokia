@@ -17,6 +17,7 @@
 package org.jolokia.request;
 
 import java.util.Map;
+import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
@@ -61,5 +62,27 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    // ===========================================================================================
+
+    /**
+     * Creator for {@link JmxSearchRequest}s
+     *
+     * @return the creator implementation
+     */
+    static RequestCreator<JmxSearchRequest> newCreator() {
+        return new RequestCreator<JmxSearchRequest>() {
+            /** {@inheritDoc} */
+            public JmxSearchRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+                return new JmxSearchRequest(pStack.pop(),pParams);
+            }
+
+            /** {@inheritDoc} */
+            public JmxSearchRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+                    throws MalformedObjectNameException {
+                return new JmxSearchRequest(requestMap,pParams);
+            }
+        };
     }
 }

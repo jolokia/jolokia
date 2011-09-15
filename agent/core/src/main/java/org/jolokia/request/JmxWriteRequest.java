@@ -16,11 +16,11 @@
 
 package org.jolokia.request;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -112,4 +112,30 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
         return ret;
     }
 
+    // ===========================================================================
+
+    /**
+     * Creator for {@link JmxWriteRequest}s
+     *
+     * @return the creator implementation
+     */
+    static RequestCreator<JmxWriteRequest> newCreator() {
+        return new RequestCreator<JmxWriteRequest>() {
+            /** {@inheritDoc} */
+            public JmxWriteRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+                return new JmxWriteRequest(
+                        pStack.pop(), // object name
+                        pStack.pop(), // attribute name
+                        StringToObjectConverter.convertSpecialStringTags(pStack.pop()), // value
+                        prepareExtraArgs(pStack), // path
+                        pParams);
+            }
+
+            /** {@inheritDoc} */
+            public JmxWriteRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+                    throws MalformedObjectNameException {
+                return new JmxWriteRequest(requestMap,pParams);
+            }
+        };
+    }
 }

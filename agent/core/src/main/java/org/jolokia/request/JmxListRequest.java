@@ -16,8 +16,9 @@
 
 package org.jolokia.request;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import javax.management.MalformedObjectNameException;
 
 import org.jolokia.util.RequestType;
 
@@ -35,7 +36,7 @@ public class JmxListRequest extends JmxRequest {
      * @param pPathParts parts of a path to restrict on the return value
      * @param pParams processing parameters
      */
-    public JmxListRequest(List<String> pPathParts, Map<String, String> pParams) {
+    JmxListRequest(List<String> pPathParts, Map<String, String> pParams) {
         super(RequestType.LIST,pPathParts,pParams);
     }
 
@@ -45,7 +46,7 @@ public class JmxListRequest extends JmxRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    public JmxListRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) {
+    JmxListRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) {
         super(pRequestMap, pParams);
     }
 
@@ -58,5 +59,29 @@ public class JmxListRequest extends JmxRequest {
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    // ====================================================================================
+
+    /**
+     * Create a new creator used for creating list requests
+     *
+     * @return creator
+     */
+    static RequestCreator<JmxListRequest> newCreator() {
+        return new RequestCreator<JmxListRequest>() {
+            /** {@inheritDoc} */
+            public JmxListRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+                return new JmxListRequest(
+                        prepareExtraArgs(pStack), // path
+                        pParams);
+            }
+
+            /** {@inheritDoc} */
+            public JmxListRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+                    throws MalformedObjectNameException {
+                return new JmxListRequest(requestMap,pParams);
+            }
+        };
     }
 }

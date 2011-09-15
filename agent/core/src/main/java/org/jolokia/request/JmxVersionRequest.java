@@ -17,6 +17,9 @@
 package org.jolokia.request;
 
 import java.util.Map;
+import java.util.Stack;
+
+import javax.management.MalformedObjectNameException;
 
 import org.jolokia.util.RequestType;
 
@@ -33,7 +36,7 @@ public class JmxVersionRequest extends JmxRequest {
      *
      * @param pInitParams optional init parameters
      */
-    public JmxVersionRequest(Map<String, String> pInitParams) {
+    JmxVersionRequest(Map<String, String> pInitParams) {
         super(RequestType.VERSION,null,pInitParams);
     }
 
@@ -43,12 +46,34 @@ public class JmxVersionRequest extends JmxRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    public JmxVersionRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) {
+    JmxVersionRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) {
         super(pRequestMap, pParams);
     }
 
     @Override
     public String toString() {
         return "JmxVersionRequest[]";
+    }
+
+    // =================================================================
+
+    /**
+     * Creator for {@link JmxVersionRequest}s
+     *
+     * @return the creator implementation
+     */
+    static RequestCreator<JmxVersionRequest> newCreator() {
+        return new RequestCreator<JmxVersionRequest>() {
+            /** {@inheritDoc} */
+            public JmxVersionRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+                return new JmxVersionRequest(pParams);
+            }
+
+            /** {@inheritDoc} */
+            public JmxVersionRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+                    throws MalformedObjectNameException {
+                return new JmxVersionRequest(requestMap,pParams);
+            }
+        };
     }
 }
