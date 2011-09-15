@@ -2,12 +2,16 @@
 <chapter id="clients" xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Clients</title>
 
-    <note>
-      Currently, three client implementations exists for Jolokia:
-      Jmx4Perl, the Perl-Binding (grandfather of all clients ;-), a
-      Java library and a Javascript library.
-    </note>
+    <para>
+      Three client implementations exists for Jolokia: Jmx4Perl, the
+      Perl binding (the grandmother of all clients ;-), a Java library
+      and a Javascript library. This reference describes the client
+      binding bundled with Jolokia. More JVM based client libraries
+      are planned for inclusiong in Jolokia (e.g. Groovy, Scala or
+      JRuby).
+    </para>
 
     <xi:include href='client/javascript.xml'/>
+    <xi:include href='client/java.xml'/>
 
 </chapter>

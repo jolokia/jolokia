@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<section id="client-java">
+  <title>Java Client Library</title>
+  <para>
+    The Java client library provides an easy access to the Jolokia
+    agent from within Java. Since JSR-160 connectors provides also a
+    Java based remote access to JMX MBeans one might wonder, what are
+    the benefits of a Jolokia Java client binding. Well, there are
+    several: 
+  </para>
+  <itemizedlist>
+    <listitem>
+      It provides a typeless access to the remote MBeans. The big
+      advantage here is that for any non-OpenMBean access to custom
+      typed objects is still possible without having the type
+      information locally. 
+    </listitem>
+    <listitem>
+      Jolokia can be used in setups where JSR-160 connectors can not be
+      used. I.e. in firewall secured environments it is much easier to
+      get through to an Jolokia Agent than to an JSR-160 connetor
+      using RMI as transport protocol. 
+    </listitem>
+    <listitem>
+      <emphasis>Remoteness</emphasis> is explicite in this API instead
+      of JSR-160 connector's seeked <emphasis>transparent
+      remoteness</emphasis>, which has some arguable conceptually
+      advantages. Expliciteness is better than falsy
+      transparence. 
+    </listitem>
+  </itemizedlist>
+  <para>
+    The Java client library follows a strict request-response
+    paradigm, much like the underlying HTTP. It uses generics heavily
+    and can be centered around three classes:
+    <classname>J4pClient</classname>,
+    <classname>J4pRequest</classname> and
+    <classname>J4pResponse</classname>
+  </para>
+  <sidebar>
+    <title>What the heck does 'J4p' mean ?</title>
+    That's a reminescence to Jolokia's roots which lies in <ulink
+    url="http://www.jmx4perl.org">Jmx4Perl</ulink>. It is always good
+    to remember where one comes from ;-)
+  </sidebar>
+  
+
+  <section id="client-java-tutorial">
+    <title>Tutorial</title>
+    <para>
+      Using the Java library is quite simple. After a client object
+      (<classname>J4pClient</classname>) has been created it can be
+      used to send requests, which are subclasses of
+      <classname>J4pRequest</classname>. The
+      <methodname>execute()</methodname> method is used in order to
+      send one or more request to the agent. 
+    </para>
+    <programlisting language="java"><![CDATA[
+    J4pClient client = new J4pClient("http://localhost:8080/jolokia");
+    J4pReadRequest request = 
+         new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage","used");
+    J4pReadResponse response = client.execute(request);
+    System.out.println("Memory used: " + response.getValue());
+]]></programlisting>
+
+  </section>
+
+  <section id="client-java-requests">
+    <title>Request types</title>
+  </section>
+
+  <section id="client-java-builder">
+    <title>J4pClientBuilder</title>
+  </section>
+</section>
