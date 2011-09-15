@@ -5,6 +5,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.request.*;
 import org.jolokia.util.PathUtil;
 import org.jolokia.util.RequestType;
 
@@ -61,7 +62,8 @@ public final class JmxRequestFactory {
      *       like collections or maps. If within collections/arrays/tabular data,
      *       <code>paramX</code> should specify
      *       a numeric index, in maps/composite data <code>paramX</code> is a used as a string
-     *       key.</li>
+     *       key.</li>. If the attribute name contains "," it is interpreted as a list of attributes.
+     *       which should be returned.
      *   <li>Type: <b>write</b> ({@link RequestType#WRITE}<br/>
      *       Parameters: <code>param1</code> = MBean name, <code>param2</code> = Attribute name,
      *       <code>param3</code> = value, <code>param4 ... paramN</code> = Inner Path.
@@ -107,9 +109,8 @@ public final class JmxRequestFactory {
      *
      *
      * @param pJsonRequests JSON representation of a list of {@link JmxRequest}
-     * @param pParameterMap
+     * @param pParameterMap processing options
      * @return list with one or more {@link JmxRequest}
-     * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
      */
     public static List<JmxRequest> createPostRequests(List pJsonRequests, Map<String, String[]> pParameterMap) {
         List<JmxRequest> ret = new ArrayList<JmxRequest>();
@@ -126,11 +127,9 @@ public final class JmxRequestFactory {
     /**
      * Create a single {@link JmxRequest}s from a JSON map representation of a request
      *
-     *
      * @param pRequestMap JSON representation of a {@link JmxRequest}
-     * @param pParameterMap
+     * @param pParameterMap additional map of opertional parameters
      * @return the created {@link JmxRequest}
-     * @throws javax.management.MalformedObjectNameException if the MBean name within the request is invalid
      */
     public static <R extends JmxRequest> R createPostRequest(Map<String, ?> pRequestMap, Map<String, String[]> pParameterMap) {
         try {

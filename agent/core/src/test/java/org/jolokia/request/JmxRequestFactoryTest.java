@@ -18,6 +18,8 @@ package org.jolokia.request;
 
 import java.util.*;
 
+import org.jolokia.request.*;
+import org.jolokia.request.JmxRequestFactory;
 import org.jolokia.util.*;
 import org.testng.annotations.Test;
 
@@ -179,7 +181,7 @@ public class JmxRequestFactoryTest {
 
     @Test(expectedExceptions = { ClassCastException.class } )
     public void castException() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc", null);
     }
 
 }
