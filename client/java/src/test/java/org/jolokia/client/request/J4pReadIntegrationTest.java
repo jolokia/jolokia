@@ -276,6 +276,22 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         assertEquals(innerInnerMap.get("deep"), "inside");
     }
 
+   @Test
+   public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
+       J4pReadRequest request = new J4pReadRequest("jolokia.it:type=mxbean","ComplexTestData");
+       Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
+       params.put(J4pQueryParameter.MAX_DEPTH,"0");
+       params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
+       for (String method : new String[] { "GET", "POST" }) {
+           J4pReadResponse response = j4pClient.execute(request,method,params);
+           JSONObject value = response.getValue();
+           Object complex = value.get("complex");
+           assertTrue(complex instanceof String);
+           assertTrue(complex.toString().contains("TabularData"));
+       }
+
+   }
+
     private void checkNames(String pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
         for (int i = 0;i<pNames.length;i++) {
             for (String name : pNames[i]) {

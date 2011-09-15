@@ -61,7 +61,6 @@ public class J4pClient  {
         httpClient = new DefaultHttpClient(cm, params);
     }
 
-
     /**
      * Constructor using a given HttpClient
      *
@@ -72,7 +71,6 @@ public class J4pClient  {
         requestHandler = new J4pRequestHandler(pJ4pServerUrl);
         httpClient = pHttpClient;
     }
-
 
     /**
      * Execute a single J4pRequest returning a single response.
@@ -85,8 +83,27 @@ public class J4pClient  {
      * @throws java.io.IOException when the execution fails
      * @throws org.json.simple.parser.ParseException if parsing of the JSON answer fails
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest) throws J4pException {
-        return this.<R,T>execute(pRequest,null);
+    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest)
+            throws J4pException {
+        return this.<R,T>execute(pRequest,null,null);
+    }
+
+    /**
+     * Execute a single J4pRequest returning a single response.
+     * The HTTP Method used is determined automatically.
+     *
+     * @param pRequest request to execute
+     * @param pProcessingOptions optional map of processing options
+     * @param <R> response type
+     * @param <T> request type
+     * @return the response as returned by the server
+     * @throws java.io.IOException when the execution fails
+     * @throws org.json.simple.parser.ParseException if parsing of the JSON answer fails
+     */
+    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,
+                                                                     Map<J4pQueryParameter,String> pProcessingOptions)
+            throws J4pException {
+        return this.<R,T>execute(pRequest,null,pProcessingOptions);
     }
 
     /**
@@ -94,14 +111,35 @@ public class J4pClient  {
      *
      * @param pRequest request to execute
      * @param pMethod method to use which should be either "GET" or "POST"
+     *
      * @param <R> response type
      * @param <T> request type
      * @return response object
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pException {
+        return this.<R,T>execute(pRequest,pMethod,null);
+    }
+
+
+
+    /**
+     * Execute a single J4pRequest which returns a single response.
+     *
+     * @param pRequest request to execute
+     * @param pMethod method to use which should be either "GET" or "POST"
+     * @param pProcessingOptions optional map of processiong options
+     *
+     * @param <R> response type
+     * @param <T> request type
+     * @return response object
+     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     */
+    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod,
+                                                                     Map<J4pQueryParameter,String> pProcessingOptions)
+            throws J4pException {
         try {
-            HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod));
+            HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod,pProcessingOptions));
             JSONAware jsonResponse = extractJsonResponse(pRequest,response);
             if (! (jsonResponse instanceof JSONObject)) {
                 throw new J4pException("Invalid JSON answer for a single request (expected a map but got a " + jsonResponse.getClass() + ")");
@@ -118,23 +156,6 @@ public class J4pClient  {
             throw mapIOException(e);
         } catch (URISyntaxException e) {
             throw mapIOException(e);
-        }
-    }
-
-    @SuppressWarnings("PMD.PreserveStackTrace")
-    private <T extends J4pRequest> JSONAware extractJsonResponse(T pRequest, HttpResponse pResponse) throws J4pException {
-        try {
-            return requestHandler.extractJsonResponse(pResponse);
-        } catch (IOException e) {
-            throw new J4pException("IO-Error while reading the response: " + e,e);
-        } catch (ParseException e) {
-            // It's a parse exception. Now, check whether the HTTResponse is
-            // an error and prepare the proper J4pException
-            StatusLine statusLine = pResponse.getStatusLine();
-            if (HttpStatus.SC_OK != statusLine.getStatusCode()) {
-                throw new J4pRemoteException(pRequest,statusLine.getReasonPhrase(), null, statusLine.getStatusCode(),null);
-            }
-            throw new J4pException("Could not parse answer: " + e,e);
         }
     }
 
@@ -161,6 +182,26 @@ public class J4pClient  {
             throw mapIOException(e);
         }
     }
+
+    // =====================================================================================================
+
+    @SuppressWarnings("PMD.PreserveStackTrace")
+    private <T extends J4pRequest> JSONAware extractJsonResponse(T pRequest, HttpResponse pResponse) throws J4pException {
+        try {
+            return requestHandler.extractJsonResponse(pResponse);
+        } catch (IOException e) {
+            throw new J4pException("IO-Error while reading the response: " + e,e);
+        } catch (ParseException e) {
+            // It's a parse exception. Now, check whether the HTTResponse is
+            // an error and prepare the proper J4pException
+            StatusLine statusLine = pResponse.getStatusLine();
+            if (HttpStatus.SC_OK != statusLine.getStatusCode()) {
+                throw new J4pRemoteException(pRequest,statusLine.getReasonPhrase(), null, statusLine.getStatusCode(),null);
+            }
+            throw new J4pException("Could not parse answer: " + e,e);
+        }
+    }
+
 
     // Extract J4pResponses from a returned bulk JSON answer
     @SuppressWarnings("PMD.PreserveStackTrace")

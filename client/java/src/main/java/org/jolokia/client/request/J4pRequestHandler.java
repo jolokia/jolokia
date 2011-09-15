@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,11 +62,14 @@ public class J4pRequestHandler {
     /**
      * Get the HttpRequest for executing the given single request
      *
+     *
      * @param pRequest request to convert
      * @param pPreferredMethod HTTP method preferred
+     * @param pProcessingOptions optional map of processiong options
      * @return the request used with HttpClient to obtain the result.
      */
-    public HttpUriRequest getHttpRequest(J4pRequest pRequest,String pPreferredMethod) throws UnsupportedEncodingException, URISyntaxException {
+    public HttpUriRequest getHttpRequest(J4pRequest pRequest, String pPreferredMethod,
+                                         Map<J4pQueryParameter, String> pProcessingOptions) throws UnsupportedEncodingException, URISyntaxException {
         String method = pPreferredMethod;
         if (method == null) {
             method = pRequest.getPreferredHttpMethod();
@@ -73,6 +77,8 @@ public class J4pRequestHandler {
         if (method == null) {
             method = HttpGet.METHOD_NAME;
         }
+        String queryParams = prepareQueryParameters(pProcessingOptions);
+
         if (method.equals(HttpGet.METHOD_NAME)) {
             List<String> parts = pRequest.getRequestParts();
             // If parts == null the request decides, that POST *must* be used
@@ -89,25 +95,18 @@ public class J4pRequestHandler {
                     requestPath.append("/");
                     requestPath.append(escape(p));
                 }
-                // TODO: Option handling, special escaping
-                URI uri = new URI(j4pServerUrl.getScheme(),
-                                  j4pServerUrl.getUserInfo(),
-                                  j4pServerUrl.getHost(),
-                                  j4pServerUrl.getPort(),
-                                  requestPath.toString(),
-                                  null,null);
-                return new HttpGet(uri);
+                return new HttpGet(createRequestURI(requestPath.toString(),queryParams));
             }
         }
 
 
         // We are using a post method as fallback
-        // TODO: Option handling
         JSONObject requestContent = pRequest.toJson();
-        HttpPost postReq = new HttpPost(j4pServerUrl);
+        HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
         return postReq;
     }
+
 
     /**
      * Get an HTTP Request for requesting multips requests at once
@@ -164,6 +163,16 @@ public class J4pRequestHandler {
         return pRequest.<R>createResponse(pJsonResponse);
     }
 
+    /**
+     * Get the J4p Server URL
+     * @return the URL to the Jolokia agent on the server side
+     */
+    public URI getJ4pServerUrl() {
+        return j4pServerUrl;
+    }
+
+    // =============================================================================================================
+
     // Escape a part for usage as part of URI path
     private String escape(String pPart) throws UnsupportedEncodingException {
         Matcher matcher = SLASH_PATTERN.matcher(pPart);
@@ -182,6 +191,7 @@ public class J4pRequestHandler {
         return ret.toString();
     }
 
+    // Our special slash escaping
     private String escapeSlash(String pPart, Matcher pMatcher) {
         StringBuilder ret = new StringBuilder();
         String separator = pPart.substring(pMatcher.start(), pMatcher.end());
@@ -198,11 +208,26 @@ public class J4pRequestHandler {
         return ret.toString();
     }
 
-    /**
-     * Get the J4p Server URL
-     * @return the URL to the Jolokia agent on the server side
-     */
-    public URI getJ4pServerUrl() {
-        return j4pServerUrl;
+    // Create the request URI to use
+    private URI createRequestURI(String path,String queryParams) throws URISyntaxException {
+        return new URI(j4pServerUrl.getScheme(),
+                                  j4pServerUrl.getUserInfo(),
+                                  j4pServerUrl.getHost(),
+                                  j4pServerUrl.getPort(),
+                                  path,
+                                  queryParams,null);
+    }
+
+    // prepare query parameters
+    private String prepareQueryParameters(Map<J4pQueryParameter, String> pProcessingOptions) {
+        if (pProcessingOptions != null && pProcessingOptions.size() > 0) {
+            StringBuilder queryParams = new StringBuilder();
+            for (Map.Entry<J4pQueryParameter,String> entry : pProcessingOptions.entrySet()) {
+                queryParams.append(entry.getKey().getParam()).append("=").append(entry.getValue()).append("&");
+            }
+            return queryParams.substring(0,queryParams.length() - 1);
+        } else {
+            return null;
+        }
     }
 }
