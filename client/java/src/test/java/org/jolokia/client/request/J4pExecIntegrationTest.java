@@ -70,7 +70,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         } catch (J4pRemoteException exp) {
             assertEquals(500,exp.getStatus());
             assertTrue(exp.getMessage().contains("Inner exception"));
-            assertTrue(exp.getRemoteStackTrace().contains("MBeanException"));
+            assertTrue(exp.getRemoteStackTrace().contains("java.lang.Exception"));
         }
     }
 

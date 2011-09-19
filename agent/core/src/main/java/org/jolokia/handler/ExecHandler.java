@@ -9,11 +9,11 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import edu.umd.cs.findbugs.annotations.*;
 import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
+import org.jolokia.util.StringUtil;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -218,7 +218,7 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         if (m.matches()) {
             ret.add(m.group(1));
             if (m.group(2).length() > 0) {
-                String[] args = m.group(2).split("\\s*,\\s*");
+                String[] args = StringUtil.splitAsArray(m.group(2),",");
                 ret.addAll(Arrays.asList(args));
             } else {
                 // It's "()" which means a no-arg method

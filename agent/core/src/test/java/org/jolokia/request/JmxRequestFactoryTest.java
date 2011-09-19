@@ -112,15 +112,15 @@ public class JmxRequestFactoryTest {
 
     @Test
     public void simpleGetWithEscapedAttribute() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/^/Heap/-/Memory/-/Usage/+/",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/!/Heap!/Memory!/Usage!/",null);
         assertEquals(req.getAttributeName(),"/Heap/Memory/Usage/","Attribute properly parsed");
     }
 
     @Test
     public void simpleGetWithEscapedPath() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used\\/bla/-/blub/bloe",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used!/bla!/blub/bloe",null);
         assertEquals(req.getPathParts().size(),2,"Size of path");
-        assertEquals(req.getPath(),"used\\/bla\\/blub/bloe","Path properly parsed");
+        assertEquals(req.getPath(),"used!/bla!/blub/bloe","Path properly parsed");
     }
 
     @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})

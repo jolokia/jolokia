@@ -152,7 +152,7 @@ public class HttpRequestHandler {
         } catch (InstanceNotFoundException e) {
             return getErrorJSON(404,e);
         } catch (MBeanException e) {
-            return getErrorJSON(500,e);
+            return getErrorJSON(500,e.getTargetException());
         } catch (AttributeNotFoundException e) {
             return getErrorJSON(404,e);
         } catch (UnsupportedOperationException e) {

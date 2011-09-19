@@ -346,8 +346,9 @@ var Jolokia = (function($) {
     };
 
     function escapePart(part) {
+        return part.replace(/!/g,"!!").replace(/\//g,"!/");
         // TODO: Escaping of slashes
-        return part;
+        //return part;
     }
 
     // Split up a path and append it to a given array. TODO: Check for escaped slashes

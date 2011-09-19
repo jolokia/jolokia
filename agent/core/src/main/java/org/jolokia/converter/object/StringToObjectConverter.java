@@ -1,13 +1,9 @@
 package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.DateUtil;
+import org.jolokia.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -193,7 +189,7 @@ public class StringToObjectConverter {
                 throw new IllegalArgumentException("Cannot convert to unknown array type " + t);
             }
         }
-        String[] values = split(pValue);
+        String[] values = StringUtil.splitAsArray(pValue,",");
         Object ret = Array.newInstance(valueType,values.length);
         int i = 0;
         for (String value : values) {
@@ -228,12 +224,6 @@ public class StringToObjectConverter {
         return ret;
     }
 
-    private String[] split(String pValue) {
-        // For now, split simply on ','. This is very simplistic
-        // and will fail on complex strings containing commas as content.
-        // Use a full blown CSV parser then (but only for string)
-        return pValue.split("\\s*,\\s*");
-    }
 
     
     // ===========================================================================

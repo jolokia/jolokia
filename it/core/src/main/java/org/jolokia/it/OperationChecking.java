@@ -141,4 +141,8 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
         }
         return seconds;
     }
+
+    public String echo(String pEcho) {
+        return pEcho;
+    }
 }

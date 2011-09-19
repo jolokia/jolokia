@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import org.jolokia.util.ConfigKey;
+import org.jolokia.util.StringUtil;
 
 /**
  * Holds all Http-Server and Jolokia configuration.
@@ -271,8 +272,8 @@ public class ServerConfig {
     private Map<String, String> parseArgs(String pAgentArgs) {
         Map<String,String> ret = new HashMap<String, String>();
         if (pAgentArgs != null && pAgentArgs.length() > 0) {
-            for (String arg : pAgentArgs.split(",")) {
-                String[] prop = arg.split("=");
+            for (String arg : StringUtil.splitAsArray(pAgentArgs,",")) {
+                String[] prop = StringUtil.splitAsArray(arg,"=");
                 if (prop == null || prop.length != 2) {
                     throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'. Ignoring");
                 } else {
