@@ -30,7 +30,7 @@
     <subsection name="Starting points">
       <ul>
         <li>
-          Overview of <a href="features-nb.html">Features</a> which
+          Overview of <a href="features-nb.html">features</a> which
           make Jolokia unique for JMX remoting.
         </li>
         <li>          
@@ -39,13 +39,14 @@
           href="reference/html/index.html">reference manual</a>.
         </li>
         <li>
-          <a href="agent.html">Agents</a> are available for many
+          <a href="agent.html">Agents</a> exist for many
           platforms (JEE, OSGi, Mule, JDK6 JVM).          
         </li>
         <li>
-          The <a href="support.html">support</a> page contains
-          information for how to get Jolokia support and how to
-          participate in the evolution of Jolokia.
+          <a href="support.html">Support</a> is available in both <a
+          href="support.html#Your_Support_for_Jolokia">directions</a>.
+          You are also welcome to add to the <a
+          href="support.html#Source">evolution</a> of Jolokia.
         </li>
       </ul>
     </subsection>
@@ -131,7 +132,7 @@
           between gets translated to a <a
           href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/TabularData.html">TabularData</a>
           with a fixed format). Since MXBeans are so easy to declare,
-          implement and to register, this missing piece really adds to
+          implement and register, this missing piece really adds to
           our <em>JMX on Capsaicin</em> mantra.
         </p>
         <p>
@@ -141,7 +142,7 @@
           coding model introduced by GitHub. Big acknowlegdments go
           out to <a href="https://github.com/asssaf">Assaf Berg</a>
           and <a href="https://github.com/GregBowyer">Greg Bowyer</a>
-          for providing patches which lead to these features.
+          for providing pull requests which lead to these features.
         </p>
         <p>
           This and all previous changes can be found in the <a
