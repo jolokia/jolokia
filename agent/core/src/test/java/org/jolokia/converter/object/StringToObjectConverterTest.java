@@ -2,7 +2,6 @@ package org.jolokia.converter.object;
 
 import java.util.*;
 
-import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -136,6 +135,12 @@ public class StringToObjectConverterTest {
         for (int i = 0;i < expected.length;i++) {
             assertEquals(expected[i],(int) ((Integer[]) obj)[i]);
         }
+
+        // Escaped arrays
+        String[] strings = (String[]) converter.convertFromString(new String[0].getClass().getName(),"hallo!,hans!!,wu!!rs!t");
+        assertEquals(strings.length,2);
+        assertEquals("hallo,hans!",strings[0]);
+        assertEquals("wu!rst",strings[1]);
 
         try {
             obj = converter.convertFromString("[Lbla;","10,20,30");

@@ -22,6 +22,9 @@ import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
+
+import static org.jolokia.util.StringUtil.*;
+
 /**
  * @author roland
  * @since 19.09.11
@@ -31,17 +34,17 @@ public class StringUtilTest {
 
     Object[] PATH_SPLIT_TEST_DATA = new Object[] {
             "hello/world", asList("hello", "world"),true,
-            "hello!/world/yeah",asList("hello/world", "yeah"),true,
-            "hello!!/world/yeah",asList("hello!","world","yeah"),true,
-            "hello!!!/world/yeah",asList("hello!/world","yeah"),true,
-            "hello!!!!world/yeah",asList("hello!!world","yeah"),true,
-            "hello!,!!/wor,ld/yeah",asList("hello,!","wor,ld","yeah"),false /* dont do this test reverse because the unnecessarily escaped backslash wont get recreated */
+            "hello" + PATH_ESCAPE + "/world/yeah",asList("hello/world", "yeah"),true,
+            "hello" + PATH_ESCAPE + PATH_ESCAPE + "/world/yeah",asList("hello" + PATH_ESCAPE,"world","yeah"),true,
+            "hello" + PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE + "/world/yeah",asList("hello" + PATH_ESCAPE + "/world","yeah"),true,
+            "hello" + PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE + "world/yeah",asList("hello" + PATH_ESCAPE + PATH_ESCAPE + "world","yeah"),true,
+            "hello" + PATH_ESCAPE + "," + PATH_ESCAPE + PATH_ESCAPE + "/wor,ld/yeah",asList("hello," + PATH_ESCAPE,"wor,ld","yeah"),false /* dont do this test reverse because the unnecessarily escaped backslash wont get recreated */
     };
 
     Object[] COMMA_SPLIT_TEST_DATA = new Object[] {
             "type=s,name=world", asList("type=s", "name=world"),
-            "hello!,world,yeah",asList("hello,world", "yeah"),
-            "hello!,!/world,yeah",asList("hello,/world","yeah"),
+            "hello\\,world,yeah",asList("hello,world", "yeah"),
+            "hello\\,\\/world,yeah",asList("hello,/world","yeah"),
     };
 
 
@@ -68,7 +71,7 @@ public class StringUtilTest {
     @Test
     public void commaSplitting() {
         for (int i = 0; i< COMMA_SPLIT_TEST_DATA.length; i +=2) {
-            List got = StringUtil.split((String) COMMA_SPLIT_TEST_DATA[i],",");
+            List got = StringUtil.split((String) COMMA_SPLIT_TEST_DATA[i],CSV_ESCAPE,",");
             assertEquals(got, (List<String>) COMMA_SPLIT_TEST_DATA[i+1]);
         }
     }

@@ -189,7 +189,7 @@ public class StringToObjectConverter {
                 throw new IllegalArgumentException("Cannot convert to unknown array type " + t);
             }
         }
-        String[] values = StringUtil.splitAsArray(pValue,",");
+        String[] values = StringUtil.splitAsArray(pValue,StringUtil.PATH_ESCAPE,",");
         Object ret = Array.newInstance(valueType,values.length);
         int i = 0;
         for (String value : values) {
@@ -200,11 +200,10 @@ public class StringToObjectConverter {
 
     // Convert a list to an array of the given type
     private Object convertListToArray(Class pType, List pList) {
-        List argAsList = (List) pList;
         Class valueType = pType.getComponentType();
-        Object ret = Array.newInstance(valueType, argAsList.size());
+        Object ret = Array.newInstance(valueType, pList.size());
         int i = 0;
-        for (Object value : argAsList) {
+        for (Object value : pList) {
             if (value == null) {
                 if (!valueType.isPrimitive()) {
                     Array.set(ret,i++,null);

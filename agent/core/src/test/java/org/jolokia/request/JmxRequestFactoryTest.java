@@ -57,6 +57,21 @@ public class JmxRequestFactoryTest {
         assert req.getPath() == null : "Path is null";
     }
 
+    @Test
+    public void simplePostWithPath() {
+        Map<String,Object> reqMap = createMap(
+                "type","read",
+                "mbean","java.lang:type=Memory",
+                "attribute","HeapMemoryUsage",
+                "path","blub!/bla/hello");
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, null);
+        List<String> path = req.getPathParts();
+        assertEquals(path.size(),2);
+        assertEquals(path.get(0),"blub/bla");
+        assertEquals(path.get(1),"hello");
+        assertEquals(req.getPath(),"blub!/bla/hello");
+    }
+
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void simplePostWithMalformedObjectName() {
         JmxRequestFactory.createPostRequest(createMap("type", "read", "mbean", "bal::blub", "attribute", "HeapMemoryUsage"), null);
