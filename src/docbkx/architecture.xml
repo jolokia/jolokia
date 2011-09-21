@@ -26,7 +26,7 @@
     favor of more explicite remote protocols.
   </para>
   <para>
-    One problem with JSR-160 is it implicite reliance on RMI and its
+    One problem with JSR-160 is it implicit reliance on RMI and its
     requirement for a complete (Java) object serialization mechanism
     for passing management information over the wire. This closes the
     door for all enviroments which are not Java (or better, JVM)
