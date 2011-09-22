@@ -101,69 +101,76 @@
           <title>
             Why escaping ?
           </title>
-            You might wonder why simple URI encoding isn't enough for
-            escaping slashes. The reason is rather simple:
-            JBoss/Tomcat has a strange behaviour when returning an HTTP
-            response <literal>HTTP/1.x 400 Invalid URI:
-            noSlash</literal> for any URL which contains an escaped
-            slash in the path info (i.e. <literal>%2F</literal>). The
-            reason behind this behaviour is security related, slashes
-            get decoded on the agent side before the agent-servlet
-            gets the request. Other appservers might exhibit a similar
-            behaviour.
+          You might wonder why simple URI encoding isn't enough for
+          escaping slashes. The reason is that JBoss/Tomcat has a
+          strange behaviour when returning an HTTP response
+          <literal>HTTP/1.x 400 Invalid URI: noSlash</literal> for
+          any URL which contains an escaped slash in the path info
+          (i.e. <literal>%2F</literal>). The reason behind this
+          behaviour is security related, slashes get decoded on the
+          agent side before the agent-servlet gets the
+          request. Other appservers might exhibit a similar
+          behaviour, so Jolokia uses an own escaping mechanism. 
         </sidebar>
         <para>
           If one of the request parts contain a slash
           (<literal>/</literal>) (e.g. as part of you bean's name) it
-          needs to be escaped. A single slash (<literal>/</literal>)
-          is escaped by the combination <literal>/-/</literal>, two
-          subsequent slashes (<literal>//</literal>) are to be escaped
-          with <literal>/--/</literal> and so on. For example, to
-          request the atrribute <literal>State</literal> on the MBean
-          named <literal>jboss.jmx:alias=jmx/rmi/RMIAdaptor</literal>,
-          an access URL like this has to be constructed:
+          needs to be escaped. An exlamation mark
+          (<literal>!</literal>) is used as escape character<footnote
+          id="no-backslash">
+          A backslash (<literal>\</literal>) can not be used, since
+          most servlet container translate a backslash into a forward
+          slash on the fly when given in an URL. 
+          </footnote>. A exclamation mark needs to be doubled for
+          escaping. Any other characted preceded by an exlamation mark
+          is taken literally. Table <xref linkend="escape-rules"/>
+          illustrates the escape rules as used in GET requests.           
+        </para>
+        <table id="escape-rules">
+          <title>Escaping rules</title>
+          <thead>
+            <tr>
+              <td>Escaped</td>
+              <td>Unescaped</td>
+            </tr>        
+          </thead>
+          <tr>
+            <td><constant>!/</constant></td>
+            <td><constant>/</constant></td>
+          </tr>
+          <tr>
+            <td><constant>!!</constant></td>
+          <td><constant>!</constant></td>
+          </tr>
+          <tr>
+            <td><constant>!</constant><emphasis>(anything else)</emphasis></td>
+            <td><emphasis>(anything else)</emphasis></td>
+          </tr>
+        </table>
+        <para>
+          For example, to read the atrribute <literal>State</literal>
+          on the MBean named
+          <literal>jboss.jmx:alias=jmx/rmi/RMIAdaptor</literal>, an
+          access URL like this has to be constructed:
         </para>        
         <informalexample>
-          <literallayout class="monospaced">.../read/jboss.jmx:alias=jmx/-/rmi/-/RMIAdaptor/State</literallayout>
+          <literallayout class="monospaced">.../read/jboss.jmx:alias=jmx!/rmi!/RMIAdaptor/State</literallayout>
         </informalexample>
         <para>
           Client libraries like <ulink
           url="http://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</ulink>
-          do this sort of escaping transparently. If the part
-          (e.g. MBean's name) <emphasis>starts</emphasis> with a slash
-          you need to use a <literal>^</literal> instead of a minus,
-          so the j4p agent can combine parts properly. The same is
-          true, if the part <emphasis>ends</emphasis> with a slash,
-          than the corresponding minus must be replaced with a
-          <literal>+</literal>. For example to encode a MBean name
-          like <literal>test:strangeName=/bla//</literal>, this should
-          be encoded like
-          <informalexample>
-            <literallayout class="monospaced">.../test:strangeName=/-/bla/-+/attribute</literallayout>
-          </informalexample>
-          The corresponding perl code
-          for creating escaping a single part looks like
-        </para> 
-        <programlisting language="perl"><![CDATA[
-$input =~ s|(/+)|"/" . ('-' x length($1)) . "/"|eg;
-$input =~ s|^/-|/^|; # The first slash needs to be escaped (first)
-$input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
-]]></programlisting>
+          do this sort of escaping transparently. 
+        </para>
        <para>
-          All of this said, this sort of strange escaping can be
-          avoided alltogether if a slightly different variant for a
-          request is used (which doesn't look that REST-stylish,
-          though). Instead of providing the information as path-info
-          a query parameter <literal>p</literal> can be used
-          instead. This should be URL encoded, though. For the
+          Escaping can be avoided alltogether if a slightly different
+          variant for a request is used (which doesn't look that
+          REST-stylish, though). Instead of providing the information
+          as path-info, a query parameter <literal>p</literal> can be
+          used instead. This should be URL encoded, though. For the
           example above, the alternative is
           <informalexample>
             <literallayout class="monospaced">http://localhost:8080/jolokia?p=/read/test:strangeName=%2Fbla%2F%2F/attribute</literallayout>
           </informalexample>
-        </para>
-        <para>
-          Luckily, the POST request variant doesn't need this slash
-          mangling. It is described in the next section.
         </para>
       </section>
 
@@ -385,7 +392,13 @@ $input =~ s|-/$|+/|; # as well as last slash. They need a special escape.
           the attribute contains arrays at some level, use a numeric
           index (0 based) as part of the inner path if you want to
           traverse into this array.
-        </para>        
+        </para>    
+        <para>
+          For both, GET and POST requests, pathes must be escaped as
+          described in <xref linkend="escape-rules"/> when they
+          contain slashes (<literal>/</literal>) or exlamation marks
+          (<literal>!</literal>).
+        </para>
       </section>
     </section>
     

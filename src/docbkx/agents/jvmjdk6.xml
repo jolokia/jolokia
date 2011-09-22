@@ -44,7 +44,9 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         JVM agent. Options can be appended as a comma separated
         list. The available options are the same as described in <xref
         linkend="agent-war-init-params"/> plus the one described in
-        table <xref linkend="agent-jvm-config"/>.
+        table <xref linkend="agent-jvm-config"/>. If an options
+        contains a comma, an equal sign or a backslash, it must be
+        escaped with a backslash. 
       </para>
       <table id="agent-jvm-config">
         <title>JVM agent configuration options</title>
