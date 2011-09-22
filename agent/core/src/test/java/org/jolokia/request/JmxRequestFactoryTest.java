@@ -57,6 +57,21 @@ public class JmxRequestFactoryTest {
         assert req.getPath() == null : "Path is null";
     }
 
+    @Test
+    public void simplePostWithPath() {
+        Map<String,Object> reqMap = createMap(
+                "type","read",
+                "mbean","java.lang:type=Memory",
+                "attribute","HeapMemoryUsage",
+                "path","blub!/bla/hello");
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, null);
+        List<String> path = req.getPathParts();
+        assertEquals(path.size(),2);
+        assertEquals(path.get(0),"blub/bla");
+        assertEquals(path.get(1),"hello");
+        assertEquals(req.getPath(),"blub!/bla/hello");
+    }
+
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void simplePostWithMalformedObjectName() {
         JmxRequestFactory.createPostRequest(createMap("type", "read", "mbean", "bal::blub", "attribute", "HeapMemoryUsage"), null);
@@ -112,15 +127,15 @@ public class JmxRequestFactoryTest {
 
     @Test
     public void simpleGetWithEscapedAttribute() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/^/Heap/-/Memory/-/Usage/+/",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/!/Heap!/Memory!/Usage!/",null);
         assertEquals(req.getAttributeName(),"/Heap/Memory/Usage/","Attribute properly parsed");
     }
 
     @Test
     public void simpleGetWithEscapedPath() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used\\/bla/-/blub/bloe",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used!/bla!/blub/bloe",null);
         assertEquals(req.getPathParts().size(),2,"Size of path");
-        assertEquals(req.getPath(),"used\\/bla\\/blub/bloe","Path properly parsed");
+        assertEquals(req.getPath(),"used!/bla!/blub/bloe","Path properly parsed");
     }
 
     @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})

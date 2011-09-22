@@ -17,11 +17,11 @@ package org.jolokia.client.request;
  */
 
 import java.io.*;
-import java.net.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.http.*;
@@ -42,9 +42,6 @@ public class J4pRequestHandler {
 
     // j4p agent URL for the agent server
     private URI j4pServerUrl;
-
-    // Escape patterns
-    private static final Pattern SLASH_PATTERN = Pattern.compile("/+");
 
     /**
      * Constructor
@@ -83,12 +80,7 @@ public class J4pRequestHandler {
             List<String> parts = pRequest.getRequestParts();
             // If parts == null the request decides, that POST *must* be used
             if (parts != null) {
-                String base = j4pServerUrl.getPath();
-                if (base == null) {
-                    base = "/";
-                } else if (!base.endsWith("/")) {
-                    base += "/";
-                }
+                String base = prepareBaseUrl(j4pServerUrl);
                 StringBuilder requestPath = new StringBuilder(base);
                 requestPath.append(pRequest.getType().getValue());
                 for (String p : parts) {
@@ -105,6 +97,17 @@ public class J4pRequestHandler {
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
         return postReq;
+    }
+
+    private String prepareBaseUrl(URI pUri) {
+        String base = pUri.getPath();
+        if (base == null) {
+            return "/";
+        } else if (!base.endsWith("/")) {
+            return base + "/";
+        } else {
+            return base;
+        }
     }
 
 
@@ -175,39 +178,14 @@ public class J4pRequestHandler {
 
     // =============================================================================================================
 
-    // Escape a part for usage as part of URI path
-    private String escape(String pPart) throws UnsupportedEncodingException {
-        Matcher matcher = SLASH_PATTERN.matcher(pPart);
-        int index = 0;
-        StringBuilder ret = new StringBuilder();
-        while (matcher.find()) {
-            String part = pPart.subSequence(index, matcher.start()).toString();
-            ret.append(part).append("/");
-            ret.append(escapeSlash(pPart, matcher));
-            ret.append("/");
-            index = matcher.end();
-        }
-        if (index != pPart.length()) {
-            ret.append(pPart.substring(index,pPart.length()));
-        }
-        return ret.toString();
-    }
-
-    // Our special slash escaping
-    private String escapeSlash(String pPart, Matcher pMatcher) {
-        StringBuilder ret = new StringBuilder();
-        String separator = pPart.substring(pMatcher.start(), pMatcher.end());
-        int len = separator.length();
-        for (int i = 0;i<len;i++) {
-            if (i == 0 && pMatcher.start() == 0) {
-                ret.append("^");
-            } else if (i == len - 1 && pMatcher.end() == pPart.length()) {
-                ret.append("+");
-            } else {
-                ret.append("-");
-            }
-        }
-        return ret.toString();
+    // Escape a part for usage as part of URI path: / -> \/, \ -> \\
+    // private final static String ESCAPE = "\\\\";
+    private final static String ESCAPE = "!";
+    private final static Pattern ESCAPE_PATTERN = Pattern.compile(ESCAPE);
+    private final static Pattern SLASH_PATTERN = Pattern.compile("/");
+    private String escape(String pPart) {
+        String ret = ESCAPE_PATTERN.matcher(pPart).replaceAll(ESCAPE + ESCAPE);
+        return SLASH_PATTERN.matcher(ret).replaceAll(ESCAPE + "/");
     }
 
     // Create the request URI to use

@@ -74,7 +74,7 @@ public abstract class JmxRequest {
     public JmxRequest(Map<String, ?> pMap, Map<String, String> pInitParams) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
-             PathUtil.parsePath((String) pMap.get("path")),
+             EscapeUtil.parsePath((String) pMap.get("path")),
              pInitParams);
 
         Map target = (Map) pMap.get("target");
@@ -186,7 +186,7 @@ public abstract class JmxRequest {
      * @return path as string or null if no path is given.
      */
     public String getPath() {
-        return PathUtil.combineToPath(pathParts);
+        return EscapeUtil.combineToPath(pathParts);
     }
 
     /**

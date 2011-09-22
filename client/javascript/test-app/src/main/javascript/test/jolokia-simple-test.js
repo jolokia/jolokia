@@ -37,6 +37,10 @@ $(document).ready(function() {
         }, "Error call");
     });
 
+    test("getAttribute with strange name (sync)", function() {
+        equals(j4p.getAttribute("jolokia.it:name=\",,/,,\",type=escape","Ok"),"OK");
+    });
+
     asyncTest("getAttribute (sync with error)", function() {
         var value = j4p.getAttribute("bla:blub=x", { error: function(resp) {
             equals(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
@@ -45,6 +49,7 @@ $(document).ready(function() {
         ok(value == null, "Error call");
     });
 
+
     asyncTest("getAttribute (async)", function() {
         var value = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used", {
             success: function(val) {
@@ -52,151 +57,158 @@ $(document).ready(function() {
                 start();
             }
         });
+    });
 
-        test("setAttribute (sync)", function() {
-            var oldValue = j4p.getAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled");
-            var value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", oldValue ? false : true);
-            equals(oldValue, value, "Old-Value should be returned");
-            value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", value ? false : true);
-            ok(oldValue != value, "Alternate state");
-            value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0");
-            equals(value, 42);
-            equals(j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0"), 23);
-            j4p.execute("jolokia.it:type=attribute", "reset");
-        });
+    test("setAttribute (sync)", function() {
+        var oldValue = j4p.getAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled");
+        var value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", oldValue ? false : true);
+        equals(oldValue, value, "Old-Value should be returned");
+        value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", value ? false : true);
+        ok(oldValue != value, "Alternate state");
+        value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0");
+        equals(value, 42);
+        equals(j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0"), 23);
+        j4p.execute("jolokia.it:type=attribute", "reset");
+    });
 
-        asyncTest("setAttribute (sync with error)", function() {
-            var value = j4p.setAttribute("bla:blub=x", "x", 10, { error: function(resp) {
-                equals(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
+    asyncTest("setAttribute (sync with error)", function() {
+        var value = j4p.setAttribute("bla:blub=x", "x", 10, { error: function(resp) {
+            equals(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
+            start();
+        }});
+        ok(value == null, "Error call");
+    });
+
+    asyncTest("setAttribute (async)", function() {
+        var value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0",
+                {
+                    success: function(val) {
+                        equals(val, 42, "Old value returned");
+                        j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0", {
+                            success: function(nval) {
+                                equals(nval, 23, "New value set");
+                                j4p.execute("jolokia.it:type=attribute", "reset");
+                                start();
+                            }
+                        })
+                    }
+                });
+        equals(value, null, "No return value for async operations");
+    });
+
+    test("execute (sync)", function() {
+        var value = j4p.execute("jolokia.it:type=operation", "fetchNumber", "inc");
+        equals(value, 0);
+        value = j4p.execute("jolokia.it:type=operation", "fetchNumber", "inc");
+        equals(value, 1);
+        value = j4p.execute("jolokia.it:type=operation", "overloadedMethod(java.lang.String,int)", "bla", 1);
+        equals(value, 2);
+        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "bla,blub", "x");
+        equals(value, "bla");
+        value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null);
+        equals(value, true);
+        j4p.execute("jolokia.it:type=operation", "reset");
+    });
+
+    test("execute (sync) with escape", function() {
+        equals(j4p.execute("jolokia.it:type=operation","echo","blub!"),"blub!");
+        equals(j4p.execute("jolokia.it:type=operation","echo","blub!!"),"blub!!");
+        equals(j4p.execute("jolokia.it:type=operation","echo","blub!/!"),"blub!/!");
+        equals(j4p.execute("jolokia.it:type=operation","echo","blub!//!"),"blub!//!");
+    });
+
+
+    asyncTest("execute (sync with error)", function() {
+        var value = j4p.execute("jolokia.it:type=operation", "throwCheckedException", {
+            error: function(resp) {
+                equals(resp.error_type, "java.lang.Exception");
                 start();
-            }});
-            ok(value == null, "Error call");
+            }
         });
+    });
 
-        asyncTest("setAttribute (async)", function() {
-            var value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0",
-                                         {
-                                             success: function(val) {
-                                                 equals(val, 42, "Old value returned");
-                                                 j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0", {
-                                                     success: function(nval) {
-                                                         equals(nval, 23, "New value set");
-                                                         j4p.execute("jolokia.it:type=attribute", "reset");
-                                                         start();
-                                                     }
-                                                 })
-                                             }
-                                         });
-            equals(value, null, "No return value for async operations");
-        });
-
-        test("execute (sync)", function() {
-            var value = j4p.execute("jolokia.it:type=operation", "fetchNumber", "inc");
-            equals(value, 0);
-            value = j4p.execute("jolokia.it:type=operation", "fetchNumber", "inc");
-            equals(value, 1);
-            value = j4p.execute("jolokia.it:type=operation", "overloadedMethod(java.lang.String,int)", "bla", 1);
-            equals(value, 2);
-            value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "bla,blub", "x");
-            equals(value, "bla");
-            value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null);
-            equals(value, true);
-            j4p.execute("jolokia.it:type=operation", "reset");
-        });
-
-        asyncTest("execute (sync with error)", function() {
-            var value = j4p.execute("jolokia.it:type=operation", "throwCheckedException", {
-                error: function(resp) {
-                    equals(resp.error_type, "java.lang.Exception");
-                    start();
-                }
-            });
-        });
-
-        asyncTest("execute (async)", function() {
+    asyncTest("execute (async)", function() {
             var value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null, {
                 success: function(value) {
                     equals(value, true);
                     start()
                 }
             });
-            equals(value, null);
+        equals(value, null);
+    });
+
+    test("search (sync)", function() {
+        var value = j4p.search("jolokia.it:*");
+        ok($.isArray(value), "Return value from search must be an array");
+        ok(value.length > 2, "Array must contain mbeans");
+        $.each(value, function(i, val) {
+            ok(typeof val == "string", "MBean name must be a string");
+            ok(val.match(/^jolokia\.it:.*/), "MBean name must start with domain name");
+        });
+    });
+
+    test("search (no result, sync)", function() {
+        var value = j4p.search("bla:notype=*");
+        ok($.isArray(value),"Return value from search must be an array");
+        equals(value.length,0,"List must be empty");
+    });
+
+    asyncTest("search (sync with error)", function() {
+        var value = j4p.search("jolokia.it:type=*=a*", { error : function(resp) {
+            ok(resp.error != null, "Error occured");
+            start();
+        },success:log});
+        equals(value, null);
+    });
+
+    asyncTest("search (async)", function() {
+        var value = j4p.search("jolokia.it:*", { success: function(val) {
+            ok($.isArray(val), "Return value from search must be an array");
+            ok(val.length > 2, "Array must contain mbeans");
+            start();
+        }});
+    });
+
+    test("version (sync)", function() {
+        var value = j4p.version({method: "post"});
+        ok(value.protocol >= 4, "Protocol >= 4");
+        ok(j4p.CLIENT_VERSION >= 0.82,"Client version: " + j4p.CLIENT_VERSION);
         });
 
-        test("search (sync)", function() {
-            var value = j4p.search("jolokia.it:*");
-            ok($.isArray(value), "Return value from search must be an array");
-            ok(value.length > 2, "Array must contain mbeans");
-            $.each(value, function(i, val) {
-                ok(typeof val == "string", "MBean name must be a string");
-                ok(val.match(/^jolokia\.it:.*/), "MBean name must start with domain name");
-            });
-        });
+    asyncTest("version (async)", function() {
+        var value = j4p.version({jsonp: true, success: function(val) {
+            ok(val.agent >= 0.8, "Agent > 0.80");
+            start();
+        }});
+        equals(value, null);
+    });
 
-        test("search (no result, sync)", function() {
-            var value = j4p.search("bla:notype=*");
-            ok($.isArray(value),"Return value from search must be an array");
-            equals(value.length,0,"List must be empty");
-        });
+    test("list (sync)", function() {
+        var value = j4p.list("java.lang/type=Memory/op");
+        ok(value["gc"], "Garbage collection");
+        equals(value.gc.args, 0);
+        raises(function() {
+            j4p.list("java.lang/type=Bla");
+        }, "Invalid path");
+    });
 
-        asyncTest("search (sync with error)", function() {
-            var value = j4p.search("jolokia.it:type=*=a*", { error : function(resp) {
-                ok(resp.error != null, "Error occured");
+    asyncTest("list (sync with error)", function() {
+        var value = j4p.list("java.lang/type=Bla", {error:function(resp) {
+            equals(resp.error_type, "java.lang.IllegalArgumentException", "java.lang.IllegalArgumentException");
                 start();
-            },success:log});
-            equals(value, null);
-        });
+        }});
+        equals(value, null);
+    });
 
-        asyncTest("search (async)", function() {
-            var value = j4p.search("jolokia.it:*", { success: function(val) {
-                ok($.isArray(val), "Return value from search must be an array");
-                ok(val.length > 2, "Array must contain mbeans");
+    asyncTest("list (async)", function() {
+        var value = j4p.list("java.lang/type=Memory/attr", {
+            success: function(val) {
+                log(val);
+                ok(val["HeapMemoryUsage"] != null, "HeapMemory");
                 start();
-            }});
+            }
         });
-
-        test("version (sync)", function() {
-            var value = j4p.version({method: "post"});
-            ok(value.protocol >= 4, "Protocol >= 4");
-            ok(j4p.CLIENT_VERSION >= 0.82,"Client version: " + j4p.CLIENT_VERSION);
-        });
-
-        asyncTest("version (async)", function() {
-            var value = j4p.version({jsonp: true, success: function(val) {
-                ok(val.agent >= 0.8, "Agent > 0.80");
-                start();
-            }});
-            equals(value, null);
-        });
-
-        test("list (sync)", function() {
-            var value = j4p.list("java.lang/type=Memory/op");
-            ok(value["gc"], "Garbage collection");
-            equals(value.gc.args, 0);
-            raises(function() {
-                j4p.list("java.lang/type=Bla");
-            }, "Invalid path");
-        });
-
-        asyncTest("list (sync with error)", function() {
-            var value = j4p.list("java.lang/type=Bla", {error:function(resp) {
-                equals(resp.error_type, "java.lang.IllegalArgumentException", "java.lang.IllegalArgumentException");
-                start();
-            }});
-            equals(value, null);
-        });
-
-        asyncTest("list (async)", function() {
-            var value = j4p.list("java.lang/type=Memory/attr", {
-                success: function(val) {
-                    log(val);
-                    ok(val["HeapMemoryUsage"] != null, "HeapMemory");
-                    start();
-                }
-            });
-            equals(value, null);
-        });
-
+        equals(value, null);
     });
 
     function log(response) {
@@ -204,3 +216,4 @@ $(document).ready(function() {
     }
 
 });
+

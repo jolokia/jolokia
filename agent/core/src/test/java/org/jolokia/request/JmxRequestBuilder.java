@@ -90,7 +90,7 @@ public class JmxRequestBuilder {
     }
 
     public JmxRequestBuilder pathParts(String... pExtraArgs) {
-        request.put("path", PathUtil.combineToPath(Arrays.asList(pExtraArgs)));
+        request.put("path", EscapeUtil.combineToPath(Arrays.asList(pExtraArgs)));
         return this;
     }
 

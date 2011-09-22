@@ -9,7 +9,6 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import edu.umd.cs.findbugs.annotations.*;
 import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
@@ -218,6 +217,8 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         if (m.matches()) {
             ret.add(m.group(1));
             if (m.group(2).length() > 0) {
+                // No escaping required since the parts a Java types which does not
+                // allow for commas
                 String[] args = m.group(2).split("\\s*,\\s*");
                 ret.addAll(Arrays.asList(args));
             } else {

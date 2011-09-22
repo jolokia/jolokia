@@ -138,6 +138,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
 
     /**
      * Get the path for extracting parts of the return value
+     *
      * @return path used for extracting
      */
     public String getPath() {

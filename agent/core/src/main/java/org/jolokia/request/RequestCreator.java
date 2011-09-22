@@ -57,8 +57,7 @@ abstract class RequestCreator<R extends JmxRequest> {
 
 
     /**
-     * Extract extra arguments from the remaining element on the stack. This takes also
-     * into account path elements which are escaped with a backslash (but were splitted previously)
+     * Extract extra arguments from the remaining element on the stack.
      *
      * @param pElements stack from where to extract extra elements
      * @return the remaining elements as list (but never null).
@@ -69,12 +68,7 @@ abstract class RequestCreator<R extends JmxRequest> {
         }
         List<String> ret = new ArrayList<String>();
         while (!pElements.isEmpty()) {
-            String element = pElements.pop();
-            // Check for escapes
-            while (element.endsWith("\\") && !pElements.isEmpty()) {
-                element = element.substring(0,element.length() - 1) + "/" + pElements.pop();
-            }
-            ret.add(element);
+            ret.add(pElements.pop());
         }
         return ret;
     }

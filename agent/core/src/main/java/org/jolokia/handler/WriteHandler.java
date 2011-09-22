@@ -12,7 +12,7 @@ import org.jolokia.converter.*;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.PathUtil;
+import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 
 /*
@@ -162,7 +162,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
             }
 
             String lastPathElement = pathParts.remove(pathParts.size()-1);
-            Stack<String> extraStack = PathUtil.reversePath(pathParts);
+            Stack<String> extraStack = EscapeUtil.reversePath(pathParts);
             // Get the object pointed to do with path-1
 
             Object inner = toJsonConverter.extractObjectWithContext(pRequest, pCurrentValue, extraStack, false);

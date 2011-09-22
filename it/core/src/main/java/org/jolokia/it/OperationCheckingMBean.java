@@ -58,4 +58,6 @@ public interface OperationCheckingMBean {
     double doubleArguments(double arg1, Double arg2);
 
     public int sleep(int seconds) throws InterruptedException;
+
+    public String echo(String pEcho);
 }
