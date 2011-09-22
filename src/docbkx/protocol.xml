@@ -976,6 +976,16 @@
       </para>
       <variablelist>
         <varlistentry>
+          <term><emphasis role="bold">6.0</emphasis> (since 1.0.0)</term>
+          <listitem>
+            <para>
+              Escaping has been changed from <literal>/-/</literal> to
+              <literal>!/</literal>. This affects GET Urls and
+              <emphasis> inner pathes</emphasis>.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
           <term><emphasis role="bold">5.0</emphasis> (since 0.95)</term>
           <listitem>
             <para>

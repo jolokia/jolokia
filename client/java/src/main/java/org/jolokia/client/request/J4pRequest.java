@@ -18,6 +18,8 @@ package org.jolokia.client.request;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.simple.*;
 
@@ -29,6 +31,8 @@ import org.json.simple.*;
  */
 public abstract class J4pRequest {
 
+    private final static Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("((?:[^!/]|!.)*)(?:/|$)");
+    private final static Pattern UNESCAPE_PATTERN = Pattern.compile("!(.)");
     // request type
     private J4pType type;
 
@@ -37,6 +41,17 @@ public abstract class J4pRequest {
 
     protected J4pRequest(J4pType pType) {
         type = pType;
+    }
+
+    /**
+     * Escape a input (like the part of an path) so that it can be safely used
+     * e.g. as a path
+     *
+     * @param pInput input to escape
+     * @return the escaped input
+     */
+    public static String escape(String pInput) {
+        return pInput.replaceAll("!","!!").replaceAll("/","!/");
     }
 
     /**
@@ -76,10 +91,6 @@ public abstract class J4pRequest {
 
     public void setPreferredHttpMethod(String pPreferredHttpMethod) {
         preferredHttpMethod = pPreferredHttpMethod;
-    }
-
-    protected List<String> splitPath(String pPath) {
-        return Arrays.asList(pPath.split("/"));
     }
 
     protected void addPath(List<String> pParts, String pPath) {
@@ -171,6 +182,26 @@ public abstract class J4pRequest {
         }
     }
 
+    /**
+     * Split up a path taking into account proper escaping (as descibed in the
+     * <a href="http://www.jolokia.org/reference">reference manual</a>).
+     *
+     * @param pArg string to split with escaping taken into account
+     * @return splitted element or null if the argument was null.
+     */
+    protected List<String> splitPath(String pArg) {
+        List<String> ret = new ArrayList<String>();
+        if (pArg != null) {
+            Matcher m = SLASH_ESCAPE_PATTERN.matcher(pArg);
+            while (m.find() && m.start(1) != pArg.length()) {
+                ret.add(UNESCAPE_PATTERN.matcher(m.group(1)).replaceAll("$1"));
+            }
+        }
+        return ret;
+    }
+
+    // =====================================================================================================
+
     private Object serializeCollection(Collection pArg) {
         JSONArray array = new JSONArray();
         for (Object value : ((Collection) pArg)) {
@@ -218,4 +249,6 @@ public abstract class J4pRequest {
             return pArg.toString();
         }
     }
+
+
 }

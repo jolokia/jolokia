@@ -12,32 +12,44 @@
         Applied patch from codewax for supporting an Equinox HTTP-Service
       </action>
       <action dev="roland" type="fix" date="2011-9-12">
-        Increased test coverage to 80.5%, documented public API to 100% (plus 100% rules coverage,
-        0% duplications, 0% package tangle index ...). See http://labs.consol.de/sonar/dashboard/index/org.jolokia:jolokia
+        Increased test coverage to 80.5%, documented public API to
+        100% (plus 100% rules coverage, 0% duplications, 0% package
+        tangle index ...). See
+        http://labs.consol.de/sonar/dashboard/index/org.jolokia:jolokia
         for more informations about Jolokia's code metrics.
       </action>
       <action dev="roland" type="fix" date="2011-9-14">
-        Fixed problem with URL encoding for GET request with the Java client library, which used to use URLEncoder.encode()
-        and switched now to URI. See http://stackoverflow.com/questions/724043/http-url-address-encoding-in-java for
-        details.
+        Fixed problem with URL encoding for GET request with the Java
+        client library, which used to use URLEncoder.encode() and
+        switched now to URI. See
+        http://stackoverflow.com/questions/724043/http-url-address-encoding-in-java
+        for details.
       </action>
       <action dev="roland" type="add" date="2011-9-15">
         Added processing options for the Java client
       </action>
+      <action dev="roland" type="add" date="2011-9-22">
+        Changed escaping scheme for GET URLs and pathes so that a
+        slash (/) can be escaped with an exclamation mark (!): / -->
+        !/
+      </action>
     </release>
     <release version="0.95" description="Release 0.95" date="2011-08-21">
       <action dev="roland" type="add" date="2011-7-29">
-        Added a dynamical attach mode for the JVM-JDK6 launcher (patch by Greg Bowyer).
-        The agent now includes also a client for dynamically starting/stoping an agent on
-        already running Java process. See the reference manual for more information.
+        Added a dynamical attach mode for the JVM-JDK6 launcher (patch
+        by Greg Bowyer).  The agent now includes also a client for
+        dynamically starting/stoping an agent on already running Java
+        process. See the reference manual for more information.
       </action>
       <action dev="roland" type="add" date="2011-8-7">
-        Support for upstream serialization of open type, i.e. CompositeData and TabularData.
-        This allows for easy access to MXBeans, which provide support of transparent
-        translation between plain Java objects and collections, which follow some restrictions,
-        to open type data. Jolokia knows how to deal with the fixed format used by this MXBean
-        translation of Maps and transparentrly dispatch this to a JSON map. Initial patch provided
-        by asssaf.
+        Support for upstream serialization of open type,
+        i.e. CompositeData and TabularData.  This allows for easy
+        access to MXBeans, which provide support of transparent
+        translation between plain Java objects and collections, which
+        follow some restrictions, to open type data. Jolokia knows how
+        to deal with the fixed format used by this MXBean translation
+        of Maps and transparentrly dispatch this to a JSON
+        map. Initial patch provided by asssaf.
       </action>
     </release>
     <release version="0.91" description="Release 0.91" date="2011-05-30">

@@ -16,6 +16,7 @@
 
 package org.jolokia.client.request;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
@@ -58,4 +59,17 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
     }
 
+    @Test
+    public void withSlash() throws MalformedObjectNameException, J4pException {
+        J4pListRequest reqs[] =  new J4pListRequest[] {
+                new J4pListRequest(new ObjectName("jolokia.it:type=naming,name=n!a!m!e with !/!")),
+                new J4pListRequest(Arrays.asList("jolokia.it","type=naming,name=n!a!m!e with !/!")),
+                new J4pListRequest("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!")
+        };
+        for (J4pListRequest req : reqs) {
+            J4pListResponse resp = j4pClient.execute(req);
+            Map val = resp.getValue();
+            assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
+        }
+    }
 }

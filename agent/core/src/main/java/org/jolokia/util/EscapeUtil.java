@@ -147,7 +147,7 @@ public final class EscapeUtil {
 
             final Matcher m = pattern[0].matcher(pArg);
             while (m.find() && m.start(1) != pArg.length()) {
-                // Now it is time to unescape all escaped parts
+                // Finally unescape all escaped parts
                 ret.add(pattern[1].matcher(m.group(1)).replaceAll("$1"));
             }
             return ret;

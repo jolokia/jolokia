@@ -18,6 +18,8 @@ package org.jolokia.client.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.management.ObjectName;
 
@@ -31,7 +33,7 @@ import org.json.simple.JSONObject;
  */
 public class J4pListRequest extends J4pRequest {
 
-    private String path;
+    private List<String> pathElements;
 
     /**
      * Default constructor to be used when all meta information should
@@ -45,11 +47,23 @@ public class J4pListRequest extends J4pRequest {
      * Constructor using a path to restrict the information
      * returned by the list command
      *
-     * @param pPath path into the JSON response
+     * @param pPath path into the JSON response. The path <strong>must already be
+     *        properly escaped</strong> when it contains slashes or exclamation marks.
+     *        You can use {@link #escape(String)} in order to escape a single path element.
      */
     public J4pListRequest(String pPath) {
         super(J4pType.LIST);
-        path = pPath;
+        pathElements = splitPath(pPath);
+    }
+
+    /**
+     * Constructor using a list of path elements to restrict the information
+     *
+     * @param pPathElements list of path elements. The elements <strong>must not be escaped</strong>
+     */
+    public J4pListRequest(List<String> pPathElements) {
+        super(J4pType.LIST);
+        pathElements = pPathElements;
     }
 
     /**
@@ -59,7 +73,9 @@ public class J4pListRequest extends J4pRequest {
      */
     public J4pListRequest(ObjectName pObjectName) {
         super(J4pType.LIST);
-        path = pObjectName.getDomain() + "/" + pObjectName.getCanonicalKeyPropertyListString();
+        pathElements = new ArrayList<String>();
+        pathElements.add(pObjectName.getDomain());
+        pathElements.add(pObjectName.getCanonicalKeyPropertyListString());
     }
 
     @Override
@@ -69,21 +85,24 @@ public class J4pListRequest extends J4pRequest {
 
     @Override
     List<String> getRequestParts() {
-        if (path != null) {
-            List<String> ret = new ArrayList<String>();
-            addPath(ret,path);
-            return ret;
-        } else {
-            return null;
-        }
+        return pathElements;
     }
 
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
-        if (path != null) {
-            ret.put("path",path);
+        if (pathElements != null) {
+            StringBuilder path = new StringBuilder();
+            for (int i = 0; i < pathElements.size(); i++) {
+                path.append(escape(pathElements.get(i)));
+                if (i < pathElements.size() - 1) {
+                    path.append("/");
+                }
+            }
+            ret.put("path",path.toString());
         }
         return ret;
     }
+
+
 }

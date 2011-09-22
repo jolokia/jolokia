@@ -41,7 +41,7 @@ public class ItSetup {
             "service%3ajmx%3armi%3a///jndi/rmi%3a//bhut%3a9999/jmxrmi",
             "\"jdbc/testDB\"",
             "name with space",
-            "n!a!m!e with !!"
+            "n!a!m!e with !/!"
 //            "äöüßÄÖÜ"
     };
     private List<String> strangeNames = new ArrayList<String>();
