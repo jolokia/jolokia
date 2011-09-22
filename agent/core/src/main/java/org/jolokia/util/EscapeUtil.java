@@ -177,7 +177,9 @@ public final class EscapeUtil {
     // Create a split pattern for a given delimiter
     private static Pattern[] createSplitPattern(String pEscape, String pDel) {
         return new Pattern[] {
+                // Escape
                 Pattern.compile("((?:[^" + pEscape + pDel + "]|" + pEscape + ".)*)(?:" + pDel + "|$)"),
+                // Unescape, group must match unescaped value
                 Pattern.compile(pEscape + "(.)")
         };
     }
