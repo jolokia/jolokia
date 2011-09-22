@@ -6,7 +6,7 @@
       <inlinegraphic align="right" fileref="jolokia_logo.png"/>
       Jolokia - Reference Documentation
     </title>
-    <releaseinfo>0.95</releaseinfo>
+    <releaseinfo>1.0.0-SNAPSHOT</releaseinfo>
     <authorgroup>
       <author>
         <firstname>Roland</firstname>
