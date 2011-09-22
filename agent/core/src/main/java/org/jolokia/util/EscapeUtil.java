@@ -32,16 +32,16 @@ public final class EscapeUtil {
      * Escape character used for path escaping as it can be used
      * in a regexp
      */
-    public final static String PATH_ESCAPE = "!";
+    public static final String PATH_ESCAPE = "!";
 
     /**
      * Escape character for escaping CSV type string as it can be used in a
      * regexp. E.g. a backslash (\ or "\\") must be doubled (\\ or "\\\\")
      */
-    public final static String CSV_ESCAPE = "\\\\";
+    public static final String CSV_ESCAPE = "\\\\";
     
     // Compile patterns in advance and cache them
-    final static Map<String,Pattern[]> SPLIT_PATTERNS = new HashMap<String, Pattern[]>();
+    static final Map<String,Pattern[]> SPLIT_PATTERNS = new HashMap<String, Pattern[]>();
     static {
         for (String param[] : new String[][] {
                 { PATH_ESCAPE, "/"} ,
@@ -136,9 +136,9 @@ public final class EscapeUtil {
      * @param pDelimiter delimiter to use
      * @return the splitted string as list or an empty array if the argument was null
      */
-    public static List<String> split(String pArg,String pEscape, String pDelimiter) {
+    public static ArrayList<String> split(String pArg,String pEscape, String pDelimiter) {
         if (pArg != null) {
-            List<String> ret = new ArrayList<String>();
+            ArrayList<String> ret = new ArrayList<String>();
             Pattern[] pattern = SPLIT_PATTERNS.get(pEscape + pDelimiter);
             if (pattern == null) {
                 pattern = createSplitPattern(pEscape,pDelimiter);
@@ -166,7 +166,8 @@ public final class EscapeUtil {
      */
     public static String[] splitAsArray(String pArg, String pEscape, String pDelimiter) {
         if (pArg != null) {
-            return new ArrayList<String>(split(pArg, pEscape, pDelimiter)).toArray(new String[0]);
+            List<String> elements = split(pArg, pEscape, pDelimiter);
+            return elements.toArray(new String[elements.size()]);
         } else {
             return new String[0];
         }
@@ -185,8 +186,8 @@ public final class EscapeUtil {
     }
 
     // Escape a single part
-    private final static Pattern ESCAPE_PATTERN = Pattern.compile(PATH_ESCAPE);
-    private final static Pattern SLASH_PATTERN = Pattern.compile("/");
+    private static final Pattern ESCAPE_PATTERN = Pattern.compile(PATH_ESCAPE);
+    private static final Pattern SLASH_PATTERN = Pattern.compile("/");
     private static String escapePart(String pPart) {
         return SLASH_PATTERN.matcher(
                 ESCAPE_PATTERN.matcher(pPart).replaceAll(PATH_ESCAPE + PATH_ESCAPE)).replaceAll(PATH_ESCAPE + "/");

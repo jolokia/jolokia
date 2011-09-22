@@ -179,10 +179,9 @@ public class J4pRequestHandler {
     // =============================================================================================================
 
     // Escape a part for usage as part of URI path: / -> \/, \ -> \\
-    // private final static String ESCAPE = "\\\\";
-    private final static String ESCAPE = "!";
-    private final static Pattern ESCAPE_PATTERN = Pattern.compile(ESCAPE);
-    private final static Pattern SLASH_PATTERN = Pattern.compile("/");
+    private static final String ESCAPE = "!";
+    private static final Pattern ESCAPE_PATTERN = Pattern.compile(ESCAPE);
+    private static final Pattern SLASH_PATTERN = Pattern.compile("/");
     private String escape(String pPart) {
         String ret = ESCAPE_PATTERN.matcher(pPart).replaceAll(ESCAPE + ESCAPE);
         return SLASH_PATTERN.matcher(ret).replaceAll(ESCAPE + "/");

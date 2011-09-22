@@ -31,8 +31,7 @@ import org.json.simple.*;
  */
 public abstract class J4pRequest {
 
-    private final static Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("((?:[^!/]|!.)*)(?:/|$)");
-    private final static Pattern UNESCAPE_PATTERN = Pattern.compile("!(.)");
+
     // request type
     private J4pType type;
 
@@ -181,6 +180,10 @@ public abstract class J4pRequest {
             return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
         }
     }
+
+    // pattern used for escaping business
+    private static final Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("((?:[^!/]|!.)*)(?:/|$)");
+    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("!(.)");
 
     /**
      * Split up a path taking into account proper escaping (as descibed in the
