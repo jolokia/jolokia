@@ -22,7 +22,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import org.jolokia.util.ConfigKey;
-import org.jolokia.util.StringUtil;
+import org.jolokia.util.EscapeUtil;
 
 /**
  * Holds all Http-Server and Jolokia configuration.
@@ -272,8 +272,8 @@ public class ServerConfig {
     private Map<String, String> parseArgs(String pAgentArgs) {
         Map<String,String> ret = new HashMap<String, String>();
         if (pAgentArgs != null && pAgentArgs.length() > 0) {
-            for (String arg : StringUtil.splitAsArray(pAgentArgs,StringUtil.CSV_ESCAPE,",")) {
-                String[] prop = StringUtil.splitAsArray(arg,StringUtil.CSV_ESCAPE,"=");
+            for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
+                String[] prop = EscapeUtil.splitAsArray(arg, EscapeUtil.CSV_ESCAPE, "=");
                 if (prop == null || prop.length != 2) {
                     throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'. Ignoring");
                 } else {

@@ -189,7 +189,7 @@ public class StringToObjectConverter {
                 throw new IllegalArgumentException("Cannot convert to unknown array type " + t);
             }
         }
-        String[] values = StringUtil.splitAsArray(pValue,StringUtil.PATH_ESCAPE,",");
+        String[] values = EscapeUtil.splitAsArray(pValue, EscapeUtil.PATH_ESCAPE, ",");
         Object ret = Array.newInstance(valueType,values.length);
         int i = 0;
         for (String value : values) {

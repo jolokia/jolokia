@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.util.StringUtil;
+import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -39,12 +39,12 @@ public class JmxRequestTest {
 
     @Test
     public void testPathSplitting() throws MalformedObjectNameException {
-        List<String> paths = StringUtil.parsePath("hello/world");
+        List<String> paths = EscapeUtil.parsePath("hello/world");
         assertEquals(paths.size(),2);
         assertEquals(paths.get(0),"hello");
         assertEquals(paths.get(1),"world");
 
-        paths = StringUtil.parsePath("hello!/world/second");
+        paths = EscapeUtil.parsePath("hello!/world/second");
         assertEquals(paths.size(),2);
         assertEquals(paths.get(0),"hello/world");
         assertEquals(paths.get(1),"second");
@@ -52,7 +52,7 @@ public class JmxRequestTest {
 
     @Test
     public void testPathGlueing() throws MalformedObjectNameException {
-        String path = StringUtil.combineToPath(Arrays.asList("hello/world", "second"));
+        String path = EscapeUtil.combineToPath(Arrays.asList("hello/world", "second"));
         assertEquals(path,"hello!/world/second");
     }
 

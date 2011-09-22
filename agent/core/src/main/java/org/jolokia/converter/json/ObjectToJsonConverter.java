@@ -110,7 +110,7 @@ public final class ObjectToJsonConverter {
      */
     public JSONObject convertToJson(Object pValue, JmxRequest pRequest, boolean pUseValueWithPath)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pUseValueWithPath ? StringUtil.reversePath(pRequest.getPathParts()) : new Stack<String>();
+        Stack<String> extraStack = pUseValueWithPath ? EscapeUtil.reversePath(pRequest.getPathParts()) : new Stack<String>();
 
         Object jsonResult = extractObjectWithContext(pRequest, pValue, extraStack, true);
 

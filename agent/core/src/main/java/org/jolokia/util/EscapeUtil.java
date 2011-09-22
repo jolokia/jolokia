@@ -26,10 +26,8 @@ import java.util.regex.Pattern;
  * @author roland
  * @since 15.03.11
  */
-public final class StringUtil {
+public final class EscapeUtil {
 
-    // Charactre used for encoding
-    //final static String ESCAPE = "\\\\";
     /**
      * Escape character used for path escaping as it can be used
      * in a regexp
@@ -50,13 +48,13 @@ public final class StringUtil {
                 { CSV_ESCAPE, ","},
                 { CSV_ESCAPE, "="}
         }) {
-            String esc = (String) param[0];
-            String del = (String) param[1];
+            String esc = param[0];
+            String del = param[1];
             SPLIT_PATTERNS.put(esc + del, createSplitPattern(esc,del));
         }
     }
 
-    private StringUtil() {}
+    private EscapeUtil() {}
 
     /**
      * Combine a list of strings to a single path with proper escaping.

@@ -23,13 +23,13 @@ import org.testng.annotations.Test;
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 
-import static org.jolokia.util.StringUtil.*;
+import static org.jolokia.util.EscapeUtil.*;
 
 /**
  * @author roland
  * @since 19.09.11
  */
-public class StringUtilTest {
+public class EscapeUtilTest {
 
 
     Object[] PATH_SPLIT_TEST_DATA = new Object[] {
@@ -52,7 +52,7 @@ public class StringUtilTest {
     @Test
     public void pathSplitting() {
         for (int i = 0; i< PATH_SPLIT_TEST_DATA.length; i += 3) {
-            List got = StringUtil.parsePath((String) PATH_SPLIT_TEST_DATA[i]);
+            List got = EscapeUtil.parsePath((String) PATH_SPLIT_TEST_DATA[i]);
             assertEquals(got, (List<String>) PATH_SPLIT_TEST_DATA[i+1]);
         }
     }
@@ -62,7 +62,7 @@ public class StringUtilTest {
         for (int i = 0; i< PATH_SPLIT_TEST_DATA.length; i += 3) {
             // Do reverse test ?
             if ((Boolean) PATH_SPLIT_TEST_DATA[i+2]) {
-                String glued = StringUtil.combineToPath((List<String>) PATH_SPLIT_TEST_DATA[i + 1]);
+                String glued = EscapeUtil.combineToPath((List<String>) PATH_SPLIT_TEST_DATA[i + 1]);
                 assertEquals(glued,PATH_SPLIT_TEST_DATA[i]);
             }
         }
@@ -71,7 +71,7 @@ public class StringUtilTest {
     @Test
     public void commaSplitting() {
         for (int i = 0; i< COMMA_SPLIT_TEST_DATA.length; i +=2) {
-            List got = StringUtil.split((String) COMMA_SPLIT_TEST_DATA[i],CSV_ESCAPE,",");
+            List got = EscapeUtil.split((String) COMMA_SPLIT_TEST_DATA[i], CSV_ESCAPE, ",");
             assertEquals(got, (List<String>) COMMA_SPLIT_TEST_DATA[i+1]);
         }
     }

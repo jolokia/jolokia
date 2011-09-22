@@ -167,7 +167,6 @@ public class MBeanInfoData {
         if (stack.empty()) {
             addFullMBeanInfo(mBeanMap, mBeanInfo);
         } else {
-            // pathStack gets cloned here since the processing will eat it up
             addPartialMBeanInfo(mBeanMap, mBeanInfo,stack);
         }
         // Trim if required
@@ -274,6 +273,7 @@ public class MBeanInfoData {
             return new Stack<String>();
         } else {
             // Trim of domain and MBean properties
+            // pathStack gets cloned here since the processing will eat it up
             Stack<String> ret = (Stack<String>) pathStack.clone();
             for (int i = 0;i < pLevel;i++) {
                 ret.pop();

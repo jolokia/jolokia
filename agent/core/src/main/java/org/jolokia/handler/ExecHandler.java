@@ -13,7 +13,6 @@ import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
-import org.jolokia.util.StringUtil;
 
 /*
  *  Copyright 2009-2010 Roland Huss

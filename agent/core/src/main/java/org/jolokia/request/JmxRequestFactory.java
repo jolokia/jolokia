@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.util.StringUtil;
+import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 
 /*
@@ -87,7 +87,7 @@ public final class JmxRequestFactory {
             String pathInfo = extractPathInfo(pPathInfo, pParameterMap);
 
             // Get all path elements as a reverse stack
-            Stack<String> elements = StringUtil.extractElementsFromPath(pathInfo);
+            Stack<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
 
             // Use version by default if no type is given
             type = elements.size() != 0 ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
