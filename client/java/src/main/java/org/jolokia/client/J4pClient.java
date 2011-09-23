@@ -177,7 +177,7 @@ public class J4pClient  {
      * dispatched on the agent side. The results are given back in the same order as the arguments provided.
      *
      * @param pRequests requests to execute
-     * @param pProcessingOptions processiong options to use
+     * @param pProcessingOptions processing options to use
      * @param <R> response type
      * @param <T> request type
      * @return list of responses, one response for each request
