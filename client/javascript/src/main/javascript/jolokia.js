@@ -402,7 +402,7 @@ var Jolokia = (function($) {
 
     // ================================================================================================
 
-    // Escape a path part
+    // Escape a path part, can be used as a static method outside this function too
     Jolokia.escape = function(part) {
         return part.replace(/!/g,"!!").replace(/\//g,"!/");
     };
