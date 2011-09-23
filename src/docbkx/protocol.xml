@@ -118,9 +118,11 @@
           needs to be escaped. An exlamation mark
           (<literal>!</literal>) is used as escape character<footnote
           id="no-backslash">
-          A backslash (<literal>\</literal>) can not be used, since
-          most servlet container translate a backslash into a forward
-          slash on the fly when given in an URL. 
+          <para>
+            A backslash (<literal>\</literal>) can not be used, since
+            most servlet container translate a backslash into a forward
+            slash on the fly when given in an URL. 
+          </para>
           </footnote>. A exclamation mark needs to be doubled for
           escaping. Any other characted preceded by an exlamation mark
           is taken literally. Table <xref linkend="escape-rules"/>
