@@ -36,13 +36,13 @@ public class HttpTestUtil {
     /**
      * POST JSON sample request in string form
      */
-    public static final String HEAP_MEMORY_POST =
+    public static final String HEAP_MEMORY_POST_REQUEST =
             "{ \"type\": \"read\",\"mbean\": \"java.lang:type=Memory\", \"attribute\": \"HeapMemoryUsage\"}";
 
     /**
      * GET sample request in string form
      */
-    public static final String HEAP_MEMORY_GET = "/read/java.lang:type=Memory/HeapMemoryUsage";
+    public static final String HEAP_MEMORY_GET_REQUEST = "/read/java.lang:type=Memory/HeapMemoryUsage";
 
     private HttpTestUtil() { }
 

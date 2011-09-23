@@ -38,7 +38,7 @@ import org.json.simple.parser.ParseException;
  * @author roland
  * @since Apr 24, 2010
  */
-public class J4pClient  {
+public class J4pClient extends J4pClientBuilderFactory {
 
     // Http client used for connecting the j4p Agent
     private HttpClient httpClient;
@@ -120,7 +120,7 @@ public class J4pClient  {
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pException {
-        return this.<R,T>execute(pRequest,pMethod,null);
+        return this.<R,T>execute(pRequest, pMethod, null);
     }
 
     /**
@@ -171,7 +171,7 @@ public class J4pClient  {
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests)
             throws J4pException {
-        return this.<R,T>execute(pRequests,null);
+        return this.<R,T>execute(pRequests, null);
     }
 
     /**
@@ -331,61 +331,5 @@ public class J4pClient  {
         return httpClient;
     }
 
-    // =============================================================================================
-    // Builder for setting up an agent
 
-    /** See {@link org.jolokia.client.J4pClientBuilder#url} */
-    public static J4pClientBuilder url(String pUrl) {
-        return new J4pClientBuilder().url(pUrl);
-    }
-
-    /** See {@link J4pClientBuilder#singleConnection()} */
-    public static J4pClientBuilder singleConnection() {
-        return new J4pClientBuilder().singleConnection();
-    }
-
-    /** See {@link J4pClientBuilder#pooledConnections()} */
-    public static J4pClientBuilder pooledConnections() {
-        return new J4pClientBuilder().pooledConnections();
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#connectionTimeout(int)} */
-    public static J4pClientBuilder connectionTimeout(int pTimeOut) {
-        return new J4pClientBuilder().connectionTimeout(pTimeOut);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#socketTimeout(int)} */
-    public static J4pClientBuilder socketTimeout(int pTimeOut) {
-        return new J4pClientBuilder().socketTimeout(pTimeOut);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#maxTotalConnections(int)} */
-    public static J4pClientBuilder maxTotalConnections(int pConnections) {
-        return new J4pClientBuilder().maxTotalConnections(pConnections);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#maxConnectionPoolTimeout(int)} */
-    public static J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
-        return new J4pClientBuilder().maxConnectionPoolTimeout(pConnectionPoolTimeout);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#contentCharset(String)} */
-    public static J4pClientBuilder contentCharset(String pContentCharset) {
-        return new J4pClientBuilder().contentCharset(pContentCharset);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#expectContinue(boolean)} */
-    public static J4pClientBuilder expectContinue(boolean pUse) {
-        return new J4pClientBuilder().expectContinue(pUse);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#tcpNoDelay(boolean)} */
-    public static J4pClientBuilder tcpNoDelay(boolean pUse) {
-        return new J4pClientBuilder().tcpNoDelay(pUse);
-    }
-
-    /** See {@link org.jolokia.client.J4pClientBuilder#socketBufferSize(int)} */
-    public static J4pClientBuilder socketBufferSize(int pSize) {
-        return new J4pClientBuilder().socketBufferSize(pSize);
-    }
 }

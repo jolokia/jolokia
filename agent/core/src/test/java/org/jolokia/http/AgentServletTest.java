@@ -89,7 +89,7 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         StringWriter sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
 
         replay(request, response);
 
@@ -108,7 +108,7 @@ public class AgentServletTest {
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
-                        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
+                        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
                         expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
                         Vector params = new Vector();
                         params.add("debug");
@@ -131,7 +131,7 @@ public class AgentServletTest {
         StringWriter responseWriter = initRequestResponseMocks();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
 
-        preparePostRequest(HttpTestUtil.HEAP_MEMORY_POST);
+        preparePostRequest(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
 
         replay(request, response);
 
@@ -155,7 +155,7 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
 
         replay(request, response);
 
@@ -179,7 +179,7 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
 
         replay(request, response);
 
@@ -227,7 +227,7 @@ public class AgentServletTest {
         servlet.init(config);
 
         StringWriter sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
 
         replay(request, response);
 

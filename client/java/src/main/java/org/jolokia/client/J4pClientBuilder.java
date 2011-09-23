@@ -17,20 +17,16 @@
 package org.jolokia.client;
 
 import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.*;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.params.*;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.VersionInfo;
 
@@ -51,6 +47,12 @@ public class J4pClientBuilder {
     // Connection URL to use
     private String url;
 
+    // User to use for authentication
+    private String user;
+
+    // Password to use for authentication
+    private String password;
+
     /**
      * Package access constructor, user static method on J4pClient for creating
      * the
@@ -65,6 +67,7 @@ public class J4pClientBuilder {
         tcpNoDelay(true);
         socketBufferSize(8129);
         pooledConnections();
+        user = password = null;
 
         HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
@@ -77,10 +80,31 @@ public class J4pClientBuilder {
 
     /**
      * The Agent URL to connect to
+     *
      * @param pUrl agent URL
      */
     public final J4pClientBuilder url(String pUrl) {
         url = pUrl;
+        return this;
+    }
+
+    /**
+     * User to use for authentication
+     *
+     * @param pUser user name
+     */
+    public final J4pClientBuilder user(String pUser) {
+        user  = pUser;
+        return this;
+    }
+
+    /**
+     * Password for authentication
+     *
+     * @param pPassword password to use
+     */
+    public final J4pClientBuilder password(String pPassword) {
+        password  = pPassword;
         return this;
     }
 
@@ -201,14 +225,18 @@ public class J4pClientBuilder {
      */
     public J4pClient build() {
         ClientConnectionManager cm = createClientConnectionManager();
-        HttpClient httpClient = new DefaultHttpClient(cm, getHttpParams());
+        DefaultHttpClient httpClient = new DefaultHttpClient(cm, getHttpParams());
+        if (user != null) {
+            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
+                                                               new UsernamePasswordCredentials(user,password));
+        }
         return new J4pClient(url,httpClient);
     }
 
     ClientConnectionManager createClientConnectionManager() {
         return pooledConnections ?
                 new ThreadSafeClientConnManager(getHttpParams(), getSchemeRegistry()) :
-                new SingleClientConnManager(getHttpParams(), getSchemeRegistry());
+                new SingleClientConnManager(getSchemeRegistry());
     }
 
 

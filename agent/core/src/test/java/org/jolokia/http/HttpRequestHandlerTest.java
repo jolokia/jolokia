@@ -77,7 +77,7 @@ public class HttpRequestHandlerTest {
         expect(backend.handleRequest(isA(JmxReadRequest.class))).andReturn(resp);
         replay(backend);
 
-        JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET, null);
+        JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET_REQUEST, null);
         assertTrue(response == resp);
     }
 
@@ -87,7 +87,7 @@ public class HttpRequestHandlerTest {
         expect(backend.handleRequest(isA(JmxReadRequest.class))).andReturn(resp);
         replay(backend);
 
-        InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST);
+        InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
         JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia",is,"utf-8",null);
         assertTrue(response == resp);
     }
@@ -99,7 +99,7 @@ public class HttpRequestHandlerTest {
         expect(backend.handleRequest(isA(JmxReadRequest.class))).andReturn(resp).times(2);
         replay(backend);
 
-        InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST + "," + HttpTestUtil.HEAP_MEMORY_POST + "]");
+        InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
         JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         assertEquals(response.size(),2);
         assertTrue(response.get(0) == resp);
