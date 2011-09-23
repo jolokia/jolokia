@@ -94,8 +94,8 @@ $(document).ready(function() {
                      {
                          success: function(response) {
                              equals(response.request.type, "version", "Type must be version");
-                             ok(response.value.protocol >= 4.0, "Protocol must be greater or equals 4.0");
-                             ok(response.value.agent >= 0.81, "Agent version check");
+                             ok(response.value.protocol >= 6.0, "Protocol must be greater or equals 4.0");
+                             ok(response.value.agent == j4p.CLIENT_VERSION, "Agent version check");
                              start();
                          }
                      }));
@@ -147,7 +147,7 @@ $(document).ready(function() {
                         success: function(response, idx) {
                             switch (idx) {
                                 case 0:
-                                    ok(response.value.agent >= 0.80, "Version request");
+                                    ok(response.value.agent == j4p.CLIENT_VERSION, "Version request");
                                     break;
                                 case 1:
                                     equals(response.request.type, "read", "Read request");
@@ -167,7 +167,7 @@ $(document).ready(function() {
                     {
                         success: [
                                  function(response, idx) {
-                                     ok(response.value.agent >= 0.80, "Version request");
+                                     ok(response.value.agent == j4p.CLIENT_VERSION, "Version request");
                                  },
                                  function(response, idx) {
                                      equals(response.request.type, "read", "Read request");
@@ -187,7 +187,7 @@ $(document).ready(function() {
                         success: [
                                  function(response, idx) {
                                      equals(idx, 0, "Success 1st request");
-                                     ok(response.value.agent >= 0.80, "Version request");
+                                     ok(response.value.agent == j4p.CLIENT_VERSION, "Version request");
                                  },
                                  function(response, idx) {
                                      throw new Error("Must not be called");
@@ -225,7 +225,7 @@ $(document).ready(function() {
             { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage"},
             {
                 ajaxError: function(xhr) {
-                    ok(!$.httpSuccess(xhr));
+                    equals(xhr.status,404);
                 }
             });
             ok(resp == null, "No response should be returned");

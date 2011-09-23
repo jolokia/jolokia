@@ -109,8 +109,8 @@
       </plugin>
       
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
         <configuration>
           <includes>
             <include>**/*.java</include>
@@ -225,7 +225,7 @@
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>1.0-alpha-3</version>
+          <version>0.7</version>
         </plugin>
 
       </plugins>

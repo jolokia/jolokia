@@ -62,7 +62,7 @@ var Jolokia = (function($) {
         }
 
         // Jolokia Javascript Client version
-        this.CLIENT_VERSION = "0.95";
+        this.CLIENT_VERSION = "1.0.0-SNAPSHOT";
 
         // Allow a single URL parameter as well
         if (typeof param === "string") {
@@ -295,14 +295,18 @@ var Jolokia = (function($) {
         type = type.toLowerCase();
         var extractor = GET_URL_EXTRACTORS[type];
         assertNotNull(extractor,"Unknown request type " + type);
-        var parts = extractor(request);
+        var result = extractor(request);
+        var parts = result.parts || {};
         var url = type;
-        $.each(parts,function(i,v) { url += "/" + escapePart(v) });
+        $.each(parts,function(i,v) { url += "/" + Jolokia.escape(v) });
+        if (result.path) {
+            url += (result.path[0] == '/' ? "" : "/") + result.path;
+        }
         return url;
     }
 
     // For POST requests it is recommended to have a trailing slash at the URL
-    // in order to avoid a redirect which the results in a GET request.
+    // in order to avoid a redirect which then results in a GET request.
     // See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=331194#c1
     // for an explanation
     function ensureTrailingSlash(url) {
@@ -312,18 +316,20 @@ var Jolokia = (function($) {
 
     // Extractors used for preparing a GET request, i.e. for creating a stack
     // of arguments which gets appended to create the proper access URL
-    // key: lowercase request type
+    // key: lowercase request type.
+    // The return value is an object with two properties: The 'parts' to glue together, where
+    // each part gets escaped and a 'path' which is appended literally
     var GET_URL_EXTRACTORS = {
         "read" : function(request) {
             if (request.attribute == null) {
                 // Path gets ignored for multiple attribute fetch
-                return [ request.mbean ];
+                return { parts: [ request.mbean ] };
             } else {
-                return appendPath([ request.mbean, request.attribute ],request.path);
+                return { parts: [ request.mbean, request.attribute ], path: request.path };
             }
         },
         "write" : function(request) {
-            return appendPath([ request.mbean, request.attribute, valueToString(request.value) ],request.path);
+            return { parts: [request.mbean, request.attribute, valueToString(request.value)], path: request.path};
         },
         "exec" : function(request) {
             var ret = [ request.mbean, request.operation ];
@@ -332,29 +338,18 @@ var Jolokia = (function($) {
                     ret.push(valueToString(value));
                 });
             }
-            return ret;
+            return {parts: ret};
         },
         "version": function() {
-            return [];
+            return {};
         },
         "search": function(request) {
-            return [ request.mbean ];
+            return { parts: [request.mbean]};
         },
         "list": function(request) {
-            return appendPath([],request.path);
+            return { path: request.path};
         }
     };
-
-    function escapePart(part) {
-        return part.replace(/!/g,"!!").replace(/\//g,"!/");
-        // TODO: Escaping of slashes
-        //return part;
-    }
-
-    // Split up a path and append it to a given array. TODO: Check for escaped slashes
-    function appendPath(array,path) {
-         return path ? $.merge(array,path.split(/\//)) : array;
-    }
 
     // Convert a value to a string for passing it to the Jolokia agent via
     // a get request (write, exec). Value can be either a single object or an array
@@ -406,6 +401,11 @@ var Jolokia = (function($) {
     }
 
     // ================================================================================================
+
+    // Escape a path part
+    Jolokia.escape = function(part) {
+        return part.replace(/!/g,"!!").replace(/\//g,"!/");
+    };
 
     // Return back exported function/constructor
     return Jolokia;

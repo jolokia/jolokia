@@ -197,15 +197,17 @@ if (Jolokia) {
          * A complete path has the format &lt;domain&gt;/property
          * list&gt;/("attribute"|"operation")/&lt;index&gt;">
          * (e.g. <code>java.lang/name=Code Cache,type=MemoryPool/attribute/0</code>). A path can be
-         * provided partially, in which case the remaining map/array is returned. See also
-         * the Jolokia Reference Manual for a more detailed discussion of inner pathes.
+         * provided partially, in which case the remaining map/array is returned. The path given must
+         * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exlamation
+         * marks like <code>!!</code>.
+         * See also the Jolokia Reference Manual for a more detailed discussion of inner pathes and escaping. 
          *
          *
          * @param path optional path for diving into the list
          * @param opts optional opts passed to Jolokia.request()
          */
         function list(path,opts) {
-            if (arguments.length === 1 && typeof path == "object") {
+            if (arguments.length == 1 && !$.isArray(path) && $.isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
@@ -217,9 +219,15 @@ if (Jolokia) {
         // =======================================================================
         // Private methods:
 
+        // If path is an array, the elements get escaped. If not, it is
+        // taken directly
         function addPath(req,path) {
             if (path != null) {
-                req.path = path;
+                if ($.isArray(path)) {
+                    req.path = $.map(path,Jolokia.escape).join("/");
+                } else {
+                    req.path = path;
+                }
             }
         }
 

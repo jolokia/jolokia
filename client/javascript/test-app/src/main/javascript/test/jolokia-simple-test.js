@@ -171,13 +171,13 @@ $(document).ready(function() {
 
     test("version (sync)", function() {
         var value = j4p.version({method: "post"});
-        ok(value.protocol >= 4, "Protocol >= 4");
-        ok(j4p.CLIENT_VERSION >= 0.82,"Client version: " + j4p.CLIENT_VERSION);
+        ok(value.protocol >= 6, "Protocol >= 4");
+        ok(j4p.CLIENT_VERSION == value.agent,"Client version: " + j4p.CLIENT_VERSION);
         });
 
     asyncTest("version (async)", function() {
         var value = j4p.version({jsonp: true, success: function(val) {
-            ok(val.agent >= 0.8, "Agent > 0.80");
+            ok(val.agent == j4p.CLIENT_VERSION, "Agent version " + j4p.CLIENT_VERSION);
             start();
         }});
         equals(value, null);
@@ -186,10 +186,19 @@ $(document).ready(function() {
     test("list (sync)", function() {
         var value = j4p.list("java.lang/type=Memory/op");
         ok(value["gc"], "Garbage collection");
+        value = j4p.list(["java.lang","type=Memory","op"]);
+        ok(value["gc"], "Garbage collection (with array path)");
         equals(value.gc.args, 0);
+        value = j4p.list("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!/attr");
+        ok(value["Ok"], "Path with /");
+        value = j4p.list(["jolokia.it","type=naming,name=n!a!m!e with !/!","attr"]);
+        ok(value["Ok"], "Path with / (path elements)");
         raises(function() {
             j4p.list("java.lang/type=Bla");
         }, "Invalid path");
+        raises(function() {
+            j4p.list("jolokia.it/type=naming,name=n!a!m!e with !/!/attr");
+        }, "Invalid path with slashes");
     });
 
     asyncTest("list (sync with error)", function() {
