@@ -85,6 +85,8 @@ public class J4pClient  {
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest)
             throws J4pException {
+        // type spec is required to keep OpenJDK 1.6 happy (other JVM dont have a problem
+        // with infering the type is missing here)
         return this.<R,T>execute(pRequest,null,null);
     }
 
@@ -169,7 +171,7 @@ public class J4pClient  {
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests)
             throws J4pException {
-        return execute(pRequests,null);
+        return this.<R,T>execute(pRequests,null);
     }
 
     /**
@@ -191,7 +193,7 @@ public class J4pClient  {
 
             verifyJsonResponse(jsonResponse);
 
-            return extractResponses(jsonResponse, pRequests);
+            return this.<R,T>extractResponses(jsonResponse, pRequests);
         } catch (IOException e) {
             throw mapException(e);
         } catch (URISyntaxException e) {
@@ -317,7 +319,7 @@ public class J4pClient  {
      * @throws J4pException when an communication error occurs
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(T ... pRequests) throws J4pException {
-        return execute(Arrays.asList(pRequests));
+        return this.<R,T>execute(Arrays.asList(pRequests));
     }
 
     /**
