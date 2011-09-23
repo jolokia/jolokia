@@ -67,7 +67,8 @@ public class J4pClientBuilder {
         tcpNoDelay(true);
         socketBufferSize(8129);
         pooledConnections();
-        user = password = null;
+        user = null;
+        password = null;
 
         HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
