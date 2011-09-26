@@ -31,9 +31,8 @@ Client Library
 --------------
 
 This binary distributions contains the Jolokia client libraries below
-the client/ directory. For usage instructions and example, please
-refer to reference documentation or to
-http://www.jolokia.org/client.apt  
+the client/ directory. For usage and installation instructions and
+example, please refer to reference documentation.
 
 Reference documentation
 -----------------------

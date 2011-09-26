@@ -65,7 +65,7 @@
       </includes>
       <binaries>
         <outputFileNameMapping>jolokia-client.jar</outputFileNameMapping>
-        <outputDirectory>client</outputDirectory>
+        <outputDirectory>client/java</outputDirectory>
         <unpack>false</unpack>
       </binaries>
     </moduleSet>
@@ -97,6 +97,20 @@
         <include>**/*</include>
       </includes>
       <outputDirectory>reference/html</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>client/javascript/target/compressed</directory>
+      <includes>
+        <include>**/*.js</include>
+      </includes>
+      <outputDirectory>client/javascript</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>client/javascript/target/scripts</directory>
+      <includes>
+        <include>**/*.js</include>
+      </includes>
+      <outputDirectory>client/javascript</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
