@@ -57,17 +57,4 @@
     linkend="mbeans"/>). Finally, the already available clients
     bindings are described (<xref linkend="clients"/>).
   </para>
-  <note>
-    <para>
-      This reference manual is a work in progress. In fact, some of the
-      chapters are still to be filled in. The most complete chapter is
-      on the <link linkend="protocol">protocol</link>, so you can
-      already start to play around implementing own client
-      bindings. We are really keen on hearing your success stories and
-      are very open to integrate JVM based binding within Jolokia itself.
-    </para>
-    <para>
-      Please stay tuned, we are really work hard on it ;-)
-    </para>
-  </note>
 </chapter>
