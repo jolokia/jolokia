@@ -82,18 +82,18 @@ public class MemoryDemo {
     <para>
       In order to compile and run this sample, two support libraries
       are required in addition to
-      <filename>jolokia-client-java.jar</filename> (<ulink url="TODO">Download</ulink>): 
+      <filename>jolokia-client-java.jar</filename> (<ulink url="../../download.html">Download</ulink>): 
     </para>
     <itemizedlist>
       <listitem>
         Apache <ulink
         url="http://hc.apache.org/httpcomponents-client-ga/index.html">HttpClient</ulink>, 
-        4.1 (<ulink url="TODO">Download</ulink>)
+        4.1 (<ulink url="http://hc.apache.org/downloads.cgi">Download</ulink>)
       </listitem>
       <listitem>
         <ulink
             url="http://code.google.com/p/json-simple/">json-simple</ulink>, 
-        1.1 (<ulink url="TODO">Download</ulink>)
+        1.1 (<ulink url="http://code.google.com/p/json-simple/downloads/list">Download</ulink>)
       </listitem>
     </itemizedlist>
     <para>
