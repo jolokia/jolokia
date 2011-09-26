@@ -47,14 +47,6 @@ public enum J4pQueryParameter {
      * This works only for certain operations like pattern reads.
      */
     IGNORE_ERRORS("ignoreErrors"),
-
-
-    /**
-     * Option which can be given to a request to speficy a JSONP callback.
-     * The generated answer will be of type text/javascript and it will
-     * contain a JSON function to be called.
-     */
-    CALLBACK("callback")
     ;
 
     // =======================================================================

@@ -21,8 +21,7 @@ import org.jolokia.Version;
 import org.jolokia.client.exception.J4pException;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.*;
 
 /**
  * @author roland
@@ -34,10 +33,7 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
     public void versionGetRequest() throws J4pException {
         J4pVersionRequest req = new J4pVersionRequest();
         J4pVersionResponse resp = j4pClient.execute(req);
-        assertEquals("Proper agent version",Version.getAgentVersion(),resp.getAgentVersion());
-        assertEquals("Proper protocol version",Version.getProtocolVersion(),resp.getProtocolVersion());
-        assertTrue("Request timestamp",resp.getRequestDate().getTime() <= System.currentTimeMillis());
-
+        verifyResponse(resp);
     }
 
     @Test
@@ -45,9 +41,16 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
         J4pVersionRequest req = new J4pVersionRequest();
         req.setPreferredHttpMethod(HttpPost.METHOD_NAME);
         J4pVersionResponse resp = (J4pVersionResponse) j4pClient.execute(req);
-        assertEquals("Proper agent version",Version.getAgentVersion(),resp.getAgentVersion());
-        assertEquals("Proper protocol version",Version.getProtocolVersion(),resp.getProtocolVersion());
-        assertTrue("Request timestamp",resp.getRequestDate().getTime() <= System.currentTimeMillis());
+        verifyResponse(resp);
+    }
+
+   private void verifyResponse(J4pVersionResponse pResp) {
+        assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
+        assertEquals("Proper protocol version",Version.getProtocolVersion(), pResp.getProtocolVersion());
+        assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
+        assertEquals("Jetty", "jetty", pResp.getProduct());
+        assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
+        assertNull(pResp.getExtraInfo());
     }
 
 

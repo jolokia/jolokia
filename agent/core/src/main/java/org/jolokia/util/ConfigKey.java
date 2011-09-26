@@ -85,7 +85,7 @@ public enum ConfigKey {
     /**
      * Option which can be given to a request to speficy a JSONP callback.
      * The generated answer will be of type text/javascript and it will
-     * contain a JSON function to be called.
+     * contain a Javascript function to be called.
      */
     CALLBACK("callback", false, true),
 

@@ -65,7 +65,7 @@ public class J4pClientBuilder {
         contentCharset(HTTP.DEFAULT_CONTENT_CHARSET);
         expectContinue(true);
         tcpNoDelay(true);
-        socketBufferSize(8129);
+        socketBufferSize(8192);
         pooledConnections();
         user = null;
         password = null;
@@ -139,11 +139,13 @@ public class J4pClientBuilder {
     }
 
     /**
-     * Sets value of the SO_TIMEOUT parameter.
+     * Defines the socket timeout (<code>SO_TIMEOUT</code>) in milliseconds,
+     * which is the timeout for waiting for data  or, put differently,
+     * a maximum period inactivity between two consecutive data packets).
+     * A timeout value of zero is interpreted as an infinite timeout.
      *
      * @param pTimeOut SO_TIMEOUT value in milliseconds, 0 mean no timeout at all.
      */
-
     public final J4pClientBuilder socketTimeout(int pTimeOut) {
         HttpConnectionParams.setSoTimeout(params,pTimeOut);
         return this;
