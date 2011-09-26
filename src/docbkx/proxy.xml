@@ -13,7 +13,7 @@
     </para>
     <para>
       Agents of all types support the proxy mode. However, since one
-      has usuallt the free choice of plattform for a dedicated Jolokia
+      has usually the free choice of platform for a dedicated Jolokia
       proxy, an enviroment optimized for HTTP communication should be
       used. These are either servlet container or JEE server hosting
       the WAR agent or an OSGi runtime with an OSGi HttpService (which
