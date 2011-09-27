@@ -51,7 +51,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     /**
      * For a simple requests (one MBean, one attribute) we let the dispatching of the servers
      * done by the upper level. If the request is for an MBean pattern or multiple attributes
-     * are required, we try multiple request for multiple server.
+     * are required, we try multiple requests for multiple server.
      *
      *
      * @param pRequest request to decide on whether to handle all request at once

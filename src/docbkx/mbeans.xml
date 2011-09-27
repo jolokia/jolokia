@@ -1,12 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <chapter id="mbeans">
   <title>Jolokia MBeans</title>
-  <note>
+  <para>
+    Beside bridging JMX to the HTTP/JSON world, the Jolokia agents
+    also installs own MBeans which provide extra services which are
+    described in this chapter.
+  </para>
+  <section id="mbean-config">
+    <title>Configuration MBean</title>
     <para>
-      This chapter, when finished, will explain the varios specific
-      MBeans that Jolokia will register. These provide services
-      switching on debug, manuplation the history, dumping all MBean
-      Servers found, and more.
+      This MBean, which is registered under the name <emphasis
+      role="bold">jolokia:type=Config</emphasis>, allows changing
+      configuration parameters. Changes are non-persistent and get
+      lost after an restart of the hosting application
+      server. Debugging and the history store can be configured with
+      this MBean.
     </para>
-  </note>
+    <section id="mbean-debugging">
+      <title>Debugging</title>
+      <para>
+        Debugging can be switched on by setting the attribute
+        <literal>Debug</literal>. When debugging is switched on, the
+        Jolokia agent will store debug information in a ring buffer in
+        memory, whose size can be tuned with the attribute
+        <literal>MaxDebugEntries</literal>. The debug information can
+        be fetched by the operation <literal>debugInfo</literal>. This
+        debugging output will contain the JSON responses (which in
+        turn contain their requests) sent to the client. Finally, the
+        operation <literal>resetDebugInfo</literal> clears the debug
+        history. 
+      </para>
+    </section>
+    <section id="mbean-history">
+      <title>History store</title>
+      <para>
+        The <emphasis>history store</emphasis> can be used to remember
+        attribute and return values within the agent's memory. The
+        Nagios check <command>check_jmx4perl</command> for instances
+        uses this feature for its delta check feature which measure
+        the increase or decrease of attribute values. In order to
+        switch on history tracking, two operations are provided:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><emphasis role="bold">setHistoryEntriesForOperation</emphasis></term>
+          <listitem>              
+            JMX operation for switching on tracking of the execution of
+            JMX operations. It takes four arguments: The MBean and
+            operation name, an optional target URL when the agent
+            is used in proxy mode and the number of maximal
+            entries to track. If the target URL is given, than
+            request for this specific target are tracked,
+            otherwise, if the URL is null, requests to this
+            operation on the local agent are tracked.  The return
+            value of calling this operations is stored in an 
+            buffer with the specified length, where the oldest
+            elements will shift out in case of an overflow. 
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><emphasis role="bold">setHistoryEntriesForAttribute</emphasis></term>
+          <listitem>              
+            JMX operation for switching on tracking of an JMX
+            attribute's value. It takes five arguments: The MBean
+            and attribute name, an  optional path and target URL and
+            the maximal number of entries to remember. As above, the
+            target URL is only used for proxy requests. The path can
+            be used to store only read request with the given path. 
+            </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        If for a request history tracking is switched on, the JSON
+        response will contain an extra field
+        <constant>history</constant> which contains a list with
+        historical values along with the timestamp when it was
+        recorded. This format is described in detail in <xref
+        linkend="history"/>.
+      </para>
+    </section>
+  </section>
+  <section id="mbean-serverhandler">
+    <title>Server Handler</title>
+    <para>
+      The MBean <emphasis
+      role="bold">jolokia:type=ServerHandler</emphasis> has a single
+      operation <methodname>mBeanServersInfo</methodname> with no
+      arguments. This operation can be used to dump out the name of
+      all registered MBean on all found MBeanServers. It is helpful to
+      get a quick and condensed overview of the available JMX
+      information. 
+    </para>
+  </section>
 </chapter>

@@ -210,13 +210,16 @@
           and <constant>path</constant> which are specific to a read
           request. 
         </para>
-        <programlisting><![CDATA[
+        <example id="request-example">
+          <title>JSON Request</title>
+          <programlisting><![CDATA[
   {
     "type" : "read",
     "mbean" : "java.lang:type=Memory",
     "attribute" : "HeapMemoryUsage",
     "path" : "used",
   }]]></programlisting>
+        </example>
         <para>
           Each request JSON object results in a single JSON response
           object contained in the HTTP answer's body. A <emphasis>bulk
@@ -267,7 +270,9 @@
         <para>
           The format of a single Jolokia response is
         </para>
-        <programlisting><![CDATA[
+        <example id="response-example">
+          <title>JSON Response</title>
+          <programlisting><![CDATA[
  {
    "value": .... ,
    "status" : 200,
@@ -282,6 +287,7 @@
                }, ....
              ]
  }]]></programlisting>
+        </example>
         <para>
           For successful requests, the <constant>status</constant> is
           always <literal>200</literal> (the HTTP success code). The
@@ -717,7 +723,7 @@
             arrays to the agent, please consider using POST requests.
           </note>
           <para>
-            Certain <em>tag values</em> are used to mark special
+            Certain <emphasis>tag values</emphasis> are used to mark special
             values.  A <constant>null</constant> value has to be
             serialized as <literal>[null]</literal>, an empty String
             as <literal>""</literal>. Tag values are not required for
@@ -866,10 +872,11 @@
 }]]></programlisting>
       <para>
         Since this representation of a simple map is unnecessarily
-        complicated, Jolokia treats TabularData of this kind (i.e. one
-        index <literal>key</literal> and rows with properties
-        <literal>key</literal> and <literal>value</literal>) specially
-        in order to translate it back (and forth) to
+        complicated, Jolokia treats <classname>TabularData</classname>
+        of this kind (i.e. one index <literal>key</literal> and rows
+        with properties <literal>key</literal> and
+        <literal>value</literal>) specially in order to translate it
+        back (and forth) to
       </para>
       <programlisting><![CDATA[{
   "kind" : "Habanero", 
@@ -891,51 +898,20 @@
         attribute or JMX operation to be tracked.
       </para>
       <para>
-        The MBean <literal>jolokia:type=Config</literal> provides the
-        following two operations:
-        <variablelist>
-          <varlistentry>
-            <term><emphasis role="bold">setHistoryEntriesForOperation</emphasis></term>
-            <listitem>              
-                JMX operation for switching on tracking of the execution of
-                JMX operations. It takes four arguments: The MBean and
-                operation name, an optional target URL when the agent
-                is used in proxy mode and the number of maximal
-                entries to track. If the target URL is given, than
-                request for this specific target are tracked,
-                otherwise, if the URL is null, requests to this
-                operation on the local agent are tracked.  The return
-                value of calling this operations is stored in an 
-                buffer with the specified length, where the oldest
-                elements will shift out in case of an overflow. 
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><emphasis role="bold">setHistoryEntriesForAttribute</emphasis></term>
-            <listitem>              
-              JMX operation for switching on tracking of an JMX
-              attribute's value. It takes five arguments: The MBean
-              and attribute name, an  optional path and target URL and
-              the maximal number of entries to remember. As above, the
-              target URL is only used for proxy requests. The path can
-              be used to store only read request with the given path. 
-            </listitem>
-          </varlistentry>
-        </variablelist>
-      </para>
-      <para>
-        Optionally, a <constant>history</constant> entry might be
-        present. This is the case, when <emphasis>history
-        tracking</emphasis> is switched on. A certain JMX
-        operation on an Jolokia specific MBean has to be executed
-        to turn history tracking on. See <xref linkend="history"/>
-        for details . If this is the case,
-        <constant>history</constant> contains an array of json
-        objects which have two attributes: <constant>value</constant>
-        containing the historical value (which can be as complex
-        as any other value) and <constant>timestamp</constant> indicating
-        the time when this value was current (as measured by the server).
-      </para>
+        A <constant>history</constant> entry is contained in every
+        response for which history tracking was switched on. A certain
+        JMX operation on an Jolokia specific MBean has to be executed
+        to turn history tracking on for a specific attribute or
+        operation. See <xref linkend="mbeans"/> for details.The
+        <constant>history</constant> property of the JSON response
+        contains an array of json objects which have two attributes:
+        <constant>value</constant> containing the historical value
+        (which can be as complex as any other value) and
+        <constant>timestamp</constant> indicating the time when this
+        value was current (as measured by the server). <xref
+        linkend="response-example"/> has an example of a response
+        containing historical values. 
+      </para>      
     </section>
 
     <section id="protocol-proxy">

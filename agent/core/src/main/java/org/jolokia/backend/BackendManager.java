@@ -176,12 +176,13 @@ public class BackendManager {
 
         // Update global history store
         historyStore.updateAndAdd(pJmxReq,json);
+        json.put("status",200 /* success */);
+
         if (debug) {
             debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
             debug("Response: " + json);
         }
-        // Ok, we did it ...
-        json.put("status",200 /* success */);
+
         return json;
     }
 

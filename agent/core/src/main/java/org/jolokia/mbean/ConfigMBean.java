@@ -43,8 +43,9 @@ public interface ConfigMBean {
      * @param pMBean MBean object name
      * @param pAttribute attribute name
      * @param pPath inner path (optional)
-     * @param pTarget remote target or null for a loal mbean
+     * @param pTarget remote target or null for a local mbean
      * @param pMaxEntries max last entries to remember, if 0 history tracking is switched off.
+     * @throws MalformedObjectNameException if the given name is not proper object name
      */
     void setHistoryEntriesForAttribute(String pMBean,String pAttribute,String pPath,String pTarget,int pMaxEntries) throws MalformedObjectNameException;
 
@@ -125,5 +126,4 @@ public interface ConfigMBean {
      * @param pNumber entries to set
      */
     void setMaxDebugEntries(int pNumber);
-
 }

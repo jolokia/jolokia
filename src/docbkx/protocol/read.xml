@@ -20,11 +20,19 @@
     fetched. Only the single response's <literal>value</literal> will
     differ dependent on what kind of read request was performed.
   </note>
-  <warning>
-    <emphasis>The description of multi-attribute and pattern fetching
-    is still missing.</emphasis>
-  </warning>
-  
+  <para>
+    A read request for multiple attributes on the same MBean is
+    initiated by giving a list of attributes to the request. For a
+    POST request this is an JSON array, for a GET request it is a
+    comma separated list of attribute names (where slashes and
+    exclamation marks must be escaped as described in <xref
+    linkend="escape-rules"/>). If no attribute is provided, then all
+    attributes are fetched.  The MBean name can be given as a pattern
+    in which case the attributes are read on all matching MBeans. If a
+    MBean pattern and multiple attributes are requestes, then only the
+    value of attributes which matches both are returned, the others
+    are ignored. Pathes cannot be used with multi value reads, though.
+  </para>
   <section id="get-read">
     <title>GET read request</title>
     <para>
@@ -49,13 +57,18 @@
           contains two parts: A domain part and a list of properties
           which are separated by <literal>:</literal>. Properties
           themselves are combined in a comma separated list of
-          key-value pairs. Example:          
+          key-value pairs. This name can be a pattern in which case
+          multiple MBeans are queried for the attribute value.
         </td>
         <td><literal>java.lang:type=Memory</literal></td>
       </tr>
       <tr>
         <td><literal>&lt;attribute name&gt;</literal></td>
-        <td>Name of attribute to read</td>
+        <td>Name of attribute to read. This can be a list of Attribute
+        names separated by comma. Slashes and exclamations marks need
+        to be escaped as described in <xref
+        linkend="escape-rules"/>. If no attribute is given, all
+        attributes are read.</td>
         <td><literal>HeapMemoryUsage</literal></td>
       </tr>
       <tr>
@@ -97,13 +110,16 @@
       </tr>
       <tr>
         <td><constant>mbean</constant></td>
-        <td>MBean's ObjectName</td>
+        <td>MBean's ObjectName which can be a pattern</td>
         <td><literal>java.lang:type=Memory</literal></td>
       </tr>
       <tr>
         <td><constant>attribute</constant></td>
-        <td>Attribute name to read</td>
-        <td><literal>HeapMemoryUsage</literal></td>
+        <td>Attribute name to read or a JSON array containing a list
+        attributes to read. No attribute is given, then all attributes
+        are read.</td>
+        <td><literal>HeapMemoryUsage</literal>, <literal>[
+        "HeapMemoryUsage", "NonHeapMemoryUsage" ]</literal></td>
       </tr>
       <tr>
         <td><constant>path</constant></td>
@@ -129,7 +145,7 @@
       linkend="responses"/> in detail.  A typical response for an
       attribute read operation for an URL like
       <informalexample>
-        <literallayout class="monospaced">http://localhost:8080/j4p/java.lang:type=Memory/HeapMemoryUsage/</literallayout>
+        <literallayout class="monospaced">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/</literallayout>
       </informalexample>
       looks like 
     </para>
@@ -164,5 +180,48 @@
       types are serialized into a JSON object. See <xref
       linkend="serialization"/> for detail on object serialization.
     </para>
+    <para>
+      For read request to a single MBean with multiple attributes, the
+      returned value is a JSON object with the attribute names as keys
+      and their values as values. For example a request to
+      <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory</literal>
+      leads to
+    </para>
+    <informalexample>
+      <programlisting><![CDATA[
+{
+ "timestamp": 1317151518,
+ "status": 200,
+ "request": {"mbean":"java.lang:type=Memory","type":"read"},
+ "value":{
+   "Verbose": false,
+   "ObjectPendingFinalizationCount": 0,
+   "NonHeapMemoryUsage": {"max":136314880,"committed":26771456,"init":24317952,"used":15211720},
+   "HeapMemoryUsage": {"max":129957888,"committed":129957888,"init":0,"used":2880008}
+ }
+}]]></programlisting>
+    </informalexample>
+    <para>
+      A request to a MBean pattern returns as value a JSON object,
+      with the MBean names as keys and as value another JSON object
+      with the attribute name as keys and the attribute values as
+      values. For example a request
+      <literal>http://localhost:8080/jolokia/read/java.lang:type=*/HeapMemoryUsage</literal> 
+      returns something like
+    </para>
+    <informalexample>
+      <programlisting><![CDATA[
+{
+ "timestamp": 1317151980,
+ "status": 200,
+ "request": {"mbean":"java.lang:type=*","attribute":"HeapMemoryUsage","type":"read"},
+ "value": { 
+    "java.lang:type=Memory": { 
+      "HeapMemoryUsage": {"max":129957888,"committed":129957888,"init":0,"used":3080912}
+    }
+ }
+}]]>
+</programlisting>
+    </informalexample>
   </section>  
 </section>
