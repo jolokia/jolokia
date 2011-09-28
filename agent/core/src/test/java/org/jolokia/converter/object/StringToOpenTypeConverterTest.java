@@ -59,8 +59,10 @@ public class StringToOpenTypeConverterTest {
         assertNull(converter.convertToObject(SimpleType.STRING,null));
     }
 
+
     @Test
     public void simpleType() {
+        assertTrue(converter.canConvert(SimpleType.STRING));
         assertEquals(converter.convertToObject(SimpleType.STRING,"bla"),"bla");
         assertEquals(converter.convertToObject(SimpleType.BOOLEAN,"true"),true);
         assertEquals(converter.convertToObject(SimpleType.BOOLEAN,false),false);
@@ -68,6 +70,7 @@ public class StringToOpenTypeConverterTest {
         assertEquals(converter.convertToObject(SimpleType.DOUBLE,"4.52"),4.52);
         assertEquals(converter.convertToObject(SimpleType.INTEGER,"9876"),9876);
     }
+
 
     @Test(expectedExceptions = { NumberFormatException.class })
     public void simpleTypeFailed() {
@@ -285,6 +288,29 @@ public class StringToOpenTypeConverterTest {
         converter.convertToObject(getSampleTabularType().getType(),"[[{ \"praesident\": \"hoeness\"}]]");
     }
 
-    // ============================================================================================================
 
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*No converter.*")
+    public void unknownOpenType() throws OpenDataException {
+        converter.convertToObject(new OpenType("java.util.Date","guenther","guenther") {
+            @Override
+            public boolean isValue(Object obj) {
+                return false;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return 0;
+            }
+
+            @Override
+            public String toString() {
+                return null;
+            }
+        },"bla");
+    }
 }
