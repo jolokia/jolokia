@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.management.openmbean.OpenType;
 
-import org.json.simple.JSONAware;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -34,7 +33,7 @@ import org.json.simple.JSONAware;
 public class StringToOpenTypeConverter extends OpenTypeConverter {
 
     // List of converters used
-    private List<OpenTypeConverter> converters;
+    private List<OpenTypeConverter<? extends OpenType>> converters;
 
     /**
      * Constructor
@@ -47,13 +46,12 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
                 new SimpleTypeConverter(this,pStringToObjectConverter),
                 new ArrayTypeConverter(this),
                 new CompositeTypeConverter(this),
-                new TabularDataConverter(this)
-                                  );
+                new TabularDataConverter(this));
     }
 
     /**
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either
-     * an {@link JSONAware} object or its string representation.
+     * an {@link org.json.simple.JSONAware} object or its string representation.
      *
      * @param openType target type
      * @param pValue value to convert from

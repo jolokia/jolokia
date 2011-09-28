@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 28.09.11
  */
-class CompositeTypeConverter extends OpenTypeConverter {
+class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
 
     /**
      * Constructor
@@ -48,24 +48,23 @@ class CompositeTypeConverter extends OpenTypeConverter {
 
     /** {@inheritDoc} */
     @Override
-    Object convertToObject(OpenType pOpenType, Object pFrom) {
-        CompositeType type = (CompositeType) pOpenType;
+    Object convertToObject(CompositeType pType, Object pFrom) {
         // break down the composite type to its field and recurse for converting each field
         JSONAware value = toJSON(pFrom);
         if (!(value instanceof JSONObject)) {
             throw new IllegalArgumentException(
                     "Conversion of " + value + " to " +
-                    type + " failed because provided JSON type " + value.getClass() + " is not a JSONObject");
+                    pType + " failed because provided JSON type " + value.getClass() + " is not a JSONObject");
         }
 
         Map<String, Object> givenValues = (JSONObject) value;
         Map<String, Object> compositeValues = new HashMap<String, Object>();
 
-        fillCompositeWithGivenValues(type, compositeValues, givenValues);
-        completeCompositeValuesWithDefaults(type, compositeValues);
+        fillCompositeWithGivenValues(pType, compositeValues, givenValues);
+        completeCompositeValuesWithDefaults(pType, compositeValues);
 
         try {
-            return new CompositeDataSupport(type, compositeValues);
+            return new CompositeDataSupport(pType, compositeValues);
         } catch (OpenDataException e) {
             throw new IllegalArgumentException("Internal error: " + e.getMessage(),e);
         }

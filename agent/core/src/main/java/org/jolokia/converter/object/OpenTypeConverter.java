@@ -28,7 +28,7 @@ import org.json.simple.parser.ParseException;
  * @author roland
  * @since 28.09.11
  */
-abstract class OpenTypeConverter {
+abstract class OpenTypeConverter<T extends OpenType> {
 
     // parent converter
     private OpenTypeConverter dispatcher;
@@ -59,7 +59,7 @@ abstract class OpenTypeConverter {
      * @param pFrom original data to convert from
      * @return the converted open data
      */
-    abstract Object convertToObject(OpenType pType, Object pFrom);
+    abstract Object convertToObject(T pType, Object pFrom);
 
     /**
      * Convert to JSON. The given object must be either a valid JSON string or of type {@link JSONAware}, in which

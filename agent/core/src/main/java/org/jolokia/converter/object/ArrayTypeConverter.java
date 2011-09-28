@@ -29,7 +29,7 @@ import org.json.simple.JSONAware;
  * @author roland
  * @since 28.09.11
  */
-class ArrayTypeConverter extends OpenTypeConverter {
+class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
 
     /**
      * Constructor
@@ -40,13 +40,14 @@ class ArrayTypeConverter extends OpenTypeConverter {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean canConvert(OpenType pType) {
         return pType instanceof ArrayType<?>;
     }
 
     /** {@inheritDoc} */
-    public Object convertToObject(OpenType pType, Object pFrom) {
-        ArrayType<?> type = (ArrayType<?>) pType;
+    @Override
+    public Object convertToObject(ArrayType type, Object pFrom) {
         JSONAware value = toJSON(pFrom);
         // prepare each value in the array and then process the array of values
         if (!(value instanceof JSONArray)) {

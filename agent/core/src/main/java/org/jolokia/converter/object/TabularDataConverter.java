@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 28.09.11
  */
-class TabularDataConverter extends OpenTypeConverter {
+class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     /**
      * Constructor
@@ -41,14 +41,15 @@ class TabularDataConverter extends OpenTypeConverter {
         super(pDispatcher);
     }
 
+    /** {@inheritDoc} */
     @Override
     boolean canConvert(OpenType pType) {
         return pType instanceof TabularType;
     }
 
+    /** {@inheritDoc} */
     @Override
-    Object convertToObject(OpenType pOpenType, Object pFrom) {
-        TabularType pType = (TabularType) pOpenType;
+    Object convertToObject(TabularType pType, Object pFrom) {
         JSONAware pValue = toJSON(pFrom);
         CompositeType rowType = pType.getRowType();
         if (rowType.containsKey("key") && rowType.containsKey("value") && rowType.keySet().size() == 2) {

@@ -25,7 +25,7 @@ import javax.management.openmbean.SimpleType;
  * @author roland
  * @since 28.09.11
  */
-class SimpleTypeConverter extends OpenTypeConverter {
+class SimpleTypeConverter extends OpenTypeConverter<SimpleType> {
 
     private StringToObjectConverter stringToObjectConverter;
 
@@ -48,7 +48,7 @@ class SimpleTypeConverter extends OpenTypeConverter {
 
     /** {@inheritDoc} */
     @Override
-    Object convertToObject(OpenType pType, Object pFrom) {
+    Object convertToObject(SimpleType pType, Object pFrom) {
         return stringToObjectConverter.prepareValue(pType.getClassName(), pFrom);
     }
 }
