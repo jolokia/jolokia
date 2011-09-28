@@ -19,6 +19,7 @@ package org.jolokia.request;
 import java.util.*;
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -41,8 +42,9 @@ public class JmxReadRequest extends JmxObjectNameRequest {
      * Constructor for GET requests
      *
      * @param pObjectName object name of MBean to read attributes from
-     * @param pAttribute a single attribute to lookup. Can be null in which case all attributes
-     *                   are to be fetched
+     * @param pAttribute a one or more attribute to lookup. Can be null in which case all attributes
+     *                   are to be fetched. More than one attribute can be provided by giving it a comma
+     *                   separated list (attribute names with commas can not be use here, though).
      * @param pPathParts optional path parts from for filtering the return value
      * @param pInitParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name.
@@ -72,12 +74,12 @@ public class JmxReadRequest extends JmxObjectNameRequest {
      * @throws IllegalStateException if this request was initialized with more than one attribute.
      */
     public String getAttributeName() {
-       if (attributeNames == null) {
+        if (attributeNames == null) {
            return null;
-       }
+        }
         if (isMultiAttributeMode()) {
             throw new IllegalStateException("Request contains more than one attribute (attrs = " +
-                    "" + attributeNames + "). Use getAttributeNames() instead.");
+                                            "" + attributeNames + "). Use getAttributeNames() instead.");
         }
         return attributeNames.get(0);
     }
@@ -149,7 +151,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
             public JmxReadRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
                 return new JmxReadRequest(
                         pStack.pop(),  // object name
-                        popOrNull(pStack), // attributes (can be null)
+                        popOrNull(pStack), // attribute(s) (can be null)
                         prepareExtraArgs(pStack), // path
                         pParams);
             }
@@ -181,20 +183,23 @@ public class JmxReadRequest extends JmxObjectNameRequest {
 
     // initialize and detect multi attribute mode
     private void initAttribute(Object pAttrval) {
-        if (pAttrval != null) {
-            if (pAttrval instanceof String) {
-                attributeNames = Arrays.asList((String) pAttrval);
+        if (pAttrval instanceof String) {
+            attributeNames = EscapeUtil.split((String) pAttrval,EscapeUtil.CSV_ESCAPE,",");
+            multiAttributeMode = attributeNames.size() > 1;
+        } else if (pAttrval instanceof Collection) {
+            Collection<String> attributes = (Collection<String>) pAttrval;
+            if (attributes.size() == 1 && attributes.iterator().next() == null) {
+                attributeNames = null;
                 multiAttributeMode = false;
-            } else if (pAttrval instanceof Collection) {
-                Collection<String> attributes = (Collection<String>) pAttrval;
-                if (attributes.size() == 1 && attributes.iterator().next() == null) {
-                    attributeNames = Arrays.asList((String) null);
-                } else {
-                    attributeNames = new ArrayList<String>(attributes);
-                    multiAttributeMode = true;
-                }
+            } else {
+                attributeNames = new ArrayList<String>(attributes);
+                multiAttributeMode = true;
             }
+        } else if (pAttrval == null) {
+            attributeNames = null;
+            multiAttributeMode = false;
+        } else {
+            throw new IllegalArgumentException("Attribute names must be either a String, Collection or null (and not " + pAttrval.getClass() + ")");
         }
     }
-
 }

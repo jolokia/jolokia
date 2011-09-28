@@ -118,7 +118,9 @@ public final class EscapeUtil {
     }
 
     /**
-     * Split a string on a delimiter, respecting escaping with backslash:
+     * Split a string on a delimiter, respecting escaping with an escape char. Assuming
+     * that a backslash (<code>\</code>) is used as escape char, then the following
+     * replacement rules apply:
      *
      * <ul>
      *  <li>
@@ -132,7 +134,7 @@ public final class EscapeUtil {
      *  </li>
      *
      * @param pArg argument to split
-     * @param pEscape single character used for escaping
+     * @param pEscape escape pattern as it can be used in a regular expression.
      * @param pDelimiter delimiter to use
      * @return the splitted string as list or an empty array if the argument was null
      */
