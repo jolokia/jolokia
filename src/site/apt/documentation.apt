@@ -16,6 +16,3 @@ Documentation
  The {{{./reference/html/index.html}reference manual}} contains a comprehensive
  documentation to Jolokia, its agents and client bindings. There is also
  a {{{./reference/pdf/jolokia-reference.pdf}PDF version}}.
-
- <The reference manual is still young, so it is only partly
- completed. It is a work in progress.>

@@ -42,7 +42,7 @@
     one or more <classname>J4pResponse</classname> objects as result.
   </para>
   <sidebar>
-    <title>What the heck does this 'J4p' mean ?</title>
+    <title>What the heck is this 'J4p' ?</title>
     That's a reminescence to Jolokia's roots which lies in <ulink
     url="http://www.jmx4perl.org">Jmx4Perl</ulink>. It is always good
     to remember where one comes from ;-)
@@ -478,7 +478,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
     </para>
     <variablelist>
       <varlistentry>
-        <term><classname>J4pConnectExcetpion</classname></term>
+        <term><classname>J4pConnectException</classname></term>
         <listitem>
           <para>
             Exception thrown when the connection to the server
@@ -488,7 +488,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><classname>J4pTimeoutExcetpion</classname></term>
+        <term><classname>J4pTimeoutException</classname></term>
         <listitem>
           <para>
             Exception thrown in case of an timeout. The nested
@@ -498,7 +498,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><classname>J4pRemoteExcetpion</classname></term>
+        <term><classname>J4pRemoteException</classname></term>
         <listitem>
           <para>
             Generic exception thrown when an exception occured on the
@@ -511,7 +511,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><classname>J4pBulkRemoteExcetpion</classname></term>
+        <term><classname>J4pBulkRemoteException</classname></term>
         <listitem>
           <para>
             Exception thrown when a bulk request fails on the remote
@@ -528,7 +528,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><classname>J4pExcetpion</classname></term>
+        <term><classname>J4pException</classname></term>
         <listitem>
           <para>
             Base exception thrown, when no other exception fits,

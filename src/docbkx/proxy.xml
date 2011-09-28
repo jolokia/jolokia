@@ -6,10 +6,10 @@
       Using Jolokia in the proxy mode enables for agentless operation
       on the target server. A dedicated agent deployment proxies by
       accepting Jolokia requests as input, translating them to JSR-160
-      requests for the target. The principal setup is
-      described in <xref linkend="architecture"/>. As noted there, the
-      real target is given within the original request, which must be
-      sent as a POST request. 
+      requests for the target. This setup is described in <xref
+      linkend="architecture"/>. As noted there, the real target is
+      given within the original request, which must be sent as a POST
+      request.
     </para>
     <para>
       Agents of all types support the proxy mode. However, since one

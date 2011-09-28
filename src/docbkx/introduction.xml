@@ -2,59 +2,59 @@
 <chapter id="introduction">
   <title>Introduction</title>
   <para>
-    JMX (Java Management Extensions) is <emphasis
-    role="bold">the</emphasis> standard management solution in the
-    Java world. Since JDK 1.5 it is available in every Java Virtual
-    Machine and especially JEE application servers use this technology
-    intensively for exposing managable entities.
+    JMX (Java Management Extensions) is <emphasis>the</emphasis>
+    standard management solution in the Java world. Since JDK 1.5 it
+    is available in every Java Virtual Machine and especially JEE
+    application servers use JMX for their management business.
   </para>
   <para>
-    We love JMX. It is a well crafted specification, created in times
+    I love JMX. It is a well crafted specification, created in times
     where other concepts like EJBs failed spectacularly. Even more
     than ten years after its incubation it is still the one-and-only
-    when it comes to management in the Java world. What we like
-    especially are the various levels of sophistications for
-    implementing MBeans, starting with dead simple <emphasis>Standard
-    MBeans</emphasis> and ending in very flexible Open MBeans.
+    when it comes to management in the Java world.  Especially the
+    various levels of sophistications for implementing MBeans,
+    starting with dead simple <emphasis>Standard MBeans</emphasis> and
+    ending in very flexible Open MBeans and MXBeans, are impressive.
   </para>
   <para>
-    Some of advanced JMX concepts didn't really hit the public and are
-    now probably obsolete. Add-on standards like JSR-77 didn't
+    However, some of the advanced JMX concepts didn't really hit the
+    public and are now probably obsolete. Add-on standards like <ulink
+    url="http://jcp.org/en/jsr/detail?id=77">JSR-77</ulink> didn't
     received the adoption level they deserved. And then there is
-    JSR-160, JMX remoting. This specificatiion is designed for ease of
-    usage and has the ambition to transparently hide the technical
-    details for remote communication so that is makes (nearly) no
+    <ulink url="http://jcp.org/en/jsr/detail?id=160">JSR-160</ulink>,
+    JMX remoting. This specificatiion is designed for ease of usage
+    and has the ambition to transparently hide the technical details
+    behind the remote communication so that is makes (nearly) no
     difference, whether MBeans are invoked locally or
     remotely. Unfortunately, the underlying transport protocol (RMI)
     and programing model is very Java centric and is not usable
     outside the Java world.
   </para>  
   <para>
-    This is where Jolokia comes into play. It is agent based approach,
+    This is where Jolokia steps in. It is an agent based approach,
     living side by side with JSR-160, but uses the much more open HTTP
     for its transport business where the data payload is serialized in
     JSON. This opens a whole new world for different, non-Java
     clients. Beside this protocol switch, Jolokia provides new
-    features for JMX remoting, which are not available for JSR-160
+    features for JMX remoting, which are not available in JSR-160
     connectors: Bulk requests allow for multiple JMX operations with a
     single remote server roundtrip. A fine grained security mechanism
     can restrict the JMX access on specific JMX operations. Other
     features like the JSR-160 proxy mode or history tracking are
-    specific to Jolokia, too. 
+    specific to Jolokia, too.
   </para>
   <para>
-    This reference manual explains all Jolokia details. After giving
-    an overview over Jolokia's architecture (<xref
-    linkend="architecture"/>), installation and configuration of the
-    various Jolokia agents is described (<xref
-    linkend="agents"/>). Jolokia's security policy mechanism
-    (<xref linkend="security"/>) and proxy mode (<xref
-    linkend="proxy"/>) are the topic of the following
-    chapters. For implementors of Jolokia client bindings the protocol
-    definition is probably the most interesting (<xref
-    linkend="protocol"/>). Jolokia itself comes with some preregister
-    MBeans which are listed in an extra chapter (<xref
-    linkend="mbeans"/>). Finally, the already available clients
-    bindings are described (<xref linkend="clients"/>).
+    This reference manual explains the Jolokia in detail. After an
+    overview of Jolokia's architecture in <xref
+    linkend="architecture"/>, installation and configuration of the
+    various Jolokia agents is described in <xref
+    linkend="agents"/>. Jolokia's security policy mechanism (<xref
+    linkend="security"/>) and proxy mode (<xref linkend="proxy"/>) are
+    covered in the following chapters. For implementors of Jolokia
+    client bindings the protocol definition is probably the most
+    interesting part (<xref linkend="protocol"/>). Jolokia itself
+    comes with some preregister MBeans which are listed in <xref
+    linkend="mbeans"/>. The available client bindings are described
+    in <xref linkend="clients"/>.
   </para>
 </chapter>

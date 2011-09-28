@@ -4,8 +4,7 @@
   <para>
     The architecture of Jolokia is quite different to that of JSR-160
     connectors. One of the most striking difference is Jolokia's
-    typeless approach avoiding a complete serialization of Java
-    objects.
+    typeless approach.
   </para>
   <para>
     JSR-160, released in 2003, has a different design goal than
@@ -21,9 +20,9 @@
     side, there are message passing models, which include remoting
     explicitely, so that the caller <emphasis>knows</emphasis> from
     the programming model that she is calling a potentially expensive
-    remote call. This is probably one of the reasons why RMI (the
-    default protocol stack of JSR-160 connectors) lost importance in
-    favor of more explicite remote protocols.
+    remote call. This is probably the main reason why RMI (the default
+    protocol stack of JSR-160 connectors) lost importance in favor of
+    more explicite remote protocols.
   </para>
   <para>
     One problem with JSR-160 is it implicit reliance on RMI and its
@@ -40,18 +39,18 @@
   <section id="agent-mode">
     <title>Agent mode</title>
     <para>
-      <xref linkend="fig-architecture-overview"/> sketches the
-      enviroment in which Jolokia operates. The heart of Jolokia is
-      the agent, which exports on the frontside a JSON based protocol
-      over HTTP that gets bridged to invocation of local JMX MBeans. It
-      lives outside the JSR-160 space and hence requires a different
-      setup. For exporting its protocol via HTTP various techniques
-      are available. The most prominent one is to put the agent into a
-      servlet container. This can be a lightweight one like Tomcat or
-      Jetty or a full blown JEE Server. Since it acts like a usual
-      web application the deployment of the agent is well understood
-      and should pose no entry barrier for any developer who ever
-      dealt with Java web applications.
+      <xref linkend="fig-architecture-overview"/> illustrates the
+      enviroment in which Jolokia operates. The agent exports on the
+      frontside a JSON based protocol over HTTP that gets bridged to
+      invocation of local JMX MBeans. It lives outside the JSR-160
+      space and hence requires a different setup. For exporting its
+      protocol via HTTP various techniques are available. The most
+      prominent one is to put the agent into a servlet container. This
+      can be a lightweight one like Tomcat or Jetty or a full blown
+      JEE Server. Since it acts like a usual web application the
+      deployment of the agent is well understood and should pose no
+      entry barrier for any developer who ever dealt with Java web
+      applications.
     </para>
 
     <figure id="fig-architecture-overview">
@@ -64,12 +63,12 @@
     </figure>
 
     <para>
-      But there is more. Specialized agents are able to use an OSGi
+      But there are more. Specialized agents are able to use an OSGi
       HttpService or come with an embedded Jetty-Server in case of the
       Mule agent. The JVM JDK6 agent uses the HTTP-Server included
-      with every Oracle JVM 6 (although this server has not the
-      best performance footprint). Agent are described in detail in
-      <xref linkend="agents"/>.
+      with every Oracle JVM 6 and can be attached dynamically to any
+      running Java process. Agents are described in detail in <xref
+      linkend="agents"/>.
     </para>
     <para>
       Beside these prefactored agents, Jolokia can be also integrated
@@ -86,13 +85,13 @@
     <para>
       The proxy mode is the solution, when it is impossible to deploy
       the Jolokia agent on the target platform. For this mode, the
-      only prerequisite for accessing the target server is, that it
-      exports its MBeans via a JSR-160 connector. Most of the time,
-      this happens for political reason, where it is simply not
-      allowed to deploy an extra piece of software or where it takes a
-      lengthy process for making this happen. Another reason could be,
-      that the target server already exports JMX via JSR-160 and you
-      want to avoid the extra step of deploying the agent.
+      only prerequisite for accessing the target server is a JSR-160
+      connection. Most of the time, this happens for political reason,
+      where it is simply not allowed to deploy an extra piece of
+      software or where it takes a lengthy process for making this
+      happen. Another reason could be, that the target server already
+      exports JMX via JSR-160 and you want to avoid the extra step of
+      deploying the agent.
     </para>
 
     <para>
@@ -126,11 +125,11 @@
       listed in <xref linkend="proxy"/>. 
     </para>      
     <para>
-      To summarize, the proxy mode should be used only when required. The agent
-      servlet on its own is more powerful than the proxy mode since it eliminates an
-      additional layer, which adds to the overall complexity and performance. Also,
-      minor additional features like merging of MBeanServers are not available in the
-      proxy mode.
+      To summarize, the proxy mode should be used only when
+      required. The agent servlet on its own is more powerful than the
+      proxy mode since it eliminates an additional layer adding to the
+      overall complexity and performance. Also, some features like
+      merging of MBeanServers are not available in the proxy mode.
     </para>    
   </section>    
 </chapter>
