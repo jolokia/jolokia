@@ -51,7 +51,6 @@ public abstract class JmxRequest {
     // Path parts, which are used for selecting parts of the return value
     private List<String> pathParts;
 
-
     /**
      * Constructor used for representing {@link HttpMethod#GET} requests.
      *

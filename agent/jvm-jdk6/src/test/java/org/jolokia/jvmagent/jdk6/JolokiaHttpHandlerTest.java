@@ -20,6 +20,9 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.util.ConfigKey;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.testng.annotations.*;
 
 import java.io.*;
@@ -41,6 +44,7 @@ public class JolokiaHttpHandlerTest {
 
     private JolokiaHttpHandler handler;
 
+
     @BeforeMethod
     public void setup() {
         handler = new JolokiaHttpHandler(getConfig());
@@ -52,6 +56,7 @@ public class JolokiaHttpHandlerTest {
         handler.stop();
     }
 
+
     @Test
     public void testCallbackGet() throws IOException, URISyntaxException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage?callback=data");
@@ -59,12 +64,10 @@ public class JolokiaHttpHandlerTest {
         // Simple GET method
         expect(exchange.getRequestMethod()).andReturn("GET");
 
-
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
 
         handler.handle(exchange);
-
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
         String result = out.toString("utf-8");
@@ -99,6 +102,50 @@ public class JolokiaHttpHandlerTest {
         assertTrue(result.startsWith("data({"));
     }
 
+    @Test
+    public void invalidMethod() throws URISyntaxException, IOException, ParseException {
+        HttpExchange exchange = prepareExchange("http://localhost:8080/");
+
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("PUT");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        handler.handle(exchange);
+
+        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        assertTrue(resp.containsKey("error"));
+        assertEquals(resp.get("error_type"),IllegalArgumentException.class.getName());
+        assertTrue(((String) resp.get("error")).contains("PUT"));
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
+    public void handlerNotStarted() throws URISyntaxException, IOException {
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getConfig());
+        newHandler.handle(prepareExchange("http://localhost:8080/"));
+
+    }
+
+    @Test
+    public void customRestrictor() throws URISyntaxException, IOException, ParseException {
+        Map<ConfigKey,String> config = getConfig();
+        config.put(ConfigKey.POLICY_LOCATION,"classpath:/access-restrictor.xml");
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+       // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        newHandler.start();
+        try {
+            newHandler.handle(exchange);
+        } finally {
+            newHandler.stop();
+        }
+        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        assertTrue(resp.containsKey("error"));
+        assertTrue(((String) resp.get("error")).contains("not allowed"));
+    }
+
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
         HttpExchange exchange = EasyMock.createMock(HttpExchange.class);
         URI uri = new URI(pUri);
@@ -117,9 +164,12 @@ public class JolokiaHttpHandlerTest {
         return out;
     }
 
+    private static boolean debugToggle = false;
     public Map<ConfigKey,String> getConfig() {
         Map<ConfigKey,String> map = new HashMap<ConfigKey, String>();
         map.put(ConfigKey.AGENT_CONTEXT,"/jolokia");
+        map.put(ConfigKey.DEBUG,debugToggle ? "true" : "false");
+        debugToggle = !debugToggle;
         return map;
     }
 }

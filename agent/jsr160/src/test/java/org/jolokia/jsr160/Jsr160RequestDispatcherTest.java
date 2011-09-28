@@ -16,10 +16,21 @@ package org.jolokia.jsr160;
  *  limitations under the License.
  */
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.management.*;
+
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.json.simple.JSONObject;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -27,10 +38,102 @@ import org.testng.annotations.Test;
  */
 public class Jsr160RequestDispatcherTest {
 
+    private Jsr160RequestDispatcher dispatcher;
+
+    @BeforeTest
+    private void setup() {
+        dispatcher = createDispatcherPointingToLocalMBeanServer();
+    }
+
     @Test
-    public void simple() {
+    public void canHandle() {
+        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", null)));
+        JmxRequest req = preparePostReadRequest(null);
+        assertTrue(dispatcher.canHandle(req));
+    }
+
+    @Test
+    public void useReturnValue() {
+        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", null)));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", null));
+    }
+
+    @Test(expectedExceptions = IOException.class)
+    public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxRequest req = preparePostReadRequest(null);
+        getOriginalDispatcher().dispatchRequest(req);
+    }
+
+    @Test
+    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxReadRequest req = (JmxReadRequest) preparePostReadRequest(null);
+        Map result = (Map) dispatcher.dispatchRequest(req);
+        assertTrue(result.containsKey("HeapMemoryUsage"));
+    }
+
+    @Test
+    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JmxReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
+        assertNotNull(dispatcher.dispatchRequest(req));
+    }
+
+    @Test
+    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        System.setProperty("TEST_WITH_USER","roland");
+        try {
+            JmxRequest req = preparePostReadRequest("roland");
+            Map result = (Map) dispatcher.dispatchRequest(req);
+            assertTrue(result.containsKey("HeapMemoryUsage"));
+        } finally {
+            System.clearProperty("TEST_WITH_USER");
+        }
+    }
+
+
+    // =========================================================================================================
+
+    private JmxReadRequest preparePostReadRequest(String pUser, String... pAttribute) {
+        JSONObject params = new JSONObject();
+        JSONObject target = new JSONObject();
+        target.put("url","service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi");
+        if (pUser != null) {
+            target.put("user","roland");
+            target.put("password","s!cr!et");
+        }
+        if (pAttribute != null && pAttribute.length > 0) {
+            params.put("attribute",pAttribute[0]);
+        }
+        params.put("target",target);
+        params.put("type","read");
+        params.put("mbean","java.lang:type=Memory");
+
+        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, null);
+    }
+
+    private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer() {
         Converters converters = new Converters(null);
         ServerHandle handle = new ServerHandle(null,null,null,null,null);
-        new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor());
+        return  new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor()) {
+            @Override
+            protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
+                Map ret = super.prepareEnv(pTargetConfig);
+                if (ret == null) {
+                    ret = new HashMap();
+                }
+                ret.put("jmx.remote.protocol.provider.pkgs","org.jolokia.jsr160");
+                return ret;
+            }
+        };
     }
+
+    private Jsr160RequestDispatcher getOriginalDispatcher() {
+        return new Jsr160RequestDispatcher(new Converters(null),
+                                           new ServerHandle(null,null,null,null,null),
+                                           new AllowAllRestrictor());
+    }
+
 }
