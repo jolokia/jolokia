@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.0" description="Release 1.0.0" date="">
+    <release version="1.0.0" description="Release 1.0.0" date="2011-10-4">
       <action dev="roland" type="add" date="2011-9-12">
         Applied patch from codewax for supporting an Equinox HTTP-Service
       </action>
@@ -32,6 +32,10 @@
         Changed escaping scheme for GET URLs and pathes so that a
         slash (/) can be escaped with an exclamation mark (!): / -->
         !/
+      </action>
+      <action dev="roland" type="add" date="2011-9-27">
+        Multiple attibutes can be added to GET read requests as a
+        comma separated value list within the URL.
       </action>
     </release>
     <release version="0.95" description="Release 0.95" date="2011-08-21">
