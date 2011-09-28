@@ -30,7 +30,8 @@ import org.json.simple.parser.ParseException;
  */
 abstract class OpenTypeConverter {
 
-    protected OpenTypeConverter dispatcher;
+    // parent converter
+    private OpenTypeConverter dispatcher;
 
     /**
      * Constructor which need the parent converter. This parent converter
@@ -81,5 +82,13 @@ abstract class OpenTypeConverter {
                                                    " cannot be parsed to JSONAware object: " + exp,exp);
             }
         }
+    }
+
+    /**
+     * Get the dispatcher converter
+     * @return dispatcher
+     */
+    protected OpenTypeConverter getDispatcher() {
+        return dispatcher;
     }
 }

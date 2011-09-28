@@ -81,7 +81,7 @@ class TabularDataConverter extends OpenTypeConverter {
             if (pLevel > 1) {
                 putRowsToTabularData(pTabularData, jsonValue, pLevel - 1);
             } else {
-                pTabularData.put((CompositeData) dispatcher.convertToObject(type.getRowType(), jsonValue));
+                pTabularData.put((CompositeData) getDispatcher().convertToObject(type.getRowType(), jsonValue));
             }
         }
     }
@@ -101,8 +101,8 @@ class TabularDataConverter extends OpenTypeConverter {
         Map<String, String> jsonObj = (Map<String,String>) pValue;
         for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("key", dispatcher.convertToObject(pRowType.getType("key"), entry.getKey()));
-            map.put("value", dispatcher.convertToObject(pRowType.getType("value"), entry.getValue()));
+            map.put("key", getDispatcher().convertToObject(pRowType.getType("key"), entry.getKey()));
+            map.put("value", getDispatcher().convertToObject(pRowType.getType("value"), entry.getValue()));
 
             try {
                 CompositeData compositeData = new CompositeDataSupport(pRowType, map);

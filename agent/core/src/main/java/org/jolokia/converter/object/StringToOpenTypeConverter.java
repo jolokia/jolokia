@@ -1,13 +1,11 @@
 package org.jolokia.converter.object;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
-import javax.management.openmbean.*;
+import javax.management.openmbean.OpenType;
 
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.simple.JSONAware;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -35,9 +33,8 @@ import org.json.simple.parser.ParseException;
  */
 public class StringToOpenTypeConverter extends OpenTypeConverter {
 
-    List<OpenTypeConverter> converters;
-
-    private StringToObjectConverter stringToObjectConverter;
+    // List of converters used
+    private List<OpenTypeConverter> converters;
 
     /**
      * Constructor
@@ -52,7 +49,6 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
                 new CompositeTypeConverter(this),
                 new TabularDataConverter(this)
                                   );
-        stringToObjectConverter = pStringToObjectConverter;
     }
 
     /**

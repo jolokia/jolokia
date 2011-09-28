@@ -46,7 +46,7 @@ class ArrayTypeConverter extends OpenTypeConverter {
 
     /** {@inheritDoc} */
     public Object convertToObject(OpenType pType, Object pFrom) {
-        ArrayType type = (ArrayType) pType;
+        ArrayType<?> type = (ArrayType<?>) pType;
         JSONAware value = toJSON(pFrom);
         // prepare each value in the array and then process the array of values
         if (!(value instanceof JSONArray)) {
@@ -62,7 +62,7 @@ class ArrayTypeConverter extends OpenTypeConverter {
 
         int i = 0;
         for (Object element : jsonArray) {
-            valueArray[i++] = dispatcher.convertToObject(elementOpenType, element);
+            valueArray[i++] = getDispatcher().convertToObject(elementOpenType, element);
         }
 
         return valueArray;

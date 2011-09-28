@@ -83,7 +83,7 @@ class CompositeTypeConverter extends OpenTypeConverter {
                         "Conversion to CompositeType failed because " + key + " is not known as composite attribute key.");
             }
             if (value != null) {
-                Object convertedValue = dispatcher.convertToObject(pType.getType(key),value);
+                Object convertedValue = getDispatcher().convertToObject(pType.getType(key),value);
                 pCompositeValues.put(key, convertedValue);
             }
         }
