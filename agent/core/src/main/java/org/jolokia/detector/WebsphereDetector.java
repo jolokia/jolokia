@@ -30,7 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Detector for IBM Websphere 6 & 7
+ * Detector for IBM Websphere 6 & 7 & 8
  *
  * @author roland
  * @since 29.11.10
@@ -40,7 +40,7 @@ public class WebsphereDetector extends AbstractServerDetector {
     private static final Pattern SERVER_VERSION_PATTERN =
             Pattern.compile("^Version\\s+([0-9.]+)\\s*$.*?^Build Date\\s+([0-9/]+)\\s*$",
                             Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    public static final  String  INTERNAL_ERROR_MSG     = "Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)";
+    public static final  String  INTERNAL_ERROR_MSG = "Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)";
 
     // Whether running under Websphere
     private boolean isWebsphere = ClassUtil.checkForClass("com.ibm.websphere.management.AdminServiceFactory");
@@ -49,27 +49,22 @@ public class WebsphereDetector extends AbstractServerDetector {
 
     /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String platformName =
-                getSingleStringAttribute(pMbeanServers, "*:j2eeType=J2EEServer,type=Server,*", "platformName");
-        if (platformName != null && platformName.contains("WebSphere")) {
-            String serverVersion =
-                    getSingleStringAttribute(pMbeanServers, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
-            if (serverVersion != null) {
-                Matcher matcher = SERVER_VERSION_PATTERN.matcher(serverVersion);
-                if (matcher.find()) {
-                    String version = matcher.group(1);
-                    String date = matcher.group(2);
-                    JSONObject extraInfo = new JSONObject();
-                    if (date != null) {
-                        extraInfo.put("buildDate",date);
-                    }
-                    // TODO: Extract access URL
-                    return new WebsphereServerHandle(version,null,extraInfo.size() > 0 ? extraInfo : null);
+        String serverVersion =
+                getSingleStringAttribute(pMbeanServers, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
+        if (serverVersion != null && serverVersion.contains("WebSphere")) {
+            Matcher matcher = SERVER_VERSION_PATTERN.matcher(serverVersion);
+            if (matcher.find()) {
+                String version = matcher.group(1);
+                String date = matcher.group(2);
+                JSONObject extraInfo = new JSONObject();
+                if (date != null) {
+                    extraInfo.put("buildDate",date);
                 }
+                return new WebsphereServerHandle(version,null,extraInfo.size() > 0 ? extraInfo : null);
             }
             return null;
         } else if (isWebsphere) {
-            return new WebsphereServerHandle(isWebsphere6 ? "6" : "7",null,null);
+            return new WebsphereServerHandle(isWebsphere6 ? "6" : "7 or 8",null,null);
         }
         return null;
     }

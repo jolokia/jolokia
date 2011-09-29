@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="agents-mule">
   <title>Mule Agent</title>
+  <para>
+    Jolokia's <ulink url="http://www.mulesoft.org">Mule</ulink> agent
+    uses Mule's own agent interface for plugging into the ESB running
+    in standalone mode. 
+  </para>
 </section>
