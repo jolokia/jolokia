@@ -5,21 +5,21 @@
   <section id="war-agent-installation">
     <title>Installation and Configuration</title>
     <para>
-      The WAR agent is the most popular variant which can be deployed
-      as any other JEE web application in a servlet container.<sidebar>
+      The WAR agent is the most popular variant, and can be deployed
+      in a servlet container just like any other JEE web application.<sidebar>
       <title>Tomcat example</title>
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <ulink
       url="http://www.jolokia.org/tutorial.html">quickstart</ulink>.
     </sidebar>    
-    Often, installation is simply a matter of copying the agent WAR in
-    a deployment directory. On other platforms a administrative Web
+    Often, installation is simply a matter of copying the agent WAR to
+    a deployment directory. On other platforms an administrative Web
     GUI or a command line tool need to be used for
-    deployment. Detailed installation instructions for every servlet
-    container are out of scope for this document.
+    deployment. Providing detailed installation instructions for every servlet
+    container is out of scope for this document.
     </para>
     <para>
-      The servlet itself can be configured with a bunch of
+      The servlet itself can be configured with
       <literal>init-param</literal> declarations within the servlet
       definition in <filename>WEB-INF/web.xml</filename>. The known
       parameters are described in <xref
@@ -42,7 +42,7 @@
           Classnames (comma separated) of <constant>RequestDispatcher</constant> used in addition
           to the
           <constant>LocalRequestDispatcher</constant>. Dispatchers are
-          a tecnique used by the JSR-160 proxy to dispatch (or
+          a technique used by the JSR-160 proxy to dispatch (or
           'route') a request to a different destination.
         </td>
         <td>
@@ -80,7 +80,7 @@
       <tr>
         <td><constant>historyMaxEntries</constant></td>
         <td>
-          Entries to keep in the history. Can be changed during
+          Entries to keep in the history. Can be changed at
           runtime via the config MBean.
         </td>
         <td>
@@ -90,9 +90,9 @@
       <tr>
         <td><constant>debugMaxEntries</constant></td>
         <td>
-          Maximum number of entries to keed in the local
-          debug history if switched on. Can be change via
-          the config MBean during runtime.
+          Maximum number of entries to keep in the local
+          debug history (if enabled). Can be changed via
+          the config MBean at runtime.
         </td>
         <td>
           Default: <constant>100</constant>
@@ -101,7 +101,7 @@
       <tr>
         <td><constant>maxDepth</constant></td>
         <td>
-          Maximum depth when traversion bean properties.
+          Maximum depth when traversing bean properties.
           If set to 0, depth checking is disabled
         </td>
         <td>
@@ -112,8 +112,8 @@
         <td><constant>maxCollectionSize</constant></td>
         <td>
           Maximum size of collections returned when
-          serializing to JSON. When set to 0, not
-          collections are truncated.
+          serializing to JSON. When set to 0,
+          collections are never truncated.
         </td>
         <td>
           Default: <constant>1000</constant>
@@ -122,11 +122,11 @@
       <tr>
         <td><constant>maxObjects</constant></td>
         <td>
-          Maximum number of objects which is traversed
+          Maximum number of objects which are traversed
           when serializing a single response. Use this
-          as airbag to avoid boosting your memory and
+          as an airbag to avoid boosting your memory and
           network traffic. Nevertheless, when set to 0
-          not limit is used.
+          no limit is imposed.
         </td>
         <td>
           Default: <constant>0</constant>
@@ -165,7 +165,7 @@
   <section id="agent-war-programmatic">
     <title>Programmatic usage of the Jolokia agent servlet</title>
     <para>
-      The Jolokia agent servlet can be integrated into own
+      The Jolokia agent servlet can be integrated into one's own
       web-applications as well. Simply add a servlet with
       the servlet class
       <classname>org.jolokia.http.AgentServlet</classname> to your
@@ -191,8 +191,8 @@
     <para>
       In order for this servlet definition to find the referenced
       Java class, the JAR <filename>jolokia-core.jar</filename> must
-      be included. This jar can be found in Jolokia's <ulink
-      url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core">maven
+      be included. This jar can be found in <ulink
+      url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core">Jolokia's maven
       resository</ulink>. Maven users will can declare a
       dependency on this jar artifact:
     </para>
@@ -224,20 +224,20 @@
       <para>
         Replace
         <classname>org.jolokia.osgi.http.AgentServlet</classname> with
-        <classname>org.jolokia.http.AgentServlet</classname> for using
-        the servlet in an non OSGi environment.        
+        <classname>org.jolokia.http.AgentServlet</classname> to use
+        the servlet in a non-OSGi environment.
       </para>
     </footnote>
     </para>
     <para>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
-      Jolokia specific MBeans on the single
-      <literal>PlatformMBeansServer</literal>, for multi agents
+      Jolokia-specific MBeans on the single
+      <literal>PlatformMBeansServer</literal>, for multi-agent
       deployments it is important to use the
       <constant>mbeanQualifier</constant> init parameter to
       distinguish multiple Jolokia MBeans by adding an extra
-      propery to those MBean's name. This needs to be done also if
+      propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
       the same JEE server. 
     </para>

@@ -17,8 +17,8 @@
     ending in very flexible Open MBeans and MXBeans, are impressive.
   </para>
   <para>
-    However, some of the advanced JMX concepts didn't really hit the
-    public and are now probably obsolete. Add-on standards like <ulink
+    However, some of the advanced JMX concepts didn't really appeal to the
+    public and are now effectively obsolete. Add-on standards like <ulink
     url="http://jcp.org/en/jsr/detail?id=77">JSR-77</ulink> didn't
     received the adoption level they deserved. And then there is
     <ulink url="http://jcp.org/en/jsr/detail?id=160">JSR-160</ulink>,
@@ -53,7 +53,7 @@
     covered in the following chapters. For implementors of Jolokia
     client bindings the protocol definition is probably the most
     interesting part (<xref linkend="protocol"/>). Jolokia itself
-    comes with some preregister MBeans which are listed in <xref
+    comes with the preregistered MBeans listed in <xref
     linkend="mbeans"/>. The available client bindings are described
     in <xref linkend="clients"/>.
   </para>
