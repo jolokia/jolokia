@@ -1,7 +1,7 @@
 ![Jolokia - JMX on Capsaicin][1]
 
-Jolokia is a fresh way for accessing JMX MBeans remotely. It is
-different to JSR-160 connectors in so far as it is an agent based
+Jolokia is a fresh way to access JMX MBeans remotely. It is
+different from JSR-160 connectors in that it is an agent-based
 approach which uses JSON over HTTP for its communication in a
 REST-stylish way.
 
@@ -46,18 +46,18 @@ JSR-160 connectors:
 * __Bulk requests__
 
   In contrast to JSR-160 remoting, Jolokia can process many JMX
-  requests with a single roundtrip. A single HTTP POST request puts
+  requests with a single round trip. A single HTTP POST request puts
   those requests in its JSON payload which gets dispatched on the
-  agent side. These bulk requests can increase performance drastically
+  agent side. These bulk requests can increase performance drastically,
   especially for monitoring solutions. The Nagios plugin
-  [check_jmx4perl][8] uses bulk requests for its multi check feature.
+  [check_jmx4perl][8] uses bulk requests for its multi-check feature.
   
 * __Fine grained security__
 
   In addition to standard HTTP security (SSL, HTTP-Authentication)
   Jolokia supports a custom policy with fine grained restrictions
   based on multiple properties like the client's IP address or subnet,
-  the MBean names and their attributes and operations. The policy is
+  and the MBean names, attributes, and operations. The policy is
   defined in an XML format with support for allow/deny sections and
   wildcards.
 
@@ -67,7 +67,7 @@ JSR-160 connectors:
   on the target platform is the standard JSR-160 export of its
   MBeanServer. A proxy listens on the front side for Jolokia requests
   via JSON/HTTP and propagates these to the target server through
-  remote JSR-160 JMX calls. Bulk requests gets dispatched into
+  remote JSR-160 JMX calls. Bulk requests get dispatched into
   multiple JSR-160 requests on the proxy transparently.
 
 Resources
