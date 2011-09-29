@@ -4,11 +4,11 @@
 
     <para>
       Security in JSR-160 remoting is an all-or-nothing option. Either
-      all MBeans are accesible or none (except your application server
-      uses a SecurityManager, but that is not often the case). Jolokia on
-      the other hand alllows for fine grained security defined in an
+      all or none of your MBeans are accessible (except when your application server
+      uses a SecurityManager, but that is not often the case). Jolokia, on
+      the other hand, allows for fine grained security defined in an
       XML security policy file. It allows for access restrictions on
-      MBean names (or patterns), attributes, operation, source IP
+      MBean names (or patterns), attributes, operations, source IP
       address (or a subnet) and type of Jolokia operation.
     </para>
 
@@ -22,16 +22,17 @@
       <section>
         <title>IP based restrictions</title>
         <para>
-          Overall access can be granted based on the IP adress of an
-          client sending a HTTP request. These restrictions a
-          specified within an <literal>&lt;remote&gt;</literal> section,
+          Overall access can be granted based on the IP address of an
+          HTTP client. These restrictions are
+          specified within a <literal>&lt;remote&gt;</literal> section,
           which contains one or more <literal>&lt;host&gt;</literal>
           elements. The source can be given either as an IP address,
-          an host name or a netmask given in CIDR format
+          a host name, or a netmask given in
+          <ulink url="http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing">CIDR format</ulink>
           (e.g. "10.0.0.0/16" for all clients coming from the 10.0
           network). The following allows access from localhost and all
-          clients whose IP address starts with "10.0". For all other
-          IP adresses, the access if forbidden.
+          clients whose IP addresses start with "10.0". For all other
+          IP addresses access if denied.
         </para>
         <programlisting language="xml"><![CDATA[
 <remote>
@@ -44,13 +45,13 @@
         <title>Commands</title>
         <para>
           This section specifies the Jolokia commands for which access
-          is granted generally. Each command in the list, access can
+          is generally granted. For each command in the list, access can
           be further restricted within the
           <literal>&lt;deny&gt;</literal> part and each command
           missing in the list, which is forbidden globally, can be
           selectively enabled for certain MBeans in the
           <literal>&lt;allow&gt;</literal> section. If the
-          <literal>&lt;commands&gt;</literal> section is missin
+          <literal>&lt;commands&gt;</literal> section is missing
           completely, access to all commands is allowed. 
         </para>
         <para>
@@ -79,7 +80,7 @@
           <varlistentry>
             <term>list</term>
             <listitem>
-              List the available MBeans allong with their supported
+              List the available MBeans along with their supported
               attributes and operations. 
             </listitem>        
           </varlistentry>
@@ -117,13 +118,13 @@
         <title>Allow and deny access to certain MBeans</title>
         <para>
           Within an <literal>&lt;allow&gt;</literal> section, access
-          to MBean can be granted regardless independently of the
+          to MBeans can be granted regardless of the
           operations specified in the
           <literal>&lt;commands&gt;</literal> section. The reverse is
           true for the <literal>&lt;deny&gt;</literal> section: It
           rejects access to the MBeans specified here. Both sections
           contain one or more <literal>&lt;mbean&gt;</literal>
-          elements which has a format like:
+          elements which have a format like:
         </para>
         <programlisting><![CDATA[
 <mbean>
@@ -139,12 +140,12 @@
           ObjectName or a MBean pattern containing wildcards. The
           value given here must conform to the JMX specification for a
           valid <classname>ObjectName</classname>. On this MBean (or
-          MBeans if <literal>name</literal> is a pattern), 
+          <emphasis>MBeans</emphasis> if <literal>name</literal> is a pattern),
           attributes are specified within one or more
-          <literal>&lt;attribute&gt;</literal> elements and operation
+          <literal>&lt;attribute&gt;</literal> elements and operations
           within one or more <literal>&lt;operation&gt;</literal>
-          elements. The content can be alaos patterns which uses a wildcard
-          <literal>*</literal>. E.g. <literal>&lt;attribute&gt;*&lt;/attribute&gt;</literal>
+          elements. The content can also be a pattern, which uses a wildcard
+          <literal>*</literal>. e.g. <literal>&lt;attribute&gt;*&lt;/attribute&gt;</literal>
           specifies all attributes on the given MBean. If for an
           <literal>&lt;attribute&gt;</literal> element the XML
           attribute <literal>mode="read"</literal> is given, then this
@@ -159,7 +160,7 @@
           <literal>&lt;http&gt;</literal> element. Method allowed
           (<literal>post</literal> or <literal>get</literal>) are
           specified with an <literal>&lt;method&gt;</literal> inner
-          element. The following example restricts the acces to POST
+          element. The following example restricts the access to POST
           requests only:
         </para>
         <programlisting><![CDATA[
@@ -175,7 +176,7 @@
       <section>
         <title>Example for a security policy</title>
         <para>
-          The following complete example applies varios access
+          The following complete example applies various access
           restrictions: 
         </para>
         <itemizedlist>
@@ -191,7 +192,7 @@
           </listitem>
           <listitem>
             A single <literal>exec</literal> request is allowed for
-            triggering a garbage collection.
+            triggering garbage collection.
           </listitem>
           <listitem>
             Read access to the C3P0 connection pool is restricted to
@@ -243,7 +244,7 @@
             inclusion of a <literal>jolokia-access.xml</literal>
             policy file
             is the command line tool <ulink
-            url="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</ulink>
+            url="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</ulink>,
             which comes with the <ulink
             url="http://www.jmx4perl.org">jmx4perl</ulink> distribution. See
             <xref linkend="tools"/> for an introduction.
@@ -311,16 +312,16 @@ public class RestrictedAgentServlet extends AgentServlet {
     }
 }]]></programlisting>        
       <para>
-        <literal>policyLocation</literal> is an URL pointing to the
+        <literal>policyLocation</literal> is a URL pointing to the
         policy file, which is either the default value
         <filename>classpath:/jolokia-access.xml</filename> or the
         value specified with the init parameter
         <literal>policyLocation</literal>. This servlet can then be
-        easily configured in an custom <filename>web.xml</filename>
+        easily configured in a custom <filename>web.xml</filename>
         the same way as the Jolokia agent.
       </para>
       <para>
-        For programmatic usage there is even a simple way:
+        For programmatic usage there is an even simpler way:
         <classname>AgentServlet</classname> provides an constructor
         which takes an restrictor as argument, so no sublcassing is
         required in this case.
@@ -328,12 +329,12 @@ public class RestrictedAgentServlet extends AgentServlet {
       <para>
         For an OSGi agent (<xref linkend="agents-osgi"/>),
         <classname>org.jolokia.osgi.servlet.JolokiaServlet</classname>
-        is the proper extension point. It can be subclasses the same
-        way as above and allows a restrictor implementation as
+        is the proper extension point. It can be subclassed the same
+        way as shown above and allows a restrictor implementation as
         constructor parameter, too. In contrast to
         <classname>AgentServlet</classname> this class is also OSGi
         exported and can be referenced from other
-        bundles. Additionally, the OSGi agent can also pickup a
+        bundles. Additionally, the OSGi agent can also pick up a
         restrictor as an OSGi service. See <xref
         linkend="agents-osgi"/> for details. 
       </para>
