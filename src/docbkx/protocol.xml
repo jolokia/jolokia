@@ -4,7 +4,7 @@
     <para>
       Jolokia uses a JSON-over-HTTP protocol which is described in
       this chapter. The communication is based on a request-response
-      paradigm, where each requests results in a single response.
+      paradigm, where each request results in a single response.
     </para>
     <sidebar>
       <title>GET URLs are chatty</title>
@@ -48,16 +48,16 @@
     <section id="request-response">
       <title>Requests and Responses</title>
       <para>
-        Jolokia knows about two different styles for handling
-        requests, which are distinguished by the HTTP method used, GET
-        or POST. Regardless what method is used, the agent doesn't
+        Jolokia knows about two different styles of handling
+        requests, which are distinguished by the HTTP method used: GET
+        or POST. Regardless of what method is used, the agent doesn't
         keep any state on the server side (except of course that
         MBeans are mostly obviously stateful). So in this aspect, the
         communication can be considered
        <ulink url="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</ulink>
         like<footnote id="rest-comment">
           <para>This document will avoid the term REST as much as
-          possible in order to avoid provocating any dogmatic
+          possible in order to avoid provoking any dogmatic
           resentments.</para> 
         </footnote>.
       </para>
@@ -66,7 +66,7 @@
         <para>
           The simplest way to access the Jolokia is by sending
           HTTP GET requests. These requests encode all its parameters
-          within the access URL. Typically, Jolokia uses the pathinfo
+          within the access URL. Typically, Jolokia uses the path-info
           part of an URL to extract the parameters. Within the
           path-info, each part is separated by a slash
           (<literal>/</literal>).  In general, the request URL looks
@@ -250,7 +250,7 @@
       <section id="responses">
         <title>Responses</title>
         <para>
-          Responses are always encoded in JSON, regardless whether the
+          Responses are always encoded in UTF-8 JSON, regardless whether the
           requst was a GET or POST request.  In general, two kinds of
           responses can be classified: In the normal case, a HTTP
           Response with response code 200 is returned, containing the
@@ -341,8 +341,8 @@
         <para>
           I.e. the <constant>status</constant> has a code in the range
           <literal>400 .. 499</literal> or <literal>500 .. 599</literal>
-          as it is specified for HTTP return codes. The
-          <constant>error</constant> member contains an error
+          <ulink url="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">as it is specified for HTTP return codes</ulink>.
+          The <constant>error</constant> member contains an error
           description. This is typically the message of an exception
           occured on the agent side<footnote
           id="mbeanexception-wrapping">
@@ -367,7 +367,7 @@
       <section id="pathes">
         <title>Pathes</title>
         <para>
-          Before we come to the Jolokia operation the general conecpt
+          Before we come to the Jolokia operation, the general concept
           of <emphasis>inner pathes</emphasis> requires some
           explanation. 
         </para>
@@ -425,7 +425,7 @@
     <section id="processing-parameters">
       <title>Processing parameters</title>
       <para>
-        Jolokia operations can be influenced by so called
+        Jolokia operations can be influenced by so-called
         <emphasis>processing parameters</emphasis>. These parameters
         are provided differently for POST and GET requests.
       </para>
@@ -536,7 +536,8 @@
             </listitem>
             <listitem>
               <classname>java.util.Map</classname> gets
-              converted into a JSON object
+              converted into a JSON object. Note, however, that JSON
+              Object keys are <emphasis>always strings</emphasis>.
             </listitem>
             <listitem>
               <classname>javax.management.openmbean.CompositeData</classname>
@@ -672,7 +673,7 @@
           linkend="serialization-response"/>. Not all types are
           supported for upstream serialization <footnote id="upstream-serialization-comment">
             <para>
-              Conversion from a typed system to an unptyped
+              Conversion from a typed system to an untyped
               representation is obviously much easier than vice
               versa. Please note, that Jolokia does not replace a full
               blown JSON object serialization framework like
@@ -684,7 +685,7 @@
           <literal>GET</literal> upstream serialization is limited to
           basic types and simple arrays. POST requests on the other
           support a much large set of types, including the
-          serialization of <constant>Maps</constant>, 
+          serialization of <constant>Map</constant>s, 
           <constant>List</constant>s and all <ulink
           url="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">Open
           Types</ulink>. 
@@ -701,7 +702,7 @@
               <listitem>Integer / int</listitem>
               <listitem>Long / long</listitem>
               <listitem>Byte / byte</listitem>
-              <listitem>Shirt / short</listitem>
+              <listitem>Short / short</listitem>
               <listitem>Float / float</listitem>
               <listitem>Double / double</listitem>
               <listitem>char</listitem>
@@ -744,7 +745,8 @@
             intrinsically key-value maps and array types, these can be
             used directly, too. I.e. if the JMX operation to execute
             takes a <constant>Map</constant> argument, the argument
-            can be given as a JSON object.
+            can be given as a JSON object. Be aware, however, that JSON
+            maps (objects) only support strings as keys.
           </para>
           <para>
             The agent knows how to convert an JSON array to Java
@@ -853,7 +855,7 @@
           <classname>TabularData</classname> with a fixed internal
           structure, i.e. with an index <literal>key</literal> and
           rows with keys <literal>key</literal> and
-          <literal>value</literal>. This leads direclty to a JSON
+          <literal>value</literal>. This leads directly to a JSON
           representation which is quite artificial. E.g a map with 
           two keys <literal>kind</literal> and
           <literal>hotness</literal> will be converted by the MXBean
@@ -894,7 +896,7 @@
         then the agent will put the list of historical values specific
         for this request into the response. History tracking is
         toggled by an MBean operation on a Jolokia-owned MBean (see
-        <xref linkend="mbeans"/>). This has to be done individually on each
+        <xref linkend="mbeans"/>). This has to be done individually for each
         attribute or JMX operation to be tracked.
       </para>
       <para>
@@ -937,7 +939,7 @@
         <literal>url</literal> within the <literal>target</literal>
         section is a JSR-160 service URL for the target server
         reachable from within the proxy agent. <literal>user</literal>
-        and <literal>password</literal> are optional credential used
+        and <literal>password</literal> are optional credentials used
         for the JSR-160 communication.
       </para>
     </section>
@@ -959,7 +961,7 @@
             <para>
               Escaping has been changed from <literal>/-/</literal> to
               <literal>!/</literal>. This affects GET Urls and
-              <emphasis> inner pathes</emphasis>.
+              <emphasis> inner paths</emphasis>.
             </para>
           </listitem>
         </varlistentry>
