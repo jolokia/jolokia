@@ -2,8 +2,8 @@
 <chapter id="mbeans">
   <title>Jolokia MBeans</title>
   <para>
-    Beside bridging JMX to the HTTP/JSON world, the Jolokia agents
-    also installs own MBeans which provide extra services which are
+    Besides bridging JMX to the HTTP/JSON world, the Jolokia agents
+    also install their own MBeans which provide the extra services 
     described in this chapter.
   </para>
   <section id="mbean-config">
@@ -12,8 +12,8 @@
       This MBean, which is registered under the name <emphasis
       role="bold">jolokia:type=Config</emphasis>, allows changing
       configuration parameters. Changes are non-persistent and get
-      lost after an restart of the hosting application
-      server. Debugging and the history store can be configured with
+      lost after a restart of the hosting application
+      server. Debugging mode and the history store can be configured with
       this MBean.
     </para>
     <section id="mbean-debugging">
@@ -36,9 +36,9 @@
       <para>
         The <emphasis>history store</emphasis> can be used to remember
         attribute and return values within the agent's memory. The
-        Nagios check <command>check_jmx4perl</command> for instances
-        uses this feature for its delta check feature which measure
-        the increase or decrease of attribute values. In order to
+        Nagios check <command>check_jmx4perl</command>, for instance,
+        uses this feature for its delta check, which measures
+        changes in attribute values. In order to
         switch on history tracking, two operations are provided:
       </para>
       <variablelist>
@@ -53,9 +53,9 @@
             request for this specific target are tracked,
             otherwise, if the URL is null, requests to this
             operation on the local agent are tracked.  The return
-            value of calling this operations is stored in an 
+            value of calling this operations is stored in a 
             buffer with the specified length, where the oldest
-            elements will shift out in case of an overflow. 
+            elements will be shifted out in case of an overflow. 
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -66,7 +66,7 @@
             and attribute name, an  optional path and target URL and
             the maximal number of entries to remember. As above, the
             target URL is only used for proxy requests. The path can
-            be used to store only read request with the given path. 
+            be used to store only read requests with the given path. 
             </listitem>
         </varlistentry>
       </variablelist>
@@ -87,7 +87,7 @@
       role="bold">jolokia:type=ServerHandler</emphasis> has a single
       operation <methodname>mBeanServersInfo</methodname> with no
       arguments. This operation can be used to dump out the name of
-      all registered MBean on all found MBeanServers. It is helpful to
+      all registered MBeans on all found MBeanServers. It is helpful to
       get a quick and condensed overview of the available JMX
       information. 
     </para>
