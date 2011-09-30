@@ -855,7 +855,7 @@
           <classname>TabularData</classname> with a fixed internal
           structure, i.e. with an index <literal>key</literal> and
           rows with keys <literal>key</literal> and
-          <literal>value</literal>. This leads directy to a JSON
+          <literal>value</literal>. This leads directly to a JSON
           representation which is quite artificial. E.g a map with 
           two keys <literal>kind</literal> and
           <literal>hotness</literal> will be converted by the MXBean
