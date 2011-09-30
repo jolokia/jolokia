@@ -55,7 +55,7 @@
           completely, access to all commands is allowed. 
         </para>
         <para>
-          All Jolokia commands a described in <xref
+          All Jolokia commands described in <xref
           linkend="protocol"/> can be used in this section: 
         </para>
         <variablelist>
