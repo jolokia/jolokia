@@ -35,7 +35,7 @@ public class WeblogicDetector extends AbstractServerDetector {
         String domainConfigMBean = getSingleStringAttribute(pMbeanServers,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
             String version = getSingleStringAttribute(pMbeanServers,domainConfigMBean,"ConfigurationVersion");
-            return new ServerHandle("Bea","weblogic",version,null,null);
+            return new ServerHandle("Oracle","weblogic",version,null,null);
         }
         return null;
     }

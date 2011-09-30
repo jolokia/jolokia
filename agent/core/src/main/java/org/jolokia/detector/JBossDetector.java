@@ -39,7 +39,7 @@ public class JBossDetector extends AbstractServerDetector {
     /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
         if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
-            // Get Version number from JR77 call
+            // Get Version number from JSR77 call
             String version = getVersionFromJsr77(pMbeanServers);
             if (version != null) {
                 int idx = version.indexOf(' ');
