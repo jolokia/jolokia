@@ -47,7 +47,7 @@ public class JBossDetector extends AbstractServerDetector {
                     // Strip off boilerplate
                     version = version.substring(0,idx);
                 }
-                return new JBossServerHandle(version,null,null);
+                return new JBossServerHandle(version,null,null,true);
             }
         }
         if (mBeanExists(pMbeanServers, "jboss.system:type=Server")) {
@@ -56,9 +56,13 @@ public class JBossDetector extends AbstractServerDetector {
             if (versionFull != null) {
                 version = versionFull.replaceAll("\\(.*", "").trim();
             }
-            return new JBossServerHandle(version,null,null);
+            return new JBossServerHandle(version,null,null,true);
         }
-
+        if (mBeanExists(pMbeanServers,"jboss.modules:*")) {
+            // Can please someone tell me, how to obtain the JBoss version either via JMX or via class lookup ?
+            // (or any other Means ?)
+            return new JBossServerHandle("7",null,null,false);
+        }
         return null;
     }
 
@@ -71,7 +75,7 @@ public class JBossDetector extends AbstractServerDetector {
             Method method = locatorClass.getMethod("locateJBoss");
             servers.add((MBeanServer) method.invoke(null));
         }
-        catch (ClassNotFoundException e) { /* Ok, its *not* JBoss, continue with search ... */ }
+        catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ }
         catch (NoSuchMethodException e) { }
         catch (IllegalAccessException e) { }
         catch (InvocationTargetException e) { }
@@ -80,6 +84,9 @@ public class JBossDetector extends AbstractServerDetector {
     // ========================================================================
     private static class JBossServerHandle extends ServerHandle {
 
+        private boolean workaroundRequired = true;
+
+
         /**
          * JBoss server handle
          *
@@ -87,14 +94,15 @@ public class JBossDetector extends AbstractServerDetector {
          * @param agentUrl URL to the agent
          * @param extraInfo extra ifo to return
          */
-        public JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
-            super("JBoss", "jboss", version, agentUrl, extraInfo);
+        public JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo,boolean pWorkaroundRequired) {
+            super("RedHat", "jboss", version, agentUrl, extraInfo);
+            workaroundRequired = pWorkaroundRequired;
         }
 
         /** {@inheritDoc} */
         @Override
         public void preDispatch(Set<MBeanServer> pMBeanServers, JmxRequest pJmxReq) {
-            if (pJmxReq instanceof JmxObjectNameRequest) {
+            if (workaroundRequired && pJmxReq instanceof JmxObjectNameRequest) {
                 JmxObjectNameRequest request = (JmxObjectNameRequest) pJmxReq;
                 if (request.getObjectName() != null &&
                         "java.lang".equals(request.getObjectName().getDomain())) {

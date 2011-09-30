@@ -23,7 +23,7 @@ import javax.management.*;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertEquals;
@@ -36,55 +36,82 @@ import static org.testng.Assert.assertNull;
 public class JBossDetectorTest {
 
 
+    private JBossDetector detector;
+    private MBeanServer server;
+    private HashSet<MBeanServer> servers;
+
+    @BeforeMethod
+    public void setup() {
+        detector = new JBossDetector();
+
+        server = createMock(MBeanServer.class);
+        servers = new HashSet<MBeanServer>(Arrays.asList(server));
+
+    }
+
     @Test
     public void simpleNotFound() throws MalformedObjectNameException {
-        JBossDetector detector = new JBossDetector();
 
-        MBeanServer server = createMock(MBeanServer.class);
-        Set<MBeanServer> servers = new HashSet<MBeanServer>(Arrays.asList(server));
-        expect(server.queryNames(getJBossObjectName(),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.modules:*"),null)).andReturn(null);
         replay(server);
         assertNull(detector.detect(servers));
+        verify(server);
     }
 
     @Test
     public void simpleFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IntrospectionException {
-        JBossDetector detector = new JBossDetector();
 
-        MBeanServer server = createMock(MBeanServer.class);
-        Set<MBeanServer> servers = new HashSet<MBeanServer>(Arrays.asList(server));
 
-        ObjectName oName = getJBossObjectName();
-        Set<ObjectName> oNames = new HashSet<ObjectName>(Arrays.asList(oName));
-        expect(server.queryNames(oName,null)).andReturn(oNames);
+        ObjectName oName = prepareQuery("jboss.system:type=Server");
         expect(server.getAttribute(oName,"Version")).andReturn("5.1.0");
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"5.1.0");
-        assertEquals(handle.getVendor(),"JBoss");
+        assertEquals(handle.getVendor(),"RedHat");
         assertEquals(handle.getProduct(),"jboss");
 
+
+        // Verify workaround
         reset(server);
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
         expect(server.getMBeanInfo(memoryBean)).andReturn(null);
         replay(server);
         handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
+        verify(server);
+    }
+
+    @Test
+    public void version7() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException {
+
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
+        prepareQuery("jboss.modules:*");
+        replay(server);
+        ServerHandle handle = detector.detect(servers);
+        assertEquals(handle.getVersion(),"7");
+        assertEquals(handle.getVendor(),"RedHat");
+        assertEquals(handle.getProduct(),"jboss");
+
+        // Verify that no workaround is active
+        reset(server);
+        ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
+        replay(server);
+        handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
+        verify(server);
+    }
+
+    private ObjectName prepareQuery(String pName) throws MalformedObjectNameException {
+        ObjectName oName = new ObjectName(pName);
+        Set<ObjectName> oNames = new HashSet<ObjectName>(Arrays.asList(oName));
+        expect(server.queryNames(oName,null)).andReturn(oNames);
+        return oName;
     }
 
     @Test
     public void addMBeanServers() {
-        JBossDetector detector = new JBossDetector();
-
-        MBeanServer server = createMock(MBeanServer.class);
-        Set<MBeanServer> servers = new HashSet<MBeanServer>(Arrays.asList(server));
-
         replay(server);
         detector.addMBeanServers(servers);
     }
 
 
-
-    public ObjectName getJBossObjectName() throws MalformedObjectNameException {
-        return new ObjectName("jboss.system:type=Server");
-    }
 }
