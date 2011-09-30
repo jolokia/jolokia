@@ -9,7 +9,7 @@
   <note>
     <para>
       This addon has been submitted to the Roobot, a central Roo addon
-      registry. As long as it is not yet available you can directly
+      registry. Until it is publicly available you can directly
       install the addon from our repository.
     </para>
     <programlisting><![CDATA[
@@ -36,7 +36,7 @@ roo> osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolokia
     <literal>/mywebapp</literal>, the agent is reachable under
     <literal>/mywebapp/jolokia</literal>. This command knows about
     the options described in <xref linkend="table-roo-options"/>,
-    which are all optional.
+    all of which are optional.
   </para>
   <table id="table-roo-options">
     <title>jolokia setup Options</title>
@@ -52,8 +52,8 @@ roo> osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolokia
         This adds an additional
         <filename>jolokia-access.xml</filename> below
         <filename>src/main/resources</filename> to allow putting
-        access restrictions into place. The installed template
-        however doesn't come with any restriction but contains
+        access restrictions into place. The installed template,
+        however, doesn't come with any restriction but contains
         sample configurations commented out.
       </td>
     </tr>
