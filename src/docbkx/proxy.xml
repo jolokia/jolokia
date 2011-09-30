@@ -3,7 +3,7 @@
     <title>Proxy Mode </title>
     
     <para>
-      Using Jolokia in the proxy mode enables for agentless operation
+      Using Jolokia in proxy mode enables for agentless operation
       on the target server. A dedicated agent deployment proxies by
       accepting Jolokia requests as input, translating them to JSR-160
       requests for the target. This setup is described in <xref
@@ -18,31 +18,31 @@
       used. These are either servlet container or JEE server hosting
       the WAR agent or an OSGi runtime with an OSGi HttpService (which
       in turn is typically based on an embedded serlvet container like
-      Tomcat or Jetty). The two other agents, the Mule and JDK6 agent
+      Tomcat or Jetty). The two other agents, the Mule and JDK6 agents
       are not that well suited for this job. 
     </para>
     <para>
       All client libraries (jmx4perl, Java and Javascript) support the
-      usage of the proxy mode in its API. 
+      usage of proxy mode in its API.
     </para>
     
     <section title="proxy-limitations">
-      <title>Limitations of the proxy mode</title>
+      <title>Limitations of proxy mode</title>
       <para>
         The proxy mode has some limitations compared to the direct
-        agent mode, so the agent mode it is recommended to use a
+        agent mode, so it is recommended to use a
         direct agent deployment if possible. The limitations are:
       </para>
       <itemizedlist>
         <listitem>
           There is no automatic merging of JMX MBeanServers as in the case
-          of the direct mode. Most application servers uses an own
+          of the direct mode. Most application servers uses their own
           MBeanServer in addition to the
           <literal>PlatformMBeanServer</literal> (which is always
           present). Each MBean is registered only in one MBeanServer. The
-          choice, which <literal>MBeanServer</literal> to use has to be
-          given upfront, usually as a part of the JMX Service URL. But even
-          then (as it is the case for JBoss 5.1) you might run into problem
+          choice of which <literal>MBeanServer</literal> to use has to be
+          given up front, usually as a part of the JMX Service URL. But even
+          then (as it is the case for JBoss 5.1) you might run into problems
           when selecting the proper MBeanServer.
         </listitem>
         <listitem>
