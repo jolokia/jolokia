@@ -26,8 +26,8 @@ console.log("Heap Memory used: " + value);
   <section id="js-installation">
     <title>Installation</title>
     <para> 
-      The Jolokia Javascript library is located in two files coming in
-      a full and compressed flavor:      
+      The Jolokia Javascript library is distributed in two parts, in
+      compressed and uncompressed forms:
     </para>    
     <variablelist>
       <varlistentry>
@@ -58,7 +58,7 @@ console.log("Heap Memory used: " + value);
       page</ulink>. For production environments the compressed version
       is highly recommended since the extensive API documentation
       included in the original version is stripped off here. For Maven
-      users, there is even a better way for integration described in
+      users there is an even better way to integrate them, described in
       <xref linkend="js-maven"/>.
     </para>
     <para>
@@ -161,7 +161,7 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
         </thead>
         <tr>
           <td><constant>url</constant></td>
-          <td>Agent URL, which is mandatory</td>
+          <td>Agent URL (mandatory)</td>
         </tr>
         <tr>
           <td><constant>method</constant></td>
@@ -273,9 +273,9 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
       Requests can be send either synchronously or asynchronously via
       Ajax. If a <constant>success</constant> callback is given in the
       request options, the request is performed asynchronously via an
-      Ajax HTTP request. The callback as arguments a Jolokia JSON
+      Ajax HTTP request. The callback gets these arguments: a Jolokia JSON
       response object (see <xref linkend="request-response"/>) and an
-      integer index indicating for which response this callback is
+      integer index indicating for which response this callback is being
       called. For bulk requests, this index corresponds to the array
       index of the request which lead to this response. The value of
       this option can be an array of callback functions which are
@@ -332,7 +332,7 @@ j4p.request(
 );]]></programlisting>    
     <para>    
       Both callbacks, <constant>success</constant> and
-      <constant>error</constant>, are only called, when the Ajax
+      <constant>error</constant>, are only called when the Ajax
       request succeeds. In case of an error on the HTTP level, the
       callback <constant>ajaxError</constant> is called with the
       <classname>XMLHttpRequest</classname>, a
@@ -345,10 +345,9 @@ j4p.request(
     </para>
     <para>
       The Jolokia agent also supports <ulink
-      url="http://en.wikipedia.org/wiki/JSONP">JSONP</ulink> request
-      in case an agent should be reached which is different than the
-      server which serves the Javascript. By default, this is
-      forbidden due to the so called
+      url="http://en.wikipedia.org/wiki/JSONP">JSONP</ulink> requests
+      for cases where the Jolokia agent is served on a different server or port
+      than the Javascript client. By default, such access is forbidden by the so called
       <emphasis>same-origin-policy</emphasis>. To swith on JSONP, the
       option <constant>jsonp</constant> should be set to
       <constant>"true"</constant>. 
@@ -357,9 +356,9 @@ j4p.request(
       As explained in <xref linkend="request-response"/> the Jolokia
       agent supports two HTTP methods, <constant>GET</constant> and
       <constant>POST</constant>. <constant>POST</constant> is more
-      powerful since it supports more features. I.e. bulk requests and
+      powerful since it supports more features. e.g. bulk requests and
       JMX proxy requests are only possible with POST. By default, the
-      Jolokia Javascript library selects automatically a HTTP method,
+      Jolokia Javascript library selects an HTTP method automatically,
       which is <code>GET</code> for simple cases and <code>POST</code>
       for more sophisticated requests. The HTTP method can be
       overridden by setting the option <constant>method</constant> to
@@ -426,15 +425,15 @@ j4p.request(
             This method returns the value of an JMX attribute
             <code>attribute</code> of an MBean <code>mbean</code>. A path
             can be optionally given, and the optional request options are
-            given as last argument. The return value for synchronous
+            given as last argument(s). The return value for synchronous
             operations are the attribute's value, for asynchronous
             operations (i.e. <code>opts.success != null</code>) it is
             <constant>null</constant>. See <xref linkend="read"/> for
             details. 
           </para>
           <para>
-            For example, getting synchronously the heap memory used,
-            the following method call can be used:
+            For example, the following method call can be used
+            to synchronously fetch the current heap memory usage:
           </para>
           <programlisting language="javascript"><![CDATA[
 var memoryUsed = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
@@ -455,7 +454,7 @@ var memoryUsed = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","use
             given to a <constant>success</constant> callback.
           </para>
           <para>
-            For setting the memory handling into verbose mode, use
+            To enable verbose mode in the memory-handling beans, use
           </para>
           <programlisting language="javascript"><![CDATA[
 var gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory","Verbose",true);
@@ -474,8 +473,8 @@ var gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory","Verbose",true);
             <xref linkend="exec"/> for details.
           </para>
           <para>
-            The following exampled fetches a thread dump as JSON
-            object asynchronously and logs it into the console:
+            The following exampled asynchronously fetches a thread dump
+            as a JSON object and logs it into the console:
           </para>
           <programlisting language="javascript"><![CDATA[
 j4p.execute("java.lang:type=Threading","dumpAllThreads",true,true,
@@ -509,10 +508,10 @@ var appServerNames = j4p.search("*:j2eeType=J2EEServer,*");
         <term>list(path,opts)</term>
         <listitem>
           <para>
-            For getting meta information about the MBeans registered,
-            the <methodname>list</methodname> can be used. The
+            For getting meta information about registered MBeans,
+            the <methodname>list</methodname> command can be used. The
             optional <code>path</code> points into this meta
-            information for retreiving partial information. The format
+            information for retrieving partial information. The format
             of the return value is described in detail in <xref
             linkend="list"/>.
           </para>
@@ -531,8 +530,8 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
         <listitem>
           <para>
             The <methodname>version</methodname> method returns the
-            agent's version, the protocol version and possibly some
-            server information if the server could be detected. See
+            agent's version, the protocol version, and possibly some
+            additional server-specific information. See
             <xref linkend="version"/> for more information about this
             method.
           </para>
@@ -558,8 +557,8 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
   <section id="js-maven">
     <title>Maven integration</title>
     <para>
-      For maven user's convenience, the Jolokia Javascript package is
-      also available as an Javascript artefact. It can be easily
+      For maven users' convenience, the Jolokia Javascript package is
+      also available as a JavaScript artifact. It can be easily
       included with help of the
       <constant>javascript-maven-plugin</constant>.
     </para>
