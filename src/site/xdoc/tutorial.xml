@@ -19,13 +19,13 @@
         <p>
           In order to start on a green field, we are installing a
           fresh Tomcat in which the agent-war is going to be
-          installed. Download Tomcat 6 from its <a
-          href="http://tomcat.apache.org/download-60.cgi">site</a> and
+          installed. Download Tomcat 7 from its <a
+          href="http://tomcat.apache.org/download-70.cgi">site</a> and
           extract it:
         </p>
         <pre><![CDATA[
-$ tar zxvf apache-tomcat-6.*.tar.gz 
-$ cd apache-tomcat-6.*
+$ tar zxvf apache-tomcat-7.*.tar.gz 
+$ cd apache-tomcat-7.*
 $ TC=`pwd`]]></pre>
         <p>
           Download the Jolokia WAR-agent and copy it into Tomcat's
@@ -34,8 +34,8 @@ $ TC=`pwd`]]></pre>
         <pre><![CDATA[
 $ cd $TC/webapps
 $ wget \ 
- http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/0.80/jolokia-war-0.80.war
-$ mv jolokia-war-0.80.war jolokia.war]]></pre>
+ http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/1.0.0/jolokia-war-1.0.0.war
+$ mv jolokia-war-1.0.0.war jolokia.war]]></pre>
       </subsection>
       <subsection name="Startup and Verification">
         <p>
@@ -86,7 +86,7 @@ public class JolokiaDemo {
         <ul>
           <li>
             <a
-                href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/0.80/jolokia-client-java-0.80.jar">jolokia-client-java.0.80.jar</a>
+                href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/1.0.0/jolokia-client-java-1.0.0.jar">jolokia-client-java-1.0.0.jar</a>
           </li>
           <li>
             <a
@@ -94,10 +94,10 @@ public class JolokiaDemo {
             json-simple</a>
           </li>
           <li>
-            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpclient/4.0.3/httpclient-4.0.3.jar">httpclient-4.0.3.jar</a>
+            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpclient/4.1.2/httpclient-4.1.2.jar">httpclient-4.1.2.jar</a>
           </li>
           <li>
-            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpcore/4.0.1/httpcore-4.0.1.jar">httpcore-4.0.1.jar</a>
+            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpcore/4.1.2/httpcore-4.1.2.jar">httpcore-4.0.1.jar</a>
           </li>
           <li>
             <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar">commons-logging-1.1.1.jar</a>
@@ -108,8 +108,8 @@ public class JolokiaDemo {
           class. Finally, compile the demo and let it run:
         </p>
         <pre class="prettyprin lang-bash"><![CDATA[
-$ export CLASSPATH=json_simple-1.1.jar:jolokia-client-java-0.80.jar:\
-httpcore-4.0.1.jar:httpclient-4.0.3.jar:commons-logging-1.1.1.jar:.
+$ export CLASSPATH=json_simple-1.1.jar:jolokia-client-java-1.0.0.jar:\
+httpcore-4.1.2.jar:httpclient-4.1.2.jar:commons-logging-1.1.1.jar:.
 ]]>
 $ javac JolokiaDemo.java
 $ java JolokiaDemo
@@ -127,7 +127,7 @@ Memory usage: used: 9526648 / max: 129957888 = 7%
           Now compile it and let it run:
         </p>
         <pre class="prettyprint"><![CDATA[
-$ CLASSPATH=json_simple-1.1.jar:jolokia-client-java.0.80.jar
+$ CLASSPATH=json_simple-1.1.jar:jolokia-client-java.1.0.0.jar
 $ javac JolokiaDemo.java
 $ java Jolokia
 ]]></pre>
@@ -232,13 +232,10 @@ $ man jmx4perl]]></pre>
       </subsection>
       <subsection name="Summary">
         <p>
-          That's all for now, I hope you enjoyed the first contact
-          with Jolokia. This tutorial demonstrated, that setting up
-          Jolokia is really easy, other servlet container works more
-          or less the same for deployment. Also, there are already
-          quite some powerful language bindings and tools for
-          connecting to the Jolokia agent. There are a lot more in the
-          pipeline, though.  Please stand by.
+          That's all for now, I hope you enjoyed this first ride. This
+          tutorial demonstrated, that setting up Jolokia is really
+          easy, other servlet containers work more or less the same
+          for deployment. 
         </p>
       </subsection>
     </section>
