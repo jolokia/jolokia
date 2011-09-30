@@ -189,16 +189,16 @@ public class MBeanInfoData {
     public void handleException(ObjectName pName, IOException pExp) throws IOException {
         // In case of a remote call, IOException can occur e.g. for
         // NonSerializableExceptions
-             if (pathStack.size() == 0) {
-                 JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-                 JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
-                 mBeanMap.put(DataKeys.ERROR.getKey(), pExp);
-             } else {
-                 // Happens for a deeper request, i.e with a path pointing directly into an MBean,
-                 // Hence we throw immediately an error here since there will be only this exception
-                 // and no extra info
-                 throw pExp;
-            }
+        if (pathStack.size() == 0) {
+            JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
+            JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+            mBeanMap.put(DataKeys.ERROR.getKey(), pExp);
+        } else {
+            // Happens for a deeper request, i.e with a path pointing directly into an MBean,
+            // Hence we throw immediately an error here since there will be only this exception
+            // and no extra info
+            throw pExp;
+        }
     }
 
     /**

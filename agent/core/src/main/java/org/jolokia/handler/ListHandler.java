@@ -31,13 +31,6 @@ import org.jolokia.util.*;
 /**
  * Handler for obtaining a list of all available MBeans and its attributes
  * and operations.
- * <p/>
- * TODO: If the path is used here directly,
- * no issue should be the order of attributes. Think also to use the MBean name directly as
- * first level and not domain as the first level and the attribute list as second level. This way,
- * the output of a search command could be used directly to obtain the meta information for a single
- * bean directly (however, fetching all meta info for a whole domain is not possible anymore this way but
- * could be approached with a bulk-list request)
  *
  * @author roland
  * @since Jun 12, 2009
@@ -129,8 +122,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     // Lookup MBeans from a pattern, and for each found extract the required information
     private void addMBeansFromPattern(MBeanInfoData pInfoMap,
-                                             Set<MBeanServerConnection> pServers,
-                                             ObjectName pPattern)
+                                      Set<MBeanServerConnection> pServers,
+                                      ObjectName pPattern)
             throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
         for (MBeanServerConnection server : pServers) {
             for (Object nameObject : server.queryNames(pPattern,null)) {
@@ -145,8 +138,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     // Add a single named MBean's information to the given map
     private void addSingleMBean(MBeanInfoData pInfomap,
-                                       Set<MBeanServerConnection> pServers,
-                                       ObjectName pName)
+                                Set<MBeanServerConnection> pServers,
+                                ObjectName pName)
             throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
 
         if (!pInfomap.handleFirstOrSecondLevel(pName)) {
