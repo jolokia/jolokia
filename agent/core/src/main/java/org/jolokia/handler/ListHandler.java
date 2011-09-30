@@ -155,7 +155,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 try {
                     // Only the first MBeanServer holding the MBean wins
                     addMBeanInfo(pInfomap,server, pName);
-                    instanceNotFound = null;
+                    return;
                 } catch (InstanceNotFoundException exp) {
                     instanceNotFound = exp;
                 }

@@ -32,7 +32,7 @@
           (e.g. "10.0.0.0/16" for all clients coming from the 10.0
           network). The following allows access from localhost and all
           clients whose IP addresses start with "10.0". For all other
-          IP addresses access if denied.
+          IP addresses access is denied.
         </para>
         <programlisting language="xml"><![CDATA[
 <remote>
