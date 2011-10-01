@@ -241,6 +241,12 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.8</version>
+        </plugin>
+
+        <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <version>0.7</version>
@@ -305,7 +311,7 @@
     <connection>scm:git:git://github.com/rhuss/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/rhuss/jolokia.git</developerConnection>
     <tag>HEAD</tag>
-    <url>http://github.com/rhuss/jolokia</url>
+    <url>git://github.com/rhuss/jolokia.git</url>
   </scm>
   
   <ciManagement>
@@ -351,7 +357,20 @@
         <version>1.1</version>
       </dependency>
 
-
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <version>4.2.0</version>
+        <scope>provided</scope>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>4.2.0</version>
+        <scope>provided</scope>
+      </dependency>
+      
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
@@ -391,59 +410,41 @@
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
   </properties>
 
-  
   <repositories>
     <repository>
-      <id>labs-consol-release</id>
-      <name>ConSol* Labs Repository (Releases)</name>
-      <url>http://labs.consol.de/maven/repository</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>labs-consol-snapshot</id>
-      <name>ConSol* Labs Repository (Snapshots)</name>
-      <url>http://labs.consol.de/maven/snapshots-repository</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>
+        http://oss.sonatype.org/content/repositories/snapshots
+      </url>
       <releases>
         <enabled>false</enabled>
       </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Release Repository</name>
+      <url>
+        https://oss.sonatype.org/service/local/staging/deploy/maven2/
+      </url>
+    </repository>
+  </distributionManagement>
   
-  <pluginRepositories>
-    <pluginRepository>
-      <id>com.springsource.repository.bundles.milestone</id>
-      <name>SpringSource Enterprise Bundle Repository</name>
-      <url>http://repository.springsource.com/maven/bundles/milestone</url>
-    </pluginRepository>
-  </pluginRepositories>
-
-
   <profiles>
     <profile>
-      <!-- Distribution to the target maven repo -->
-      <id>dist-labs</id>
-      <distributionManagement>
-        <repository>
-          <id>consol-labs-release</id>
-          <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/repository</url>
-        </repository>
-        <snapshotRepository>
-          <id>consol-labs-snapshots</id>
-          <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/snapshots-repository</url>
-        </snapshotRepository>
-        <site>
-          <id>jolokia-site</id>
-          <url>scpexe://labs.consol.de/home/jolokia/www/htdocs_staging</url>
-        </site>
-      </distributionManagement>
+      <!-- Distribution to maven central. This is default deployment target -->
+      <id>dist</id>
       <build>
         <plugins>
           <plugin>
@@ -458,11 +459,24 @@
               </execution>
             </executions>
           </plugin>
-
+          
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.1</version>
+            <version>1.4</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -479,7 +493,26 @@
         </plugins>
       </build>
     </profile>
-
+    
+    <profile>
+      <!-- Distribution to labs.consol.de, for artefacts and site -->
+      <id>labs</id>
+      <distributionManagement>
+        <repository>
+          <id>consol-labs-release</id>
+          <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/repository</url>
+        </repository>
+        <snapshotRepository>
+          <id>consol-labs-snapshots</id>
+          <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/snapshots-repository</url>
+        </snapshotRepository>
+        <site>
+          <id>jolokia-site</id>
+          <url>scpexe://labs.consol.de/home/jolokia/www/htdocs_staging</url>
+        </site>
+      </distributionManagement>
+    </profile>
+    
     <profile>
       <id>obr-release</id>
       <build>
@@ -514,27 +547,7 @@
       </build>
     </profile>
 
-    <profile>
-      <id>maven-3</id>
-      <activation>
-        <file>
-          <!--  This employs that the basedir expression is only recognized by Maven 3.x (see MNG-2363) -->
-          <exists>${basedir}</exists>
-        </file>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-site-plugin</artifactId>
-              <version>3.0</version>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
+    <!-- Profile for running only Java 5 compliant tests-->
     <profile>
       <id>java5</id>
       <activation>
@@ -554,6 +567,7 @@
       </build>
     </profile>
 
+    <!-- Include Roo, which is not build by default -->
     <profile>
       <id>roo</id>
       <modules>

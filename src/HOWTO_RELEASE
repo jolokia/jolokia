@@ -18,8 +18,11 @@ vi pom.xml
 # Build release
 git clone git@github.com:rhuss/jolokia.git
 cd jolokia
-mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:prepare
-mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist-labs,roo release:perform
+mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist,roo release:prepare
+mvn -Proo -DdevelopmentVersion=0.83-SNAPSHOT -DreleaseVersion=0.84 -Dtag=v0.84 -Pdist,roo release:perform
+
+# Deploying to labs.consol.de
+mvn -Pdist,labs,roo deploy
 
 # Push tags and changes to github
 git push 
@@ -54,9 +57,9 @@ git commit -a
 # Adapted tracking code
 git co piwik
 git rebase master
-cd tools/site-skin; mvn clean intall;
+cd tools/site-skin; mvn clean install;
 cd ../..
-mvn -Pdist-labs site site:deploy
+mvn -Plabs site site:deploy
 
 # Roo-Plugin:
 # Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 

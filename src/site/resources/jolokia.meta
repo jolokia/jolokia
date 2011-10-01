@@ -1,6 +1,7 @@
 {
    "repositories" : [
-      "http://labs.consol.de/maven/repository"
+      "http://labs.consol.de/maven/repository",
+      "http://repo1.maven.org/maven2"
    ],
    "snapshots-repositories" : [
       "http://labs.consol.de/maven/snapshots-repository"
