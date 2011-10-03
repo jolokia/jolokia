@@ -509,17 +509,19 @@
           <url>scpexe://labs.consol.de/home/jolokia/www/htdocs_staging</url>
         </site>
       </distributionManagement>
-      <pluginManagement>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <configuration>
-              <remoteOBR>true</remoteOBR>
-            </configuration>
-          </plugin>
-        </plugins>
-      </pluginManagement>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>maven-bundle-plugin</artifactId>
+              <configuration>
+                <remoteOBR>true</remoteOBR>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
     
     <profile>
@@ -584,4 +586,4 @@
       </modules>
   </profile>
   </profiles>
-/project>
+</project>
