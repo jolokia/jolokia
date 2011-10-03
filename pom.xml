@@ -46,7 +46,6 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <releaseProfiles>dist-labs</releaseProfiles>
           <goals>deploy docbkx:generate-html docbkx:generate-pdf package assembly:assembly</goals>
         </configuration>
       </plugin>
@@ -136,7 +135,6 @@
             <artifactId>${project.artifactId}</artifactId>
             <version>${project.version}</version>
             <packaging>${project.packaging}</packaging>
-            <remoteOBR>true</remoteOBR>
           </configuration>
         </plugin>
 
@@ -511,6 +509,17 @@
           <url>scpexe://labs.consol.de/home/jolokia/www/htdocs_staging</url>
         </site>
       </distributionManagement>
+      <pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <configuration>
+              <remoteOBR>true</remoteOBR>
+            </configuration>
+          </plugin>
+        </plugins>
+      </pluginManagement>
     </profile>
     
     <profile>
@@ -573,6 +582,6 @@
       <modules>
         <module>tools/roo-addon</module>
       </modules>
-    </profile>
+  </profile>
   </profiles>
-</project>
+/project>

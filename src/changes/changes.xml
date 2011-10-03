@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.0" description="Release 1.0.0" date="2011-10-4">
+    <release version="1.0.0" description="Release 1.0.0" date="2011-10-3">
       <action dev="roland" type="add" date="2011-9-12">
         Applied patch from codewax for supporting an Equinox HTTP-Service
       </action>
