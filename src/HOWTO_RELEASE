@@ -65,6 +65,7 @@ git co piwik
 git rebase master
 cd tools/site-skin; mvn clean install;
 cd ../..
+mvn clean install
 mvn -Plabs site site:deploy
 
 # Roo-Plugin:

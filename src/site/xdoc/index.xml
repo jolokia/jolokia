@@ -51,30 +51,31 @@
       </ul>
     </subsection>
     <section name="News">
-      <subsection name="1.0 - Finally">
+      <subsection name="1.0.0">
         <div class="news-date">2011-10-04</div>
         <p>
-          It's time to celebrate: After two and half years of work on
-          Jmx4Perl and Jolokia have been all wrapped up and their 1.0
-          versions have been released. 
+          It's time to celebrate: After two and half years of hard
+          work, Jmx4Perl and Jolokia have been all wrapped up for
+          their 1.0 releases.
         </p>
         <p>
           The last month the focus was on hardening this first
-          official release, which is backed up by these numbers:
+          official release. This effort is backed up by these numbers:
         </p>
         <ul>
           <li>
             216 integration tests which has been successfully run on 38
-            different platforms
+            different platforms.
           </li>
           <li>
             a unit test coverarge of 82.7% with 404 Java and 194
             Javascript unit tests.  
           </li>
           <li>
-            a <a href="http://docs.codehaus.org/display/SONAR/Technical+Debt+Calculation">technical debt</a> as measured by <a
-            href="http://www.sonarsource.org">Sonar</a> of 2% (or 
-            8 man day)
+            a <a
+            href="http://docs.codehaus.org/display/SONAR/Technical+Debt+Calculation">technical
+            debt</a> of 2% (or 8 man day) as measured by <a
+            href="http://www.sonarsource.org">Sonar</a>
           </li>
           <li>
             other Sonar metrics inlcuding:
@@ -96,18 +97,23 @@
           documented in the <a href="http://labs.consol.de/sonar/timemachine/index/946">time machine</a>
         </p>
         <p>
-          I'm very confident that this 1.0.0 version is rocky solid
+          I'm very confident that this 1.0.0 version is rock solid
           and production ready.
         </p>
         <p>
-          Please note that there has been a minor protocol change when
-          it comes to URL escaping for slashes within GET requests,
-          which is not backwards compatible to the pre-1.0 protocol
-          (which used a different, more complicated scheme). Clients
-          needs to be updated, which has been done for Jmx4Perl 1.00
-          and of course Jolokia 1.0.0's Javascript und Java client
-          libraries.  Since Jolokia is out of beta now, such kind of
-          change won't happen in this ad-hoc in the future, though.
+          Please note that there has been a minor protocol change for
+          the way how Jolokia does URL escaping for slashes within GET
+          requests. This scheme is not backwards compatible to the
+          pre-1.0 protocol (which used a different, more complicated
+          algorithm). Clients need to be updated, which has been
+          already done for Jmx4Perl 1.00 and of course Jolokia 1.0.0's
+          Javascript und Java client libraries.  Since Jolokia is out
+          of beta now such kind of change won't happen in this ad-hoc
+          manner in the future, promised. 
+        </p>
+        <p>
+          All changes for this release are summarized as always in the 
+          <a href="changes-report.html">change log</a>. 
         </p>
       </subsection>
       <subsection name="Jolokia and Jmx4Perl on tour">
