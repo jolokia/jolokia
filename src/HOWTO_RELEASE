@@ -10,9 +10,11 @@ vi src/docbkx/index.xml
 vi client/javascript/src/main/javascript/jolokia.js
 vi agent/core/src/main/java/org/jolokia/Version.java
 vi pom.xml
---> <currentStableVersion>0.82</currentStableVersion>
-    <currentSnapshotVersion>0.83-SNAPSHOT</currentSnapshotVersion>
-    include roo-addon 
+--> <currentStableVersion>1.0.0</currentStableVersion>
+    <currentSnapshotVersion>1.0.1-SNAPSHOT</currentSnapshotVersion>
+
+
+Checking and push
 
 # ========================================================================
 # Build release
