@@ -54,9 +54,9 @@ md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 # ========================================================================
 # Recreate Website (~/jolokia)
 
-# Update version numbers in site.xml
-find . -name site.xml | xargs perl -i -p -e s/0.83-SNAPSHOT/0.84-SNAPSHOT/
-# Update 0.83-SNAPSHOT --> 0.84-SNAPSHOT
+# Update version number in site.xml to next dev version
+vi ./src/site/site.xml
+# Update Skin version to next snapshot
 vi tools/site-skin/pom.xml
 git commit -a
 
