@@ -41,7 +41,7 @@ git push
 git push --tags
 
 # ========================================================================
-# Adapte meta data
+# Adapt meta data
 
 # Add new release to jolokia.meta
 vi src/site/resources/jolokia.meta
