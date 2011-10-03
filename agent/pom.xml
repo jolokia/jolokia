@@ -34,7 +34,7 @@
         <jdk>1.6</jdk>
       </activation>
       <modules>
-        <module>jvm-jdk6</module>
+        <module>jvm</module>
       </modules>
     </profile>
   </profiles>

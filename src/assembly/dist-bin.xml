@@ -50,7 +50,7 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-jvm-jdk6</include>
+        <include>org.jolokia:jolokia-jvm</include>
       </includes>
       <binaries>
         <attachmentClassifier>agent</attachmentClassifier>

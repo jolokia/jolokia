@@ -99,6 +99,6 @@
   <xi:include href='agents/war.xml'/>
   <xi:include href='agents/osgi.xml'/>
   <xi:include href='agents/mule.xml'/>
-  <xi:include href='agents/jvmjdk6.xml'/>
+  <xi:include href='agents/jvm.xml'/>
 
 </chapter>

@@ -56,7 +56,7 @@
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-jvm-jdk6/${currentStableVersion}/jolokia-jvm-jdk6-${currentStableVersion}-agent.jar">jolokia-jvm-jdk6-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>            
           </tr>
           <tr>
             <td>Java Client Library</td>
