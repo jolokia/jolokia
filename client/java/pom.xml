@@ -4,7 +4,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-client-java</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>jolokia-client-java</name>
   <packaging>bundle</packaging>
   <description>Java client for Jolokia agents</description>
@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-client-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
