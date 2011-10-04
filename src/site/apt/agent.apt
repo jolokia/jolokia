@@ -15,8 +15,8 @@ Agents
     agent is packaged as a bundle and comes in two flavors (minimal,
     all-in-one).
 
-  * <<JVM JDK6 Agent>> which can be used with any Oracle/Sun JVM,
-    Version 6.
+  * <<JVM Agent>> which can be used with any Oracle/Sun based JVM,
+    Version 6 or later.
 
   * <<Mule Agent>> for usage within a Mule ESB.
 
@@ -39,27 +39,27 @@ Agents
 
   The WAR agent has been tested to work on
 
-  * JBoss 4.2.3 GA, 5.1.0 GA & 6.0.0 GA
+  * JBoss 4.2.3, 5.1.0, 6.1.0, 7.0.2
 
-  * Oracle WebLogic 9.2 MP3 & 10.0.2.0
+  * Oracle WebLogic 9.2.3.0, 10.0.2.0, 10.3.5.0
 
-  * Glassfish 2.1.1 and 3.0.1
+  * Glassfish 2.1.1, 3.0.1, 3.1.1
 
-  * IBM Websphere 6.1 & 7.0
+  * IBM Websphere 6.1.0.33, 7.0.0.11, 8.0.0.1
 
-  * Apache Tomcat 5.5.31 & 6.0.30 & 7.0.6
+  * Apache Tomcat 5.5.33, 6.0.33, 7.0.20
 
-  * Jetty 5.1.15 & 6.1.26 & 7.2.2 & 8.0.0.M2
+  * Jetty 5.1.15, 6.1.26, 7.5.1, 8.0.1
 
   * Resin 3.1.9
 
-  * Jonas 4.10.7 (with Jetty 5.1.10 and Tomcat 5.5.28) & 5.1.1 & 5.2.0-M3
+  * Jonas 4.10.7, 5.1.1 & 5.2.1
 
-  * Apache Geronimo 2.2 (Jetty 7 and Tomcat 6) & 3.0 M1
+  * Apache Geronimo 2.1.6, 2.2.1, 2.2, 3.0 M1
 
   * Spring dm Server 2.0.0.RELEASE
 
-  * Eclipse Virgo 2.1
+  * Eclipse Virgo 2.1.0
 
   []
 
@@ -82,11 +82,13 @@ Agents
 
   The OSGi agent has been tested with the following containers:
 
-  * Felix 2.0.5 & 3.0.8
+  * Felix 2.0.5, 3.2.2, 4.0.0
 
-  * Equinox 3.5.2 & 3.6.1 & 3.7 M5
+  * Equinox 3.5.2, 3.6.1, 3.7.1, 3.8 M1
 
-  * Virgo 2.1
+  * Virgo 2.1.0, 3.0.1
+
+  * Knopflerfish 3.2.0
 
   []
 
@@ -105,9 +107,11 @@ Agents
 
   The JVM Agent has been tested with:
 
-  * Hadoop 0.20.2
+  * Camel 2.8.1
 
-  * ActiveMQ 5.3.1
+  * ActiveMQ 5.5.0
+
+  * Hadoop 0.20.2
 
   * Terracotta 3.2.1
 
@@ -121,4 +125,4 @@ Agents
   The {{{http://www.mulesoft.org}Mule Standalone ESB}} offers a dedicated JMX agent
   interface, into which this agents plugs in seemlessly. 
 
-  This agent has been tested for Mule 2 and Mule 3.
+  This agent has been tested for Mule 2 and Mule 3 (3.1.1 and 3.2.0).

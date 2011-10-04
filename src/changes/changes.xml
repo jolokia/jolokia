@@ -40,7 +40,7 @@
     </release>
     <release version="0.95" description="Release 0.95" date="2011-08-21">
       <action dev="roland" type="add" date="2011-7-29">
-        Added a dynamical attach mode for the JVM-JDK6 launcher (patch
+        Added a dynamical attach mode for the JVM agent launcher (patch
         by Greg Bowyer).  The agent now includes also a client for
         dynamically starting/stoping an agent on already running Java
         process. See the reference manual for more information.
@@ -63,7 +63,7 @@
         signature "()" after the operation name.
       </action>
       <action dev="roland" type="add" date="2011-04-23">
-        Added HTTPS support for the JVM-JDK6 agent. In order to switch
+        Added HTTPS support for the JVM agent. In order to switch
         it on, the property "protocol=https" must be set and
         additional the properties "keystore" and "keystorePassword"
         for pointing to the keystore which holds the server side

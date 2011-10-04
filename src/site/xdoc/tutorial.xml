@@ -34,7 +34,7 @@ $ TC=`pwd`]]></pre>
         <pre><![CDATA[
 $ cd $TC/webapps
 $ wget \ 
- http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/1.0.0/jolokia-war-1.0.0.war
+http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/1.0.0/jolokia-war-1.0.0.war
 $ mv jolokia-war-1.0.0.war jolokia.war]]></pre>
       </subsection>
       <subsection name="Startup and Verification">
@@ -97,7 +97,7 @@ public class JolokiaDemo {
             <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpclient/4.1.2/httpclient-4.1.2.jar">httpclient-4.1.2.jar</a>
           </li>
           <li>
-            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpcore/4.1.2/httpcore-4.1.2.jar">httpcore-4.0.1.jar</a>
+            <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpcore/4.1.2/httpcore-4.1.2.jar">httpcore-4.1.2.jar</a>
           </li>
           <li>
             <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar">commons-logging-1.1.1.jar</a>
@@ -123,15 +123,6 @@ Memory usage: used: 9526648 / max: 129957888 = 7%
           magic. (In fact, the client library only depends on
           jsons-simple and http-components directly)
         </p>
-        <p>
-          Now compile it and let it run:
-        </p>
-        <pre class="prettyprint"><![CDATA[
-$ CLASSPATH=json_simple-1.1.jar:jolokia-client-java.1.0.0.jar
-$ javac JolokiaDemo.java
-$ java Jolokia
-]]></pre>
-
       </subsection>
       <subsection name="Install Jmx4Perl">
         <p>
@@ -139,7 +130,7 @@ $ java Jolokia
           recommend to install <a
           href="http://www.jmx4perl.org">jmx4perl</a> right
           now. Beside providing a Perl language binding for Jolokia,
-          there are quite some command line tools included which are
+          there are some cool command line tools included which are
           useful on their own.
         </p>
         <ul>
@@ -190,8 +181,8 @@ Install 'jmx4perl' ? (y/n) [y ]
         <p>
           You will be asked for each featured script whether it should
           be installed in addition to the core Perl modules. Each of
-          the scripts (jmx4perl, j4psh, jolokia, check_jmx4perl) will
-          introduce a set of new depedencies on Perl modules which in
+          these scripts (jmx4perl, j4psh, jolokia, check_jmx4perl) will
+          introduce a set of new depedencies of Perl modules which in
           turn might depend on other Perl modules or system
           libraries. Perl modules are resolved and installed
           automatically. The agent management script
@@ -201,7 +192,7 @@ Install 'jmx4perl' ? (y/n) [y ]
           <code>libxml2-dev</code> with the package management tool of
           your OS (e.g. <code>apt-get install libxml2-dev</code>
           ). Alternatively, the OS package for XML::LibXML could be
-          installed, too (e.g. <code>libxml-libxml-perl</code> for
+          used. (e.g. <code>libxml-libxml-perl</code> for
           Ubuntu)
         </p>
         <p>
@@ -232,10 +223,9 @@ $ man jmx4perl]]></pre>
       </subsection>
       <subsection name="Summary">
         <p>
-          That's all for now, I hope you enjoyed this first ride. This
-          tutorial demonstrated, that setting up Jolokia is really
-          easy, other servlet containers work more or less the same
-          for deployment. 
+          That's all for now, I hope you enjoyed this first ride. For
+          the next steps I recommend to have a look into <a
+          href="reference/html/index.html">reference manual</a>.
         </p>
       </subsection>
     </section>

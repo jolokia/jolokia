@@ -70,7 +70,7 @@
       </listitem>
     </varlistentry>
     <varlistentry>
-      <term><emphasis role="bold">JVM JDK6 agent</emphasis></term>
+      <term><emphasis role="bold">JVM agent</emphasis></term>
       <listitem>
         Starting with Java 6 the JDK provided by Oracle contains a
         lightweight HTTP-Server which is used e.g. for the reference

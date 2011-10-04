@@ -101,7 +101,7 @@
         For enabling basic security the properties user and password can be set:
       </p>
       <pre class="prettyprint"><![CDATA[
- <custom-agent name="jolokia-agent" class="org.jmx4perl.mule.JolokiaMuleAgent">
+ <custom-agent name="jolokia-agent" class="org.jolokia.mule.JolokiaMuleAgent">
    <spring:property name="user" value="roland"/>
    <spring:property name="password" value="wtf"/>
  </custom-agent>

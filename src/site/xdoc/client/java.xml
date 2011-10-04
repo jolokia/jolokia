@@ -10,6 +10,11 @@
 
   <body>
     <section name="Jolokia Java Client library">
+      <p>
+        The Jolokia Java client bindings provide typeless access to a
+        remote JMX MBeanServer. Its programming model follows a
+        request-response paradigm and  is easy to use:
+      </p>
       <pre class="prettyprint lang-java">
   J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
   J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
@@ -17,6 +22,11 @@
   J4pReadResponse resp = j4pClient.execute(req);
   System.out.println(resp.getValue());
       </pre>
+      <p>
+        This client library is described in detail with all
+        configuration options in the <a
+        href="../reference/html/clients.html#client-java">reference manual</a>
+      </p>
     </section>
   </body>
 </document>

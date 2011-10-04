@@ -63,7 +63,7 @@
               textual representation like JSON and although they have
               some performance advantages, Jolokia balances this for
               many use cases with advanced features like bulk requests
-              and low startup times.<a href="features/fast.html">More
+              and low startup times. <a href="features/fast.html">More
               ...</a>
             </p>
           </section>

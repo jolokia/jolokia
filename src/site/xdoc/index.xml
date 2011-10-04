@@ -40,10 +40,10 @@
         </li>
         <li>
           <a href="agent.html">Agents</a> exist for many
-          platforms (JEE, OSGi, Mule, JDK6 JVM).          
+          platforms (JEE, OSGi, Mule, JVM).          
         </li>
         <li>
-          <a href="support.html">Support</a> is available in both <a
+          <a href="support.html">Support</a> channels are available in both <a
           href="support.html#Your_Support_for_Jolokia">directions</a>.
           You are also welcome to add to the <a
           href="support.html#Source">evolution</a> of Jolokia.
@@ -64,8 +64,8 @@
         </p>
         <ul>
           <li>
-            216 integration tests which has been successfully run on 38
-            different platforms.
+            216 integration tests which has been successfully run on
+            <a href="agent.html">38</a> different platforms.
           </li>
           <li>
             a unit test coverarge of 82.7% with 404 Java and 194
@@ -101,15 +101,15 @@
           and production ready.
         </p>
         <p>
-          Please note that there has been a minor protocol change for
-          the way how Jolokia does URL escaping for slashes within GET
-          requests. This scheme is not backwards compatible to the
+          There has been a minor protocol change for the way how
+          Jolokia does URL escaping for slashes within GET requests,
+          though. This scheme is not backwards compatible to the
           pre-1.0 protocol (which used a different, more complicated
           algorithm). Clients need to be updated, which has been
           already done for Jmx4Perl 1.00 and of course Jolokia 1.0.0's
           Javascript und Java client libraries.  Since Jolokia is out
           of beta now such kind of change won't happen in this ad-hoc
-          manner in the future, promised. 
+          manner in the future, promised.
         </p>
         <p>
           All changes for this release are summarized as always in the 
@@ -169,7 +169,7 @@
           two new features. Very cool features, IMO.
         </p>
         <p>
-          The Jolokia <a href="agent/jvm.html">JDK6 JVM Agent</a> is
+          The Jolokia <a href="agent/jvm.html">JVM Agent</a> is
           now able to use the <a
           href="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html">Java
           Attach API</a> so that it is possible to dynamically attach

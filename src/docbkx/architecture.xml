@@ -65,7 +65,7 @@
     <para>
       But there are more options. Specialized agents are able to use an OSGi
       HttpService or come with an embedded Jetty-Server in case of the
-      Mule agent. The JVM JDK6 agent uses the HTTP-Server included
+      Mule agent. The JVM agent uses the HTTP-Server included
       with every Oracle JVM 6 and can be attached dynamically to any
       running Java process. Agents are described in detail in <xref
       linkend="agents"/>.

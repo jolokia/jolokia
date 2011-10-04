@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="agents-jvm">
-  <title>JVM JDK 1.6 Agent</title>
+  <title>JVM Agent</title>
   
   <para>
-    The JVM JDK6 agent is right agent when it comes to instrument an
+    The JVM agent is right agent when it comes to instrument an
     arbitrary Java application which is not covered by the other
     agents. This agent can be started by any Java program by
     providing certain startup options to the JVM. Or it can be
@@ -17,7 +17,7 @@
   <section id="jvm-agent">
     <title>Jolokia as JVM Agent</title>
     <para>
-      The JVM JDK6 agent uses the <ulink
+      The JVM agent uses the <ulink
       url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
       Agent interface</ulink> for linking into any JVM. Under the
       hood it uses an HTTP-Server, which is available on every
@@ -70,7 +70,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
         <td><constant>host</constant></td>
         <td>
-          Hostname to the HTTP server should bind to. 
+          Hostaddress to which the HTTP server should bind to. 
         </td>        
         <td>
           <constant>InetAddress.getLocalHost()</constant>
@@ -79,7 +79,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>port</constant></td>
           <td>
-            Port the HTTP server should listen to 
+            Port the HTTP server should listen to.
           </td>        
           <td>
             <constant>8778</constant>
@@ -213,7 +213,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       start of the agent, it can be reached over the network.
     </para>
     <para>
-      The JAR containing the JVM JDK6 agent also contains a client
+      The JAR containing the JVM  agent also contains a client
       application which can be reached via the
       <literal>-jar</literal> option. Call it with
       <literal>--help</literal> to get a short usage information:

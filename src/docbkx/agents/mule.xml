@@ -6,4 +6,159 @@
     uses Mule's own agent interface for plugging into the ESB running
     in standalone mode. 
   </para>
+  <para>
+    The agent needs to be included into the Mule configuration as
+    shown in the following example, which is the way how to configure 
+    the agent for Mule 3:
+  </para>
+  <informalexample>
+    <programlisting><![CDATA[
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:management="http://www.mulesoft.org/schema/mule/management"
+    xmlns:spring="http://www.springframework.org/schema/beans" 
+    xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core 
+             http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+       http://www.springframework.org/schema/beans 
+             http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+       http://www.mulesoft.org/schema/mule/management 
+             http://www.mulesoft.org/schema/mule/management/3.1/mule-management.xsd">
+
+   <!-- .... -->
+   <custom-agent name="jolokia-agent" class="org.jolokia.mule.JolokiaMuleAgent">
+      <spring:property name="port" value="8899"/>
+   </custom-agent>
+   <management:jmx-server/>
+</mule>
+]]></programlisting>
+  </informalexample>
+  <para>
+    For Mule 2, the configuration is slightly different since the
+    <literal>&lt;custom-agent&gt;</literal> is contained in the
+    <literal>management</literal> namespace for Mule 2
+    (<literal>&lt;management:custom-agent&gt;</literal>) 
+  </para>
+  <para>
+    This agent knows about the following configuration parameters
+  </para>
+  <table id="agent-mule-config">
+    <title>Mule agent configuration options</title>
+    <thead>
+      <tr>
+        <td>Parameter</td>
+        <td>Description</td>
+        <td>Example</td>
+      </tr>        
+    </thead>
+    <tr>
+      <td><constant>host</constant></td>
+      <td>
+        Hostaddress to which the HTTP server should bind to. 
+      </td>        
+      <td>
+        <constant>InetAddress.getLocalHost()</constant>
+      </td>
+    </tr>
+    <tr>
+      <td><constant>port</constant></td>
+      <td>
+        Port the HTTP server should listen to.
+      </td>        
+      <td>
+        <constant>8888</constant>
+      </td>
+    </tr>
+    <tr>
+      <td><constant>user</constant></td>
+      <td>
+        Use to authenticate against. This switches on security and
+        requires a client to provide a user and password.
+      </td>        
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td><constant>password</constant></td>
+      <td>
+        Password to check against when security is switched on. 
+      </td>        
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td><constant>debug</constant></td>
+      <td>
+        Debugging state after startup. Can be changed via the <xref
+        linkend="mbean-config">configuration MBean</xref> during
+        runtime.
+      </td>
+      <td>
+        <constant>false</constant>
+      </td>
+    </tr>
+    <tr>
+      <td><constant>historyMaxEntries</constant></td>
+      <td>
+        Entries to keep in the history. Can be changed at
+        runtime via the <xref linkend="mbean-config">configuration MBean</xref>.
+      </td>
+      <td>
+        <constant>10</constant>
+      </td>
+      </tr>
+      <tr>
+        <td><constant>debugMaxEntries</constant></td>
+        <td>
+          Maximum number of entries to keep in the local
+          debug history (if enabled). Can be changed via
+          the <xref linkend="mbean-config">configuration MBean</xref> at runtime.
+        </td>
+        <td>
+          <constant>100</constant>
+        </td>
+      </tr>
+      <tr>
+      <td><constant>maxDepth</constant></td>
+      <td>
+        Maximum depth when traversing bean properties.
+        If set to 0, depth checking is disabled
+        </td>
+        <td>
+          <constant>5</constant>
+        </td>
+    </tr>
+    <tr>
+      <td><constant>maxCollectionSize</constant></td>
+        <td>
+          Maximum size of collections returned when
+          serializing to JSON. When set to 0,
+          collections are never truncated.
+        </td>
+        <td>
+          <constant>0</constant>
+        </td>
+    </tr>
+    <tr>
+      <td><constant>maxObjects</constant></td>
+      <td>
+        Maximum number of objects which are traversed
+        when serializing a single response. Use this
+        as an airbag to avoid boosting your memory and
+        network traffic. Nevertheless, when set to 0
+        no limit is imposed.
+      </td>
+      <td>
+        <constant>10000</constant>
+      </td>
+    </tr>   
+  </table>      
+  <para>
+    The context under which the agent is reachable is fixed to
+    <literal>/jolokia</literal>. As an alternative to this Mule agent,
+    the <xref linkend="agents-jvm">JVM agent</xref> can be used for
+    Mule, too. This agent also knows about SSL encryption and
+    authentication.
+  </para>
+  
 </section>

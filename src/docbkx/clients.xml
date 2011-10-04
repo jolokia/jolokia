@@ -8,7 +8,8 @@
       and a Javascript library. This reference describes the client
       bindings bundled with Jolokia. More JVM based client libraries
       are planned for inclusiong in Jolokia (e.g. Groovy, Scala or
-      JRuby).
+      JRuby). Information about Jmx4Perl can be found <xref
+      linkend="http://www.jmx4perl.org">elsewhere</xref>.
     </para>
 
     <xi:include href='client/javascript.xml'/>

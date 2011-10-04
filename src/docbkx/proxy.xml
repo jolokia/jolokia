@@ -18,7 +18,7 @@
       used. These are either servlet container or JEE server hosting
       the WAR agent or an OSGi runtime with an OSGi HttpService (which
       in turn is typically based on an embedded serlvet container like
-      Tomcat or Jetty). The two other agents, the Mule and JDK6 agents
+      Tomcat or Jetty). The two other agents, the Mule and JVM agents
       are not that well suited for this job. 
     </para>
     <para>

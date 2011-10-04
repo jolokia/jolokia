@@ -52,7 +52,7 @@
         </p>
         <pre class="pretty-print lang-html">
 <![CDATA[<head>
-  <script type="text/javascript" src="jquery-1.4.4.js"></script>
+  <script type="text/javascript" src="jquery-1.6.4.js"></script>
   <script type="text/javascript" src="json2.js"></script>
   <script type="text/javascript" src="jolokia.js"></script>
   <script type="text/javascript" src="jolokia-simple.js"></script>
