@@ -50,6 +50,11 @@
          "jolokia-jvm-jdk6-%v-agent.jar",
          "jolokia.jar"
       ],
+      "jvm" : [
+         "jolokia-jvm",
+         "jolokia-jvm-%v-agent.jar",
+         "jolokia.jar"
+      ],
       "war" : [
          "jolokia-war",
          "jolokia-war-%v.war",
