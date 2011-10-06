@@ -18,13 +18,12 @@ package org.jolokia.jvmagent.client.command;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 
 /**
  * Toggle between "start" and "stop" depending on the existance of the system
- * property {@link JvmAgent#JOLOKIA_AGENT_URL}
+ * property {@link org.jolokia.jvmagent.JvmAgent#JOLOKIA_AGENT_URL}
  *
  * @author roland
  * @since 06.10.11

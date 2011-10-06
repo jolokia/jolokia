@@ -28,6 +28,7 @@ import java.util.regex.*;
  * @author roland
  * @since 12.08.11
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class OptionsAndArgs {
 
     // ===================================================================================
