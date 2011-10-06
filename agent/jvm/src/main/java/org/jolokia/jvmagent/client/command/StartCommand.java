@@ -38,6 +38,7 @@ public class StartCommand extends AbstractBaseCommand {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("PMD.SystemPrintln")
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
             throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl;

@@ -42,6 +42,7 @@ public class StatusCommand extends AbstractBaseCommand {
      * @return the exit code (0: agent is attached, 1: agent is not attached.)
      */
     @Override
+    @SuppressWarnings("PMD.SystemPrintln")
     int execute(OptionsAndArgs pOptions, Object pVm, VirtualMachineHandler pHandler)
             throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl = checkAgentUrl(pVm);

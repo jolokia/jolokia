@@ -28,7 +28,7 @@ import java.util.regex.*;
  * @author roland
  * @since 12.08.11
  */
-final public class OptionsAndArgs {
+public final class OptionsAndArgs {
 
     // ===================================================================================
     // Available options
@@ -117,10 +117,7 @@ final public class OptionsAndArgs {
         command = arguments.size() > 0 ? arguments.get(0) : null;
         String pidArg = arguments.size() > 1 ? arguments.get(1) : null;
 
-        quiet = options.containsKey("quiet");
-        verbose = options.containsKey("verbose");
-        jarFile = lookupJarFile();
-        initCommand(pCommands,pidArg);
+        init(pCommands, pidArg);
     }
 
 
@@ -261,41 +258,53 @@ final public class OptionsAndArgs {
     }
 
     // Initialise default command and validate
-    private void initCommand(Set<String> pCommands, String pArg) {
-        String process = pArg;
+    private void init(Set<String> pCommands, String pArg) {
+        quiet = options.containsKey("quiet");
+        verbose = options.containsKey("verbose");
+        jarFile = lookupJarFile();
+
         // Special cases first
+        String process = checkCommand(pCommands, pArg);
+        initPid(process);
+        verifyCommandAndProcess();
+    }
+
+    private void verifyCommandAndProcess() {
+        if (!"list".equals(command) &&
+            !"help".equals(command) &&
+            pid == null &&
+            processPattern == null) {
+                throw new IllegalArgumentException("No process id (PID) or pattern given");
+        }
+    }
+
+    private String checkCommand(Set<String> pCommands, String pProcess) {
+        String ret = pProcess;
         if (options.containsKey("help")) {
             command = "help";
-        } else if (command != null && process == null && !pCommands.contains(command)) {
-            process = command;
+        } else if (command != null && pProcess == null && !pCommands.contains(command)) {
+            ret = command;
             command = "toggle";
-        } else  if (command == null && process == null) {
+        } else  if (command == null && pProcess == null) {
             command = "list";
-        } else {
-            // Ok, from here on "command" and "pid" are required
-            // command == null and pid != null is never possible, hence command can not be null here
-            if (!"list".equals(command)) {
-                if (process == null) {
-                    throw new IllegalArgumentException("No process id (PID) or pattern given");
-                }
-            }
         }
-        // Check whether pPidArg is a pattern or a numeric id
-        if (process != null) {
-            if (process.matches("^\\d+$")) {
-                pid = process;
+        return ret;
+    }
+
+    // Dispatch to either a numeric PID or a pattern matching the process name
+    private void initPid(String pProcess) {
+        if (pProcess != null) {
+            if (pProcess.matches("^\\d+$")) {
+                pid = pProcess;
             } else {
                 try {
-                    processPattern = Pattern.compile(process,Pattern.CASE_INSENSITIVE);
+                    processPattern = Pattern.compile(pProcess, Pattern.CASE_INSENSITIVE);
                 } catch (PatternSyntaxException exp) {
-                    throw new IllegalArgumentException("Invalid pattern '" + process + "' for matching process names");
+                    throw new IllegalArgumentException("Invalid pattern '" + pProcess + "' for matching process names",exp);
                 }
             }
         }
     }
-
-
-
 
     // A parsed argument
     private static final class ArgParsed {

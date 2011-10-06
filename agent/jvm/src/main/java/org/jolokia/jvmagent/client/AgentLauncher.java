@@ -44,6 +44,8 @@ public final class AgentLauncher {
      *
      * @param args command line arguments
      */
+    // We use processing exception thrown here for better error reporting, not flow control.
+    @SuppressWarnings("PMD.ExceptionAsFlowControl")
     public static void main(String... args) {
         OptionsAndArgs options;
         try {

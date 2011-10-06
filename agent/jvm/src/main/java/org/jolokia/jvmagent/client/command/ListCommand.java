@@ -37,7 +37,9 @@ public class ListCommand extends AbstractBaseCommand {
         return "list";
     }
 
+    /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("PMD.SystemPrintln")
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> vmDescriptors = pHandler.listProcesses();
         for (ProcessDescription descriptor : vmDescriptors) {

@@ -229,8 +229,5 @@ public class VirtualMachineHandler {
         }
         throw new ClassNotFoundException("No tools.jar found (" + extraInfo + ")");
     }
-
-
-    // =========================================================================================
 }
 

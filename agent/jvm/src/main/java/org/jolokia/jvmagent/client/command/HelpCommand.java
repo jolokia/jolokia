@@ -39,7 +39,6 @@ public class HelpCommand extends AbstractBaseCommand {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         printUsage();
         return 0;
@@ -48,6 +47,7 @@ public class HelpCommand extends AbstractBaseCommand {
     /**
      * Print out usage
      */
+    @SuppressWarnings({"PMD.SystemPrintln","PMD.AvoidDuplicateLiterals"})
     static void printUsage() {
         String jar = OptionsAndArgs.lookupJarFile().getName();
         System.out.println(
