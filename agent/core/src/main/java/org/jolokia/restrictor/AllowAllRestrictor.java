@@ -29,35 +29,10 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jul 28, 2009
  */
-public class AllowAllRestrictor implements Restrictor {
+public class AllowAllRestrictor extends AbstractConstantRestrictor {
 
     /** {@inheritDoc} */
-    public boolean isHttpMethodAllowed(HttpMethod pMethod) {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    public boolean isTypeAllowed(RequestType pType) {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    public boolean isOperationAllowed(ObjectName pName, String pOperation) {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return true;
+    public AllowAllRestrictor() {
+        super(true);
     }
 }

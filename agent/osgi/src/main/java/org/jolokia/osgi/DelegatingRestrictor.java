@@ -29,7 +29,7 @@ import org.osgi.framework.*;
  * if none is available. If multiple services are available, it will grant access
  * only if all restrictors allow
  */
-class DelegatingRestrictor extends DenyAllRestrictor {
+class DelegatingRestrictor implements Restrictor {
 
     private BundleContext bundleContext;
 
@@ -82,7 +82,6 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     };
 
     /** {@inheritDoc} */
-    @Override
     public boolean isHttpMethodAllowed(HttpMethod pMethod) {
         return checkRestrictorService(HTTP_METHOD_CHECK,pMethod);
     }
@@ -97,7 +96,6 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     };
 
     /** {@inheritDoc} */
-    @Override
     public boolean isTypeAllowed(RequestType pType) {
         return checkRestrictorService(TYPE_CHECK, pType);
     }
@@ -112,7 +110,6 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     };
 
     /** {@inheritDoc} */
-    @Override
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
         return checkRestrictorService(ATTRIBUTE_READ_CHECK,pName,pAttribute);
     }
@@ -127,7 +124,6 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     };
 
     /** {@inheritDoc} */
-    @Override
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
         return checkRestrictorService(ATTRIBUTE_WRITE_CHECK,pName,pAttribute);
     }
@@ -142,7 +138,6 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     };
 
     /** {@inheritDoc} */
-    @Override
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         return checkRestrictorService(OPERATION_CHECK,pName,pOperation);
     }
@@ -161,7 +156,6 @@ class DelegatingRestrictor extends DenyAllRestrictor {
     };
 
     /** {@inheritDoc} */
-    @Override
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
         return checkRestrictorService(REMOTE_CHECK,pHostOrAddress);
     }
