@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent.client;
+package org.jolokia.jvmagent.client.util;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -16,6 +16,10 @@ package org.jolokia.jvmagent.client;
  *  limitations under the License.
  */
 
+import java.util.regex.Pattern;
+
+import org.jolokia.jvmagent.client.util.OptionsAndArgs;
+import org.jolokia.jvmagent.client.command.CommandDispatcher;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -27,9 +31,13 @@ import static org.testng.Assert.*;
 @Test
 public class OptionsAndArgsTest {
 
+    private OptionsAndArgs opts(String ... args) {
+        return  new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),args);
+    }
+
     @Test
     public void help() {
-        OptionsAndArgs o = new OptionsAndArgs(new String[] { "--help","--verbose"});
+        OptionsAndArgs o = opts("--help","--verbose");
         assertEquals(o.getCommand(), "help");
         assertFalse(o.isQuiet());
         assertTrue(o.isVerbose());
@@ -37,56 +45,61 @@ public class OptionsAndArgsTest {
 
     @Test
     public void simple() {
-        OptionsAndArgs o = new OptionsAndArgs(new String[] { "--host","localhost","start","12","--password=bla","-u","roland","--quiet"});
+        OptionsAndArgs o = opts("--host","localhost","start","12","--password=bla","-u","roland","--quiet");
         assertEquals(o.getCommand(), "start");
         assertTrue(o.isQuiet());
         assertFalse(o.isVerbose());
         assertEquals(o.getPid(),"12");
+        assertNull(o.getProcessPattern());
         assertEquals(o.toAgentArg(),"host=localhost,user=roland,password=bla");
     }
 
     @Test
     public void lookupJar() {
-        OptionsAndArgs o = new OptionsAndArgs(new String[0]);
+        OptionsAndArgs o = opts();
         assertEquals(o.getJarFileName(),"classes");
         assertNotNull(o.getJarFilePath(),"");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown option.*")
     public void unknownOption() {
-        new OptionsAndArgs(new String[] { "--blubber","bla"});
+        opts("--blubber","bla");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*short option.*")
     public void unknownShortOption() {
-        new OptionsAndArgs(new String[] { "-x","bla"});
+        opts("-x","bla");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*host.*requires.*")
     public void noOptionArg() {
-        new OptionsAndArgs(new String[] { "--host","--user","roland"});
+        opts("--host","--user","roland");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*user.*requires.*")
     public void noOptionArg2() {
-        new OptionsAndArgs(new String[] { "--host","localhost","--user"});
+        opts("--host","localhost","--user");
     }
 
     @Test
     public void defaultCommands() {
-        OptionsAndArgs o = new OptionsAndArgs(new String[0]);
+        OptionsAndArgs o = opts();
         assertEquals(o.getCommand(),"list");
-        o = new OptionsAndArgs(new String[] { "12" });
+        o = opts("12");
         assertEquals(o.getCommand(),"toggle");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*process id.*")
-    public void invalidDefaultCommands() {
-       new OptionsAndArgs(new String[] { "bla" });
+    @Test
+    public void toggleDefaultWithPattern() {
+        OptionsAndArgs o = opts("bla");
+        assertNull(o.getPid());
+        Pattern pat = o.getProcessPattern();
+        assertEquals(pat.pattern(),"bla");
+        assertEquals(o.getCommand(), "toggle");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*numeric.*")
-    public void invalidDefaultCommands2() {
-       new OptionsAndArgs(new String[] { "bla" , "blub"});
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Invalid pattern.*")
+    public void invalidPattern() {
+        opts("start","i+*");
     }
 }

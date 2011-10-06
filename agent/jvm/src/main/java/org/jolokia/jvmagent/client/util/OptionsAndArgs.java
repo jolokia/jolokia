@@ -1,10 +1,9 @@
-package org.jolokia.jvmagent.client;
+package org.jolokia.jvmagent.client.util;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -29,7 +28,7 @@ import java.util.regex.Pattern;
  * @author roland
  * @since 12.08.11
  */
-final class OptionsAndArgs {
+final public class OptionsAndArgs {
 
     // ===================================================================================
     // Available options
@@ -63,8 +62,16 @@ final class OptionsAndArgs {
         }
     }
 
+    // Launcher command
     private String command;
+
+    // Either pid or processPattern must be set, but not both
+    // Process id.
     private String pid;
+
+    // Pattern for matching a process pattern
+    private Pattern processPattern;
+
     private Map<String,String> options;
 
     private boolean quiet;
@@ -73,17 +80,24 @@ final class OptionsAndArgs {
     // Jar file where this class is in
     private File jarFile;
 
+
     /**
      * Parse a list of arguments. Options start with '--' (long form) or '-' (short form) and are
      * defined in {@see OPTIONS} and {@see SHORT_OPTS}. For options with arguments, the argument can
      * bei either provided in the form '--option=value' or '--option value'. Everything which is
-     * not an option is considered to be an argument. Exactly two arguments are allowed: The command
-     * (first) and the PID (second).
+     * not an option is considered to be an argument. Two arguments are allowed: The command
+     * (first) and the PID (second). Any non numeric PID is considered to be a pattern. Either {@link #getPid()} or
+     * {@link #getProcessPattern()} is set.
+     * <p/>
+     * If no PID/pattern and no command is given the "list" command is implied. If as first argument a pure numeric value
+     * or a pattern (which must not be equal to a valid command) is given, then "toggle" is infered with the given
+     * PID/pattern.
      *
+     * @param pCommands set of commands which are known
      * @param pArgs arguments as given on the command line
      * @throws IllegalArgumentException if parsing fails
      */
-    public OptionsAndArgs(String ... pArgs) {
+    public OptionsAndArgs(Set<String> pCommands,String ... pArgs) {
         options = new HashMap<String, String>();
 
         // Parse options
@@ -101,12 +115,12 @@ final class OptionsAndArgs {
             }
         }
         command = arguments.size() > 0 ? arguments.get(0) : null;
-        pid = arguments.size() > 1 ? arguments.get(1) : null;
+        String pidArg = arguments.size() > 1 ? arguments.get(1) : null;
 
         quiet = options.containsKey("quiet");
         verbose = options.containsKey("verbose");
         jarFile = lookupJarFile();
-        initCommand();
+        initCommand(pCommands,pidArg);
     }
 
 
@@ -126,12 +140,23 @@ final class OptionsAndArgs {
     }
 
     /**
-     * Pid as give as argument
+     * Process id as given as argument (if any). If a pattern for matching the process name is used, this
+     * method returns null.
      *
-     * @return process id
+     * @return process id or null
      */
     public String getPid() {
         return pid;
+    }
+
+    /**
+     * A pattern used for matching a process name. If  {@link #getPid()} return a non-null value,
+     * this method returns always null
+     *
+     * @return pattern to match a process name or null
+     */
+    public Pattern getProcessPattern() {
+        return processPattern;
     }
 
     /**
@@ -178,6 +203,23 @@ final class OptionsAndArgs {
         return jarFile.getName();
     }
 
+    /**
+     * Lookup the JAR File from where this class is loaded
+     *
+     * @return File pointint to the JAR-File from where this class was loaded.
+     */
+    public static File lookupJarFile() {
+        try {
+            return new File(OptionsAndArgs.class
+                                    .getProtectionDomain()
+                                    .getCodeSource()
+                                    .getLocation()
+                                    .toURI());
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Error: Cannot lookup jar for this class: " + e,e);
+        }
+    }
+
 
     // ===============================================================
     // Command line handling
@@ -219,42 +261,40 @@ final class OptionsAndArgs {
     }
 
     // Initialise default command and validate
-    private void initCommand() {
+    private void initCommand(Set<String> pCommands, String pArg) {
+        String process = pArg;
         // Special cases first
         if (options.containsKey("help")) {
             command = "help";
-        } else if (command != null && pid == null && command.matches("^[0-9]+$")) {
-            pid = command;
+        } else if (command != null && process == null && !pCommands.contains(command)) {
+            process = command;
             command = "toggle";
-        } else  if (command == null && pid == null) {
+        } else  if (command == null && process == null) {
             command = "list";
         } else {
             // Ok, from here on "command" and "pid" are required
             // command == null and pid != null is never possible, hence command can not be null here
             if (!"list".equals(command)) {
-                if (pid == null) {
-                    throw new IllegalArgumentException("No process id (PID) given");
+                if (process == null) {
+                    throw new IllegalArgumentException("No process id (PID) or pattern given");
                 }
-                if (!pid.matches("^[0-9]+$")) {
-                    throw new IllegalArgumentException("Process id (PID) is not numeric");
+            }
+        }
+        // Check whether pPidArg is a pattern or a numeric id
+        if (process != null) {
+            if (process.matches("^\\d+$")) {
+                pid = process;
+            } else {
+                try {
+                    processPattern = Pattern.compile(process,Pattern.CASE_INSENSITIVE);
+                } catch (PatternSyntaxException exp) {
+                    throw new IllegalArgumentException("Invalid pattern '" + process + "' for matching process names");
                 }
             }
         }
     }
 
 
-    // Lookup the JAR File from where this class is loaded
-    static File lookupJarFile() {
-        try {
-            return new File(OptionsAndArgs.class
-                                    .getProtectionDomain()
-                                    .getCodeSource()
-                                    .getLocation()
-                                    .toURI());
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Error: Cannot lookup jar for this class: " + e,e);
-        }
-    }
 
 
     // A parsed argument

@@ -16,6 +16,11 @@ package org.jolokia.jvmagent.client;
  *  limitations under the License.
  */
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.jolokia.jvmagent.client.util.*;
+import org.jolokia.jvmagent.client.command.CommandDispatcher;
+
 /**
  * Launcher for attaching/detaching a Jolokia agent dynamically to an already
  * running Java process.
@@ -42,7 +47,7 @@ public final class AgentLauncher {
     public static void main(String... args) {
         OptionsAndArgs options;
         try {
-            options = new OptionsAndArgs(args);
+            options = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),args);
             VirtualMachineHandler vmHandler = new VirtualMachineHandler(options);
             CommandDispatcher dispatcher = new CommandDispatcher(options);
 
@@ -53,6 +58,12 @@ public final class AgentLauncher {
             int exitCode = 0;
             try {
                 exitCode = dispatcher.dispatchCommand(vm,vmHandler);
+            } catch (InvocationTargetException e) {
+                throw new ProcessingException("InvocationTargetException",e,options);
+            } catch (NoSuchMethodException e) {
+                throw new ProcessingException("Internal: NoSuchMethod",e,options);
+            } catch (IllegalAccessException e) {
+                throw new ProcessingException("IllegalAccess",e,options);
             } finally {
                 vmHandler.detachAgent(vm);
             }
@@ -60,7 +71,7 @@ public final class AgentLauncher {
 
         } catch (IllegalArgumentException exp) {
             System.err.println("Error: " + exp.getMessage() + "\n");
-            CommandDispatcher.printHelp(OptionsAndArgs.lookupJarFile().getName());
+            CommandDispatcher.printHelp();
             System.exit(1);
         } catch (ProcessingException exp) {
             exp.printErrorMessage();

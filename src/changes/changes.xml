@@ -7,6 +7,13 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.0.1" description="Release 1.0.1" date="">
+      <action dev="roland" type="update" date="2011-9-12">
+        The JVM agent know can also take as argument a regular
+        expression for matching a process' name in adition to a
+        process id.
+      </action>
+    </release>
     <release version="1.0.0" description="Release 1.0.0" date="2011-10-3">
       <action dev="roland" type="add" date="2011-9-12">
         Applied patch from codewax for supporting an Equinox HTTP-Service

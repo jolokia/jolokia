@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent.client;
+package org.jolokia.jvmagent.client.util;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -17,11 +17,15 @@ package org.jolokia.jvmagent.client;
  */
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * A handler for dealing with <code>VirtualMachine</code> without directly referencing internally
@@ -35,9 +39,9 @@ public class VirtualMachineHandler {
     private OptionsAndArgs options;
 
     /**
-     * Constructor
+     * Constructor with options
      *
-     * @param pOptions options for
+     * @param pOptions options for getting e.g. the process id to attach to
      *
      */
     public VirtualMachineHandler(OptionsAndArgs pOptions) {
@@ -55,22 +59,24 @@ public class VirtualMachineHandler {
      * @return the create virtual machine of <code>null</code> if none could be created
      */
     public Object attachVirtualMachine() {
-        if (options.getPid() == null) {
+        if (options.getPid() == null && options.getProcessPattern() == null) {
             return null;
         }
         Class vmClass = lookupVirtualMachineClass();
-
         try {
             Method method = vmClass.getMethod("attach",String.class);
-            return method.invoke(null,options.getPid());
+            return method.invoke(null, getProcessId(options));
         } catch (NoSuchMethodException e) {
             throw new ProcessingException("Internal: No method 'attach' found on " + vmClass,e,options);
         } catch (InvocationTargetException e) {
             throw new ProcessingException("InvocationTarget " + vmClass,e,options);
         } catch (IllegalAccessException e) {
             throw new ProcessingException("IllegalAccess to " + vmClass,e,options);
+        } catch (IllegalArgumentException e) {
+            throw new ProcessingException("Illegal Argument",e,options);
         }
     }
+
 
     /**
      * Detach from the virtual machine
@@ -100,8 +106,8 @@ public class VirtualMachineHandler {
      * @throws InvocationTargetException reflection error
      * @throws IllegalAccessException reflection error
      */
-    public List<ProcessDesc> listProcesses() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        List<ProcessDesc> ret = new ArrayList<ProcessDesc>();
+    public List<ProcessDescription> listProcesses() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
         Class vmClass = lookupVirtualMachineClass();
         Method method = vmClass.getMethod("list");
         List vmDescriptors = (List) method.invoke(null);
@@ -110,12 +116,75 @@ public class VirtualMachineHandler {
             String id = (String) idMethod.invoke(descriptor);
             Method displayMethod = descriptor.getClass().getMethod("displayName");
             String display = (String) displayMethod.invoke(descriptor);
-            ret.add(new ProcessDesc(id, display));
+            ret.add(new ProcessDescription(id, display));
         }
         return ret;
     }
 
+    /**
+     * Filter the process list for a regular expression and returns the description. The process this
+     * JVM is running in is ignored. If more than one process or no process is found, an exception
+     * is raised.
+     *
+     * @param pPattern regular expression to match
+     * @return a process description of the one process found but never null
+     * @throws IllegalArgumentException if more than one or no process has been found.
+     */
+    public ProcessDescription findProcess(Pattern pPattern)
+            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
+        String ownId = getOwnProcessId();
+
+        for (ProcessDescription desc : listProcesses()) {
+            Matcher matcher = pPattern.matcher(desc.getDisplay());
+            if (!desc.getId().equals(ownId) && matcher.find()) {
+                ret.add(desc);
+            }
+        }
+        if (ret.size() == 1) {
+            return ret.get(0);
+        } else if (ret.size() == 0) {
+            throw new IllegalArgumentException("No process found matching \"" + pPattern.pattern() + "\"");
+        } else {
+            StringBuilder buf = new StringBuilder();
+            for (ProcessDescription desc : ret) {
+                buf.append(desc.getId()).append(" (").append(desc.getDisplay()).append("),");
+            }
+            throw new IllegalArgumentException("More than one process found matching \"" +
+                                               pPattern.pattern() + "\": " + buf.substring(0,buf.length()-1));
+        }
+    }
+
     // ========================================================================================================
+
+    /**
+     * Get the process id, either directly from option's ID or by looking up a regular expression for java process name
+     * (but not this java process)
+     *
+     * @param pOpts used to get eithe the process Id ({@link OptionsAndArgs#getPid()} or the pattern for matching a
+     *        process name ({@link OptionsAndArgs#getProcessPattern()})
+     * @return the numeric id as string
+     * @throws IllegalArgumentException if a pattern is used and no or more than one process name matches.
+     */
+    private String getProcessId(OptionsAndArgs pOpts) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        if (pOpts.getPid() != null) {
+            return pOpts.getPid();
+        } else if (pOpts.getProcessPattern() != null) {
+            return findProcess(pOpts.getProcessPattern()).getId();
+        } else {
+            throw new IllegalArgumentException("No process ID and no process name pattern given");
+        }
+    }
+
+    // Try to find out own process id. This is platform dependent and works on Sun/Oracl/OpeneJDKs like the
+    // whole agent, so it should be safe
+    private String getOwnProcessId() {
+        // Format of name is : <pid>@<host>
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        int endIdx = name.indexOf('@');
+        return endIdx != -1 ? name.substring(0,endIdx) : name;
+    }
+
 
     // Try hard to load the VirtualMachine class
     Class lookupVirtualMachineClass() {
@@ -133,7 +202,7 @@ public class VirtualMachineHandler {
     "\n" +
     "Please call this launcher with a qualified classpath on the command line like\n" +
     "\n" +
-    "   java -cp path/to/tools.jar:" + options.getJarFileName() + " " + AgentLauncher.class.getName() + " [options] <command> <ppid>\n",
+    "   java -cp path/to/tools.jar:" + options.getJarFileName() + " org.jolokia.jvmagent.client.AgentLauncher [options] <command> <ppid>\n",
     exp,options);
         }
     }
@@ -151,7 +220,7 @@ public class VirtualMachineHandler {
             };
             for (File toolsJar : toolsJars) {
                 if (toolsJar.exists()) {
-                    ClassLoader loader = new URLClassLoader(new URL[] {toolsJar.toURI().toURL() },AgentLauncher.class.getClassLoader());
+                    ClassLoader loader = new URLClassLoader(new URL[] {toolsJar.toURI().toURL() },getClass().getClassLoader());
                     return loader.loadClass(pVmClassName);
                 }
             }
@@ -163,38 +232,5 @@ public class VirtualMachineHandler {
 
 
     // =========================================================================================
-    /**
-     * Process descriptor, immutable
-     */
-    static class ProcessDesc {
-        private String id;
-        private String display;
-
-        /**
-         * Constructor for process descriptor
-         * @param pId procuess id
-         * @param pDisplay process description
-         */
-        public ProcessDesc(String pId, String pDisplay) {
-            id = pId;
-            display = pDisplay;
-        }
-
-        /**
-         * Process id
-         * @return id
-         */
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * Process description
-         * @return description
-         */
-        public String getDisplay() {
-            return display;
-        }
-    }
 }
 

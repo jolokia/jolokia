@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent.client;
+package org.jolokia.jvmagent.client.util;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -25,6 +25,7 @@ package org.jolokia.jvmagent.client;
 public class ProcessingException extends RuntimeException {
     private boolean quiet;
     private boolean verbose;
+    private String command;
 
     /**
      * Constructor  
@@ -37,6 +38,7 @@ public class ProcessingException extends RuntimeException {
         super(pErrMsg,pStoredExp);
         quiet = pOptions.isQuiet();
         verbose = pOptions.isVerbose();
+        command = pOptions.getCommand();
     }
 
     /**
@@ -46,7 +48,7 @@ public class ProcessingException extends RuntimeException {
     @SuppressWarnings({"PMD.SystemPrintln"})
     public void printErrorMessage() {
         if (!quiet) {
-            System.err.println(getMessage() + ": " + getCause());
+            System.err.println(getMessage() + " (command: " + command + ") : " + getCause());
         }
         if (verbose) {
             getCause().printStackTrace(System.err);

@@ -219,19 +219,19 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <literal>--help</literal> to get a short usage information:
     </para>
     <programlisting><![CDATA[
-$ java -jar jolokia-jvm-1.0.0-agent.jar --help
+$ java -jar jolokia-jvm-1.0.1-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.0.0-SNAPSHOT-agent.jar [options] <command> <pid>
+Usage: java -jar jolokia-jvm-1.0.1-SNAPSHOT-agent.jar [options] <command> <pid/regexp>
 
 where <command> is one of
-    start     -- Start a Jolokia agent for the given process id
-    stop      -- Stop a Jolokia agent for the given process id
+    start     -- Start a Jolokia agent for the process specified
+    stop      -- Stop a Jolokia agent for the process specified
     status    -- Show status of an (potentially) attached agent
     toggle    -- Toggle between start/stop (default when no command is given)
-    list      -- List all attachable Java processes (default when no argument is given)
+    list      -- List all attachable Java processes (default when no argument is given at all)
 
 [options] are used for providing runtime information for attaching the agent:
 
@@ -241,8 +241,7 @@ where <command> is one of
     --agentContext <context>      HTTP Context under which the agent is reachable (default: /jolokia)
     --user <user>                 User used for Basic-Authentication
     --password <password>         Password used for Basic-Authentication
-    --quiet                       No output. "status" will exit with code 0 if the agent is running, 
-                                  1 otherwise
+    --quiet                       No output. "status" will exit with code 0 if the agent is running, 1 otherwise
     --verbose                     Verbose output
     --executor <executor>         Executor policy for HTTP Threads to use (default: single)
                                   "fixed"  -- Thread pool with a fixed number of threads (default: 5)
@@ -255,17 +254,17 @@ where <command> is one of
     --keystorePassword <pwd>      Password to the keystore (https only)
     --useSslClientAuthentication  Use client certificate authentication (https only)
     --debug                       Switch on agent debugging
-    --debugMaxEntries <nr>        Number of debug entries to keep in memory which can be fetched 
-                                  from the Jolokia MBean
+    --debugMaxEntries <nr>        Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
     --maxDepth <depth>            Maximum number of levels for serialization of beans (default: null)
-    --maxCollectionSize <size>    Maximum number of element in collections to keep when serializing the 
-                                  response (default: null)
-    --maxObjects <nr>             Maximum number of objects to consider for serialization 
-                                  (default: maxObjects)
+    --maxCollectionSize <size>    Maximum number of element in collections to keep when serializing the response (default: null)
+    --maxObjects <nr>             Maximum number of objects to consider for serialization (default: maxObjects)
     --policyLocation <url>        Location of a Jolokia policy file
     --mbeanQualifier <qualifier>  Qualifier to use when registering Jolokia internal MBeans
     --config <configfile>         Path to a property file from where to read the configuration
     --help                        This help documentation
+
+<pid/regexp> can be either a numeric process id or a regular expression. A regular expression is matched
+against the processes' names (ignoring case) and must be specific enough to select exactly one process.
 
 If no <command> is given but only a <pid> the state of the Agent will be toggled
 between "start" and "stop"
@@ -273,8 +272,7 @@ between "start" and "stop"
 If neither <command> nor <pid> is given, a list of Java processes along with their IDs
 is printed
 
-For more information please visit www.jolokia.org
-]]></programlisting>
+For more documentation please visit www.jolokia.org]]></programlisting>
     <para>
       Every option described in <xref linkend="agent-jvm-config"/>
       is reflected by a command line option for the
@@ -293,14 +291,17 @@ For more information please visit www.jolokia.org
         <listitem>
           <para>
             Use this to attach an agent to an already running, local
-            Java process. The additional argument is the
+            Java process. The additional argument is either the
             <emphasis>process id</emphasis> of the Java process to
-            attach to. The command will return with an return code
-            of 0 if an agent has been started. If the agent is
-            already running, nothing happens and the launcher
+            attach to or a <emphasis>regular expression</emphasis>
+            which is matched against the Java processes names. In the
+            later case, exactly one process must match, otherwise an
+            exception is raised. The command will return with an
+            return code of 0 if an agent has been started. If the
+            agent is already running, nothing happens and the launcher
             returns with 1. The URL of the Agent will be printed to
             standard out on an extra line except when the
-            <literal>--quiet</literal> option is used. 
+            <literal>--quiet</literal> option is used.
           </para>
         </listitem>
       </varlistentry>    
@@ -308,11 +309,12 @@ For more information please visit www.jolokia.org
         <term><literal>stop</literal></term>
         <listitem>
           <para>
-              Command for stoping an running and dynamically attached
-              agent. The required argument is the Java process id of
-              to which the agent is attached. If the agent could be
+              Command for stopping an running and dynamically attached
+              agent. The required argument is the Java process id or
+              an regular expression as described for the
+              <literal>start</literal> command. If the agent could be
               stopped, the launcher exits with 0, it exits with 1 if
-              there was no agent running. 
+              there was no agent running.
           </para>
         </listitem>
       </varlistentry>    
@@ -328,8 +330,9 @@ For more information please visit www.jolokia.org
             except when the operation fails. When the agent is
             started, the full agent's URL is printed to standard
             out. <literal>toggle</literal> is the default command
-            when only a numeric process id is given as argument and
-            no explicit command.
+            when only a numeric process id is given as argument or a
+            regular expression which <emphasis>not</emphasis> the same
+            as a known command.
           </para>
         </listitem>
       </varlistentry>    
@@ -338,9 +341,9 @@ For more information please visit www.jolokia.org
         <listitem>
           <para>
             Command for showing the current agent status for a given
-            process. The process id is required. The launcer will
-            return with 0 when the agent is running, otherwise with
-            1.  
+            process. The process id or a regular expresssion is
+            required. The launcer will return with 0 when the agent is
+            running, otherwise with 1.
           </para>
         </listitem>
       </varlistentry>
