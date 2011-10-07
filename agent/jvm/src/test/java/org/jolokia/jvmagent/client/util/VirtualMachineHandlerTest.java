@@ -56,7 +56,7 @@ public class VirtualMachineHandlerTest {
     }
 
     @Test
-    public void listAndAttach() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void listAndAttach() throws Exception, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> procs = vmHandler.listProcesses();
         assertTrue(procs.size() > 0);
         boolean foundAtLeastOne = false;
@@ -68,14 +68,14 @@ public class VirtualMachineHandlerTest {
 
 
     @Test
-    public void findProcess() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void findProcess() throws Exception, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> procs = filterOwnProcess(vmHandler.listProcesses());
         if (procs.size() > 0) {
             Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(procs.get(0).getDisplay()) + "$");
             assertTrue(tryAttach(singleHitPattern.pattern()));
         }
 
-        assertFalse(tryAttach("RobertMakClaudiPizarro","No process"));
+        assertFalse(tryAttach("RobertMakClaudiPizarro",".*No.*process.*"));
         if (procs.size() >= 2) {
             assertFalse(tryAttach(".",procs.get(0).getId()));
         }
@@ -98,7 +98,7 @@ public class VirtualMachineHandlerTest {
         return endIdx != -1 ? name.substring(0,endIdx) : name;
     }
 
-    private boolean tryAttach(String pId,String ... expMsg) {
+    private boolean tryAttach(String pId,String ... expMsg) throws Exception {
         OptionsAndArgs o = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),"start", pId);
         VirtualMachineHandler h = new VirtualMachineHandler(o);
         Object vm = null;
@@ -107,7 +107,9 @@ public class VirtualMachineHandlerTest {
             return true;
         } catch (Exception exp) {
             if (expMsg.length > 0) {
-                assertTrue(exp.getMessage().contains(expMsg[0]) || exp.getCause().getMessage().contains(expMsg[0]));
+                assertTrue(exp.getMessage().matches(expMsg[0]) || exp.getCause().getMessage().matches(expMsg[0]));
+            } else {
+                throw exp;
             }
         } finally {
             if (vm != null) {

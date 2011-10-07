@@ -270,10 +270,12 @@ public final class OptionsAndArgs {
         verifyCommandAndProcess();
     }
 
+    // Command which dont need an argument
+    private final static Set<String> COMMANDS_WITHOUT_PID =
+            new HashSet<String>(Arrays.asList("list","help","version"));
+    
     private void verifyCommandAndProcess() {
-        if (!"list".equals(command) &&
-            !"help".equals(command) &&
-            !"version".equals(command) &&
+        if (!COMMANDS_WITHOUT_PID.contains(command) &&
             pid == null &&
             processPattern == null) {
                 throw new IllegalArgumentException("No process id (PID) or pattern given");

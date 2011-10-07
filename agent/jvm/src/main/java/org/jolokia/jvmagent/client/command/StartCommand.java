@@ -53,7 +53,7 @@ public class StartCommand extends AbstractBaseCommand {
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("Jolokia already attached to " + getProcessDescription(pOpts,pHandler));
+                System.out.println("Jolokia is already attached to " + getProcessDescription(pOpts,pHandler));
                 System.out.println(agentUrl);
             }
             return 1;

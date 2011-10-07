@@ -144,13 +144,13 @@ public class VirtualMachineHandler {
         if (ret.size() == 1) {
             return ret.get(0);
         } else if (ret.size() == 0) {
-            throw new IllegalArgumentException("No process found matching \"" + pPattern.pattern() + "\"");
+            throw new IllegalArgumentException("No attachable process found matching \"" + pPattern.pattern() + "\"");
         } else {
             StringBuilder buf = new StringBuilder();
             for (ProcessDescription desc : ret) {
                 buf.append(desc.getId()).append(" (").append(desc.getDisplay()).append("),");
             }
-            throw new IllegalArgumentException("More than one process found matching \"" +
+            throw new IllegalArgumentException("More than one attachable process found matching \"" +
                                                pPattern.pattern() + "\": " + buf.substring(0,buf.length()-1));
         }
     }
@@ -168,12 +168,26 @@ public class VirtualMachineHandler {
      */
     private String getProcessId(OptionsAndArgs pOpts) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         if (pOpts.getPid() != null) {
-            return pOpts.getPid();
+            String pid = pOpts.getPid();
+            if (!isAttachable(pid)) {
+                throw new IllegalArgumentException("Cannot attach to process-ID " + pid + ".\nSee --help for possible reasons.");
+            }
+            return pid;
         } else if (pOpts.getProcessPattern() != null) {
             return findProcess(pOpts.getProcessPattern()).getId();
         } else {
             throw new IllegalArgumentException("No process ID and no process name pattern given");
         }
+    }
+
+    // Check whether the given pid is in the list of attachable JVMs
+    private boolean isAttachable(String pPid) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        for (ProcessDescription desc : listProcesses()) {
+            if (desc.getId().equals(pPid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Try to find out own process id. This is platform dependent and works on Sun/Oracl/OpeneJDKs like the

@@ -48,7 +48,7 @@ public class ProcessingException extends RuntimeException {
     @SuppressWarnings({"PMD.SystemPrintln"})
     public void printErrorMessage() {
         if (!quiet) {
-            System.err.println(getMessage() + " (command: " + command + ") : " + getCause());
+            System.err.println(getMessage() + " (command: " + command + ") : " + getCause().getMessage());
         }
         if (verbose) {
             getCause().printStackTrace(System.err);
