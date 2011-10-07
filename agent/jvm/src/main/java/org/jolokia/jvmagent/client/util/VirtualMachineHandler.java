@@ -16,11 +16,9 @@ package org.jolokia.jvmagent.client.util;
  *  limitations under the License.
  */
 
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -199,49 +197,23 @@ public class VirtualMachineHandler {
         return endIdx != -1 ? name.substring(0,endIdx) : name;
     }
 
-
-    // Try hard to load the VirtualMachine class
-    Class lookupVirtualMachineClass() {
+    // lookup virtual machine class
+    private Class lookupVirtualMachineClass() {
         try {
-            String vmClassName = "com.sun.tools.attach.VirtualMachine";
-            try {
-                return Class.forName(vmClassName);
-            } catch (ClassNotFoundException exp) {
-                return lookupInToolsJar(vmClassName);
-            }
-        } catch (Exception exp) {
+            return ToolsClassFinder.lookupClass("com.sun.tools.attach.VirtualMachine");
+        } catch (ClassNotFoundException exp) {
             throw new ProcessingException(
-    "Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
-    "essential classes for attaching to a running JVM could locate the necessary jar file.\n" +
-    "\n" +
-    "Please call this launcher with a qualified classpath on the command line like\n" +
-    "\n" +
-    "   java -cp path/to/tools.jar:" + options.getJarFileName() + " org.jolokia.jvmagent.client.AgentLauncher [options] <command> <ppid>\n",
-    exp,options);
+                    "Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
+                    "essential classes for attaching to a running JVM could locate the necessary jar file.\n" +
+                    "\n" +
+                    "Please call this launcher with a qualified classpath on the command line like\n" +
+                    "\n" +
+                    "   java -cp path/to/tools.jar:" + options.getJarFileName() + " org.jolokia.jvmagent.client.AgentLauncher [options] <command> <ppid>\n",
+                    exp,
+                    options);
         }
     }
 
-    // Go hunting for tools.jar
-    private Class lookupInToolsJar(String pVmClassName) throws MalformedURLException, ClassNotFoundException {
-        // Try to look up tools.jar within $java.home, otherwise give up
-        String javaHome = System.getProperty("java.home");
-        String extraInfo;
-        if (javaHome != null) {
-            extraInfo = "JAVA_HOME is " + javaHome;
-            File[] toolsJars = new File[] {
-                    new File(javaHome + "/../lib/tools.jar"),
-                    new File(javaHome + "/lib/tools.jar")
-            };
-            for (File toolsJar : toolsJars) {
-                if (toolsJar.exists()) {
-                    ClassLoader loader = new URLClassLoader(new URL[] {toolsJar.toURI().toURL() },getClass().getClassLoader());
-                    return loader.loadClass(pVmClassName);
-                }
-            }
-        } else {
-            extraInfo = "No JAVA_HOME set";
-        }
-        throw new ClassNotFoundException("No tools.jar found (" + extraInfo + ")");
-    }
+
 }
 

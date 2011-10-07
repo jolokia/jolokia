@@ -271,7 +271,7 @@ public final class OptionsAndArgs {
     }
 
     // Command which dont need an argument
-    private final static Set<String> COMMANDS_WITHOUT_PID =
+    private static final Set<String> COMMANDS_WITHOUT_PID =
             new HashSet<String>(Arrays.asList("list","help","version"));
     
     private void verifyCommandAndProcess() {

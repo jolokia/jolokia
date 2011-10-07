@@ -45,8 +45,8 @@ public class VirtualMachineHandlerTest {
 
 
     @Test
-    public void simple() {
-        Class clazz = vmHandler.lookupVirtualMachineClass();
+    public void simple() throws ClassNotFoundException {
+        Class clazz = ToolsClassFinder.lookupClass("com.sun.tools.attach.VirtualMachine");
         assertEquals(clazz.getName(),"com.sun.tools.attach.VirtualMachine");
     }
 
