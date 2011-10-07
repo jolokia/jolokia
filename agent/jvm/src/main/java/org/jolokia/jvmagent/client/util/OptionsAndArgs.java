@@ -38,7 +38,7 @@ public final class OptionsAndArgs {
     private static final Set<String> OPTIONS = new HashSet<String>(Arrays.asList(
                 // JVM Agent options:
                 "host", "port", "agentContext", "user", "password",
-                "quiet!", "verbose!", "executor", "threadNr",
+                "quiet!", "verbose!", "version!", "executor", "threadNr",
                 "backlog", "protocol", "keystore", "keystorePassword",
                 "useSslClientAuthentication!",
                 // Jolokia options:
@@ -273,6 +273,7 @@ public final class OptionsAndArgs {
     private void verifyCommandAndProcess() {
         if (!"list".equals(command) &&
             !"help".equals(command) &&
+            !"version".equals(command) &&
             pid == null &&
             processPattern == null) {
                 throw new IllegalArgumentException("No process id (PID) or pattern given");
@@ -283,10 +284,12 @@ public final class OptionsAndArgs {
         String ret = pProcess;
         if (options.containsKey("help")) {
             command = "help";
+        } else if (options.containsKey("version")) {
+            command = "version";
         } else if (command != null && pProcess == null && !pCommands.contains(command)) {
             ret = command;
             command = "toggle";
-        } else  if (command == null && pProcess == null) {
+        } else if (command == null && pProcess == null) {
             command = "list";
         }
         return ret;

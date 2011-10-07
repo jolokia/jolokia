@@ -92,6 +92,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --mbeanQualifier <qualifier>  Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --config <configfile>         Path to a property file from where to read the configuration\n" +
 "    --help                        This help documentation\n" +
+"    --version                     Version of this agent\n" +
 "\n" +
 "<pid/regexp> can be either a numeric process id or a regular expression. A regular expression is matched\n" +
 "against the processes' names (ignoring case) and must be specific enough to select exactly one process.\n" +

@@ -43,7 +43,8 @@ public class CommandDispatcher {
                 new ToggleCommand(),
                 new StatusCommand(),
                 new ListCommand(),
-                new HelpCommand()
+                new HelpCommand(),
+                new VersionCommand()
         }) {
             COMMANDS.put(command.getName(),command);
         }

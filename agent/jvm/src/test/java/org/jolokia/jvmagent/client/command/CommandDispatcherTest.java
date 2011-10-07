@@ -24,12 +24,13 @@ import java.util.regex.Pattern;
 import com.sun.tools.attach.*;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.jolokia.Version;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.jvmagent.client.util.*;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -64,6 +65,23 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("--help"));
         assertEquals(d.dispatchCommand(null, null), 0);
         CommandDispatcher.printHelp();
+        assertTrue(outStream.toString().contains("Jolokia Agent Launcher"));
+    }
+
+    @Test
+    public void version() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        CommandDispatcher d = new CommandDispatcher(opts("--version"));
+        assertEquals(d.dispatchCommand(null, null), 0);
+        assertTrue(outStream.toString().contains(Version.getAgentVersion()));
+        assertFalse(outStream.toString().contains(Version.getProtocolVersion()));
+    }
+
+    @Test
+    public void versionVerbose() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        CommandDispatcher d = new CommandDispatcher(opts("--version","--verbose"));
+        assertEquals(d.dispatchCommand(null, null), 0);
+        assertTrue(outStream.toString().contains(Version.getAgentVersion()));
+        assertTrue(outStream.toString().contains(Version.getProtocolVersion()));
     }
 
     @Test
