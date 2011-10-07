@@ -18,6 +18,8 @@ package org.jolokia.jvmagent.client.util;
 
 import java.io.File;
 import java.net.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * Utility class for looking up a class within tools.jar
@@ -25,7 +27,7 @@ import java.net.*;
  * @author roland
  * @since 07.10.11
  */
-public class ToolsClassFinder {
+public final class ToolsClassFinder {
 
     private ToolsClassFinder() {}
 
@@ -78,8 +80,7 @@ public class ToolsClassFinder {
             for (File toolsJar : TOOLS_JAR_LOCATIONS) {
                 try {
                     if (toolsJar.exists()) {
-                        ClassLoader loader = new URLClassLoader(new URL[] {toolsJar.toURI().toURL() },
-                                                                ToolsClassFinder.class.getClassLoader());
+                        ClassLoader loader = createClassLoader(toolsJar);
                         return loader.loadClass(pClassName);
                     }
                 } catch (MalformedURLException e) {
@@ -94,4 +95,18 @@ public class ToolsClassFinder {
         throw new ClassNotFoundException("No tools.jar found (" + extraInfo + ")");
     }
 
+
+    // Create a classloader and respect a security manager if installed
+    private static ClassLoader createClassLoader(File toolsJar) throws MalformedURLException {
+        final URL urls[] = new URL[] {toolsJar.toURI().toURL() };
+        if (System.getSecurityManager() == null) {
+            return new URLClassLoader(urls,ToolsClassFinder.class.getClassLoader());
+        } else {
+            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+                public ClassLoader run() {
+                    return new URLClassLoader(urls,ToolsClassFinder.class.getClassLoader());
+                }
+            });
+        }
+    }
 }
