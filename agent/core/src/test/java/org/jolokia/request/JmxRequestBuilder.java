@@ -94,6 +94,11 @@ public class JmxRequestBuilder {
         return this;
     }
 
+    public JmxRequestBuilder path(String pPath) {
+        request.put("path",pPath);
+        return this;
+    }
+
     public JmxRequestBuilder arguments(List<Object> pArguments) {
         request.put("arguments", pArguments);
         return this;
@@ -117,4 +122,5 @@ public class JmxRequestBuilder {
         }
         return ret;
     }
+
 }

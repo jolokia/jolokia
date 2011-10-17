@@ -50,7 +50,7 @@ public final class EscapeUtil {
         }) {
             String esc = param[0];
             String del = param[1];
-            SPLIT_PATTERNS.put(esc + del, createSplitPattern(esc,del));
+            SPLIT_PATTERNS.put(esc + del, createSplitPatterns(esc, del));
         }
     }
 
@@ -86,6 +86,10 @@ public final class EscapeUtil {
      * @return list of path elements or null if the initial path is null.
      */
     public static List<String> parsePath(String pPath) {
+        // Special cases which simply implies 'no path'
+        if (pPath == null || pPath.equals("") || pPath.equals("/")) {
+            return null;
+        }
         return split(pPath, PATH_ESCAPE, "/");
     }
 
@@ -143,7 +147,7 @@ public final class EscapeUtil {
             ArrayList<String> ret = new ArrayList<String>();
             Pattern[] pattern = SPLIT_PATTERNS.get(pEscape + pDelimiter);
             if (pattern == null) {
-                pattern = createSplitPattern(pEscape,pDelimiter);
+                pattern = createSplitPatterns(pEscape, pDelimiter);
                 SPLIT_PATTERNS.put(pEscape + pDelimiter,pattern);
             }
 
@@ -178,7 +182,7 @@ public final class EscapeUtil {
     // ===================================================================================
 
     // Create a split pattern for a given delimiter
-    private static Pattern[] createSplitPattern(String pEscape, String pDel) {
+    private static Pattern[] createSplitPatterns(String pEscape, String pDel) {
         return new Pattern[] {
                 // Escape
                 Pattern.compile("((?:[^" + pEscape + pDel + "]|" + pEscape + ".)*)(?:" + pDel + "|$)"),

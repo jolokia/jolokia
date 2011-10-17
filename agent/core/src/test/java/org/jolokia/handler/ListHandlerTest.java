@@ -49,6 +49,16 @@ public class ListHandlerTest {
     }
 
     @Test
+    public void singleSlashPath() throws Exception {
+        for (String p : new String[] { null, "", "/" }) {
+            JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).path(p).build();
+            Map res = execute(request);
+            assertTrue(res.containsKey("java.lang"));
+            assertTrue(res.get("java.lang") instanceof Map);
+        }
+    }
+
+    @Test
     public void domainPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
         Map res = execute(request);
