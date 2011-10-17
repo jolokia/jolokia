@@ -130,7 +130,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
                 </listitem>
               </varlistentry>
               <varlistentry>
-                <term><literal>fixed</literal></term>
+                <term><literal>single</literal></term>
                 <listitem>
                   <para>
                     A single thread only

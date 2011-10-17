@@ -51,6 +51,50 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia and Jmx4Perl on tour">
+        <div class="news-date">2011-08-29</div>
+        <div style="margin-left: 30px; float:right">
+          <a style="background: none;" href="http://www.devoxx.com"><img src="images/banner/devoxx.png" alt="Devoxx"/></a>
+        </div>        
+        <p>
+          <em>Meet us in Paradise</em> at Devoxx 2011 ! "<a
+          href="http://www.devoxx.com/display/DV11/Jolokia+-+JMX+on+Capsaicin">Jolokia
+          - JMX on Capsaicin</a>" will be presented on November 14th
+          2011 in Antwerp, Belgium. I'm really excited to have the
+          chance to bring some chili pepper to this superb premium
+          conference which I greatly enjoyed as visitor in the
+          past. 30 minutes are surely not long enough for getting in
+          every feature, so please le me know whether you have a
+          favourite one.
+        </p>
+        <div style="clear: both"></div>
+        <div style="margin-left: 30px; margin-top: 20px; float:right">
+          <a style="background: none;" href="http://www.netways.de/en/osmc/y2011/"><img src="images/banner/osmc_2011.png" alt="OSMC 2011"/></a>
+        </div>        
+        <p>
+          The second conference where Jolokia will play its role this
+          autumn is at the Open Source Monitoring Conference "<a
+          href="http://www.netways.de/en/osmc/y2011/programm/v/nagios_java_monitoring_mit_jmx4perl_und_jolokia/">Nagios
+          Java monitoring with Jmx4Perl and Jolokia</a>" in Nuremberg
+          on November 30th 2011. It's a quite different talk with
+          focus on Jmx4Perl, discovery of relevant monitoring metrics
+          and it's configuration in a Nagios environment. Not much
+          Java here, but tooling en masse. I'm really looking forward
+          to this home play, too.
+        </p>
+        <div style="clear: both;"></div>
+        <p>
+          If you intend to participate in one of these conferences and
+          would like some discussion about Jolokia, Jmx4Perl, JMX,
+          Chili pepper growing, the world, you can contact me on various
+          channels. Jolokia can be found at twitter at <code><a
+          href="http://twitter.com/jolokia_jmx">@jolokia_jmx</a></code>,
+          the <a href="forum.html">forum</a> or on IRC at the Freenode
+          channel <code>#jolokia</code>. For a simple chat you can use
+          also the new <a href="irc.html">webchat</a> on this site. I
+          would really like to hear from you !
+        </p>
+      </subsection>
       <subsection name="1.0.0">
         <div class="news-date">2011-10-03</div>
         <p>
@@ -114,50 +158,6 @@
         <p>
           All changes for this release are summarized as always in the 
           <a href="changes-report.html">change log</a>. 
-        </p>
-      </subsection>
-      <subsection name="Jolokia and Jmx4Perl on tour">
-        <div class="news-date">2011-08-29</div>
-        <div style="margin-left: 30px; float:right">
-          <a style="background: none;" href="http://www.devoxx.com"><img src="images/banner/devoxx.png" alt="Devoxx"/></a>
-        </div>        
-        <p>
-          <em>Meet us in Paradise</em> at Devoxx 2011 ! "<a
-          href="http://www.devoxx.com/display/DV11/Jolokia+-+JMX+on+Capsaicin">Jolokia
-          - JMX on Capsaicin</a>" will be presented on November 14th
-          2011 in Antwerp, Belgium. I'm really excited to have the
-          chance to bring some chili pepper to this superb premium
-          conference which I greatly enjoyed as visitor in the
-          past. 30 minutes are surely not long enough for getting in
-          every feature, so please le me know whether you have a
-          favourite one.
-        </p>
-        <div style="clear: both"></div>
-        <div style="margin-left: 30px; margin-top: 20px; float:right">
-          <a style="background: none;" href="http://www.netways.de/en/osmc/y2011/"><img src="images/banner/osmc_2011.png" alt="OSMC 2011"/></a>
-        </div>        
-        <p>
-          The second conference where Jolokia will play its role this
-          autumn is at the Open Source Monitoring Conference "<a
-          href="http://www.netways.de/en/osmc/y2011/programm/v/nagios_java_monitoring_mit_jmx4perl_und_jolokia/">Nagios
-          Java monitoring with Jmx4Perl and Jolokia</a>" in Nuremberg
-          on November 30th 2011. It's a quite different talk with
-          focus on Jmx4Perl, discovery of relevant monitoring metrics
-          and it's configuration in a Nagios environment. Not much
-          Java here, but tooling en masse. I'm really looking forward
-          to this home play, too.
-        </p>
-        <div style="clear: both;"></div>
-        <p>
-          If you intend to participate in one of these conferences and
-          would like some discussion about Jolokia, Jmx4Perl, JMX,
-          Chili pepper growing, the world, you can contact me on various
-          channels. Jolokia can be found at twitter at <code><a
-          href="http://twitter.com/jolokia_jmx">@jolokia_jmx</a></code>,
-          the <a href="forum.html">forum</a> or on IRC at the Freenode
-          channel <code>#jolokia</code>. For a simple chat you can use
-          also the new <a href="irc.html">webchat</a> on this site. I
-          would really like to hear from you !
         </p>
       </subsection>
       <subsection name="Summer break is over and 0.95 is here">
