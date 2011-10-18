@@ -82,9 +82,10 @@ public final class ObjectToJsonConverter {
         // Collection handlers
         handlers.add(new ListExtractor());
         handlers.add(new MapExtractor());
+        handlers.add(new CollectionExtractor());
 
         // Special, well known objects
-        addSimplifiers(handlers,pSimplifyHandlers);
+        addSimplifiers(handlers, pSimplifyHandlers);
 
         // Special date handling
         handlers.add(new DateExtractor());

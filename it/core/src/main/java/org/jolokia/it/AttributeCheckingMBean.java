@@ -70,6 +70,10 @@ public interface AttributeCheckingMBean {
 
     void setMap(Map map);
 
+    Set getSet();
+
+    void setSet(Set set);
+
     Map getComplexNestedValue();
 
     void setComplexNestedValue(Map map);

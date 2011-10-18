@@ -45,6 +45,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private List list;
     private Map complexMap;
     private Map map;
+    private Set set;
     private Object bean;
     private String domain;
     private Date date = new Date();
@@ -77,6 +78,10 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
             inner.add(anotherInner);
             complexMap.put("Blub",inner);
             bean = new TestBean(13,"roland");
+
+            set = new HashSet<String>();
+            set.add("jolokia");
+            set.add("habanero");
         } catch (IOException e) {
             throw new RuntimeException("Couldnot create temporary file name",e);
         } catch (MalformedObjectNameException e) {
@@ -168,6 +173,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public void setMap(Map pMap) {
         map = pMap;
+    }
+
+    public Set getSet() {
+        return set;
+    }
+
+    public void setSet(Set pSet) {
+        set = pSet;
     }
 
     public Map getComplexNestedValue() {

@@ -31,7 +31,6 @@ public final class ToolsClassFinder {
 
     private ToolsClassFinder() {}
 
-
     private static final String JAVA_HOME = System.getProperty("java.home");
 
     // Location to look for tools.jar
@@ -103,6 +102,7 @@ public final class ToolsClassFinder {
             return new URLClassLoader(urls,ToolsClassFinder.class.getClassLoader());
         } else {
             return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+                /** {@inheritDoc} */
                 public ClassLoader run() {
                     return new URLClassLoader(urls,ToolsClassFinder.class.getClassLoader());
                 }
