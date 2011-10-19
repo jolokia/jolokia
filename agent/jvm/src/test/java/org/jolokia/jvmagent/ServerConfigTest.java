@@ -104,7 +104,7 @@ public class ServerConfigTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidHost() {
-        new ServerConfig("host=1923.12.5.1");
+        new ServerConfig("host=[192.168.5.0]");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
