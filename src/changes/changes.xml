@@ -8,7 +8,11 @@
   </properties>
   <body>
     <release version="1.0.1" description="Release 1.0.1" date="">
-      <action dev="roland" type="update" date="2011-9-12">
+      <action dev="roland" type="add" date="2011-10-18">
+        Added a CollectionConverter for deserializing collections in
+        addition to Maps and Lists.
+      </action>
+      <action dev="roland" type="update" date="2011-10-12">
         The JVM agent know can also take as argument a regular
         expression for matching a process' name in adition to a
         process id.
