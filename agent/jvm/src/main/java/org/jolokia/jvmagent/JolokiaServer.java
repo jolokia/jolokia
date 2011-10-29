@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -53,6 +54,9 @@ public class JolokiaServer {
 
     // Handler for jolokia requests
     private JolokiaHttpHandler jolokiaHttpHandler;
+
+    // the thread factory
+    private ThreadFactory threadFactory = new SimpleThreadFactory();
 
     /**
      * Create the Jolokia server, i.e. the HttpServer for serving Jolokia requests.
@@ -146,15 +150,23 @@ public class JolokiaServer {
         }
     }
 
+    private class SimpleThreadFactory implements ThreadFactory {
+	public Thread newThread(Runnable r) {
+	    Thread t = new Thread(r);
+	    t.setDaemon(true);
+	    return t;
+	}
+    }
+
     private void initializeExecutor() {
         Executor executor;
         String mode = config.getExecutor();
         if ("fixed".equalsIgnoreCase(mode)) {
-            executor = Executors.newFixedThreadPool(config.getThreadNr());
+            executor = Executors.newFixedThreadPool(config.getThreadNr(), threadFactory);
         } else if ("cached".equalsIgnoreCase(mode)) {
-            executor = Executors.newCachedThreadPool();
+            executor = Executors.newCachedThreadPool(threadFactory);
         } else {
-            executor = Executors.newSingleThreadExecutor();
+            executor = Executors.newSingleThreadExecutor(threadFactory);
         }
         httpServer.setExecutor(executor);
     }
