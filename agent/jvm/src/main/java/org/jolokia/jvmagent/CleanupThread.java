@@ -36,7 +36,7 @@ class CleanupThread extends Thread {
     /**
      * Constructor associating the clean up thread with an HTTP-Server
      *
-     * @param pServer HTTP server to observate
+     * @param pServer HTTP server to observe
      * @param pThreadGroup thread group needed for proper cleanup
      */
     CleanupThread(HttpServer pServer, ThreadGroup pThreadGroup) {

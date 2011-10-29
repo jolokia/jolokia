@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadFactory;
 public class JolokiaServer {
 
 
-    // Overal configuration
+    // Overall configuration
     private ServerConfig config;
 
     // Thread for proper cleaning up our server thread
@@ -55,8 +55,8 @@ public class JolokiaServer {
     // Handler for jolokia requests
     private JolokiaHttpHandler jolokiaHttpHandler;
 
-    // the thread factory
-    private ThreadFactory threadFactory = new SimpleThreadFactory();
+    // Thread factory which creates only daemon threads
+    private ThreadFactory daemonThreadFactory = new DaemonThreadFactory();
 
     /**
      * Create the Jolokia server, i.e. the HttpServer for serving Jolokia requests.
@@ -99,7 +99,6 @@ public class JolokiaServer {
         jolokiaHttpHandler.stop();
 
         if (cleaner != null) {
-            // Instructs cleaner thread to finish and stop the server
             cleaner.stopServer();
         }
     }
@@ -150,23 +149,15 @@ public class JolokiaServer {
         }
     }
 
-    private class SimpleThreadFactory implements ThreadFactory {
-	public Thread newThread(Runnable r) {
-	    Thread t = new Thread(r);
-	    t.setDaemon(true);
-	    return t;
-	}
-    }
-
     private void initializeExecutor() {
         Executor executor;
         String mode = config.getExecutor();
         if ("fixed".equalsIgnoreCase(mode)) {
-            executor = Executors.newFixedThreadPool(config.getThreadNr(), threadFactory);
+            executor = Executors.newFixedThreadPool(config.getThreadNr(), daemonThreadFactory);
         } else if ("cached".equalsIgnoreCase(mode)) {
-            executor = Executors.newCachedThreadPool(threadFactory);
+            executor = Executors.newCachedThreadPool(daemonThreadFactory);
         } else {
-            executor = Executors.newSingleThreadExecutor(threadFactory);
+            executor = Executors.newSingleThreadExecutor(daemonThreadFactory);
         }
         httpServer.setExecutor(executor);
     }
@@ -213,6 +204,19 @@ public class JolokiaServer {
     }
 
     // ======================================================================================
+
+    // Thread factory for creating daemon threads only
+    private static class DaemonThreadFactory implements ThreadFactory {
+
+        @Override
+        /** {@inheritDoc} */
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        }
+    }
+
     // Simple authenticator
     private static class JolokiaAuthenticator extends BasicAuthenticator {
         private String user;
