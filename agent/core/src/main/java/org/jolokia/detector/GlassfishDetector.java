@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import com.sun.tools.javac.resources.version;
-
 /**
  * Detector for Glassfish servers
  *
