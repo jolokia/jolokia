@@ -225,36 +225,47 @@ public final class OptionsAndArgs {
     private static final Pattern ARGUMENT_PATTERN_WITH_EQUAL = Pattern.compile("([^=]+)=(.*)");
 
     private ArgParsed parseArgument(String pArg, String pNextArgument) {
-        if (pArg.startsWith("--")) {
-            // Long option
-            String opt = pArg.substring(2);
-            String value = null;
+        return pArg.startsWith("--") ?
+                parseLongOption(pArg, pNextArgument) :
+                parseShortOption(pArg, pNextArgument);
+    }
 
-            // Check for format 'key=value' as argument
-            Matcher matcher = ARGUMENT_PATTERN_WITH_EQUAL.matcher(opt);
-            if (matcher.matches()) {
-                opt = matcher.group(1);
-                value = matcher.group(2);
-            }
-            if (OPTIONS.contains(opt)) {
-                // Option with argument
-                if (value == null && (pNextArgument == null || pNextArgument.startsWith("-"))) {
-                    throw new IllegalArgumentException("Option '" + opt + "' requires an argument");
-                }
-                return value != null ? new ArgParsed(opt, value, false) : new ArgParsed(opt,pNextArgument,true);
-            } else if (OPTIONS.contains(opt + "!")) {
-                return new ArgParsed(opt,"true",false);
-            } else {
-                throw new IllegalArgumentException("Unknown option '" + opt + "'");
-            }
+    private ArgParsed parseShortOption(String pArg, String pNextArgument) {
+        // Short option
+        String opt = pArg.substring(1);
+        String longOpt = SHORT_OPTS.get(opt);
+        if (longOpt == null) {
+            throw new IllegalArgumentException("No short option '" + opt + "' known");
+        }
+        return parseArgument("--" + longOpt,pNextArgument);
+    }
+
+    private ArgParsed parseLongOption(String pArg, String pNextArgument) {
+        // Long option
+        String opt = pArg.substring(2);
+        String value = null;
+
+        // Check for format 'key=value' as argument
+        Matcher matcher = ARGUMENT_PATTERN_WITH_EQUAL.matcher(opt);
+        if (matcher.matches()) {
+            opt = matcher.group(1);
+            value = matcher.group(2);
+        }
+        
+        if (OPTIONS.contains(opt)) {
+            verifyOptionWithArgument(opt, value, pNextArgument);
+            return value != null ? new ArgParsed(opt, value, false) : new ArgParsed(opt,pNextArgument,true);
+        } else if (OPTIONS.contains(opt + "!")) {
+            return new ArgParsed(opt,"true",false);
         } else {
-            // Short option
-            String opt = pArg.substring(1);
-            String longOpt = SHORT_OPTS.get(opt);
-            if (longOpt == null) {
-                throw new IllegalArgumentException("No short option '" + opt + "' known");
-            }
-            return parseArgument("--" + longOpt,pNextArgument);
+            throw new IllegalArgumentException("Unknown option '" + opt + "'");
+        }
+    }
+
+    private void verifyOptionWithArgument(String pOpt, String pValue, String pNextArgument) {
+        // Option with argument
+        if (pValue == null && (pNextArgument == null || pNextArgument.startsWith("-"))) {
+            throw new IllegalArgumentException("Option '" + pOpt + "' requires an argument");
         }
     }
 

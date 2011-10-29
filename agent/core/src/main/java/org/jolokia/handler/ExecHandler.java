@@ -85,11 +85,7 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         int nrParams = types.paramClasses.length;
         Object[] params = new Object[nrParams];
         List<Object> args = request.getArguments();
-        if ( (nrParams > 0 && args == null) || (args != null && args.size() != nrParams)) {
-            throw new IllegalArgumentException("Invalid number of operation arguments. Operation " +
-                    request.getOperation() + " on " + request.getObjectName() + " requires " + types.paramClasses.length +
-                    " parameters, not " + (args == null ? 0 : args.size()) + " as given");
-        }
+        verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
         		params[i] = converters.getToOpenTypeConverter().convertToObject(types.paramOpenTypes[i], args.get(i));
@@ -100,6 +96,15 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
 
         // TODO: Maybe allow for a path as well which could be applied on the return value ...
         return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
+    }
+
+    // check whether the given arguments are compatible with the signature and if not so, raise an excepton
+    private void verifyArguments(JmxExecRequest request, OperationAndParamType pTypes, int pNrParams, List<Object> pArgs) {
+        if ( (pNrParams > 0 && pArgs == null) || (pArgs != null && pArgs.size() != pNrParams)) {
+            throw new IllegalArgumentException("Invalid number of operation arguments. Operation " +
+                    request.getOperation() + " on " + request.getObjectName() + " requires " + pTypes.paramClasses.length +
+                    " parameters, not " + (pArgs == null ? 0 : pArgs.size()) + " as given");
+        }
     }
 
     /**

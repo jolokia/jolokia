@@ -156,12 +156,7 @@ public final class JmxRequestFactory {
                 pathInfo = vals[0];
             }
         }
-        if (pathInfo != null && pathInfo.length() > 0) {
-            // Strip of a leadin slash
-            return pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo;
-        } else {
-            return "";
-        }
+        return normalizePathInfo(pathInfo);
     }
 
     private static Map<String,String> extractParameters(Map<String,String[]> pParameterMap) {
@@ -181,23 +176,48 @@ public final class JmxRequestFactory {
     // Merge multiple maps to a single map, with the former taking precedence over later maps.
     // Has some optimizations for null map arguments
     private static Map<String,String> mergeMaps(Map<String,String> ... pMaps) {
-        Map<String,String> ret = new HashMap<String,String>();
-        if (pMaps.length == 2 && pMaps[0] == null) {
-            return pMaps[1];
-        } else if (pMaps.length == 2 && pMaps[1] == null) {
-            return pMaps[0];
-        } if (pMaps.length == 1) {
-            return pMaps[0];
-        } else if (pMaps.length > 0) {
-            for (int i = pMaps.length - 1;i >= 0;i--) {
-                if (pMaps[i] != null) {
-                    ret.putAll(pMaps[i]);
-                }
-            }
-        } else {
+
+        // No map to merge
+        if (pMaps.length == 0) {
             return null;
         }
-        return ret;
+
+        // Single map is returned directly
+        if (pMaps.length == 1) {
+            return pMaps[0];
+        }
+
+        // If one of two maps is null return the other (saves a copy
+        if (pMaps.length == 2) {
+            if (pMaps[0] == null) {
+                return pMaps[1];
+            }
+            if (pMaps[1] == null) {
+                return pMaps[0];
+            }
+        }
+
+        return plainMergeMaps(pMaps);
+    }
+
+    // merge together with former map having precedence
+    private static Map<String, String> plainMergeMaps(Map<String, String>[] pMaps) {
+        Map<String, String> pRet = new HashMap<String, String>();
+        for (int i = pMaps.length - 1;i >= 0;i--) {
+            if (pMaps[i] != null) {
+                pRet.putAll(pMaps[i]);
+            }
+        }
+        return pRet;
+    }
+
+    // Return always a non-null string and strip of leading slash
+    private static String normalizePathInfo(String pPathInfo) {
+        if (pPathInfo != null && pPathInfo.length() > 0) {
+            return pPathInfo.startsWith("/") ? pPathInfo.substring(1) : pPathInfo;
+        } else {
+            return "";
+        }
     }
 
     // ==================================================================================
