@@ -38,6 +38,7 @@ cd ../..
 
 # Release on central maven repo
 # See: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+# Staging Nexus: https://oss.sonatype.org/
 
 # Push tags and changes to github
 git push 
