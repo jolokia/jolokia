@@ -51,6 +51,37 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="Scary 1.0.1 is out">
+        <div class="news-date">2011-10-31</div>
+        <p>
+          A minor bug fix release, probably the last before Devoxx,
+          brings also two new features:
+        </p>
+        <ul>
+          <li>
+            The <a href="agent/jvm.html">JVM Agent</a> can now also take a regular
+            expression as argument for specifying a process to attach
+            to. This pattern is matched against the process'
+            name. Alternatively you can of course specify the process id
+            as before.
+          </li>
+          <li>
+            Collections which are not lists or maps (like <code>Set</code>) are
+            serialized properly as JSON arrays.
+          </li>
+        </ul>
+        <p>
+          Jolokia is now available also at <a
+          href="http://search.maven.org/">Maven Central</a> so adding
+          the <a href="http://labs.consol.de/maven/repository/">Consol
+          Labs repository</a> is not required anymore in your poms
+          (except you want depend on Jolokia <a
+          href="http://labs.consol.de/maven/snapshots-repository/">snapshots</a>).
+        </p>
+        <p>
+          Happy Halloween ....
+        </p>
+      </subsection>
       <subsection name="Jolokia and Jmx4Perl on tour">
         <div class="news-date">2011-08-29</div>
         <div style="margin-left: 30px; float:right">

@@ -137,24 +137,10 @@
           href="../reference/html/clients.html#js-maven">Reference Manual</a>
         </p>
         <p>
-          For automatic dependency resolution, please add the
-          following repository to your <code>pom.xml</code> to get the offcially released
-          versions:
-        </p>
-        <pre class="prettyprint"><![CDATA[
- <repository>
-   <id>labs-consol-release</id>
-   <name>ConSol* Labs Repository (Releases)</name>
-   <url>http://labs.consol.de/maven/repository</url>
-   <snapshots>
-     <enabled>false</enabled>
-   </snapshots>
-   <releases>
-     <enabled>true</enabled>
-   </releases>
- </repository>]]></pre>
-        <p>
-          Snapshots are deployed regulary and can be accessed via this repository:
+          The released Jolokia artifacts are available from <a
+          href="http://search.maven.org/">Maven central</a>. Snapshots
+          are deployed regulary and can be accessed via this
+          repository:
         </p>
         <pre class="prettyprint"><![CDATA[
  <repository>
