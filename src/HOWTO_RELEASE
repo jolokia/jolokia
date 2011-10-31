@@ -14,14 +14,14 @@ vi pom.xml
     <currentSnapshotVersion>1.0.1-SNAPSHOT</currentSnapshotVersion>
 
 
-Checking and push
+Check in and push
 
 # ========================================================================
 # Build release and deploy it on labs
 git clone git@github.com:rhuss/jolokia.git
 cd jolokia
 mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:prepare
-mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plans,dist,roo release:perform
+mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:perform
 
 # Copy assembly to labs:
 ssh jolokia@labs.consol.de mkdir -p www/dist/1.0.0/js
@@ -35,6 +35,9 @@ cd ../../../../..
 cd target/checkout
 mvn -Pdist,roo deploy
 cd ../..
+
+# Release on central maven repo
+# See: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
 
 # Push tags and changes to github
 git push 
