@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.1" description="Release 1.0.1" date="">
+    <release version="1.0.1" description="Release 1.0.1" date="2011-10-31">
       <action dev="senthilnest" type="fix" date="2011-10-29" issue="GIT-37">
         Daemonized threads created by the thread pool for the JVM agent.
       </action>

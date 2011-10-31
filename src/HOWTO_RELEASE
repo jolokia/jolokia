@@ -12,7 +12,7 @@ vi agent/core/src/main/java/org/jolokia/Version.java
 vi pom.xml
 --> <currentStableVersion>1.0.0</currentStableVersion>
     <currentSnapshotVersion>1.0.1-SNAPSHOT</currentSnapshotVersion>
-
+vi src/changes/changes.xml and update date
 
 Check in and push
 
