@@ -94,7 +94,7 @@ http://jolokia-proxy:8080/jolokia</pre>
           </li>
           <li>
             For each Jolokia request, a new JMX connection (likely
-            using RMI) is created which is an exensive operation. A
+            using RMI) is created which is an expensive operation. A
             future version of Jolokia will tackle this by providing
             some sort of optional JSR-160 connection pooling.
           </li>
