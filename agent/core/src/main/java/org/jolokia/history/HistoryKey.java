@@ -123,7 +123,12 @@ public class HistoryKey implements Serializable {
         mBean = new ObjectName(pMBean);
         secondary = pOperation;
         path = null;
-        target = pTarget;
+        target = sanitize(pTarget);
+    }
+
+    // Return null
+    private String sanitize(String pValue) {
+        return "".equals(pValue) ? null : pValue;
     }
 
     /**
