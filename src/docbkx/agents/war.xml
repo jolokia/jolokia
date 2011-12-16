@@ -132,6 +132,20 @@
           Default: <constant>0</constant>
         </td>
       </tr>
+      <tr>
+        <td><constant>mbeanQualifier</constant></td>
+        <td>
+          Qualifier to add to the ObjectName of Jolokia's own
+          MBeans. This can become necessary if more than one agent is
+          active within a servlet container. This qualifier is added
+          to the <constant>ObjectName</constant> of this agent with a
+          comma. For example a <constant>mbeanQualifier</constant>
+          with the value <constant>qualifier=own</constant> will
+          result in Jolokia server handler MBean with the name
+          <constant>jolokia:type=ServerHandler,qualifier=own</constant>
+        </td>
+        <td></td>
+      </tr>
     </table>      
   </section>
   <section id="agent-war-security">
