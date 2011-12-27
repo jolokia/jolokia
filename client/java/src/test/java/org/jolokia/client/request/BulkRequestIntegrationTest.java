@@ -86,6 +86,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
             assertEquals(404,exp.getStatus());
             assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
+            assertEquals(exp.getRequest(),req2);
         }
     }
 }

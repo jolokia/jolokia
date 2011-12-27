@@ -29,6 +29,7 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.*;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.VersionInfo;
+import org.jolokia.client.request.J4pTargetConfig;
 
 /**
  * A builder for a {@link org.jolokia.client.J4pClient}.
@@ -53,11 +54,20 @@ public class J4pClientBuilder {
     // Password to use for authentication
     private String password;
 
+    // Service-URL when used in proxy mode
+    private String targetUrl;
+
+    // User used for JSR-160 communication when using with a proxy (i.e. targetUrl != null)
+    private String targetUser;
+
+    // Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
+    private String targetPassword;
+
     /**
-     * Package access constructor, user static method on J4pClient for creating
-     * the
+     * Package access constructor, use static method on J4pClient for creating
+     * the builder.
      */
-    J4pClientBuilder() {
+    public J4pClientBuilder() {
         params = new BasicHttpParams();
         connectionTimeout(20 * 1000);
         maxTotalConnections(20);
@@ -106,6 +116,37 @@ public class J4pClientBuilder {
      */
     public final J4pClientBuilder password(String pPassword) {
         password  = pPassword;
+        return this;
+    }
+
+    /**
+     * Target service URL when using the agent as a JSR-160 proxy
+     *
+     * @param pUrl JMX service URL for the 'real' target (that gets contacted by the agent)
+     */
+    public final J4pClientBuilder target(String pUrl) {
+        targetUrl = pUrl;
+        return this;
+    }
+
+    /**
+     * Target user for proxy mode. This parameter takes only effect when a target is set.
+     *
+     * @param pUser User to be used for authentication in JSR-160 proxy communication
+     */
+    public final J4pClientBuilder targetUser(String pUser) {
+        targetUser = pUser;
+        return this;
+    }
+
+    /**
+     * Target password for proxy mode. This parameter takes only effect when a target is set and the target user is
+     * not null
+     *
+     * @param pPassword Password to be used for authentication in JSR-160 proxy communication
+     */
+    public final J4pClientBuilder targetPassword(String pPassword) {
+        targetPassword = pPassword;
         return this;
     }
 
@@ -233,7 +274,7 @@ public class J4pClientBuilder {
             httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
                                                                new UsernamePasswordCredentials(user,password));
         }
-        return new J4pClient(url,httpClient);
+        return new J4pClient(url,httpClient,targetUrl != null ? new J4pTargetConfig(targetUrl,targetUser,targetPassword) : null);
     }
 
     ClientConnectionManager createClientConnectionManager() {

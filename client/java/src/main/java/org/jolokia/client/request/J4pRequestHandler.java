@@ -43,14 +43,19 @@ public class J4pRequestHandler {
     // j4p agent URL for the agent server
     private URI j4pServerUrl;
 
+    // Optional default target configuration
+    private J4pTargetConfig defaultTargetConfig;
+
     /**
      * Constructor
      *
      * @param pJ4pServerUrl URL to remote agent
+     * @param pTargetConfig optional default target configuration for proxy requests
      */
-    public J4pRequestHandler(String pJ4pServerUrl) {
+    public J4pRequestHandler(String pJ4pServerUrl, J4pTargetConfig pTargetConfig) {
         try {
             j4pServerUrl = new URI(pJ4pServerUrl);
+            defaultTargetConfig = pTargetConfig;
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid URL " + pJ4pServerUrl,e);
         }
@@ -58,7 +63,6 @@ public class J4pRequestHandler {
 
     /**
      * Get the HttpRequest for executing the given single request
-     *
      *
      * @param pRequest request to convert
      * @param pPreferredMethod HTTP method preferred
@@ -72,11 +76,15 @@ public class J4pRequestHandler {
             method = pRequest.getPreferredHttpMethod();
         }
         if (method == null) {
-            method = HttpGet.METHOD_NAME;
+            method = doUseProxy(pRequest) ? HttpPost.METHOD_NAME : HttpGet.METHOD_NAME;
         }
         String queryParams = prepareQueryParameters(pProcessingOptions);
 
+        // GET request
         if (method.equals(HttpGet.METHOD_NAME)) {
+            if (doUseProxy(pRequest)) {
+                throw new IllegalArgumentException("Proxy mode can only be used with POST requests");
+            }
             List<String> parts = pRequest.getRequestParts();
             // If parts == null the request decides, that POST *must* be used
             if (parts != null) {
@@ -91,12 +99,15 @@ public class J4pRequestHandler {
             }
         }
 
-
         // We are using a post method as fallback
-        JSONObject requestContent = pRequest.toJson();
+        JSONObject requestContent = getJsonRequestContent(pRequest);
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
         return postReq;
+    }
+
+    private boolean doUseProxy(J4pRequest pRequest) {
+        return defaultTargetConfig != null || pRequest.getTargetConfig() != null;
     }
 
     private String prepareBaseUrl(URI pUri) {
@@ -123,7 +134,7 @@ public class J4pRequestHandler {
         String queryParams = prepareQueryParameters(pProcessingOptions);
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         for (T request : pRequests) {
-            JSONObject requestContent = request.toJson();
+            JSONObject requestContent = getJsonRequestContent(request);
             bulkRequest.add(requestContent);
         }
         postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
@@ -177,6 +188,14 @@ public class J4pRequestHandler {
     }
 
     // =============================================================================================================
+
+    private JSONObject getJsonRequestContent(J4pRequest pRequest) {
+        JSONObject requestContent = pRequest.toJson();
+        if (defaultTargetConfig != null && pRequest.getTargetConfig() == null) {
+            requestContent.put("target", defaultTargetConfig.toJson());
+        }
+        return requestContent;
+    }
 
     // Escape a part for usage as part of URI path: / -> \/, \ -> \\
     private static final String ESCAPE = "!";

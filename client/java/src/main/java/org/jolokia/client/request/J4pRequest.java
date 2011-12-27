@@ -38,8 +38,13 @@ public abstract class J4pRequest {
     // "GET" or "POST"
     private String preferredHttpMethod;
 
-    protected J4pRequest(J4pType pType) {
+    // target configuration for this request when used as a JSR-160 proxy
+    private J4pTargetConfig targetConfig;
+
+    // TODO: Add target config
+    protected J4pRequest(J4pType pType, J4pTargetConfig pTargetConfig) {
         type = pType;
+        targetConfig = pTargetConfig;
     }
 
     /**
@@ -62,6 +67,14 @@ public abstract class J4pRequest {
         return type;
     }
 
+    /**
+     * Get a target configuration for use with an agent in JSR-160 proxy mode
+     * @return the target config or <code>null</code> if this is a direct request
+     */
+    public J4pTargetConfig getTargetConfig() {
+        return targetConfig;
+    }
+
     // ==================================================================================================
     // Methods used for building up HTTP Requests and setting up the reponse
     // These methods are package visible only since are used only internally
@@ -73,6 +86,9 @@ public abstract class J4pRequest {
     JSONObject toJson() {
         JSONObject ret = new JSONObject();
         ret.put("type",type.name());
+        if (targetConfig != null) {
+            ret.put("target",targetConfig.toJson());
+        }
         return ret;
     }
 
@@ -89,7 +105,7 @@ public abstract class J4pRequest {
     }
 
     public void setPreferredHttpMethod(String pPreferredHttpMethod) {
-        preferredHttpMethod = pPreferredHttpMethod;
+        preferredHttpMethod = pPreferredHttpMethod != null ? pPreferredHttpMethod.toUpperCase() : null;
     }
 
     protected void addPath(List<String> pParts, String pPath) {

@@ -49,7 +49,19 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
      * @param pValue new value
      */
     public J4pWriteRequest(ObjectName pMBeanName,String pAttribute,Object pValue,String ... pPath) {
-        super(J4pType.WRITE, pMBeanName);
+        this(null,pMBeanName,pAttribute,pValue,pPath);
+    }
+
+    /**
+     * Constructor for a write request
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pMBeanName MBean name which attribute should be set
+     * @param pAttribute name of the attribute to set
+     * @param pValue new value
+     */
+    public J4pWriteRequest(J4pTargetConfig pTargetConfig,ObjectName pMBeanName,String pAttribute,Object pValue,String ... pPath) {
+        super(J4pType.WRITE, pMBeanName,pTargetConfig);
         attribute = pAttribute;
         value = pValue;
         if (pPath != null && pPath.length > 0) {
@@ -68,7 +80,22 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
      */
     public J4pWriteRequest(String pMBeanName,String pAttribute, Object pValue,String ... pPath)
             throws MalformedObjectNameException {
-        this(new ObjectName(pMBeanName),pAttribute,pValue,pPath);
+        this(null,pMBeanName,pAttribute,pValue,pPath);
+    }
+
+    /**
+     * Constructor for a write request
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pMBeanName MBean name which attribute should be set
+     * @param pAttribute name of the attribute to set
+     * @param pValue new value
+     * @param pPath optional path for setting an inner value
+     * @throws MalformedObjectNameException if the mbean name is invalid
+     */
+    public J4pWriteRequest(J4pTargetConfig pTargetConfig,String pMBeanName,String pAttribute, Object pValue,String ... pPath)
+            throws MalformedObjectNameException {
+        this(pTargetConfig,new ObjectName(pMBeanName),pAttribute,pValue,pPath);
     }
 
     @Override

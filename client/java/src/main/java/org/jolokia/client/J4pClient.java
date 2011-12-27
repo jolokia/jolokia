@@ -52,25 +52,40 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param pJ4pServerUrl the agent URL for how to contact the server.
      */
     public J4pClient(String pJ4pServerUrl) {
-        requestHandler = new J4pRequestHandler(pJ4pServerUrl);
-
-        // Using the default as defined in the client builder
-        J4pClientBuilder builder = new J4pClientBuilder();
-        HttpParams params = builder.getHttpParams();
-        ClientConnectionManager cm = builder.createClientConnectionManager();
-        httpClient = new DefaultHttpClient(cm, params);
+        this(pJ4pServerUrl,null);
     }
 
     /**
-     * Constructor using a given HttpClient
+     * Constructor for a given agent URl and a given HttpClient
      *
      * @param pJ4pServerUrl the agent URL for how to contact the server.
      * @param pHttpClient HTTP client to use for the connecting to the agent
      */
     public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient) {
-        requestHandler = new J4pRequestHandler(pJ4pServerUrl);
-        httpClient = pHttpClient;
+        this(pJ4pServerUrl,pHttpClient,null);
     }
+
+    /**
+     * Constructor using a given Agent URL, HttpClient and a proxy target config. If the HttpClient is null,
+     * a default client is used. If no target config is given, a plain request is performed
+     *
+     * @param pJ4pServerUrl the agent URL for how to contact the server.
+     * @param pHttpClient HTTP client to use for the connecting to the agent
+     * @param pTargetConfig optional target
+     */
+    public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient,J4pTargetConfig pTargetConfig) {
+        requestHandler = new J4pRequestHandler(pJ4pServerUrl,pTargetConfig);
+        // Using the default as defined in the client builder
+        if (pHttpClient != null) {
+            httpClient = pHttpClient;
+        } else {
+            J4pClientBuilder builder = new J4pClientBuilder();
+            HttpParams params = builder.getHttpParams();
+            ClientConnectionManager cm = builder.createClientConnectionManager();
+            httpClient = new DefaultHttpClient(cm, params);
+        }
+    }
+
 
     /**
      * Execute a single J4pRequest returning a single response.
@@ -80,8 +95,6 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <R> response type
      * @param <T> request type
      * @return the response as returned by the server
-     * @throws java.io.IOException when the execution fails
-     * @throws org.json.simple.parser.ParseException if parsing of the JSON answer fails
      */
     public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest)
             throws J4pException {
@@ -191,7 +204,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests,pProcessingOptions));
             JSONAware jsonResponse = extractJsonResponse(null, response);
 
-            verifyJsonResponse(jsonResponse);
+            verifyBulkJsonResponse(jsonResponse);
 
             return this.<R,T>extractResponses(jsonResponse, pRequests);
         } catch (IOException e) {
@@ -281,7 +294,7 @@ public class J4pClient extends J4pClientBuilderFactory {
 
 
     // Verify the returned JSON answer.
-    private void verifyJsonResponse(JSONAware pJsonResponse) throws J4pException {
+    private void verifyBulkJsonResponse(JSONAware pJsonResponse) throws J4pException {
         if (!(pJsonResponse instanceof JSONArray)) {
             if (pJsonResponse instanceof JSONObject) {
                 JSONObject errorObject = (JSONObject) pJsonResponse;
@@ -313,7 +326,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * dispatched on the agent side. The results are given back in the same order as the arguments provided.
      *
      * @param pRequests requests to execute
-     * @param <R> response type
+     * @param <R> response typex
      * @param <T> request type
      * @return list of responses, one response for each request
      * @throws J4pException when an communication error occurs

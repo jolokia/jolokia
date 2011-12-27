@@ -39,80 +39,96 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simpleOperation() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"reset");
-        j4pClient.execute(request);
-        request = new J4pExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
-        J4pExecResponse resp = j4pClient.execute(request);
-        assertEquals(0L,resp.getValue());
-        resp = j4pClient.execute(request);
-        assertEquals(1L,resp.getValue());
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            J4pExecRequest request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"reset");
+            j4pClient.execute(request);
+            request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"fetchNumber","inc");
+            J4pExecResponse resp = j4pClient.execute(request);
+            assertEquals(0L,resp.getValue());
+            resp = j4pClient.execute(request);
+            assertEquals(1L,resp.getValue());            
+        }
     }
 
     @Test
     public void failedOperation() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"fetchNumber","bla");
-        try {
-            j4pClient.execute(request);
-            fail();
-        } catch (J4pRemoteException exp) {
-            assertEquals(400,exp.getStatus());
-            assertTrue(exp.getMessage().contains("IllegalArgumentException"));
-            assertTrue(exp.getRemoteStackTrace().contains("IllegalArgumentException"));
+        for (J4pExecRequest request : execRequests("fetchNumber","bla")) {
+            try {
+                j4pClient.execute(request);
+                fail();
+            } catch (J4pRemoteException exp) {
+                assertEquals(400,exp.getStatus());
+                assertTrue(exp.getMessage().contains("IllegalArgumentException"));
+                assertTrue(exp.getRemoteStackTrace().contains("IllegalArgumentException"));
+            }
         }
+    }
+
+    private J4pExecRequest[] execRequests(String pOperation, Object... pArgs) throws MalformedObjectNameException {
+        return new J4pExecRequest[] {
+                new J4pExecRequest(itSetup.getOperationMBean(),pOperation,pArgs),
+                new J4pExecRequest(getTargetProxyConfig(),itSetup.getOperationMBean(),pOperation,pArgs)                
+        };
     }
 
     @Test
     public void checkedException() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"throwCheckedException");
-        try {
-            j4pClient.execute(request);
-            fail();
-        } catch (J4pRemoteException exp) {
-            assertEquals(500,exp.getStatus());
-            assertTrue(exp.getMessage().contains("Inner exception"));
-            assertTrue(exp.getRemoteStackTrace().contains("java.lang.Exception"));
+        for (J4pExecRequest request : execRequests("throwCheckedException")) {
+            try {
+                j4pClient.execute(request);
+                fail();
+            } catch (J4pRemoteException exp) {
+                assertEquals(500,exp.getStatus());
+                assertTrue(exp.getMessage().contains("Inner exception"));
+                assertTrue(exp.getRemoteStackTrace().contains("java.lang.Exception"));
+            }
         }
     }
 
     @Test
-    public void nullArgumentCheck() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"nullArgumentCheck",null,null);
-        J4pExecResponse resp = j4pClient.execute(request);
-        assertEquals(true,resp.getValue());
+    public void nullArgumentCheck() throws MalformedObjectNameException, J4pException {        
+        for (J4pExecRequest request : execRequests("nullArgumentCheck",null,null))  {
+            J4pExecResponse resp = j4pClient.execute(request);
+            assertEquals(true,resp.getValue());
+        }        
     }
 
     @Test
     public void emptyStringArgumentCheck() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request = new J4pExecRequest(itSetup.getOperationMBean(),"emptyStringArgumentCheck","");
-        J4pExecResponse resp = j4pClient.execute(request);
-        assertEquals(true,resp.getValue());
+        for (J4pExecRequest request : execRequests("emptyStringArgumentCheck","")) {
+            J4pExecResponse resp = j4pClient.execute(request);
+            assertEquals(true,resp.getValue());
+        }
     }
 
     @Test
     public void collectionArg() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
         for (String type : new String[] { "GET", "POST" }) {
             for (Object args : new Object[] {
                     new String[] { "roland","tanja","forever" },
                     Arrays.asList("roland", "tanja","forever")
             }) {
-                request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",args,"myExtra");
-                J4pExecResponse resp = j4pClient.execute(request,type);
-                assertEquals("roland",resp.getValue());
-
-                // Check request params
-                assertEquals("arrayArguments",request.getOperation());
-                assertEquals(2,request.getArguments().size());
-
-                // With null
-                request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
-                resp = j4pClient.execute(request);
-                assertNull(resp.getValue());
-
-                // With ints
-                request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
-                resp = j4pClient.execute(request);
-                assertEquals("1",resp.getValue());
+                for (J4pExecRequest request : execRequests("arrayArguments",args,"myExtra")) {
+                    if (type.equals("GET") && request.getTargetConfig() != null) {
+                        continue;
+                    }
+                    J4pExecResponse resp = j4pClient.execute(request,type);
+                    assertEquals("roland",resp.getValue());
+                    
+                    // Check request params
+                    assertEquals("arrayArguments",request.getOperation());
+                    assertEquals(2,request.getArguments().size());
+                    
+                    // With null
+                    request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
+                    resp = j4pClient.execute(request);
+                    assertNull(resp.getValue());
+                    
+                    // With ints
+                    request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
+                    resp = j4pClient.execute(request);
+                    assertEquals("1",resp.getValue());
+                }
             }
         }
     }
@@ -122,48 +138,53 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void objectArray() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
         Object args[] = new Object[] { 12,true,null, "Bla" };
-        request = new J4pExecRequest(itSetup.getOperationMBean(),"objectArrayArg",new Object[] { args });
-        J4pExecResponse resp = j4pClient.execute(request,"POST");
-        assertEquals(12L,resp.getValue());
+        for (J4pExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
+            J4pExecResponse resp = j4pClient.execute(request,"POST");
+            assertEquals(12L,resp.getValue());
+        }
     }
 
     @Test
     // Lists are only supported for POST requests
     public void listArg() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
         List args = Arrays.asList("roland",new Integer(12),true);
-        request = new J4pExecRequest(itSetup.getOperationMBean(),"listArgument",args);
-        J4pExecResponse resp;
-        resp = j4pClient.execute(request,"POST");
-        assertEquals("roland",resp.getValue());
+        for (J4pExecRequest request : execRequests("listArgument",args)) {
+            J4pExecResponse resp;
+            resp = j4pClient.execute(request,"POST");
+            assertEquals("roland",resp.getValue());
+        }
     }
 
     @Test
     public void booleanArgs() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request;
         J4pExecResponse resp;
-        for (String type : new String[] { "GET", "POST" }) {
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"booleanArguments",true,Boolean.TRUE);
-            resp = j4pClient.execute(request,type);
-            assertTrue((Boolean) resp.getValue());
-
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"booleanArguments",Boolean.TRUE,false);
-            resp = j4pClient.execute(request,type);
-            assertFalse((Boolean) resp.getValue());
-
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"booleanArguments",true,null);
-            resp = j4pClient.execute(request,type);
-            assertNull(resp.getValue());
-
-
-            try {
-                request = new J4pExecRequest(itSetup.getOperationMBean(),"booleanArguments",null,null);
-                j4pClient.execute(request,type);
-                fail();
-            } catch (J4pRemoteException exp) {
-                assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (String type : new String[] { "GET", "POST" }) {
+                if (type.equals("GET") && cfg != null) {
+                    continue;
+                }
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,Boolean.TRUE);
+                resp = j4pClient.execute(request,type);
+                assertTrue((Boolean) resp.getValue());
+                
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",Boolean.TRUE,false);
+                resp = j4pClient.execute(request,type);
+                assertFalse((Boolean) resp.getValue());
+                
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,null);
+                resp = j4pClient.execute(request,type);
+                assertNull(resp.getValue());
+                
+                
+                try {
+                    request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",null,null);
+                    j4pClient.execute(request,type);
+                    fail();
+                } catch (J4pRemoteException exp) {
+                    assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                }
             }
         }
     }
@@ -172,44 +193,53 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void intArgs() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request;
         J4pExecResponse resp;
-        for (String type : new String[] { "GET", "POST" }) {
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"intArguments",10,20);
-            resp = j4pClient.execute(request,type);
-            assertEquals(30L, resp.getValue());
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (String type : new String[] { "GET", "POST" }) {
+                if (type.equals("GET") && cfg != null) {
+                    continue;
+                }
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,20);
+                resp = j4pClient.execute(request,type);
+                assertEquals(30L, resp.getValue());
 
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"intArguments",10,null);
-            resp = j4pClient.execute(request,type);
-            assertEquals(-1L,resp.getValue());
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,null);
+                resp = j4pClient.execute(request,type);
+                assertEquals(-1L,resp.getValue());
 
-            try {
-                request = new J4pExecRequest(itSetup.getOperationMBean(),"intArguments",null,null);
-                j4pClient.execute(request,type);
-                fail();
-            } catch (J4pRemoteException exp) {
-                assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                try {
+                    request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",null,null);
+                    j4pClient.execute(request,type);
+                    fail();
+                } catch (J4pRemoteException exp) {
+                    assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                }
             }
         }
     }
-
     @Test
     public void doubleArgs() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request;
         J4pExecResponse resp;
-        for (String type : new String[] { "GET", "POST" }) {
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"doubleArguments",1.5,1.5);
-            resp = j4pClient.execute(request,type);
-            assertEquals(3.0, resp.getValue());
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (String type : new String[] { "GET", "POST" }) {
+                if (type.equals("GET") && cfg != null) {
+                    continue;
+                }
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,1.5);
+                resp = j4pClient.execute(request,type);
+                assertEquals(3.0, resp.getValue());
 
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"doubleArguments",1.5,null);
-            resp = j4pClient.execute(request,type);
-            assertEquals(-1.0,resp.getValue());
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,null);
+                resp = j4pClient.execute(request,type);
+                assertEquals(-1.0,resp.getValue());
 
-            try {
-                request = new J4pExecRequest(itSetup.getOperationMBean(),"doubleArguments",null,null);
-                j4pClient.execute(request,type);
-                fail();
-            } catch (J4pRemoteException exp) {
-                assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                try {
+                    request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",null,null);
+                    j4pClient.execute(request,type);
+                    fail();
+                } catch (J4pRemoteException exp) {
+                    assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                }
             }
         }
     }
@@ -229,18 +259,23 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         map.put("drei",10L);
         map.put("vier",true);
 
-        request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",map);
-        for (String method : new String[] { "GET", "POST" }) {
-            resp = j4pClient.execute(request,method);
-            Map res = resp.getValue();
-            assertEquals(res.get("eins"),"fcn");
-            assertEquals(((List) res.get("zwei")).get(1),"svw");
-            assertEquals(res.get("drei"),10L);
-            assertEquals(res.get("vier"),true);
-        }
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"mapArgument",map);
+            for (String method : new String[] { "GET", "POST" }) {
+                if (method.equals("GET") && cfg != null) {
+                    continue;
+                }
+                resp = j4pClient.execute(request,method);
+                Map res = resp.getValue();
+                assertEquals(res.get("eins"),"fcn");
+                assertEquals(((List) res.get("zwei")).get(1),"svw");
+                assertEquals(res.get("drei"),10L);
+                assertEquals(res.get("vier"),true);
+            }
 
-        request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",null);
-        resp = j4pClient.execute(request,"POST");
-        assertNull(resp.getValue());
+            request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",null);
+            resp = j4pClient.execute(request,"POST");
+            assertNull(resp.getValue());
+        }
     }
 }

@@ -128,13 +128,18 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void access() throws MalformedObjectNameException {
-        J4pWriteRequest req = new J4pWriteRequest("jolokia.it:type=attribute","List","bla");
-        req.setPath("0");
-        assertEquals(req.getPath(),"0");
-        assertEquals(req.getAttribute(),"List");
-        assertEquals(req.getObjectName(),new ObjectName("jolokia.it:type=attribute"));
-        assertEquals(req.getValue(),"bla");
-        assertEquals(req.getType(),J4pType.WRITE);
+
+        for (J4pWriteRequest req : new J4pWriteRequest[] {
+                new J4pWriteRequest("jolokia.it:type=attribute","List","bla"),
+                new J4pWriteRequest(getTargetProxyConfig(),"jolokia.it:type=attribute","List","bla")
+        }) {
+            req.setPath("0");
+            assertEquals(req.getPath(),"0");
+            assertEquals(req.getAttribute(),"List");
+            assertEquals(req.getObjectName(),new ObjectName("jolokia.it:type=attribute"));
+            assertEquals(req.getValue(),"bla");
+            assertEquals(req.getType(),J4pType.WRITE);
+        }
     }
 
 
@@ -195,31 +200,37 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     private void checkWrite(String mBean,String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        for (String method : methods) {
-            reset();
-            J4pReadRequest readReq = new J4pReadRequest(mBean,pAttribute);
-            if (pPath != null) {
-                readReq.setPath(pPath);
-            }
-            J4pReadResponse readResp = j4pClient.execute(readReq,method);
-            Object oldValue = readResp.getValue();
-            assertNotNull("Old value must not be null",oldValue);
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()  }) {
+            for (String method : methods) {
+                if (method.equals("GET") && cfg != null) {
+                    // No proxy for GET
+                    continue;
+                }
+                reset(cfg);
+                J4pReadRequest readReq = new J4pReadRequest(cfg,mBean,pAttribute);
+                if (pPath != null) {
+                    readReq.setPath(pPath);
+                }
+                J4pReadResponse readResp = j4pClient.execute(readReq,method);
+                Object oldValue = readResp.getValue();
+                assertNotNull("Old value must not be null",oldValue);
 
-            J4pWriteRequest req = new J4pWriteRequest(mBean,pAttribute,pValue,pPath);
-            J4pWriteResponse resp = j4pClient.execute(req,method);
-            assertEquals("Old value should be returned",oldValue,resp.getValue());
+                J4pWriteRequest req = new J4pWriteRequest(cfg,mBean,pAttribute,pValue,pPath);
+                J4pWriteResponse resp = j4pClient.execute(req,method);
+                assertEquals("Old value should be returned",oldValue,resp.getValue());
 
-            readResp = j4pClient.execute(readReq);
-            if (pFinalAssert != null && pFinalAssert.length > 0) {
-                pFinalAssert[0].assertResponse(readResp);
-            } else {
-                assertEquals("New value should be set",pValue != null ? pValue : null,readResp.getValue());
+                readResp = j4pClient.execute(readReq);
+                if (pFinalAssert != null && pFinalAssert.length > 0) {
+                    pFinalAssert[0].assertResponse(readResp);
+                } else {
+                    assertEquals("New value should be set",pValue != null ? pValue : null,readResp.getValue());
+                }
             }
         }
     }
 
-    private void reset() throws MalformedObjectNameException, J4pException {
-        j4pClient.execute(new J4pExecRequest("jolokia.it:type=attribute", "reset"));
+    private void reset(J4pTargetConfig cfg) throws MalformedObjectNameException, J4pException {
+        j4pClient.execute(new J4pExecRequest(cfg,"jolokia.it:type=attribute", "reset"));
     }
 
     private interface ResponseAssertion {

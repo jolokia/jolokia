@@ -35,7 +35,17 @@ public class J4pSearchRequest extends AbtractJ4pMBeanRequest {
      * @param pMBeanPattern pattern to use for a search
      */
     protected J4pSearchRequest(ObjectName pMBeanPattern) {
-        super(J4pType.SEARCH,pMBeanPattern);
+        this(null,pMBeanPattern);
+    }
+
+    /**
+     * Create request with a objectname, which can be a pattern
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pMBeanPattern pattern to use for a search
+     */
+    protected J4pSearchRequest(J4pTargetConfig pTargetConfig,ObjectName pMBeanPattern) {
+        super(J4pType.SEARCH,pMBeanPattern,pTargetConfig);
     }
 
     /**
@@ -45,7 +55,18 @@ public class J4pSearchRequest extends AbtractJ4pMBeanRequest {
      * @throws MalformedObjectNameException if the provided pattern is not a valid {@link ObjectName}
      */
     public J4pSearchRequest(String pMBeanPattern) throws MalformedObjectNameException {
-        this(new ObjectName(pMBeanPattern));
+        this(null,pMBeanPattern);
+    }
+
+    /**
+     * Create a search request
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pMBeanPattern MBean pattern as string
+     * @throws MalformedObjectNameException if the provided pattern is not a valid {@link ObjectName}
+     */
+    public J4pSearchRequest(J4pTargetConfig pTargetConfig,String pMBeanPattern) throws MalformedObjectNameException {
+        this(pTargetConfig,new ObjectName(pMBeanPattern));
     }
 
     @Override

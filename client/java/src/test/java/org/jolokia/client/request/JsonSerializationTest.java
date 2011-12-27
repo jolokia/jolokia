@@ -114,7 +114,7 @@ public class JsonSerializationTest {
 
 
     private Object serialize(Object o) {
-        J4pRequest req = new J4pRequest(J4pType.VERSION) {
+        J4pRequest req = new J4pRequest(J4pType.VERSION,null) {
             @Override
             List<String> getRequestParts() {
                 return null;

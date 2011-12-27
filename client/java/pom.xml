@@ -49,6 +49,13 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-jsr160</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-it-core</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
@@ -64,7 +71,6 @@
 
   <build>
     <plugins>
-
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -89,6 +95,14 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false</argLine>
+          <forkMode>once</forkMode>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

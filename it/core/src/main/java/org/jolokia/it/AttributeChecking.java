@@ -2,6 +2,7 @@ package org.jolokia.it;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 import javax.management.*;
@@ -224,7 +225,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     public void postDeregister() {
     }
 
-    final private class TestBean {
+    final static private class TestBean implements Serializable {
         private int value;
         private String name;
 

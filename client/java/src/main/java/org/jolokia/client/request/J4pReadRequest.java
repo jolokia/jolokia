@@ -50,7 +50,22 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      * @param pAttribute one or more attributes to request.
      */
     public J4pReadRequest(ObjectName pObjectName,String ... pAttribute) {
-        super(J4pType.READ, pObjectName);
+        this(null,pObjectName,pAttribute);
+    }
+
+    /**
+     * Create a READ request to request one or more attributes
+     * from the remote j4p agent
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pObjectName Name of the MBean to request, which can be a pattern in
+     *                    which case the given attributes are looked at all MBeans matched
+     *                    by this pattern. If an attribute does not fit to a matched MBean it is
+     *                    ignored.
+     * @param pAttribute one or more attributes to request.
+     */
+    public J4pReadRequest(J4pTargetConfig pTargetConfig,ObjectName pObjectName,String ... pAttribute) {
+        super(J4pType.READ, pObjectName,pTargetConfig);
         attributes = Arrays.asList(pAttribute);
     }
 
@@ -63,7 +78,20 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
      */
     public J4pReadRequest(String pObjectName,String ... pAttribute) throws MalformedObjectNameException {
-        this(new ObjectName(pObjectName),pAttribute);
+        this(null,pObjectName,pAttribute);
+    }
+
+    /**
+     * Create a READ request to request one or more attributes
+     * from the remote j4p agent
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pObjectName object name as sting which gets converted to a {@link javax.management.ObjectName}}
+     * @param pAttribute one or more attributes to request.
+     * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
+     */
+    public J4pReadRequest(J4pTargetConfig pTargetConfig,String pObjectName,String ... pAttribute) throws MalformedObjectNameException {
+        this(pTargetConfig,new ObjectName(pObjectName),pAttribute);
     }
 
 

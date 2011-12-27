@@ -69,8 +69,7 @@ public class J4pBulkRemoteException extends J4pException {
     }
 
     /**
-     * Get the list of {@link J4pRemoteException}. At list one element is contained
-     * in this list.
+     * Get the list of {@link J4pRemoteException}. At list with all remote exceptions is collected in this list.
      *
      * @return list of remote exceptions
      */

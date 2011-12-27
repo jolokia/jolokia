@@ -33,7 +33,15 @@ public class J4pVersionRequest extends J4pRequest {
      * Plain Constructor
      */
     public J4pVersionRequest() {
-        super(J4pType.VERSION);
+        this(null);
+    }
+
+    /**
+     * Constructor with using a proxy configuration
+     * @param pConfig proxy configuration for a JSR-160 proxy
+     */
+    public J4pVersionRequest(J4pTargetConfig pConfig) {
+        super(J4pType.VERSION,pConfig);
     }
 
     /** {@inheritDoc} */

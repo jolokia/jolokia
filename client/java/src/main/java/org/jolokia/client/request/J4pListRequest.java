@@ -38,7 +38,17 @@ public class J4pListRequest extends J4pRequest {
      * be fetched.
      */
     protected J4pListRequest() {
-        this((String) null);
+        this(null, (String) null);
+    }
+
+    /**
+     * Default constructor to be used when all meta information should
+     * be fetched.
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     */
+    protected J4pListRequest(J4pTargetConfig pTargetConfig) {
+        this(pTargetConfig, (String) null);
     }
 
     /**
@@ -50,8 +60,21 @@ public class J4pListRequest extends J4pRequest {
      *        You can use {@link #escape(String)} in order to escape a single path element.
      */
     public J4pListRequest(String pPath) {
-        super(J4pType.LIST);
-        pathElements = splitPath(pPath);
+        this(null, pPath);
+    }
+
+    /**
+     * Constructor using a path to restrict the information
+     * returned by the list command
+     *
+     * @param pConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pPath path into the JSON response. The path <strong>must already be
+ *        properly escaped</strong> when it contains slashes or exclamation marks.
+ *        You can use {@link #escape(String)} in order to escape a single path element.
+     */
+    public J4pListRequest(J4pTargetConfig pConfig, String pPath) {
+        super(J4pType.LIST,pConfig);
+        pathElements = splitPath(pPath);                
     }
 
     /**
@@ -60,7 +83,17 @@ public class J4pListRequest extends J4pRequest {
      * @param pPathElements list of path elements. The elements <strong>must not be escaped</strong>
      */
     public J4pListRequest(List<String> pPathElements) {
-        super(J4pType.LIST);
+        this(null, pPathElements);
+    }
+
+    /**
+     * Constructor using a list of path elements to restrict the information
+     *
+     * @param pConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pPathElements list of path elements. The elements <strong>must not be escaped</strong>
+     */
+    public J4pListRequest(J4pTargetConfig pConfig, List<String> pPathElements) {
+        super(J4pType.LIST,pConfig);
         pathElements = pPathElements;
     }
 
@@ -70,7 +103,18 @@ public class J4pListRequest extends J4pRequest {
      * @param pObjectName name of MBean for which to fetch the meta data
      */
     public J4pListRequest(ObjectName pObjectName) {
-        super(J4pType.LIST);
+        this(null, pObjectName);
+    }
+
+
+    /**
+     * Constructor for fetching the meta data of a specific MBean
+     *
+     * @param pConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pObjectName name of MBean for which to fetch the meta data
+     */
+    public J4pListRequest(J4pTargetConfig pConfig, ObjectName pObjectName) {
+        super(J4pType.LIST,pConfig);
         pathElements = new ArrayList<String>();
         pathElements.add(pObjectName.getDomain());
         pathElements.add(pObjectName.getCanonicalKeyPropertyListString());

@@ -113,184 +113,199 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nameWithSpace() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest req = new J4pReadRequest("jolokia.it:type=naming,name=name with space","Ok");
-        J4pReadResponse resp = j4pClient.execute(req);
-        assertNotNull(resp);
+        for (J4pReadRequest req : readRequests("jolokia.it:type=naming,name=name with space","Ok")) {
+            J4pReadResponse resp = j4pClient.execute(req);
+            assertNotNull(resp);
+        }
+    }
+
+    private J4pReadRequest[] readRequests(String mbean, String ... attributes) throws MalformedObjectNameException {
+        return new J4pReadRequest[] {
+                new J4pReadRequest(mbean,attributes),
+                new J4pReadRequest(getTargetProxyConfig(),mbean,attributes)
+        };
     }
 
     @Test
     public void multipleAttributes() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes");
-        J4pReadResponse resp = j4pClient.execute(req);
-        assertFalse(req.hasSingleAttribute());
-        assertEquals(2,req.getAttributes().size());
-        Map respVal = resp.getValue();
-        assertTrue(respVal.containsKey("LongSeconds"));
-        assertTrue(respVal.containsKey("SmallMinutes"));
 
-        Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
-        Set<String> attrSet = new HashSet<String>(attrs);
-        assertTrue(attrSet.contains("LongSeconds"));
-        assertTrue(attrSet.contains("SmallMinutes"));
+        for (J4pReadRequest req : readRequests(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes")) {
+            J4pReadResponse resp = j4pClient.execute(req);
+            assertFalse(req.hasSingleAttribute());
+            assertEquals(2,req.getAttributes().size());
+            Map respVal = resp.getValue();
+            assertTrue(respVal.containsKey("LongSeconds"));
+            assertTrue(respVal.containsKey("SmallMinutes"));
 
-        try {
-            resp.getAttributes(new ObjectName("blub:type=bla"));
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains(itSetup.getAttributeMBean()));
-        }
+            Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
+            Set<String> attrSet = new HashSet<String>(attrs);
+            assertTrue(attrSet.contains("LongSeconds"));
+            assertTrue(attrSet.contains("SmallMinutes"));
 
-        Set<String> allAttrs = new HashSet<String>(resp.getAttributes());
-        assertEquals(2,allAttrs.size());
-        assertTrue(allAttrs.contains("LongSeconds"));
-        assertTrue(allAttrs.contains("SmallMinutes"));
+            try {
+                resp.getAttributes(new ObjectName("blub:type=bla"));
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains(itSetup.getAttributeMBean()));
+            }
 
-        Double val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
-        assertNotNull(val);
+            Set<String> allAttrs = new HashSet<String>(resp.getAttributes());
+            assertEquals(2,allAttrs.size());
+            assertTrue(allAttrs.contains("LongSeconds"));
+            assertTrue(allAttrs.contains("SmallMinutes"));
 
-        try {
-            resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"Aufsteiger");
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("Aufsteiger"));
-        }
+            Double val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
+            assertNotNull(val);
 
-        Double longVal = resp.getValue("LongSeconds");
-        assertNotNull(longVal);
+            try {
+                resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"Aufsteiger");
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("Aufsteiger"));
+            }
 
-        try {
+            Double longVal = resp.getValue("LongSeconds");
+            assertNotNull(longVal);
+
+            try {
             resp.getValue("Pinola bleibt");
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("Pinola"));
-        }
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("Pinola"));
+            }
 
-        try {
-            resp.getValue(null);
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("null"));
-        }
+            try {
+                resp.getValue(null);
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("null"));
+            }
 
-        try {
-            req.getAttribute();
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("than one"));
+            try {
+                req.getAttribute();
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("than one"));
+            }
         }
     }
 
     @Test
     public void mbeanPattern() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest req = new J4pReadRequest("*:type=attribute","LongSeconds");
-        J4pReadResponse resp = j4pClient.execute(req);
-        assertEquals(1,resp.getObjectNames().size());
-        Map respVal = resp.getValue();
-        assertTrue(respVal.containsKey(itSetup.getAttributeMBean()));
-        Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
-        assertEquals(1,attrs.size());
-        assertTrue(attrs.containsKey("LongSeconds"));
+        for (J4pReadRequest req : readRequests("*:type=attribute","LongSeconds")) {
+            J4pReadResponse resp = j4pClient.execute(req);
+            assertEquals(1,resp.getObjectNames().size());
+            Map respVal = resp.getValue();
+            assertTrue(respVal.containsKey(itSetup.getAttributeMBean()));
+            Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
+            assertEquals(1,attrs.size());
+            assertTrue(attrs.containsKey("LongSeconds"));
 
-        Set<String> attrSet = new HashSet<String>(resp.getAttributes(new ObjectName(itSetup.getAttributeMBean())));
-        assertEquals(1,attrSet.size());
-        assertTrue(attrSet.contains("LongSeconds"));
+            Set<String> attrSet = new HashSet<String>(resp.getAttributes(new ObjectName(itSetup.getAttributeMBean())));
+            assertEquals(1,attrSet.size());
+            assertTrue(attrSet.contains("LongSeconds"));
 
-        try {
-            resp.getAttributes(new ObjectName("blub:type=bla"));
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("blub:type=bla"));
-        }
+            try {
+                resp.getAttributes(new ObjectName("blub:type=bla"));
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("blub:type=bla"));
+            }
 
-        try {
-            resp.getAttributes();
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("*:type=attribute"));
-        }
+            try {
+                resp.getAttributes();
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("*:type=attribute"));
+            }
 
-        try {
-            resp.getValue("LongSeconds");
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("non-pattern"));
+            try {
+                resp.getValue("LongSeconds");
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("non-pattern"));
+            }
         }
     }
 
     @Test
     public void mbeanPatternWithAttributes() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest req = new J4pReadRequest("*:type=attribute","LongSeconds","List");
-        assertNull(req.getPath());
-        J4pReadResponse resp = j4pClient.execute(req);
-        assertEquals(1,resp.getObjectNames().size());
-        Map respVal = resp.getValue();
-        Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
-        assertEquals(2,attrs.size());
-        assertTrue(attrs.containsKey("LongSeconds"));
-        assertTrue(attrs.containsKey("List"));
+        for (J4pReadRequest req : readRequests("*:type=attribute","LongSeconds","List")) {
+            assertNull(req.getPath());
+            J4pReadResponse resp = j4pClient.execute(req);
+            assertEquals(1,resp.getObjectNames().size());
+            Map respVal = resp.getValue();
+            Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
+            assertEquals(2,attrs.size());
+            assertTrue(attrs.containsKey("LongSeconds"));
+            assertTrue(attrs.containsKey("List"));
 
-        Double longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
-        assertNotNull(longVal);
+            Double longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
+            assertNotNull(longVal);
 
-        try {
-            resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"FCN");
-            fail();
-        } catch (IllegalArgumentException exp) {
-            assertTrue(exp.getMessage().contains("FCN"));
+            try {
+                resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"FCN");
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("FCN"));
+            }
         }
     }
 
-
     @Test
     public void mxBeanReadTest() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest request = new J4pReadRequest("jolokia.it:type=mxbean","ComplexTestData");
-        J4pReadResponse response = j4pClient.execute(request);
-        JSONObject value = response.getValue();
-        assertEquals(value.get("number"),1968L);
-        assertEquals(value.get("string"),"late");
+        for (J4pReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
+            J4pReadResponse response = j4pClient.execute(request);
+            JSONObject value = response.getValue();
+            assertEquals(value.get("number"),1968L);
+            assertEquals(value.get("string"),"late");
 
-        List set = (List) value.get("set");
-        assertEquals(set.size(),2);
-        assertTrue(set.contains(12L));
-        assertTrue(set.contains(14L));
+            List set = (List) value.get("set");
+            assertEquals(set.size(),2);
+            assertTrue(set.contains(12L));
+            assertTrue(set.contains(14L));
 
-        Map map = (Map) value.get("map");
-        assertEquals(map.size(),2);
-        assertEquals(map.get("kill"), true);
-        assertEquals(map.get("bill"), false);
+            Map map = (Map) value.get("map");
+            assertEquals(map.size(),2);
+            assertEquals(map.get("kill"), true);
+            assertEquals(map.get("bill"), false);
 
-        List array = (List) value.get("stringArray");
-        assertEquals(array.size(),2);
-        assertTrue(array.contains("toy"));
-        assertTrue(array.contains("story"));
+            List array = (List) value.get("stringArray");
+            assertEquals(array.size(),2);
+            assertTrue(array.contains("toy"));
+            assertTrue(array.contains("story"));
 
-        List<Boolean> list = (List<Boolean>) value.get("list");
-        assertEquals(list.size(),3);
-        assertTrue(list.get(0));
-        assertFalse(list.get(1));
-        assertTrue(list.get(2));
+            List<Boolean> list = (List<Boolean>) value.get("list");
+            assertEquals(list.size(),3);
+            assertTrue(list.get(0));
+            assertFalse(list.get(1));
+            assertTrue(list.get(2));
 
-        Map complex = (Map) value.get("complex");
-        List innerList = (List) complex.get("hidden");
-        Map innerInnerMap = (Map) innerList.get(0);
-        assertEquals(innerInnerMap.get("deep"), "inside");
+            Map complex = (Map) value.get("complex");
+            List innerList = (List) complex.get("hidden");
+            Map innerInnerMap = (Map) innerList.get(0);
+            assertEquals(innerInnerMap.get("deep"), "inside");
+        }
     }
 
-   @Test
-   public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
-       J4pReadRequest request = new J4pReadRequest("jolokia.it:type=mxbean","ComplexTestData");
-       Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-       params.put(J4pQueryParameter.MAX_DEPTH,"0");
-       params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
-       for (String method : new String[] { "GET", "POST" }) {
-           J4pReadResponse response = j4pClient.execute(request,method,params);
-           JSONObject value = response.getValue();
-           Object complex = value.get("complex");
-           assertTrue(complex instanceof String);
-           assertTrue(complex.toString().contains("TabularData"));
-       }
-
-   }
+    @Test
+    public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
+        for (J4pReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
+            Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
+            params.put(J4pQueryParameter.MAX_DEPTH,"0");
+            params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
+            for (String method : new String[] { "GET", "POST" }) {
+                if (request.getTargetConfig() != null && method.equals("GET")) {
+                    continue;
+                }
+                J4pReadResponse response = j4pClient.execute(request,method,params);
+                JSONObject value = response.getValue();
+                Object complex = value.get("complex");
+                assertTrue(complex instanceof String);
+                assertTrue(complex.toString().contains("TabularData"));
+            }
+        }
+    }
 
     private void checkNames(String pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
         for (int i = 0;i<pNames.length;i++) {

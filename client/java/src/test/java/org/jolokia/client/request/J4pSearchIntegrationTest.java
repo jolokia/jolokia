@@ -37,18 +37,24 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException {
-        J4pSearchRequest req = new J4pSearchRequest("java.lang:type=*");
-        J4pSearchResponse resp = j4pClient.execute(req);
-        assertNotNull(resp);
-        List<ObjectName> names = resp.getObjectNames();
-        assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));
+        for (J4pSearchRequest req : new J4pSearchRequest[] {
+                new J4pSearchRequest("java.lang:type=*"),
+                new J4pSearchRequest(getTargetProxyConfig(),"java.lang:type=*")
+        }) {
+            J4pSearchResponse resp = j4pClient.execute(req);
+            assertNotNull(resp);
+            List<ObjectName> names = resp.getObjectNames();
+            assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));
+        }
     }
 
     @Test
     public void emptySearch() throws MalformedObjectNameException, J4pException {
-        J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest("bla:gimme=*"));
-        assertEquals(resp.getObjectNames().size(),0);
-        assertEquals(resp.getMBeanNames().size(),0);
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest(cfg,"bla:gimme=*"));
+            assertEquals(resp.getObjectNames().size(),0);
+            assertEquals(resp.getMBeanNames().size(),0);
+        }
     }
 
     @Test(expectedExceptions = { MalformedObjectNameException.class })
@@ -58,8 +64,10 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void advancedPattern() throws MalformedObjectNameException, J4pException {
-        J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest("java.lang:type=Mem*"));
-        List<String> names = resp.getMBeanNames();
-        assertEquals(names.size(),1);
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest(cfg,"java.lang:type=Mem*"));
+            List<String> names = resp.getMBeanNames();
+            assertEquals(names.size(),1);
+        }
     }
 }

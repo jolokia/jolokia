@@ -17,6 +17,7 @@
 package org.jolokia.client.request;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
@@ -36,35 +37,51 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simple() throws J4pException {
-        J4pListRequest req = new J4pListRequest();
-        J4pListResponse resp = j4pClient.execute(req);
-        assertNotNull(resp);
+        for (J4pListRequest req : new J4pListRequest[] {
+                new J4pListRequest(),
+                new J4pListRequest(getTargetProxyConfig())
+        }) {
+            J4pListResponse resp = j4pClient.execute(req);
+            assertNotNull(resp);
+        }
     }
 
     @Test
     public void mbeanMeta() throws J4pException, MalformedObjectNameException {
-        J4pListRequest req = new J4pListRequest(new ObjectName("java.lang:type=Memory"));
-        J4pListResponse resp = j4pClient.execute(req);
-        Map val = resp.getValue();
-        assertTrue(val.containsKey("desc"));
-        assertTrue(val.containsKey("op"));
-        assertTrue(val.containsKey("attr"));
+        ObjectName objectName = new ObjectName("java.lang:type=Memory");
+        for (J4pListRequest req : new J4pListRequest[]{
+                new J4pListRequest(objectName),
+                new J4pListRequest(getTargetProxyConfig(), objectName)
+        }) {
+            J4pListResponse resp = j4pClient.execute(req);
+            Map val = resp.getValue();
+            assertTrue(val.containsKey("desc"));
+            assertTrue(val.containsKey("op"));
+            assertTrue(val.containsKey("attr"));
+        }
     }
 
     @Test
     public void withSpace() throws MalformedObjectNameException, J4pException {
-        J4pListRequest req = new J4pListRequest("jolokia.it/name=name with space,type=naming");
-        J4pListResponse resp = j4pClient.execute(req);
-        Map val = resp.getValue();
-        assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
+        for (J4pListRequest req : new J4pListRequest[] {
+                new J4pListRequest("jolokia.it/name=name with space,type=naming"),
+                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space,type=naming")
+        }) {
+            J4pListResponse resp = j4pClient.execute(req);
+            Map val = resp.getValue();
+            assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
+        }
     }
 
     @Test
     public void withSlash() throws MalformedObjectNameException, J4pException {
         J4pListRequest reqs[] =  new J4pListRequest[] {
                 new J4pListRequest(new ObjectName("jolokia.it:type=naming,name=n!a!m!e with !/!")),
+                new J4pListRequest(getTargetProxyConfig(),new ObjectName("jolokia.it:type=naming,name=n!a!m!e with !/!")),
                 new J4pListRequest(Arrays.asList("jolokia.it","type=naming,name=n!a!m!e with !/!")),
-                new J4pListRequest("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!")
+                new J4pListRequest(getTargetProxyConfig(),Arrays.asList("jolokia.it","type=naming,name=n!a!m!e with !/!")),
+                new J4pListRequest("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!"),
+                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!")
         };
         for (J4pListRequest req : reqs) {
             J4pListResponse resp = j4pClient.execute(req);

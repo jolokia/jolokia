@@ -40,7 +40,6 @@ abstract public class AbstractJ4pIntegrationTest {
 
     protected static final String J4P_DEFAULT_URL = SERVER_BASE_URL + J4P_CONTEXT;
 
-
     private String j4pUrl;
 
     // Client which can be used by subclasses for testing
@@ -53,7 +52,9 @@ abstract public class AbstractJ4pIntegrationTest {
         if (testUrl == null) {
             jettyServer = new Server(JETTY_DEFAULT_PORT);
             Context jettyContext = new Context(jettyServer, "/");
-            jettyContext.addServlet(new ServletHolder(new AgentServlet()), J4P_CONTEXT + "/*");
+            ServletHolder holder = new ServletHolder(new AgentServlet());
+            holder.setInitParameter("dispatcherClasses","org.jolokia.jsr160.Jsr160RequestDispatcher");
+            jettyContext.addServlet(holder, J4P_CONTEXT + "/*");
             jettyServer.start();
             j4pUrl = J4P_DEFAULT_URL;
             // Start the integration MBeans
@@ -61,8 +62,12 @@ abstract public class AbstractJ4pIntegrationTest {
         } else {
             j4pUrl = testUrl;
         }
-        j4pClient = J4pClient.url(j4pUrl).pooledConnections().build();
+        j4pClient = createJ4pClient(j4pUrl);
 	}
+
+    protected J4pClient createJ4pClient(String url) {
+        return J4pClient.url(url).pooledConnections().build();
+    }
 
 
     protected void startWithoutAgent() throws Exception {
@@ -97,4 +102,7 @@ abstract public class AbstractJ4pIntegrationTest {
         return j4pUrl;
     }
 
+    public J4pTargetConfig getTargetProxyConfig() {
+        return new J4pTargetConfig("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi",null,null);
+    }
 }

@@ -7,6 +7,24 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.0.2" description="Release 1.0.2" date="2011">
+      <action dev="roland" type="add" date="2011-12-27">
+        Jolokia's Java client library now can request MBeans via an
+        JSR-160 proxy. This is done either by giving a default proxy
+        configuration to the J4pClient or by providing a proxy config
+        to the request objects.
+      </action>
+      <action dev="roland" type="add" date="2011-12-15">
+        Added support for global and request procession parameter
+        "mimeType" for specifying the HTTP content-type for the
+        Jolokia response. By default this is "text/plain" (but
+        "application/json" can be useful, too).
+      </action>
+      <action dev="roland" type="add" date="2011-12-16">
+        In case of an error, the request leading to this error is
+        returned in the response, too.
+      </action>
+    </release>
     <release version="1.0.1" description="Release 1.0.1" date="2011-10-31">
       <action dev="senthilnest" type="fix" date="2011-10-29" issue="GIT-37">
         Daemonized threads created by the thread pool for the JVM agent.

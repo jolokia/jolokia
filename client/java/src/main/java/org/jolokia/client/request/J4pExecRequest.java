@@ -46,7 +46,19 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
      * @param pArgs any arguments to pass (which must match the JMX operation's declared signature)
      */
     public J4pExecRequest(ObjectName pMBeanName,String pOperation,Object ... pArgs) {
-        super(J4pType.EXEC, pMBeanName);
+        this(null,pMBeanName,pOperation,pArgs);
+    }
+
+    /**
+     * New client request for executing a JMX operation
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pMBeanName name of the MBean to execute the request on
+     * @param pOperation operation to execute
+     * @param pArgs any arguments to pass (which must match the JMX operation's declared signature)
+     */
+    public J4pExecRequest(J4pTargetConfig pTargetConfig,ObjectName pMBeanName,String pOperation,Object ... pArgs) {
+        super(J4pType.EXEC, pMBeanName, pTargetConfig);
         operation = pOperation;
         if (pArgs == null) {
             // That's the case when a single, null argument is given (which is the only
@@ -69,7 +81,22 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
      */
     public J4pExecRequest(String pMBeanName, String pOperation,Object ... pArgs)
             throws MalformedObjectNameException {
-        this(new ObjectName(pMBeanName),pOperation,pArgs);
+        this(null,pMBeanName,pOperation,pArgs);
+    }
+
+    /**
+     * New client request for executing a JMX operation
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pMBeanName name of the MBean to execute the request on
+     * @param pOperation operation to execute
+     * @param pArgs any arguments to pass (which must match the JMX operation's declared signature)
+     *
+     * @throws MalformedObjectNameException if the given name is not an {@link ObjectName}
+     */
+    public J4pExecRequest(J4pTargetConfig pTargetConfig,String pMBeanName, String pOperation,Object ... pArgs)
+            throws MalformedObjectNameException {
+        this(pTargetConfig,new ObjectName(pMBeanName),pOperation,pArgs);
     }
 
     /**

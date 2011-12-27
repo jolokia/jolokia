@@ -33,8 +33,8 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
     // name of MBean to execute a request on
     private ObjectName objectName;
 
-    protected AbtractJ4pMBeanRequest(J4pType pType,ObjectName pMBeanName) {
-        super(pType);
+    protected AbtractJ4pMBeanRequest(J4pType pType,ObjectName pMBeanName,J4pTargetConfig pTargetConfig) {
+        super(pType,pTargetConfig);
         objectName = pMBeanName;
     }
 
