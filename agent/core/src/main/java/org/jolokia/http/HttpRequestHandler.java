@@ -147,25 +147,25 @@ public class HttpRequestHandler {
         try {
             return backendManager.handleRequest(pJmxReq);
         } catch (ReflectionException e) {
-            return getErrorJSON(404,e);
+            return getErrorJSON(404,e, pJmxReq);
         } catch (InstanceNotFoundException e) {
-            return getErrorJSON(404,e);
+            return getErrorJSON(404,e, pJmxReq);
         } catch (MBeanException e) {
-            return getErrorJSON(500,e.getTargetException());
+            return getErrorJSON(500,e.getTargetException(), pJmxReq);
         } catch (AttributeNotFoundException e) {
-            return getErrorJSON(404,e);
+            return getErrorJSON(404,e, pJmxReq);
         } catch (UnsupportedOperationException e) {
-            return getErrorJSON(500,e);
+            return getErrorJSON(500,e, pJmxReq);
         } catch (IOException e) {
-            return getErrorJSON(500,e);
+            return getErrorJSON(500,e, pJmxReq);
         } catch (IllegalArgumentException e) {
-            return getErrorJSON(400,e);
+            return getErrorJSON(400,e, pJmxReq);
         } catch (SecurityException e) {
             // Wipe out stacktrace
-            return getErrorJSON(403,new Exception(e.getMessage()));
+            return getErrorJSON(403,new Exception(e.getMessage()), pJmxReq);
         } catch (RuntimeMBeanException e) {
             // Use wrapped exception
-            return errorForUnwrappedException(e);
+            return errorForUnwrappedException(e,pJmxReq);
         }
     }
 
@@ -187,12 +187,12 @@ public class HttpRequestHandler {
      */
     public JSONObject handleThrowable(Throwable pThrowable) {
         if (pThrowable instanceof IllegalArgumentException) {
-            return getErrorJSON(400,pThrowable);
+            return getErrorJSON(400,pThrowable, null);
         } else if (pThrowable instanceof SecurityException) {
             // Wipe out stacktrace
-            return getErrorJSON(403,new Exception(pThrowable.getMessage()));
+            return getErrorJSON(403,new Exception(pThrowable.getMessage()), null);
         } else {
-            return getErrorJSON(500,pThrowable);
+            return getErrorJSON(500,pThrowable, null);
         }
     }
 
@@ -200,11 +200,13 @@ public class HttpRequestHandler {
     /**
      * Get the JSON representation for a an exception
      *
+     *
      * @param pErrorCode the HTTP error code to return
      * @param pExp the exception or error occured
+     * @param pJmxReq
      * @return the json representation
      */
-    public JSONObject getErrorJSON(int pErrorCode, Throwable pExp) {
+    public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JmxRequest pJmxReq) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status",pErrorCode);
         jsonObject.put("error",getExceptionMessage(pExp));
@@ -214,6 +216,9 @@ public class HttpRequestHandler {
         jsonObject.put("stacktrace",writer.toString());
         if (backendManager.isDebug()) {
             backendManager.error("Error " + pErrorCode,pExp);
+        }
+        if (pJmxReq != null) {
+            jsonObject.put("request",pJmxReq.toJSON());
         }
         return jsonObject;
     }
@@ -239,10 +244,9 @@ public class HttpRequestHandler {
 
     // Unwrap an exception to get to the 'real' exception
     // and extract the error code accordingly
-    private JSONObject errorForUnwrappedException(Exception e) {
+    private JSONObject errorForUnwrappedException(Exception e, JmxRequest pJmxReq) {
         Throwable cause = e.getCause();
         int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
-        return getErrorJSON(code,cause);
+        return getErrorJSON(code,cause, pJmxReq);
     }
-
 }
