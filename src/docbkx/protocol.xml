@@ -493,6 +493,18 @@
             </para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term><literal>mimeType</literal></term>
+          <listitem>
+            <para>
+              The MIME type to return for the response. By default,
+              this is <literal>text/plain</literal>, but it can be
+              useful for some tools to change it to
+              <literal>application/json</literal>. Init parameters can
+              be used to change the default mime type.
+            </para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </section>
     
@@ -955,6 +967,15 @@
         protocol version <emphasis role="bold">5.0</emphasis>
       </para>
       <variablelist>
+        <varlistentry>
+          <term><emphasis role="bold">6.1</emphasis> (since 1.0.2</term>
+          <listitem>
+            <para>
+              Error responses contain now the original request as
+              well, for single and bulk requests.
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><emphasis role="bold">6.0</emphasis> (since 1.0.0)</term>
           <listitem>

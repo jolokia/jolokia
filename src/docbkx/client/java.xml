@@ -159,6 +159,28 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <td></td>
       </tr>
       <tr>
+        <td><constant>target</constant></td>
+        <td>A JMX JSR-160 ServiceURL which should be used by the agent
+        as the <emphasis>real</emphasis> target. This parameter should
+        be set if the client is used for accessing the agent in <xref
+        linkend="proxy">proxy mode</xref>.
+        </td> 
+        <td></td>
+      </tr>
+      <tr>
+        <td><constant>targetUser</constant></td>
+        <td>The JSR-160 user to use when using the proxy mode. If not
+        given (and <constant>target</constant> is set), then no
+        authentication is used for JSR-160 communication.
+        </td> 
+        <td></td>
+      </tr>
+      <tr>
+        <td><constant>targetPassword</constant></td>
+        <td>JSR-160 Password to use for the proxy mode.</td> 
+        <td></td>
+      </tr>
+      <tr>
         <td><constant>connectionTimeout</constant></td>
         <td>The timeout in milliseconds until a connection is
         established. A timeout value of zero is interpreted as an
@@ -341,6 +363,16 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
       Each request type has a corresponding response type which used
       for the return values of the
       <methodname>J4pClient.execute()</methodname>.
+    </para>
+    <para>
+      The constructor of each kind of request can take a
+      <classname>J4pTargetConfig</classname> as argument for using a
+      request in <xref linkend="proxy">proxy mode</xref>. This
+      configurational object holds the JMX service url and
+      (optionally) credentials for JSR-160 authentication. When
+      given, this proxy target specification overrides any default
+      proxy configuration set during the initialization of the 
+      <classname>J4pClient</classname>. 
     </para>
     <variablelist>
       <varlistentry>

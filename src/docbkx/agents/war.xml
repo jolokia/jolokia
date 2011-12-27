@@ -146,6 +146,15 @@
         </td>
         <td></td>
       </tr>
+      <tr>
+        <td><constant>mimeType</constant></td>
+        <td>
+          MIME to use for the JSON responses
+        </td>
+        <td>
+          Default: <constant>text/plain</constant>
+        </td>
+      </tr>
     </table>      
   </section>
   <section id="agent-war-security">
