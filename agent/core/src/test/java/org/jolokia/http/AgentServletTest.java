@@ -30,6 +30,7 @@ import org.jolokia.util.ConfigKey;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -90,7 +91,7 @@ public class AgentServletTest {
 
         StringWriter sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
-
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         replay(request, response);
 
         servlet.doGet(request, response);
@@ -117,6 +118,7 @@ public class AgentServletTest {
                     }
                 },
                 getStandardResponseSetup());
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         replay(request,response);
 
         servlet.doGet(request,response);
@@ -130,6 +132,7 @@ public class AgentServletTest {
 
         StringWriter responseWriter = initRequestResponseMocks();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
 
         preparePostRequest(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
 
@@ -156,6 +159,7 @@ public class AgentServletTest {
                     }
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
 
         replay(request, response);
 
@@ -200,6 +204,8 @@ public class AgentServletTest {
                     }
                 },
                 getStandardResponseSetup());
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+
         replay(request, response);
 
         servlet.doGet(request, response);
@@ -228,7 +234,7 @@ public class AgentServletTest {
 
         StringWriter sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
-
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         replay(request, response);
 
         servlet.doGet(request, response);

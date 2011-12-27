@@ -184,7 +184,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
         try {
             Headers headers = pExchange.getResponseHeaders();
-            headers.set("Content-Type",(callback == null ? "text/plain" : "text/javascript") + "; charset=utf-8");
+            headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
             String content = callback == null ? pJson : callback + "(" + pJson + ");";
             byte[] response = content.getBytes();
             pExchange.sendResponseHeaders(200,response.length);
@@ -196,6 +196,20 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
                 // Otherwise the thread blocks.
                 out.close();
             }
+        }
+    }
+
+    // Get the proper mime type according to configuration
+    private String getMimeType(ParsedUri pParsedUri) {
+        if (pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue()) != null) {
+            return "text/javascript";
+        } else {
+            String mimeType = pParsedUri.getParameter(ConfigKey.MIME_TYPE.getKeyValue());
+            if (mimeType != null) {
+                return mimeType;
+            }
+            mimeType = configuration.get(ConfigKey.MIME_TYPE);
+            return mimeType != null ? mimeType : ConfigKey.MIME_TYPE.getDefaultValue();
         }
     }
 

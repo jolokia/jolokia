@@ -63,6 +63,9 @@ public class AgentServlet extends HttpServlet {
 
     // Restrictor to use as given in the constructor
     private Restrictor restrictor;
+    
+    // Mime type used for returning the answer
+    private String configMimeType;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -142,6 +145,10 @@ public class AgentServlet extends HttpServlet {
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
+        configMimeType = config.get(ConfigKey.MIME_TYPE);
+        if (configMimeType == null) {
+            configMimeType = ConfigKey.MIME_TYPE.getDefaultValue();
+        }
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(backendManager,logHandler);
     }
@@ -206,7 +213,8 @@ public class AgentServlet extends HttpServlet {
             json = pReqHandler.handleRequest(pReq,pResp);
         } catch (Throwable exp) {
             JSONObject error = requestHandler.handleThrowable(
-                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
+                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp
+                    );
             json = error;
         } finally {
             String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
@@ -214,9 +222,18 @@ public class AgentServlet extends HttpServlet {
                 // Send a JSONP response
                 sendResponse(pResp, "text/javascript",callback + "(" + json.toJSONString() +  ");");
             } else {
-                sendResponse(pResp, "text/plain",json.toJSONString());
+                sendResponse(pResp, getMimeType(pReq),json.toJSONString());
             }
         }
+    }
+
+    // Extract mime type for response (if not JSONP)
+    private String getMimeType(HttpServletRequest pReq) {
+        String requestMimeType = pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue());
+        if (requestMimeType != null) {
+            return requestMimeType;
+        }
+        return configMimeType;
     }
 
     private interface ServletRequestHandler {

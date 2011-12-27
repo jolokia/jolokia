@@ -89,6 +89,14 @@ public enum ConfigKey {
      */
     CALLBACK("callback", false, true),
 
+    /**
+     * Mime Type to use for the response value. By default, this is
+     * <code>text/plain</code>, but it could be useful to return
+     * <code>application/json</code>, too. A request parameter overrides a global
+     * configuration.
+     */
+    MIME_TYPE("mimeType", true, true,"text/plain"),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 
