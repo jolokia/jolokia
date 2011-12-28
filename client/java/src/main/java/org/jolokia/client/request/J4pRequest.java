@@ -41,7 +41,12 @@ public abstract class J4pRequest {
     // target configuration for this request when used as a JSR-160 proxy
     private J4pTargetConfig targetConfig;
 
-    // TODO: Add target config
+    /**
+     * Constructor for subclasses
+     * @param pType type of this request
+     * @param pTargetConfig a target configuration if used in proxy mode or <code>null</code>
+     *                      if this is a direct request
+     */
     protected J4pRequest(J4pType pType, J4pTargetConfig pTargetConfig) {
         type = pType;
         targetConfig = pTargetConfig;
@@ -69,10 +74,28 @@ public abstract class J4pRequest {
 
     /**
      * Get a target configuration for use with an agent in JSR-160 proxy mode
+     *
      * @return the target config or <code>null</code> if this is a direct request
      */
     public J4pTargetConfig getTargetConfig() {
         return targetConfig;
+    }
+
+    /**
+     * The preferred HTTP method to use (either 'GET' or 'POST')
+     * @return the HTTP method to use for this request, or <code>null</code> if the method should be automatically selected.
+     */
+    public String getPreferredHttpMethod() {
+        return preferredHttpMethod;
+    }
+
+    /**
+     * Set the preferred HTTP method, either 'GET' or 'POST'.
+     *
+     * @param pPreferredHttpMethod HTTP method to use.
+     */
+    public void setPreferredHttpMethod(String pPreferredHttpMethod) {
+        preferredHttpMethod = pPreferredHttpMethod != null ? pPreferredHttpMethod.toUpperCase() : null;
     }
 
     // ==================================================================================================
@@ -100,14 +123,7 @@ public abstract class J4pRequest {
      */
     abstract <R extends J4pResponse<? extends J4pRequest>> R createResponse(JSONObject pResponse);
 
-    public String getPreferredHttpMethod() {
-        return preferredHttpMethod;
-    }
-
-    public void setPreferredHttpMethod(String pPreferredHttpMethod) {
-        preferredHttpMethod = pPreferredHttpMethod != null ? pPreferredHttpMethod.toUpperCase() : null;
-    }
-
+    // Helper class
     protected void addPath(List<String> pParts, String pPath) {
         if (pPath != null) {
             // Split up path
