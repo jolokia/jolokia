@@ -2,6 +2,10 @@ mvn clean install
 
 # Check integration tests (with jmx4perl/it/it.pl)
 # Check Javascript tests
+cd client/javascript/test-app
+# Fix version number, test-app is not increased with the release plugin
+mvn clean install jetty:run-war
+firefox http://localhost:8080/
 
 # =======================================================================
 # Increase Version Numbers:
