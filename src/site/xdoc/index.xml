@@ -51,12 +51,59 @@
       </ul>
     </subsection>
     <section name="News">
-      <subsection name="Scary 1.0.1 is out">
-        <div class="news-date">2011-10-31</div>
+      <subsection name="Happy new year 2012 !">
+        <div class="news-date">2011-12-29</div>
         <p>
+          The last year was very exciting for Jolokia:
+        </p>
+        <ul>
+          <li>We hit 1.0.0 in October after one year of active development</li>
+          <li>Jolokia was presented at <a
+          href="http://www.devoxx.com">Devoxx 2011</a> in the
+          "<em>Tools in action</em>" track. Despite the competition on
+          the parallel tracks was very strong and some technical issues, I
+          think the talk went rather well (although there is of course
+          quite some space for improvement ;-). I blogged about my
+          <a
+          href="http://labs.consol.de/blog/devoxx/devoxx-2011-day-1/#jolokia">experience</a>
+          and you can find the <a
+          href="http://www.parleys.com/d/2864">full talk</a> recorded
+          at Parleys. In order to see the full talk you either need to
+          wait a year or buy a 79 EU subscription from Parleys for all
+          those fantastic talks (>120) given at Devoxx this year. The
+          <a href="">slides</a> can also be found on Slideshare and
+          the <a
+          href="http://labs.consol.de/blog/jolokia/devoxx-talk-jolokia-jmx-on-capsaicin-shownotes/">shownotes</a>
+          with all the links are given our blog. Devoxx was definitely
+          my personal highlight this year and I hope to get the chance
+          to present in Antwerp next year, too.</li>
+          <li>I also gave a <a
+          href="http://www.netways.de/index.php?id=3031&L=1">talk</a>
+          at the <a
+          href="http://www.netways.de/en/osmc/y2011/overview/">Open
+          Source 
+          Monitoring Conference 2011</a> in Nuremberg, where I was the
+          'Java guy' this year. It was my thirds time at OSMC and it
+          was as always a big pleasure to meet the Nagios folks and
+          catering was phantastic, too ;-)</li>
+        </ul>
+        <p>
+          So what's next ? There will be a minor release 1.0.2 in the
+          first january week containing some minor feature additions
+          and library updates. And I'm going to start the work on a
+          whole new Jolokia based open source web console, called <a
+          href="http://en.wikipedia.org/wiki/Aj%C3%AD_pepper">Aji</a>. 
+        </p>
+        <p>
+          Please stay tuned and a happy new year !
+        </p>
+      </subsection>
+      <subsection name="1.0.1 is out"> 
+        <div class="news-date">2011-10-31</div>
+       <p>
           A minor bug fix release, probably the last before Devoxx,
           brings also two new features:
-        </p>
+          </p>
         <ul>
           <li>
             The <a href="agent/jvm.html">JVM Agent</a> can now also take a regular
@@ -189,60 +236,6 @@
         <p>
           All changes for this release are summarized as always in the 
           <a href="changes-report.html">change log</a>. 
-        </p>
-      </subsection>
-      <subsection name="Summer break is over and 0.95 is here">
-        <div class="news-date">2011-08-21</div>        
-        <p>
-          The summer break is over and Jolokia is one step closer to
-          1.0. Germans might reasonably argue, 'ehm, what summer do
-          you talk about ?' but at least 0.95 is a fact and introduces
-          two new features. Very cool features, IMO.
-        </p>
-        <p>
-          The Jolokia <a href="agent/jvm.html">JVM Agent</a> is
-          now able to use the <a
-          href="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html">Java
-          Attach API</a> so that it is possible to dynamically attach
-          and detach a Jolokia agent to a running Java process, much
-          like <a
-          href="http://download.oracle.com/javase/6/docs/technotes/guides/management/jconsole.html">jconsole</a>. It
-          is a really exciting and powerful feature, because it allows
-          for HTTP/JSON access without (permanently) instrumenting a
-          Java process by deploying an agent or modifying startup
-          options, which is a major obstacle for quite some users. The
-          nice advantage over <code>jconsole</code> is that it
-          attaches <em>locally</em> but export the data
-          <em>remotely</em>. Perfect for headless server
-          installations.
-        </p>
-        <p>
-          The second addition is the support for upstream
-          serialization of all <a
-          href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">OpenType</a>
-          types so that JMX operations and write requests can be used
-          with <code>OpenTypes</code>, too. For <a
-          href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBeans</a>
-          special support has been added, so that e.g. a JSON map gets
-          properly translated to an MXBean's Map attribute (which in
-          between gets translated to a <a
-          href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/TabularData.html">TabularData</a>
-          with a fixed format). Since MXBeans are so easy to declare,
-          implement and register, this missing piece really adds to
-          our <em>JMX on Capsaicin</em> mantra.
-        </p>
-        <p>
-          Both features arrived via GitHub <a
-          href="https://github.com/rhuss/jolokia/pulls">pull
-          requests</a> and are proofs for the relevance of the social
-          coding model introduced by GitHub. Big acknowlegdments go
-          out to <a href="https://github.com/asssaf">Assaf Berg</a>
-          and <a href="https://github.com/GregBowyer">Greg Bowyer</a>
-          for providing pull requests which lead to these features.
-        </p>
-        <p>
-          This and all previous changes can be found in the <a
-          href="changes-report.html">change log</a>. 
         </p>
       </subsection>
   </section>

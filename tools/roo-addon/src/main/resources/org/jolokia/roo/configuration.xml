@@ -25,18 +25,22 @@
         <version>${jolokia.version}</version>
       </dependency>
     </dependencies>
-    <repositories>
+    <snapshots-repositories>
+      <!-- Snapshots are available from our labs repository -->
       <repository>
-        <id>labs-consol-release</id>
-        <name>ConSol* Labs Repository (Releases)</name>
-        <url>http://labs.consol.de/maven/repository</url>
+        <id>labs-consol-snapshot</id>
+        <name>ConSol* Labs Repository (Snapshots)</name>
+        <url>http://labs.consol.de/maven/snapshots-repository</url>
         <snapshots>
-          <enabled>false</enabled>
+          <enabled>true</enabled>
         </snapshots>
         <releases>
-          <enabled>true</enabled>
+          <enabled>false</enabled>
         </releases>
       </repository>
+    </snapshots-repositories>
+    <repositories>
+      <!-- Jolokia is now available from Maven central, no extra repository required-->
     </repositories>
     <initParams>
       <init-param>

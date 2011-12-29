@@ -26,6 +26,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.*;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.*;
 import org.springframework.roo.support.util.*;
 import org.w3c.dom.*;
@@ -50,17 +51,15 @@ public class JolokiaCommands implements CommandMarker {
 
     @CliAvailabilityIndicator("jolokia setup")
 	public boolean isJolokiaAvailable() {
-        ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+        String module = projectOperations.getFocusedModuleName();
+        ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier(module));
 		if (project == null) {
 			return false;
 		}
 
-		// Do not permit installation unless they have a web project (as per ROO-342)
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
-			return false;
-		}
-        return true;
-	}
+		// Do not permit installation unless they have a web project
+        return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP.getModulePathId(module), "/WEB-INF/web.xml"));
+    }
 
     @CliCommand(value = "jolokia setup", help = "Adds/Updates dependencies and a servlet \"/jolokia\" for accessing the Jolokia agent")
 	public void setupJolokia(
@@ -101,45 +100,65 @@ public class JolokiaCommands implements CommandMarker {
     // =================================================================================================
 
     private void updateDependencies(Element configuration, boolean pAddJsr160Proxy) {
-        ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		List<Element> dependencies =
+        List<Element> dependencyElements =
                 XmlUtils.findElements("/configuration/jolokia/dependencies/dependency", configuration);
-        if (pAddJsr160Proxy) {
-            dependencies.addAll(
-                    XmlUtils.findElements("/configuration/jolokia/jsr160Proxy/dependency",configuration)
-            );
+        addJsr160Dependencies(configuration,dependencyElements, pAddJsr160Proxy);
+
+        List<Dependency> dependencies = new ArrayList<Dependency>();
+        for (Element dependencyElement : dependencyElements) {
+            dependencies.add(new Dependency(dependencyElement));
         }
-        for (Element dependencyElement : dependencies) {
-            Dependency dep = new Dependency(dependencyElement);
-            Set<Dependency> givenDeps = project.getDependenciesExcludingVersion(dep);
-            for (Dependency given : givenDeps) {
-                if (!given.getVersionId().equals(dep.getVersionId())) {
-                    log.info("Updating " + dep.getGroupId() + ":" + dep.getArtifactId() + " from version " + given.getVersionId() + " to " + dep.getVersionId());
-                    projectOperations.removeDependency(given);
-                }
-            }
-            projectOperations.addDependency(dep);
-        }
+        projectOperations.addDependencies(projectOperations.getFocusedModuleName(), dependencies);
 	}
 
-    private void addRepository(Element configuration) {
-        ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-        List<Element> repositories =
-                XmlUtils.findElements("/configuration/jolokia/repositories/repository", configuration);
-        for (Element repositoryElement : repositories) {
-            Repository repository = new Repository(repositoryElement);
-            if (!project.isRepositoryRegistered(repository)) {
-                projectOperations.addRepository(repository);
+    private void addJsr160Dependencies(Element configuration, List<Element> pDependencyElements, boolean pAddJsr160Proxy) {
+        List<Element> pJsr160DepElements = XmlUtils.findElements("/configuration/jolokia/jsr160Proxy/dependency", configuration);
+        if (pAddJsr160Proxy) {
+            pDependencyElements.addAll(pJsr160DepElements);
+        } else {
+            // Check, whether there is already a jsr160 dependency present. If so, add it again 
+            // so that it gets properly update if an dep update operation is performed.
+            Pom pom = projectOperations.getFocusedModule();
+            for (Element jsr160DepElement : pJsr160DepElements) {
+                Dependency jsr160Dep = new Dependency(jsr160DepElement);
+                for (Dependency dep: pom.getDependencies()) {
+                    if (dep.hasSameCoordinates(jsr160Dep)) {
+                        pDependencyElements.add(jsr160DepElement);
+                    }
+                }                
             }
         }
     }
 
+    private void addRepository(Element configuration) {
+        Pom pom = projectOperations.getFocusedModule();
+        // Check whether we are a snapshot version, if so, we are adding our snapshot repository
+        List<Element> versions =
+                XmlUtils.findElements("/configuration/jolokia/dependencies/dependency/version", configuration);
+        boolean isSnapshot = false;
+        for (Element version : versions) {
+            if (version.getTextContent().matches(".*SNAPSHOT$")) {
+                isSnapshot = true;
+                break;
+            }
+        }
 
+        List<Element> repositories =
+                isSnapshot ?
+                        XmlUtils.findElements("/configuration/jolokia/snapshots-repositories/repository", configuration) :
+                        XmlUtils.findElements("/configuration/jolokia/repositories/repository", configuration);
+
+        for (Element repositoryElement : repositories) {
+            Repository repository = new Repository(repositoryElement);
+            projectOperations.addRepository(pom.getModuleName(),repository);
+        }
+    }
 
     private void updateWebXml(Element pConfiguration, boolean pAddjsr160proxy, boolean pAdddefaultinitparams) {
         InputStream is = null;
         try {
-            String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+            String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP.getModulePathId(projectOperations.getFocusedModuleName()), 
+                                                       "WEB-INF/web.xml");
             if (fileManager.exists(webXml)) {
                 MutableFile mutableWebXml = fileManager.updateFile(webXml);
                 is = mutableWebXml.getInputStream();
@@ -193,10 +212,12 @@ public class JolokiaCommands implements CommandMarker {
     }
 
     private void updateJolokiaAccessXml() {
-        String destination = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "jolokia-access.xml");
+        String destination = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES.getModulePathId(projectOperations.getFocusedModuleName()), 
+                                                        "jolokia-access.xml");
         if (!fileManager.exists(destination)) {
             try {
-                FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "jolokia-access.xml"), fileManager.createFile(destination).getOutputStream());
+                FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "jolokia-access.xml"),
+                                   fileManager.createFile(destination).getOutputStream());
             } catch (IOException ioe) {
                 throw new IllegalStateException(ioe);
             }

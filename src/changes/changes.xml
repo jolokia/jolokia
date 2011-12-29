@@ -7,7 +7,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.2" description="Release 1.0.2" date="2011">
+    <release version="1.0.2-SNAPSHOT" description="Release 1.0.2-SNAPSHOT" date="2011-11-29">
+      <action dev="roland" type="update" date="2011-12-29">
+        Updated Roo plugin for Roo 1.2. It won't work with older Roo
+        versions.
+      </action>
       <action dev="roland" type="add" date="2011-12-27">
         Jolokia's Java client library now can request MBeans via an
         JSR-160 proxy. This is done either by giving a default proxy
