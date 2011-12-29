@@ -80,4 +80,11 @@ mvn -Plabs site site:deploy
 # Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 
 # URL
 
+# =============================================================================
+# Snapshot release
+
+# Set version number in Version.java, jolokia.js, docbkx/index.xml
+mvn -Pdist,labs deploy
+# Adapt URI and version number in root-repository.xml on labs.consol.de to us a httppgp URL
+
 
