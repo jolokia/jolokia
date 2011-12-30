@@ -54,7 +54,7 @@
       <subsection name="Happy new year 2012 !">
         <div class="news-date">2011-12-29</div>
         <p>
-          The last year was very exciting for Jolokia:
+          This was an exciting year for Jolokia:
         </p>
         <ul>
           <li>We hit 1.0.0 in October after one year of active development</li>
@@ -70,8 +70,8 @@
           href="http://www.parleys.com/d/2864">full talk</a> recorded
           at Parleys. In order to see the full talk you either need to
           wait a year or buy a 79 EU subscription from Parleys for all
-          those fantastic talks (>120) given at Devoxx this year. The
-          <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx">slides</a> can also be found on Slideshare and
+          those fantastic talks (>120) given at Devoxx this year. The slides are given below, hosted by 
+          <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx">Slideshare</a> and
           the <a
           href="http://labs.consol.de/blog/jolokia/devoxx-talk-jolokia-jmx-on-capsaicin-shownotes/">shownotes</a>
           with all the links are given our blog. Devoxx was definitely
@@ -97,6 +97,7 @@
         <p>
           Please stay tuned and a happy new year !
         </p>
+<div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="http://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
       </subsection>
       <subsection name="1.0.1 is out"> 
         <div class="news-date">2011-10-31</div>
