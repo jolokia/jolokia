@@ -603,9 +603,10 @@
 
     <!-- Include Roo, which is not build by default -->
     <profile>
-      <id>roo</id>
+      <id>tools</id>
       <modules>
         <module>tools/roo-addon</module>
+        <module>tools/forge-plugin</module>
       </modules>
   </profile>
   </profiles>
