@@ -37,8 +37,12 @@ cd ../../../../..
 
 # Deploy to Sonatype staging
 cd target/checkout
-mvn -Pdist,roo deploy
+mvn -Pdist deploy
 cd ../..
+
+# Deploy roo to labs, too
+cd tools/roo-addon
+mvn -Plabs deploy
 
 # Release on central maven repo
 # See: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
@@ -81,6 +85,7 @@ mvn -Plabs site site:deploy
 
 # Roo-Plugin:
 # Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 
+# /home/maven-repository/www/htdocs/repository/roo-repository.xml  
 # URL
 
 # =============================================================================

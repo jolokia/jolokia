@@ -50,7 +50,7 @@
         the same as no path at all).
       </action>
     </release>
-    <release version="1.0.0" description="Release 1.0.0" date="2011-10-3">
+    <release version="1.0.0" description="Release 1.0.0" date="2011-10-03">
       <action dev="roland" type="add" date="2011-9-12">
         Applied patch from codewax for supporting an Equinox HTTP-Service
       </action>
