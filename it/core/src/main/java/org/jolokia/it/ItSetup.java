@@ -41,10 +41,14 @@ public class ItSetup {
             "service%3ajmx%3armi%3a///jndi/rmi%3a//bhut%3a9999/jmxrmi",
             "\"jdbc/testDB\"",
             "name with space",
-            "n!a!m!e with !/!"
+            "n!a!m!e with !/!",
 //            "äöüßÄÖÜ"
     };
     private List<String> strangeNames = new ArrayList<String>();
+
+    private String[] fullNames = {
+            "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor"
+    };
 
     private String[] escapedNamesShort = {
 //            "name*with?strange=\"chars"
@@ -97,6 +101,11 @@ public class ItSetup {
                 registerMBean(new ObjectNameChecking(escapedName),escapedName);
             }
 
+            // Other MBeans with different names
+            for (String name : fullNames) {
+                registerMBean(new ObjectNameChecking(name),name);
+            }
+                        
             // Other MBeans
             boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
             registerMBean(new OperationChecking(JOLOKIA_IT_DOMAIN),isWebsphere ? null : JOLOKIA_IT_DOMAIN + ":type=operation");
