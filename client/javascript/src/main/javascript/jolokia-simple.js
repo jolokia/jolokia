@@ -27,8 +27,8 @@
  * @author roland
  */
 
-if (Jolokia) {
-    (function($) {
+(function() {
+    var builder = function($,Jolokia) {
         /**
          * Get one or more attributes
          *
@@ -77,10 +77,10 @@ if (Jolokia) {
 
         /**
          * Execute a JMX operation and return the result value
-         *  
+         *
          * @param mbean objectname of the MBean to operate on
          * @param operation name of operation to execute. Can contain a signature in case overloaded
-         *                  operations are to be called (comma separated fully qualified argument types 
+         *                  operations are to be called (comma separated fully qualified argument types
          *                  append to the operation name within parentheses)
          * @param arg1, arg2, ..... one or more argument required for executing the operation.
          * @param opts optional options for Jolokia.request() (must be an object)
@@ -200,7 +200,7 @@ if (Jolokia) {
          * provided partially, in which case the remaining map/array is returned. The path given must
          * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exlamation
          * marks like <code>!!</code>.
-         * See also the Jolokia Reference Manual for a more detailed discussion of inner pathes and escaping. 
+         * See also the Jolokia Reference Manual for a more detailed discussion of inner pathes and escaping.
          *
          *
          * @param path optional path for diving into the list
@@ -260,15 +260,32 @@ if (Jolokia) {
 
         // Extend the Jolokia prototype with new functionality (mixin)
         $.extend(Jolokia.prototype,
-                 {
-                     "getAttribute" : getAttribute,
-                     "setAttribute" : setAttribute,
-                     "execute": execute,
-                     "search": search,
-                     "version": version,
-                     "list": list
-                 });
-    })(jQuery);
-} else {
-    console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
-}
+                {
+                    "getAttribute" : getAttribute,
+                    "setAttribute" : setAttribute,
+                    "execute": execute,
+                    "search": search,
+                    "version": version,
+                    "list": list
+                });
+        return Jolokia;
+    };
+
+    // =====================================================================================================
+    // Register either at the global Jolokia object global or as an AMD module
+    (function (root, factory) {
+        if (typeof define === 'function' && define.amd) {
+            // AMD. Register as a named module
+            define(["jquery","jolokia"], factory);
+        } else {
+            if (root.Jolokia) {
+                builder(jQuery,root.Jolokia);
+            } else {
+                console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
+            }
+        }
+    }(this, function (jQuery,Jolokia) {
+        return builder(jQuery,Jolokia);
+    }));
+})();
+
