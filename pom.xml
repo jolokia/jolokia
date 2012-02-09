@@ -309,7 +309,7 @@
     <system>GitHub</system>
     <url>http://github.com/rhuss/jolokia/issues</url>
   </issueManagement>
-  
+
   <scm>
     <connection>scm:git:git://github.com/rhuss/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/rhuss/jolokia.git</developerConnection>
