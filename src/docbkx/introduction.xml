@@ -44,7 +44,7 @@
     specific to Jolokia, too.
   </para>
   <para>
-    This reference manual explains the Jolokia in detail. After an
+    This reference manual explains the details of Jolokia. After an
     overview of Jolokia's architecture in <xref
     linkend="architecture"/>, installation and configuration of the
     various Jolokia agents is described in <xref

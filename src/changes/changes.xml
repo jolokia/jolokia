@@ -7,6 +7,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.0.3-SNAPSHOT" description="Release 1.0.3-SNAPSHOT" date="">
+      <action dev="roland" type="fix" date="2011-02-09">
+        Fixed issue with Glassfish detector and Jolokia running under gcj
+      </action>
+      <action dev="roland" type="update" date="2011-01-30">
+        Added support for AMD in jolokia.js and jolokia-simple.js
+      </action>
+    </release>
     <release version="1.0.2" description="Release 1.0.2" date="2012-01-06">
       <action dev="roland" type="update" date="2011-12-29">
         Verified that javascript client binding works with jQuery 1.7.1
