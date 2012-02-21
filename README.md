@@ -84,7 +84,7 @@ Resources
 Even more information on Jolokia can be found at [www.jolokia.org][5], including
 a complete [reference manual][12].
 
-[![endorse](http://api.coderwall.com/rhuss/endorsecount.png)](http://coderwall.com/rhuss)
+<div style="float: right">[![endorse](http://api.coderwall.com/rhuss/endorsecount.png)](http://coderwall.com/rhuss)</div>
 
  [1]: http://labs.consol.de/wp-content/uploads/2010/10/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
