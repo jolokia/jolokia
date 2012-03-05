@@ -70,9 +70,12 @@ public class VirtualMachineHandlerTest {
     @Test
     public void findProcess() throws Exception, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> procs = filterOwnProcess(vmHandler.listProcesses());
-        if (procs.size() > 0) {
-            Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(procs.get(0).getDisplay()) + "$");
-            assertTrue(tryAttach(singleHitPattern.pattern()));
+        for (ProcessDescription desc : procs) {
+            if (desc.getDisplay() != null && desc.getDisplay().length() > 0) {
+                Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(procs.get(0).getDisplay()) + "$");
+                assertTrue(tryAttach(singleHitPattern.pattern()));
+                break;
+            }
         }
 
         assertFalse(tryAttach("RobertMakClaudiPizarro",".*No.*process.*"));
