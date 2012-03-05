@@ -53,7 +53,7 @@ public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
     /** {@inheritDoc} */
     private static class ObjectNameAttributeExtractor implements AttributeExtractor<ObjectName> {
         /** {@inheritDoc} */
-        public Object extract(ObjectName value) throws SkipAttributeException {
+        public Object extract(ObjectName value)  {
             return value.getCanonicalName();
         }
     }
