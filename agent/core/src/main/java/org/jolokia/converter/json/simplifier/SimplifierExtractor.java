@@ -76,7 +76,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
             try {
                 attributeValue = extractor.extract((T) pValue);
                 return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
-            } catch (SkipAttributeException e) {
+            } catch (AttributeExtractor.SkipAttributeException e) {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue,e);
             }
         } else {
@@ -86,7 +86,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
                     Object value = null;
                     try {
                         value = entry.getValue().extract((T) pValue);
-                    } catch (SkipAttributeException e) {
+                    } catch (AttributeExtractor.SkipAttributeException e) {
                         // Skip this one ...
                         continue;
                     }
@@ -147,9 +147,10 @@ abstract class SimplifierExtractor<T> implements Extractor {
          *                                should be omitted in the result
          */
         Object extract(T value) throws SkipAttributeException;
+
+        static class SkipAttributeException extends Exception {}
     }
 
-    static class SkipAttributeException extends Exception {}
 
     /**
      * Add extractors to map
