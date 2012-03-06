@@ -39,15 +39,15 @@ class HistoryEntry implements Serializable {
 
     @SuppressWarnings("PMD.LooseCoupling")
     private LinkedList<ValueEntry> values;
-    private int maxEntries;
+    private HistoryLimit limit;
 
     /**
      * Constructor
      *
-     * @param pMaxEntries how many values to keep
+     * @param pLimit how many values to keep and/or how long
      */
-    HistoryEntry(int pMaxEntries) {
-        maxEntries = pMaxEntries;
+    HistoryEntry(HistoryLimit pLimit) {
+        limit = pLimit;
         values = new LinkedList<ValueEntry>();
     }
 
@@ -69,20 +69,29 @@ class HistoryEntry implements Serializable {
 
 
     /**
-     * Set the maximum number of entries and truncate if necessary
+     * Set the limit (maximum number, maximum duration) for entries and truncate if necessary
      *
-     * @param pMaxEntries new maxium entries
+     * @param pLimit new limit to apply
+     */
+    public void setLimit(HistoryLimit pLimit) {
+        limit = pLimit;
+        trim();
+    }
+
+    /**
+     * Set the maximum entries for a history entry
+     *
+     * @param pMaxEntries maximum number of values to keep
      */
     public void setMaxEntries(int pMaxEntries) {
-        maxEntries = pMaxEntries;
-        trim();
+        setLimit(new HistoryLimit(pMaxEntries,limit.getMaxDuration()));
     }
 
     /**
      * Add a new value with the given times stamp to the values list
      *
      * @param pObject object to add
-     * @param pTime timestamp
+     * @param pTime timestamp in milliseconds
      */
     public void add(Object pObject, long pTime) {
         values.addFirst(new ValueEntry(pObject,pTime));
@@ -91,9 +100,19 @@ class HistoryEntry implements Serializable {
 
     // Truncate list so that no more than max entries are stored in the list
     private void trim() {
+
         // Trim
-        while (values.size() > maxEntries) {
+        while (values.size() > limit.getMaxEntries()) {
             values.removeLast();
+        }
+
+        // Trim according to duration
+        if (limit.getMaxDuration() > 0) {
+            long duration = limit.getMaxDuration();
+            long start = values.getFirst().getTimestamp();
+            while (start - values.getLast().getTimestamp() > duration) {
+                values.removeLast();
+            }
         }
     }
 
@@ -102,8 +121,9 @@ class HistoryEntry implements Serializable {
         final StringBuilder sb = new StringBuilder();
         sb.append("HistoryEntry");
         sb.append("{values=").append(values);
-        sb.append(", maxEntries=").append(maxEntries);
+        sb.append(", limit=").append(limit);
         sb.append('}');
         return sb.toString();
     }
+
 }

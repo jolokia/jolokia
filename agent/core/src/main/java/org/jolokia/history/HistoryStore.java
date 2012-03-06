@@ -43,7 +43,7 @@ public class HistoryStore implements Serializable {
     private int globalMaxEntries;
 
     private Map<HistoryKey, HistoryEntry> historyStore;
-    private Map<HistoryKey, Integer /* max entries */> patterns;
+    private Map<HistoryKey, HistoryLimit> patterns;
 
     // Keys used in JSON representation
     private static final String KEY_HISTORY = "history";
@@ -61,7 +61,7 @@ public class HistoryStore implements Serializable {
     public HistoryStore(int pTotalMaxEntries) {
         globalMaxEntries = pTotalMaxEntries;
         historyStore = new HashMap<HistoryKey, HistoryEntry>();
-        patterns = new HashMap<HistoryKey, Integer>();
+        patterns = new HashMap<HistoryKey, HistoryLimit>();
         initHistoryUpdaters();
     }
 
@@ -89,35 +89,35 @@ public class HistoryStore implements Serializable {
 
     /**
      * Configure the history length for a specific entry. If the length
-     * is 0 disable history for this key.
+     * is 0 disable history for this key. Please note, that this method might change the limit
+     * object so the ownership of this object goes over to the callee.
      *
      * @param pKey history key
-     * @param pMaxEntries number of maximal entries. If larger than globalMaxEntries,
-     * then globalMaxEntries is used instead.
+     * @param pHistoryLimit limit to apply or <code>null</code> if no history should be recored for this entry
      */
-    public synchronized void configure(HistoryKey pKey,int pMaxEntries) {
-        int maxEntries = pMaxEntries > globalMaxEntries ? globalMaxEntries : pMaxEntries;
-
-        // Remove entries if set to 0
-        if (pMaxEntries == 0) {
+    public synchronized void configure(HistoryKey pKey, HistoryLimit pHistoryLimit) {
+        // Remove entries if set to null
+        if (pHistoryLimit == null) {
             removeEntries(pKey);
             return;
         }
+        HistoryLimit limit = pHistoryLimit.respectGlobalMaxEntries(globalMaxEntries);
+
         if (pKey.isMBeanPattern()) {
-            patterns.put(pKey,maxEntries);
+            patterns.put(pKey,limit);
             // Trim all already stored keys
             for (HistoryKey key : historyStore.keySet()) {
                 if (pKey.matches(key)) {
                     HistoryEntry entry = historyStore.get(key);
-                    entry.setMaxEntries(maxEntries);
+                    entry.setLimit(limit);
                 }
             }
         } else {
             HistoryEntry entry = historyStore.get(pKey);
             if (entry != null) {
-                entry.setMaxEntries(maxEntries);
+                entry.setLimit(limit);
             } else {
-                entry = new HistoryEntry(maxEntries);
+                entry = new HistoryEntry(limit);
                 historyStore.put(pKey,entry);
             }
         }
@@ -128,7 +128,7 @@ public class HistoryStore implements Serializable {
      */
     public synchronized void reset() {
         historyStore = new HashMap<HistoryKey, HistoryEntry>();
-        patterns = new HashMap<HistoryKey, Integer>();
+        patterns = new HashMap<HistoryKey, HistoryLimit>();
     }
 
     /**
@@ -307,7 +307,7 @@ public class HistoryStore implements Serializable {
             } catch (MalformedObjectNameException e) {
                 // Shouldnt occur since we get the MBeanName from a JMX operation's result. However,
                 // we will rethrow it
-                throw new IllegalArgumentException("Cannot pars MBean name " + pBeanName,e);
+                throw new IllegalArgumentException("Cannot parse MBean name " + pBeanName,e);
             }
             addAttributeFromSingleValue(ret,
                                         attrName,

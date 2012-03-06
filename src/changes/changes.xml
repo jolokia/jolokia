@@ -8,11 +8,14 @@
   </properties>
   <body>
     <release version="1.0.3-SNAPSHOT" description="Release 1.0.3-SNAPSHOT" date="">
-      <action dev="roland" type="fix" date="2011-02-09">
+      <action dev="roland" type="fix" date="2012-02-09">
         Fixed issue with Glassfish detector and Jolokia running under gcj
       </action>
-      <action dev="roland" type="update" date="2011-01-30">
+      <action dev="roland" type="update" date="2012-01-30">
         Added support for AMD in jolokia.js and jolokia-simple.js
+      </action>
+      <action dev="roland" type="add" date="2012-03-06">
+        The history store allows now also for time based eviction
       </action>
     </release>
     <release version="1.0.2" description="Release 1.0.2" date="2012-01-06">

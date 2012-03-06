@@ -43,13 +43,14 @@
       </para>
       <variablelist>
         <varlistentry>
-          <term><emphasis role="bold">setHistoryEntriesForOperation</emphasis></term>
+          <term><emphasis role="bold">setHistoryLimitForOperation</emphasis></term>
           <listitem>              
             JMX operation for switching on tracking of the execution of
-            JMX operations. It takes four arguments: The MBean and
+            JMX operations. It takes five arguments: The MBean and
             operation name, an optional target URL when the agent
-            is used in proxy mode and the number of maximal
-            entries to track. If the target URL is given, than
+            is used in proxy mode and as limit the number of maximal
+            entries to track and a duration in seconds. 
+            If the target URL is given, then
             request for this specific target are tracked,
             otherwise, if the URL is null, requests to this
             operation on the local agent are tracked.  The return
@@ -59,17 +60,33 @@
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><emphasis role="bold">setHistoryEntriesForAttribute</emphasis></term>
+          <term><emphasis role="bold">setHistoryLimitForAttribute</emphasis></term>
           <listitem>              
             JMX operation for switching on tracking of an JMX
-            attribute's value. It takes five arguments: The MBean
-            and attribute name, an  optional path and target URL and
-            the maximal number of entries to remember. As above, the
-            target URL is only used for proxy requests. The path can
-            be used to store only read requests with the given path. 
+            attribute's value. It takes six arguments: The MBean and
+            attribute name, an optional path and target URL and as
+            limit the maximal number of entries to remember and/or an
+            maximum duration for the elements to keep in the
+            history. As above, the target URL is only used for proxy
+            requests. The path can be used to store only read requests
+            with the given path.
             </listitem>
         </varlistentry>
       </variablelist>
+      <para>
+       There are two kinds of limits which can be applied: Either by a
+       maximum number of historical values to remember or a maximum
+       duration for the values to keep. If both limits are given in a
+       configuration call on the MBean above, both limits are
+       applied. In any case, there are never more values remembered
+       than the global limit which can be set and retrieved with
+       attribute <constant>HistoryMaxEntries</constant>. 
+      </para>
+      <para>
+        The History store can be emptied with a call to the operation
+        <methodname>resetHistoryEntries</methodname>. This also
+        switches off all history tracking. 
+      </para>
       <para>
         If for a request history tracking is switched on, the JSON
         response will contain an extra field

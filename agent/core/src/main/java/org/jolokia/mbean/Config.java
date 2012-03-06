@@ -2,8 +2,7 @@ package org.jolokia.mbean;
 
 import javax.management.*;
 
-import org.jolokia.history.HistoryKey;
-import org.jolokia.history.HistoryStore;
+import org.jolokia.history.*;
 import org.jolokia.util.DebugStore;
 
 /*
@@ -55,14 +54,24 @@ public class Config implements ConfigMBean,MBeanRegistration {
     /** {@inheritDoc} */
     public void setHistoryEntriesForAttribute(String pMBean, String pAttribute, String pPath, String pTarget, int pMaxEntries)
             throws MalformedObjectNameException {
+        setHistoryLimitForAttribute(pMBean, pAttribute, pPath, pTarget, pMaxEntries, 0L);
+    }
+
+    /** {@inheritDoc} */
+    public void setHistoryLimitForAttribute(String pMBean, String pAttribute, String pPath, String pTarget, int pMaxEntries, long pMaxDuration) throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey(pMBean,pAttribute,pPath,pTarget);
-        historyStore.configure(key,pMaxEntries);
+        historyStore.configure(key,limitOrNull(pMaxEntries, pMaxDuration));
     }
 
     /** {@inheritDoc} */
     public void setHistoryEntriesForOperation(String pMBean, String pOperation, String pTarget, int pMaxEntries) throws MalformedObjectNameException {
+        setHistoryLimitForOperation(pMBean, pOperation, pTarget, pMaxEntries, 0L);
+    }
+
+    /** {@inheritDoc} */
+    public void setHistoryLimitForOperation(String pMBean, String pOperation, String pTarget, int pMaxEntries, long pMaxDuration) throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey(pMBean,pOperation,pTarget);
-        historyStore.configure(key,pMaxEntries);
+        historyStore.configure(key, limitOrNull(pMaxEntries,pMaxDuration));
     }
 
     /** {@inheritDoc} */
@@ -114,6 +123,12 @@ public class Config implements ConfigMBean,MBeanRegistration {
     public int getHistorySize() {
         return historyStore.getSize();
     }
+
+    // The limit or null if the entry should be disabled in the history store
+    private HistoryLimit limitOrNull(int pMaxEntries, long pMaxDuration) {
+        return pMaxEntries != 0 || pMaxDuration != 0 ? new HistoryLimit(pMaxEntries, pMaxDuration) : null;
+    }
+
 
     // ========================================================================
 

@@ -925,7 +925,13 @@
         value was current (as measured by the server). <xref
         linkend="response-example"/> has an example of a response
         containing historical values. 
-      </para>      
+      </para>
+      <para>
+        For multi attribute read requests, the history entry in the
+        response is a JSON object instead of an array, where this
+        object's attributes are the request's attribute names and the
+        values are the history arrays as described above.
+      </para>
     </section>
 
     <section id="protocol-proxy">

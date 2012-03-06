@@ -23,13 +23,13 @@ import javax.management.MalformedObjectNameException;
 import org.jolokia.request.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.jolokia.util.RequestType.*;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 
 /**
@@ -77,31 +77,43 @@ public class HistoryStoreTest {
                 new JmxRequestBuilder(EXEC,"test:type=exec")
                         .operation("op")
                         .build();
-        store.configure(new HistoryKey(req),2);
+        store.configure(new HistoryKey(req), new HistoryLimit(2, 0L));
         assertEquals("2 history entries",2,updateNTimesAsList(req,3).size());
-        store.configure(new HistoryKey(req),4);
+        store.configure(new HistoryKey(req), new HistoryLimit(4, 0L));
         assertEquals("4 history entries",4,updateNTimesAsList(req,5).size());
-        store.configure(new HistoryKey(req),12);
+        store.configure(new HistoryKey(req), new HistoryLimit(12, 0L));
         assertEquals("10 history entries (max. for store)",10,updateNTimesAsList(req,10).size());
         store.setGlobalMaxEntries(20);
         assertEquals("Read max entries",20,store.getGlobalMaxEntries());
         assertEquals("20 history entries (max. for store)",20,updateNTimesAsList(req,30).size());
         store.reset();
-        store.configure(new HistoryKey(req),20);
+        store.configure(new HistoryKey(req), new HistoryLimit(20, 0L));
         /** 5 fresh updates yield 4 history entries returned (and 5 stored) */
         assertEquals("4 history entries after reset",4,updateNTimesAsList(req,5).size());
-        store.configure(new HistoryKey(req),0);
+        store.configure(new HistoryKey(req), null);
         assertEquals("History disabled",null,updateNTimesAsList(req,12));
-
+    }
+    
+    @Test
+    public void durationBasedEvicting() throws MalformedObjectNameException {
+        JmxReadRequest req =
+                new JmxRequestBuilder(READ,"test:type=read")
+                        .attribute("attr")
+                        .build();
+        HistoryKey key = new HistoryKey(req);
+        store.configure(key,new HistoryLimit(0,1));
+        JSONArray hist = updateNTimesAsListWithSleep(req, 3, 2000);
+        assertEquals("1 History Entry", 1, hist.size());
     }
 
+    
     @Test
     public void singleAttributeRead() throws Exception {
         JmxReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attribute("attr")
                         .build();
-        store.configure(new HistoryKey(req),3);
+        store.configure(new HistoryKey(req), new HistoryLimit(3, 0L));
         /** 3 fresh updates yield 2 history entries returned (and 3 stored) */
         assertEquals("2 history entries",2,updateNTimesAsList(req,3,"42").size());
 
@@ -114,7 +126,7 @@ public class HistoryStoreTest {
                         .attribute("attr")
                         .value("val1")
                         .build();
-        store.configure(new HistoryKey(req),5);
+        store.configure(new HistoryKey(req), new HistoryLimit(5, 0L));
         assertEquals("4 history entries",3,updateNTimesAsList(req,4).size());
     }
     @Test
@@ -123,7 +135,7 @@ public class HistoryStoreTest {
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attributes("attr")
                         .build();
-        store.configure(new HistoryKey(req),5);
+        store.configure(new HistoryKey(req), new HistoryLimit(5, 0L));
         Map value = new HashMap();
         value.put("attr","42");
         JSONObject res = updateNTimesAsMap(req,4,value);
@@ -136,8 +148,8 @@ public class HistoryStoreTest {
         JmxReadRequest req =
                 new JmxRequestBuilder(READ,mbean)
                         .build();
-        store.configure(new HistoryKey(mbean,"attr1",null,null),4);
-        store.configure(new HistoryKey(mbean,"attr2",null,null),5);
+        store.configure(new HistoryKey(mbean,"attr1",null,null), new HistoryLimit(4, 0L));
+        store.configure(new HistoryKey(mbean,"attr2",null,null), new HistoryLimit(5, 0L));
         Map value = new HashMap();
         value.put("attr1","val1");
         value.put("attr2","val2");
@@ -153,8 +165,8 @@ public class HistoryStoreTest {
                 new JmxRequestBuilder(READ,mbean)
                         .attributes("attr1","attr2")
                         .build();
-        store.configure(new HistoryKey(mbean,"attr1",null,null),3);
-        store.configure(new HistoryKey(mbean,"attr2",null,null),5);
+        store.configure(new HistoryKey(mbean,"attr1",null,null), new HistoryLimit(3, 0L));
+        store.configure(new HistoryKey(mbean,"attr2",null,null), new HistoryLimit(5, 0L));
         /** 5 fresh updates yield 2 history entries returned (and 3 stored) */
         Map value = new HashMap();
         value.put("attr1","val1");
@@ -167,8 +179,8 @@ public class HistoryStoreTest {
 
     @Test
     public void patternConfigure() throws MalformedObjectNameException {
-        store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null),10);
-        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 3);
+        store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null), new HistoryLimit(10, 0L));
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
         JmxReadRequest req =
                 new JmxRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
@@ -180,9 +192,9 @@ public class HistoryStoreTest {
 
     @Test
     public void patternRemoveEntries() throws MalformedObjectNameException {
-        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 3);
-        store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null),10);
-        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 0);
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
+        store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null), new HistoryLimit(10, 0L));
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), null);
 
                 JmxReadRequest req =
                 new JmxRequestBuilder(READ,"java.lang:type=Memory")
@@ -195,7 +207,7 @@ public class HistoryStoreTest {
 
     @Test
     public void patternGetEntries() throws MalformedObjectNameException {
-        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), 3);
+        store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
 
         JmxReadRequest req =
                 new JmxRequestBuilder(READ,"java.lang:type=Memory")
@@ -220,8 +232,8 @@ public class HistoryStoreTest {
                 new JmxRequestBuilder(READ,"test:type=*")
                         .attributes("attr1","attr2")
                         .build();
-        store.configure(new HistoryKey("test:type=read","attr1",null,null),3);
-        store.configure(new HistoryKey("test:type=write","attr2",null,null),5);
+        store.configure(new HistoryKey("test:type=read","attr1",null,null), new HistoryLimit(3, 0L));
+        store.configure(new HistoryKey("test:type=write","attr2",null,null), new HistoryLimit(5, 0L));
         /** 5 fresh updates yield 2 history entries returned (and 3 stored) */
         Map mBeanMap = new HashMap();
         Map attr1Map = new HashMap();
@@ -238,24 +250,56 @@ public class HistoryStoreTest {
         assertEquals("attr2 has 3 history entries",3,((List) ((Map) history.get("test:type=write")).get("attr2")).size());
     }
 
+    private JSONArray updateNTimesAsListWithSleep(JmxReadRequest pReq, int pNr, long pSleep,Object ... pValue) {
+        return (JSONArray) updateNTimes(pReq,pNr,pSleep,pValue);    
+    }
+
 
     private JSONArray updateNTimesAsList(JmxRequest pReq, int pNr,Object ... pValue) {
-        return (JSONArray) updateNTimes(pReq, pNr,pValue);
+        return (JSONArray) updateNTimes(pReq, pNr,0L,pValue);
     }
 
     private JSONObject updateNTimesAsMap(JmxRequest pReq, int pNr,Object ... pValue) {
-        return (JSONObject) updateNTimes(pReq, pNr,pValue);
+        return (JSONObject) updateNTimes(pReq, pNr,0L,pValue);
     }
-    private Object updateNTimes(JmxRequest pReq, int pNr,Object ... pValue) {
+    
+    private synchronized Object updateNTimes(JmxRequest pReq, int pNr,long pSleep, Object ... pValue) {
         JSONObject res = new JSONObject();
         if (pValue != null && pValue.length > 0) {
             res.put("value",pValue[0]);
         }
         for (int i=0;i<pNr;i++) {
             store.updateAndAdd(pReq,res);
+            if (pSleep != 0L) {
+                try {
+                    wait(pSleep);
+                } catch (InterruptedException e) {
+                    throw new IllegalArgumentException("Interrupted",e);
+                }
+            }
         }
         return res.get("history");
     }
 
 
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxEntries.*maxDuration.*")
+    public void invalidHistoryLimit() {
+        new HistoryLimit(0,0L);
+    }
+
+    @Test
+    public void valueEntryTest() {
+        ValueEntry entry = new ValueEntry("Test",42L);
+        assertTrue(entry.toString().contains("42"));
+        assertTrue(entry.toString().contains("Test"));
+    }
+
+    @Test
+    public void historyEntryTest() {
+        HistoryEntry entry = new HistoryEntry(new HistoryLimit(10,20L));
+        entry.add("Blub",30L);
+        assertTrue(entry.toString().contains("10"));
+        assertTrue(entry.toString().contains("20"));
+        assertTrue(entry.toString().contains("Blub"));
+    }
 }
