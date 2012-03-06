@@ -54,7 +54,7 @@ public class ClassSimplifier extends SimplifierExtractor<Class> {
 
     private static class InterfaceAttributeExtractor implements AttributeExtractor<Class> {
         /** {@inheritDoc} */
-        public Object extract(Class value) throws SkipAttributeException {
+        public Object extract(Class value) throws AttributeExtractor.SkipAttributeException {
             if (value.isInterface()) {
                 throw new SkipAttributeException();
             }
