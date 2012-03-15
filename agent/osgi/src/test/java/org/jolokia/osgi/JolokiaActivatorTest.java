@@ -17,6 +17,9 @@ package org.jolokia.osgi;
  */
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 
 import javax.servlet.ServletException;
@@ -238,17 +241,29 @@ public class JolokiaActivatorTest {
     private void prepareStart(boolean doHttpService, boolean doRestrictor) throws InvalidSyntaxException {
         expect(context.getProperty("org.jolokia.listenForHttpService")).andReturn("" + doHttpService);
         if (doHttpService) {
-            Filter filter = createMock(Filter.class);
+            expect(context.getProperty("org.jolokia.httpServiceFilter")).andReturn("");
+            Filter filter = createFilterMockWithToString(SERVICE_FILTER);
             expect(context.createFilter(SERVICE_FILTER)).andReturn(filter);
+            expect(context.getProperty("org.osgi.framework.version")).andReturn("4.5.0");
             context.addServiceListener(rememberListener(), eq(SERVICE_FILTER));
-            expect(context.getServiceReferences(HttpService.class.getName(),null)).andReturn(null);
+            expect(context.getServiceReferences(null, SERVICE_FILTER)).andReturn(null);
             registration = createMock(ServiceRegistration.class);
             expect(context.registerService(JolokiaContext.class.getName(), activator, null)).andReturn(registration);
 
-            replay(filter);
         }
         expect(context.getProperty("org.jolokia.useRestrictorService")).andReturn("" + doRestrictor);
+    }
 
+    // Easymock work around given the fact you can not mock toString() using easymock
+    private Filter createFilterMockWithToString(final String filter) {
+        return (Filter) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("toString")) {
+                    return filter;
+                }
+                throw new UnsupportedOperationException("Sorry this is a very limited proxy implementation of Filter");
+            }
+        });
     }
 
     private ServiceListener rememberListener() {
