@@ -73,11 +73,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
         // Track HttpService
         if (Boolean.parseBoolean(getConfiguration(LISTEN_FOR_HTTP_SERVICE))) {
-            httpServiceTracker = new ServiceTracker(pBundleContext,HttpService.class.getName(), new HttpServiceCustomizer(pBundleContext));
+            Filter serviceFilter = buildHttpServiceFilter(pBundleContext);
+            httpServiceTracker = new ServiceTracker(pBundleContext, serviceFilter, new HttpServiceCustomizer(pBundleContext));
             httpServiceTracker.open();
 
             // Register us as JolokiaContext
-            jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(),this,null);
+            jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(), this, null);
         }
 
 
@@ -130,8 +131,8 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         return getConfiguration(AGENT_CONTEXT);
     }
 
-
     // ==================================================================================
+
 
     // Customizer for registering servlet at a HttpService
     private Dictionary<String,String> getConfiguration() {
@@ -152,6 +153,19 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             value = pKey.getDefaultValue();
         }
         return value;
+    }
+
+    private Filter buildHttpServiceFilter(BundleContext pBundleContext) {
+        String filterDef = "(" + Constants.OBJECTCLASS + "=" + HttpService.class.getName() + ")";
+        String optionalFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
+        if( optionalFilter.trim().length() > 0 ){
+            filterDef = "(&" + optionalFilter + ")";
+        }
+        try {
+            return pBundleContext.createFilter(filterDef);
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalArgumentException("Unable to parse the filter",e);
+        }
     }
 
     // =============================================================================
