@@ -222,6 +222,19 @@
         </td>
       </tr>
       <tr>
+        <td>org.jolokia.httpServiceFilter</td>
+        <td></td>
+        <td>
+           Can be any valid OSGi filter for locating a which
+           <classname>org.osgi.service.http.HttpService</classname>
+           is used to expose the Jolokia servlet. The syntax is that
+           used by the <classname>org.osgi.framework.Filter</classname>
+           which is in turn a <ulink url="http://www.ietf.org/rfc/rfc1960.txt">
+           RFC 1960 based filter</ulink>. The use of this property
+           is described in <xref linkend="running-on-glassfish"/>
+        </td>
+      </tr>
+      <tr>
         <td>org.jolokia.useRestrictorService</td>
         <td>false</td>
         <td>
@@ -246,7 +259,50 @@
       HttpService is registered). 
     </para>
   </section>
+  <section id="running-on-glassfish">
+     <title>Running on Glassfish v3 upwards</title>
+     <para>
+        You have a couple of choices when running jolokia on
+        Glassfish v3 and up, since Glassfish is a both a fully
+        fledged JEE container and an OSGi container. If you
+        choose to run the <xref linkend="agents-war"/> then it
+        is completely straight forward just deploy the war
+        in the normal way. If you choose to deploy
+        the <xref linkend="agents-osgi"/> then you will need
+        to configure the <literal>org.jolokia.httpServiceFilter</literal>
+        option with a filter to select either the Admin
+        <classname>HttpService</classname> (4848 by default) or the Default
+        <classname>HttpService</classname> which is where WAR files are
+        deployed to.
 
+     </para>
+     <para>
+        In Glassfish 3.1.2 the OSGi bundle configuration is done in
+        <constant>glassfish/conf/osgi.properties</constant> in version's
+        prior to this the configuration is by default in
+        <constant>glassfish/osgi/felix/conf/config.properties</constant>
+        or if you are using Equinox
+        <constant>glassfish/osgi/equinox/configuration/config.ini</constant>
+     </para>
+     <informalexample>
+        <programlisting><![CDATA[
+# Restrict the jolokia http service selection to the admin host
+org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
+# Or alternatively to the normal http service use : (VirtualServer=server)
+]]></programlisting>
+     </informalexample>
+     <para>
+        Deploying the bundle can be either be done by coping the
+        <literal>jolokia-osgi.jar</literal> into the domain
+        <constant>glassfish/domains/&lt;domain&gt;/autodeploy/bundles</constant>
+        directory or it can be added to all instances by copying the jar
+        to <constant>glassfish/modules/autostart</constant>
+     </para>
+     <para>
+        By default the agent will be available on <constant>http://localhost:&lt;port&gt;/osgi/jolokia</constant>
+        rather than <constant>http://localhost:&lt;port&gt;/jolokia</constant> as with WAR deployment.
+     </para>
+  </section>
   <section id="agents-osgi-bundle">
     <title>jolokia-osgi-bundle.jar</title>
     <para>
