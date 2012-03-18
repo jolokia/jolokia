@@ -127,7 +127,19 @@ public enum ConfigKey {
      * an agent servlet. Set this to false if you want to instantiate the
      * servlet on your own (either declaratively within another war or programmatically)
      */
-    LISTEN_FOR_HTTP_SERVICE("listenForHttpService",true,false,"true");
+    LISTEN_FOR_HTTP_SERVICE("listenForHttpService",true,false,"true"),
+
+    /**
+     * By default, the OSGi Agent will bind to all HttpService implementations.
+     * Set this to control which of the implementations of HttpService are bound to.
+     * <p>The syntax is that of the standard OSGi Filter.</p>
+     * <pre><code>
+     *     (VirtualServer=__asadmin)  - Glassfish 3+ administration server
+     * </code></pre>
+     * <p>Note this will be combined with the objectClass filter for HttpService with
+     * the and (&amp;) operator.</p>
+     */
+    HTTP_SERVICE_FILTER("httpServiceFilter",true,false,"");
 
     private String key;
     private String defaultValue;
