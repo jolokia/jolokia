@@ -16,7 +16,6 @@ package org.jolokia.osgi;
  *  limitations under the License.
  */
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -32,7 +31,6 @@ import org.jolokia.util.ConfigKey;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
-import org.osgi.util.tracker.ServiceTracker;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -65,7 +63,7 @@ public class JolokiaActivatorTest {
 
     @Test
     public void withHttpService() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         startupHttpService();
         unregisterJolokiaServlet();
         stopActivator(true);
@@ -74,7 +72,7 @@ public class JolokiaActivatorTest {
 
     @Test
     public void withHttpServiceAndExplicitServiceShutdown() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         startupHttpService();
 
         // Expect that servlet gets unregistered
@@ -87,8 +85,17 @@ public class JolokiaActivatorTest {
     }
 
     @Test
+    public void withHttpServiceAndAdditionalFilter() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException {
+        startActivator(true, "(Wibble=Wobble)");
+        startupHttpService();
+        unregisterJolokiaServlet();
+        stopActivator(true);
+        verify(httpService);
+    }
+
+    @Test
     public void modifiedService() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         startupHttpService();
 
         // Expect that servlet gets unregistered
@@ -100,13 +107,13 @@ public class JolokiaActivatorTest {
 
     @Test
     public void withoutServices() throws InvalidSyntaxException {
-        startActivator(false);
+        startActivator(false, null);
         stopActivator(false);
     }
 
     @Test
     public void exceptionDuringRegistration() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         ServletException exp = new ServletException();
         prepareErrorLog(exp,"Servlet");
         startupHttpService(exp);
@@ -114,7 +121,7 @@ public class JolokiaActivatorTest {
 
     @Test
     public void exceptionDuringRegistration2() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         NamespaceException exp = new NamespaceException("Error");
         prepareErrorLog(exp,"Namespace");
         startupHttpService(exp);
@@ -122,14 +129,14 @@ public class JolokiaActivatorTest {
 
     @Test
     public void exceptionWithoutLogService() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         expect(context.getServiceReference(LogService.class.getName())).andReturn(null);
         startupHttpService(new ServletException());
     }
 
     @Test
     public void authentication() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true);
+        startActivator(true, null);
         startupHttpService("roland","s!cr!t");
         unregisterJolokiaServlet();
         stopActivator(true);
@@ -222,9 +229,9 @@ public class JolokiaActivatorTest {
         activator.stop(context);
     }
 
-    private void startActivator(boolean withHttpListener) throws InvalidSyntaxException {
+    private void startActivator(boolean withHttpListener, String httpFilter) throws InvalidSyntaxException {
         reset(context);
-        prepareStart(withHttpListener,true);
+        prepareStart(withHttpListener, true, httpFilter);
 
         replay(context);
         if (withHttpListener) {
@@ -238,15 +245,16 @@ public class JolokiaActivatorTest {
         reset(context);
     }
 
-    private void prepareStart(boolean doHttpService, boolean doRestrictor) throws InvalidSyntaxException {
+    private void prepareStart(boolean doHttpService, boolean doRestrictor, String httpFilter) throws InvalidSyntaxException {
         expect(context.getProperty("org.jolokia.listenForHttpService")).andReturn("" + doHttpService);
         if (doHttpService) {
-            expect(context.getProperty("org.jolokia.httpServiceFilter")).andReturn("");
-            Filter filter = createFilterMockWithToString(SERVICE_FILTER);
-            expect(context.createFilter(SERVICE_FILTER)).andReturn(filter);
+            expect(context.getProperty("org.jolokia.httpServiceFilter")).andReturn(httpFilter);
+
+            Filter filter = createFilterMockWithToString(SERVICE_FILTER, httpFilter);
+            expect(context.createFilter(filter.toString())).andReturn(filter);
             expect(context.getProperty("org.osgi.framework.version")).andReturn("4.5.0");
-            context.addServiceListener(rememberListener(), eq(SERVICE_FILTER));
-            expect(context.getServiceReferences(null, SERVICE_FILTER)).andReturn(null);
+            context.addServiceListener(rememberListener(), eq(filter.toString()));
+            expect(context.getServiceReferences(null, filter.toString())).andReturn(null);
             registration = createMock(ServiceRegistration.class);
             expect(context.registerService(JolokiaContext.class.getName(), activator, null)).andReturn(registration);
 
@@ -255,11 +263,15 @@ public class JolokiaActivatorTest {
     }
 
     // Easymock work around given the fact you can not mock toString() using easymock
-    private Filter createFilterMockWithToString(final String filter) {
+    private Filter createFilterMockWithToString(final String filter, final String additionalFilter) {
         return (Filter) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (method.getName().equals("toString")) {
-                    return filter;
+                    if( additionalFilter == null) {
+                        return filter;
+                    } else {
+                        return "(&" + filter + additionalFilter +")" ;
+                    }
                 }
                 throw new UnsupportedOperationException("Sorry this is a very limited proxy implementation of Filter");
             }

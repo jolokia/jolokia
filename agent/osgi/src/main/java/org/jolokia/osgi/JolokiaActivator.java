@@ -159,7 +159,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         String filterDef = "(" + Constants.OBJECTCLASS + "=" + HttpService.class.getName() + ")";
         String optionalFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
         if( optionalFilter.trim().length() > 0 ){
-            filterDef = "(&" + optionalFilter + ")";
+            filterDef = "(&" + filterDef + optionalFilter + ")";
         }
         try {
             return pBundleContext.createFilter(filterDef);
