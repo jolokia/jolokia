@@ -25,6 +25,12 @@
         a OSGi filter expression which gets applied when selecting the HttpService
         to bind to. (#39)
       </action>
+      <action dev="roland" type="update" date="2012-03-26">
+        If registering of an ConfigMBean doesnt work because there has been already one be
+        registered with the same name by another agent, a warning is giving out and a UUID is adde to
+        the object name, so startup works as usual. Use either a "mbeanQualifier" or an "httpServiceFilter" in
+        order to avoid naming collisions from the very beginning.
+      </action>
 
     </release>
     <release version="1.0.2" description="Release 1.0.2" date="2012-01-06">

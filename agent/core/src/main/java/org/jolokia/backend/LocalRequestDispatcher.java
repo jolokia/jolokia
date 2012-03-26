@@ -16,6 +16,8 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
+import java.util.UUID;
+
 import javax.management.*;
 
 import org.jolokia.converter.Converters;
@@ -45,6 +47,9 @@ public class LocalRequestDispatcher implements RequestDispatcher {
     // An (optional) qualifier for registering MBeans.
     private String qualifier;
 
+    // Logger
+    private LogHandler log;
+
     /**
      * Create a new local dispatcher which accesses local MBeans.
      *
@@ -58,6 +63,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         // handler object
         mBeanServerHandler = new MBeanServerHandler(pQualifier,pLogHandler);
         qualifier = pQualifier;
+        log = pLogHandler;
 
         // Request handling manager 
         requestHandlerManager =
@@ -102,19 +108,34 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         // Register the Config MBean
         String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
         Config config = new Config(pHistoryStore,pDebugStore,oName);
-        mBeanServerHandler.registerMBean(config,oName);
+        try {
+            mBeanServerHandler.registerMBean(config,oName);
+        } catch (InstanceAlreadyExistsException exp) {
+            // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
+            // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
+            // a random number, but this can already be performed with a qualifier
+            String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
+            log.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
+                     "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
+            mBeanServerHandler.registerMBean(config,alternativeOName);
+        }
 
         // Register another Config MBean (which dispatched to the stores anyway) for access by
         // jmx4perl version < 0.80
         String legacyOName = createObjectNameWithQualifier(Config.LEGACY_OBJECT_NAME);
-        Config legacyConfig = new Config(pHistoryStore,pDebugStore,legacyOName);
-        mBeanServerHandler.registerMBean(legacyConfig,legacyOName);
+        try {
+            Config legacyConfig = new Config(pHistoryStore,pDebugStore,legacyOName);
+            mBeanServerHandler.registerMBean(legacyConfig,legacyOName);
+        } catch (InstanceAlreadyExistsException exp) {
+            log.info("Cannot register (legacy) MBean handler for config store with name " + legacyOName + " since it already exists. " +
+                     "This is the case if another agent has been already started within the same JVM. The registration is skipped.");
+        }
     }
 
     /**
      * Unregister the config MBean
      *
-     * @throws JMException is unregistration fails
+     * @throws JMException if unregistration fails
      */
     public void destroy() throws JMException {
         mBeanServerHandler.unregisterMBeans();
