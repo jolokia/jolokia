@@ -94,9 +94,10 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @throws InstanceAlreadyExistsException if a config MBean is already present
      * @throws NotCompliantMBeanException if we have a non compliant MBean (cannot happen, too)
      */
-    public void init(HistoryStore pHistoryStore, DebugStore pDebugStore)
+    public void initMBeans(HistoryStore pHistoryStore, DebugStore pDebugStore)
             throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        mBeanServerHandler.init();
+
+        mBeanServerHandler.initMBean();
 
         // Register the Config MBean
         String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);

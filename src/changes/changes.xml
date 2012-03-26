@@ -15,8 +15,17 @@
         Added support for AMD in jolokia.js and jolokia-simple.js
       </action>
       <action dev="roland" type="add" date="2012-03-06">
-        The history store allows now also for time based eviction (JOL-28)
+        The history store allows also for time based eviction (JOL-28)
       </action>
+      <action dev="roland" type="fix" date="2012-03-24">
+        Fix for possible NPE when serializing a complex Java objects (#41)
+      </action>
+      <action dev="gid79" type="add" date="2012-03-25">
+        Added additional configuration property "httpServiceFilter" added for adding
+        a OSGi filter expression which gets applied when selecting the HttpService
+        to bind to. (#39)
+      </action>
+      
     </release>
     <release version="1.0.2" description="Release 1.0.2" date="2012-01-06">
       <action dev="roland" type="update" date="2011-12-29">

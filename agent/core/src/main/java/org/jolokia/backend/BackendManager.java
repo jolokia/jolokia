@@ -222,7 +222,7 @@ public class BackendManager {
         debugStore = new DebugStore(maxDebugEntries,debug);
 
         try {
-            localDispatcher.init(historyStore,debugStore);
+            localDispatcher.initMBeans(historyStore, debugStore);
         } catch (NotCompliantMBeanException e) {
             intError("Error registering config MBean: " + e, e);
         } catch (MBeanRegistrationException e) {

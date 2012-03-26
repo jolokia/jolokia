@@ -42,6 +42,10 @@ import static org.jolokia.util.ConfigKey.*;
  */
 public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
+    // Base filter to use for filtering out HttpServices
+    public static final String HTTP_SERVICE_FILTER_BASE =
+            "(" + Constants.OBJECTCLASS + "=" + HttpService.class.getName() + ")";
+
     // Context associated with this activator
     private BundleContext bundleContext;
 
@@ -73,8 +77,9 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
         // Track HttpService
         if (Boolean.parseBoolean(getConfiguration(LISTEN_FOR_HTTP_SERVICE))) {
-            Filter serviceFilter = buildHttpServiceFilter(pBundleContext);
-            httpServiceTracker = new ServiceTracker(pBundleContext, serviceFilter, new HttpServiceCustomizer(pBundleContext));
+            httpServiceTracker = new ServiceTracker(pBundleContext,
+                                                    buildHttpServiceFilter(pBundleContext),
+                                                    new HttpServiceCustomizer(pBundleContext));
             httpServiceTracker.open();
 
             // Register us as JolokiaContext
@@ -156,15 +161,14 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     }
 
     private Filter buildHttpServiceFilter(BundleContext pBundleContext) {
-        String filterDef = "(" + Constants.OBJECTCLASS + "=" + HttpService.class.getName() + ")";
-        String optionalFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
-        if( optionalFilter.trim().length() > 0 ){
-            filterDef = "(&" + filterDef + optionalFilter + ")";
-        }
+        String customFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
+        String filter = customFilter.trim().length() > 0 ?
+                "(&" + HTTP_SERVICE_FILTER_BASE + customFilter + ")" :
+                HTTP_SERVICE_FILTER_BASE;
         try {
-            return pBundleContext.createFilter(filterDef);
+            return pBundleContext.createFilter(filter);
         } catch (InvalidSyntaxException e) {
-            throw new IllegalArgumentException("Unable to parse the filter",e);
+            throw new IllegalArgumentException("Unable to parse filter " + filter,e);
         }
     }
 

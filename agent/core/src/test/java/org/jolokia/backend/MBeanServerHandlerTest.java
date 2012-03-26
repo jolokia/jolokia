@@ -25,7 +25,6 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.LogHandler;
@@ -130,7 +129,7 @@ public class MBeanServerHandlerTest {
     @Test
     public void mbeanRegistration() throws JMException {
         try {
-            handler.init();
+            handler.initMBean();
             ObjectName oName = new ObjectName(handler.getObjectName());
             Set<MBeanServer> servers = handler.getMBeanServers();
             boolean found = false;
@@ -152,7 +151,7 @@ public class MBeanServerHandlerTest {
         // New setup because detection happens at construction time
         setup();
         try {
-            handler.init();
+            handler.initMBean();
             ObjectName oName = new ObjectName(handler.getObjectName());
             Set<MBeanServer> servers = handler.getMBeanServers();
             boolean found = false;

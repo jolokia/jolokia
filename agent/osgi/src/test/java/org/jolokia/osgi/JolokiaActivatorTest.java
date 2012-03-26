@@ -262,12 +262,13 @@ public class JolokiaActivatorTest {
         expect(context.getProperty("org.jolokia.useRestrictorService")).andReturn("" + doRestrictor);
     }
 
-    // Easymock work around given the fact you can not mock toString() using easymock
+    // Easymock work around given the fact you can not mock toString() using easymock (because it easymock uses toString()
+    // of mocked objects internally)
     private Filter createFilterMockWithToString(final String filter, final String additionalFilter) {
         return (Filter) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (method.getName().equals("toString")) {
-                    if( additionalFilter == null) {
+                    if (additionalFilter == null) {
                         return filter;
                     } else {
                         return "(&" + filter + additionalFilter +")" ;
