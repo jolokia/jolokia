@@ -328,12 +328,14 @@ public final class ObjectToJsonConverter {
 
 
     private String checkForLimits(Object pValue, ObjectSerializationContext pStackContext) {
-        if (pStackContext.exceededMaxDepth()) {
-            // We use its string representation
-            return pValue.toString();
-        }
-        if (pValue != null && pStackContext.alreadyVisited(pValue)) {
-            return "[Reference " + pValue.getClass().getName() + "@" + Integer.toHexString(pValue.hashCode()) + "]";
+        if (pValue != null) {
+            if (pStackContext.exceededMaxDepth()) {
+                // We use its string representation.
+                return pValue.toString();
+            }
+            if (pStackContext.alreadyVisited(pValue)) {
+                return "[Reference " + pValue.getClass().getName() + "@" + Integer.toHexString(pValue.hashCode()) + "]";
+            }
         }
         if (pStackContext.exceededMaxObjects()) {
             return "[Object limit exceeded]";
