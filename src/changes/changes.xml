@@ -21,11 +21,11 @@
         Fix for possible NPE when serializing a complex Java objects (#41)
       </action>
       <action dev="gid79" type="add" date="2012-03-25">
-        Added additional configuration property "httpServiceFilter" added for adding
+        New configuration property "httpServiceFilter" added for providing
         a OSGi filter expression which gets applied when selecting the HttpService
         to bind to. (#39)
       </action>
-      
+
     </release>
     <release version="1.0.2" description="Release 1.0.2" date="2012-01-06">
       <action dev="roland" type="update" date="2011-12-29">
