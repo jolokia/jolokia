@@ -47,7 +47,7 @@
     This reference manual explains the details of Jolokia. After an
     overview of Jolokia's architecture in <xref
     linkend="architecture"/>, installation and configuration of the
-    various Jolokia agents is described in <xref
+    various Jolokia agents are described in <xref
     linkend="agents"/>. Jolokia's security policy mechanism (<xref
     linkend="security"/>) and proxy mode (<xref linkend="proxy"/>) are
     covered in the following chapters. For implementors of Jolokia

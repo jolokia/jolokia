@@ -239,7 +239,7 @@
                 return response.value;
             }
             if (opts && opts.error) {
-                opts.error(response);
+                return opts.error(response);
             } else {
                 throw new Error("Jolokia-Error: " + JSON.stringify(response));
             }

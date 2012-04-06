@@ -202,6 +202,7 @@
 
                     // Perform the request
                     $.ajax(ajaxParams);
+                    return null;
                 } else {
                     // Synchronous operation requested (i.e. no callbacks provided)
                     if (opts.jsonp) {

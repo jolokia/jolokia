@@ -115,7 +115,7 @@
         <para>
           If one of the request parts contain a slash
           (<literal>/</literal>) (e.g. as part of you bean's name) it
-          needs to be escaped. An exlamation mark
+          needs to be escaped. An exclamation mark
           (<literal>!</literal>) is used as escape character<footnote
           id="no-backslash">
           <para>
@@ -124,7 +124,7 @@
             slash on the fly when given in an URL. 
           </para>
           </footnote>. A exclamation mark needs to be doubled for
-          escaping. Any other characted preceded by an exlamation mark
+          escaping. Any other characted preceded by an exclamation mark
           is taken literally. Table <xref linkend="escape-rules"/>
           illustrates the escape rules as used in GET requests.           
         </para>
@@ -404,7 +404,7 @@
         <para>
           For both, GET and POST requests, pathes must be escaped as
           described in <xref linkend="escape-rules"/> when they
-          contain slashes (<literal>/</literal>) or exlamation marks
+          contain slashes (<literal>/</literal>) or exclamation marks
           (<literal>!</literal>).
         </para>
       </section>

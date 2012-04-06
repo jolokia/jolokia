@@ -15,10 +15,11 @@
   </para>
   <note>
     Don't confuse fetching multiple attributes on possibly multiple
-    MBeans with bulk requests. A single read request will always result
-    in a single read response, even when multiple attribute values are
-    fetched. Only the single response's <literal>value</literal> will
-    differ dependent on what kind of read request was performed.
+    MBeans with bulk requests. A single read request will always
+    result in a single read response, even when multiple attribute
+    values are fetched. Only the single response's structure of the
+    <literal>value</literal> will differ dependening on what kind of
+    read request was performed.
   </note>
   <para>
     A read request for multiple attributes on the same MBean is
