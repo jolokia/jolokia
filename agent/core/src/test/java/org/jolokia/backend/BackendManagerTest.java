@@ -118,6 +118,13 @@ public class BackendManagerTest implements LogHandler {
         backendManager.destroy();
     }
 
+    @Test
+    public void corsAccessCheck() {
+        BackendManager backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        assertTrue(backendManager.isCorsAccessAllowed("http://bla.com"));
+        backendManager.destroy();
+    }
+
     public void debug(String message) {
         System.out.println("D> " + message);
     }

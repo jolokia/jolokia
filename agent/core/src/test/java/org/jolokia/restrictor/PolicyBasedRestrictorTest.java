@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.restrictor;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -16,18 +16,16 @@ package org.jolokia.config;
  *  limitations under the License.
  */
 
+import java.io.InputStream;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import org.jolokia.util.HttpMethod;
-import org.jolokia.restrictor.PolicyRestrictor;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.Test;
 
-import java.io.InputStream;
-
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -69,8 +67,8 @@ public class PolicyBasedRestrictorTest {
         for (String check[] : ips) {
             String res = restrictor.isRemoteAccessAllowed(check[0]) ? "true" : "false";
             assertEquals("Ip " + check[0] + " is " +
-                    (check[1].equals("false") ? "not " : "") +
-                    "allowed",check[1],res);
+                         (check[1].equals("false") ? "not " : "") +
+                         "allowed",check[1],res);
         }
     }
 
@@ -210,6 +208,36 @@ public class PolicyBasedRestrictorTest {
             assertTrue(exp.getMessage().contains("method"));
             assertTrue(exp.getMessage().contains("blubber"));
         }
+    }
+
+    @Test
+    public void cors() {
+        InputStream is = getClass().getResourceAsStream("/allow-origin1.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
+        assertFalse(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+    }
+
+    @Test
+    public void corsWildCard() {
+        InputStream is = getClass().getResourceAsStream("/allow-origin2.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+    }
+
+    @Test
+    public void corsNoTags() {
+        InputStream is = getClass().getResourceAsStream("/access-sample1.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
     }
 
 

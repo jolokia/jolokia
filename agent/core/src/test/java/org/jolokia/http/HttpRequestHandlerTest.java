@@ -16,7 +16,9 @@ package org.jolokia.http;
  *  limitations under the License.
  */
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 import javax.management.*;
 
@@ -104,6 +106,28 @@ public class HttpRequestHandlerTest {
         assertEquals(response.size(),2);
         assertTrue(response.get(0) == resp);
         assertTrue(response.get(1) == resp);
+    }
+
+    @Test
+    public void preflightCheck() {
+        String origin = "http://bla.com";
+        String headers ="X-Data: Test";
+        expect(backend.isCorsAccessAllowed(origin)).andReturn(true);
+        replay(backend);
+
+        Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
+        assertEquals(ret.get("Access-Control-Allow-Origin"),origin);
+    }
+
+    @Test
+    public void preflightCheckNegative() {
+        String origin = "http://bla.com";
+        String headers ="X-Data: Test";
+        expect(backend.isCorsAccessAllowed(origin)).andReturn(false);
+        replay(backend);
+
+        Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
+        assertNull(ret.get("Access-Control-Allow-Origin"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

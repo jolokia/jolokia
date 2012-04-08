@@ -16,26 +16,22 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
+import java.io.*;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
-import org.jolokia.jvmagent.JolokiaHttpHandler;
 import org.jolokia.util.ConfigKey;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.*;
 
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -57,7 +53,6 @@ public class JolokiaHttpHandlerTest {
         handler.stop();
     }
 
-
     @Test
     public void testCallbackGet() throws IOException, URISyntaxException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage?callback=data");
@@ -78,20 +73,13 @@ public class JolokiaHttpHandlerTest {
 
     @Test
     public void testCallbackPost() throws URISyntaxException, IOException {
-        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data");
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data",
+                                                "Content-Type","text/plain; charset=UTF-8",
+                                                "Origin",null
+                                               );
 
         // Simple GET method
-        expect(exchange.getRequestMethod()).andReturn("POST");
-
-        Headers reqHeaders = new Headers();
-        reqHeaders.add("Content-Type","text/plain; charset=UTF-8");
-        expect(exchange.getRequestHeaders()).andReturn(reqHeaders);
-        String req = "{\"timestamp\":1287914327,\"status\":200," +
-                "\"request\":{\"mbean\":\"java.lang:type=Memory\",\"attribute\":\"HeapMemoryUsage\",\"type\":\"read\"}," +
-                "\"value\":{\"max\":\"129957888\",\"committed\":\"85000192\",\"init\":\"0\",\"used\":\"6813824\"}}";
-        byte[] buf = req.getBytes("utf-8");
-        InputStream is = new ByteArrayInputStream(buf);
-        expect(exchange.getRequestBody()).andReturn(is);
+        prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
 
@@ -101,6 +89,7 @@ public class JolokiaHttpHandlerTest {
         String result = out.toString("utf-8");
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
+        assertTrue(result.contains("\"used\""));
     }
 
     @Test
@@ -128,35 +117,86 @@ public class JolokiaHttpHandlerTest {
 
     @Test
     public void customRestrictor() throws URISyntaxException, IOException, ParseException {
-        Map<ConfigKey,String> config = getConfig();
-        config.put(ConfigKey.POLICY_LOCATION,"classpath:/access-restrictor.xml");
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
-        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
-       // Simple GET method
-        expect(exchange.getRequestMethod()).andReturn("GET");
+        for (String[] params : new String[][] {  { "classpath:/access-restrictor.xml","not allowed"},{"file:///not-existing.xml","No access"}}) {
+            Map<ConfigKey,String> config = getConfig();
+            config.put(ConfigKey.POLICY_LOCATION,params[0]);
+            JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+            HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+            // Simple GET method
+            expect(exchange.getRequestMethod()).andReturn("GET");
+            Headers header = new Headers();
+            ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+            newHandler.start();
+            try {
+                newHandler.handle(exchange);
+            } finally {
+                newHandler.stop();
+            }
+            JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+            assertTrue(resp.containsKey("error"));
+            assertTrue(((String) resp.get("error")).contains(params[1]));
+        }
+    }
+
+    @Test
+    public void simlePostRequestWithCors() throws URISyntaxException, IOException {
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia",
+                                                "Content-Type","text/plain; charset=UTF-8",
+                                                "Origin","http://localhost:8080/"
+                                               );
+
+        prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-        newHandler.start();
-        try {
-            newHandler.handle(exchange);
-        } finally {
-            newHandler.stop();
-        }
-        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
-        assertTrue(resp.containsKey("error"));
-        assertTrue(((String) resp.get("error")).contains("not allowed"));
+
+        handler.handle(exchange);
+
+        assertEquals(header.getFirst("content-type"), "text/plain; charset=utf-8");
+        assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
+    }
+
+    private void prepareMemoryPostReadRequest(HttpExchange pExchange) throws UnsupportedEncodingException {
+        expect(pExchange.getRequestMethod()).andReturn("POST");
+        String response = "{\"mbean\":\"java.lang:type=Memory\",\"attribute\":\"HeapMemoryUsage\",\"type\":\"read\"}";
+        byte[] buf = response.getBytes("utf-8");
+        InputStream is = new ByteArrayInputStream(buf);
+        expect(pExchange.getRequestBody()).andReturn(is);
+    }
+
+    @Test
+    public void preflightCheck() throws URISyntaxException, IOException {
+        HttpExchange exchange = prepareExchange("http://localhost:8080/",
+                                                "Origin","http://localhost:8080/",
+                                                "Access-Control-Request-Headers",null);
+        expect(exchange.getRequestMethod()).andReturn("OPTIONS");
+
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        handler.handle(exchange);
+        assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
+        assertNotNull(header.get("Access-Control-Allow-Headers"));
+        assertNotNull(header.get("Access-Control-Allow-Max-Age"));
     }
 
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
+        return prepareExchange(pUri,"Origin",null);
+    }
+
+    private HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
         HttpExchange exchange = EasyMock.createMock(HttpExchange.class);
         URI uri = new URI(pUri);
         expect(exchange.getRequestURI()).andReturn(uri);
         expect(exchange.getRemoteAddress()).andReturn(new InetSocketAddress(8080));
+        Headers headers = new Headers();
+        expect(exchange.getRequestHeaders()).andReturn(headers).anyTimes();
+        for (int i = 0; i < pHeaders.length; i += 2) {
+            headers.set(pHeaders[i], pHeaders[i + 1]);
+        }
         return exchange;
     }
 
     private ByteArrayOutputStream prepareResponse(JolokiaHttpHandler handler, HttpExchange exchange, Headers header) throws IOException {
-        expect(exchange.getResponseHeaders()).andReturn(header);
+        expect(exchange.getResponseHeaders()).andReturn(header).anyTimes();
         exchange.sendResponseHeaders(anyInt(),anyLong());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();

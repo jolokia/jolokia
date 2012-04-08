@@ -30,7 +30,6 @@ import org.jolokia.util.ConfigKey;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -106,6 +105,7 @@ public class AgentServletTest {
         StringWriter sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
+                        expect(request.getHeader("Origin")).andReturn(null);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
@@ -170,6 +170,58 @@ public class AgentServletTest {
     }
 
     @Test
+    public void corsPreflightCheck() throws ServletException, IOException {
+        prepareStandardInitialisation();
+        request = createMock(HttpServletRequest.class);
+        response = createMock(HttpServletResponse.class);
+
+        expect(request.getHeader("Origin")).andReturn("http://bla.com");
+        expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
+
+        response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
+        response.setHeader("Access-Control-Allow-Headers", null);
+        response.setHeader("Access-Control-Allow-Origin", "http://bla.com");
+
+        replay(request, response);
+
+        servlet.doOptions(request, response);
+        servlet.destroy();
+    }
+
+    @Test
+    public void corsHeaderGetCheck() throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        StringWriter sw = initRequestResponseMocks(
+                new Runnable() {
+                    public void run() {
+                        expect(request.getHeader("Origin")).andReturn("http://bla.com");
+                        expect(request.getRemoteHost()).andReturn("localhost");
+                        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+                        expect(request.getRequestURI()).andReturn("/jolokia/");
+                        expect(request.getParameterMap()).andReturn(null);
+                    }
+                },
+                new Runnable() {
+                    public void run() {
+                        response.setHeader("Access-Control-Allow-Origin", "http://bla.com");
+                        response.setCharacterEncoding("utf-8");
+                        response.setContentType("text/plain");
+                        response.setStatus(200);
+                    }
+                }
+
+        );
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        replay(request, response);
+
+        servlet.doGet(request, response);
+
+        servlet.destroy();
+    }
+
+    @Test
     public void withCallback() throws IOException, ServletException {
         prepareStandardInitialisation();
 
@@ -200,6 +252,7 @@ public class AgentServletTest {
         StringWriter sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
+                        expect(request.getHeader("Origin")).andReturn(null);
                         expect(request.getRemoteHost()).andThrow(new IllegalStateException());
                     }
                 },
@@ -321,6 +374,7 @@ public class AgentServletTest {
     private Runnable getStandardRequestSetup() {
         return new Runnable() {
             public void run() {
+                expect(request.getHeader("Origin")).andReturn(null);
                 expect(request.getRemoteHost()).andReturn("localhost");
                 expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                 expect(request.getRequestURI()).andReturn("/jolokia/");

@@ -23,11 +23,11 @@ import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.osgi.framework.*;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -76,13 +76,14 @@ public class DelegatingRestrictorTest {
 
     @Test
     public void withRestrictor() throws InvalidSyntaxException, MalformedObjectNameException {
-        setupRestrictor(new InnerRestrictor(true,false,true,false,true,false));
+        setupRestrictor(new InnerRestrictor(true,false,true,false,true,false,true));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.GET));
         assertFalse(restrictor.isTypeAllowed(RequestType.EXEC));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage"));
         assertFalse(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Memory"), "gc"));
         assertFalse(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Impossible.*")
@@ -94,15 +95,16 @@ public class DelegatingRestrictorTest {
 
     private static class InnerRestrictor implements Restrictor {
 
-        boolean httpMethod,type,read,write,operation,remote;
+        boolean httpMethod,type,read,write,operation,remote,cors;
 
-        private InnerRestrictor(boolean pHttpMethod, boolean pType, boolean pRead, boolean pWrite, boolean pOperation, boolean pRemote) {
+        private InnerRestrictor(boolean pHttpMethod, boolean pType, boolean pRead, boolean pWrite, boolean pOperation, boolean pRemote,boolean pCors) {
             httpMethod = pHttpMethod;
             type = pType;
             read = pRead;
             write = pWrite;
             operation = pOperation;
             remote = pRemote;
+            cors = pCors;
         }
 
 
@@ -128,6 +130,10 @@ public class DelegatingRestrictorTest {
 
         public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
             return remote;
+        }
+
+        public boolean isCorsAccessAllowed(String pOrigin) {
+            return cors;
         }
     }
 }

@@ -1,8 +1,7 @@
 package org.jolokia.http;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.*;
 
@@ -13,6 +12,8 @@ import org.jolokia.util.LogHandler;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+//import org.json.simple.parser.JSONParser;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -118,6 +119,30 @@ public class HttpRequestHandler {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);
         }
     }
+
+    /**
+     * Handling an option request which is used for preflight checks before a CORS based browser request is
+     * sent (for certain circumstances).
+     *
+     * See the <a href="https://developer.mozilla.org/en/http_access_control">CORS specification</a>
+     * (section 'preflight checks') for more details.
+     *
+     * @param pOrigin the origin to check. If <code>null</code>, no headers are returned
+     * @param pRequestHeaders extra headers to check against
+     * @return headers to set
+     */
+    public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
+        Map<String,String> ret = new HashMap<String, String>();
+        if (pOrigin != null && isCorsAccessAllowed(pOrigin)) {
+            // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
+            ret.put("Access-Control-Allow-Origin",pOrigin);
+            ret.put("Access-Control-Allow-Headers",pRequestHeaders);
+            // Allow for one year. Changes in access.xml are reflected directly in the  cors request itself
+            ret.put("Access-Control-Allow-Max-Age","" + 3600 * 24 * 365);
+        }
+        return ret;
+    }
+
 
     private Object extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
         InputStreamReader reader = null;
@@ -236,6 +261,17 @@ public class HttpRequestHandler {
         }
     }
 
+    /**
+     * Check whether for the given host is a cross-browser request allowed. This check is deligated to the
+     * backendmanager which is responsible for the security configuration.
+     *
+     * @param pOrigin the origin URL to check agains
+     * @return true if access is allowed, or false if not
+     */
+    public boolean isCorsAccessAllowed(String pOrigin) {
+        return backendManager.isCorsAccessAllowed(pOrigin);
+    }
+
     // Extract class and exception message for an error message
     private String getExceptionMessage(Throwable pException) {
         String message = pException.getLocalizedMessage();
@@ -249,4 +285,5 @@ public class HttpRequestHandler {
         int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
         return getErrorJSON(code,cause, pJmxReq);
     }
+
 }

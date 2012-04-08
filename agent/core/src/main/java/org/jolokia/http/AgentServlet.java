@@ -13,7 +13,6 @@ import org.jolokia.restrictor.*;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -202,6 +201,23 @@ public class AgentServlet extends HttpServlet {
         handle(httpPostHandler,req,resp);
     }
 
+    /**
+     * OPTION requests are treated as CORS preflight requests
+     *
+     * @param req the original request
+     * @param resp the response the answer are written to
+     * */
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String,String> responseHeaders =
+                requestHandler.handleCorsPreflightRequest(
+                        req.getHeader("Origin"),
+                        req.getHeader("Access-Control-Request-Headers"));
+        for (Map.Entry<String,String> entry : responseHeaders.entrySet()) {
+            resp.setHeader(entry.getKey(),entry.getValue());
+        }
+    }
+
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     private void handle(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONAware json = null;
@@ -212,18 +228,27 @@ public class AgentServlet extends HttpServlet {
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
         } catch (Throwable exp) {
-            JSONObject error = requestHandler.handleThrowable(
+            json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp
                     );
-            json = error;
         } finally {
+            setCorsHeader(pReq, pResp);
+
             String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
             if (callback != null) {
                 // Send a JSONP response
-                sendResponse(pResp, "text/javascript",callback + "(" + json.toJSONString() +  ");");
+                sendResponse(pResp, "text/javascript", callback + "(" + json.toJSONString() + ");");
             } else {
                 sendResponse(pResp, getMimeType(pReq),json.toJSONString());
             }
+        }
+    }
+
+    // Set an appropriate CORS header if requested and if allowed
+    private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
+        String origin = pReq.getHeader("Origin");
+        if (origin != null && requestHandler.isCorsAccessAllowed(origin)) {
+            pResp.setHeader("Access-Control-Allow-Origin",origin);
         }
     }
 

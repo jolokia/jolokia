@@ -48,6 +48,9 @@ public class PolicyRestrictor implements Restrictor {
     // Check for hosts and subnets
     private NetworkChecker networkChecker;
 
+    // Check for CORS access
+    private CorsChecker corsChecker;
+
     // Check for MBean access
     private MBeanAccessChecker mbeanAccessChecker;
 
@@ -68,6 +71,7 @@ public class PolicyRestrictor implements Restrictor {
             httpChecker = new HttpMethodChecker(doc);
             networkChecker = new NetworkChecker(doc);
             mbeanAccessChecker = new MBeanAccessChecker(doc);
+            corsChecker = new CorsChecker(doc);
         }
         catch (SAXException e) { exp = e; }
         catch (IOException e) { exp = e; }
@@ -92,6 +96,11 @@ public class PolicyRestrictor implements Restrictor {
     /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String ... pHostOrAddress) {
         return networkChecker.check(pHostOrAddress);
+    }
+
+    /** {@inheritDoc} */
+    public boolean isCorsAccessAllowed(String pOrigin) {
+        return corsChecker.check(pOrigin);
     }
 
     /** {@inheritDoc} */

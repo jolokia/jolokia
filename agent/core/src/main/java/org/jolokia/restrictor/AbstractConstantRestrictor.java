@@ -71,4 +71,9 @@ public abstract class AbstractConstantRestrictor implements Restrictor {
     public final boolean isRemoteAccessAllowed(String... pHostOrAddress) {
         return isAllowed;
     }
+
+    /** {@inheritDoc} */
+    public boolean isCorsAccessAllowed(String pOrigin) {
+        return isAllowed;
+    }
 }

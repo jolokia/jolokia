@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.restrictor;
 
 import org.jolokia.util.IpChecker;
 import org.testng.annotations.Test;

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<restrict>
+
+  <allow-origin>http://bla.com</allow-origin>
+  <allow-origin>http://blub.com</allow-origin>
+  <allow-origin>http://*.consol.de</allow-origin>
+</restrict>

@@ -1,21 +1,20 @@
 package org.jolokia.backend;
 
-import org.jolokia.converter.*;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.history.HistoryStore;
-import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
-import org.jolokia.request.JmxRequest;
-import org.json.simple.JSONObject;
-
-import javax.management.*;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import javax.management.*;
+
+import org.jolokia.converter.Converters;
+import org.jolokia.detector.ServerHandle;
+import org.jolokia.history.HistoryStore;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.*;
+import org.json.simple.JSONObject;
 
 import static org.jolokia.util.ConfigKey.*;
 
@@ -274,6 +273,16 @@ public class BackendManager {
     }
 
     /**
+     * Check whether CORS access is allowed for the given origin.
+     *
+     * @param pOrigin origin URL which needs to be checked
+     * @return true if icors access is allowed
+     */
+    public boolean isCorsAccessAllowed(String pOrigin) {
+        return restrictor.isCorsAccessAllowed(pOrigin);
+    }
+
+    /**
      * Log at info level
      *
      * @param msg to log
@@ -319,4 +328,5 @@ public class BackendManager {
     public boolean isDebug() {
         return debugStore != null && debugStore.isDebug();
     }
+
 }

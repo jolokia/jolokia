@@ -1,8 +1,6 @@
 package org.jolokia.jvmagent;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Map;
@@ -12,17 +10,13 @@ import java.util.regex.Pattern;
 import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.util.ConfigKey;
-import org.jolokia.restrictor.RestrictorFactory;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -122,8 +116,12 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             // Dispatch for the proper HTTP request method
             if ("GET".equalsIgnoreCase(method)) {
                 json = executeGetRequest(parsedUri);
+                setCorsHeader(pExchange);
             } else if ("POST".equalsIgnoreCase(method)) {
                 json = executePostRequest(pExchange, parsedUri);
+                setCorsHeader(pExchange);
+            } else if ("OPTIONS".equalsIgnoreCase(method)) {
+                performCorsPreflightCheck(pExchange);
             } else {
                 throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
             }
@@ -131,14 +129,12 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
                 backendManager.info("Response: " + json);
             }
         } catch (Throwable exp) {
-            JSONObject error = requestHandler.handleThrowable(
+            json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
-            json = error;
         } finally {
-            sendResponse(pExchange,parsedUri, json.toJSONString());
+            sendResponse(pExchange,parsedUri,json);
         }
     }
-
 
 
     private Restrictor createRestrictor(Map<ConfigKey, String> pConfig) {
@@ -178,15 +174,40 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         return requestHandler.handlePostRequest(pUri.toString(),is, encoding, pUri.getParameterMap());
     }
 
+    private void performCorsPreflightCheck(HttpExchange pExchange) {
+        Headers requestHeaders = pExchange.getRequestHeaders();
+        Map<String,String> respHeaders =
+                requestHandler.handleCorsPreflightRequest(requestHeaders.getFirst("Origin"),
+                                                          requestHeaders.getFirst("Access-Control-Request-Headers"));
+        Headers responseHeaders = pExchange.getResponseHeaders();
+        for (Map.Entry<String,String> entry : respHeaders.entrySet()) {
+            responseHeaders.set(entry.getKey(), entry.getValue());
+        }
+    }
 
-    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, String pJson) throws IOException {
+    private void setCorsHeader(HttpExchange pExchange) {
+        String origin = pExchange.getRequestHeaders().getFirst("Origin");
+        if (origin != null && requestHandler.isCorsAccessAllowed(origin)) {
+            pExchange.getResponseHeaders().set("Access-Control-Allow-Origin",origin);
+        }
+    }
+
+
+    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
         OutputStream out = null;
         String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
         try {
             Headers headers = pExchange.getResponseHeaders();
-            headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
-            String content = callback == null ? pJson : callback + "(" + pJson + ");";
-            byte[] response = content.getBytes();
+            byte[] response;
+            if (pJson != null) {
+                headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+                String json = pJson.toJSONString();
+                String content = callback == null ? json : callback + "(" + json + ");";
+                response = content.getBytes();
+            } else {
+                headers.set("Content-Type", "text/plain");
+                response = new byte[0];
+            }
             pExchange.sendResponseHeaders(200,response.length);
             out = pExchange.getResponseBody();
             out.write(response);

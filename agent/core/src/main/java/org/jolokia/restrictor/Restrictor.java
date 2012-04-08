@@ -1,9 +1,9 @@
 package org.jolokia.restrictor;
 
+import javax.management.ObjectName;
+
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
-
-import javax.management.ObjectName;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -84,4 +84,14 @@ public interface Restrictor {
      * @param pHostOrAddress one or more host or address names
      */
     boolean isRemoteAccessAllowed(String ... pHostOrAddress);
+
+    /**
+     * Check whether cross browser access via CORS is allowed. See the
+     * <a href="https://developer.mozilla.org/en/http_access_control">CORS</a> specification
+     * for details
+     *
+     * @param pOrigin the "Origin:" URL provided within the request
+     * @return true if this cross browser request allowed, false otherwise
+     */
+    boolean isCorsAccessAllowed(String pOrigin);
 }

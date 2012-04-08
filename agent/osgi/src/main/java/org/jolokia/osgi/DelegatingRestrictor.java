@@ -2,7 +2,7 @@ package org.jolokia.osgi;
 
 import javax.management.ObjectName;
 
-import org.jolokia.restrictor.*;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.osgi.framework.*;
@@ -158,6 +158,20 @@ class DelegatingRestrictor implements Restrictor {
     /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
         return checkRestrictorService(REMOTE_CHECK,pHostOrAddress);
+    }
+
+
+    // ====================================================================
+
+    private final RestrictorCheck CORS_CHECK = new RestrictorCheck() {
+        public boolean check(Restrictor restrictor, Object... args) {
+            return restrictor.isCorsAccessAllowed((String) args[0]);
+        }
+    };
+
+
+    public boolean isCorsAccessAllowed(String pOrigin) {
+        return checkRestrictorService(CORS_CHECK,pOrigin);
     }
 
     // =======================================================================================================
