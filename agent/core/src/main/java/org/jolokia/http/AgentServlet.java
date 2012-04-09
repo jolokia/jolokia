@@ -247,8 +247,12 @@ public class AgentServlet extends HttpServlet {
     // Set an appropriate CORS header if requested and if allowed
     private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
         String origin = pReq.getHeader("Origin");
-        if (origin != null && requestHandler.isCorsAccessAllowed(origin)) {
-            pResp.setHeader("Access-Control-Allow-Origin",origin);
+        if (origin != null) {
+            // Prevent HTTP response splitting attacks (if the container not already filtered it out)
+            origin = origin.replaceAll("[\\n\\r]*","");
+            if (requestHandler.isCorsAccessAllowed(origin)) {
+                pResp.setHeader("Access-Control-Allow-Origin",origin);
+            }
         }
     }
 

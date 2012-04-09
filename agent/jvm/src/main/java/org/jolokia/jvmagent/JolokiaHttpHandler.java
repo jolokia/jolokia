@@ -187,8 +187,12 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
     private void setCorsHeader(HttpExchange pExchange) {
         String origin = pExchange.getRequestHeaders().getFirst("Origin");
-        if (origin != null && requestHandler.isCorsAccessAllowed(origin)) {
-            pExchange.getResponseHeaders().set("Access-Control-Allow-Origin",origin);
+        if (origin != null) {
+            // Prevent HTTP response splitting attacks
+            origin = origin.replaceAll("[\\n\\r]*","");
+            if (requestHandler.isCorsAccessAllowed(origin)) {
+                pExchange.getResponseHeaders().set("Access-Control-Allow-Origin",origin);
+            }
         }
     }
 

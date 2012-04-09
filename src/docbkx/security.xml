@@ -174,7 +174,7 @@
         </para>
       </section>
       <section>
-        <title>Cross-Origin Resource Sharing (CORS) restrictions
+        <title>Cross-Origin Resource Sharing (CORS) restrictions</title>
         <para>
           Jolokia (since version 1.0.3) supports the W3C specification
           for <ulink url="http://www.w3.org/TR/cors/">Cross-Origin
