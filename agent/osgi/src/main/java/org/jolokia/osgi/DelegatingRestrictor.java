@@ -164,6 +164,7 @@ class DelegatingRestrictor implements Restrictor {
     // ====================================================================
 
     private static final RestrictorCheck CORS_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
         public boolean check(Restrictor restrictor, Object... args) {
             return restrictor.isCorsAccessAllowed((String) args[0]);
         }
