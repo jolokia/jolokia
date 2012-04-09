@@ -175,14 +175,13 @@
       </section>
       <section>
         <title>Cross-Origin Resource Sharing (CORS) restrictions
-        (since 1.0.3)</title>
         <para>
-          Jolokia supports the W3C specification for <ulink
-          url="http://www.w3.org/TR/cors/">Cross-Origin Resource
-          Sharing</ulink> (also known as "CORS") which allows browser
-          to access resources which are located on a different server
-          than the calling script is loaded from. This specifciation
-          allows a controlled way to come around the this
+          Jolokia (since version 1.0.3) supports the W3C specification
+          for <ulink url="http://www.w3.org/TR/cors/">Cross-Origin
+          Resource Sharing</ulink> (also known as "CORS") which allows
+          browser to access resources which are located on a different
+          server than the calling script is loaded from. This
+          specification provides a controlled way to come around the
           <emphasis>same origin policy</emphasis>. Most <ulink
           url="http://caniuse.com/#search=CORS">contemporary
           browsers</ulink> support CORS.
