@@ -1,5 +1,7 @@
 package org.jolokia.restrictor.policy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.*;
@@ -12,22 +14,32 @@ import org.w3c.dom.*;
  */
 public class CorsChecker extends AbstractChecker<String> {
 
-    Pattern[] patterns;
+    private List<Pattern> patterns;
 
     public CorsChecker(Document pDoc) {
-        NodeList nodes = pDoc.getElementsByTagName("allow-origin");
-        patterns = new Pattern[nodes.getLength()];
-        for (int i = 0;i<nodes.getLength();i++) {
-            Node node = nodes.item(i);
-            String p = node.getTextContent().trim().toLowerCase();
-            p = Pattern.quote(p).replace("*","\\E.*\\Q");
-            patterns[i] = Pattern.compile("^" + p + "$");
+        NodeList corsNodes = pDoc.getElementsByTagName("cors");
+        if (corsNodes.getLength() > 0) {
+            patterns = new ArrayList<Pattern>();
+            for (int i = 0; i < corsNodes.getLength(); i++) {
+                Node corsNode = corsNodes.item(i);
+                NodeList nodes = corsNode.getChildNodes();
+                for (int j = 0;j <nodes.getLength();j++) {
+                    Node node = nodes.item(j);
+                    if (node.getNodeType() != Node.ELEMENT_NODE) {
+                        continue;
+                    }
+                    assertNodeName(node,"allow-origin");
+                    String p = node.getTextContent().trim().toLowerCase();
+                    p = Pattern.quote(p).replace("*","\\E.*\\Q");
+                    patterns.add(Pattern.compile("^" + p + "$"));
+                }
+            }
         }
     }
 
     @Override
     public boolean check(String pArg) {
-        if (patterns.length == 0) {
+        if (patterns == null || patterns.size() == 0) {
             return true;
         }
         for (Pattern pattern : patterns) {

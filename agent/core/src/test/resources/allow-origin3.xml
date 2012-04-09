@@ -3,7 +3,6 @@
 <restrict>
 
   <cors>
-    <allow-origin>*</allow-origin>
   </cors>
 
 </restrict>

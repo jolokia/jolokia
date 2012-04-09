@@ -174,6 +174,39 @@
         </para>
       </section>
       <section>
+        <title>Cross-Origin Resource Sharing (CORS) restrictions
+        (since 1.0.3)</title>
+        <para>
+          Jolokia supports the W3C specification for <ulink
+          url="http://www.w3.org/TR/cors/">Cross-Origin Resource
+          Sharing</ulink> (also known as "CORS") which allows browser
+          to access resources which are located on a different server
+          than the calling script is loaded from. This specifciation
+          allows a controlled way to come around the this
+          <emphasis>same origin policy</emphasis>. Most <ulink
+          url="http://caniuse.com/#search=CORS">contemporary
+          browsers</ulink> support CORS.
+        </para>
+        <para>
+          By default Jolokia allows cross origin access from any
+          host. This can be limited to certain hosts by using
+          <literal>&lt;allow-origin&gt;</literal> sections within a
+          <literal>&lt;cors&gt;</literal> sections. This tags can
+          contain the origin URL provided by browsers with the
+          <literal>Origin:</literal> header literally or a
+          wildcard specification with <literal>*</literal>.          
+        </para>
+      </section>
+      <programlisting language="xml"><![CDATA[
+<cors>
+   <!-- Allow cross origin access from www.jolokia.org ... -->
+   <allow-origin>http://www.jolokia.org</allow-origin>
+
+   <!-- ... and all servers from jmx4perl.org with any protocol ->
+   <allow-origin>*://*.jmx4perl.org</allow-origin>
+</cors>
+]]></programlisting>
+      <section>
         <title>Example for a security policy</title>
         <para>
           The following complete example applies various access

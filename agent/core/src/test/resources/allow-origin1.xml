@@ -2,7 +2,9 @@
 
 <restrict>
 
-  <allow-origin>http://bla.com</allow-origin>
-  <allow-origin>http://blub.com</allow-origin>
-  <allow-origin>http://*.consol.de</allow-origin>
+  <cors>
+    <allow-origin>http://bla.com</allow-origin>
+    <allow-origin>http://blub.com</allow-origin>
+    <allow-origin>*://*.consol.de</allow-origin>
+  </cors>
 </restrict>

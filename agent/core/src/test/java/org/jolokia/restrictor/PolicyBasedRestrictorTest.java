@@ -217,12 +217,22 @@ public class PolicyBasedRestrictorTest {
 
         assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
         assertFalse(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+        assertTrue(restrictor.isCorsAccessAllowed("https://www.consol.de"));
     }
 
     @Test
     public void corsWildCard() {
         InputStream is = getClass().getResourceAsStream("/allow-origin2.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
+        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+    }
+
+    @Test
+    public void corsEmpty() {
+        InputStream is = getClass().getResourceAsStream("/allow-origin3.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
         assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
@@ -237,7 +247,7 @@ public class PolicyBasedRestrictorTest {
 
         assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
         assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+        assertTrue(restrictor.isCorsAccessAllowed("https://www.consol.de"));
     }
 
 

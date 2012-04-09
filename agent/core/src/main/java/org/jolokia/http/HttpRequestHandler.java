@@ -124,7 +124,7 @@ public class HttpRequestHandler {
      * Handling an option request which is used for preflight checks before a CORS based browser request is
      * sent (for certain circumstances).
      *
-     * See the <a href="https://developer.mozilla.org/en/http_access_control">CORS specification</a>
+     * See the <a href="http://www.w3.org/TR/cors/">CORS specification</a>
      * (section 'preflight checks') for more details.
      *
      * @param pOrigin the origin to check. If <code>null</code>, no headers are returned
