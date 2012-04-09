@@ -136,7 +136,9 @@ public class HttpRequestHandler {
         if (pOrigin != null && isCorsAccessAllowed(pOrigin)) {
             // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
             ret.put("Access-Control-Allow-Origin",pOrigin);
-            ret.put("Access-Control-Allow-Headers",pRequestHeaders);
+            if (pRequestHeaders != null) {
+                ret.put("Access-Control-Allow-Headers",pRequestHeaders);
+            }
             // Allow for one year. Changes in access.xml are reflected directly in the  cors request itself
             ret.put("Access-Control-Allow-Max-Age","" + 3600 * 24 * 365);
         }

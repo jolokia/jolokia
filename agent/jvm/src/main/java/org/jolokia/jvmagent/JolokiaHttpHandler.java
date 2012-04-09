@@ -115,11 +115,11 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
             // Dispatch for the proper HTTP request method
             if ("GET".equalsIgnoreCase(method)) {
+                setCorsHeader(pExchange);
                 json = executeGetRequest(parsedUri);
-                setCorsHeader(pExchange);
             } else if ("POST".equalsIgnoreCase(method)) {
-                json = executePostRequest(pExchange, parsedUri);
                 setCorsHeader(pExchange);
+                json = executePostRequest(pExchange, parsedUri);
             } else if ("OPTIONS".equalsIgnoreCase(method)) {
                 performCorsPreflightCheck(pExchange);
             } else {
@@ -192,25 +192,23 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         }
     }
 
-
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
         OutputStream out = null;
-        String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
         try {
             Headers headers = pExchange.getResponseHeaders();
-            byte[] response;
             if (pJson != null) {
                 headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
                 String json = pJson.toJSONString();
+                String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
                 String content = callback == null ? json : callback + "(" + json + ");";
-                response = content.getBytes();
+                byte[] response = content.getBytes();
+                pExchange.sendResponseHeaders(200,response.length);
+                out = pExchange.getResponseBody();
+                out.write(response);
             } else {
                 headers.set("Content-Type", "text/plain");
-                response = new byte[0];
+                pExchange.sendResponseHeaders(200,-1);
             }
-            pExchange.sendResponseHeaders(200,response.length);
-            out = pExchange.getResponseBody();
-            out.write(response);
         } finally {
             if (out != null) {
                 // Always close in order to finish the request.

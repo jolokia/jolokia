@@ -179,7 +179,6 @@ public class AgentServletTest {
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
 
         response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
-        response.setHeader("Access-Control-Allow-Headers", null);
         response.setHeader("Access-Control-Allow-Origin", "http://bla.com");
 
         replay(request, response);

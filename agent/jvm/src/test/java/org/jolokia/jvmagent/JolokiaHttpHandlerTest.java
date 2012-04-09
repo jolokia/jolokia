@@ -167,15 +167,15 @@ public class JolokiaHttpHandlerTest {
     public void preflightCheck() throws URISyntaxException, IOException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/",
                                                 "Origin","http://localhost:8080/",
-                                                "Access-Control-Request-Headers",null);
+                                                "Access-Control-Request-Headers","X-Bla, X-Blub");
         expect(exchange.getRequestMethod()).andReturn("OPTIONS");
 
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
         handler.handle(exchange);
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
-        assertNotNull(header.get("Access-Control-Allow-Headers"));
-        assertNotNull(header.get("Access-Control-Allow-Max-Age"));
+        assertEquals(header.getFirst("Access-Control-Allow-Headers"),"X-Bla, X-Blub");
+        assertNotNull(header.getFirst("Access-Control-Allow-Max-Age"));
     }
 
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
