@@ -16,6 +16,18 @@ public class CorsChecker extends AbstractChecker<String> {
 
     private List<Pattern> patterns;
 
+    /**
+     * Constructor buiilding up this checker from the XML document provided.
+     * CORS sections look like
+     * <pre>
+     *     &lt;cors&gt;
+     *       &lt;allow-origin&gt;http://jolokia.org&lt;allow-origin&gt;
+     *       &lt;allow-origin&gt;*://*.jmx4perl.org&gt;
+     *     &lt;/cors&gt;
+     * </pre>
+     *
+     * @param pDoc the overall policy documents
+     */
     public CorsChecker(Document pDoc) {
         NodeList corsNodes = pDoc.getElementsByTagName("cors");
         if (corsNodes.getLength() > 0) {
@@ -37,6 +49,7 @@ public class CorsChecker extends AbstractChecker<String> {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean check(String pArg) {
         if (patterns == null || patterns.size() == 0) {

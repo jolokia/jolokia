@@ -169,7 +169,7 @@ class DelegatingRestrictor implements Restrictor {
         }
     };
 
-
+    /** {@inheritDoc} */
     public boolean isCorsAccessAllowed(String pOrigin) {
         return checkRestrictorService(CORS_CHECK,pOrigin);
     }
