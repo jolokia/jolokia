@@ -171,15 +171,24 @@ public class AgentServletTest {
 
     @Test
     public void corsPreflightCheck() throws ServletException, IOException {
+        checkCorsOriginPreflight("http://bla.com", "http://bla.com");
+    }
+
+    @Test
+    public void corsPreflightCheckWithNullOrigin() throws ServletException, IOException {
+        checkCorsOriginPreflight("null", "*");
+    }
+
+    private void checkCorsOriginPreflight(String in, String out) throws ServletException, IOException {
         prepareStandardInitialisation();
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
 
-        expect(request.getHeader("Origin")).andReturn("http://bla.com");
+        expect(request.getHeader("Origin")).andReturn(in);
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
 
         response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
-        response.setHeader("Access-Control-Allow-Origin", "http://bla.com");
+        response.setHeader("Access-Control-Allow-Origin", out);
 
         replay(request, response);
 
@@ -187,14 +196,24 @@ public class AgentServletTest {
         servlet.destroy();
     }
 
+
     @Test
     public void corsHeaderGetCheck() throws ServletException, IOException {
+        checkCorsGetOrigin("http://bla.com","http://bla.com");
+    }
+
+    @Test
+    public void corsHeaderGetCheckWithNullOrigin() throws ServletException, IOException {
+        checkCorsGetOrigin("null","*");
+    }
+
+    private void checkCorsGetOrigin(final String in, final String out) throws ServletException, IOException {
         prepareStandardInitialisation();
 
         StringWriter sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
-                        expect(request.getHeader("Origin")).andReturn("http://bla.com");
+                        expect(request.getHeader("Origin")).andReturn(in);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
@@ -203,7 +222,7 @@ public class AgentServletTest {
                 },
                 new Runnable() {
                     public void run() {
-                        response.setHeader("Access-Control-Allow-Origin", "http://bla.com");
+                        response.setHeader("Access-Control-Allow-Origin", out);
                         response.setCharacterEncoding("utf-8");
                         response.setContentType("text/plain");
                         response.setStatus(200);

@@ -133,9 +133,9 @@ public class HttpRequestHandler {
      */
     public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
         Map<String,String> ret = new HashMap<String, String>();
-        if (pOrigin != null && isCorsAccessAllowed(pOrigin)) {
+        if (pOrigin != null && backendManager.isCorsAccessAllowed(pOrigin)) {
             // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
-            ret.put("Access-Control-Allow-Origin",pOrigin);
+            ret.put("Access-Control-Allow-Origin","null".equals(pOrigin) ? "*" : pOrigin);
             if (pRequestHeaders != null) {
                 ret.put("Access-Control-Allow-Headers",pRequestHeaders);
             }
@@ -266,12 +266,22 @@ public class HttpRequestHandler {
     /**
      * Check whether for the given host is a cross-browser request allowed. This check is deligated to the
      * backendmanager which is responsible for the security configuration.
+     * Also, some sanity checks are applied.
      *
-     * @param pOrigin the origin URL to check agains
-     * @return true if access is allowed, or false if not
+     * @param pOrigin the origin URL to check against
+     * @return the origin to put in the response header or null if none is to be set
      */
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return backendManager.isCorsAccessAllowed(pOrigin);
+    public String extractCorsOrigin(String pOrigin) {
+        if (pOrigin != null) {
+            // Prevent HTTP response splitting attacks
+            pOrigin = pOrigin.replaceAll("[\\n\\r]*","");
+            if (backendManager.isCorsAccessAllowed(pOrigin)) {
+                return "null".equals(pOrigin) ? "*" : pOrigin;
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
     // Extract class and exception message for an error message
@@ -287,5 +297,6 @@ public class HttpRequestHandler {
         int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
         return getErrorJSON(code,cause, pJmxReq);
     }
+
 
 }
