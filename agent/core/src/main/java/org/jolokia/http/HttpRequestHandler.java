@@ -274,9 +274,9 @@ public class HttpRequestHandler {
     public String extractCorsOrigin(String pOrigin) {
         if (pOrigin != null) {
             // Prevent HTTP response splitting attacks
-            pOrigin = pOrigin.replaceAll("[\\n\\r]*","");
-            if (backendManager.isCorsAccessAllowed(pOrigin)) {
-                return "null".equals(pOrigin) ? "*" : pOrigin;
+            String origin  = pOrigin.replaceAll("[\\n\\r]*","");
+            if (backendManager.isCorsAccessAllowed(origin)) {
+                return "null".equals(origin) ? "*" : origin;
             } else {
                 return null;
             }
