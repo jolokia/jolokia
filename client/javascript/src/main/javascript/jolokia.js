@@ -63,7 +63,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.0.2-SNAPSHOT";
+            this.CLIENT_VERSION = "1.0.3-SNAPSHOT";
 
             // Allow a single URL parameter as well
             if (typeof param === "string") {
