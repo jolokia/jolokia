@@ -239,6 +239,12 @@ public class AgentServletTest {
         servlet.destroy();
     }
 
+    private void setNoCacheHeaders(HttpServletResponse pResp) {
+        pResp.setHeader("Cache-Control", "no-cache");
+        pResp.setHeader("Pragma","no-cache");
+        pResp.setHeader("Expires","-1");
+    }
+
     @Test
     public void withCallback() throws IOException, ServletException {
         prepareStandardInitialisation();
@@ -356,6 +362,7 @@ public class AgentServletTest {
     private StringWriter initRequestResponseMocks(String callback,Runnable requestSetup,Runnable responseSetup) throws IOException {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
+        setNoCacheHeaders(response);
 
         expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(callback);
         requestSetup.run();

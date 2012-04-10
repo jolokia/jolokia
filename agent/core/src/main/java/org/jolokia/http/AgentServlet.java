@@ -246,13 +246,9 @@ public class AgentServlet extends HttpServlet {
 
     // Set an appropriate CORS header if requested and if allowed
     private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
-        String origin = pReq.getHeader("Origin");
+        String origin = requestHandler.extractCorsOrigin(pReq.getHeader("Origin"));
         if (origin != null) {
-            // Prevent HTTP response splitting attacks (if the container not already filtered it out)
-            origin = origin.replaceAll("[\\n\\r]*","");
-            if (requestHandler.isCorsAccessAllowed(origin)) {
-                pResp.setHeader("Access-Control-Allow-Origin",origin);
-            }
+            pResp.setHeader("Access-Control-Allow-Origin",origin);
         }
     }
 
@@ -337,8 +333,15 @@ public class AgentServlet extends HttpServlet {
     private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {
         setContentType(pResp, pContentType);
         pResp.setStatus(200);
+        setNoCacheHeaders(pResp);
         PrintWriter writer = pResp.getWriter();
         writer.write(pJsonTxt);
+    }
+
+    private void setNoCacheHeaders(HttpServletResponse pResp) {
+        pResp.setHeader("Cache-Control", "no-cache");
+        pResp.setHeader("Pragma","no-cache");
+        pResp.setHeader("Expires","-1");
     }
 
     private void setContentType(HttpServletResponse pResp, String pContentType) {

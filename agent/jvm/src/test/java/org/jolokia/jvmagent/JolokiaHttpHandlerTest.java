@@ -90,6 +90,10 @@ public class JolokiaHttpHandlerTest {
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
         assertTrue(result.contains("\"used\""));
+
+        assertEquals(header.getFirst("Cache-Control"),"no-cache");
+        assertEquals(header.getFirst("Pragma"),"no-cache");
+        assertEquals(header.getFirst("Expires"),"-1");
     }
 
     @Test

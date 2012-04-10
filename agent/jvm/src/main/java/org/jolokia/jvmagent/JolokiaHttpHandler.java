@@ -115,10 +115,10 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
             // Dispatch for the proper HTTP request method
             if ("GET".equalsIgnoreCase(method)) {
-                setCorsHeader(pExchange);
+                setHeaders(pExchange);
                 json = executeGetRequest(parsedUri);
             } else if ("POST".equalsIgnoreCase(method)) {
-                setCorsHeader(pExchange);
+                setHeaders(pExchange);
                 json = executePostRequest(pExchange, parsedUri);
             } else if ("OPTIONS".equalsIgnoreCase(method)) {
                 performCorsPreflightCheck(pExchange);
@@ -185,15 +185,17 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         }
     }
 
-    private void setCorsHeader(HttpExchange pExchange) {
-        String origin = pExchange.getRequestHeaders().getFirst("Origin");
+    private void setHeaders(HttpExchange pExchange) {
+        String origin = requestHandler.extractCorsOrigin(pExchange.getRequestHeaders().getFirst("Origin"));
+        Headers headers = pExchange.getResponseHeaders();
         if (origin != null) {
-            // Prevent HTTP response splitting attacks
-            origin = origin.replaceAll("[\\n\\r]*","");
-            if (requestHandler.isCorsAccessAllowed(origin)) {
-                pExchange.getResponseHeaders().set("Access-Control-Allow-Origin",origin);
-            }
+            headers.set("Access-Control-Allow-Origin",origin);
         }
+
+        // Avoid caching at all costs
+        headers.set("Cache-Control", "no-cache");
+        headers.set("Pragma","no-cache");
+        headers.set("Expires","-1");
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
