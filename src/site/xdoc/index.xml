@@ -51,8 +51,55 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="1.0.3 with CORS support">
+        <div class="news-date">2012-04-11</div>
+        <p>
+          This minor release adds cross-origin resource sharing (CORS)
+          support to all Jolokia agents. Cross domain access can be
+          easily restricted with Jolokia's <a
+          href="features/security.html">security setup</a>. The <a
+          href="client/javascript.html">Javascript</a> library already
+          support CORS for most browsers out of the box, for IE8 and
+          larger some special setup is still required. Transparent
+          CORS client support for all browsers will be added to the
+          Jolokia Javascript client in one of the next releases.
+        </p>
+        <p>
+          In addition the following new features were added:
+        </p>
+        <ul>
+          <li><a
+          href="https://github.com/amdjs/amdjs-api/wiki/AMD">AMD</a>
+          support for jolokia.js and jolokia-simple.js</li>
+          <li>Time based eviction of historical values remembered on
+          the client side, in addition to count based eviction</li>
+          <li>New configuration option <code>httpServiceFilter</code>
+          for the OSGi agent for selection of a specific HttpService
+          to bind to.</li>
+          <li>None-caching headers added to the response</li>
+        </ul>
+        <p>
+          All theses changes plus the bug fixes are listed in the <a
+          href="changes-report.html">change log</a>. 
+        </p>
+        <p>
+          Starting with this release, bug tracking and release planing
+          switches over to Jolokia's <a
+          href="http://jolokia.jira.com">JIRA</a> instance, kindly
+          donated by the fine guys from <a
+          href="http://www.atlassian.com">Atlassian</a>. 
+        </p>
+        <p>
+          Also, there has been some (minor) progress with the new kid in
+          the Chili garden, <a
+          href="https://github.com/rhuss/aji">Ají</a>, a Javascript
+          single-page-application with an MBeanBrowser and a
+          Dashboard. I'm still looking for helping hands, there is
+          quite a lot to do here ;-)
+        </p>
+      </subsection>
       <subsection name="1.0.2 released">
-        <div class="news-date">2011-01-06</div>
+        <div class="news-date">2012-01-06</div>
         <p>
           The first release of this year brings some updates and minor features:
         </p>

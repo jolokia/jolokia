@@ -45,6 +45,11 @@
     <host>localhost</host>
     <host>10.0.0.0/16</host>
   </remote>
+  
+  <cors>
+    <allow-origin>http://www.jmx4perl.org</allow-origin>
+    <allow-origin>*.jolokia.org</allow-origin>
+  </cors>
 
   <commands>
     <command>read</command>
