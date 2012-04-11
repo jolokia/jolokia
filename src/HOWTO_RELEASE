@@ -41,7 +41,7 @@ mvn -Pdist deploy
 cd ../..
 
 # Deploy roo to labs, too
-cd tools/roo-addon
+cd target/checkout/tools/roo-addon
 mvn -Plabs deploy
 
 # Release on central maven repo
