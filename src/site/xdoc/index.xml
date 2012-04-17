@@ -54,7 +54,7 @@
       <subsection name="1.0.3 with CORS support">
         <div class="news-date">2012-04-11</div>
         <p>
-          This minor release adds cross-origin resource sharing (CORS)
+          This minor release adds cross-origin resource sharing (<a href="http://www.w3.org/TR/cors/">CORS</a>)
           support to all Jolokia agents. Cross domain access can be
           easily restricted with Jolokia's <a
           href="features/security.html">security setup</a>. The <a
@@ -83,10 +83,10 @@
           href="changes-report.html">change log</a>. 
         </p>
         <p>
-          Starting with this release, bug tracking and release planing
+          Starting with this release, bug tracking and release planning
           switches over to Jolokia's <a
           href="http://jolokia.jira.com">JIRA</a> instance, kindly
-          donated by the fine guys from <a
+          donated by the fine folks from <a
           href="http://www.atlassian.com">Atlassian</a>. 
         </p>
         <p>
