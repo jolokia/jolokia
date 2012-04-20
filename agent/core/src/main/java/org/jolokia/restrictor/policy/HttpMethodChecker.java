@@ -61,8 +61,8 @@ public class HttpMethodChecker extends AbstractChecker<HttpMethod> {
                 }
                 assertNodeName(commandNode,"method");
                 String methodName = commandNode.getTextContent().trim().toLowerCase();
-                if (!methodName.equals("post") || methodName.equals("get")) {
-                    throw new SecurityException("HTTP method must be either GET or POST, but not " + methodName);
+                if (!methodName.equals("post") && ! methodName.equals("get")) {
+                    throw new SecurityException("HTTP method must be either GET or POST, but not " + methodName.toUpperCase());
                 }
                 httpMethodsSet.add(methodName);
             }

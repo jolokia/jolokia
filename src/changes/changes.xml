@@ -7,6 +7,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.0.4" description="Release 1.0.4">
+      <action dev="roland" type="fix" date="2012-04-20">
+        Fixed issue with HTTP method checker for policy based restrictions.
+      </action>
+    </release>
     <release version="1.0.3" description="Release 1.0.3" date="2012-04-11">
       <action dev="roland" type="fix" date="2012-02-09">
         Fixed issue with Glassfish detector and Jolokia running under gcj

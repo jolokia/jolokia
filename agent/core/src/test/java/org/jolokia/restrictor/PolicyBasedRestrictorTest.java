@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author roland
@@ -120,16 +121,16 @@ public class PolicyBasedRestrictorTest {
     public void allow() throws MalformedObjectNameException {
         InputStream is = getClass().getResourceAsStream("/access-sample5.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
-        assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
-        assertTrue(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage"));
-        assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
-        assertFalse(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"),"NonHeapMemoryUsage"));
-        assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"),"BlaUsage"));
+        assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage"));
+        assertTrue(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage"));
+        assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"), "NonHeapMemoryUsage"));
+        assertFalse(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"), "NonHeapMemoryUsage"));
+        assertFalse(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"), "BlaUsage"));
 
-        assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config"),"Debug"));
+        assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("jolokia:type=Config"), "Debug"));
 
-        assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Blubber,name=x"),"gc"));
-        assertFalse(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Blubber,name=x"),"xavier"));
+        assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Blubber,name=x"), "gc"));
+        assertFalse(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Blubber,name=x"), "xavier"));
     }
 
     @Test
@@ -185,6 +186,15 @@ public class PolicyBasedRestrictorTest {
             assertTrue(exp.getMessage().contains("name"));
         }
 
+    }
+
+
+    @Test
+    public void httpMethod() {
+        InputStream is = getClass().getResourceAsStream("/method.xml");
+        PolicyRestrictor res = new PolicyRestrictor(is);
+        assertTrue(res.isHttpMethodAllowed(HttpMethod.GET));
+        assertTrue(res.isHttpMethodAllowed(HttpMethod.POST));
     }
 
     @Test
