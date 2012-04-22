@@ -204,7 +204,7 @@ public class PolicyBasedRestrictorTest {
             new PolicyRestrictor(is);
             fail();
         } catch (SecurityException exp) {
-            assertTrue(exp.getMessage().contains("bla"));
+            assertTrue(exp.getMessage().contains("BLA"));
         }
     }
 
