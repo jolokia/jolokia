@@ -117,7 +117,12 @@ public class LocalRequestDispatcher implements RequestDispatcher {
             String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
             log.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
                      "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
-            mBeanServerHandler.registerMBean(config,alternativeOName);
+ 	   		try {
+          		mBeanServerHandler.registerMBean(config,alternativeOName);
+	   		} catch (InstanceAlreadyExistsException iae) {
+	   	 		// still could not register
+		 		log.info("Failed to register config mbean with alternative name: " + alternativeOName);
+	   		}
         }
 
         // Register another Config MBean (which dispatched to the stores anyway) for access by
