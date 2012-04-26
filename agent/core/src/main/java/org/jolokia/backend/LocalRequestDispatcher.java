@@ -107,8 +107,8 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
         // Register the Config MBean
         String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
-        Config config = new Config(pHistoryStore,pDebugStore,oName);
         try {
+            Config config = new Config(pHistoryStore,pDebugStore,oName);
             mBeanServerHandler.registerMBean(config,oName);
         } catch (InstanceAlreadyExistsException exp) {
             // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
@@ -117,6 +117,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
             String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
             log.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
                      "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
+            Config config = new Config(pHistoryStore,pDebugStore,alternativeOName);
             mBeanServerHandler.registerMBean(config,alternativeOName);
         }
 
