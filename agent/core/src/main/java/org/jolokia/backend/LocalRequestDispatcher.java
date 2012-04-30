@@ -97,11 +97,10 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @param pDebugStore managed debug store
      * @throws MalformedObjectNameException if our MBean's name is wrong (which cannot happen)
      * @throws MBeanRegistrationException if registration fails
-     * @throws InstanceAlreadyExistsException if a config MBean is already present
      * @throws NotCompliantMBeanException if we have a non compliant MBean (cannot happen, too)
      */
     public void initMBeans(HistoryStore pHistoryStore, DebugStore pDebugStore)
-            throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
+            throws MalformedObjectNameException, MBeanRegistrationException, NotCompliantMBeanException {
 
         mBeanServerHandler.initMBean();
 
@@ -111,14 +110,18 @@ public class LocalRequestDispatcher implements RequestDispatcher {
             Config config = new Config(pHistoryStore,pDebugStore,oName);
             mBeanServerHandler.registerMBean(config,oName);
         } catch (InstanceAlreadyExistsException exp) {
-            // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
-            // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
-            // a random number, but this can already be performed with a qualifier
             String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
-            log.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
-                     "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
-            Config config = new Config(pHistoryStore,pDebugStore,alternativeOName);
-            mBeanServerHandler.registerMBean(config,alternativeOName);
+            try {
+                // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
+                // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
+                // a random number, but this can already be performed with a qualifier
+                log.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
+                         "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
+                Config config = new Config(pHistoryStore,pDebugStore,alternativeOName);
+                mBeanServerHandler.registerMBean(config,alternativeOName);
+            } catch (InstanceAlreadyExistsException e) {
+                log.error("Cannot even register fallback MBean with name " + alternativeOName + ". Should never happen. Really.",e);
+            }
         }
 
         // Register another Config MBean (which dispatched to the stores anyway) for access by

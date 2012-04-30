@@ -55,7 +55,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      * @throws InstanceAlreadyExistsException if we already have been initialised
      * @throws NotCompliantMBeanException if we are not compliant MBean (but we are)
      */
-    public void initMBean() throws MalformedObjectNameException, InstanceAlreadyExistsException, NotCompliantMBeanException {
+    public void initMBean() throws MalformedObjectNameException, NotCompliantMBeanException {
         try {
             registerMBean(this,getObjectName());
         } catch (InstanceAlreadyExistsException exp) {

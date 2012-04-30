@@ -228,8 +228,6 @@ public class BackendManager {
             intError("Cannot register MBean: " + e, e);
         } catch (MalformedObjectNameException e) {
             intError("Invalid name for config MBean: " + e, e);
-        } catch (InstanceAlreadyExistsException e) {
-            intError("Config MBean already exists: " + e, e);
         }
     }
 
