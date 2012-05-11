@@ -129,7 +129,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.3.5</version>
+          <version>2.3.7</version>
           <configuration>
             <groupId>${project.groupId}</groupId>
             <artifactId>${project.artifactId}</artifactId>
@@ -256,11 +256,6 @@
           <version>2.0</version>
         </plugin>
 
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.3.7</version>
-        </plugin>
       </plugins>
     </pluginManagement>
 
