@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ j * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -65,7 +65,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.0.3";
+            this.CLIENT_VERSION = "1.0.4";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -264,7 +264,7 @@
                         success: null,
                         error: null,
                         callback: callback
-                    }
+                    };
                 } else {
                     throw "First argument must be either a callback func " + "or an object with 'success' and 'error' attrs";
                 }
