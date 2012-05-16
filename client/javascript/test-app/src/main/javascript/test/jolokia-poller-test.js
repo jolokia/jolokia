@@ -24,10 +24,10 @@ $(document).ready(function() {
             counter2 = 1;
         var j4p = new Jolokia("/jolokia");
 
-        j4p.registerRequest(function(resp) {
+        j4p.register(function(resp) {
             counter1++;
         },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
-        j4p.registerRequest(function(resp) {
+        j4p.register(function(resp) {
             counter2++;
         },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "max"});
 
@@ -37,17 +37,17 @@ $(document).ready(function() {
         setTimeout(function() {
             j4p.stop();
             ok(!j4p.isRunning(),"Poller should be stopped");
-            equals(counter1,3,"Request should have been called 3 times");
-            equals(counter2,3,"Request should have been called 3 times");
+            equals(counter1,3,"Request1 should have been called 3 times");
+            equals(counter2,3,"Request2 should have been called 3 times");
             start();
-        },250);
+        },280);
     });
 
     asyncTest("Starting and stopping",function() {
         var j4p = new Jolokia("/jolokia");
         var counter = 1;
 
-        j4p.registerRequest(function(resp) {
+        j4p.register(function(resp) {
             counter++;
             },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
             { type: "SEARCH", mbean: "java.lang:type=*"});
@@ -67,17 +67,17 @@ $(document).ready(function() {
         var j4p = new Jolokia("/jolokia");
         var counter1 = 1,
             counter2 = 1;
-        var id1 = j4p.registerRequest(function(resp) {
+        var id1 = j4p.register(function(resp) {
             counter1++;
         },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
-        var id2 = j4p.registerRequest(function(resp) {
+        var id2 = j4p.register(function(resp) {
             counter2++;
         },{ type: "EXEC", mbean: "java.lang:type=Memory", operation: "gc"});
         j4p.start(200);
         setTimeout(function() {
             equals(counter1,3,"Req1 should be called 3 times");
             equals(counter2,3,"Req2 should be called 3 times");
-            j4p.unregisterRequest(id2);
+            j4p.unregister(id2);
             setTimeout(function() {
                 j4p.stop();
                 equals(counter1,4,"Req1 should continue to be requested, now for 4 times");
@@ -90,7 +90,7 @@ $(document).ready(function() {
     asyncTest("Multiple requests",function() {
         var j4p = new Jolokia("/jolokia");
         var counter = 1;
-        j4p.registerRequest(function(resp1,resp2,resp3,resp4) {
+        j4p.register(function(resp1,resp2,resp3,resp4) {
                 equals(resp1.status,200);
                 equals(resp2.status,200);
                 ok(resp1.value > 0);
@@ -107,6 +107,31 @@ $(document).ready(function() {
         setTimeout(function() {
             j4p.stop();
             equals(counter,3,"Req should be called 3 times");
+            start();
+        },500);
+    })
+
+    asyncTest("Multiple requests with success/error callbacks",function() {
+        var j4p = new Jolokia("/jolokia");
+        var counterS = 1,
+            counterE = 1;
+        j4p.register({
+                success: function(resp) {
+                    counterS++;
+                },
+                error: function(resp) {
+                    counterE++;
+                    equals(resp.status,404);
+                }
+            },
+            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+            { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
+        j4p.start(200);
+        setTimeout(function() {
+            j4p.stop();
+            equals(counterS,5,"Req should be called 4 times successfully");
+            equals(counterE,3,"One error request, twice");
             start();
         },500);
     })

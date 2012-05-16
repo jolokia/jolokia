@@ -235,15 +235,18 @@
              *
              * @param callback either a function which will be called on a successful performed request or an object
              *        with the two attributes <code>success</code> and <code>error</code> for two callbacks, one for a
-             *        successful call, one in case on an error. The callback will be called with a single response, which is the
-             *        response object for a single request. If multiple requests have been registered along with this callback,
-             *        the callback is called multiple times, one for each request in the same order as the request are given.
-             *        As second argument, the handle which is
-             *        returned by this method is given and as third argument the index within the list of requests
+             *        successful call, one in case on an error. If given only a singel callback function, then this
+             *        function is called with all responses received as argument, regardless whether the response indicates
+             *        a success or error stat. For the second case, when an object with an success and error function is
+             *        given, these callback are called with with a single response object as argument. If multiple requests
+             *        have been registered along with this callback object, the callback is called multiple times, one for
+             *        each request in the same order as the request are given.
+             *        As second argument, the handle which is returned by this method is given and as third argument the index
+             *        within the list of requests
              * @param request, request, .... One or more requests to be registered for this single callback
              * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
              */
-            this.registerRequest = function() {
+            this.register = function() {
                 if (arguments.length < 2) {
                     throw "At a least one request must be provided";
                 }
@@ -275,7 +278,7 @@
              * the handle returned during the registration process must be given
              * @param handle
              */
-            this.unregisterRequest = function(handle) {
+            this.unregister = function(handle) {
                 if (handle < jobs.length) {
                     jobs.splice(handle,1);
                 }
@@ -387,7 +390,7 @@
             };
         }
 
-        // Closure for a full callback which stores the responses in an array
+        // Closure for a full callback which stores the responses in an (closed) array
         function cbCallbackClosure(job,jolokia) {
             var responses = [],
                 callback = job.callback;

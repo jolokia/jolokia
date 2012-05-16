@@ -72,7 +72,7 @@ console.log("Heap Memory used: " + value);
     </para>
     <programlisting language="html"><![CDATA[
 <head>
-  <script src="jquery-1.4.4.js"></script>
+  <script src="jquery-1.7.2.js"></script>
   <script src="json2.js"></script>
   <script src="jolokia-min.js"></script>
   <script src="jolokia-simple-min.js"></script>
@@ -395,7 +395,6 @@ j4p.request(
       single, simple requests and not for JMX proxy calls. 
     </para>
   </section>
-
   
   <section id="js-simple">
     <title>Simple API</title>
@@ -549,6 +548,131 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
           amxBooted: false
      }
 }]]></programlisting>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+  <section id="js-poller">
+    <title>Request scheduler</title>
+    <para>
+      A <classname>Jolokia</classname> object can be also used for
+      periodically sending requests to the agent. Therefor requests
+      can be registered to the client object, and a poller can be
+      started and stopped. All registered requests are send all at
+      once with a single bulk request so this is quite efficient. 
+    </para>
+    <para>
+      Here is a simple example, which queries the heap memory usage
+      every 10 seconds and prints out the used memory on the console:
+    </para>
+          <programlisting language="javascript"><![CDATA[
+var j4p = new Jolokia("/jolokia")
+handle = j4p.register(function(resp) {
+   console.log("HeapMemory used: " + resp.value);
+ },
+ { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
+j4p.start(10000);
+]]></programlisting>
+    <variablelist>
+      <varlistentry>
+        <term>handle = j4p.register(callback,request,request,....)</term>
+        <listitem>
+          <para>
+            This method registers one or more request for being
+            periodically fetched. <code>callback</code> is either a
+            function which will be called with all responses as
+            arguments (in the same order as the requests). Or it is an
+            object with two attributes <code>success</code> and
+            <code>error</code> which have a function as value. In the
+            later case these functions are called for successful and
+            failed requests, respectively. If multiple requests have
+            been registered, the succes- and/or error-function is called
+            multiple times, once for each request.             
+          </para>
+          <para>
+            This method returns a handle which can be used later for
+            unregistering these requests. 
+          </para>
+          <para>
+            In the following example two requests are registered along
+            with a single callback function, which takes two responses
+            as arguments:
+          </para>
+          <programlisting language="javascript"><![CDATA[
+handle = j4p.register(function(resp1,resp2) {
+   console.log("HeapMemory used: " + resp1.value);
+   console.log("ThreadCount: " + resp2.value);
+ },
+ { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+ { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"});
+]]>
+          </programlisting>
+          <para>
+            In the next example, the a dedicated <code>success</code>
+            and <code>error</code> callback are provided, which are
+            called individually for each request (but with the given
+            order):
+          </para>
+          <programlisting language="javascript"><![CDATA[
+j4p.register(
+  {
+    success: function(resp) {
+       console.log("MBean :" + resp.mbean + ", attr:  " + resp.attribute + ", value: " + resp.value);
+    },
+    error: function(resp) {
+       console.log("Error: " + resp.error_text);
+    }
+  },
+  { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+  { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
+  { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
+]]>
+          </programlisting>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>j4p.unregister(handle)</term>
+        <listitem>
+          <para>
+            Unregister one or more requests registered with
+            <code>handle</code> so that they are no longer polled
+            with the scheduler. 
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>j4p.start(period)</term>
+        <listitem>
+          <para>
+            Startup the scheduler for requeting the agent every
+            <code>period</code> milliseconds. If the scheduler is
+            already running, it adapts its scheduling period according
+            to the given argument. If no <code>period</code> is given,
+            the period provided during construction time (with the
+            option <code>fetchInterval</code>) is used. The default
+            value is 30 seconds. 
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>j4p.stop()</term>
+        <listitem>
+          <para>
+            Stop the scheduler. If the scheduler is not running,
+            nothing happens. The scheduler can be restarted after it
+            has been stopped. 
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>j4p.isRunning()</term>
+        <listitem>
+          <para>
+            Checks whether the scheduler is running. Returns
+            <code>true</code> if this is the case, <code>false</code>
+            otherwise. 
+          </para>
         </listitem>
       </varlistentry>
     </variablelist>
