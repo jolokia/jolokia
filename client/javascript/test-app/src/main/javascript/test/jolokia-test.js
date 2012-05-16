@@ -49,8 +49,8 @@ $(document).ready(function() {
         module("Async: " + label);
         asyncTest("Simple Memory Read Request", function() {
             j4p.request(
-            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage"},
-            $.extend(extraParams,
+                { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage"},
+                $.extend(extraParams,
                      {
                          success: function(response) {
                              equals(response.request.type, "read", "Type must be read");
@@ -63,17 +63,17 @@ $(document).ready(function() {
         });
         asyncTest("Simple Memory Read Request with path", function() {
             j4p.request(
-            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" },
-            $.extend(extraParams,
-                     {
-                         success: function(response) {
-                             equals(response.request.type, "read", "Type must be read");
-                             ok(response.value != null, "Value must be set: " + response.value);
-                             ok(response.value.used == null, "No complex structure");
-                             start();
-                         }
-                     })
-                    );
+                { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" },
+                $.extend(extraParams,
+                    {
+                        success: function(response) {
+                            equals(response.request.type, "read", "Type must be read");
+                            ok(response.value != null, "Value must be set: " + response.value);
+                            ok(response.value.used == null, "No complex structure");
+                            start();
+                        }
+                    })
+            );
         });
         asyncTest("Exec Request: garbage collection", function() {
             j4p.request(

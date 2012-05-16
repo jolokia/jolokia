@@ -25,5 +25,7 @@ rm jolokia-test.js
 ln -s ../../../../src/main/javascript/test/jolokia-test.js .
 rm jolokia-simple-test.js
 ln -s ../../../../src/main/javascript/test/jolokia-simple-test.js .
+rm jolokia-poller-test.js
+ln -s ../../../../src/main/javascript/test/jolokia-poller-test.js .
 
 cd ../../../..

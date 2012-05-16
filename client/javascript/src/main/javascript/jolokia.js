@@ -23,12 +23,14 @@
  */
 
 (function() {
+
     var _jolokiaConstructorFunc = function ($) {
 
         // Default paramerters for GET and POST requests
         var DEFAULT_CLIENT_PARAMS = {
             type:"POST",
-            jsonp:false
+            jsonp:false,
+            fetchInterval: 30 * 1000
         };
 
         var GET_AJAX_PARAMS = {
@@ -64,6 +66,12 @@
 
             // Jolokia Javascript Client version
             this.CLIENT_VERSION = "1.0.3";
+
+            // Registered requests for fetching periodically
+            var jobs = [];
+
+            // State of the scheduler
+            var pollerIsRunning = false;
 
             // Allow a single URL parameter as well
             if (typeof param === "string") {
@@ -219,11 +227,190 @@
             };
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Schedule related methods
+
+            /**
+             * Register one or more requests for periodically polling the agent along with a callback to call on receipt
+             * of the response.
+             *
+             * @param callback either a function which will be called on a successful performed request or an object
+             *        with the two attributes <code>success</code> and <code>error</code> for two callbacks, one for a
+             *        successful call, one in case on an error. The callback will be called with a single response, which is the
+             *        response object for a single request. If multiple requests have been registered along with this callback,
+             *        the callback is called multiple times, one for each request in the same order as the request are given.
+             *        As second argument, the handle which is
+             *        returned by this method is given and as third argument the index within the list of requests
+             * @param request, request, .... One or more requests to be registered for this single callback
+             * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
+             */
+            this.registerRequest = function() {
+                if (arguments.length < 2) {
+                    throw "At a least one request must be provided";
+                }
+                var callback = arguments[0],
+                    requests = Array.prototype.slice.call(arguments,1),
+                    job;
+                if (typeof callback === 'object') {
+                    job = {
+                        success: callback.success,
+                        error: callback.error,
+                        callback: null
+                    };
+                } else if (typeof callback === 'function') {
+                    job = {
+                        success: null,
+                        error: null,
+                        callback: callback
+                    }
+                } else {
+                    throw "First argument must be either a callback func " + "or an object with 'success' and 'error' attrs";
+                }
+                job.requests = requests;
+                jobs.push(job);
+                return jobs.length - 1;
+            };
+
+            /**
+             * Unregister a one or more request which has been registered with {@link #registerRequest}. As parameter
+             * the handle returned during the registration process must be given
+             * @param handle
+             */
+            this.unregisterRequest = function(handle) {
+                if (handle < jobs.length) {
+                    jobs.splice(handle,1);
+                }
+            };
+
+            /**
+             * Start the poller. The interval between two polling attempts can be optionally given or are taken from
+             * the parameter <code>fetchInterval</code> given at construction time. If no interval is given at all,
+             * 30 seconds is the default.
+             *
+             * If the poller is already running (i.e. {@link #isRunning()} is <code>true</code> then the scheduler
+             * is restarted, but only if the new interval differs from the currently active one.
+             *
+             * @param interval interval in milliseconds between two polling attempts
+             */
+            this.start = function(interval) {
+                interval = interval || this.fetchInterval;
+                if (pollerIsRunning) {
+                    if (interval === this.fetchInterval) {
+                        // Nothing to do
+                        return;
+                    }
+                    // Re-start with new interval
+                    this.stop();
+                }
+                this.fetchInterval = interval;
+                this.timerId = setInterval(callJolokia(this,jobs), interval);
+
+                pollerIsRunning = true;
+            };
+
+            /**
+             * Stop the poller. If the poller is not running, no operation is performed.
+             */
+            this.stop = function() {
+                if (!pollerIsRunning && this.timerId != undefined) {
+                    return;
+                }
+                clearInterval(this.timerId);
+                this.timerId = null;
+
+                pollerIsRunning = false;
+            };
+
+            /**
+             * Check whether the poller is running.
+             * @return true if the poller is running, false otherwise.
+             */
+            this.isRunning = function() {
+                return pollerIsRunning;
+            };
+
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         }
 
         // Private Methods:
 
         // ========================================================================
+
+
+        // Create a function called by a timer, which requests the registered requests
+        // calling the stored callback on receipt. jolokia and jobs are put into the closure
+        function callJolokia(jolokia,jobs) {
+            return function() {
+                var errorCbs = [],
+                    successCbs = [],
+                    reqs,
+                    i, j,
+                    len = jobs.length;
+                var requests = [];
+                var opts;
+                for (i = 0; i < len; i++) {
+                    var job = jobs[i];
+                    reqs = job != null ? job.requests : void 0;
+                    var reqsLen = reqs.length;
+                    if (job.success) {
+                        // Success/error pair of callbacks
+                        var successCb = cbSuccessErrorClosure("success",job,i);
+                        var errorCb = cbSuccessErrorClosure("error",job,i);
+                        for (j = 0; j < reqsLen; j++) {
+                            requests.push(reqs[j]);
+                            successCbs.push(successCb);
+                            errorCbs.push(errorCb);
+                        }
+                    } else {
+                        // Pure callback getting all requests at once
+                        var dCb = cbCallbackClosure(job,jolokia);
+                        // Add callbacks which collect the responses
+                        for (j = 0; j < reqsLen - 1; j++) {
+                            requests.push(reqs[j]);
+                            successCbs.push(dCb.cb);
+                            errorCbs.push(dCb.cb);
+                        }
+                        // Add final callback which calls the last method
+                        requests.push(reqs[reqsLen-1]);
+                        successCbs.push(dCb.lcb);
+                        errorCbs.push(dCb.lcb);
+                    }
+                }
+                opts = {
+                    success: function(resp, j) {
+                        return successCbs[j].apply(jolokia, [resp, j]);
+                    },
+                    error: function(resp, j) {
+                        return errorCbs[j].apply(jolokia, [resp, j]);
+                    }
+                };
+                return jolokia.request(requests, opts);
+            };
+        }
+
+        // Closure for a full callback which stores the responses in an array
+        function cbCallbackClosure(job,jolokia) {
+            var responses = [],
+                callback = job.callback;
+
+            return {
+                cb : function(resp,j) {
+                    responses.push(resp);
+                },
+                lcb : function(resp,j) {
+                    responses.push(resp);
+                    callback.apply(jolokia,responses);
+                }
+            };
+        }
+
+        // Own function for creating a closure to avoid reference to mutable state in the loop
+        function cbSuccessErrorClosure(type, job, i) {
+            return function(resp,j) {
+                if (job[type]) {
+                    job[type](resp,i,j)
+                }
+            }
+        }
 
         // Construct a callback dispatcher for appropriately dispatching
         // to a single callback or within an array of callbacks
