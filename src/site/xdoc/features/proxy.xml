@@ -82,7 +82,7 @@ http://jolokia-proxy:8080/jolokia</pre>
             MBeanServer merging as it happens for direct operation is
             not available. Also, certain workarounds for bugs in the
             server's JMX implementation are not available. (e.g. see
-            this <a href="">blog post</a> for a JBoss bug when
+            this <a href="http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx/">blog post</a> for a JBoss bug when  
             accessing MXBeans in the PlatformMBeanServer)
           </li>
           <li>
