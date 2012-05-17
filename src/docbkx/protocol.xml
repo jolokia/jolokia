@@ -171,7 +171,7 @@
           used instead. This should be URL encoded, though. For the
           example above, the alternative is
           <informalexample>
-            <literallayout class="monospaced">http://localhost:8080/jolokia?p=/read/test:strangeName=%2Fbla%2F%2F/attribute</literallayout>
+            <literallayout class="monospaced">http://localhost:8080/jolokia?p=/read/jboss.jmx:alias=jmx%2Frmi%2FRMIAdaptor/State</literallayout>
           </informalexample>
         </para>
       </section>
