@@ -17,7 +17,7 @@
         In order to monitor Java application servers, a multitude of
         parameters can be observed. Memory and thread consumption,
         database connection pool utilisation, HTTP request response
-        for various web application are example for valuable metrics
+        for various web application are examples for valuable metrics
         to monitor. Typically, 10-20 monitored attributes are a good
         setup for a single JEE server.
       </p>
