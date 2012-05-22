@@ -29,8 +29,7 @@
         // Default paramerters for GET and POST requests
         var DEFAULT_CLIENT_PARAMS = {
             type:"POST",
-            jsonp:false,
-            fetchInterval: 30 * 1000
+            jsonp:false
         };
 
         var GET_AJAX_PARAMS = {
@@ -200,7 +199,7 @@
                         var responses = $.isArray(data) ? data : [ data ];
                         for (var idx = 0; idx < responses.length; idx++) {
                             var resp = responses[idx];
-                            if (resp.status == null || resp.status != 200) {
+                            if (Jolokia.isError(resp)) {
                                 error_callback(resp, idx);
                             } else {
                                 success_callback(resp, idx);
@@ -295,7 +294,7 @@
              * @param interval interval in milliseconds between two polling attempts
              */
             this.start = function(interval) {
-                interval = interval || this.fetchInterval;
+                interval = interval || this.fetchInterval || 30000;
                 if (pollerIsRunning) {
                     if (interval === this.fetchInterval) {
                         // Nothing to do
@@ -599,10 +598,18 @@
         // ================================================================================================
 
         // Escape a path part, can be used as a static method outside this function too
-        Jolokia.escape = function (part) {
+        Jolokia.prototype.escape = Jolokia.escape = function (part) {
             return part.replace(/!/g, "!!").replace(/\//g, "!/");
         };
 
+        /**
+         * Utility method which checks whether a response is an error or a success
+         * @param resp response to check
+         * @return true if response is an error, false otherwise
+         */
+        Jolokia.prototype.isError = Jolokia.isError = function(resp) {
+            return resp.status == null || resp.status != 200;
+        };
 
         // Return back exported function/constructor
         return Jolokia;
