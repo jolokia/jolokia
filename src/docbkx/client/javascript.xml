@@ -557,10 +557,11 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
     <title>Request scheduler</title>
     <para>
       A <classname>Jolokia</classname> object can be also used for
-      periodically sending requests to the agent. Therefor requests
+      periodically sending requests to the agent. Therefore requests
       can be registered to the client object, and a poller can be
-      started and stopped. All registered requests are send all at
-      once with a single bulk request so this is quite efficient. 
+      started and stopped. All registered requests are send at once
+      with a single bulk request so this is quite efficient method for
+      periodically polling multiple values.
     </para>
     <para>
       Here is a simple example, which queries the heap memory usage
@@ -572,6 +573,7 @@ handle = j4p.register(function(resp) {
    console.log("HeapMemory used: " + resp.value);
  },
  { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
+
 j4p.start(10000);
 ]]></programlisting>
     <variablelist>
@@ -587,7 +589,7 @@ j4p.start(10000);
             <code>error</code> which have a function as value. In the
             later case these functions are called for successful and
             failed requests, respectively. If multiple requests have
-            been registered, the succes- and/or error-function is called
+            been registered, the success- and/or error-function is called
             multiple times, once for each request.             
           </para>
           <para>
@@ -609,9 +611,9 @@ handle = j4p.register(function(resp1,resp2) {
 ]]>
           </programlisting>
           <para>
-            In the next example, the a dedicated <code>success</code>
+            In the next example, a dedicated <code>success</code>
             and <code>error</code> callback are provided, which are
-            called individually for each request (but with the given
+            called individually for each request (in the given
             order):
           </para>
           <programlisting language="javascript"><![CDATA[

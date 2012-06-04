@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Jolokia Javascript Demo</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+  
+  <head>
+    <script type="text/javascript" src="../js/d3.v2.js"></script>
+    <script type="text/javascript" src="../js/jquery.js"></script>
+    <script type="text/javascript" src="../js/jolokia.js"></script>
+    <script type="text/javascript" src="../js/cubism.v1-jolokia.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+  </head>
+  
+  <body>
+    <section name="Javascript Demo">
+      <div id="col_left" style="float: left;">
+        <div class="col_title">Memory</div>
+      </div>
+      <div id="col_right" style="float: right;">
+        <div class="col_title">Requests</div>
+      </div>
+      <button style="margin-top: 10px;" onclick="gc()">Trigger Garbage Collection</button>
+      <div style="clear: both"></div>
+    </section>
+
+    <script type="text/javascript">
+                  //<![CDATA[
+                  var j4p = new Jolokia("http://jolokia.org/jolokia");
+
+                  $(function() {
+                    var ctx1 = cubism.context()
+                            .serverDelay(0)
+                            .clientDelay(0)
+                            .step(1000)
+                            .size(340);
+
+                    var jol1 = ctx1.jolokia(j4p);
+                    var memory = jol1.metric(
+                            function(resp1,resp2) {
+                              return Number(resp1.value) / Number(resp2.value);
+                            },
+                            {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+                            {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "max"},"Heap-Memory"
+                    );
+                    var gcCount = jol1.metric(
+                            {type: "read", mbean: "java.lang:name=PS MarkSweep,type=GarbageCollector", attribute: "CollectionCount"},
+                            {delta: 1000, name: "GC Old"}
+                    );
+                    var gcCount2 = jol1.metric(
+                            {type: "read", mbean: "java.lang:name=PS Scavenge,type=GarbageCollector", attribute: "CollectionCount"},
+                            {delta: 1000, name: "GC Young"}
+                    );
+                    j4p.start(1000);
+
+                    var colorsRed = ["#FDBE85", "#FEEDDE", "#FD8D3C", "#E6550D", "#A63603","#FDBE85", "#FEEDDE", "#FD8D3C", "#E6550D", "#A63603" ],
+                            colorsGreen = [ "#E5F5F9", "#99D8C9", "#2CA25F", "#E5F5F9", "#99D8C9", "#2CA25F"],
+                            colorsBlue = [ "#ECE7F2", "#A6BDDB", "#2B8CBE", "#ECE7F2", "#A6BDDB", "#2B8CBE"];
+                    d3.select("#col_left").call(function(div) {
+
+                      div.append("div")
+                              .attr("class", "axis")
+                              .call(ctx1.axis().orient("top"));
+
+                      div.selectAll(".horizon")
+                              .data([memory])
+                              .enter().append("div")
+                              .attr("class", "horizon")
+                              .call(
+                              ctx1.horizon()
+                                      .colors(colorsRed)
+                                      .format(d3.format(".4p"))
+                      );
+                      div.selectAll(".horizon-gc")
+                              .data([gcCount2,gcCount])
+                              .enter().append("div")
+                              .attr("class","horizon horizon-gc")
+                              .call(
+                              ctx1.horizon().colors(colorsRed).height(10)
+                      );
+                      div.append("div")
+                              .attr("class", "rule")
+                              .call(ctx1.rule());
+
+                    });
+
+
+                    var ctx2 = cubism.context()
+                            .serverDelay(0)
+                            .clientDelay(0)
+                            .step(1000)
+                            .size(340);
+
+                    var jol2 = ctx2.jolokia(j4p);
+                    var numberThreads = jol2.metric({type: "read", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},"Threads");
+                    var agentRequest = jol2.metric(
+                            {type: "read", mbean: "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
+                              attribute: "requestCount"},{name: "Jolokia", delta: 10 * 1000});
+                    var hudsonRequest = jol2.metric(
+                            {type: "read", mbean: "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/hudson,j2eeType=Servlet,name=Stapler",
+                              attribute: "requestCount"},{name: "Hudson", delta: 10 * 1000});
+                    var sonarRequest = jol2.metric(
+                            {type: "read", mbean: "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/sonar,j2eeType=Servlet,name=default",
+                              attribute: "requestCount"},{name: "Sonar", delta: 10 * 1000});
+                    var allRequests = jol2.metric(
+                            function (resp) {
+                              var attrs = resp.value;
+                              var sum = 0;
+                              for (var key in attrs) {
+                                sum += attrs[key].requestCount;
+                              }
+                              return sum;
+                            },
+                            {type: "read", mbean: "Catalina:j2eeType=Servlet,*",
+                              attribute: "requestCount"},{name: "All", delta: 10 * 1000});
+
+                    d3.select("#col_right").call(function(div) {
+
+                      div.append("div")
+                              .attr("class", "axis")
+                              .call(ctx2.axis().orient("top"));
+
+
+                      div.selectAll(".horizon")
+                              .data([agentRequest,hudsonRequest,sonarRequest,allRequests])
+                              .enter()
+                              .append("div")
+                              .attr("class", "horizon")
+                              .call(ctx2.horizon()
+                              .format(d3.format("10d"))
+                              .colors(function(d,i) {
+                                return i == 3 ? colorsBlue : colorsGreen
+                              }));
+
+                      div.append("div")
+                              .attr("class", "rule")
+                              .call(ctx2.rule());
+
+                    });
+
+
+
+                    // On mousemove, reposition the chart values to match the rule.
+                    ctx2.on("focus", function(i) {
+                      d3.selectAll("#col_right .value").style("right", i == null ? null : ctx2.size() - i + "px");
+                    });
+                    ctx1.on("focus", function(i) {
+                      d3.selectAll("#col_left .value").style("right", i == null ? null : ctx1.size() - i + "px");
+                    });
+
+                  });
+
+                  function gc() {
+                    j4p.request({type: "exec", mbean: "java.lang:type=Memory", operation: "gc"})
+                  }
+
+                  //]]>
+                </script>
+              </body>
+</document>
