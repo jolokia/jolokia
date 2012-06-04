@@ -17,19 +17,46 @@
   </head>
   
   <body>
-    <section name="Javascript Demo">
-      <div id="col_left" style="float: left;">
-        <div class="col_title">Memory</div>
-      </div>
-      <div id="col_right" style="float: right;">
-        <div class="col_title">Requests</div>
-      </div>
-      <button style="margin-top: 10px;" onclick="gc()">Trigger Garbage Collection</button>
-      <div style="clear: both"></div>
+    <section name="Cubism Demos">
+      <subsection name="HeapMemory">
+        <div id="memory"></div>
+        <button style="margin-top: 10px; margin-left: 465px;" onclick="gc()">Trigger Garbage Collection</button>
+      </subsection>
+      <subsection name="Requests (per 10 seconds)">
+        <div id="request">
+        </div>
+      </subsection>
+      <subsection name="Examples">
+      <pre class="prettyprint lang-javascript">  // Create a top-level Cubism Context
+  var context = cubism.context();
+  
+  // Create a source for Jolokia metrics pointing to the agent 
+  // at 'http://jolokia.org/jolokia'
+  var jolokia = context.jolokia("http://jolokia.org/jolokia");
+
+  // Create a metric for the absolut Heap memory usage
+  var memoryAbs = jolokia.metric({
+                      type: 'read', 
+                      mbean: 'java.lang:type=Memory',
+                      attribute: 'HeapMemoryUsage',
+                      path: 'used'
+                  },"HeapMemory Usage");
+ 
+   // Use d3 to attach the metrics with a specific graph type 
+   // ('horizon' in this case) to the document
+   d3.select("#charts").call(function(div) {
+       div.append("div")
+           .data([memoryAbs])
+           .call(context.horizon())
+   });</pre>
+      </subsection>
     </section>
 
+    <!-- ======================================================================= -->
+
+
     <script type="text/javascript">
-                  //<![CDATA[
+      //<![CDATA[
                   var j4p = new Jolokia("http://jolokia.org/jolokia");
 
                   $(function() {
@@ -37,7 +64,7 @@
                             .serverDelay(0)
                             .clientDelay(0)
                             .step(1000)
-                            .size(340);
+                            .size(598);
 
                     var jol1 = ctx1.jolokia(j4p);
                     var memory = jol1.metric(
@@ -60,7 +87,7 @@
                     var colorsRed = ["#FDBE85", "#FEEDDE", "#FD8D3C", "#E6550D", "#A63603","#FDBE85", "#FEEDDE", "#FD8D3C", "#E6550D", "#A63603" ],
                             colorsGreen = [ "#E5F5F9", "#99D8C9", "#2CA25F", "#E5F5F9", "#99D8C9", "#2CA25F"],
                             colorsBlue = [ "#ECE7F2", "#A6BDDB", "#2B8CBE", "#ECE7F2", "#A6BDDB", "#2B8CBE"];
-                    d3.select("#col_left").call(function(div) {
+                    d3.select("#memory").call(function(div) {
 
                       div.append("div")
                               .attr("class", "axis")
@@ -89,24 +116,17 @@
                     });
 
 
-                    var ctx2 = cubism.context()
-                            .serverDelay(0)
-                            .clientDelay(0)
-                            .step(1000)
-                            .size(340);
-
-                    var jol2 = ctx2.jolokia(j4p);
-                    var numberThreads = jol2.metric({type: "read", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},"Threads");
-                    var agentRequest = jol2.metric(
+                    var numberThreads = jol1.metric({type: "read", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},"Threads");
+                    var agentRequest = jol1.metric(
                             {type: "read", mbean: "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
                               attribute: "requestCount"},{name: "Jolokia", delta: 10 * 1000});
-                    var hudsonRequest = jol2.metric(
+                    var hudsonRequest = jol1.metric(
                             {type: "read", mbean: "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/hudson,j2eeType=Servlet,name=Stapler",
                               attribute: "requestCount"},{name: "Hudson", delta: 10 * 1000});
-                    var sonarRequest = jol2.metric(
+                    var sonarRequest = jol1.metric(
                             {type: "read", mbean: "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/sonar,j2eeType=Servlet,name=default",
                               attribute: "requestCount"},{name: "Sonar", delta: 10 * 1000});
-                    var allRequests = jol2.metric(
+                    var allRequests = jol1.metric(
                             function (resp) {
                               var attrs = resp.value;
                               var sum = 0;
@@ -118,11 +138,11 @@
                             {type: "read", mbean: "Catalina:j2eeType=Servlet,*",
                               attribute: "requestCount"},{name: "All", delta: 10 * 1000});
 
-                    d3.select("#col_right").call(function(div) {
+                    d3.select("#request").call(function(div) {
 
                       div.append("div")
                               .attr("class", "axis")
-                              .call(ctx2.axis().orient("top"));
+                              .call(ctx1.axis().orient("top"));
 
 
                       div.selectAll(".horizon")
@@ -130,7 +150,7 @@
                               .enter()
                               .append("div")
                               .attr("class", "horizon")
-                              .call(ctx2.horizon()
+                              .call(ctx1.horizon()
                               .format(d3.format("10d"))
                               .colors(function(d,i) {
                                 return i == 3 ? colorsBlue : colorsGreen
@@ -138,18 +158,14 @@
 
                       div.append("div")
                               .attr("class", "rule")
-                              .call(ctx2.rule());
+                              .call(ctx1.rule());
 
                     });
-
-
 
                     // On mousemove, reposition the chart values to match the rule.
-                    ctx2.on("focus", function(i) {
-                      d3.selectAll("#col_right .value").style("right", i == null ? null : ctx2.size() - i + "px");
-                    });
                     ctx1.on("focus", function(i) {
-                      d3.selectAll("#col_left .value").style("right", i == null ? null : ctx1.size() - i + "px");
+                      d3.selectAll("#memory .value").style("right", i == null ? null : ctx1.size() - i + "px");
+                      d3.selectAll("#request .value").style("right", i == null ? null : ctx1.size() - i + "px");
                     });
 
                   });
@@ -159,6 +175,6 @@
                   }
 
                   //]]>
-                </script>
-              </body>
+    </script>
+  </body>
 </document>
