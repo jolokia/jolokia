@@ -5,7 +5,7 @@ var context = cubism.context()
     .serverDelay(0)
     .clientDelay(0)
     .step(1000)
-    .size(598);
+    .size(594);
 var jolokia = context.jolokia(j4p);
 
 // =============================================================================
