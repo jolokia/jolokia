@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  
+  <properties>
+    <title>Jolokia Javascript Demo</title>
+    <author email="roland@jolokia.org">Roland Huss</author>
+  </properties>
+  
+  <head>
+    <script type="text/javascript" src="../js/d3.v2.js"></script>
+    <script type="text/javascript" src="../js/jquery.js"></script>
+    <script type="text/javascript" src="../js/jolokia.js"></script>
+    <script type="text/javascript" src="../js/cubism.v1-jolokia.js"></script>
+    <script type="text/javascript" src="../js/javascript-cubism.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+  </head>
+  
+  <body>
+    <section name="Cubism Demos">
+      <subsection name="HeapMemory">
+        <div id="memory"></div>
+        <button style="margin-top: 10px; margin-left: 25px;" onclick="gc()">Trigger Garbage Collection</button>
+      </subsection>
+      <subsection name="Requests (per 10 seconds)">
+        <div id="request">
+        </div>
+      </subsection>
+      <subsection name="Examples">
+      <pre class="prettyprint lang-javascript">  // Create a top-level Cubism Context
+  var context = cubism.context();
+  
+  // Create a source for Jolokia metrics pointing to the agent 
+  // at 'http://jolokia.org/jolokia'
+  var jolokia = context.jolokia("http://jolokia.org/jolokia");
+
+  // Create a metric for the absolut Heap memory usage
+  var memoryAbs = jolokia.metric({
+                      type: 'read', 
+                      mbean: 'java.lang:type=Memory',
+                      attribute: 'HeapMemoryUsage',
+                      path: 'used'
+                  },"HeapMemory Usage");
+ 
+   // Use d3 to attach the metrics with a specific graph type 
+   // ('horizon' in this case) to the document
+   d3.select("#charts").call(function(div) {
+       div.append("div")
+           .data([memoryAbs])
+           .call(context.horizon())
+   });</pre>
+      </subsection>
+    </section>
+
+  </body>
+</document>
