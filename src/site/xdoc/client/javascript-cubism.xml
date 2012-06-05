@@ -4,21 +4,21 @@
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   
   <properties>
-    <title>Jolokia Javascript Demo</title>
+    <title>Jolokia Cubism Demo</title>
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
   
   <head>
-    <script type="text/javascript" src="../js/d3.v2.js"></script>
-    <script type="text/javascript" src="../js/jquery.js"></script>
-    <script type="text/javascript" src="../js/jolokia.js"></script>
-    <script type="text/javascript" src="../js/cubism.v1-jolokia.js"></script>
+    <script type="text/javascript" src="../js/d3.v2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-1.7.2-min.js"></script>
+    <script type="text/javascript" src="../js/jolokia-min.js"></script>
+    <script type="text/javascript" src="../js/cubism.v1-jolokia-min.js"></script>
     <script type="text/javascript" src="../js/javascript-cubism.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/style.css" />
   </head>
   
   <body>
-    <section name="Cubism Demos">
+    <section name="Jolokia-Cubism Integration">
       <p>
         <a href="http://square.github.com/cubism/">Cubism</a> is a
         fine Javascript library for plotting timeseries data based on
