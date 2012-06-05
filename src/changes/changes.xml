@@ -8,6 +8,10 @@
   </properties>
   <body>
     <release version="1.0.4-SNAPSHOT" description="Release 1.0.4">
+      <action dev="roland" type="add" date="2012-06-05">
+        Adde a page showing the Jolokia-Cubism integration including
+        live demos. 
+      </action>
       <action dev="roland" type="add" date="2012-05-16">
         Added a scheduler to the JavaScript client library.
       </action>
@@ -15,7 +19,8 @@
         Fixed issue with HTTP method checker for policy based restrictions.
       </action>
       <action dev="roland" type="fix" date="2012-04-26">
-        Fixed fallback when registering ConfigMBean which didn't properly work (see pull request #42)
+        Fixed fallback when registering ConfigMBean which didn't
+        properly work (see pull request #42)  
       </action>
     </release>
     <release version="1.0.3" description="Release 1.0.3" date="2012-04-11">
