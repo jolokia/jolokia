@@ -93,5 +93,19 @@
       </subsection>
       
     </section>
+    <section name="Jolokia as Cubism source">
+      <p>
+        <a href="http://square.github.com/cubism/">Cubism</a> is a <a
+        href="http://d3js.org/">d3.js</a> plugin for plotting time
+        series data. It can be easily be used with Jolokia for
+        periodically reading JMX attributes and plotting them in the
+        browser. 
+      </p>
+      <p>
+        More details on the Jolokia-Cubism integration along with some
+        demo can be found on an <a
+        href="javascript-cubism.html">extra page</a>. 
+      </p>
+    </section>
   </body>
 </document>
