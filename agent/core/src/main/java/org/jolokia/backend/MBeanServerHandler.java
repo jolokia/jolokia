@@ -7,10 +7,9 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.request.JmxRequest;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.*;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.util.ServiceObjectFactory;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -80,15 +79,21 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     /**
      * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
+     * An optional qualifier used for registering this object as an MBean is taken from the given configuration as well
      *
-     * @param pQualifier optional qualifier used for registering this object as an MBean (can be null)
-     * @param pLogHandler log handler used for logging purpooses
+     * @param pConfig configuration for this agent which is also given to the {@see ServerHandle#postDetect()} method for
+     *                special initialization.
+     *
+     * @param pLogHandler log handler used for logging purposes
      */
-    public MBeanServerHandler(String pQualifier,LogHandler pLogHandler) {
+    public MBeanServerHandler(Map<ConfigKey,String> pConfig,LogHandler pLogHandler) {
         List<ServerDetector> detectors = lookupDetectors();
         initMBeanServers(detectors);
         serverHandle = detectServers(detectors,pLogHandler);
-        qualifier = pQualifier;
+        if (serverHandle != null) {
+            serverHandle.postDetect(pConfig,pLogHandler);
+        }
+        qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
     }
 
     /**

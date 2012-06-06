@@ -246,6 +246,15 @@
           linkend="security-policy"/>.
         </td>
       </tr>
+      <tr>
+        <td>org.jolokia.detectorOptions</td>
+        <td></td>
+        <td>
+          An optional JSON representation for application specific
+          options used by detectors for post-initialization steps. See
+          <xref linkend="agent-war-init-params"/> for details. 
+        </td>
+      </tr>
     </table>
     <para>
       This bundle also exports the service

@@ -98,7 +98,7 @@ public class BackendManager {
         // Create and remember request dispatchers
         localDispatcher = new LocalRequestDispatcher(converters,
                                                      restrictor,
-                                                     pConfig.get(ConfigKey.MBEAN_QUALIFIER),
+                                                     pConfig,
                                                      logHandler);
         ServerHandle serverHandle = localDispatcher.getServerInfo();
         requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),

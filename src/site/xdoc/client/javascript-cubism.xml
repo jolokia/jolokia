@@ -70,8 +70,8 @@
           and the <a href="http://labs.consol.de/sonar">Sonar Code
           Metrics</a> server. Since this demo queries the Jolokia
           agent every second, the first chart should show up at least
-          10 request per 10 seconds. Finally, the number of requests
-          served by all deployed servlets a drawn in blue. 
+          10 request per 10 seconds. Finally the number of requests
+          served by all deployed servlets is drawn in blue. 
         </p>
         <div id="request">
         </div>
@@ -115,7 +115,7 @@
      requests object given following the function argument. The final
      argument can be an options object, which in this case indicates
      the label of the chart and the type to be a delta chart,
-     measuring only the increase rate in ten seconds. 
+     measuring only the increase rate for ten seconds. 
    </p>
    <p>
      This sample also shows howto use wildcard patterns in a read

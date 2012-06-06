@@ -23,7 +23,10 @@ import java.util.Set;
 import javax.management.*;
 
 import org.jolokia.request.JmxRequest;
+import org.jolokia.util.ConfigKey;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  * Information about the the server product the agent is running in.
@@ -124,6 +127,19 @@ public class ServerHandle {
     }
 
     /**
+     * Hook called after the detection phase. This can be used by a handle to perform
+     * some specific action, possibly based on the configuration given.
+     *
+     * The default is a no-op.
+     *
+     * @param pConfig agent configuration
+     * @param pLoghandler logger to use for logging any error.
+     */
+    public void postDetect(Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
+        // Do nothing
+    }
+
+    /**
      * Register a MBean at the dedicated server. This method can be overridden if
      * something special registration procedure is required, like for using the
      * specific name for the registration or deligating the namin to MBean to register.
@@ -159,8 +175,15 @@ public class ServerHandle {
         addNullSafe(ret, "vendor", vendor);
         addNullSafe(ret, "product", product);
         addNullSafe(ret, "version", version);
-        addNullSafe(ret, "agent-url", agentUrl);
-        addNullSafe(ret, "extraInfo", getExtraInfo(pServers));
+        addNullSafe(ret, "agent-url", agentUrl != null ? agentUrl.toExternalForm() : null);
+        Map<String,String> extraInfo = getExtraInfo(pServers);
+        if (extraInfo != null) {
+            JSONObject jsonExtra = new JSONObject();
+            for (Map.Entry<String,String> entry : extraInfo.entrySet()) {
+                jsonExtra.put(entry.getKey(),entry.getValue());
+            }
+            ret.put("extraInfo",jsonExtra);
+        }
         return ret;
     }
 
@@ -170,4 +193,31 @@ public class ServerHandle {
         }
     }
 
+    /**
+     * Get the optional options used for detectors. This should be a JSON string specifying all options
+     * for all detectors. Keys are the name of the detector's product, the values are JSON object containing
+     * specific parameters for this agent. E.g.
+     *
+     * <pre>
+     *    {
+     *        "glassfish" : { "bootAmx": true  }
+     *    }
+     * </pre>
+     *
+     * @param pConfig the agent configuration
+     * @param pLogHandler a log handler for putting out error messages
+     * @return the detector specific configuration
+     */
+    protected JSONObject getDetectorOptions(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+        String optionString = pConfig.get(ConfigKey.DETECTOR_OPTIONS);
+        if (optionString != null) {
+            try {
+                JSONObject opts = (JSONObject) new JSONParser().parse(optionString);
+                return (JSONObject) opts.get(getProduct());
+            } catch (Exception e) {
+                pLogHandler.error("Could not parse options '" + optionString + "' as JSON object: " + e,e);
+            }
+        }
+        return null;
+    }
 }

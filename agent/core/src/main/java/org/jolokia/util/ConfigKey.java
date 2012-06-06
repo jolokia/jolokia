@@ -139,7 +139,23 @@ public enum ConfigKey {
      * <p>Note this will be combined with the objectClass filter for HttpService with
      * the and (&amp;) operator.</p>
      */
-    HTTP_SERVICE_FILTER("httpServiceFilter",true,false,"");
+    HTTP_SERVICE_FILTER("httpServiceFilter",true,false,""),
+
+    /**
+     * Extra options passed to a server handle after it has been detected. The value
+     * must be a JSON object with the product name as key and another JSON object as value containing
+     * the specific handle configuration.
+     *
+     * E.g.
+     *
+     * <pre>
+     *     {
+     *         "glassfish" : { "bootAmx" : true},
+     *         "jboss" : { "disableWorkaround" : true}
+     *     }
+     * </pre>
+     */
+    DETECTOR_OPTIONS("detectorOptions",true, false);
 
     private String key;
     private String defaultValue;

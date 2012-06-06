@@ -24,6 +24,11 @@ import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
+import org.jolokia.util.ConfigKey;
+import org.jolokia.util.LogHandler;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 /**
  * Detector for Glassfish servers
  *
@@ -106,6 +111,18 @@ public class GlassfishDetector extends AbstractServerDetector {
                 extra.put("amxBooted",Boolean.toString(mBeanExists(pServers,"amx:type=domain-root,*")));
             }
             return extra;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void postDetect(Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
+            JSONObject opts = getDetectorOptions(pConfig,pLoghandler);
+            if (opts != null) {
+                Boolean bootAmx = (Boolean) opts.get("bootAmx");
+                if (bootAmx != null) {
+
+                }
+            }
         }
     }
 }

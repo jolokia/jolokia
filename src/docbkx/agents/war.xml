@@ -155,7 +155,47 @@
           Default: <constant>text/plain</constant>
         </td>
       </tr>
-    </table>      
+      <tr>
+        <td><constant>detectorOptions</constant></td>
+        <td>
+          Extra options passed to an detector after successful
+          detection of an application server. See below for an
+          explanation. 
+        </td>
+        <td>          
+        </td>
+      </tr>
+    </table>
+    <para>
+      Jolokia has various detectors which can detect the brand and
+      version of an application server it is running in. This version
+      is revealed with the <constant>version</constant> command. With
+      the configuration parameter <constant>detectorOptions</constant>
+      extra options can be passed to the detectors. These options take
+      the form of a JSON object, where the keys are productnames and
+      the values other JSON objects containing the specific
+      configuration. This configuration is feed to a successful
+      detector which can do some extra initialization on agent
+      startup. Currently the following extra options are supported:
+    </para>
+   <table id="agent-war-detector-options">
+      <title>Servlet init parameters</title>
+      <thead>
+        <tr>
+          <td>Product</td>
+          <td>Option</td>
+          <td>Description</td>
+        </tr>        
+      </thead>
+      <tr>
+        <td>glassfish</td>
+        <td>bootAmx</td>
+        <td>If <constant>true</constant> and the agent is running on
+        Glassfish, this will cause the AMX subsystem to be booted on
+        startup of the agent.
+        </td>
+      </tr>
+   </table>
   </section>
   <section id="agent-war-security">
     <title>Security Setup</title>

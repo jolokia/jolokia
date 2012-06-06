@@ -18,7 +18,7 @@ package org.jolokia.backend;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.*;
 
@@ -27,8 +27,7 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,7 +47,9 @@ public class MBeanServerHandlerTest {
     @BeforeMethod
     public void setup() throws MalformedObjectNameException {
         TestDetector.reset();
-        handler = new MBeanServerHandler("qualifier=test",getEmptyLogHandler());
+        Map<ConfigKey,String> config = new HashMap<ConfigKey,String>();
+        config.put(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
+        handler = new MBeanServerHandler(config,getEmptyLogHandler());
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 

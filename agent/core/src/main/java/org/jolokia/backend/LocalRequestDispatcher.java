@@ -16,6 +16,7 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.management.*;
@@ -28,8 +29,7 @@ import org.jolokia.history.HistoryStore;
 import org.jolokia.mbean.Config;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.DebugStore;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.*;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -55,14 +55,14 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      *
      * @param pConverters object/string converters
      * @param pRestrictor restrictor which checks the access for various operations
-     * @param pQualifier optional qualifier for registering own MBean to allow for multiple J4P instances in the VM
+     * @param pConfig agent configuration
      * @param pLogHandler local handler used for logging out errors and warnings
      */
-    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, String pQualifier, LogHandler pLogHandler) {
+    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
-        mBeanServerHandler = new MBeanServerHandler(pQualifier,pLogHandler);
-        qualifier = pQualifier;
+        mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
+        qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         log = pLogHandler;
 
         // Request handling manager 
