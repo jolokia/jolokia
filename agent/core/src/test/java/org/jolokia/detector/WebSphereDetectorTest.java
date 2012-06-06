@@ -53,39 +53,39 @@ public class WebSphereDetectorTest {
 
 
     private static String SERVER_MBEAN = "WebSphere:cell=bhutNode02Cell,j2eeType=J2EEServer," +
-                                "mbeanIdentifier=cells/bhutNode02Cell/nodes/bhutNode02/servers/server1/server.xml#Server_1245012281417," +
-                                "name=server1,node=bhutNode02,platform=proxy,process=server1,processType=UnManagedProcess," +
-                                "spec=1.0,type=Server,version=6.1.0.33";
+                                         "mbeanIdentifier=cells/bhutNode02Cell/nodes/bhutNode02/servers/server1/server.xml#Server_1245012281417," +
+                                         "name=server1,node=bhutNode02,platform=proxy,process=server1,processType=UnManagedProcess," +
+                                         "spec=1.0,type=Server,version=6.1.0.33";
 
     private static String SERVER_VERSION_V6 =
-                    "--------------------------------------------------------------------------------\n" +
-                    "IBM WebSphere Application Server Product Installation Status Report\n" +
-                    "--------------------------------------------------------------------------------\n" +
-                    "\n" +
-                    "Report at date and time November 29, 2010 11:46:41 AM CET\n" +
-                    "\n" +
-                    "Installation\n" +
-                    "--------------------------------------------------------------------------------\n" +
-                    "Product Directory        /opt/websphere/was61\n" +
-                    "Version Directory        /opt/websphere/was61/properties/version\n" +
-                    "DTD Directory            /opt/websphere/was61/properties/version/dtd\n" +
-                    "Log Directory            /opt/websphere/was61/logs\n" +
-                    "Backup Directory         /opt/websphere/was61/properties/version/nif/backup\n" +
-                    "TMP Directory            /tmp\n" +
-                    "\n" +
-                    "Product List\n" +
-                    "--------------------------------------------------------------------------------\n" +
-                    "ND                       installed\n" +
-                    "\n" +
-                    "Installed Product\n" +
-                    "--------------------------------------------------------------------------------\n" +
-                    "Name                     IBM WebSphere Application Server - ND\n" +
-                    "Version                  6.1.0.33\n" +
-                    "ID                       ND\n" +
-                    "Build Level              cf331032.09\n" +
-                    "Build Date               8/14/10\n" +
-                    "\n" +
-                    "--------------------------------------------------------------------------------\n" +
-                    "End Installation Status Report\n" +
-                    "--------------------------------------------------------------------------------";
+            "--------------------------------------------------------------------------------\n" +
+            "IBM WebSphere Application Server Product Installation Status Report\n" +
+            "--------------------------------------------------------------------------------\n" +
+            "\n" +
+            "Report at date and time November 29, 2010 11:46:41 AM CET\n" +
+            "\n" +
+            "Installation\n" +
+            "--------------------------------------------------------------------------------\n" +
+            "Product Directory        /opt/websphere/was61\n" +
+            "Version Directory        /opt/websphere/was61/properties/version\n" +
+            "DTD Directory            /opt/websphere/was61/properties/version/dtd\n" +
+            "Log Directory            /opt/websphere/was61/logs\n" +
+            "Backup Directory         /opt/websphere/was61/properties/version/nif/backup\n" +
+            "TMP Directory            /tmp\n" +
+            "\n" +
+            "Product List\n" +
+            "--------------------------------------------------------------------------------\n" +
+            "ND                       installed\n" +
+            "\n" +
+            "Installed Product\n" +
+            "--------------------------------------------------------------------------------\n" +
+            "Name                     IBM WebSphere Application Server - ND\n" +
+            "Version                  6.1.0.33\n" +
+            "ID                       ND\n" +
+            "Build Level              cf331032.09\n" +
+            "Build Date               8/14/10\n" +
+            "\n" +
+            "--------------------------------------------------------------------------------\n" +
+            "End Installation Status Report\n" +
+            "--------------------------------------------------------------------------------";
 }

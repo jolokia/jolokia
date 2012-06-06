@@ -16,18 +16,18 @@
 
 package org.jolokia.detector;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
+import javax.management.*;
 
+import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /**
  * Detector for Glassfish servers
@@ -78,6 +78,34 @@ public class GlassfishDetector extends AbstractServerDetector {
         return null;
     }
 
+    private boolean isAmxBooted(Set<? extends MBeanServerConnection> pServers) {
+        return mBeanExists(pServers,"amx:type=domain-root,*");
+    }
+
+    private void bootAmx(Set<? extends MBeanServerConnection> pServers, LogHandler pLoghandler) {
+        ObjectName bootMBean = null;
+        try {
+            bootMBean = new ObjectName("amx-support:type=boot-amx");
+        } catch (MalformedObjectNameException e) {
+            // Cannot happen ....
+        }
+        InstanceNotFoundException infExp = null;
+        for (MBeanServerConnection server : pServers) {
+            try {
+                server.invoke(bootMBean, "bootAMX", null, null);
+                return;
+            } catch (InstanceNotFoundException e) {
+                // Can be the case if multiple MBeanServers has been found, next try ...
+                infExp = e;
+            } catch (Exception e) {
+                pLoghandler.error("Exception while executing bootAmx: " + e,e);
+            }
+        }
+        if (infExp != null) {
+            pLoghandler.error("No bootAmx MBean found: ",infExp);
+        }
+    }
+
     private String getVersionFromFullVersion(String pOriginalVersion,String pFullVersion) {
         if (pFullVersion == null) {
             return pOriginalVersion;
@@ -91,6 +119,8 @@ public class GlassfishDetector extends AbstractServerDetector {
     }
 
     private class GlassfishServerHandle extends ServerHandle {
+        private boolean amxShouldBeBooted = false;
+        private LogHandler logHandler;
 
         /**
          * Server handle for a glassfish server
@@ -100,7 +130,7 @@ public class GlassfishDetector extends AbstractServerDetector {
          * @param extraInfo extra infos
          */
         public GlassfishServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
-            super("Sun", "glassfish", version, agentUrl, extraInfo);
+            super("Oracle", "glassfish", version, agentUrl, extraInfo);
         }
 
         /** {@inheritDoc} */
@@ -108,21 +138,29 @@ public class GlassfishDetector extends AbstractServerDetector {
         public Map<String, String> getExtraInfo(Set<? extends MBeanServerConnection> pServers) {
             Map<String,String> extra = super.getExtraInfo(pServers);
             if (extra != null && getVersion().startsWith("3")) {
-                extra.put("amxBooted",Boolean.toString(mBeanExists(pServers,"amx:type=domain-root,*")));
+                extra.put("amxBooted",Boolean.toString(isAmxBooted(pServers)));
             }
             return extra;
         }
 
-        /** {@inheritDoc} */
         @Override
-        public void postDetect(Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
-            JSONObject opts = getDetectorOptions(pConfig,pLoghandler);
-            if (opts != null) {
-                Boolean bootAmx = (Boolean) opts.get("bootAmx");
-                if (bootAmx != null) {
-
-                }
+        public void preDispatch(Set<MBeanServer> pMBeanServers, JmxRequest pJmxReq) {
+            if (amxShouldBeBooted) {
+                bootAmx(pMBeanServers,logHandler);
+                amxShouldBeBooted = false;
             }
         }
+
+        /** {@inheritDoc} */
+        @Override
+        public void postDetect(Set<? extends MBeanServerConnection> pServers,
+                               Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
+            JSONObject opts = getDetectorOptions(pConfig,pLoghandler);
+            amxShouldBeBooted = (opts == null || opts.get("bootAmx") == null || (Boolean) opts.get("bootAmx"))
+                                && !isAmxBooted(pServers);
+            logHandler = pLoghandler;
+        }
     }
+
+
 }

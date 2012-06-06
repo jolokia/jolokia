@@ -132,10 +132,11 @@ public class ServerHandle {
      *
      * The default is a no-op.
      *
+     * @param pServers
      * @param pConfig agent configuration
      * @param pLoghandler logger to use for logging any error.
      */
-    public void postDetect(Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
+    public void postDetect(Set<? extends MBeanServerConnection> pServers, Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
         // Do nothing
     }
 
@@ -182,7 +183,7 @@ public class ServerHandle {
             for (Map.Entry<String,String> entry : extraInfo.entrySet()) {
                 jsonExtra.put(entry.getKey(),entry.getValue());
             }
-            ret.put("extraInfo",jsonExtra);
+            ret.put("extraInfo", jsonExtra);
         }
         return ret;
     }

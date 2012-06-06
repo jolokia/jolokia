@@ -110,6 +110,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
         }
     }
 
+
     /**
      * Get a single attribute for a given MBeanName pattern.
      *

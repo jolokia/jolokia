@@ -190,9 +190,10 @@
       <tr>
         <td>glassfish</td>
         <td>bootAmx</td>
-        <td>If <constant>true</constant> and the agent is running on
-        Glassfish, this will cause the AMX subsystem to be booted on
-        startup of the agent.
+        <td>If <constant>false</constant> and the agent is running on
+        Glassfish, this will cause the AMX subsystem not to be booted
+        during startup. By default, AMX which contains all relevant
+        MBeans for monitoring Glassfish is booted.
         </td>
       </tr>
    </table>

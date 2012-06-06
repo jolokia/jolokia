@@ -51,7 +51,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      * Initialise this server handler and register as an MBean
      *
      * @throws MalformedObjectNameException if our name is wrong (cannot happen)
-     * @throws InstanceAlreadyExistsException if we already have been initialised
      * @throws NotCompliantMBeanException if we are not compliant MBean (but we are)
      */
     public void initMBean() throws MalformedObjectNameException, NotCompliantMBeanException {
@@ -91,7 +90,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         initMBeanServers(detectors);
         serverHandle = detectServers(detectors,pLogHandler);
         if (serverHandle != null) {
-            serverHandle.postDetect(pConfig,pLogHandler);
+            serverHandle.postDetect(mBeanServers, pConfig,pLogHandler);
         }
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
     }
@@ -105,6 +104,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      */
     public Object dispatchRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+        serverHandle.preDispatch(mBeanServers,pJmxReq);
         if (pRequestHandler.handleAllServersAtOnce(pJmxReq)) {
             try {
                 return pRequestHandler.handleRequest(mBeanServerConnections,pJmxReq);
@@ -112,7 +112,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
                 throw new IllegalStateException("Internal: IOException " + e + ". Shouldn't happen.",e);
             }
         } else {
-            serverHandle.preDispatch(mBeanServers,pJmxReq);
             return handleRequest(pRequestHandler, pJmxReq);
         }
     }
