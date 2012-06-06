@@ -16,7 +16,6 @@
 
 package org.jolokia.detector;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -98,7 +97,7 @@ public class GlassfishDetector extends AbstractServerDetector {
                 // Can be the case if multiple MBeanServers has been found, next try ...
                 infExp = e;
             } catch (Exception e) {
-                pLoghandler.error("Exception while executing bootAmx: " + e,e);
+                pLoghandler.error("Exception while executing bootAmx: " + e, e);
             }
         }
         if (infExp != null) {

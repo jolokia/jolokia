@@ -177,10 +177,10 @@ public class ServerHandle {
         addNullSafe(ret, "product", product);
         addNullSafe(ret, "version", version);
         addNullSafe(ret, "agent-url", agentUrl != null ? agentUrl.toExternalForm() : null);
-        Map<String,String> extraInfo = getExtraInfo(pServers);
-        if (extraInfo != null) {
+        Map<String,String> extra = getExtraInfo(pServers);
+        if (extra != null) {
             JSONObject jsonExtra = new JSONObject();
-            for (Map.Entry<String,String> entry : extraInfo.entrySet()) {
+            for (Map.Entry<String,String> entry : extra.entrySet()) {
                 jsonExtra.put(entry.getKey(),entry.getValue());
             }
             ret.put("extraInfo", jsonExtra);

@@ -12,8 +12,10 @@
         Allow for custom detector options in the agent's
         configuration. These options can be evaluated during startup
         of the agent. The first (and only) option it 'bootAmx' for
-        allowing a Glassfish detector to boot up the AMX subsystem
-        upon start of this agent. 
+        allowing a Glassfish detector to not boot up the AMX subsystem
+        upon start of this agent. By default (since it is probably
+        needed every time when Jolokia is installed), AMX is booted to
+        provide the most userful information over JMX.
       </action>
       <action dev="roland" type="add" date="2012-06-05">
         Adde a page showing the Jolokia-Cubism integration including
