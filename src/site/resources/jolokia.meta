@@ -7,6 +7,9 @@
       "http://labs.consol.de/maven/snapshots-repository"
    ],
    "versions" : {
+      "1.0.4" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
       "1.0.3" : {
          "jmx4perl" : "[1.00,2.00)"
       },
