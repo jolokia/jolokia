@@ -40,10 +40,6 @@ cd target/checkout
 mvn -Pdist deploy
 cd ../..
 
-# Deploy roo to labs, too
-cd target/checkout/tools/roo-addon
-mvn -Plabs deploy
-
 # Release on central maven repo
 # See: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
 # Staging Nexus: https://oss.sonatype.org/
