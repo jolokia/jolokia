@@ -69,6 +69,20 @@
       <param-name>maxObjects</param-name>
       <param-value>0</param-value>
     </init-param>
+    <init-param>
+      <description>
+        Options specific for certain application
+        server detectors. Detectors can evaluate these
+        options and perform a specific initialization based
+        on these options. The value is a JSON object with
+        the detector's name as key and the options as value.
+        E.g. '{glassfish: {bootAmx: false}}' would prevent
+        the booting of the AMX subsystem on a glassfish with
+        is done by default.
+      </description>
+      <param-name>detectorOptions</param-name>
+      <param-value>{}</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
 

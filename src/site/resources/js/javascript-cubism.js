@@ -10,6 +10,7 @@ var jolokia = context.jolokia(j4p);
 
 // =============================================================================
 // Various metrics used
+
 var memory = jolokia.metric(
     function (resp1, resp2) {
         return Number(resp1.value) / Number(resp2.value);

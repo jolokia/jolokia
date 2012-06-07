@@ -234,7 +234,7 @@
              *
              * @param callback either a function which will be called on a successful performed request or an object
              *        with the two attributes <code>success</code> and <code>error</code> for two callbacks, one for a
-             *        successful call, one in case on an error. If given only a singel callback function, then this
+             *        successful call, one in case on an error. If given only a single callback function, then this
              *        function is called with all responses received as argument, regardless whether the response indicates
              *        a success or error stat. For the second case, when an object with an success and error function is
              *        given, these callback are called with with a single response object as argument. If multiple requests

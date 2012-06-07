@@ -7,7 +7,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.4-SNAPSHOT" description="Release 1.0.4">
+    <release version="1.0.4" description="Release 1.0.4" date="2012-06-07">
       <action dev="roland" type="add" date="2012-06-06">
         Allow for custom detector options in the agent's
         configuration. These options can be evaluated during startup
@@ -18,7 +18,7 @@
         provide the most userful information over JMX.
       </action>
       <action dev="roland" type="add" date="2012-06-05">
-        Adde a page showing the Jolokia-Cubism integration including
+        Added a page showing the Jolokia-Cubism integration including
         live demos. 
       </action>
       <action dev="roland" type="add" date="2012-05-16">
@@ -61,10 +61,10 @@
         based restrictor allows for fine grained restriction of cross
         origin access with a &lt;cors&gt; section.
       </action>
-      <acion dev="roland" type="update" date="2012-04-10">
+      <action dev="roland" type="update" date="2012-04-10">
         Added none-caching headers (cache-control: 'no-cache', pragma: 'no-cache', expires: '-1') to
         Jolokia's response for all requests.
-      </acion>
+      </action>
     </release>
     <release version="1.0.2" description="Release 1.0.2" date="2012-01-06">
       <action dev="roland" type="update" date="2011-12-29">

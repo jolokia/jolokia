@@ -51,14 +51,74 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="1.0.4 introduces a Javascript request scheduler">
+        <div class="news-date">2012-06-07</div>
+        <p>
+          Beside some <a href="changes-report.html">bug fixes</a> two
+          new features are included in this new release:
+        </p>
+        <p>
+          Jolokia's Javascript library has now a scheduler for
+          periodically querying the agent. Requests can be registered
+          at the agent and all registered requests are sent at once in
+          a single bulk request periodically. This is especially
+          useful when building up dashboard like web pages with
+          multiple charts.
+        </p>
+        <p>
+          The folowing example registers two requests which are called
+          every second. The <a
+          href="reference/html/clients.html#js-poller">reference
+          documentation</a> has all the details.
+        </p>
+        <pre class="prettyprint lang-javascript">var jolokia = new Jolokia("http://localhost:8080/jolokia");
+
+// Register request along with callback printing out 
+// the heap memory usage
+jolokia.register(function(resp) {
+   console.log("Memory: " + resp.value);
+},{ 
+    type:"read", 
+    mbean:"java.lang:type=Memory", 
+    attribute:"HeapMemoryUsage", 
+    path:"used"
+});
+
+// Start the scheduler for calling the request every second
+jolokia.start(1000);</pre>
+        <p>
+          The scheduler is used by the new Jolokia-<a
+          href="http://square.github.com/cubism/">Cubism</a>
+          integration for plotting real time JMX data. Please have a
+          look at the <a href="client/javascript-cubism.html">demo
+          page</a> for more information about using Jolokia together
+          with Cubism.
+        </p>
+        <p>
+          On the agent side detectors now support custom options. The
+          first option available is for the Glassfish detector to
+          prevent booting of the AMX subsystem, which registers the
+          most interesting MBeans. AMX is booted now by default on the
+          first request when running in Glassfish. For more
+          information, please refer to the <a
+          href="reference/html/agents.html#war-agent-installation">WAR
+          configuration options</a> in the reference documentation.
+        </p>
+        <p>
+          <a href="https://github.com/rhuss/aji">Ají</a> moves on,
+          too, although slower than expected. The main focus of the
+          next months will to be bring that Javascript JMX application
+          on and out. Stay tuned ...
+        </p>
+      </subsection>
       <subsection name="1.0.3 with CORS support">
         <div class="news-date">2012-04-11</div>
         <p>
           This minor release adds cross-origin resource sharing (<a href="http://www.w3.org/TR/cors/">CORS</a>)
           support to all Jolokia agents. Cross domain access can be
           easily restricted with Jolokia's <a
-          href="features/security.html">security setup</a>. The <a
-          href="client/javascript.html">Javascript</a> library already
+                href="features/security.html">security setup</a>. The <a
+                href="client/javascript.html">Javascript</a> library already
           support CORS for most browsers out of the box, for IE8 and
           larger some special setup is still required. Transparent
           CORS client support for all browsers will be added to the
@@ -69,30 +129,30 @@
         </p>
         <ul>
           <li><a
-          href="https://github.com/amdjs/amdjs-api/wiki/AMD">AMD</a>
-          support for jolokia.js and jolokia-simple.js</li>
+                  href="https://github.com/amdjs/amdjs-api/wiki/AMD">AMD</a>
+            support for jolokia.js and jolokia-simple.js</li>
           <li>Time based eviction of historical values remembered on
-          the client side, in addition to count based eviction</li>
+            the client side, in addition to count based eviction</li>
           <li>New configuration option <code>httpServiceFilter</code>
-          for the OSGi agent for selection of a specific HttpService
-          to bind to.</li>
+            for the OSGi agent for selection of a specific HttpService
+            to bind to.</li>
           <li>None-caching headers added to the response</li>
         </ul>
         <p>
           All theses changes plus the bug fixes are listed in the <a
-          href="changes-report.html">change log</a>. 
+                href="changes-report.html">change log</a>.
         </p>
         <p>
           Starting with this release, bug tracking and release planning
           switches over to Jolokia's <a
-          href="http://jolokia.jira.com">JIRA</a> instance, kindly
+                href="http://jolokia.jira.com">JIRA</a> instance, kindly
           donated by the fine folks from <a
-          href="http://www.atlassian.com">Atlassian</a>. 
+                href="http://www.atlassian.com">Atlassian</a>.
         </p>
         <p>
           Also, there has been some (minor) progress with the new kid in
           the Chili garden, <a
-          href="https://github.com/rhuss/aji">Ají</a>, a Javascript
+                href="https://github.com/rhuss/aji">Ají</a>, a Javascript
           single-page-application with an MBeanBrowser and a
           Dashboard. I'm still looking for helping hands, there is
           quite a lot to do here ;-)
@@ -181,146 +241,6 @@
           Please stay tuned and a happy new year !
         </p>
 <div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="http://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
-      </subsection>
-      <subsection name="1.0.1 is out"> 
-        <div class="news-date">2011-10-31</div>
-       <p>
-          A minor bug fix release, probably the last before Devoxx,
-          brings also two new features:
-          </p>
-        <ul>
-          <li>
-            The <a href="agent/jvm.html">JVM Agent</a> can now also take a regular
-            expression as argument for specifying a process to attach
-            to. This pattern is matched against the process'
-            name. Alternatively you can of course specify the process id
-            as before.
-          </li>
-          <li>
-            Collections which are not lists or maps (like <code>Set</code>) are
-            serialized properly as JSON arrays.
-          </li>
-        </ul>
-        <p>
-          Jolokia is now available also at <a
-          href="http://search.maven.org/">Maven Central</a> so adding
-          the <a href="http://labs.consol.de/maven/repository/">Consol
-          Labs repository</a> is not required anymore in your poms
-          (except you want depend on Jolokia <a
-          href="http://labs.consol.de/maven/snapshots-repository/">snapshots</a>).
-        </p>
-        <p>
-          Happy Halloween ....
-        </p>
-      </subsection>
-      <subsection name="Jolokia and Jmx4Perl on tour">
-        <div class="news-date">2011-08-29</div>
-        <div style="margin-left: 30px; float:right">
-          <a style="background: none;" href="http://www.devoxx.com"><img src="images/banner/devoxx.png" alt="Devoxx"/></a>
-        </div>        
-        <p>
-          <em>Meet us in Paradise</em> at Devoxx 2011 ! "<a
-          href="http://www.devoxx.com/display/DV11/Jolokia+-+JMX+on+Capsaicin">Jolokia
-          - JMX on Capsaicin</a>" will be presented on November 14th
-          2011 in Antwerp, Belgium. I'm really excited to have the
-          chance to bring some chili pepper to this superb premium
-          conference which I greatly enjoyed as visitor in the
-          past. 30 minutes are surely not long enough for getting in
-          every feature, so please le me know whether you have a
-          favourite one.
-        </p>
-        <div style="clear: both"></div>
-        <div style="margin-left: 30px; margin-top: 20px; float:right">
-          <a style="background: none;" href="http://www.netways.de/en/osmc/y2011/"><img src="images/banner/osmc_2011.png" alt="OSMC 2011"/></a>
-        </div>        
-        <p>
-          The second conference where Jolokia will play its role this
-          autumn is at the Open Source Monitoring Conference "<a
-          href="http://www.netways.de/en/osmc/y2011/programm/v/nagios_java_monitoring_mit_jmx4perl_und_jolokia/">Nagios
-          Java monitoring with Jmx4Perl and Jolokia</a>" in Nuremberg
-          on November 30th 2011. It's a quite different talk with
-          focus on Jmx4Perl, discovery of relevant monitoring metrics
-          and it's configuration in a Nagios environment. Not much
-          Java here, but tooling en masse. I'm really looking forward
-          to this home play, too.
-        </p>
-        <div style="clear: both;"></div>
-        <p>
-          If you intend to participate in one of these conferences and
-          would like some discussion about Jolokia, Jmx4Perl, JMX,
-          Chili pepper growing, the world, you can contact me on various
-          channels. Jolokia can be found at twitter at <code><a
-          href="http://twitter.com/jolokia_jmx">@jolokia_jmx</a></code>,
-          the <a href="forum.html">forum</a> or on IRC at the Freenode
-          channel <code>#jolokia</code>. For a simple chat you can use
-          also the new <a href="irc.html">webchat</a> on this site. I
-          would really like to hear from you !
-        </p>
-      </subsection>
-      <subsection name="1.0.0">
-        <div class="news-date">2011-10-03</div>
-        <p>
-          It's time to celebrate: After two and half years of hard
-          work, Jmx4Perl and Jolokia have been all wrapped up for
-          their 1.0 releases.
-        </p>
-        <p>
-          The last month the focus was on hardening this first
-          official release. This effort is backed up by these numbers:
-        </p>
-        <ul>
-          <li>
-            216 integration tests which has been successfully run on
-            <a href="agent.html">38</a> different platforms.
-          </li>
-          <li>
-            a unit test coverarge of 82.7% with 404 Java and 194
-            Javascript unit tests.  
-          </li>
-          <li>
-            a <a
-            href="http://docs.codehaus.org/display/SONAR/Technical+Debt+Calculation">technical
-            debt</a> of 2% (or 8 man day) as measured by <a
-            href="http://www.sonarsource.org">Sonar</a>
-          </li>
-          <li>
-            other Sonar metrics inlcuding:
-            <ul>
-              <li>
-                100% rule compliance
-              </li>
-              <li>
-                0% package tangle index
-              </li>
-              <li>34.1% comments and 100% documented API</li>
-              <li>94.6% total quality</li>
-            </ul>
-          </li>
-        </ul>
-        <p>
-          The detailed code metrics can be examined on <a href="http://labs.consol.de/sonar/dashboard/index/org.jolokia:jolokia">Jolokia's
-          Sonar Dashboard</a> and it's evolution over time is
-          documented in the <a href="http://labs.consol.de/sonar/timemachine/index/946">time machine</a>
-        </p>
-        <p>
-          I'm very confident that this 1.0.0 version is rock solid
-          and production ready.
-        </p>
-        <p>
-          There has been a minor protocol change for the way how
-          Jolokia does URL escaping for slashes within GET requests,
-          though. This scheme is not backwards compatible to the
-          pre-1.0 protocol (which used a different, more complicated
-          algorithm). Clients need to be updated, which has been
-          already done for Jmx4Perl 1.00 and of course Jolokia 1.0.0's
-          Javascript und Java client libraries.  Since Jolokia is out
-          of beta now such kind of change won't happen in this ad-hoc
-          manner in the future, promised.
-        </p>
-        <p>
-          All changes for this release are summarized as always in the 
-          <a href="changes-report.html">change log</a>. 
-        </p>
       </subsection>
   </section>
 </body>
