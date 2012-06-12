@@ -7,6 +7,15 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.0.5-SNAPSHOT" description="Release 1.0.5">
+      <action dev="roland" type="fix" date="2012-06-12">
+        Fixed regular expression for detecting Oracle Glassfish server
+      </action>
+      <action dev="roland" type="add" date="2012-06-12">
+        Added specific check for 7.1.x to JBoss Handler since for 7.1 there seems
+        to be an MBean for the version number (contrary to 7.0.x)
+      </action>
+    </release>
     <release version="1.0.4" description="Release 1.0.4" date="2012-06-07">
       <action dev="roland" type="add" date="2012-06-06">
         Allow for custom detector options in the agent's

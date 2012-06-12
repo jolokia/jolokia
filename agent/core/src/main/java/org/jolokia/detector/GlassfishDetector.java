@@ -37,7 +37,7 @@ import org.json.simple.JSONObject;
 public class GlassfishDetector extends AbstractServerDetector {
 
     private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*GlassFish.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
-    private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^\\s*GlassFish.*?\\sv?([.\\d]+)\\s.*$");
+    private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^.*GlassFish.*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
 
     /** {@inheritDoc} */
     public ServerHandle detect(Set<MBeanServer> pMbeanServers) {

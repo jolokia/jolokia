@@ -52,8 +52,13 @@ public class JBossDetectorTest {
     @Test
     public void simpleNotFound() throws MalformedObjectNameException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
-        expect(server.queryNames(new ObjectName("jboss.modules:*"),null)).andReturn(null);
+        for (String name : new String[] {
+                "jboss.system:type=Server",
+                "jboss.as:management-root=server",
+                "jboss.modules:*"
+        }) {
+            expect(server.queryNames(new ObjectName(name),null)).andReturn(null);
+        }
         replay(server);
         assertNull(detector.detect(servers));
         verify(server);
@@ -82,9 +87,35 @@ public class JBossDetectorTest {
     }
 
     @Test
+    public void version71() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
+
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
+        prepareQuery("jboss.as:management-root=server");
+        expect(server.getAttribute(new ObjectName("jboss.as:management-root=server"),"releaseVersion")).andReturn("7.1.1.Final");
+        replay(server);
+        ServerHandle handle = detector.detect(servers);
+        assertEquals(handle.getVersion(),"7.1.1.Final");
+        assertEquals(handle.getVendor(),"RedHat");
+        assertEquals(handle.getProduct(),"jboss");
+        verifyNoWorkaround(handle);
+
+
+    }
+
+    private void verifyNoWorkaround(ServerHandle pHandle) throws MalformedObjectNameException {
+        // Verify that no workaround is active
+        reset(server);
+        ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
+        replay(server);
+        pHandle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
+        verify(server);
+    }
+
+    @Test
     public void version7() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException {
 
         expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(null);
         prepareQuery("jboss.modules:*");
         replay(server);
         ServerHandle handle = detector.detect(servers);
@@ -93,11 +124,7 @@ public class JBossDetectorTest {
         assertEquals(handle.getProduct(),"jboss");
 
         // Verify that no workaround is active
-        reset(server);
-        ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
-        replay(server);
-        handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
-        verify(server);
+        verifyNoWorkaround(handle);
     }
 
     private ObjectName prepareQuery(String pName) throws MalformedObjectNameException {

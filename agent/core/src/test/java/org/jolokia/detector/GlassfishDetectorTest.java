@@ -36,6 +36,10 @@ public class GlassfishDetectorTest {
         detectDeep(" Blub ",null);
     }
 
+    @Test
+    public void detectFromSystemPropertyWithOracle() throws MalformedObjectNameException {
+        detectDeep("Oracle Glassfish v3.1.2","3.1.2");
+    }
 
     private void detectDeep(String property,String version) throws MalformedObjectNameException {
         MBeanServer mockServer = createMock(MBeanServer.class);

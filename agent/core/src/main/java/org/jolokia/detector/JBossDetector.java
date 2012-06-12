@@ -58,9 +58,12 @@ public class JBossDetector extends AbstractServerDetector {
             }
             return new JBossServerHandle(version,null,null,true);
         }
+        String version = getSingleStringAttribute(pMbeanServers,"jboss.as:management-root=server","releaseVersion");
+        if (version != null) {
+            return new JBossServerHandle(version,null,null,false);
+        }
         if (mBeanExists(pMbeanServers,"jboss.modules:*")) {
-            // Can please someone tell me, how to obtain the JBoss version either via JMX or via class lookup ?
-            // (or any other Means ?)
+            // It's a JBoss 7, probably a 7.0.x one ...
             return new JBossServerHandle("7",null,null,false);
         }
         return null;
