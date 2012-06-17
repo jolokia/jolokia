@@ -59,7 +59,7 @@
     <programlisting><![CDATA[
 { 
    "type":"SEARCH",
-   "mbean":"java.lang:*",
+   "mbean":"java.lang:*"
 }]]></programlisting>
   </section>
 

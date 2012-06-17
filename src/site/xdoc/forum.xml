@@ -10,8 +10,10 @@
 
   <body>
     <section name="Forum">
-      <a id="nabblelink" href="http://jolokia.963608.n3.nabble.com/">Jolokia</a>
-      <script src="http://jolokia.963608.n3.nabble.com/embed/f1377287" type="text/javascript"></script>
+      <div width="98%">
+        <a id="nabblelink" href="http://jolokia.963608.n3.nabble.com/">Jolokia</a>
+        <script src="http://jolokia.963608.n3.nabble.com/embed/f1377287" type="text/javascript"></script>
+      </div>
     </section>
   </body>
 </document>
