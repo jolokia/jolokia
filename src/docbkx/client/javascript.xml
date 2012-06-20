@@ -560,7 +560,7 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
       periodically sending requests to the agent. Therefore requests
       can be registered to the client object, and a poller can be
       started and stopped. All registered requests are send at once
-      with a single bulk request so this is quite efficient method for
+      with a single bulk request so this is a quite efficient method for
       periodically polling multiple values.
     </para>
     <para>
@@ -586,7 +586,7 @@ j4p.start(10000);
             function which will be called with all responses as
             arguments (in the same order as the requests). Or it is an
             object with two attributes <code>success</code> and
-            <code>error</code> which have a function as value. In the
+            <code>error</code> which have a functions as value. In the
             later case these functions are called for successful and
             failed requests, respectively. If multiple requests have
             been registered, the success- and/or error-function is called
