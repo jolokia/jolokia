@@ -8,6 +8,10 @@
   </properties>
   <body>
     <release version="1.0.5-SNAPSHOT" description="Release 1.0.5">
+      <action dev="roland" type="add" date="2012-06-25">
+        Jolokia WAR agent initialisation parameters can now be given as servlet context
+        parameters, too.
+      </action>
       <action dev="roland" type="fix" date="2012-06-12">
         Fixed regular expression for detecting Oracle Glassfish server
       </action>

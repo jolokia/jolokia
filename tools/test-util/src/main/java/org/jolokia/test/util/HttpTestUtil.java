@@ -20,10 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletInputStream;
+import javax.servlet.*;
 
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 
 /**
  * Test utility methods for HTTP related tests
@@ -81,7 +81,36 @@ public class HttpTestUtil {
             }
         }
 
-        Vector paramNames = new Vector(configParams.keySet());
-        EasyMock.expect(config.getInitParameterNames()).andReturn(paramNames.elements());
+        final Vector paramNames = new Vector(configParams.keySet());
+        EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
+            public Enumeration answer() throws Throwable {
+                return paramNames.elements();
+            }
+        }).anyTimes();
+    }
+
+    /**
+     * Prepare a servlet context Mock so that the config parameters are returned properly
+     *
+     * @param pContext mocked context
+     * @param pContextParams context parameters to return
+     */
+    public static void prepareServletContextMock(ServletContext pContext, String ... pContextParams) {
+        Map<String,String> configParams = new HashMap<String, String>();
+        if (pContextParams != null) {
+            for (int i = 0; i < pContextParams.length; i += 2) {
+                configParams.put(pContextParams[i],pContextParams[i+1]);
+            }
+            for (Map.Entry<String,String> entry : configParams.entrySet()) {
+                EasyMock.expect(pContext.getInitParameter(entry.getKey())).andReturn(entry.getValue()).anyTimes();
+            }
+        }
+
+        final Vector paramNames = new Vector(configParams.keySet());
+        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
+            public Enumeration answer() throws Throwable {
+                return paramNames.elements();
+            }
+        }).anyTimes();
     }
 }

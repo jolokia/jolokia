@@ -17,6 +17,7 @@ package org.jolokia.http;
  */
 
 import java.io.*;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.*;
@@ -30,7 +31,7 @@ import org.jolokia.util.ConfigKey;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -49,7 +50,7 @@ public class AgentServletTest {
     @Test
     public void simpleInit() throws ServletException {
         servlet = new AgentServlet();
-        initConfigMocks(null, "No access restrictor found", null);
+        initConfigMocks(null, null,"No access restrictor found", null);
         replay(config, context);
 
         servlet.init(config);
@@ -60,6 +61,7 @@ public class AgentServletTest {
     public void initWithAcessRestriction() throws ServletException {
         servlet = new AgentServlet();
         initConfigMocks(new String[]{ConfigKey.POLICY_LOCATION.getKeyValue(), "classpath:/access-sample1.xml"},
+                        null,
                         "Using access restrictor.*access-sample1.xml", null);
         replay(config, context);
 
@@ -71,11 +73,35 @@ public class AgentServletTest {
     public void initWithInvalidPolicyFile() throws ServletException {
         servlet = new AgentServlet();
         initConfigMocks(new String[]{ConfigKey.POLICY_LOCATION.getKeyValue(), "file:///blablub.xml"},
+                        null,
                         "Error.*blablub.xml.*Denying", FileNotFoundException.class);
         replay(config, context);
 
         servlet.init(config);
         servlet.destroy();
+    }
+
+    @Test
+    public void configWithOverWrite() throws ServletException {
+        servlet = new AgentServlet();
+        request = createMock(HttpServletRequest.class);
+        response = createMock(HttpServletResponse.class);
+        initConfigMocks(new String[] {ConfigKey.AGENT_CONTEXT.getKeyValue(),"/jmx4perl",ConfigKey.MAX_DEPTH.getKeyValue(),"10"},
+                        new String[] {ConfigKey.AGENT_CONTEXT.getKeyValue(),"/j0l0k14",ConfigKey.MAX_OBJECTS.getKeyValue(),"20",
+                                      ConfigKey.CALLBACK.getKeyValue(),"callback is a request option, must be empty here"},
+                        null,null);
+        replay(config, context,request,response);
+
+        servlet.init(config);
+        servlet.destroy();
+
+        Map<ConfigKey,String> cfg = servlet.configAsMap(config);
+        assertEquals(cfg.get(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
+        assertEquals(cfg.get(ConfigKey.MAX_DEPTH), "10");
+        assertEquals(cfg.get(ConfigKey.MAX_OBJECTS), "20");
+        assertNull(cfg.get(ConfigKey.CALLBACK));
+        assertNull(cfg.get(ConfigKey.DETECTOR_OPTIONS));
+
     }
 
     @Test
@@ -298,7 +324,7 @@ public class AgentServletTest {
     @Test
     public void debug() throws IOException, ServletException {
         servlet = new AgentServlet();
-        initConfigMocks(new String[]{ConfigKey.DEBUG.getKeyValue(), "true"},"No access restrictor found",null);
+        initConfigMocks(new String[]{ConfigKey.DEBUG.getKeyValue(), "true"},null,"No access restrictor found",null);
         context.log(find("URI:"));
         context.log(find("Path-Info:"));
         context.log(find("Request:"));
@@ -332,19 +358,24 @@ public class AgentServletTest {
     }
     // ============================================================================================
 
-    private void initConfigMocks(String[] pInitParams, String pLogRegexp, Class<? extends Exception> pExceptionClass) {
+    private void initConfigMocks(String[] pInitParams, String[] pContextParams,String pLogRegexp, Class<? extends Exception> pExceptionClass) {
         config = createMock(ServletConfig.class);
-
+        context = createMock(ServletContext.class);
 
         HttpTestUtil.prepareServletConfigMock(config,pInitParams);
+        HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
-        context = createMock(ServletContext.class);
+
         expect(config.getServletContext()).andReturn(context).anyTimes();
         expect(config.getServletName()).andReturn("jolokia").anyTimes();
         if (pExceptionClass != null) {
             context.log(find(pLogRegexp),isA(pExceptionClass));
         } else {
-            context.log(find(pLogRegexp));
+            if (pLogRegexp != null) {
+                context.log(find(pLogRegexp));
+            } else {
+                context.log((String) anyObject());
+            }
         }
         context.log(find("TestDetector"),isA(RuntimeException.class));
     }
@@ -381,7 +412,7 @@ public class AgentServletTest {
 
     private void prepareStandardInitialisation() throws ServletException {
         servlet = new AgentServlet(new AllowAllRestrictor());
-        initConfigMocks(null, "custom access", null);
+        initConfigMocks(null, null,"custom access", null);
         replay(config, context);
         servlet.init(config);
     }

@@ -26,6 +26,7 @@ import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
+import org.jolokia.util.LogHandler;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;
 import org.osgi.service.log.LogService;
@@ -77,6 +78,7 @@ public class JolokiaServletTest {
 
         expect(servletContext.getAttribute("osgi-bundlecontext")).andReturn(null).anyTimes();
         HttpTestUtil.prepareServletConfigMock(config);
+        HttpTestUtil.prepareServletContextMock(servletContext);
         preparePlainLogging();
         replay(servletContext,config);
         servlet.init(config);
@@ -87,6 +89,7 @@ public class JolokiaServletTest {
     private void initWithLogService() throws InvalidSyntaxException, ServletException {
         prepareLogServiceLookup();
         HttpTestUtil.prepareServletConfigMock(config);
+        HttpTestUtil.prepareServletContextMock(servletContext);
         preparePlainLogging();
 
         replay(config, servletContext, bundleContext);
@@ -94,6 +97,10 @@ public class JolokiaServletTest {
         servlet.init(config);
         assertNull(JolokiaServlet.getCurrentBundleContext());
 
+        LogHandler handler = servlet.createLogHandler(config);
+        handler.debug("Debug");
+        handler.info("Info");
+        handler.error("Error",new Exception());
         destroyServlet();
     }
 
@@ -109,14 +116,18 @@ public class JolokiaServletTest {
     // ===========================================================================
 
     private void prepareLogServiceLookup() throws InvalidSyntaxException {
-        expect(servletContext.getAttribute("osgi-bundlecontext")).andReturn(bundleContext).times(2);
-        expect(bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)")).andReturn(createMock(Filter.class));
+        expect(servletContext.getAttribute("osgi-bundlecontext")).andReturn(bundleContext).times(3);
+        expect(bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)")).andReturn(createMock(Filter.class)).times(2);
         bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=org.osgi.service.log.LogService)"));
-        expect(bundleContext.getServiceReferences(LogService.class.getName(),null)).andReturn(null);
+        expectLastCall().times(2);
+        expect(bundleContext.getServiceReferences(LogService.class.getName(),null)).andReturn(null).times(2);
     }
 
     private void preparePlainLogging() {
         servletContext.log(EasyMock.<String>anyObject());
+        servletContext.log("jolokia: Debug");
+        servletContext.log("jolokia: Info");
+        servletContext.log(eq("jolokia: Error"),isA(Exception.class));
         expectLastCall().anyTimes();
     }
 

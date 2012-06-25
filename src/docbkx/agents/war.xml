@@ -19,14 +19,39 @@
     container is out of scope for this document.
     </para>
     <para>
-      The servlet itself can be configured with
-      <literal>init-param</literal> declarations within the servlet
-      definition in <filename>WEB-INF/web.xml</filename>. The known
-      parameters are described in <xref
-      linkend="agent-war-init-params"/>. The stock agent needs to be
-      repackaged, though, in order to modify the internal
-      <filename>web.xml</filename>.
+      The servlet itself can be configured in two ways:
     </para>
+  <variablelist>
+    <varlistentry>
+      <term><emphasis role="bold">Servlet Init Parameters</emphasis></term>
+      <listitem>
+        Jolokia can be configured with <literal>init-param</literal>
+        declarations within the servlet definition in
+        <filename>WEB-INF/web.xml</filename>. The known parameters are
+        described in <xref linkend="agent-war-init-params"/>. The
+        stock agent needs to be repackaged, though, in order to modify
+        the internal <filename>web.xml</filename>.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><emphasis role="bold">Servlet Context Parameters</emphasis></term>
+      <listitem>
+        A more convenient possibility might be to use servlet context
+        parameters, which can be configured outside the WAR
+        archive. This is done differently for each servlet container
+        but involves typically the editing of a configuration
+        file. E.g. for <ulink
+        url="http://tomcat.apache.org/tomcat-7.0-doc/config/context.html">Tomcat</ulink>,
+        the context for 
+        the Jolokia agent can be adapted by putting a file
+        <filename>jolokia.xml</filename> below
+        <filename>$TC/conf/Catalina/localhost/</filename> with a
+        content like: <programlisting><![CDATA[<Context> 
+   <Parameter name="maxDepth" value="1"/> 
+</Context>]]></programlisting>
+      </listitem>
+    </varlistentry>
+  </variablelist>
     <table id="agent-war-init-params">
       <title>Servlet init parameters</title>
       <thead>

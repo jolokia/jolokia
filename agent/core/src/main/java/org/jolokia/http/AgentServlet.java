@@ -4,8 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
@@ -138,7 +137,7 @@ public class AgentServlet extends HttpServlet {
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
 
-        Map<ConfigKey,String> config = servletConfigAsMap(pServletConfig);
+        Map<ConfigKey,String> config = configAsMap(pServletConfig);
         if (restrictor == null) {
             restrictor = createRestrictor(ConfigKey.POLICY_LOCATION.getValue(config));
         } else {
@@ -317,17 +316,57 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private Map<ConfigKey, String> servletConfigAsMap(ServletConfig pConfig) {
-        Enumeration e = pConfig.getInitParameterNames();
+    // Examines servlet config and servlet context for configurtion parameters.
+    // Configuration from the servlet context overrides servlet parameters defined in web.xn
+    Map<ConfigKey, String> configAsMap(ServletConfig pConfig) {
         Map<ConfigKey,String> ret = new HashMap<ConfigKey, String>();
+        extractConfigFromServletConfig(ret, pConfig);
+        extractConfigFromServletContext(ret,getServletContext());
+        return ret;
+    }
+
+    // Simple interface for wrapping aroung ServletConfig and ServletContext
+    private interface ConfigFacade {
+        Enumeration getNames();
+        String getParameter(String pKeyS);
+    }
+
+    // From ServletContext ....
+    private void extractConfigFromServletContext(Map<ConfigKey, String> pRet, final ServletContext pServletContext) {
+        extractConfig(pRet,new ConfigFacade() {
+            public Enumeration getNames() {
+                return pServletContext.getInitParameterNames();
+            }
+
+            public String getParameter(String pName) {
+                return pServletContext.getInitParameter(pName);
+            }
+        });
+    }
+
+    // ... and ServletConfig
+    private void extractConfigFromServletConfig(Map<ConfigKey, String> pRet, final ServletConfig pConfig) {
+        extractConfig(pRet,new ConfigFacade() {
+            public Enumeration getNames() {
+                return pConfig.getInitParameterNames();
+            }
+
+            public String getParameter(String pName) {
+                return pConfig.getInitParameter(pName);
+            }
+        });
+    }
+
+    // Do the real work
+    private void extractConfig(Map<ConfigKey, String> pRet, ConfigFacade pConfig) {
+        Enumeration e = pConfig.getNames();
         while (e.hasMoreElements()) {
             String keyS = (String) e.nextElement();
             ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
             if (key != null) {
-                ret.put(key,pConfig.getInitParameter(keyS));
+                pRet.put(key,pConfig.getParameter(keyS));
             }
         }
-        return ret;
     }
 
     private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {
