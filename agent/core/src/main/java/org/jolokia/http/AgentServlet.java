@@ -402,7 +402,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Implementation for the ServletConfig
-    private final static class ServletConfigFacade implements ConfigFacade {
+    private static final class ServletConfigFacade implements ConfigFacade {
         private final ServletConfig config;
 
         private ServletConfigFacade(ServletConfig pConfig) {
@@ -421,7 +421,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Implementation for ServletContextFacade
-    private final static class ServletContextFacade implements ConfigFacade {
+    private static final class ServletContextFacade implements ConfigFacade {
         private final ServletContext servletContext;
 
         private ServletContextFacade(ServletContext pServletContext) {
