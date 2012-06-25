@@ -71,7 +71,10 @@
           with its <code>request()</code> for sending JSON
           requests. <code>jolokia-simple.js</code> adds on this code
           and provides a simplified API for Jolokia request, but is
-          slightly less powerful. The <code>-min</code> versions are
+          slightly less powerful. Finally,
+          <code>jolokia-cubism.js</code> contains the Jolokia <a
+          href="http://square.github.com/cubism/">Cubism</a> integration which adds Jolokia as a data
+          source. The <code>-min</code> versions are
           compressed with all documentation stripped off and
           recommended for production use.
         </p>
@@ -96,6 +99,14 @@
           <tr>
             <td>Simplified API, compressed</td>
             <td><a href="dist/${currentStableVersion}/js/jolokia-simple-min.js">jolokia-simple-min.js</a></td>            
+          </tr>
+          <tr>
+            <td>Jolokia Cubism Integration</td>
+            <td><a href="dist/${currentStableVersion}/js/jolokia-cubism.js">jolokia-cubism.js</a></td>            
+          </tr>
+          <tr>
+            <td>Jolokia Cubism Integration, compressed</td>
+            <td><a href="dist/${currentStableVersion}/js/jolokia-cubism-min.js">jolokia-cubism-min.js</a></td>            
           </tr>
           </tbody>
         </table>
