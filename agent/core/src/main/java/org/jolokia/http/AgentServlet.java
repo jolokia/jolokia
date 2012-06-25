@@ -234,11 +234,14 @@ public class AgentServlet extends HttpServlet {
             setCorsHeader(pReq, pResp);
 
             String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+            String answer = json != null ?
+                    json.toJSONString() :
+                    requestHandler.handleThrowable(new Exception("Internal error while handling an exception")).toJSONString();
             if (callback != null) {
                 // Send a JSONP response
-                sendResponse(pResp, "text/javascript", callback + "(" + json.toJSONString() + ");");
+                sendResponse(pResp, "text/javascript", callback + "(" + answer + ");");
             } else {
-                sendResponse(pResp, getMimeType(pReq),json.toJSONString());
+                sendResponse(pResp, getMimeType(pReq),answer);
             }
         }
     }
@@ -399,7 +402,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Implementation for the ServletConfig
-    private static class ServletConfigFacade implements ConfigFacade {
+    private final static class ServletConfigFacade implements ConfigFacade {
         private final ServletConfig config;
 
         private ServletConfigFacade(ServletConfig pConfig) {
@@ -416,7 +419,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Implementation for ServletContextFacade
-    private static class ServletContextFacade implements ConfigFacade {
+    private final static class ServletContextFacade implements ConfigFacade {
         private final ServletContext servletContext;
 
         private ServletContextFacade(ServletContext pServletContext) {
