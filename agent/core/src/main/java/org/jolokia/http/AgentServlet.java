@@ -333,28 +333,12 @@ public class AgentServlet extends HttpServlet {
 
     // From ServletContext ....
     private void extractConfigFromServletContext(Map<ConfigKey, String> pRet, final ServletContext pServletContext) {
-        extractConfig(pRet,new ConfigFacade() {
-            public Enumeration getNames() {
-                return pServletContext.getInitParameterNames();
-            }
-
-            public String getParameter(String pName) {
-                return pServletContext.getInitParameter(pName);
-            }
-        });
+        extractConfig(pRet, new ServletContextFacade(pServletContext));
     }
 
     // ... and ServletConfig
     private void extractConfigFromServletConfig(Map<ConfigKey, String> pRet, final ServletConfig pConfig) {
-        extractConfig(pRet,new ConfigFacade() {
-            public Enumeration getNames() {
-                return pConfig.getInitParameterNames();
-            }
-
-            public String getParameter(String pName) {
-                return pConfig.getInitParameter(pName);
-            }
-        });
+        extractConfig(pRet, new ServletConfigFacade(pConfig));
     }
 
     // Do the real work
@@ -398,4 +382,38 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
+    // =======================================================================================
+    // Helper classes for extracting configuration from servlet classes
+
+    private static class ServletConfigFacade implements ConfigFacade {
+        private final ServletConfig config;
+
+        private ServletConfigFacade(ServletConfig pConfig) {
+            config = pConfig;
+        }
+
+        public Enumeration getNames() {
+            return config.getInitParameterNames();
+        }
+
+        public String getParameter(String pName) {
+            return config.getInitParameter(pName);
+        }
+    }
+
+    private static class ServletContextFacade implements ConfigFacade {
+        private final ServletContext servletContext;
+
+        private ServletContextFacade(ServletContext pServletContext) {
+            servletContext = pServletContext;
+        }
+
+        public Enumeration getNames() {
+            return servletContext.getInitParameterNames();
+        }
+
+        public String getParameter(String pName) {
+            return servletContext.getInitParameter(pName);
+        }
+    }
 }
