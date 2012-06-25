@@ -325,11 +325,6 @@ public class AgentServlet extends HttpServlet {
         return ret;
     }
 
-    // Simple interface for wrapping aroung ServletConfig and ServletContext
-    private interface ConfigFacade {
-        Enumeration getNames();
-        String getParameter(String pKeyS);
-    }
 
     // From ServletContext ....
     private void extractConfigFromServletContext(Map<ConfigKey, String> pRet, final ServletContext pServletContext) {
@@ -385,6 +380,25 @@ public class AgentServlet extends HttpServlet {
     // =======================================================================================
     // Helper classes for extracting configuration from servlet classes
 
+    /**
+     * Interface for abstracting ServletConfig and ServletContext's configuration parameters
+     */
+    private interface ConfigFacade {
+        /**
+         * Get all configuration name
+         * @return enumeration of config names
+         */
+        Enumeration getNames();
+
+        /**
+         * Get the parameter for a certain
+         * @param pKeyS string representation of the config key to fetch
+         * @return the value of the configuration parameter or <code>null</code> if no such parameter exists
+         */
+        String getParameter(String pKeyS);
+    }
+
+    // Implementation for the ServletConfig
     private static class ServletConfigFacade implements ConfigFacade {
         private final ServletConfig config;
 
@@ -401,6 +415,7 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
+    // Implementation for ServletContextFacade
     private static class ServletContextFacade implements ConfigFacade {
         private final ServletContext servletContext;
 
