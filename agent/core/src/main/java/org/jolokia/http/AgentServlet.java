@@ -409,10 +409,12 @@ public class AgentServlet extends HttpServlet {
             config = pConfig;
         }
 
+        /** {@inheritDoc} */
         public Enumeration getNames() {
             return config.getInitParameterNames();
         }
 
+        /** {@inheritDoc} */
         public String getParameter(String pName) {
             return config.getInitParameter(pName);
         }
@@ -426,10 +428,12 @@ public class AgentServlet extends HttpServlet {
             servletContext = pServletContext;
         }
 
+        /** {@inheritDoc} */
         public Enumeration getNames() {
             return servletContext.getInitParameterNames();
         }
 
+        /** {@inheritDoc} */
         public String getParameter(String pName) {
             return servletContext.getInitParameter(pName);
         }
