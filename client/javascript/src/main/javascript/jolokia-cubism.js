@@ -216,7 +216,6 @@
                 return builder(cubism,Jolokia);
             });
         } else {
-            builder(root.cubism,root.Jolokia);
             if (root.Jolokia && root.cubism) {
                 builder(root.cubism,root.Jolokia);
             } else {
