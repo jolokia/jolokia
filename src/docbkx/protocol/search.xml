@@ -72,7 +72,7 @@
     <para>
       For example, the request
       <informalexample>
-        <literallayout class="monospaced">http://localhost:8888/j4p/search/*:j2eeType=J2EEServer,*</literallayout>
+        <literallayout class="monospaced">http://localhost:8888/jolokia/search/*:j2eeType=J2EEServer,*</literallayout>
       </informalexample>
       results in
       <programlisting><![CDATA[

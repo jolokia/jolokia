@@ -56,7 +56,7 @@
     <para>
       The following request will trigger a garbage collection:
       <informalexample>
-        <literallayout class="monospaced">http://localhost:8080/j4p/exec/java.lang:type=Memory/gc</literallayout>
+        <literallayout class="monospaced">http://localhost:8080/jolokia/exec/java.lang:type=Memory/gc</literallayout>
       </informalexample>
     </para>
   </section>
@@ -122,7 +122,7 @@
       operation. <constant>null</constant> is returned if either the
       operation returns a null value or the operation is declared as
       void. A typical response for an URL like
-      <synopsis><![CDATA[http://localhost:8080/j4p/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO]]></synopsis>
+      <synopsis><![CDATA[http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO]]></synopsis>
       looks like
     </para>
     <programlisting><![CDATA[

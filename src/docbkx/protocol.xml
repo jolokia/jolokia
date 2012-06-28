@@ -381,7 +381,7 @@
           The attribute <literal>HeapMemoryUsage</literal> of the MBean 
           <literal>java.lang:type=Memory</literal> can be
           requested with the URL 
-          <literal>http://localhost:8080/j4p/read/java.lang:type=Memory/HeapMemoryUsage</literal>
+          <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</literal>
           which returns a complex JSON structure like
           <programlisting language="json">
  {
@@ -395,7 +395,7 @@
           In order to get to the value for used heap memory you should
           specify an inner path <literal>used</literal>, so that the
           request
-          <literal>http://localhost:8080/j4p/read/java.lang:type=Memory/HeapMemoryUsage/used</literal>
+          <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</literal>
           results in a response of <literal>15348352</literal>.  If
           the attribute contains arrays at some level, use a numeric
           index (0 based) as part of the inner path if you want to

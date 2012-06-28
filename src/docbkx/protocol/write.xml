@@ -55,7 +55,7 @@
         For example, you can set the garbage collector to verbose mode by using
         something like
         <informalexample>
-          <literallayout class="monospaced">http://localhost:8080/j4p/write/java.lang:type=Memory/Verbose/true</literallayout>
+          <literallayout class="monospaced">http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true</literallayout>
         </informalexample>
       </para>
     </section>
@@ -113,7 +113,7 @@
       <para>
         As response for a write operation the old attribute's value is
         returned. For a request
-        <synopsis><![CDATA[http://localhost:8080/j4p/write/java.lang:type=ClassLoading/Verbose/true]]></synopsis>
+        <synopsis><![CDATA[http://localhost:8080/jolokia/write/java.lang:type=ClassLoading/Verbose/true]]></synopsis>
         you get the answer (supposed that verbose mode was switched
         off for class loading at the time this request was sent)
       </para>
