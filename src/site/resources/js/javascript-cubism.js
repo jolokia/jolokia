@@ -1,4 +1,4 @@
-var j4p = new Jolokia("http://jolokia.org/jolokia");
+var j4p = new Jolokia({url: "http://jolokia.org/jolokia", fetchInterval: 5000});
 
 
 var context = cubism.context()
@@ -48,7 +48,7 @@ var allRequests = jolokia.metric(
     {type:        "read", mbean:"Catalina:j2eeType=Servlet,*",
         attribute:"requestCount"}, {name:"All", delta:10 * 1000});
 
-j4p.start(1000);
+//j4p.start(1000);
 
 var colorsRed = ["#FDBE85", "#FEEDDE", "#FD8D3C", "#E6550D", "#A63603", "#FDBE85", "#FEEDDE", "#FD8D3C", "#E6550D", "#A63603" ],
     colorsGreen = [ "#E5F5F9", "#99D8C9", "#2CA25F", "#E5F5F9", "#99D8C9", "#2CA25F"],

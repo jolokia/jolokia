@@ -299,6 +299,7 @@ dd {
 p, .section > div {
     margin: 10px 25px;
     text-align: justify;
+    position: relative;
 }
 
 code {

@@ -28,6 +28,15 @@
                 j4p = createAgent(url, opts),
                 step = 5e3;                    // 5 seconds by default
 
+            // Connecto to start and stop events
+            context.on("start",function() {
+                j4p.start();
+            });
+
+            context.on("stop",function() {
+                j4p.stop();
+            });
+
             source.metric = function () {
                 var values = [];
                 // If the first argument is a function, this callback function is used for calculating the
