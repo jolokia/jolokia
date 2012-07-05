@@ -54,7 +54,7 @@ console.log("Heap Memory used: " + value);
     </variablelist>
     <para>
       All four files can be obtained from the <ulink
-      url="http://www.jolokia.org/download.html">download
+      url="/download.html">download
       page</ulink>. For production environments the compressed version
       is highly recommended since the extensive API documentation
       included in the original version is stripped off here. For Maven
@@ -97,7 +97,7 @@ console.log("Heap Memory used: " + value);
       can be overwritten by subsequent requests. On the most basic
       layer is a single <methodname>request()</methodname> method,
       which takes two arguments: A request object and an optional
-      option object. For example, a synchronous request for obtaining
+      options object. For example, a synchronous request for obtaining
       the agent's version for a agent running on the same server which
       delivered the Javascript looks like:
     </para>
@@ -679,7 +679,207 @@ j4p.register(
       </varlistentry>
     </variablelist>
   </section>
+  
+  <section id="js-cubism">
+    <title>Jolokia as a Cubism Source</title>
+    <para>
+      <ulink url="http://square.github.com/cubism/">Cubism</ulink> is a Javascript library for
+      plotting time-series data and is based on <ulink
+      url="http://d3js.org/">d3.js</ulink>. Jolokia comes with a plugin for Cubism and
+      can act as a data source. The usage is quite simple: After
+      creating a Jolokia Cubism source, one or more JSON request can
+      be registered, which are queried periodically. No matter how
+      many requests are registered, only a single HTTP request is sent
+      to the server after each period. Cubism is then responsible for
+      plotting the data.
+    </para>
+    <para>
+      <xref linkend="fig-jolokia-cubism-example"/>  shows a sample for a memory plot. More examples can
+      be found on this <ulink url="../../client/javascript-cubism.html">page</ulink>.
+    </para>
+    <figure id="fig-jolokia-cubism-example">
+      <title>Horizon Chart for Heap-Memory Usage</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="jolokia-cubism-memory-horizon.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      <filename>jolokia-cubism.js</filename> can be downloaded from
+      the <ulink url="/download.html">downlad page</ulink> and also
+      comes with a minified version. As dependencies it requires
+      <ulink url="/download.html">jolokia.js</ulink>, <ulink
+      url="http://www.jquery.com">JQuery</ulink>, <ulink
+      url="http://square.github.com/cubism/">Cubism</ulink> and <ulink
+      url="http://d3js.org/">d3.js</ulink>. <filename>jolokia-cubism.js</filename>
+      registers itself as an <ulink
+      url="http://requirejs.org/docs/whyamd.html">AMD</ulink> module
+      if running within an AMD environment.
+    </para>
+    <para>
+      In order to use Jolokia with Cubism, you first need to create a
+      Cubism <ulink url="https://github.com/square/cubism/wiki/Context">context</ulink>. Next use
+      <code>context.jolokia()</code> for creating a connection to the
+      Jolokia agent.
+    </para>
+    <programlisting language="javascript"><![CDATA[var context = cubism.context();
+  
+// Create a source for Jolokia metrics pointing to the agent 
+// at 'http://jolokia.org/jolokia'
+var jolokia = context.jolokia("http://jolokia.org/jolokia");]]></programlisting>
+    <para>
+      The method <methodname>context.jolokia()</methodname> can take various
+      kind of arguments: 
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          A single string as in the example above is used as the
+          agent's URL. Additionally, options as key-value pairs can be
+          given as an additional argument. The possible keys are
+          described in <xref linkend="js-request-options-table"/>. If
+          the URL is omitted, but only an option object is provided,
+          then this object must also contain a key <code>url</code>
+          for specifying the agent URL.
+        </para>  
+      </listitem>
+      <listitem>
+        <para>
+          Alternatively, an already instantiated Jolokia object can be
+          provided as single argument, which then is used for all
+          communications to the server. 
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      From this source object, a <ulink
+      url="https://github.com/square/cubism/wiki/Metric">metric</ulink>
+      object can be easily created. This metric object embrasses one
+      or more Jolokia requests which are send to the server
+      periodically. The response(s) are then used for calculating a
+      single numerical value which gets plotted. For example:
+    </para>
+    <programlisting language="javascript"><![CDATA[
+// Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
+var metricMem = jolokia.metric({
+                      type: 'read', 
+                      mbean: 'java.lang:type=Memory',
+                      attribute: 'HeapMemoryUsage',
+                      path: 'used'
+                  },"HeapMemory Usage"); 
 
+// Example for a callback function for evaluating responses
+// dynamically. In this case, the first
+// argument is a function, which gets feed with all response objects
+// (one in this case). The requests objects are given next, and an
+// options object as last argument. 
+var metricReq = jolokia.metric(
+    function (resp) {
+        var attrs = resp.value;
+        var sum = 0;
+        for (var key in attrs) {
+            sum += attrs[key].requestCount;
+        }
+        return sum;
+    },
+    { 
+        type: "read",
+        mbean: "Catalina:j2eeType=Servlet,*",
+        attribute:"requestCount"
+    }, 
+    { name: "All", delta: 101000});]]></programlisting>
+    <para>
+      <methodname>metric()</methodname> is a factory method which can be
+      called in various ways.      
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          If the first argument is a Jolokia request object (i.e. not
+          a function), this request is used for sending requests
+          periodically.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          If the first argument is a function, this function is used
+          for calculating the numeric value to be plotted. The rest of
+          the arguments can be one or more request objects, which are
+          registered and their responses are put as arguments to the
+          given callback function.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The last argument, if an object but not a Jolokia request
+          (i.e. there is no <code>type</code> key), is 
+          taken as an option object which is described below.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Finally, if the last argument is a pure string, then this
+          string is used as name for the chart.                      
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      An object which can be given as last argument is used for fine
+      tuning the metrics:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><constant>name</constant></term>
+        <listitem>
+          <para>
+            Name used in charts. The name can also be given
+            alternatively as a string directly as last argument (but
+            then without any other options)
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>delta</constant></term>
+        <listitem>
+          <para>
+            Delta value in milliseconds for creating delta (velocity)
+            charts. This is done by taking the value measured
+            that many milliseconds ago and substract them from each other..
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><constant>keepDelay</constant></term>
+        <listitem>
+          <para>
+            How many milliseconds before the oldest shown value should be
+            kept in memory, which e.g. is necessary for delta
+            charts. When <constant>delta</constant> is given, this
+            value is implicetly set.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>    
+    <para>
+      One or more metric objects can now be converted to charts and
+      added to a website with <filename>d3.js</filename>. This is done
+      in the usual cubism way as described here. In our example, in
+      order to append charts to a <constant>div</constant> with id
+      <constant>chart</constant> the following code can be used:
+    </para>
+    <programlisting language="xml"><![CDATA[// Use d3 to attach the metrics with a specific graph type 
+// ('horizon' in this case) to the document
+d3.select("#charts").call(function(div) {
+    div.append("div")
+        .data([metricMem, metricReq])
+        .call(context.horizon())
+});]]></programlisting>
+    <para>
+      For a complete API documentation please refer to the <ulink
+      url="https://github.com/square/cubism/wiki/API-Reference">Cubism API</ulink>.
+    </para>
+  </section>
   <section id="js-maven">
     <title>Maven integration</title>
     <para>
@@ -695,7 +895,7 @@ j4p.register(
         <code>1.0-alpha-1-SNAPSHOT</code>. Although it is quite
         usable, in order to avoid a snapshot dependency, it is
         recommended to use a fork of this plugin hosted on <ulink
-        url="https://github.com/harlanji/javascript-test-maven-plugin">GitHub</ulink> and deployed at the 
+        url="https://github.com/harlanji/javascript-maven-tools">GitHub</ulink> and deployed at the 
         <ulink url="https://oss.sonatype.org/content/groups/public">Sonatype Maven repository</ulink>.
       </sidebar>
       <para>
@@ -710,7 +910,7 @@ j4p.register(
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-javascript</artifactId>
       <type>javascript</type>
-      <version>0.82</version>
+      <version>1.0.5</version>
     </dependency>
     ....
   </dependencies>
@@ -756,7 +956,7 @@ j4p.register(
       </para>
       <programlisting language="html"><![CDATA[
 <head>
-  <script src="jquery-1.4.4.js"></script>
+  <script src="jquery-1.7.2.js"></script>
   <script src="scripts/libk/json2.js"></script>
   <script src="scripts/lib/jolokia.js"></script>
   <script src="scripts/lib/jolokia-simple.js"></script>

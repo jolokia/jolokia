@@ -22,7 +22,10 @@
 
 (function () {
     var builder = function (cubism,Jolokia) {
-        return cubism.context.prototype.jolokia = function (url, opts) {
+        
+        var VERSION = "1.0.5";
+        
+        var ctx_jolokia = function (url, opts) {
             var source = {},
                 context = this,
                 j4p = createAgent(url, opts),
@@ -37,6 +40,30 @@
                 j4p.stop();
             });
 
+            /**
+             * Factory method for create a metric objects which has various variants.
+             *
+             * If the first argument is a Jolokia request object (i.e. not a function), this request
+             * is used for sending requests periodically.
+             *
+             * If the first argument is a function, this function is used for calculating the numeric value
+             * to be plotted. The rest of the argumens can be one or more request objects, which are registered and their
+             * responses are put as arguments to the given callback function.
+             *
+             * The last argument, if an object but not a Jolokia request (i.e. there is no <code>type</code> key), is
+             * taken as an option object with the following possible keys:
+             *
+             * <ul>
+             *   <li><b>name</b>: name used in charts</li>
+             *   <li><b>delta</b>: delta value in milliseconds for creating delta (velocity) charts. This is done by
+             *            taking the value measured that many milliseconds ago and subtract them from each other.</li>
+             *   <li><b>keepDelay</b>: how many seconds back the fetched values should be kept.</li>
+             * </ul>
+             *
+             * Finally, if the last argument is a pure string, then this string is used as name for the chart.
+             *
+             * @return the metric objects which can be used in Cubism for creating charts.
+             */
             source.metric = function () {
                 var values = [];
                 // If the first argument is a function, this callback function is used for calculating the
@@ -48,8 +75,7 @@
                 var options = {};
 
                 // Create metric upfront so that it can be used in extraction functions. The name defaults to the mbean name
-                // but can be given as first arguments
-
+                // but can be given as first argument
                 var lastIdx = arguments.length - 1;
                 var lastArg = arguments[lastIdx];
                 if (typeof lastArg == "string") {
@@ -66,7 +92,7 @@
                     name = arguments[0].mbean;
                 }
 
-                // Metric which maps our previously loally stored values to the ones requested by cubism
+                // Metric which maps our previously locally stored values to the ones requested by cubism
                 var metric = context.metric(mapValuesFunc(values, options.keepDelay, context.width), name);
                 if (options.delta) {
                     // Use cubism metric chaining for calculating the difference value and keep care that the
@@ -215,7 +241,12 @@
                 }
             }
         };
+        ctx_jolokia.VERSION = VERSION;
+
+        cubism.context.prototype.jolokia  = ctx_jolokia;
+        return ctx_jolokia;
     };
+
     // =====================================================================================================
     // Register either at the global Jolokia object global or as an AMD module
     (function (root) {
