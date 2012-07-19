@@ -1,9 +1,14 @@
 package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.jolokia.util.*;
+import org.jolokia.util.ClassUtil;
+import org.jolokia.util.DateUtil;
+import org.jolokia.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -61,6 +66,8 @@ public class StringToObjectConverter {
                                         JSONObject.class, JSONArray.class }) {
             PARSER_MAP.put(type.getName(),jsonExtractor);
         }
+
+        PARSER_MAP.put(javax.management.ObjectName.class.getName(), new ObjectNameParser());
 
         TYPE_SIGNATURE_MAP.put("Z",boolean.class);
         TYPE_SIGNATURE_MAP.put("B",byte.class);
@@ -170,7 +177,7 @@ public class StringToObjectConverter {
         }
         return parser.extract(value);
     }
-    
+
     // Convert an array
     private Object convertToArray(String pType, String pValue) {
         // It's an array
@@ -224,7 +231,7 @@ public class StringToObjectConverter {
     }
 
 
-    
+
     // ===========================================================================
     // Extractor interface
     private interface Parser {
@@ -296,5 +303,16 @@ public class StringToObjectConverter {
             }
         }
     }
-    
+
+    private static class ObjectNameParser implements Parser {
+    	/** {@inheritDoc} */
+    	public Object extract(String pValue) {
+    		try {
+    			return new javax.management.ObjectName(pValue);
+    		} catch(javax.management.MalformedObjectNameException e) {
+    			throw new IllegalArgumentException("Cannot parse ObjectName "+ pValue +": " +e, e);
+    		}
+    	}
+    }
+
 }
