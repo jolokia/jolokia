@@ -1,6 +1,19 @@
 package org.jolokia.converter.object;
 
-import java.util.*;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNull;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
@@ -8,12 +21,6 @@ import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNull;
 
 
 /*
@@ -122,6 +129,14 @@ public class StringToObjectConverterTest {
     @Test(expectedExceptions = { IllegalArgumentException.class})
     public void dateConversionFailed() {
         converter.prepareValue(Date.class.getName(),"illegal-date-format");
+    }
+
+    @Test
+    public void objectNameConversion() throws MalformedObjectNameException {
+    	String name = "JOLOKIA:class=Conversion,type=builder,name=jlk";
+    	ObjectName objName = new ObjectName(name);
+    	ObjectName testName = (ObjectName)converter.convertFromString(ObjectName.class.getName(), name);
+    	assertEquals(objName, testName);
     }
 
     @Test
