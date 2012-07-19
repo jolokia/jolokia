@@ -1,14 +1,11 @@
 package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.DateUtil;
-import org.jolokia.util.EscapeUtil;
+import javax.management.ObjectName;
+
+import org.jolokia.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -60,14 +57,13 @@ public class StringToObjectConverter {
         PARSER_MAP.put("char",new CharParser());
         PARSER_MAP.put(String.class.getName(),new StringParser());
         PARSER_MAP.put(Date.class.getName(),new DateParser());
+        PARSER_MAP.put(ObjectName.class.getName(), new ObjectNameParser());
 
         JSONParser jsonExtractor = new JSONParser();
         for (Class type : new Class[] { Map.class, List.class,
                                         JSONObject.class, JSONArray.class }) {
             PARSER_MAP.put(type.getName(),jsonExtractor);
         }
-
-        PARSER_MAP.put(javax.management.ObjectName.class.getName(), new ObjectNameParser());
 
         TYPE_SIGNATURE_MAP.put("Z",boolean.class);
         TYPE_SIGNATURE_MAP.put("B",byte.class);

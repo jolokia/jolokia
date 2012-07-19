@@ -139,6 +139,12 @@ public class StringToObjectConverterTest {
     	assertEquals(objName, testName);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class,
+          expectedExceptionsMessageRegExp = ".*parse.*ObjectName.*")
+    public void objectNameConversionFailed() {
+        converter.convertFromString(ObjectName.class.getName(),"bla:blub:InvalidName");
+    }
+
     @Test
     public void arrayConversions() {
         Object obj = converter.convertFromString(new int[0].getClass().getName(),"10,20,30");

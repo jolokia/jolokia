@@ -1,11 +1,8 @@
 package org.jolokia.converter.object;
 
-import java.util.Map;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.*;
 
-import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.converter.util.CompositeTypeAndJson;
 import org.jolokia.converter.util.TabularTypeAndJson;
 import org.json.simple.JSONArray;
@@ -43,15 +40,12 @@ public class StringToOpenTypeConverterTest {
 
     private StringToOpenTypeConverter converter;
 
-    private ObjectToJsonConverter toJsonConverter;
-
 
     @BeforeTest
     public void setup() {
 
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
         converter = new StringToOpenTypeConverter(stringToObjectConverter);
-        toJsonConverter = new ObjectToJsonConverter(stringToObjectConverter,null);
     }
 
     @Test
