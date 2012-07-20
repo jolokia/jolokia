@@ -82,6 +82,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
             set = new HashSet<String>();
             set.add("jolokia");
+
             set.add("habanero");
         } catch (IOException e) {
             throw new RuntimeException("Couldnot create temporary file name",e);
