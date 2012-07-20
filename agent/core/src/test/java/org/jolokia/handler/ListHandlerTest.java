@@ -138,7 +138,8 @@ public class ListHandlerTest {
         assertTrue(ops.containsKey("gc"));
         assertTrue(ops.get("gc") instanceof Map);
         Map attrs = (Map) res.get("attr");
-        assertEquals(attrs.size(),4);
+        // Java 7 introduces a new attribute 'ObjectName' here
+        assertEquals(attrs.size(),attrs.containsKey("ObjectName") ? 5 : 4);
         assertTrue(attrs.get("HeapMemoryUsage") instanceof Map);
         assertTrue(res.get("desc") instanceof String);
     }
