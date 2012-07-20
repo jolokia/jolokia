@@ -20,12 +20,11 @@ import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.scheme.*;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.BasicClientConnectionManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.*;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.VersionInfo;
@@ -63,6 +62,10 @@ public class J4pClientBuilder {
     // Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
     private String targetPassword;
 
+    // Pooling parameters
+    private int maxTotalConnections;
+    private int maxPerRoute;
+
     /**
      * Package access constructor, use static method on J4pClient for creating
      * the builder.
@@ -71,8 +74,8 @@ public class J4pClientBuilder {
         params = new BasicHttpParams();
         connectionTimeout(20 * 1000);
         maxTotalConnections(20);
-        maxConnectionPoolTimeout(500);
-        contentCharset(HTTP.DEFAULT_CONTENT_CHARSET);
+        maxPerRoute(2);
+        contentCharset(HTTP.DEF_CONTENT_CHARSET.name());
         expectContinue(true);
         tcpNoDelay(true);
         socketBufferSize(8192);
@@ -151,7 +154,7 @@ public class J4pClientBuilder {
     }
 
     /**
-     * Use a {@link org.apache.http.impl.conn.SingleClientConnManager} for connecting to the agent. This
+     * Use a {@link BasicClientConnectionManager} for connecting to the agent. This
      * is not very suitable in multithreaded environements
      */
     public final J4pClientBuilder singleConnection() {
@@ -160,7 +163,7 @@ public class J4pClientBuilder {
     }
 
     /**
-     * Use a {@link org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager} for connecting to the agent, which
+     * Use a {@link PoolingClientConnectionManager} for connecting to the agent, which
      * uses a pool of connections (see {@link #maxTotalConnections(int) and {@link #maxConnectionPoolTimeout(int)} for
      * tuning the pool}
      */
@@ -193,22 +196,34 @@ public class J4pClientBuilder {
     }
 
     /**
-     * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
+     * Sets the overall maximum number of connections allowed when using {@link #pooledConnections()}.
+     *
      * @param pConnections number of max. simultaneous connections
      */
     public final J4pClientBuilder maxTotalConnections(int pConnections) {
-        ConnManagerParams.setMaxTotalConnections(params, pConnections);
+        maxTotalConnections = pConnections;
         return this;
     }
 
     /**
-     * Sets the timeout in milliseconds used when retrieving a connection
-     * from the {@link org.apache.http.conn.ClientConnectionManager}.
+     * Defines the maximum number of connections per route.
      *
-     * @param pConnectionPoolTimeout timeout in milliseconds
+     * @param pMaxPerRoot maximum connections per route
+     */
+    public final J4pClientBuilder maxPerRoute(int pMaxPerRoot) {
+        maxPerRoute = pMaxPerRoot;
+        return this;
+    }
+
+    /**
+     * Formerly supposed to set the pool timeout, but never worked in older version of HttpClient <= 4.0 and
+     * has been removed for HttpClients > 4.0
+     *
+     * @param pConnectionPoolTimeout (ignored) timeout
+     *
+     * @deprecated
      */
     public final J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
-        ConnManagerParams.setTimeout(params,pConnectionPoolTimeout);
         return this;
     }
 
@@ -278,11 +293,15 @@ public class J4pClientBuilder {
     }
 
     ClientConnectionManager createClientConnectionManager() {
-        return pooledConnections ?
-                new ThreadSafeClientConnManager(getHttpParams(), getSchemeRegistry()) :
-                new SingleClientConnManager(getSchemeRegistry());
+        if (pooledConnections) {
+            PoolingClientConnectionManager cm = new PoolingClientConnectionManager(getSchemeRegistry());
+            cm.setMaxTotal(maxTotalConnections);
+            cm.setDefaultMaxPerRoute(maxPerRoute);
+            return cm;
+        } else {
+            return new BasicClientConnectionManager(getSchemeRegistry());
+        }
     }
-
 
     HttpParams getHttpParams() {
         return params;
@@ -291,8 +310,8 @@ public class J4pClientBuilder {
     private SchemeRegistry getSchemeRegistry() {
         // Create and initialize scheme registry
         SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+        schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
         return schemeRegistry;
     }
 }

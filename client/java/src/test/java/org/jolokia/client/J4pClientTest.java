@@ -18,16 +18,17 @@ package org.jolokia.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.apache.http.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.easymock.EasyMock;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
@@ -35,7 +36,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -110,7 +111,7 @@ public class J4pClientTest {
         expect(response.getEntity()).andReturn(entity);
         expect(entity.getContentEncoding()).andReturn(null);
         expect(entity.getContent()).andThrow(new IOException());
-        entity.consumeContent();
+        expect(entity.isStreaming()).andReturn(false);
         replay(client, entity, response);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
@@ -158,7 +159,7 @@ public class J4pClientTest {
         final ByteArrayInputStream bis =
                 new ByteArrayInputStream(jsonResp.getBytes());
         expect(entity.getContent()).andReturn(bis);
-        entity.consumeContent();
+        expect(entity.isStreaming()).andReturn(false);
         replay(client, response, entity);
         return client;
     }

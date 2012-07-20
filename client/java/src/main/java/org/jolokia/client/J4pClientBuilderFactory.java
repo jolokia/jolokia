@@ -66,7 +66,14 @@ public abstract class J4pClientBuilderFactory {
         return new J4pClientBuilder().maxTotalConnections(pConnections);
     }
 
-    /** See {@link J4pClientBuilder#maxConnectionPoolTimeout(int)} */
+    /** See {@link J4pClientBuilder#maxPerRoute(int)} */
+    public static J4pClientBuilder maxPerRoute(int pMaxPerRoute) {
+        return new J4pClientBuilder().maxPerRoute(pMaxPerRoute);
+    }
+
+    /** See {@link J4pClientBuilder#maxConnectionPoolTimeout(int)}
+     * @deprecated
+     * */
     public static J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
         return new J4pClientBuilder().maxConnectionPoolTimeout(pConnectionPoolTimeout);
     }
