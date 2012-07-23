@@ -7,11 +7,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.5" description="Release 1.0.5" date="2012-07-22">
-      <action dev="matejj" type="add" date="2012-07-19">
+    <release version="1.0.5" description="Release 1.0.5" date="2012-07-23">
+      <action dev="matejj" type="add" date="2012-07-19" issue="JOL-35">
         Added a deserialization to javax.management.ObjectName so that attributes of
         this type and operations taking such an argument can be properly invoked
-        with a Jolokia request (JOL-35).
+        with a Jolokia request.
       </action>
       <action dev="roland" type="add" date="2012-06-25">
         Added Jolokia datasource for Cubism (with AMD support).
