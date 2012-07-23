@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2012 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.0.4";
+            this.CLIENT_VERSION = "1.0.5";
 
             // Registered requests for fetching periodically
             var jobs = [];

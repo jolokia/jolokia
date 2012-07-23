@@ -12,6 +12,7 @@ firefox http://localhost:8080/
 
 vi src/docbkx/index.xml
 vi client/javascript/src/main/javascript/jolokia.js
+vi client/javascript/src/main/javascript/jolokia-cubism.js
 vi agent/core/src/main/java/org/jolokia/Version.java
 vi pom.xml
 --> <currentStableVersion>1.0.0</currentStableVersion>

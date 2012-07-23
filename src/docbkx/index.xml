@@ -6,7 +6,7 @@
       <inlinegraphic align="right" fileref="jolokia_logo.png"/>
       Jolokia - Reference Documentation
     </title>
-    <releaseinfo>1.0.4</releaseinfo>
+    <releaseinfo>1.0.5</releaseinfo>
     <authorgroup>
       <author>
         <firstname>Roland</firstname>
@@ -14,7 +14,7 @@
       </author>
     </authorgroup>
     <copyright>
-      <year>2011</year>
+      <year>2012</year>
       <holder>Roland Huﬂ</holder>
     </copyright>
   </bookinfo>

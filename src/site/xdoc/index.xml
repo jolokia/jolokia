@@ -72,7 +72,9 @@
         <p>
           A very cool live demo where a Jolokia JavaScript client
           fetches live data from our servers and plot it with Cubism
-          can be found on this <a href="client/javascript-cubism.html">demo page</a>.
+          can be found on this <a
+          href="client/javascript-cubism.html">demo page</a>.
+          The documentation can be found in the <a href="reference/html/clients.html#js-cubism">reference manual</a>.
         </p>
         <p>
           Jolokia uses also a <a
