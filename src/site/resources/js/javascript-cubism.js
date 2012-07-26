@@ -1,4 +1,4 @@
-var j4p = new Jolokia({url: "http://jolokia.org/jolokia", fetchInterval: 5000});
+var j4p = new Jolokia({url: "http://jolokia.org/jolokia", fetchInterval: 1000});
 
 
 var context = cubism.context()
