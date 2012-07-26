@@ -39,7 +39,6 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     };
 
     private int intValue = 0;
-
     private File file;
     private File origFile;
     private ObjectName objectName;
@@ -212,6 +211,15 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     public void setWriteOnlyString(String pString) {
         // nothing to be done
     }
+
+    public double getDoubleValueMin() {
+        return 4E-200;
+    }
+
+    public double getDoubleValueMax() {
+        return 4E+200;
+    }
+
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         return new ObjectName(domain + ":type=attribute");

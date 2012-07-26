@@ -62,7 +62,7 @@
   </commands>
 
   <!-- For each command type missing in a given <commands> section, for certain MBeans (which
-       be a pattern, too) an command be alloed. Note that an <allow> entry e.g. for reading
+       can be a pattern, too) an command be alloed. Note that an <allow> entry e.g. for reading
        an attribute of an certain MBean has no influence if reading is enabled globally anyway -->
   <allow>
 
