@@ -72,7 +72,7 @@ public class JolokiaServerTest {
     public void invalidConfig() throws IOException, InterruptedException {
         ServerConfig cfg = new ServerConfig("user=roland,port=" + EnvTestUtil.getFreePort());
         Thread.sleep(1000);
-        new JolokiaServer(cfg);
+        new JolokiaServer(cfg,false);
     }
 
     // ==================================================================
@@ -90,7 +90,7 @@ public class JolokiaServerTest {
         int port = EnvTestUtil.getFreePort();
         String c = pConfig != null ? pConfig + "," : "";
         ServerConfig config = new ServerConfig(c + "host=localhost,port=" + port);
-        JolokiaServer server = new JolokiaServer(config);
+        JolokiaServer server = new JolokiaServer(config,false);
         server.start();
         //Thread.sleep(2000);
         try {

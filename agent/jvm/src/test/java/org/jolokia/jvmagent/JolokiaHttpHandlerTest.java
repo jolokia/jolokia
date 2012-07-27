@@ -45,7 +45,7 @@ public class JolokiaHttpHandlerTest {
     @BeforeMethod
     public void setup() {
         handler = new JolokiaHttpHandler(getConfig());
-        handler.start();
+        handler.start(false);
     }
 
     @AfterMethod
@@ -130,7 +130,7 @@ public class JolokiaHttpHandlerTest {
             expect(exchange.getRequestMethod()).andReturn("GET");
             Headers header = new Headers();
             ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-            newHandler.start();
+            newHandler.start(false);
             try {
                 newHandler.handle(exchange);
             } finally {

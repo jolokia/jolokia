@@ -2,16 +2,14 @@ package org.jolokia.backend;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.URL;
 import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.request.JmxRequest;
-import org.jolokia.util.*;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
-import sun.jvm.hotspot.debugger.posix.elf.ELFSectionHeader;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.util.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss

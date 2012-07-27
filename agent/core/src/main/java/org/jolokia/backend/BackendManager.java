@@ -65,6 +65,7 @@ public class BackendManager {
 
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
+    private Initializer initializer;
 
     /**
      * Constrcuct a new backend manager with the given configuration and which allows
@@ -74,7 +75,7 @@ public class BackendManager {
      * @param pLogHandler logger
      */
     public BackendManager(Map<ConfigKey,String> pConfig, LogHandler pLogHandler) {
-        this(pConfig,pLogHandler,null);
+        this(pConfig, pLogHandler, null);
     }
 
     /**
@@ -85,69 +86,29 @@ public class BackendManager {
      * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
      */
     public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
+        this(pConfig,pLogHandler,pRestrictor,false);
+    }
 
-        // Central objects
-        converters = new Converters(pConfig);
-
+    /**
+     * Construct a new backend manager with the given configuration.
+     *
+     * @param pConfig configuration map used for tuning this handler's behaviour
+     * @param pLogHandler logger
+     * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
+     * @param pLazy whether the initialisation should be done lazy
+     */
+    public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor, boolean pLazy) {
         // Access restrictor
         restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
 
         // Log handler for putting out debug
         logHandler = pLogHandler;
 
-        // Create and remember request dispatchers
-        localDispatcher = new LocalRequestDispatcher(converters,
-                                                     restrictor,
-                                                     pConfig,
-                                                     logHandler);
-        ServerHandle serverHandle = localDispatcher.getServerInfo();
-        requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
-                                                      converters,serverHandle,restrictor);
-        requestDispatchers.add(localDispatcher);
-
-        // Backendstore for remembering agent state
-        initStores(pConfig);
-    }
-
-    // Construct configured dispatchers by reflection. Returns always
-    // a list, an empty one if no request dispatcher should be created
-    private List<RequestDispatcher> createRequestDispatchers(String pClasses,
-                                                             Converters pConverters,
-                                                             ServerHandle pServerHandle,
-                                                             Restrictor pRestrictor) {
-        List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
-        if (pClasses != null && pClasses.length() > 0) {
-            String[] names = pClasses.split("\\s*,\\s*");
-            for (String name : names) {
-                ret.add(createDispatcher(name, pConverters, pServerHandle, pRestrictor));
-            }
-        }
-        return ret;
-    }
-
-    // Create a single dispatcher
-    private RequestDispatcher createDispatcher(String pDispatcherClass,
-                                               Converters pConverters,
-                                               ServerHandle pServerHandle, Restrictor pRestrictor) {
-        try {
-            Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
-            Constructor constructor = clazz.getConstructor(Converters.class,
-                                                           ServerHandle.class,
-                                                           Restrictor.class);
-            return (RequestDispatcher)
-                    constructor.newInstance(pConverters,
-                                            pServerHandle,
-                                            pRestrictor);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Couldn't load class " + pDispatcherClass + ": " + e,e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class " + pDispatcherClass + " has invalid constructor: " + e,e);
-        } catch (IllegalAccessException e) {
-        throw new IllegalArgumentException("Constructor of " + pDispatcherClass + " couldn't be accessed: " + e,e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(pDispatcherClass + " couldn't be instantiated: " + e,e);
+        if (pLazy) {
+            initializer = new Initializer(pConfig);
+        } else {
+            init(pConfig);
+            initializer = null;
         }
     }
 
@@ -164,6 +125,7 @@ public class BackendManager {
      */
     public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
             ReflectionException, MBeanException, IOException {
+        lazyInitIfNeeded();
 
         boolean debug = isDebug();
 
@@ -183,69 +145,6 @@ public class BackendManager {
         }
 
         return json;
-    }
-
-    // call the an appropriate request dispatcher
-    private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
-        Object retValue = null;
-        boolean useValueWithPath = false;
-        boolean found = false;
-        for (RequestDispatcher dispatcher : requestDispatchers) {
-            if (dispatcher.canHandle(pJmxReq)) {
-                retValue = dispatcher.dispatchRequest(pJmxReq);
-                useValueWithPath = dispatcher.useReturnValueWithPath(pJmxReq);
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
-        }
-        return converters.getToJsonConverter().convertToJson(retValue, pJmxReq, useValueWithPath);
-    }
-
-    // init various application wide stores for handling history and debug output.
-    private void initStores(Map<ConfigKey, String> pConfig) {
-        int maxEntries = getIntConfigValue(pConfig, HISTORY_MAX_ENTRIES);
-        int maxDebugEntries = getIntConfigValue(pConfig,DEBUG_MAX_ENTRIES);
-
-        String doDebug = DEBUG.getValue(pConfig);
-        boolean debug = false;
-        if (doDebug != null && Boolean.valueOf(doDebug)) {
-            debug = true;
-        }
-
-
-        historyStore = new HistoryStore(maxEntries);
-        debugStore = new DebugStore(maxDebugEntries,debug);
-
-        try {
-            localDispatcher.initMBeans(historyStore, debugStore);
-        } catch (NotCompliantMBeanException e) {
-            intError("Error registering config MBean: " + e, e);
-        } catch (MBeanRegistrationException e) {
-            intError("Cannot register MBean: " + e, e);
-        } catch (MalformedObjectNameException e) {
-            intError("Invalid name for config MBean: " + e, e);
-        }
-    }
-
-    // Final private error log for use in the constructor above
-    private void intError(String message,Throwable t) {
-        logHandler.error(message, t);
-        debugStore.log(message, t);
-    }
-
-
-    private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {
-        int ret;
-        try {
-            ret = Integer.parseInt(pKey.getValue(pConfig));
-        } catch (NumberFormatException exp) {
-            ret = Integer.parseInt(pKey.getDefaultValue());
-        }
-        return ret;
     }
 
     /**
@@ -326,5 +225,159 @@ public class BackendManager {
     public boolean isDebug() {
         return debugStore != null && debugStore.isDebug();
     }
+
+    // ==========================================================================================================
+
+    // Initialized used for late initialisation as it is required for the agent when used
+    // as startup options
+    private class Initializer {
+
+        private Map<ConfigKey, String> config;
+
+        public Initializer(Map<ConfigKey, String> pConfig) {
+            config = pConfig;
+        }
+
+        void init() {
+            BackendManager.this.init(config);
+        }
+    }
+
+    // Run initialized if not already done
+    private void lazyInitIfNeeded() {
+        if (initializer != null) {
+            synchronized (this) {
+                if (initializer != null) {
+                    initializer.init();
+                    initializer = null;
+                }
+            }
+        }
+    }
+
+    // Initialize this object;
+    private void init(Map<ConfigKey, String> pConfig) {
+        // Central objects
+        converters = new Converters(pConfig);
+
+        // Create and remember request dispatchers
+        localDispatcher = new LocalRequestDispatcher(converters,
+                                                     restrictor,
+                                                     pConfig,
+                                                     logHandler);
+        ServerHandle serverHandle = localDispatcher.getServerInfo();
+        requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
+                                                      converters,serverHandle,restrictor);
+        requestDispatchers.add(localDispatcher);
+
+        // Backendstore for remembering agent state
+        initStores(pConfig);
+    }
+
+    // Construct configured dispatchers by reflection. Returns always
+    // a list, an empty one if no request dispatcher should be created
+    private List<RequestDispatcher> createRequestDispatchers(String pClasses,
+                                                             Converters pConverters,
+                                                             ServerHandle pServerHandle,
+                                                             Restrictor pRestrictor) {
+        List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
+        if (pClasses != null && pClasses.length() > 0) {
+            String[] names = pClasses.split("\\s*,\\s*");
+            for (String name : names) {
+                ret.add(createDispatcher(name, pConverters, pServerHandle, pRestrictor));
+            }
+        }
+        return ret;
+    }
+
+    // Create a single dispatcher
+    private RequestDispatcher createDispatcher(String pDispatcherClass,
+                                               Converters pConverters,
+                                               ServerHandle pServerHandle, Restrictor pRestrictor) {
+        try {
+            Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
+            Constructor constructor = clazz.getConstructor(Converters.class,
+                                                           ServerHandle.class,
+                                                           Restrictor.class);
+            return (RequestDispatcher)
+                    constructor.newInstance(pConverters,
+                                            pServerHandle,
+                                            pRestrictor);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Couldn't load class " + pDispatcherClass + ": " + e,e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Class " + pDispatcherClass + " has invalid constructor: " + e,e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Constructor of " + pDispatcherClass + " couldn't be accessed: " + e,e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException(e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException(pDispatcherClass + " couldn't be instantiated: " + e,e);
+        }
+    }
+
+    // call the an appropriate request dispatcher
+    private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        Object retValue = null;
+        boolean useValueWithPath = false;
+        boolean found = false;
+        for (RequestDispatcher dispatcher : requestDispatchers) {
+            if (dispatcher.canHandle(pJmxReq)) {
+                retValue = dispatcher.dispatchRequest(pJmxReq);
+                useValueWithPath = dispatcher.useReturnValueWithPath(pJmxReq);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
+        }
+        return converters.getToJsonConverter().convertToJson(retValue, pJmxReq, useValueWithPath);
+    }
+
+    // init various application wide stores for handling history and debug output.
+    private void initStores(Map<ConfigKey, String> pConfig) {
+        int maxEntries = getIntConfigValue(pConfig, HISTORY_MAX_ENTRIES);
+        int maxDebugEntries = getIntConfigValue(pConfig,DEBUG_MAX_ENTRIES);
+
+        String doDebug = DEBUG.getValue(pConfig);
+        boolean debug = false;
+        if (doDebug != null && Boolean.valueOf(doDebug)) {
+            debug = true;
+        }
+
+
+        historyStore = new HistoryStore(maxEntries);
+        debugStore = new DebugStore(maxDebugEntries,debug);
+
+        try {
+            localDispatcher.initMBeans(historyStore, debugStore);
+        } catch (NotCompliantMBeanException e) {
+            intError("Error registering config MBean: " + e, e);
+        } catch (MBeanRegistrationException e) {
+            intError("Cannot register MBean: " + e, e);
+        } catch (MalformedObjectNameException e) {
+            intError("Invalid name for config MBean: " + e, e);
+        }
+    }
+
+    // Final private error log for use in the constructor above
+    private void intError(String message,Throwable t) {
+        logHandler.error(message, t);
+        debugStore.log(message, t);
+    }
+
+
+    private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {
+        int ret;
+        try {
+            ret = Integer.parseInt(pKey.getValue(pConfig));
+        } catch (NumberFormatException exp) {
+            ret = Integer.parseInt(pKey.getDefaultValue());
+        }
+        return ret;
+    }
+
 
 }

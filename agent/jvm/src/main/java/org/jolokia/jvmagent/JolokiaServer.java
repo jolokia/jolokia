@@ -42,6 +42,9 @@ public class JolokiaServer {
     // Overall configuration
     private ServerConfig config;
 
+    // Whether the initialisation should be done lazy
+    private boolean lazy;
+
     // Thread for proper cleaning up our server thread
     // on exit
     private CleanupThread cleaner = null;
@@ -64,9 +67,9 @@ public class JolokiaServer {
      * @param pConfig configuration for this server
      * @throws IOException if initialization fails
      */
-    public JolokiaServer(ServerConfig pConfig) throws IOException {
+    public JolokiaServer(ServerConfig pConfig,boolean pLazy) throws IOException {
         config = pConfig;
-
+        lazy = pLazy;
         initServer();
     }
 
@@ -75,7 +78,7 @@ public class JolokiaServer {
      * Start HttpServer
      */
     public void start() {
-        jolokiaHttpHandler.start();
+        jolokiaHttpHandler.start(lazy);
 
         ThreadGroup threadGroup = new ThreadGroup("jolokia");
         threadGroup.setDaemon(false);

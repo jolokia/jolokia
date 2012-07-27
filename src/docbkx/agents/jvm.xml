@@ -201,10 +201,11 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
             If set to <constant>true</constant> and if the agent is
             attached to a Glassfish server, then during startub the
             AMX subsystem is booted so that Glassfish specific MBeans
-            are available. 
+            are available. Otherwise, if set to
+            <constant>false</constant> the AMX system is not booted. 
           </td>
           <td>
-            <constant>false</constant>
+            <constant>true</constant>
           </td>
         </tr>
         <tr>
