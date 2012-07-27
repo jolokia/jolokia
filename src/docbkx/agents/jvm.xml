@@ -26,10 +26,9 @@
     <sidebar>
       The JDK embedded HTTP-Server is not the fastest one (it is used
       e.g. for the JAXWS reference implementation), but for our
-      monitoring needs the performance is sufficient. it is
-      sufficient for our needs. There are several configuration
-      options for tuning the HTTP server's performance. See below for
-      details. 
+      monitoring needs the performance is sufficient. There are
+      several configuration options for tuning the HTTP server's
+      performance. See below for details.
     </sidebar>
     <section id="jvm-agent-installation">
       <title>Installation</title>
@@ -83,6 +82,22 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>        
           <td>
             <constant>8778</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>user</constant></td>
+          <td>
+            User to be used for authentication (along with a <constant>password</constant>)
+          </td>        
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>password</constant></td>
+          <td>
+            Password used for authentication (<constant>user</constant> is then required, too)
+          </td>        
+          <td>
           </td>
         </tr>
         <tr>
@@ -176,6 +191,18 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
             authentication (https only). (<constant>true</constant> or
             <constant>false</constant>). 
           </td>        
+          <td>
+            <constant>false</constant>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>bootAmx</constant></td>
+          <td>
+            If set to <constant>true</constant> and if the agent is
+            attached to a Glassfish server, then during startub the
+            AMX subsystem is booted so that Glassfish specific MBeans
+            are available. 
+          </td>
           <td>
             <constant>false</constant>
           </td>

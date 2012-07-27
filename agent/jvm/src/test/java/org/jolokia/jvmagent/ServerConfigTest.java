@@ -43,6 +43,14 @@ public class ServerConfigTest {
     }
 
     @Test
+    public void detectorArgs() {
+        ServerConfig config = new ServerConfig("bootAmx=true");
+        Map<ConfigKey,String> jConfig = config.getJolokiaConfig();
+        String detectorOpts = jConfig.get(ConfigKey.DETECTOR_OPTIONS);
+        assertEquals(detectorOpts.replaceAll("\\s*",""),"{\"glassfish\":{\"bootAmx\":true}}");
+    }
+
+    @Test
     public void defaults() throws UnknownHostException {
         ServerConfig config = new ServerConfig("");
         assertEquals(config.getAddress(), InetAddress.getLocalHost());

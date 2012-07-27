@@ -2,6 +2,7 @@ package org.jolokia.backend;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.URL;
 import java.util.*;
 
 import javax.management.*;
@@ -10,6 +11,7 @@ import org.jolokia.request.JmxRequest;
 import org.jolokia.util.*;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
+import sun.jvm.hotspot.debugger.posix.elf.ELFSectionHeader;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -86,14 +88,10 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      * @param pLogHandler log handler used for logging purposes
      */
     public MBeanServerHandler(Map<ConfigKey,String> pConfig,LogHandler pLogHandler) {
-        List<ServerDetector> detectors = lookupDetectors();
-        initMBeanServers(detectors);
-        serverHandle = detectServers(detectors,pLogHandler);
-        if (serverHandle != null) {
-            serverHandle.postDetect(mBeanServers, pConfig,pLogHandler);
-        }
+        initServerHandle(pConfig, pLogHandler);
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
     }
+
 
     /**
      * Dispatch a request to the MBeanServer which can handle it
@@ -232,6 +230,18 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     // =================================================================================
 
+    /**
+     * Initialize the server handle. This method is either called
+     * @param pConfig configuration passed through to the server detectors
+     * @param pLogHandler used for putting out diagnostic messags
+     */
+    private void initServerHandle(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+        List<ServerDetector> detectors = lookupDetectors();
+        initMBeanServers(detectors);
+        serverHandle = detectServers(detectors,pLogHandler);
+        serverHandle.postDetect(mBeanServers, pConfig,pLogHandler);
+    }
+
     // Lookup all registered detectors + a default detector
     private List<ServerDetector> lookupDetectors() {
         List<ServerDetector> detectors =
@@ -252,9 +262,8 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      *   <li>Finally, use the {@link java.lang.management.ManagementFactory#getPlatformMBeanServer()}
      * </ul>
      *
-     * @return the MBeanServer found
      * @throws IllegalStateException if no MBeanServer could be found.
-     * @param pDetectors
+     * @param pDetectors detectors which might have extra possibilities to add MBeanServers
      */
     private void initMBeanServers(List<ServerDetector> pDetectors) {
 
@@ -383,10 +392,16 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // ==================================================================================
     // Fallback server detector which matches always
 
+    private static class NullServerHandle extends ServerHandle {
+        public NullServerHandle() {
+            super(null,null,null,null,null);
+        }
+    }
+
     private static class FallbackServerDetector extends AbstractServerDetector {
         /** {@inheritDoc} */
         public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-            return new ServerHandle(null,null,null,null,null);
+            return new NullServerHandle();
         }
     }
 }

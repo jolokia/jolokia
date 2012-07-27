@@ -285,11 +285,21 @@ public class ServerConfig {
         if (ret.containsKey("config")) {
             Map<String,String> userConfig = readConfig(ret.get("config"));
             config.putAll(userConfig);
-            config.putAll(ret);
-            return config;
-        } else {
-            config.putAll(ret);
-            return config;
+        }
+        config.putAll(ret);
+        prepareDetectorOptions(config);
+        return config;
+    }
+
+    // Add detector specific options if given on the command line
+    private void prepareDetectorOptions(Map<String, String> pConfig) {
+        StringBuffer detectorOpts = new StringBuffer("{");
+        if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
+            detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");
+        }
+        if (detectorOpts.length() > 1) {
+            detectorOpts.append("}");
+            pConfig.put(ConfigKey.DETECTOR_OPTIONS.getKeyValue(),detectorOpts.toString());
         }
     }
 

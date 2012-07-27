@@ -78,7 +78,7 @@ public class BackendManager {
     }
 
     /**
-     * Constrcuct a new backend manager with the given configuration.
+     * Construct a new backend manager with the given configuration.
      *
      * @param pConfig configuration map used for tuning this handler's behaviour
      * @param pLogHandler logger
