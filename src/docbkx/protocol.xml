@@ -41,7 +41,7 @@
       distinguished from one another. <emphasis>Jolokia operations</emphasis> denote
       the various kind of Jolokia requests, whereas <emphasis>JMX
       operations</emphasis> are methods which can be invoked on an JMX
-      MBean. Wherever the context requires it, this documents uses
+      MBean. Whenever the context requires it, this documents uses
       <emphasis>Jolokia</emphasis> or <emphasis>JMX</emphasis> as
       prefix.  
     </note>
@@ -52,33 +52,32 @@
         requests, which are distinguished by the HTTP method used: GET
         or POST. Regardless of what method is used, the agent doesn't
         keep any state on the server side (except of course that
-        MBeans are mostly obviously stateful). So in this aspect, the
+        MBeans are obviously stateful most of the time). So in this aspect, the
         communication can be considered
        <ulink url="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</ulink>
         like<footnote id="rest-comment">
           <para>This document will avoid the term REST as much as
           possible in order to avoid provoking any dogmatic
-          resentments.</para> 
+          resentments.</para>
         </footnote>.
       </para>
       <section id="get-request">
         <title>GET requests</title>
         <para>
-          The simplest way to access the Jolokia is by sending
-          HTTP GET requests. These requests encode all its parameters
-          within the access URL. Typically, Jolokia uses the path-info
-          part of an URL to extract the parameters. Within the
-          path-info, each part is separated by a slash
-          (<literal>/</literal>).  In general, the request URL looks
-          like
+          The simplest way to access the Jolokia agent is by sending
+          HTTP GET requests. These requests encode all their
+          parameters within the access URL. Typically, Jolokia uses
+          the path-info part of an URL to extract the
+          parameters. Within the path-info, each part is separated by
+          a slash (<literal>/</literal>).  In general, the request URL
+          looks like
           <synopsis><![CDATA[<base-url>/<type>/<arg1>/<arg2>/..../]]></synopsis>
           The <literal>&lt;base-url&gt;</literal> specifies the URL
-          under which the agent is accessible. It
-          typically looks like
-          <uri>http://localhost:8080/jolokia</uri>, but depends
-          obviously on your deployment setup. Normally, the last part
-          of this URL is the name of the deployed agent, which by
-          default is based on the agent's filename
+          under which the agent is accessible. It normally looks like
+          <uri>http://localhost:8080/jolokia</uri>, but depends on
+          your deployment setup. The last part of this URL is the
+          <emphasis>context root</emphasis> of the deployed agent,
+          which by default is based on the agent's filename
           (e.g. <filename>jolokia.war</filename>).
           <literal>&lt;type&gt;</literal> specifies one of the
           supported Jolokia operations (described in the next
@@ -123,10 +122,11 @@
             most servlet container translate a backslash into a forward
             slash on the fly when given in an URL. 
           </para>
-          </footnote>. A exclamation mark needs to be doubled for
-          escaping. Any other characted preceded by an exclamation mark
-          is taken literally. Table <xref linkend="escape-rules"/>
-          illustrates the escape rules as used in GET requests.           
+          </footnote>. An exclamation mark itself needs to be doubled
+          for escaping. Any other characted preceded by an exclamation
+          mark is taken literally. Table <xref
+          linkend="escape-rules"/> illustrates the escape rules as
+          used in GET requests.
         </para>
         <table id="escape-rules">
           <title>Escaping rules</title>
