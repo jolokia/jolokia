@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// Test for testing the poller
+// Poller tests
 
 $(document).ready(function() {
 
@@ -77,12 +77,20 @@ $(document).ready(function() {
         setTimeout(function() {
             equals(counter1,3,"Req1 should be called 3 times");
             equals(counter2,3,"Req2 should be called 3 times");
-            j4p.unregister(id2);
+            j4p.unregister(id1);
             setTimeout(function() {
-                j4p.stop();
-                equals(counter1,4,"Req1 should continue to be requested, now for 4 times");
-                equals(counter2,3,"Req2 stays at 3 times since it was unregistered");
-                start();
+                equals(counter1,3,"Req1 stays at 3 times since it was unregistered");
+                equals(counter2,4,"Req2 should continue to be requested, now for 4 times");
+                j4p.unregister(id2);
+                // Handles should stay stable, so the previous unregister of id1 should not change
+                // the meaining of id2 (see http://jolokia.963608.n3.nabble.com/Possible-bug-in-the-scheduler-tp4023893.html
+                // for details)
+                setTimeout(function() {
+                    j4p.stop();
+                    equals(counter1,3,"Req1 stays at 3 times since it was unregistered");
+                    equals(counter2,4,"Req2 stays at 4 times since it was unregistered");
+                    start();
+                },300);
             },300);
         },500)
     });

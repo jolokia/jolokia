@@ -268,8 +268,9 @@
                     throw "First argument must be either a callback func " + "or an object with 'success' and 'error' attrs";
                 }
                 job.requests = requests;
-                jobs.push(job);
-                return jobs.length - 1;
+                var idx = jobs.length;
+                jobs[idx] = job;
+                return idx;
             };
 
             /**
@@ -279,7 +280,7 @@
              */
             this.unregister = function(handle) {
                 if (handle < jobs.length) {
-                    jobs.splice(handle,1);
+                    jobs[handle] = undefined;
                 }
             };
 
@@ -351,6 +352,9 @@
                 var opts;
                 for (i = 0; i < len; i++) {
                     var job = jobs[i];
+                    if (!job) {
+                        continue;
+                    }
                     reqs = job != null ? job.requests : void 0;
                     var reqsLen = reqs.length;
                     if (job.success) {
