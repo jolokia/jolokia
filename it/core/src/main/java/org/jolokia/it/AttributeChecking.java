@@ -213,11 +213,11 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     }
 
     public double getDoubleValueMin() {
-        return 4E-200;
+        return 4.208154711E-212;
     }
 
     public double getDoubleValueMax() {
-        return 4E+200;
+        return 4.208154711E+212;
     }
 
 
