@@ -85,6 +85,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
     }
 
     public Map mapArgument(Map arg) {
+        return arg;
+    }
+
+    public Map ArmapArgument(Map arg) {
         if (arg == null) {
             return null;
         }

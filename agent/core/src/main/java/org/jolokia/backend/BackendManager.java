@@ -65,7 +65,11 @@ public class BackendManager {
 
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
-    private Initializer initializer;
+
+    // Initialize used for late initialization
+    // ("volatile: because we use double-checked locking later on
+    // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
+    private volatile Initializer initializer;
 
     /**
      * Constrcuct a new backend manager with the given configuration and which allows
