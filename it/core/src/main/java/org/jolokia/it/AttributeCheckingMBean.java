@@ -91,4 +91,7 @@ public interface AttributeCheckingMBean {
     double getDoubleValueMin();
 
     double getDoubleValueMax();
+
+
+    String getUtf8Content();
 }

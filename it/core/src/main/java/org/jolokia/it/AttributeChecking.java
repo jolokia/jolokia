@@ -50,6 +50,8 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private String domain;
     private Date date = new Date();
 
+
+
     public AttributeChecking(String pDomain) {
         domain = pDomain;
         reset();
@@ -220,6 +222,10 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         return 4.208154711E+212;
     }
 
+    public String getUtf8Content() {
+        // UTF-8: E2 98 AF, Unicode: U+262F
+        return "☯";
+    }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         return new ObjectName(domain + ":type=attribute");
