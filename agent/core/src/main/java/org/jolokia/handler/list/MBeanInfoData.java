@@ -190,15 +190,37 @@ public class MBeanInfoData {
         // In case of a remote call, IOException can occur e.g. for
         // NonSerializableExceptions
         if (pathStack.size() == 0) {
-            JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-            JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
-            mBeanMap.put(DataKeys.ERROR.getKey(), pExp);
+            addException(pName, pExp);
         } else {
             // Happens for a deeper request, i.e with a path pointing directly into an MBean,
             // Hence we throw immediately an error here since there will be only this exception
             // and no extra info
-            throw pExp;
+            throw new IOException("IOException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
         }
+    }
+
+    /**
+     * Add an exception which occurred during extraction of an {@link MBeanInfo} for
+     * a certain {@link ObjectName} to this map.
+     *
+     * @param pName MBean name for which the error occurred
+     * @param pExp exception occurred
+     * @throws IllegalStateException if this method decides to rethrow the execption
+     */
+    public void handleException(ObjectName pName, IllegalStateException pExp) throws IllegalStateException {
+        // This happen happens for JBoss 7.1 in some cases.
+        if (pathStack.size() == 0) {
+            addException(pName, pExp);
+        } else {
+            throw new IllegalStateException("IllegalStateException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
+        }
+    }
+
+    // Add an exception to the info map
+    private void addException(ObjectName pName, Exception pExp) {
+        JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 
     /**

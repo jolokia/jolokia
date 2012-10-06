@@ -167,6 +167,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             pInfoMap.addMBeanInfo(mBeanInfo,pName);
         } catch (IOException exp) {
             pInfoMap.handleException(pName,exp);
+        } catch (IllegalStateException exp) {
+            pInfoMap.handleException(pName,exp);
         }
     }
 
