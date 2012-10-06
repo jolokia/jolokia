@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -42,12 +43,12 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pType request type
      * @param pObjectName object name, which must not be null.
      * @param pPathParts parts of an path
-     * @param pInitParams optional init params
+     * @param pProcessingParams optional init params
      * @throws MalformedObjectNameException if the given MBean name is not a valid object name
      */
-    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, Map<String, String> pInitParams)
+    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, Map<String, String> pProcessingParams)
             throws MalformedObjectNameException {
-        super(pType,pPathParts,pInitParams);
+        super(pType,pPathParts,pProcessingParams);
         initObjectName(pObjectName);
     }
 
@@ -92,7 +93,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
     }
 
     /**
-     * String representation of the object name
+     * String representation of the object name for this request.
      *
      * @return the object name a string representation
      */
@@ -100,6 +101,23 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
         return objectName.getCanonicalName();
     }
 
+    /**
+     * Name prepared according to requested formatting note. The key ordering can be influenced by the
+     * proccesing parameter {@link ConfigKey#OBJECT_NAME_KEY_ORDER}. If not given or set to "canonical",
+     * then the canonical order is used, if set to "initial" the name is given to construction time
+     * is used.
+     *
+     * @param pName name to format
+     * @return formatted string
+     */
+    public String getOrderedObjectName(ObjectName pName) {
+        String keyOrder = getProcessingConfig(ConfigKey.OBJECT_NAME_KEY_ORDER);
+        if ("initial".equals(keyOrder)) {
+            return pName.getDomain() + ":" + pName.getKeyPropertyListString();
+        } else {
+            return pName.getCanonicalName();
+        }
+    }
 
     private void initObjectName(String pObjectName) throws MalformedObjectNameException {
         if (pObjectName == null) {

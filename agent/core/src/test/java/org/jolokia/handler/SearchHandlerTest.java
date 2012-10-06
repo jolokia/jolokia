@@ -24,13 +24,13 @@ import javax.management.*;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.ConfigKey;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -61,7 +61,7 @@ public class SearchHandlerTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        List<String> res = doSearch("java.lang:*", "java.lang:type=Memory", "java.lang:type=Runtime");
+        List<String> res = doSearch("java.lang:*", null, "java.lang:type=Memory", "java.lang:type=Runtime");
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:type=Memory"));
         assertTrue(res.contains("java.lang:type=Runtime"));
@@ -72,16 +72,33 @@ public class SearchHandlerTest {
     @Test
     public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         String attr = "java.lang:type=\"m:e*m\\\"?o\\\\y\\n\"";
-        List<String> res = doSearch("java.lang:*", attr);
+        List<String> res = doSearch("java.lang:*", null, attr);
         assertEquals(res.size(),1);
         assertTrue(res.contains(attr));
         verify(connection);
     }
 
+    @Test
+    public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        List<String> res = doSearch("java.lang:*", "canonical", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
+        assertEquals(res.size(),2);
+        assertTrue(res.contains("java.lang:name=bla,type=Memory"));
+        assertTrue(res.contains("java.lang:mode=run,type=Runtime"));
+        verify(connection);
+    }
 
-    private List<String> doSearch(String pPattern, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    @Test
+    public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        List<String> res = doSearch("java.lang:*", "initial", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
+        assertEquals(res.size(),2);
+        assertTrue(res.contains("java.lang:type=Memory,name=bla"));
+        assertTrue(res.contains("java.lang:type=Runtime,mode=run"));
+        verify(connection);
+    }
+
+    private List<String> doSearch(String pPattern, String pKeyOrder, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         ObjectName oName = new ObjectName(pPattern);
-        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).build();
+        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.OBJECT_NAME_KEY_ORDER,pKeyOrder).build();
 
         connection = createMock(MBeanServerConnection.class);
         Set<ObjectName> names = new HashSet<ObjectName>();

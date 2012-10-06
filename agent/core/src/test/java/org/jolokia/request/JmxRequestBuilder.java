@@ -16,10 +16,10 @@ package org.jolokia.request;
  *  limitations under the License.
  */
 
+import java.util.*;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import java.util.*;
 
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;

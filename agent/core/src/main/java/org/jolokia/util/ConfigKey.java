@@ -78,6 +78,13 @@ public enum ConfigKey {
     IGNORE_ERRORS("ignoreErrors", false, true),
 
     /**
+     * Order with which propery keys of Objectnames are ordered.
+     * The allowed values are either "canonical" for an alphateic sorting of
+     * the keys or ""
+     */
+    OBJECT_NAME_KEY_ORDER("objectNameKeyOrder",false,true,"canonical"),
+
+    /**
      * Optional domain name for registering own MBeans
      */
     MBEAN_QUALIFIER("mbeanQualifier", true, false),

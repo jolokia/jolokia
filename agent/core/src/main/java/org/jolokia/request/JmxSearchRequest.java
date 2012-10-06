@@ -53,6 +53,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
         super(pRequestMap, pParams);
     }
 
+
     @Override
     public String toString() {
         StringBuffer ret = new StringBuffer("JmxSearchRequest[");

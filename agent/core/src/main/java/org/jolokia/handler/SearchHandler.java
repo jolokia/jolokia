@@ -64,7 +64,7 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         for (MBeanServerConnection server : servers) {
             Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
             for (ObjectName name : names) {
-                ret.add(name.getCanonicalName());
+                ret.add(request.getOrderedObjectName(name));
             }
         }
         return new ArrayList<String>(ret);
