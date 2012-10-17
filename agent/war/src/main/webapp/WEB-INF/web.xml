@@ -94,6 +94,7 @@
   <!--
   Example Configuration for switching on BASIC security. The role 'Jolokia'
   must be mapped to real users with passwords on the Appserver side:
+  -->
 
   <login-config>
     <auth-method>BASIC</auth-method>
@@ -113,6 +114,7 @@
   <security-role>
     <role-name>Jolokia</role-name>
   </security-role>
+  <!--
   -->
 </web-app>
 
