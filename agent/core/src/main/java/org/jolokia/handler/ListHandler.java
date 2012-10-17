@@ -75,10 +75,12 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
 
         int maxDepth = getMaxDepth(pRequest);
+        boolean useCanonicalName =
+                Boolean.parseBoolean(pRequest.getProcessingConfig(ConfigKey.CANONICAL_NAMING));
         ObjectName oName = null;
         try {
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
-            MBeanInfoData infoMap = new MBeanInfoData(maxDepth,pathStack);
+            MBeanInfoData infoMap = new MBeanInfoData(maxDepth,pathStack,useCanonicalName);
 
             oName = objectNameFromPath(pathStack);
             if (oName == null || oName.isPattern()) {

@@ -97,6 +97,9 @@ public class MBeanInfoData {
     // Initialise updaters
     private static final Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
 
+    // How to order keys in Object Names
+    private boolean useCanonicalName;
+
     static {
         for (DataUpdater updater : new DataUpdater[] {
                 new DescriptionDataUpdater(),
@@ -115,9 +118,11 @@ public class MBeanInfoData {
      *
      * @param pMaxDepth max depth
      * @param pPathStack the stack for restricting the information to add
+     * @param pUseCanonicalName whether to use canonical name in listings
      */
-    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack) {
+    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
         maxDepth = pMaxDepth;
+        useCanonicalName = pUseCanonicalName;
         pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<String>();
         infoMap = new JSONObject();
     }
@@ -143,10 +148,14 @@ public class MBeanInfoData {
         } else if (maxDepth == 2 && pathStack.size() == 0) {
             // Add domain an object name into the map, final value is a dummy value
             JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-            mBeansMap.put(pName.getCanonicalKeyPropertyListString(),1);
+            mBeansMap.put(getKeyPropertyString(pName),1);
             return true;
         }
         return false;
+    }
+
+    private String getKeyPropertyString(ObjectName pName) {
+        return useCanonicalName ? pName.getCanonicalKeyPropertyListString() : pName.getKeyPropertyListString();
     }
 
     /**
@@ -161,7 +170,7 @@ public class MBeanInfoData {
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
         JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         // Trim down stack to get rid of domain/property list
         Stack<String> stack = truncatePathStack(2);
         if (stack.empty()) {
@@ -171,7 +180,7 @@ public class MBeanInfoData {
         }
         // Trim if required
         if (mBeanMap.size() == 0) {
-            mBeansMap.remove(pName.getCanonicalKeyPropertyListString());
+            mBeansMap.remove(getKeyPropertyString(pName));
             if (mBeansMap.size() == 0) {
                 infoMap.remove(pName.getDomain());
             }
@@ -219,7 +228,7 @@ public class MBeanInfoData {
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
         JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 

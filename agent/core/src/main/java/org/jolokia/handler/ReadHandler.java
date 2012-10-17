@@ -1,12 +1,14 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.*;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.RequestType;
-
-import javax.management.*;
 import java.io.IOException;
 import java.util.*;
+
+import javax.management.*;
+
+import org.jolokia.request.JmxReadRequest;
+import org.jolokia.request.ValueFaultHandler;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -103,14 +105,14 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
             if (!pRequest.hasAttribute()) {
                 Map values = (Map) fetchAttributes(pServers,name, null, faultHandler);
                 if (values != null && values.size() > 0) {
-                    ret.put(name.getCanonicalName(),values);
+                    ret.put(pRequest.getOrderedObjectName(name),values);
                 }
             } else {
                 List<String> filteredAttributeNames = filterAttributeNames(pServers,name,attributeNames);
                 if (filteredAttributeNames.size() == 0) {
                     continue;
                 }
-                ret.put(name.getCanonicalName(),
+                ret.put(pRequest.getOrderedObjectName(name),
                         fetchAttributes(pServers,name,filteredAttributeNames, faultHandler));
             }
         }

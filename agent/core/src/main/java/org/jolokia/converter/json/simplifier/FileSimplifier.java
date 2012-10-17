@@ -30,7 +30,7 @@ import java.util.Map;
 public class FileSimplifier extends SimplifierExtractor<File> {
 
     /**
-     * Empty constructor
+     * Default constructor
      */
     public FileSimplifier() {
         super(File.class);

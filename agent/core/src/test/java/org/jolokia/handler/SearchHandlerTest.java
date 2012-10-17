@@ -80,7 +80,7 @@ public class SearchHandlerTest {
 
     @Test
     public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        List<String> res = doSearch("java.lang:*", "canonical", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
+        List<String> res = doSearch("java.lang:*", "true", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:name=bla,type=Memory"));
         assertTrue(res.contains("java.lang:mode=run,type=Runtime"));
@@ -89,16 +89,16 @@ public class SearchHandlerTest {
 
     @Test
     public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        List<String> res = doSearch("java.lang:*", "initial", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
+        List<String> res = doSearch("java.lang:*", "false", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:type=Memory,name=bla"));
         assertTrue(res.contains("java.lang:type=Runtime,mode=run"));
         verify(connection);
     }
 
-    private List<String> doSearch(String pPattern, String pKeyOrder, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    private List<String> doSearch(String pPattern, String pUseCanonicalName, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         ObjectName oName = new ObjectName(pPattern);
-        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.OBJECT_NAME_KEY_ORDER,pKeyOrder).build();
+        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.CANONICAL_NAMING,pUseCanonicalName).build();
 
         connection = createMock(MBeanServerConnection.class);
         Set<ObjectName> names = new HashSet<ObjectName>();

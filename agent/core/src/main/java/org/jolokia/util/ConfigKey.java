@@ -78,11 +78,12 @@ public enum ConfigKey {
     IGNORE_ERRORS("ignoreErrors", false, true),
 
     /**
-     * Order with which propery keys of Objectnames are ordered.
-     * The allowed values are either "canonical" for an alphateic sorting of
-     * the keys or ""
+     * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
+     * are created.
+     * The allowed values are either "true" in which case the canonical key order (== alphabetical
+     * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
-    OBJECT_NAME_KEY_ORDER("objectNameKeyOrder",false,true,"canonical"),
+    CANONICAL_NAMING("canonicalNaming",true,true,"true"),
 
     /**
      * Optional domain name for registering own MBeans

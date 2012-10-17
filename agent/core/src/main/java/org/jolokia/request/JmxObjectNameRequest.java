@@ -69,7 +69,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
-        ret.put("mbean",objectName.getCanonicalName());
+        ret.put("mbean",getOrderedObjectName(objectName));
         return ret;
     }
 
@@ -103,7 +103,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
 
     /**
      * Name prepared according to requested formatting note. The key ordering can be influenced by the
-     * proccesing parameter {@link ConfigKey#OBJECT_NAME_KEY_ORDER}. If not given or set to "canonical",
+     * proccesing parameter {@link ConfigKey#CANONICAL_NAMING}. If not given or set to "true",
      * then the canonical order is used, if set to "initial" the name is given to construction time
      * is used.
      *
@@ -111,11 +111,15 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @return formatted string
      */
     public String getOrderedObjectName(ObjectName pName) {
-        String keyOrder = getProcessingConfig(ConfigKey.OBJECT_NAME_KEY_ORDER);
-        if ("initial".equals(keyOrder)) {
-            return pName.getDomain() + ":" + pName.getKeyPropertyListString();
-        } else {
+        // For patterns we always return the canonical name
+        if (pName.isPattern()) {
             return pName.getCanonicalName();
+        }
+        boolean useCanonicalName = Boolean.parseBoolean(getProcessingConfig(ConfigKey.CANONICAL_NAMING));
+        if (useCanonicalName) {
+            return pName.getCanonicalName();
+        } else {
+            return pName.getDomain() + ":" + pName.getKeyPropertyListString();
         }
     }
 

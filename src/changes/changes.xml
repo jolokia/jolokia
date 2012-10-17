@@ -17,6 +17,12 @@
         itself lazily in order to await all the MBeans required for a
         proper server detection.
       </action>
+      <action dev="roland" type="add" date="2012-10-10">
+        One can now change the key property order for MBeans names with the query parameter "canonicalNaming" 
+        for read, list and search operations. By default this is set to "true" in which case
+        an alphabetical ordering for the keys is used. If set to "false", then original name as registered
+        is used. 
+      </action>
     </release>
     <release version="1.0.5" description="Release 1.0.5" date="2012-07-23">
       <action dev="matejj" type="add" date="2012-07-19" issue="JOL-35">

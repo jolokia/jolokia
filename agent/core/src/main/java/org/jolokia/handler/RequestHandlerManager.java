@@ -16,13 +16,13 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
-import org.jolokia.converter.*;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.util.RequestType;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jolokia.converter.Converters;
+import org.jolokia.detector.ServerHandle;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.RequestType;
 
 /**
  * A request handler manager is responsible for managing so called "request handlers" which
@@ -35,7 +35,6 @@ public class RequestHandlerManager {
 
     // Map with all json request handlers
     private final Map<RequestType, JsonRequestHandler> requestHandlerMap = new HashMap<RequestType, JsonRequestHandler>();
-
 
     /**
      * Manager and dispatcher for incoming requests
