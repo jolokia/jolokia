@@ -242,6 +242,10 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
           <td>Maximum traversal depth for serialization of complex return values</td>
         </tr>
         <tr>
+          <td><constant>canonicalProperties</constant></td>
+          <td>Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</td>
+        </tr>
+        <tr>
           <td><constant>maxCollectionSize</constant></td>
           <td>
             Maximum size of collections returned during serialization.
