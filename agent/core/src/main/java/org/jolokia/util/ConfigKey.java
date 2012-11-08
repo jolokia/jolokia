@@ -85,7 +85,7 @@ public enum ConfigKey {
     /**
      * Should canonical property names be used
      */
-    MBEAN_CANONICAL_PROPERTIES("canonicalProperties", false, true),
+    MBEAN_CANONICAL_PROPERTIES("canonicalProperties", true, true),
 
     /**
      * Option which can be given to a request to speficy a JSONP callback.
