@@ -130,7 +130,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         for (MBeanServerConnection server : pServers) {
             for (Object nameObject : server.queryNames(pPattern,null)) {
                 ObjectName name = (ObjectName) nameObject;
-                if (!pInfoMap.handleFirstOrSecondLevel(name)) {
+                if (!pInfoMap.handleFirstOrSecondLevel(name, canonicalPropertyString)) {
                     addMBeanInfo(pInfoMap,server, name, canonicalPropertyString);
                 }
             }
@@ -149,7 +149,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                                 ObjectName pName, boolean canonicalPropertyString)
             throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
 
-        if (!pInfomap.handleFirstOrSecondLevel(pName)) {
+        if (!pInfomap.handleFirstOrSecondLevel(pName, canonicalPropertyString)) {
             InstanceNotFoundException instanceNotFound = null;
             for (MBeanServerConnection server : pServers) {
                 try {
