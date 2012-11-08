@@ -83,10 +83,11 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             oName = objectNameFromPath(pathStack);
             if (oName == null || oName.isPattern()) {
                 // MBean pattern for MBean can match at multiple servers
-                addMBeansFromPattern(infoMap,pServers,oName);
+                addMBeansFromPattern(infoMap,pServers,oName,pRequest);
             } else {
                 // Fixed name, which can only be registered at a single MBeanServer
-                addSingleMBean(infoMap,pServers,oName);
+                boolean canonicalPropertyString = isCanonicalPropertyString(pRequest);
+                addSingleMBean(infoMap,pServers,oName, canonicalPropertyString);
             }
             return infoMap.truncate();
         } catch (MalformedObjectNameException e) {
@@ -123,31 +124,37 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     // Lookup MBeans from a pattern, and for each found extract the required information
     private void addMBeansFromPattern(MBeanInfoData pInfoMap,
                                       Set<MBeanServerConnection> pServers,
-                                      ObjectName pPattern)
+                                      ObjectName pPattern, JmxListRequest pRequest)
             throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+        boolean canonicalPropertyString = isCanonicalPropertyString(pRequest);
         for (MBeanServerConnection server : pServers) {
             for (Object nameObject : server.queryNames(pPattern,null)) {
                 ObjectName name = (ObjectName) nameObject;
-                if (!pInfoMap.handleFirstOrSecondLevel(name)) {
-                    addMBeanInfo(pInfoMap,server, name);
+                if (!pInfoMap.handleFirstOrSecondLevel(name, canonicalPropertyString)) {
+                    addMBeanInfo(pInfoMap,server, name, canonicalPropertyString);
                 }
             }
         }
+    }
+
+    private boolean isCanonicalPropertyString(JmxListRequest pRequest) {
+        String value = pRequest.getProcessingConfig(ConfigKey.MBEAN_CANONICAL_PROPERTIES);
+        return value == null || !value.equals("false");
     }
 
 
     // Add a single named MBean's information to the given map
     private void addSingleMBean(MBeanInfoData pInfomap,
                                 Set<MBeanServerConnection> pServers,
-                                ObjectName pName)
+                                ObjectName pName, boolean canonicalPropertyString)
             throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
 
-        if (!pInfomap.handleFirstOrSecondLevel(pName)) {
+        if (!pInfomap.handleFirstOrSecondLevel(pName, canonicalPropertyString)) {
             InstanceNotFoundException instanceNotFound = null;
             for (MBeanServerConnection server : pServers) {
                 try {
                     // Only the first MBeanServer holding the MBean wins
-                    addMBeanInfo(pInfomap,server, pName);
+                    addMBeanInfo(pInfomap,server, pName, canonicalPropertyString);
                     return;
                 } catch (InstanceNotFoundException exp) {
                     instanceNotFound = exp;
@@ -160,11 +167,11 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // Extract MBean infos for a given MBean and add results to pResult.
-    private void addMBeanInfo(MBeanInfoData pInfoMap, MBeanServerConnection  server, ObjectName pName)
+    private void addMBeanInfo(MBeanInfoData pInfoMap, MBeanServerConnection server, ObjectName pName, boolean canonicalPropertyString)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         try {
             MBeanInfo mBeanInfo = server.getMBeanInfo(pName);
-            pInfoMap.addMBeanInfo(mBeanInfo,pName);
+            pInfoMap.addMBeanInfo(mBeanInfo,pName,canonicalPropertyString);
         } catch (IOException exp) {
             pInfoMap.handleException(pName,exp);
         } catch (IllegalStateException exp) {

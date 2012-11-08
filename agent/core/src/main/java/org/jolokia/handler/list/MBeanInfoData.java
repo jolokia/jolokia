@@ -132,9 +132,10 @@ public class MBeanInfoData {
      * map with the name part extracted from the given object name
      *
      * @param pName the objectname used for the first two levels
+     * @param canonicalPropertyString whether or not to use canonical property strings
      * @return true if the object name has been added.
      */
-    public boolean handleFirstOrSecondLevel(ObjectName pName) {
+    public boolean handleFirstOrSecondLevel(ObjectName pName, boolean canonicalPropertyString) {
         if (maxDepth == 1 && pathStack.size() == 0) {
             // Only add domain names with a dummy value if max depth is restricted to 1
             // But only when used without path
@@ -143,7 +144,8 @@ public class MBeanInfoData {
         } else if (maxDepth == 2 && pathStack.size() == 0) {
             // Add domain an object name into the map, final value is a dummy value
             JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-            mBeansMap.put(pName.getCanonicalKeyPropertyListString(),1);
+            String propertyListString = getPropertyListString(pName, canonicalPropertyString);
+            mBeansMap.put(propertyListString,1);
             return true;
         }
         return false;
@@ -157,11 +159,12 @@ public class MBeanInfoData {
      * @param mBeanInfo the MBean info
      * @param pName the object name of the MBean
      */
-    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
+    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName, boolean canoicalProperties)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
         JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        String propertyListString = getPropertyListString(pName, canoicalProperties);
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, propertyListString);
         // Trim down stack to get rid of domain/property list
         Stack<String> stack = truncatePathStack(2);
         if (stack.empty()) {
@@ -171,11 +174,21 @@ public class MBeanInfoData {
         }
         // Trim if required
         if (mBeanMap.size() == 0) {
-            mBeansMap.remove(pName.getCanonicalKeyPropertyListString());
+            mBeansMap.remove(propertyListString);
             if (mBeansMap.size() == 0) {
                 infoMap.remove(pName.getDomain());
             }
         }
+    }
+
+    private String getPropertyListString(ObjectName pName, boolean canoicalProperties) {
+        String propertyListString;
+        if (canoicalProperties) {
+            propertyListString = pName.getCanonicalKeyPropertyListString();
+        } else {
+            propertyListString = pName.getKeyPropertyListString();
+        }
+        return propertyListString;
     }
 
     /**
