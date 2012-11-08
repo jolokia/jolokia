@@ -157,11 +157,17 @@ public class MBeanInfoData {
      * @param mBeanInfo the MBean info
      * @param pName the object name of the MBean
      */
-    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
+    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName, boolean canoicalProperties)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
         JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        String propertyListString;
+        if (canoicalProperties) {
+            propertyListString = pName.getCanonicalKeyPropertyListString();
+        } else {
+            propertyListString = pName.getKeyPropertyListString();
+        }
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, propertyListString);
         // Trim down stack to get rid of domain/property list
         Stack<String> stack = truncatePathStack(2);
         if (stack.empty()) {
@@ -171,7 +177,7 @@ public class MBeanInfoData {
         }
         // Trim if required
         if (mBeanMap.size() == 0) {
-            mBeansMap.remove(pName.getCanonicalKeyPropertyListString());
+            mBeansMap.remove(propertyListString);
             if (mBeansMap.size() == 0) {
                 infoMap.remove(pName.getDomain());
             }

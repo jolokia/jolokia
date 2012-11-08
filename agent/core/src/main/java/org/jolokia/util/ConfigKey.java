@@ -83,6 +83,11 @@ public enum ConfigKey {
     MBEAN_QUALIFIER("mbeanQualifier", true, false),
 
     /**
+     * Should canonical property names be used
+     */
+    MBEAN_CANONICAL_PROPERTIES("canonicalProperties", false, true),
+
+    /**
      * Option which can be given to a request to speficy a JSONP callback.
      * The generated answer will be of type text/javascript and it will
      * contain a Javascript function to be called.
