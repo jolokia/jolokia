@@ -505,6 +505,15 @@
             </para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term><literal>canonicalNaming</literal></term>
+          <listitem>
+            <para>
+              Defaults to "true" to return the canonical format of property lists.
+              If set to "false" then the default unsorted property list is returned.
+            </para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </section>
     

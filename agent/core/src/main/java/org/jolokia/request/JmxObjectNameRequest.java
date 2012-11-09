@@ -115,8 +115,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
         if (pName.isPattern()) {
             return pName.getCanonicalName();
         }
-        boolean useCanonicalName = Boolean.parseBoolean(getProcessingConfig(ConfigKey.CANONICAL_NAMING));
-        if (useCanonicalName) {
+        if (getProcessingConfigAsBoolean(ConfigKey.CANONICAL_NAMING)) {
             return pName.getCanonicalName();
         } else {
             return pName.getDomain() + ":" + pName.getKeyPropertyListString();

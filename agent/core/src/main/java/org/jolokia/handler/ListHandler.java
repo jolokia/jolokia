@@ -75,8 +75,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
 
         int maxDepth = getMaxDepth(pRequest);
-        boolean useCanonicalName =
-                Boolean.parseBoolean(pRequest.getProcessingConfig(ConfigKey.CANONICAL_NAMING));
+        boolean useCanonicalName = pRequest.getProcessingConfigAsBoolean(ConfigKey.CANONICAL_NAMING);
+
         ObjectName oName = null;
         try {
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
@@ -87,7 +87,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                 // MBean pattern for MBean can match at multiple servers
                 addMBeansFromPattern(infoMap,pServers,oName);
             } else {
-                // Fixed name, which can only be registered at a single MBeanServer
                 addSingleMBean(infoMap,pServers,oName);
             }
             return infoMap.truncate();
@@ -137,7 +136,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         }
     }
 
-
     // Add a single named MBean's information to the given map
     private void addSingleMBean(MBeanInfoData pInfomap,
                                 Set<MBeanServerConnection> pServers,
@@ -162,7 +160,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // Extract MBean infos for a given MBean and add results to pResult.
-    private void addMBeanInfo(MBeanInfoData pInfoMap, MBeanServerConnection  server, ObjectName pName)
+    private void addMBeanInfo(MBeanInfoData pInfoMap, MBeanServerConnection server, ObjectName pName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         try {
             MBeanInfo mBeanInfo = server.getMBeanInfo(pName);

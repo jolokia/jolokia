@@ -126,6 +126,17 @@ public abstract class JmxRequest {
     }
 
     /**
+     * Get a processing configuration as a boolean value
+     *
+     * @param pConfigKey configuration to lookup
+     * @return boolean value of the configuration, the default value or false if the default value is null
+     */
+    public Boolean getProcessingConfigAsBoolean(ConfigKey pConfigKey) {
+        String booleanS = getProcessingConfig(pConfigKey);
+        return Boolean.parseBoolean(booleanS != null ? booleanS : pConfigKey.getDefaultValue());
+    }
+
+    /**
      * Get the proxy target configuration provided with the request
      *
      * @return the proxy target configuration or null if the the request
@@ -257,7 +268,6 @@ public abstract class JmxRequest {
             throw exception;
         }
     };
-
 
 
 }
