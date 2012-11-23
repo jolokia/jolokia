@@ -31,6 +31,8 @@ $(document).ready(function() {
             counter2++;
         },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "max"});
 
+        equals(j4p.jobs().length,2,"Two jobs registered");
+
         ok(!j4p.isRunning(),"Poller should not be running");
         j4p.start(100);
         ok(j4p.isRunning(),"Poller should be running");
@@ -74,14 +76,17 @@ $(document).ready(function() {
             counter2++;
         },{ type: "EXEC", mbean: "java.lang:type=Memory", operation: "gc"});
         j4p.start(200);
+        equals(j4p.jobs().length,2,"2 jobs registered");
         setTimeout(function() {
             equals(counter1,3,"Req1 should be called 3 times");
             equals(counter2,3,"Req2 should be called 3 times");
             j4p.unregister(id1);
+            equals(j4p.jobs().length,1,"1 job remaining");
             setTimeout(function() {
                 equals(counter1,3,"Req1 stays at 3 times since it was unregistered");
                 equals(counter2,4,"Req2 should continue to be requested, now for 4 times");
                 j4p.unregister(id2);
+                equals(j4p.jobs().length,0,"No job remaining");
                 // Handles should stay stable, so the previous unregister of id1 should not change
                 // the meaining of id2 (see http://jolokia.963608.n3.nabble.com/Possible-bug-in-the-scheduler-tp4023893.html
                 // for details)

@@ -23,6 +23,10 @@
         an alphabetical ordering for the keys is used. If set to "false", then the original name as registered
         is used. 
       </action>
+      <action dev="roland" type="add" date="2012-11-23">
+        Added a method "jobs()" to the JavaScript Jolokia agent to get all handles for all currently registered
+        jobs.
+      </action>
     </release>
     <release version="1.0.5" description="Release 1.0.5" date="2012-07-23">
       <action dev="matejj" type="add" date="2012-07-19" issue="JOL-35">

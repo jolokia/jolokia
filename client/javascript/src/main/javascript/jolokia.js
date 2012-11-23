@@ -285,6 +285,21 @@
             };
 
             /**
+             * Return an array of handles for currently registered jobs.
+             * @return Array of job handles or an empty array
+             */
+            this.jobs = function() {
+                var ret = [],
+                    len = jobs.length;
+                for (var i = 0; i < len; i++) {
+                    if (jobs[i] != undefined) {
+                        ret.push(i);
+                    }
+                }
+                return ret;
+            };
+
+            /**
              * Start the poller. The interval between two polling attempts can be optionally given or are taken from
              * the parameter <code>fetchInterval</code> given at construction time. If no interval is given at all,
              * 30 seconds is the default.
@@ -334,10 +349,9 @@
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         }
 
-        // Private Methods:
 
         // ========================================================================
-
+        // Private Methods:
 
         // Create a function called by a timer, which requests the registered requests
         // calling the stored callback on receipt. jolokia and jobs are put into the closure

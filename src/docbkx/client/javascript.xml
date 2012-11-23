@@ -643,7 +643,15 @@ j4p.register(
           <para>
             Unregister one or more requests registered with
             <code>handle</code> so that they are no longer polled
-            with the scheduler. 
+            with the scheduler.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>j4p.jobs()</term>
+        <listitem>
+          <para>
+            Return an array of handles for all registered jobs. This array can be freely manipulated since it
           </para>
         </listitem>
       </varlistentry>
