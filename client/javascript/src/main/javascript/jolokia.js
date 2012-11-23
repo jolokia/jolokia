@@ -292,7 +292,7 @@
                 var ret = [],
                     len = jobs.length;
                 for (var i = 0; i < len; i++) {
-                    if (jobs[i] != undefined) {
+                    if (jobs[i]) {
                         ret.push(i);
                     }
                 }
