@@ -201,7 +201,8 @@ Install 'jmx4perl' ? (y/n) [y ]
         <pre><![CDATA[
 $ jmx4perl http://localhost:8080/jolokia list
 ....
-$ jmx4perl http://localhost:8080/jolokia read java.lang:type=Memory HeapMemoryUsage
+$ jmx4perl http://localhost:8080/jolokia \
+           read java.lang:type=Memory HeapMemoryUsage
 $ jmx4perl --help
 $ man jmx4perl]]></pre>
         <p>

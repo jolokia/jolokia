@@ -51,6 +51,28 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="1.0.6 cosmetics">
+        <div class="news-date">2012-11-23</div>
+        <p>
+          Although it has been quite calm in Jolokia land for some
+          months, there is quite some momentum around Jolokia. This
+          minor release brings some cosmetic changes, mostly for
+          tuning the ordering within MBeans names and some JavaScript
+          fixes. More on this in the <a
+          href="changes-report.html">changelog</a>.
+        </p>
+        <p>
+          Some other tidbits:
+        </p>
+        <ul>
+          <li>The new <a href="talks.html">Talks and Screencast</a> section collects some fancy multimedia introducing Jolokia</li>
+          <li>I'm going to talk about Jolokia at <a href="http://www.jayday.de/?lang=en">jayday 2012</a>, a brand new, low cost
+          conference in Munich on 3th December 2012. Hopefully there will be some brand new stuff to show, too.</li>
+          <li>Completely irrelevant stuff: Jolokia T-Shirts can be found in the <a href="http://jolokia.spreadshirt.de/">Jolokia Shop</a>
+            The shop was too easy to setup for not doing it ;-) Our designer did an excellent (and hard) job to make the Jolokia logo
+            look good when printed on clothes. They look freaking cool in the real world, too ....</li>
+        </ul>
+      </subsection>
       <subsection name="Cubism support in 1.0.5">
         <div class="news-date">2012-07-22</div>
         <p>
@@ -236,54 +258,6 @@ jolokia.start(1000);</pre>
           available now on <a href="http://search.maven.org">Maven
           central</a>, too. 
         </p>
-      </subsection>
-      <subsection name="Happy new year 2012 !">
-        <div class="news-date">2011-12-29</div>
-        <p>
-          This was an exciting year for Jolokia:
-        </p>
-        <ul>
-          <li>We hit 1.0.0 in October after one year of active development</li>
-          <li>Jolokia was presented at <a
-          href="http://www.devoxx.com">Devoxx 2011</a> in the
-          "<em>Tools in action</em>" track. Despite the competition on
-          the parallel tracks was very strong and some technical issues, I
-          think the talk went rather well (although there is of course
-          quite some space for improvement ;-). I blogged about my
-          <a
-          href="http://labs.consol.de/blog/devoxx/devoxx-2011-day-1/#jolokia">experience</a>
-          and you can find the <a
-          href="http://www.parleys.com/d/2864">full talk</a> recorded
-          at Parleys. In order to see the full talk you either need to
-          wait a year or buy a 79 EU subscription from Parleys for all
-          those fantastic talks (>120) given at Devoxx this year. The slides are given below, hosted by 
-          <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx">Slideshare</a> and
-          the <a
-          href="http://labs.consol.de/blog/jolokia/devoxx-talk-jolokia-jmx-on-capsaicin-shownotes/">shownotes</a>
-          with all the links are given our blog. Devoxx was definitely
-          my personal highlight this year and I hope to get the chance
-          to present in Antwerp next year, too.</li>
-          <li>I also gave a <a
-          href="http://www.netways.de/index.php?id=3031&amp;L=1">talk</a>
-          at the <a
-          href="http://www.netways.de/en/osmc/y2011/overview/">Open
-          Source 
-          Monitoring Conference 2011</a> in Nuremberg, where I was the
-          'Java guy' this year. It was my thirds time at OSMC and it
-          was as always a big pleasure to meet the Nagios folks and
-          catering was phantastic, too ;-)</li>
-        </ul>
-        <p>
-          So what's next ? There will be a minor release 1.0.2 in the
-          first january week containing some minor feature additions
-          and library updates. And I'm going to start the work on a
-          whole new Jolokia based open source web console, called <a
-          href="http://en.wikipedia.org/wiki/Aj%C3%AD_pepper">Aji</a>. 
-        </p>
-        <p>
-          Please stay tuned and a happy new year !
-        </p>
-<div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="http://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
       </subsection>
   </section>
 </body>
