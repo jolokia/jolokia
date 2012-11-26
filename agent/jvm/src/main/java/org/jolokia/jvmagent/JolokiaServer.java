@@ -21,13 +21,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Factory for creating the HttpServer used for exporting
