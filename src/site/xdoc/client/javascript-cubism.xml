@@ -112,14 +112,14 @@
      The following example present an advanced concept if more
      flexibility is required. When the first argument to
      <code>jolokia.metric()</code> is a function, this function is
-     feed periodically with Jolokia response object resulting from the
-     requests object given following the function argument. The final
+     feed periodically with Jolokia response objects resulting from the
+     requests object given as second argument. The final
      argument can be an options object, which in this case indicates
      the label of the chart and the type to be a delta chart,
      measuring only the increase rate for ten seconds. 
    </p>
    <p>
-     This sample also shows howto use wildcard patterns in a read
+     This sample also shows how to use wildcard patterns in a read
      request to fetch multiple values at once in a generic
      fashion. Wildcard reading is explained in detail in the <a
      href="../reference/html/protocol.html#read">reference manual</a>.

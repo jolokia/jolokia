@@ -1011,7 +1011,7 @@
               the former versions of this protocol is not correct,
               since <classname>TabularData</classname> in fact is a
               hash and not a list. It is now generated as map (or
-              multiple maps), dependening on the declared
+              multiple maps), depending on the declared
               <emphasis>index</emphasis>. Also, access via path is now
               an access via key, not a list index. For the special
               case of MXBean map serialization, where the returned
