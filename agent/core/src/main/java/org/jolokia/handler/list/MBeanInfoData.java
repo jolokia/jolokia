@@ -117,7 +117,8 @@ public class MBeanInfoData {
      * can be given, in which only a sub information is (sub-tree or leaf value) is stored
      *
      * @param pMaxDepth max depth
-     * @param pPathStack the stack for restricting the information to add
+     * @param pPathStack the stack for restricting the information to add. The given stack will be cloned
+     *                   and is left untouched.
      * @param pUseCanonicalName whether to use canonical name in listings
      */
     public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
@@ -214,9 +215,9 @@ public class MBeanInfoData {
      *
      * @param pName MBean name for which the error occurred
      * @param pExp exception occurred
-     * @throws IllegalStateException if this method decides to rethrow the execption
+     * @throws IllegalStateException if this method decides to rethrow the exception
      */
-    public void handleException(ObjectName pName, IllegalStateException pExp) throws IllegalStateException {
+    public void handleException(ObjectName pName, IllegalStateException pExp) {
         // This happen happens for JBoss 7.1 in some cases.
         if (pathStack.size() == 0) {
             addException(pName, pExp);

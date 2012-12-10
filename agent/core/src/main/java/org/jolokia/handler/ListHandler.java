@@ -84,7 +84,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
             oName = objectNameFromPath(pathStack);
             if (oName == null || oName.isPattern()) {
-                // MBean pattern for MBean can match at multiple servers
+                // MBean pattern for an MBean can match at multiple servers
                 addMBeansFromPattern(infoMap,pServers,oName);
             } else {
                 addSingleMBean(infoMap,pServers,oName);

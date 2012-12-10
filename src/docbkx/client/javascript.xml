@@ -651,7 +651,8 @@ j4p.register(
         <term>j4p.jobs()</term>
         <listitem>
           <para>
-            Return an array of handles for all registered jobs. This array can be freely manipulated since it
+            Return an array of handles for all registered jobs. This array can be freely manipulated, its a copy of
+            the handle list.
           </para>
         </listitem>
       </varlistentry>

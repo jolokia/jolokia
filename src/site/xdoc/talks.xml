@@ -39,7 +39,7 @@
     </section>
     <section name="Osgish">
       <p>
-        This screencast demos the cousing of j4psh, osgish an Perl bases OSGi shell which uses Jolokia and Aries for
+        This screencast demos the cousin of j4psh, osgish an Perl bases OSGi shell which uses Jolokia and Aries for
         managing OSGi container. It works well, but is still yet some sort of prototype. The screencast is cool nevertheless ;-)
       </p>
       <div style="width:500px; margin-left: auto; margin-right: auto;">
