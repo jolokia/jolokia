@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="jolokiaServerConfig" class="org.jolokia.jvmagent.ServerConfig">
+    <constructor-arg value="port=7777,host=localhost"/>
+  </bean>
+  
+  <bean id="jolokiaServer" class="org.jolokia.jvmagent.JolokiaServer" lazy-init="false" init-method="start" destroy-method="stop">
+    <constructor-arg index="0" ref="jolokiaServerConfig"/>
+    <constructor-arg index="1" value="false"/>
+  </bean>
+</beans>
