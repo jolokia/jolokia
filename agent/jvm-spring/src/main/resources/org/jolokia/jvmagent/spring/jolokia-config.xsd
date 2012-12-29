@@ -28,7 +28,7 @@
         <xs:element name="config" type="tns:Config" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:attribute name="id" type="xs:ID" use="required"/>
-      <xs:attribute name="lookup-config" type="xs:boolean" use="optional"/>
+      <xs:attribute name="lookupConfig" type="xs:boolean" use="optional"/>
     </xs:complexType>
   </xs:element>
 

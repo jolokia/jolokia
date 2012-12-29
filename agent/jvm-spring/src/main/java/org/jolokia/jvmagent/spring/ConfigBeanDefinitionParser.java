@@ -2,9 +2,9 @@ package org.jolokia.jvmagent.spring;
 
 import java.util.*;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.*;
@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 * @author roland
 * @since 29.12.12
 */
-class ConfigBeanDefinitionParser implements BeanDefinitionParser {
+class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
     final static String SKIP_ATTRIBUTES[] = {
             "order",
@@ -26,7 +26,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
         skipMap = new HashSet<String>(Arrays.asList(SKIP_ATTRIBUTES));
     }
 
-    public BeanDefinition parse(Element element, ParserContext parserContext) {
+    @Override
+    protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaConfig.class);
         Map<String, String> config = new HashMap<String, String>();
         NamedNodeMap attrs = element.getAttributes();
@@ -44,5 +45,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
             builder.addPropertyValue("order",Integer.parseInt(order));
         }
         return builder.getBeanDefinition();
+    }
+
+    @Override
+    protected boolean shouldGenerateId() {
+        return true;
     }
 }

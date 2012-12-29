@@ -19,6 +19,9 @@ import org.springframework.core.OrderComparator;
  */
 public class SpringJolokiaServer extends JolokiaServer implements ApplicationContextAware, InitializingBean, DisposableBean {
 
+    // Spring id
+    private String id;
+
     // Default configuration to use
     private SpringJolokiaConfig config;
 
@@ -42,7 +45,9 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
             List<SpringJolokiaConfig> configs = new ArrayList<SpringJolokiaConfig>(configsMap.values());
             Collections.sort(configs, new OrderComparator());
             for (SpringJolokiaConfig c : configs) {
-                finalConfig.putAll(c.getConfig());
+                if (c != config) {
+                    finalConfig.putAll(c.getConfig());
+                }
             }
         }
         String autoStartS = finalConfig.remove("autoStart");
@@ -96,6 +101,15 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
         if (lookupConfig) {
             context = pContext;
         }
+    }
+
+    /**
+     * Set spring context id, required because an ID is required.
+     *
+     * @param pId id to set
+     */
+    public void setId(String pId) {
+        id = pId;
     }
 
     // ===================================================================

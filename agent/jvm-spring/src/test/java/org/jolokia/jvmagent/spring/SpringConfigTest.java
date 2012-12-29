@@ -12,8 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -31,10 +30,10 @@ public class SpringConfigTest {
     public void simpleServer() throws ParserConfigurationException, IOException, SAXException {
         Element element = getElement("/simple-server.xml");
         ServerBeanDefinitionParser parser = new ServerBeanDefinitionParser();
-        BeanDefinition bd = parser.parse(element, null);
+        BeanDefinition bd = parser.parseInternal(element, null);
         assertEquals(bd.getBeanClassName(), SpringJolokiaServer.class.getName());
         MutablePropertyValues props = bd.getPropertyValues();
-        assertEquals(props.size(),2);
+        assertEquals(props.size(),3);
         assertEquals(props.getPropertyValue("lookupConfig").getValue(), false);
         BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();;
         assertEquals(cBd.getBeanClassName(),SpringJolokiaConfig.class.getName());
@@ -47,13 +46,14 @@ public class SpringConfigTest {
     public void simpleConfig() throws Exception {
         Element element = getElement("/simple-config.xml");
         ConfigBeanDefinitionParser parser = new ConfigBeanDefinitionParser();
-        BeanDefinition bd = parser.parse(element, null);
+        BeanDefinition bd = parser.parseInternal(element, null);
         assertEquals(bd.getBeanClassName(),SpringJolokiaConfig.class.getName());
         MutablePropertyValues cProps = bd.getPropertyValues();
         assertEquals(cProps.size(),2);
         verifyConfig(cProps);
         assertEquals(cProps.getPropertyValue("order").getValue(), 1000);
     }
+
 
     private Element getElement(String pXmlPath) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();

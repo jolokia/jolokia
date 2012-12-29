@@ -1,11 +1,9 @@
 package org.jolokia.jvmagent.spring;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.Version;
 import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.jolokia.test.util.EnvTestUtil;
 import org.springframework.context.ApplicationContext;
@@ -13,13 +11,12 @@ import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
  * @since 29.12.12
  */
-public class SpringJolokiaServerTest {
+public class SpringJolokiaServerTest extends BaseServerTest {
 
     @Test
     public void withoutStart() throws Exception {
@@ -52,7 +49,7 @@ public class SpringJolokiaServerTest {
         replay(ctx);
         server.setApplicationContext(ctx);
         server.afterPropertiesSet();
-        JolokiaServerConfig cfg = server.getConfig();
+        JolokiaServerConfig cfg = server.getServerConfig();
         assertEquals(cfg.getExecutor(),"fixed");
         assertEquals(cfg.getThreadNr(),2);
         assertEquals(cfg.getContextPath(),"/j4p/");
@@ -73,19 +70,4 @@ public class SpringJolokiaServerTest {
         return cfg;
     }
 
-    private void checkServerAndStop(SpringJolokiaServer server) throws Exception {
-        //Thread.sleep(2000);
-        try {
-            URL url = new URL(server.getUrl());
-            String resp = EnvTestUtil.readToString(url.openStream());
-            assertTrue(resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
-        } finally {
-            server.destroy();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-
-            }
-        }
-    }
 }

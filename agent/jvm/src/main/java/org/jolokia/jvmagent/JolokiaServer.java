@@ -123,7 +123,7 @@ public class JolokiaServer {
      *
      * @return server configuration
      */
-    public JolokiaServerConfig getConfig() {
+    public JolokiaServerConfig getServerConfig() {
         return config;
     }
 
