@@ -36,12 +36,12 @@ import java.io.IOException;
  * </ul>
  *
  * Configuration will be also looked up from a properties file found in the class path as
- * <code>/jolokia-agent.properties</code>
+ * <code>/default-jolokia-agent.properties</code>
  *
  * All configurations will be merged in the following order with the later taking precedence:
  *
  * <ul>
- *   <li>Default properties from <code>/jolokia-agent.properties<code>
+ *   <li>Default properties from <code>/default-jolokia-agent.properties<code>
  *   <li>Configuration from a config file (if given)
  *   <li>Options given on the command line in the form
  *       <code>-javaagent:agent.jar=key1=value1,key2=value2...</code>
@@ -65,7 +65,7 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        startAgent(new ServerConfig(agentArgs),true /* register and detect lazy */);
+        startAgent(new JvmAgentConfig(agentArgs),true /* register and detect lazy */);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void agentmain(String agentArgs) {
-        ServerConfig config = new ServerConfig(agentArgs);
+        JvmAgentConfig config = new JvmAgentConfig(agentArgs);
         if (!config.isModeStop()) {
             startAgent(config,false);
         } else {
@@ -83,7 +83,7 @@ public final class JvmAgent {
         }
     }
 
-    private static void startAgent(ServerConfig pConfig,boolean pLazy)  {
+    private static void startAgent(JvmAgentConfig pConfig,boolean pLazy)  {
         try {
             server = new JolokiaServer(pConfig,pLazy);
 

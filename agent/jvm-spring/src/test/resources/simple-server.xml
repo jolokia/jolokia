@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server id="jolokiaServer"
+                xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <config
+          host="localhost"
+          port="8778"
+          autoStart="false"/>
+</server>

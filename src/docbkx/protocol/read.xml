@@ -18,7 +18,7 @@
     MBeans with bulk requests. A single read request will always
     result in a single read response, even when multiple attribute
     values are fetched. Only the single response's structure of the
-    <literal>value</literal> will differ dependening on what kind of
+    <literal>value</literal> will differ depending on what kind of
     read request was performed.
   </note>
   <para>
@@ -182,7 +182,7 @@
       linkend="serialization"/> for detail on object serialization.
     </para>
     <para>
-      For read request to a single MBean with multiple attributes, the
+      For a read request to a single MBean with multiple attributes, the
       returned value is a JSON object with the attribute names as keys
       and their values as values. For example a request to
       <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory</literal>

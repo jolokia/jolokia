@@ -58,7 +58,6 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     // Configuration of this handler
     private Map<ConfigKey, String> configuration;
 
-
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -70,7 +69,6 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         if (!context.endsWith("/")) {
             context += "/";
         }
-
     }
 
     /**

@@ -1,67 +1,51 @@
 package org.jolokia.jvmagent;
 
-/*
- * Copyright 2009-2011 Roland Huss
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
 import org.jolokia.util.ConfigKey;
-import org.jolokia.util.EscapeUtil;
 
 /**
- * Holds all Http-Server and Jolokia configuration.
- *
- * Default values are first loaded from the <code>jolokia-agent.properties</code>
- * from the class path (top-level). All default values are defined within this file.
+ * Configuration required for the JolokiaServer
  *
  * @author roland
- * @since 13.08.11
+ * @since 28.12.12
  */
-public class ServerConfig {
+public class JolokiaServerConfig {
 
     // Jolokia configuration is used for general jolokia config, the untyped configuration
     // is used for this agent only
-    private Map<String,String> agentConfig;
-    private Map<ConfigKey,String> jolokiaConfig;
+    private Map<ConfigKey, String> jolokiaConfig;
 
-    // Validated properties
-    private boolean isStopMode;
-    private String protocol;
-    private int port;
-    private int backlog;
+    private String      protocol;
+    private int         port;
+    private int         backlog;
     private InetAddress address;
-    private String executor;
-    private int threadNr;
-    private String keystore;
-    private String context;
+    private String      executor;
+    private int         threadNr;
+    private String      keystore;
+    private String      context;
+    private boolean     useClientAuthentication;
+    private char[]      keystorePassword;
+
 
     /**
-     * Constructor which parser an agent argument string
+     * Initialize the configuration with the given map
      *
-     * @param pArgs arguments glued together as provided on the commandline
-     *        for an agent parameter
+     * @param pConfig map holding the configuration in string representation. A reference to the map will be kept
      */
-    public ServerConfig(String pArgs) {
-        agentConfig = parseArgs(pArgs);
-        jolokiaConfig = ConfigKey.extractConfig(agentConfig);
+    protected void init(Map<String, String> pConfig) {
+        jolokiaConfig = ConfigKey.extractConfig(pConfig);
+        initConfigAndValidate(pConfig);
+    }
 
-        initialiseAndValidate();
+    protected Map<String, String> getDefaultConfig() {
+        InputStream is =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("default-jolokia-agent.properties");
+        return readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
     }
 
     /**
@@ -70,14 +54,6 @@ public class ServerConfig {
      */
     public Map<ConfigKey, String> getJolokiaConfig() {
         return jolokiaConfig;
-    }
-
-    /**
-     * The mode is 'stop' indicates that the server should be stopped when used in dynamic mode
-     * @return the running mode
-     */
-    public boolean isModeStop() {
-        return isStopMode;
     }
 
     /**
@@ -165,10 +141,8 @@ public class ServerConfig {
      *
      * @return true when ssl client authentication should be used
      */
-
     public boolean useClientAuthentication() {
-        String auth = agentConfig.get("useSslClientAuthentication");
-        return auth != null && Boolean.getBoolean(auth);
+        return useClientAuthentication;
     }
 
     /**
@@ -185,34 +159,28 @@ public class ServerConfig {
      * @return the keystore password as char array or an empty array of no password is given
      */
     public char[] getKeystorePassword() {
-        String password = agentConfig.get("keystorePassword");
-        return password != null ? password.toCharArray() : new char[0];
+        return keystorePassword;
     }
-
-    // ==========================================================================================================
 
     // Initialise and validate early in order to fail fast in case of an configuration error
-    private void initialiseAndValidate() {
-        initMode();
+    protected void initConfigAndValidate(Map<String,String> agentConfig) {
         initContext();
-        initProtocol();
-        initAddress();
+        initProtocol(agentConfig);
+        initAddress(agentConfig);
         port = Integer.parseInt(agentConfig.get("port"));
         backlog = Integer.parseInt(agentConfig.get("backlog"));
-        initExecutor();
-        initThreadNr();
-        initKeystore();
+        initExecutor(agentConfig);
+        initThreadNr(agentConfig);
+        initKeystore(agentConfig);
+
+        String auth = agentConfig.get("useSslClientAuthentication");
+        useClientAuthentication = auth != null && Boolean.getBoolean(auth);
+
+        String password = agentConfig.get("keystorePassword");
+        keystorePassword =  password != null ? password.toCharArray() : new char[0];
     }
 
-    private void initMode() {
-        String mode = agentConfig.get("mode");
-        if (mode != null && !mode.equals("start") && !mode.equals("stop")) {
-            throw new IllegalArgumentException("Invalid running mode '" + mode + "'. Must be either 'start' or 'stop'");
-        }
-        isStopMode = "stop".equals(mode);
-    }
-
-    private void initProtocol() {
+    private void initProtocol(Map<String, String> agentConfig) {
         protocol = agentConfig.containsKey("protocol") ? agentConfig.get("protocol") : "http";
         if (!protocol.equals("http") && !protocol.equals("https")) {
             throw new IllegalArgumentException("Invalid protocol '" + protocol + "'. Must be either 'http' or 'https'");
@@ -229,8 +197,7 @@ public class ServerConfig {
         }
     }
 
-
-    private void initKeystore() {
+    private void initKeystore(Map<String, String> agentConfig) {
         // keystore
         keystore = agentConfig.get("keystore");
         if (protocol.equals("https") && keystore == null) {
@@ -239,13 +206,13 @@ public class ServerConfig {
         }
     }
 
-    private void initThreadNr() {
+    private void initThreadNr(Map<String, String> agentConfig) {
         // Thread-Nr
         String threadNrS =  agentConfig.get("threadNr");
         threadNr = threadNrS != null ? Integer.parseInt(threadNrS) : 5;
     }
 
-    private void initExecutor() {
+    private void initExecutor(Map<String, String> agentConfig) {
         executor = agentConfig.containsKey("executor") ? agentConfig.get("executor") : "single";
         if (!"single".equalsIgnoreCase(executor) &&
                 !"fixed".equalsIgnoreCase(executor) &&
@@ -255,7 +222,7 @@ public class ServerConfig {
         }
     }
 
-    private void initAddress() {
+    private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
         try {
             address = host != null ? InetAddress.getByName(host) : InetAddress.getLocalHost();
@@ -265,61 +232,7 @@ public class ServerConfig {
     }
 
 
-
-    // ======================================================================================
-    // Parse argument
-
-    private Map<String, String> parseArgs(String pAgentArgs) {
-        Map<String,String> ret = new HashMap<String, String>();
-        if (pAgentArgs != null && pAgentArgs.length() > 0) {
-            for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
-                String[] prop = EscapeUtil.splitAsArray(arg, EscapeUtil.CSV_ESCAPE, "=");
-                if (prop == null || prop.length != 2) {
-                    throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'. Ignoring");
-                } else {
-                    ret.put(prop[0],prop[1]);
-                }
-            }
-        }
-        Map<String,String> config = getDefaultConfig();
-        if (ret.containsKey("config")) {
-            Map<String,String> userConfig = readConfig(ret.get("config"));
-            config.putAll(userConfig);
-        }
-        config.putAll(ret);
-        prepareDetectorOptions(config);
-        return config;
-    }
-
-    // Add detector specific options if given on the command line
-    private void prepareDetectorOptions(Map<String, String> pConfig) {
-        StringBuffer detectorOpts = new StringBuffer("{");
-        if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
-            detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");
-        }
-        if (detectorOpts.length() > 1) {
-            detectorOpts.append("}");
-            pConfig.put(ConfigKey.DETECTOR_OPTIONS.getKeyValue(),detectorOpts.toString());
-        }
-    }
-
-    private Map<String, String> readConfig(String pFilename) {
-        File file = new File(pFilename);
-        try {
-            InputStream is = new FileInputStream(file);
-            return readPropertiesFromInputStream(is,pFilename);
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException("jolokia: Can not find configuration file " + pFilename,e);
-        }
-    }
-
-    private Map<String, String> getDefaultConfig() {
-        InputStream is =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("jolokia-agent.properties");
-        return readPropertiesFromInputStream(is,"jolokia-agent.properties");
-    }
-
-    private Map<String, String> readPropertiesFromInputStream(InputStream pIs,String pLabel) {
+    protected Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
         Map ret = new HashMap<String, String>();
         if (pIs == null) {
             return ret;
@@ -329,10 +242,8 @@ public class ServerConfig {
             props.load(pIs);
             ret.putAll(props);
         } catch (IOException e) {
-            throw new IllegalArgumentException("jolokia: Cannot load default properties " + pLabel + " : " + e,e);
+            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e,e);
         }
         return ret;
     }
-
-
 }

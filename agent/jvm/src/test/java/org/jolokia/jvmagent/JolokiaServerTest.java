@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.jolokia.Version;
-import org.jolokia.jvmagent.JolokiaServer;
-import org.jolokia.jvmagent.ServerConfig;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.Test;
 
@@ -70,7 +68,7 @@ public class JolokiaServerTest {
 
     //@Test(expectedExceptions = SecurityException.class,expectedExceptionsMessageRegExp = ".*No password.*")
     public void invalidConfig() throws IOException, InterruptedException {
-        ServerConfig cfg = new ServerConfig("user=roland,port=" + EnvTestUtil.getFreePort());
+        JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
         Thread.sleep(1000);
         new JolokiaServer(cfg,false);
     }
@@ -89,7 +87,7 @@ public class JolokiaServerTest {
     private void roundtrip(String pConfig, boolean pDoRequest) throws IOException {
         int port = EnvTestUtil.getFreePort();
         String c = pConfig != null ? pConfig + "," : "";
-        ServerConfig config = new ServerConfig(c + "host=localhost,port=" + port);
+        JvmAgentConfig config = new JvmAgentConfig(c + "host=localhost,port=" + port);
         JolokiaServer server = new JolokiaServer(config,false);
         server.start();
         //Thread.sleep(2000);
@@ -104,7 +102,7 @@ public class JolokiaServerTest {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                
+
             }
         }
     }

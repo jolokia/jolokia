@@ -367,11 +367,6 @@
       <section id="pathes">
         <title>Pathes</title>
         <para>
-          Before we come to the Jolokia operation, the general concept
-          of <emphasis>inner pathes</emphasis> requires some
-          explanation. 
-        </para>
-        <para>
           An <emphasis>inner path</emphasis> points to a certain
           substructure (plain value, array, hash) within a a complex
           JSON value. Think of it as something like "XPath lite". This

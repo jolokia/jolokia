@@ -36,9 +36,8 @@ import com.sun.net.httpserver.*;
  */
 public class JolokiaServer {
 
-
     // Overall configuration
-    private ServerConfig config;
+    private JolokiaServerConfig config;
 
     // Whether the initialisation should be done lazy
     private boolean lazy;
@@ -63,14 +62,20 @@ public class JolokiaServer {
      * Create the Jolokia server, i.e. the HttpServer for serving Jolokia requests.
      *
      * @param pConfig configuration for this server
+     * @param pLazy lazy initialisation if true. This is required for agents
+     *              configured via startup options since at this early boot time
+     *              the JVM is not fully setup for the server detectors to work
      * @throws IOException if initialization fails
      */
-    public JolokiaServer(ServerConfig pConfig,boolean pLazy) throws IOException {
-        config = pConfig;
-        lazy = pLazy;
-        initServer();
+    public JolokiaServer(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+        init(pConfig, pLazy);
     }
 
+    /**
+     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig, boolean)} must be called later on
+     * for initialization
+     */
+    protected JolokiaServer() {}
 
     /**
      * Start HttpServer
@@ -105,7 +110,7 @@ public class JolokiaServer {
     }
 
     /**
-     * URL how this agent can be reached from the outsid.
+     * URL how this agent can be reached from the outside.
      *
      * @return the agent URL
      */
@@ -113,9 +118,20 @@ public class JolokiaServer {
         return url;
     }
 
+    /**
+     * Get configuration for this server
+     *
+     * @return server configuration
+     */
+    public JolokiaServerConfig getConfig() {
+        return config;
+    }
+
     // =========================================================================================
 
-    private void initServer() throws IOException {
+    final protected void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+        config = pConfig;
+        lazy = pLazy;
 
         int port = config.getPort();
         InetAddress address = config.getAddress();

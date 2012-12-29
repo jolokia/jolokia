@@ -35,6 +35,7 @@
       </activation>
       <modules>
         <module>jvm</module>
+        <module>jvm-spring</module>
       </modules>
     </profile>
   </profiles>

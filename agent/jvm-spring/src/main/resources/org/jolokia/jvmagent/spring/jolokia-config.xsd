@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ * Copyright 2006-2012 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://www.jolokia.org/jolokia-spring/schema/config"
+           targetNamespace="http://www.jolokia.org/jolokia-spring/schema/config"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <!-- Declaration of a Jolokia server -->
+  <xs:element name="server">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Configuration used -->
+        <xs:element name="config" type="tns:Config" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:ID" use="required"/>
+      <xs:attribute name="lookup-config" type="xs:boolean" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Configuration for the Jolokia server -->
+  <xs:element name="config" type="tns:Config"/>
+
+  <!-- ============================================================================== -->
+  <!-- Type definition for the configuration -->
+  <xs:complexType name="Config">
+    <xs:attribute name="order" type="xs:int">
+      <xs:annotation>
+        <xs:documentation>
+          Order in which configuration should be applied. This attribute is
+          only used when the &lt;jolokia:server&gt;
+          is configured with "lookup-config" set to true. If multiple
+          &lt;jolokia:config&gt; config objects exist, they get applied in the provided
+          order. This attribute is ignored when using &lt;jolokia:config&gt; within a
+          &lt;jolokia:server&gt; configuration. Embedded configuration always serves as
+          default value with the lowese precedence. The higher the
+          order the higher the importance/precedence configuration is.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="host" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Host address to listen to. Default is InetAddress.getLocalHost()
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="port" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Port to listen to. Default is 8778.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="autoStart" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          Whether to start the Jolokia server automatically. Default is false.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!--
+    private String      context;
+    -->
+
+
+
+    <xs:attribute name="protocol">
+      <xs:annotation>
+        <xs:documentation>
+          Protocol to use for communication. Can be either "http" or "https".
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="http"/>
+          <xs:enumeration value="https"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+
+    <xs:attribute name="executor">
+      <xs:annotation>
+        <xs:documentation>
+          Threading model of the HTTP server:
+          "fixed" -- Thread pool with a fixed number of threads (see also "thread-nr"),
+          "cached" -- Cached thread pool which creates threads on demand,
+          "single" -- A single thread only
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="fixed"/>
+          <xs:enumeration value="cached"/>
+          <xs:enumeration value="single"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+
+    <xs:attribute name="threadNr" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Number of threads to use when the execution model is configured to "fixed".
+          (See attribute "executor")
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="backlog" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Size of request backlog before requests get discarded.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="useSslAuthentication" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          Whether client certificates should be used for authentication (https only).
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="keystore" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Path to the SSL keystore to use (https only)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="keystorePassword" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Keystore password (https only)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+
+    <!-- Jolokia generic config (see enum ConfigKey) -->
+    <xs:attribute name="user" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          User which is allowed to connect
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="password" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Password for authenticating the user.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="agentContext" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Context under which the agent is deployed. The full URL
+          will be protocol://host:port/context
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="historyMaxEntries" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Maximum number of history entries to keep
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="debug" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          Whether debug is switched on or not
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="debugMaxEntries" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Maximum number of debug entries to hold
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="dispatcherClasses" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Request Dispatcher to use in addition to the local dispatcher.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxDepth" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Maximum traversal depth for serialization of complex objects.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxCollectionSize" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Maximum size of collections returned during serialization.
+          If larger, the collection is truncated
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="maxObjects" type="xs:positiveInteger">
+      <xs:annotation>
+        <xs:documentation>
+          Maximum number of objects returned by serialization
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="policyLocation" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Location of the policy file
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="mbeanQualifier" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Optional domain name for registering own MBeans
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="mimeType">
+      <xs:annotation>
+        <xs:documentation>
+          Mime Type to use for the response value. By default, this is
+          "text/plain", but it could be useful to return
+          "application/json", too.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="text/plain"/>
+          <xs:enumeration value="application/json"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  </xs:schema>

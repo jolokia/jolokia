@@ -139,7 +139,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
                 <term><literal>cached</literal></term>
                 <listitem>
                   <para>
-                    Cached thred pool which
+                    Cached thread pool which
                     creates threads on demand
                   </para>
                 </listitem>
@@ -199,7 +199,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>bootAmx</constant></td>
           <td>
             If set to <constant>true</constant> and if the agent is
-            attached to a Glassfish server, then during startub the
+            attached to a Glassfish server, then during startup the
             AMX subsystem is booted so that Glassfish specific MBeans
             are available. Otherwise, if set to
             <constant>false</constant> the AMX system is not booted. 
