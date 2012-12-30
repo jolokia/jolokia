@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package org.jolokia.jvmagent;
+package org.jolokia.jvmagent.spring.config;
+
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
  * @author roland
- * @since Mar 3, 2010
+ * @since 29.12.12
  */
-public class TestMain {
+public class JolokiaNamespaceHandler extends NamespaceHandlerSupport {
 
-    public static void main(String[] args) throws InterruptedException {
-        for (int i = 1;i< 10;i++) {
-            Thread thread = new Thread("Bla " + i) {
-                @Override
-                public void run() {
-                    try {
-                        sleep((long) (Math.random() * 20000));
-                    } catch (InterruptedException e) {
-                    }
-                }
-            };
-            thread.start();
-        }
+    /** {@inheritDoc} */
+    public void init() {
+        registerBeanDefinitionParser("server",new ServerBeanDefinitionParser());
+        registerBeanDefinitionParser("config",new ConfigBeanDefinitionParser());
     }
+
 }

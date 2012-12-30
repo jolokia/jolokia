@@ -15,11 +15,18 @@
   ~ limitations under the License.
   -->
 
-<server id="jolokiaServer"
-        xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <config
-          host="localhost"
-          port="8778"
-          autoStart="false"/>
-</server>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
+       xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.jolokia.org/jolokia-spring/schema/config http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
+          ">
+
+  <jolokia:server lookupConfig="true">
+    <jolokia:config
+       autoStart="true"
+       port="8778"
+       host="0.0.0.0"/>
+  </jolokia:server>
+</beans>

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2009-2012  Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jolokia.jvmagent.spring;
 
 import java.io.IOException;
@@ -42,10 +58,10 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         server.setConfig(getConfig(true,100));
 
         ApplicationContext ctx = createMock(ApplicationContext.class);
-        Map<String,SpringJolokiaConfig> configs = new HashMap<String, SpringJolokiaConfig>();
+        Map<String,SpringJolokiaConfigWrapper> configs = new HashMap<String, SpringJolokiaConfigWrapper>();
         configs.put("B",getConfig(false,10,"executor","single","agentContext","/j4p/"));
         configs.put("A", getConfig(true, 20, "executor", "fixed", "threadNr", "2"));
-        expect(ctx.getBeansOfType(SpringJolokiaConfig.class)).andReturn(configs);
+        expect(ctx.getBeansOfType(SpringJolokiaConfigWrapper.class)).andReturn(configs);
         replay(ctx);
         server.setApplicationContext(ctx);
         server.afterPropertiesSet();
@@ -56,8 +72,8 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         checkServerAndStop(server);
     }
 
-    private SpringJolokiaConfig getConfig(boolean autoStart, int order, String ... extraArgs) throws IOException {
-        SpringJolokiaConfig cfg = new SpringJolokiaConfig();
+    private SpringJolokiaConfigWrapper getConfig(boolean autoStart, int order, String ... extraArgs) throws IOException {
+        SpringJolokiaConfigWrapper cfg = new SpringJolokiaConfigWrapper();
         cfg.setOrder(order);
         Map<String, String> map = new HashMap<String, String>();
         map.put("autoStart","" + autoStart);

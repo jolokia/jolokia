@@ -16,13 +16,22 @@
   -->
 
 <assembly>
-  <id>agent</id>
+  <id>plugin</id>
   <formats>
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src/main/plugin-resources</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
   <dependencySets>
     <dependencySet>
+      <includes>
+        <include>org.jolokia:jolokia-spring</include>
+      </includes>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <unpack>true</unpack>
       <scope>runtime</scope>

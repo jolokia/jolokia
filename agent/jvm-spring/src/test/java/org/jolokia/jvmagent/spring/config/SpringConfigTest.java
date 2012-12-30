@@ -1,10 +1,28 @@
-package org.jolokia.jvmagent.spring;
+/*
+ * Copyright 2009-2012  Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jolokia.jvmagent.spring.config;
 
 import java.io.IOException;
 import java.util.Map;
 
 import javax.xml.parsers.*;
 
+import org.jolokia.jvmagent.spring.SpringJolokiaConfigWrapper;
+import org.jolokia.jvmagent.spring.SpringJolokiaServer;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.testng.annotations.Test;
@@ -33,10 +51,10 @@ public class SpringConfigTest {
         BeanDefinition bd = parser.parseInternal(element, null);
         assertEquals(bd.getBeanClassName(), SpringJolokiaServer.class.getName());
         MutablePropertyValues props = bd.getPropertyValues();
-        assertEquals(props.size(),3);
+        assertEquals(props.size(),2);
         assertEquals(props.getPropertyValue("lookupConfig").getValue(), false);
         BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();;
-        assertEquals(cBd.getBeanClassName(),SpringJolokiaConfig.class.getName());
+        assertEquals(cBd.getBeanClassName(),SpringJolokiaConfigWrapper.class.getName());
         MutablePropertyValues cProps = cBd.getPropertyValues();
         assertEquals(cProps.size(),1);
         verifyConfig(cProps);
@@ -47,7 +65,7 @@ public class SpringConfigTest {
         Element element = getElement("/simple-config.xml");
         ConfigBeanDefinitionParser parser = new ConfigBeanDefinitionParser();
         BeanDefinition bd = parser.parseInternal(element, null);
-        assertEquals(bd.getBeanClassName(),SpringJolokiaConfig.class.getName());
+        assertEquals(bd.getBeanClassName(),SpringJolokiaConfigWrapper.class.getName());
         MutablePropertyValues cProps = bd.getPropertyValues();
         assertEquals(cProps.size(),2);
         verifyConfig(cProps);

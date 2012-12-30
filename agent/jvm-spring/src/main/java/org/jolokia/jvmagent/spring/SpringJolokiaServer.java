@@ -1,3 +1,19 @@
+/*
+ * Copyright 2009-2012  Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jolokia.jvmagent.spring;
 
 import java.util.*;
@@ -23,7 +39,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
     private String id;
 
     // Default configuration to use
-    private SpringJolokiaConfig config;
+    private SpringJolokiaConfigWrapper config;
 
     // Whether to lookup up other configurations in the context
     private boolean lookupConfig = false;
@@ -37,14 +53,14 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
      * @throws Exception
      */
     public void afterPropertiesSet() throws Exception {
-        Map<String,String> finalConfig = new HashMap<String, String>();
+        Map<String, String> finalConfig = new HashMap<String, String>();
         finalConfig.putAll(config.getConfig());
         if (lookupConfig) {
             // Merge all configs in the context in the reverse order
-            Map<String, SpringJolokiaConfig> configsMap = context.getBeansOfType(SpringJolokiaConfig.class);
-            List<SpringJolokiaConfig> configs = new ArrayList<SpringJolokiaConfig>(configsMap.values());
+            Map<String, SpringJolokiaConfigWrapper> configsMap = context.getBeansOfType(SpringJolokiaConfigWrapper.class);
+            List<SpringJolokiaConfigWrapper> configs = new ArrayList<SpringJolokiaConfigWrapper>(configsMap.values());
             Collections.sort(configs, new OrderComparator());
-            for (SpringJolokiaConfig c : configs) {
+            for (SpringJolokiaConfigWrapper c : configs) {
                 if (c != config) {
                     finalConfig.putAll(c.getConfig());
                 }
@@ -55,8 +71,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
-        final Map<String, String> configMap = finalConfig;
-        init(new ServerConfig(configMap),false);
+        init(new ServerConfig(finalConfig),false);
         if (autoStart) {
             start();
         }
@@ -76,14 +91,15 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
      *
      * @param pConfig configuration to use
      */
-    public void setConfig(SpringJolokiaConfig pConfig) {
+    public void setConfig(SpringJolokiaConfigWrapper pConfig) {
         config = pConfig;
     }
 
     /**
      * Whether to lookup dynamically configs in the application context after creation
      * of this bean. This especially useful if the server is automatically started in a different
-     * module and needs some extra customization
+     * module and needs some extra customization. Used e.g for the spring plugin.
+     *
      * @param pLookupConfig whether to lookup configuration dynamically. Default is false.
      */
     public void setLookupConfig(boolean pLookupConfig) {
@@ -104,7 +120,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
     }
 
     /**
-     * Set spring context id, required because an ID is required.
+     * Set spring context id, required because an ID can be given. Not used otherwise.
      *
      * @param pId id to set
      */
@@ -114,6 +130,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
 
     // ===================================================================
 
+    // Simple extenstion to the JolokiaServerConfig in order to do the proper initialization
     private static class ServerConfig extends JolokiaServerConfig {
 
         private ServerConfig(Map<String,String> config) {
