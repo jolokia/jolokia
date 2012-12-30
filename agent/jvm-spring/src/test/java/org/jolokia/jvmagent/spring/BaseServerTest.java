@@ -33,6 +33,7 @@ class BaseServerTest {
         //Thread.sleep(2000);
         try {
             URL url = new URL(server.getUrl());
+            System.out.println(">>> URL: " + server.getUrl());
             String resp = EnvTestUtil.readToString(url.openStream());
             assertTrue(resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
         } finally {
