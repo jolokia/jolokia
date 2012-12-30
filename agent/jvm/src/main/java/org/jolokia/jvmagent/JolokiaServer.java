@@ -129,7 +129,7 @@ public class JolokiaServer {
 
     // =========================================================================================
 
-    final protected void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+    protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
         config = pConfig;
         lazy = pLazy;
 

@@ -32,10 +32,9 @@ public class JolokiaServerIntegrationTest extends BaseServerTest {
     @Test
     public void simple() throws Exception {
         System.setProperty("jolokia.port", "" + EnvTestUtil.getFreePort());
-        System.out.println("Port: " + System.getProperty("jolokia.port"));
+        System.out.println("Port selected: " + System.getProperty("jolokia.port"));
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("/spring-jolokia-context.xml");
         SpringJolokiaServer server = (SpringJolokiaServer) ctx.getBean("jolokia");
-        System.out.println(">>> " + server.getServerConfig().getAddress() + ":" + server.getServerConfig().getPort());
         JolokiaServerConfig cfg = server.getServerConfig();
         assertEquals(cfg.getContextPath(),"/j4p/");
         checkServerAndStop(server);

@@ -33,7 +33,7 @@ import org.w3c.dom.*;
 class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
     // Properties to ignore for setting the configuration
-    private final static String SKIP_ATTRIBUTES[] = {
+    private static final String SKIP_ATTRIBUTES[] = {
             "order",
             "xmlns"
     };

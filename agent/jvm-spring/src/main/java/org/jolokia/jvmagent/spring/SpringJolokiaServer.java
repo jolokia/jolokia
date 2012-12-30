@@ -16,11 +16,11 @@
 
 package org.jolokia.jvmagent.spring;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -35,9 +35,6 @@ import org.springframework.core.OrderComparator;
  */
 public class SpringJolokiaServer extends JolokiaServer implements ApplicationContextAware, InitializingBean, DisposableBean {
 
-    // Spring id
-    private String id;
-
     // Default configuration to use
     private SpringJolokiaConfigWrapper config;
 
@@ -49,10 +46,8 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
 
     /**
      * Callback used for initializing and optionally starting up the server
-     *
-     * @throws Exception
      */
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() throws IOException {
         Map<String, String> finalConfig = new HashMap<String, String>();
         finalConfig.putAll(config.getConfig());
         if (lookupConfig) {
@@ -79,10 +74,8 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
 
     /**
      * Stop the server
-     *
-     * @throws Exception
      */
-    public void destroy() throws Exception {
+    public void destroy() {
         stop();
     }
 
@@ -111,27 +104,24 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
      * the Jolokia Server if lookupConfig is true
      *
      * @param pContext spring context containing the bean definition
-     * @throws BeansException
      */
-    public void setApplicationContext(ApplicationContext pContext) throws BeansException {
+    public void setApplicationContext(ApplicationContext pContext)  {
         if (lookupConfig) {
             context = pContext;
         }
     }
 
     /**
-     * Set spring context id, required because an ID can be given. Not used otherwise.
+     * Set spring context id, required because an ID can be given. Not used.
      *
      * @param pId id to set
      */
-    public void setId(String pId) {
-        id = pId;
-    }
+    public void setId(String pId) {   }
 
     // ===================================================================
 
-    // Simple extenstion to the JolokiaServerConfig in order to do the proper initialization
-    private static class ServerConfig extends JolokiaServerConfig {
+    // Simple extension to the JolokiaServerConfig in order to do the proper initialization
+    final private static class ServerConfig extends JolokiaServerConfig {
 
         private ServerConfig(Map<String,String> config) {
             Map<String,String> finalCfg = getDefaultConfig();
