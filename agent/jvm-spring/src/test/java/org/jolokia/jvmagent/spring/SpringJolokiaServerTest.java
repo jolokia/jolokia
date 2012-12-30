@@ -78,6 +78,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         Map<String, String> map = new HashMap<String, String>();
         map.put("autoStart","" + autoStart);
         map.put("port", "" + EnvTestUtil.getFreePort());
+        map.put("host","127.0.0.1");
         for (int i = 0; i < extraArgs.length; i+=2) {
             map.put(extraArgs[i],extraArgs[i+1]);
         }

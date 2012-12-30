@@ -35,6 +35,7 @@
     <jolokia:config
             autoStart="true"
             port="${jolokia.port}"
+            host="127.0.0.1"
             />
   </jolokia:server>
 </beans>
