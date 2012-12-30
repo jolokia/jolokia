@@ -34,7 +34,6 @@
   <jolokia:server id="jolokia" lookupConfig="true">
     <jolokia:config
             autoStart="true"
-            host="0.0.0.0"
             port="${jolokia.port}"
             />
   </jolokia:server>

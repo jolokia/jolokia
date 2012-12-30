@@ -19,7 +19,7 @@
         xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <config
-          host="localhost"
+          host="127.0.0.1"
           port="8778"
           autoStart="false"/>
 </server>

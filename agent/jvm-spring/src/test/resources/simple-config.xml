@@ -16,8 +16,8 @@
   -->
 
 <config xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
+        host="127.0.0.1"
         order="1000"
-        host="localhost"
         port="8778"
         autoStart="false"
         />
