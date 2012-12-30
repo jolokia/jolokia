@@ -207,14 +207,15 @@ public class BackendManager {
         }
     }
 
+
     /**
      * Log at error level.
      *
      * @param message message to log
      * @param t ecxeption occured
      */
-    // Must not be final so that we can mock it in EasyMock for our tests
     public void error(String message, Throwable t) {
+        // Must not be final so that we can mock it in EasyMock for our tests
         logHandler.error(message, t);
         if (debugStore != null) {
             debugStore.log(message, t);

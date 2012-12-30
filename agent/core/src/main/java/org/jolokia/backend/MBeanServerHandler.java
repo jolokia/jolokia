@@ -391,6 +391,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // Fallback server detector which matches always
 
     private static class NullServerHandle extends ServerHandle {
+        /**
+         * Empty constructor initializing the server handle completely with null values.
+         */
         public NullServerHandle() {
             super(null,null,null,null,null);
         }

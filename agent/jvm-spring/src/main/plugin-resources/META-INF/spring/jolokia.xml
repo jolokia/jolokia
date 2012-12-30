@@ -27,6 +27,6 @@
     <jolokia:config
        autoStart="true"
        port="8778"
-       host="0.0.0.0"/>
+     />
   </jolokia:server>
 </beans>
