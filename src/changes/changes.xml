@@ -7,6 +7,17 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.0.7-SNAPSHOT" description="Release 1.0.7-SNAPSHOT">
+      <action dev="roland" type="add" date="2012-12-30">
+        New module "jolokia-spring" with Spring integration for the
+        JVM agent has been added. It contains an own Spring
+        configuration syntax and provides also a plugin for automatic
+        startup the agent with default values by only declaring a
+        dependency (works for containers which automatically lookup
+        META-INF/spring/*.xml). Kudos to James Strachan for the
+        initial idea.
+      </action>
+    </release>
     <release version="1.0.6" description="Release 1.0.6" date="2012-11-26">
       <action dev="roland" type="fix" date="2012-08-14">
         Jolokia's Javascript poller fixes an register/unregister issue, where the returned
