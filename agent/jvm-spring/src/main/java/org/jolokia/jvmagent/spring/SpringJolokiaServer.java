@@ -121,7 +121,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
     // ===================================================================
 
     // Simple extension to the JolokiaServerConfig in order to do the proper initialization
-    final private static class ServerConfig extends JolokiaServerConfig {
+    private static final class ServerConfig extends JolokiaServerConfig {
 
         private ServerConfig(Map<String,String> config) {
             Map<String,String> finalCfg = getDefaultConfig();
