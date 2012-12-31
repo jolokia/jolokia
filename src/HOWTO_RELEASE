@@ -88,7 +88,7 @@ mvn -Plabs site site:deploy
 # =============================================================================
 # Snapshot release
 
-# Set version number in Version.java, jolokia.js, docbkx/index.xml
+# Set version number in Version.java, jolokia.js, jolokia-cubism.js, test-app/pom.xml, docbkx/index.xml
 mvn -Pdist,labs deploy
 # Adapt URI and version number in root-repository.xml on labs.consol.de to us a httppgp URL
 
