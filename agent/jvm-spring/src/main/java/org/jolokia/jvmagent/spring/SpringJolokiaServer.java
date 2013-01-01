@@ -21,7 +21,6 @@ import java.util.*;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
-import org.jolokia.jvmagent.spring.config.SystemPropertyMode;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;

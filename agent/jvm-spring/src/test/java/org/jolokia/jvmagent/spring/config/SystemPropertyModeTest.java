@@ -16,6 +16,7 @@
 
 package org.jolokia.jvmagent.spring.config;
 
+import org.jolokia.jvmagent.spring.SystemPropertyMode;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

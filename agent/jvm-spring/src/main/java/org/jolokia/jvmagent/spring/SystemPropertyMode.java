@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.jvmagent.spring.config;
+package org.jolokia.jvmagent.spring;
 
 /**
  * Enumeration for how to handle system properties when configuring a {@link SpringJolokiaServer}.

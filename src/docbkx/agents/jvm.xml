@@ -415,7 +415,7 @@ echo "Memory Usage: $usage %"
 java -jar agent.jar --quiet stop $1]]></programlisting>
   </section>
   <section id="jvm-spring">
-    <title>Jolokia Spring integration</title>
+    <title>Spring integration</title>
     <para>
       The JVM agent can be easily integrated into a Spring application
       context. A dedicated artefact
@@ -491,46 +491,47 @@ java -jar agent.jar --quiet stop $1]]></programlisting>
       <constant>jolokia.</constant> can be used as configuration
       values. There are three modes available:
     </para>
-    <variablelist id="jvm-spring-system-properties">
-      <varlistentry>
-        <term><literal>never</literal></term>
-        <listitem>
-          <para>
+    <table id="jvm-spring-system-properties">
+      <title>System properties modes</title>
+      <thead>
+        <tr>
+          <td>Mode</td>
+          <td>Description</td>
+        </tr>
+      </thead>
+      <tr>
+        <td><literal>never</literal></td>
+        <td>
             No lookup is done on system properties as all. This is the
             default mode.
-          </para>
-        </listitem>
-      </varlistentry>    
-      <varlistentry>
-        <term><literal>fallback</literal></term>
-        <listitem>
-          <para>
-            System properties with a prefix
-            <constant>jolokia.</constant> are used as fallback
-            configuration values if not specified locally in the
-            Spring application
-            context. E.g. <constant>jolokia.port=8888</constant> will
-            change the port on which the agent is listening to 8888 if
-            the port is not explicitely specified in the
-            configuration. 
-          </para>
-        </listitem>
-      </varlistentry>    
-      <varlistentry>
-        <term><literal>override</literal></term>
-        <listitem>
-          <para>
-            System properties with a prefix
-            <constant>jolokia.</constant> are used as configuration
-            values even if they are specified in locally in the Spring
-            application
-            context. E.g. <constant>jolokia.port=8888</constant> will
-            change the port on which the agent is listening to 8888 in
-            any case. 
-          </para>
-        </listitem>
-      </varlistentry>    
-    </variablelist>
+        </td>
+      </tr>
+      <tr>
+        <td><literal>fallback</literal></td>
+        <td>
+          System properties with a prefix
+          <constant>jolokia.</constant> are used as fallback
+          configuration values if not specified locally in the
+          Spring application
+          context. E.g. <constant>jolokia.port=8888</constant> will
+          change the port on which the agent is listening to 8888 if
+          the port is not explicitely specified in the
+          configuration. 
+        </td>
+      </tr>
+      <tr>
+        <td><literal>override</literal></td>
+        <td>
+          System properties with a prefix
+          <constant>jolokia.</constant> are used as configuration
+          values even if they are specified in locally in the Spring
+          application
+          context. E.g. <constant>jolokia.port=8888</constant> will
+          change the port on which the agent is listening to 8888 in
+          any case. 
+        </td>
+      </tr>
+    </table>
     <para>
       <constant>&lt;jolokia:config&gt;</constant> takes as attributes all
       the configuration parameters for the JVM agent as described in
