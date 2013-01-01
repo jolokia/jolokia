@@ -389,7 +389,7 @@ For more documentation please visit www.jolokia.org]]></programlisting>
       </varlistentry>    
     </variablelist>
     <para>
-      The launcher is especially suitable for
+      The launcher is especially suited for
       <emphasis>one-shot</emphasis>, <emphasis>local</emphasis>
       queries. For example, a simple shell script for printing out
       the memory usage of a local Java process, including
@@ -515,7 +515,7 @@ java -jar agent.jar --quiet stop $1]]></programlisting>
           Spring application
           context. E.g. <constant>jolokia.port=8888</constant> will
           change the port on which the agent is listening to 8888 if
-          the port is not explicitely specified in the
+          the port is not explicitily specified in the
           configuration. 
         </td>
       </tr>
@@ -569,13 +569,13 @@ java -jar agent.jar --quiet stop $1]]></programlisting>
         url="http://camel.apache.org/camel-maven-plugin.html">Camel
         Maven Plugin</ulink> do this automatically for you, nothing
         has to be configured here. Otherwise this
-        context path has to be added manually, but in this case it is
+        application context path has to be added manually, but in this case it is
         probably easier to use the non-plugin version (without
-        classifier) and declare the Jolokia server explicitely in an
+        classifier) and declare the Jolokia server explicitily in an
         existing Spring configuration file as described above.
       </para>
       <para>
-        By default, the Jolokia agent starts on Port 8778 on every
+        By default, the Jolokia agent starts on port 8778 on every
         IP-Address of the host <emphasis>without</emphasis>
         security.
       </para>
@@ -588,7 +588,7 @@ java -jar agent.jar --quiet stop $1]]></programlisting>
         "<constant>fallback</constant>". 
       </para>
       <para> 
-        As an alternative, these default settings can be customized by
+        As an alternative, the default settings can be customized by
         providing a standalone
         <constant>&lt;jolokia:config&gt;</constant> somewhere in the
         Spring application context. An <constant>order</constant>
