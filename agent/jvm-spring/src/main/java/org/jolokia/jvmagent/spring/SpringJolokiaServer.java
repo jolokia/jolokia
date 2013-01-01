@@ -21,6 +21,7 @@ import java.util.*;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
+import org.jolokia.jvmagent.spring.config.SystemPropertyMode;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -36,10 +37,13 @@ import org.springframework.core.OrderComparator;
 public class SpringJolokiaServer extends JolokiaServer implements ApplicationContextAware, InitializingBean, DisposableBean {
 
     // Default configuration to use
-    private SpringJolokiaConfigWrapper config;
+    private SpringJolokiaConfigHolder config;
 
     // Whether to lookup up other configurations in the context
     private boolean lookupConfig = false;
+
+    // How to deal with system properties
+    private SystemPropertyMode systemPropertyMode;
 
     // Remember the context for dynamic lookup of multiple configs
     private ApplicationContext context;
@@ -49,27 +53,47 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
      */
     public void afterPropertiesSet() throws IOException {
         Map<String, String> finalConfig = new HashMap<String, String>();
+        if (systemPropertyMode == SystemPropertyMode.MODE_FALLBACK) {
+            finalConfig.putAll(lookupSystemProperties());
+        }
         finalConfig.putAll(config.getConfig());
         if (lookupConfig) {
             // Merge all configs in the context in the reverse order
-            Map<String, SpringJolokiaConfigWrapper> configsMap = context.getBeansOfType(SpringJolokiaConfigWrapper.class);
-            List<SpringJolokiaConfigWrapper> configs = new ArrayList<SpringJolokiaConfigWrapper>(configsMap.values());
+            Map<String, SpringJolokiaConfigHolder> configsMap = context.getBeansOfType(SpringJolokiaConfigHolder.class);
+            List<SpringJolokiaConfigHolder> configs = new ArrayList<SpringJolokiaConfigHolder>(configsMap.values());
             Collections.sort(configs, new OrderComparator());
-            for (SpringJolokiaConfigWrapper c : configs) {
+            for (SpringJolokiaConfigHolder c : configs) {
                 if (c != config) {
                     finalConfig.putAll(c.getConfig());
                 }
             }
+        }
+        if (systemPropertyMode == SystemPropertyMode.MODE_OVERRIDE) {
+            finalConfig.putAll(lookupSystemProperties());
         }
         String autoStartS = finalConfig.remove("autoStart");
         boolean autoStart = false;
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
-        init(new ServerConfig(finalConfig),false);
+        init(new SpringServerConfig(finalConfig),false);
         if (autoStart) {
             start();
         }
+    }
+
+    // Lookup system properties for all configurations possible
+    private Map<String, String> lookupSystemProperties() {
+        Map<String,String> ret = new HashMap<String, String>();
+        Enumeration propEnum = System.getProperties().propertyNames();
+        while (propEnum.hasMoreElements()) {
+            String prop = (String) propEnum.nextElement();
+            if (prop.startsWith("jolokia.")) {
+                String key = prop.substring("jolokia.".length());
+                ret.put(key,System.getProperty(prop));
+            }
+        }
+        return ret;
     }
 
     /**
@@ -84,7 +108,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
      *
      * @param pConfig configuration to use
      */
-    public void setConfig(SpringJolokiaConfigWrapper pConfig) {
+    public void setConfig(SpringJolokiaConfigHolder pConfig) {
         config = pConfig;
     }
 
@@ -112,19 +136,31 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
     }
 
     /**
+     * Set the system propert mode for how to deal with configuration coming from system properties
+     *
+     */
+    public void setSystemPropertiesMode(String pMode) {
+        systemPropertyMode = SystemPropertyMode.fromMode(pMode);
+        if (systemPropertyMode == null) {
+            systemPropertyMode = SystemPropertyMode.MODE_NEVER;
+        }
+    }
+
+    /**
      * Set spring context id, required because an ID can be given. Not used.
      *
      * @param pId id to set
      */
-    public void setId(String pId) {   }
+    public void setId(String pId) {
+    }
 
     // ===================================================================
 
     // Simple extension to the JolokiaServerConfig in order to do the proper initialization
-    private static final class ServerConfig extends JolokiaServerConfig {
+    private static final class SpringServerConfig extends JolokiaServerConfig {
 
-        private ServerConfig(Map<String,String> config) {
-            Map<String,String> finalCfg = getDefaultConfig();
+        private SpringServerConfig(Map<String, String> config) {
+            Map<String, String> finalCfg = getDefaultConfig();
             finalCfg.putAll(config);
             init(finalCfg);
         }

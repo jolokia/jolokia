@@ -21,6 +21,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -39,8 +40,14 @@ public class ServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
             builder.addPropertyValue("config", configParser.parseInternal(config, parserContext));
         }
         String lookupConfig = element.getAttribute("lookupConfig");
-        if (lookupConfig != null) {
+        if (StringUtils.hasLength(lookupConfig)) {
             builder.addPropertyValue("lookupConfig", Boolean.parseBoolean(lookupConfig));
+        } else {
+            builder.addPropertyValue("lookupConfig",false);
+        }
+        String systemPropertiesMode = element.getAttribute("systemPropertiesMode");
+        if (StringUtils.hasLength(systemPropertiesMode)) {
+            builder.addPropertyValue("systemPropertiesMode",systemPropertiesMode);
         }
         return builder.getBeanDefinition();
     }

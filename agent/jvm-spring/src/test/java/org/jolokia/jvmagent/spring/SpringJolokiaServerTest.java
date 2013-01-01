@@ -44,6 +44,32 @@ public class SpringJolokiaServerTest extends BaseServerTest {
     }
 
     @Test
+    public void systemProperties() throws Exception {
+        checkSystemPropertyMode("fallback","/jol/","/j4p/","/j4p/");
+        checkSystemPropertyMode("fallback","/jol/",null,"/jol/");
+        checkSystemPropertyMode("fallback",null,null,"/jolokia/");
+
+        checkSystemPropertyMode("override","/jol/","/j4p/","/jol/");
+        checkSystemPropertyMode("override","/jol/",null,"/jol/");
+        checkSystemPropertyMode("override",null,null,"/jolokia/");
+
+        checkSystemPropertyMode(null,"/jol/",null,"/jolokia/");
+    }
+
+    private void checkSystemPropertyMode(String mode,String propContext,String configContext,String expectContext) throws IOException {
+        if (propContext != null) {
+            System.setProperty("jolokia.agentContext", propContext);
+        }
+        SpringJolokiaServer server = new SpringJolokiaServer();
+        server.setConfig(getConfig(true,100,"agentContext", configContext));
+        server.setSystemPropertiesMode(mode);
+        server.afterPropertiesSet();
+        assertEquals(server.getServerConfig().getContextPath(), expectContext);
+        System.getProperties().remove("jolokia.agentContext");
+        server.stop();
+    }
+
+    @Test
     public void withStart() throws Exception {
         SpringJolokiaServer server = new SpringJolokiaServer();
         server.setConfig(getConfig(true,100));
@@ -58,10 +84,10 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         server.setConfig(getConfig(true,100));
 
         ApplicationContext ctx = createMock(ApplicationContext.class);
-        Map<String,SpringJolokiaConfigWrapper> configs = new HashMap<String, SpringJolokiaConfigWrapper>();
+        Map<String,SpringJolokiaConfigHolder> configs = new HashMap<String, SpringJolokiaConfigHolder>();
         configs.put("B",getConfig(false,10,"executor","single","agentContext","/j4p/"));
         configs.put("A", getConfig(true, 20, "executor", "fixed", "threadNr", "2"));
-        expect(ctx.getBeansOfType(SpringJolokiaConfigWrapper.class)).andReturn(configs);
+        expect(ctx.getBeansOfType(SpringJolokiaConfigHolder.class)).andReturn(configs);
         replay(ctx);
         server.setApplicationContext(ctx);
         server.afterPropertiesSet();
@@ -72,15 +98,17 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         checkServerAndStop(server);
     }
 
-    private SpringJolokiaConfigWrapper getConfig(boolean autoStart, int order, String ... extraArgs) throws IOException {
-        SpringJolokiaConfigWrapper cfg = new SpringJolokiaConfigWrapper();
+    private SpringJolokiaConfigHolder getConfig(boolean autoStart, int order, String ... extraArgs) throws IOException {
+        SpringJolokiaConfigHolder cfg = new SpringJolokiaConfigHolder();
         cfg.setOrder(order);
         Map<String, String> map = new HashMap<String, String>();
         map.put("autoStart","" + autoStart);
         map.put("port", "" + EnvTestUtil.getFreePort());
         map.put("host","127.0.0.1");
         for (int i = 0; i < extraArgs.length; i+=2) {
-            map.put(extraArgs[i],extraArgs[i+1]);
+            if (extraArgs[i+1] != null) {
+                map.put(extraArgs[i],extraArgs[i+1]);
+            }
         }
         cfg.setConfig(map);
         return cfg;

@@ -18,7 +18,7 @@ package org.jolokia.jvmagent.spring.config;
 
 import java.util.*;
 
-import org.jolokia.jvmagent.spring.SpringJolokiaConfigWrapper;
+import org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -46,7 +46,7 @@ class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaConfigWrapper.class);
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaConfigHolder.class);
         Map<String, String> config = new HashMap<String, String>();
         NamedNodeMap attrs = element.getAttributes();
         for (int i = 0;i < attrs.getLength(); i++) {

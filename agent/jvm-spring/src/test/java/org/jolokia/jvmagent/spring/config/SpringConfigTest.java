@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.xml.parsers.*;
 
-import org.jolokia.jvmagent.spring.SpringJolokiaConfigWrapper;
+import org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder;
 import org.jolokia.jvmagent.spring.SpringJolokiaServer;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -48,13 +48,14 @@ public class SpringConfigTest {
     public void simpleServer() throws ParserConfigurationException, IOException, SAXException {
         Element element = getElement("/simple-server.xml");
         ServerBeanDefinitionParser parser = new ServerBeanDefinitionParser();
+        assertTrue(parser.shouldGenerateIdAsFallback());
         BeanDefinition bd = parser.parseInternal(element, null);
         assertEquals(bd.getBeanClassName(), SpringJolokiaServer.class.getName());
         MutablePropertyValues props = bd.getPropertyValues();
         assertEquals(props.size(),2);
         assertEquals(props.getPropertyValue("lookupConfig").getValue(), false);
         BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();;
-        assertEquals(cBd.getBeanClassName(),SpringJolokiaConfigWrapper.class.getName());
+        assertEquals(cBd.getBeanClassName(),SpringJolokiaConfigHolder.class.getName());
         MutablePropertyValues cProps = cBd.getPropertyValues();
         assertEquals(cProps.size(),1);
         verifyConfig(cProps);
@@ -65,7 +66,7 @@ public class SpringConfigTest {
         Element element = getElement("/simple-config.xml");
         ConfigBeanDefinitionParser parser = new ConfigBeanDefinitionParser();
         BeanDefinition bd = parser.parseInternal(element, null);
-        assertEquals(bd.getBeanClassName(),SpringJolokiaConfigWrapper.class.getName());
+        assertEquals(bd.getBeanClassName(),SpringJolokiaConfigHolder.class.getName());
         MutablePropertyValues cProps = bd.getPropertyValues();
         assertEquals(cProps.size(),2);
         verifyConfig(cProps);

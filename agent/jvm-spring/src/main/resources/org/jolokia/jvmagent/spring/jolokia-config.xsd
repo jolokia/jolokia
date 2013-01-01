@@ -28,8 +28,44 @@
         <!-- Configuration used -->
         <xs:element name="config" type="tns:Config" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
-      <xs:attribute name="id" type="xs:ID" use="optional"/>
-      <xs:attribute name="lookupConfig" type="xs:boolean" use="optional"/>
+      <xs:attribute name="id" type="xs:ID" use="optional">
+        <xs:annotation>
+          <xs:documentation>
+            Optional id for specifying this servers name as it
+            can be referenced from the Spring application context.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="lookupConfig" type="xs:boolean" use="optional">
+        <xs:annotation>
+          <xs:documentation>
+            If set to true, externally defined configurations are looked
+            up and used according to their order in addition to the configuration
+            defined withing this tag.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="systemPropertiesMode">
+        <xs:annotation>
+          <xs:documentation><![CDATA[
+  Configuration for the Jolokia server can be looked up from system properties, too. Any system
+  property starting with "jolokia." is considered to be a configuration option where the configuration
+  key is the part after "jolokia.". Several modes are available for how system properties should be used.
+  By default, no lookup for system properties is performed.
+
+  "never" indicates no system properties should be looked up. This is the default.
+	"fallback" indicates system properties should be used as fallback if no local configuration is given
+	"override" indicates system properties should override any local configuration with highest priority
+          ]]></xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="never"/>
+            <xs:enumeration value="fallback"/>
+            <xs:enumeration value="override"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 
