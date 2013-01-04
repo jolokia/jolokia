@@ -17,6 +17,9 @@
         META-INF/spring/*.xml). Kudos to James Strachan for the
         initial idea.
       </action>
+      <action dev="twhite" type="fix" date="2013-01-04">
+        Fixed timestamp in the Java client library's response.
+      </action>
     </release>
     <release version="1.0.6" description="Release 1.0.6" date="2012-11-26">
       <action dev="roland" type="fix" date="2012-08-14">

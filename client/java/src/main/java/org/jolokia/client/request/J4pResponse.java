@@ -18,7 +18,6 @@ package org.jolokia.client.request;
 
 import java.util.Date;
 
-import org.jolokia.client.request.J4pType;
 import org.json.simple.JSONObject;
 
 /**
@@ -43,7 +42,7 @@ public abstract class J4pResponse<T extends J4pRequest> {
         request = pRequest;
         jsonResponse = pJsonResponse;
         Long timestamp = (Long) jsonResponse.get("timestamp");
-        requestDate = timestamp != null ? new Date(timestamp) : new Date();
+        requestDate = timestamp != null ? new Date(timestamp * 1000) : new Date();
     }
 
     /**
