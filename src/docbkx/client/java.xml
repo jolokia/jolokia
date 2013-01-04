@@ -73,7 +73,8 @@ public class MemoryDemo {
     public static void main(String[] args) {
        J4pClient client = new J4pClient("http://localhost:8080/jolokia");
        J4pReadRequest request = 
-           new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage","used");
+           new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
+       request.setPath("used");
        J4pReadResponse response = client.execute(request);
        System.out.println("Memory used: " + response.getValue());
     }
