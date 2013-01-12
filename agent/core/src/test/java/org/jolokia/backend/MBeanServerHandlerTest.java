@@ -130,7 +130,6 @@ public class MBeanServerHandlerTest {
     @Test
     public void mbeanRegistration() throws JMException {
         try {
-            handler.initMBean();
             ObjectName oName = new ObjectName(handler.getObjectName());
             Set<MBeanServer> servers = handler.getMBeanServers();
             boolean found = false;
@@ -152,7 +151,6 @@ public class MBeanServerHandlerTest {
         // New setup because detection happens at construction time
         setup();
         try {
-            handler.initMBean();
             ObjectName oName = new ObjectName(handler.getObjectName());
             Set<MBeanServer> servers = handler.getMBeanServers();
             boolean found = false;

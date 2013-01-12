@@ -35,10 +35,11 @@ import org.jolokia.util.*;
  * @author roland
  * @since Jun 15, 2009
  */
-public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistration {
+public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistration {
 
     // The MBeanServers to use
-    private Set<MBeanServer> mBeanServers;
+    private Set<MBeanServer>
+            mBeanServers;
     private Set<MBeanServerConnection> mBeanServerConnections;
 
     // Optional domain for registering this handler as a mbean
@@ -47,34 +48,8 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
     // Information about the server environment
     private ServerHandle serverHandle;
 
-    /**
-     * Initialise this server handler and register as an MBean
-     *
-     * @throws MalformedObjectNameException if our name is wrong (cannot happen)
-     * @throws NotCompliantMBeanException if we are not compliant MBean (but we are)
-     */
-    public void initMBean() throws MalformedObjectNameException, NotCompliantMBeanException {
-        try {
-            registerMBean(this,getObjectName());
-        } catch (InstanceAlreadyExistsException exp) {
-            // This is no problem, since our MBeanServer interface is stateless and only provides
-            // extra information.
-            // This exception can happen, when multiple servlets get registered within the same JVM
-        }
-    }
-
-    // Handle for remembering registered MBeans
-    private static final class MBeanHandle {
-        private ObjectName objectName;
-        private MBeanServer server;
-
-        private MBeanHandle(MBeanServer pServer, ObjectName pRegisteredName) {
-            server = pServer;
-            objectName = pRegisteredName;
-        }
-    }
     // Handles remembered for unregistering
-    private List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
+    private final List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
 
     /**
      * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
@@ -86,10 +61,13 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
      * @param pLogHandler log handler used for logging purposes
      */
     public MBeanServerHandler(Map<ConfigKey,String> pConfig,LogHandler pLogHandler) {
-        initServerHandle(pConfig, pLogHandler);
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
+        List<ServerDetector> detectors = lookupDetectors();
+        initMBeanServers(detectors);
+        serverHandle = detectServers(detectors, pLogHandler);
+        serverHandle.postDetect(mBeanServers, pConfig, pLogHandler);
+        initMBean();
     }
-
 
     /**
      * Dispatch a request to the MBeanServer which can handle it
@@ -111,30 +89,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
             return handleRequest(pRequestHandler, pJmxReq);
         }
     }
-
-    private Object handleRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
-            throws ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
-        AttributeNotFoundException attrException = null;
-        InstanceNotFoundException objNotFoundException = null;
-        for (MBeanServer s : mBeanServers) {
-            try {
-                return pRequestHandler.handleRequest(s, pJmxReq);
-            } catch (InstanceNotFoundException exp) {
-                // Remember exceptions for later use
-                objNotFoundException = exp;
-            } catch (AttributeNotFoundException exp) {
-                attrException = exp;
-            } catch (IOException exp) {
-                throw new IllegalStateException("I/O Error while dispatching",exp);
-            }
-        }
-        if (attrException != null) {
-            throw attrException;
-        }
-        // Must be there, otherwise we would not have left the loop
-        throw objNotFoundException;
-    }
-
 
     /**
      * Register a MBean under a certain name to the first available MBeans server
@@ -228,16 +182,63 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     // =================================================================================
 
+    // Handle a given request
+    private Object handleRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
+            throws ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
+        AttributeNotFoundException attrException = null;
+        InstanceNotFoundException objNotFoundException = null;
+        for (MBeanServer s : mBeanServers) {
+            try {
+                return pRequestHandler.handleRequest(s, pJmxReq);
+            } catch (InstanceNotFoundException exp) {
+                // Remember exceptions for later use
+                objNotFoundException = exp;
+            } catch (AttributeNotFoundException exp) {
+                attrException = exp;
+            } catch (IOException exp) {
+                throw new IllegalStateException("I/O Error while dispatching",exp);
+            }
+        }
+        if (attrException != null) {
+            throw attrException;
+        }
+        // Must be there, otherwise we would not have left the loop
+        throw objNotFoundException;
+    }
+
+
     /**
      * Initialize the server handle. This method is either called
      * @param pConfig configuration passed through to the server detectors
      * @param pLogHandler used for putting out diagnostic messags
      */
     private void initServerHandle(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+        qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         List<ServerDetector> detectors = lookupDetectors();
         initMBeanServers(detectors);
         serverHandle = detectServers(detectors,pLogHandler);
         serverHandle.postDetect(mBeanServers, pConfig,pLogHandler);
+        initMBean();
+    }
+
+    /**
+     * Initialise this server handler and register as an MBean
+     */
+    private void initMBean()  {
+        try {
+            registerMBean(this,getObjectName());
+        } catch (InstanceAlreadyExistsException exp) {
+            // This is no problem, since this MBeanServerHandlerMBean holds only global information
+            // with no special state (so all instances of this MBean behave similar)
+            // This exception can happen, when multiple servlets get registered within the same JVM
+        } catch (MalformedObjectNameException e) {
+            // Cannot happen, otherwise this is a bug. We should be always provide our own name in correct
+            // form.
+            throw new RuntimeException("Internal Error: Own ObjectName " + getObjectName() + " is malformed",e);
+        } catch (NotCompliantMBeanException e) {
+            // Same here
+            throw new RuntimeException("Internal Error: " + this.getClass().getName() + " is not a compliant MBean",e);
+        }
     }
 
     // Lookup all registered detectors + a default detector
@@ -268,7 +269,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         // Check for JBoss MBeanServer via its utility class
         mBeanServers = new LinkedHashSet<MBeanServer>();
 
-        // Let everydetector add its own MBeanServer
+        // Let every detector add its own MBeanServer
         for (ServerDetector detector : pDetectors) {
             detector.addMBeanServers(mBeanServers);
         }
@@ -349,6 +350,10 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
         return ret.toString();
     }
 
+    public MBeanServer getJolokiaMBeanServer() {
+        return null;
+    }
+
     private void appendDomainInfo(StringBuffer pRet, MBeanServer pServer, String pDomain) {
         try {
             pRet.append("         == ").append(pDomain).append("\n");
@@ -385,6 +390,18 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean,MBeanRegistra
 
     /** {@inheritDoc} */
     public void postDeregister() {
+    }
+
+    // ==================================================================================
+    // Handle for remembering registered MBeans
+    private static final class MBeanHandle {
+        private ObjectName objectName;
+        private MBeanServer server;
+
+        private MBeanHandle(MBeanServer pServer, ObjectName pRegisteredName) {
+            server = pServer;
+            objectName = pRegisteredName;
+        }
     }
 
     // ==================================================================================

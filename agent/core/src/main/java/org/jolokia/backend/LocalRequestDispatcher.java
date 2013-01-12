@@ -102,8 +102,6 @@ public class LocalRequestDispatcher implements RequestDispatcher {
     public void initMBeans(HistoryStore pHistoryStore, DebugStore pDebugStore)
             throws MalformedObjectNameException, MBeanRegistrationException, NotCompliantMBeanException {
 
-        mBeanServerHandler.initMBean();
-
         // Register the Config MBean
         String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
         try {
