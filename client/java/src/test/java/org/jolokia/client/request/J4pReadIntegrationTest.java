@@ -113,7 +113,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nameWithSpace() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest req : readRequests("jolokia.it:type=naming,name=name with space","Ok")) {
+        for (J4pReadRequest req : readRequests("jolokia.it:type=naming/,name=name with space","Ok")) {
             J4pReadResponse resp = j4pClient.execute(req);
             assertNotNull(resp);
         }

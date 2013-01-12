@@ -71,7 +71,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest pRequest)
-            throws InstanceNotFoundException, IOException {
+            throws IOException {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
 
         int maxDepth = getMaxDepth(pRequest);

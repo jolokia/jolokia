@@ -91,7 +91,7 @@ public class ItSetup {
         try {
             // Register my test mbeans
             for (String name : strangeNamesShort) {
-                String strangeName = JOLOKIA_IT_DOMAIN + ":type=naming,name=" + name;
+                String strangeName = JOLOKIA_IT_DOMAIN + ":type=naming/,name=" + name;
                 strangeNames.add(strangeName);
                 registerMBean(new ObjectNameChecking(strangeName),strangeName);
             }

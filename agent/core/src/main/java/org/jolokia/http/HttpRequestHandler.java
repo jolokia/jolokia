@@ -1,7 +1,10 @@
 package org.jolokia.http;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.management.*;
 
@@ -67,12 +70,29 @@ public class HttpRequestHandler {
      * @param pParameterMap parameters of the GET request  @return the response
      */
     public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) {
+
+        String pathInfo = pPathInfo;
+        if (pUri.contains("!//")) {
+            // Special treatment for trailing slashes in pathes
+            Pattern pattern = Pattern.compile("^/?[^/]+/");
+            Matcher matcher = pattern.matcher(pPathInfo);
+            if (matcher.find()) {
+                String prefix = matcher.group();
+                String pathInfoEncoded = pUri.replaceFirst("^.*?" + prefix,prefix);
+                try {
+                    pathInfo = URLDecoder.decode(pathInfoEncoded,"UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    // Should not happen at all ... so we silently fall through
+                }
+            }
+        }
+
         JmxRequest jmxReq =
-                JmxRequestFactory.createGetRequest(pPathInfo,pParameterMap);
+                JmxRequestFactory.createGetRequest(pathInfo,pParameterMap);
 
         if (backendManager.isDebug()) {
             logHandler.debug("URI: " + pUri);
-            logHandler.debug("Path-Info: " + pPathInfo);
+            logHandler.debug("Path-Info: " + pathInfo);
             logHandler.debug("Request: " + jmxReq.toString());
         }
 
