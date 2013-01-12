@@ -70,22 +70,7 @@ public class HttpRequestHandler {
      * @param pParameterMap parameters of the GET request  @return the response
      */
     public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) {
-
-        String pathInfo = pPathInfo;
-        if (pUri.contains("!//")) {
-            // Special treatment for trailing slashes in pathes
-            Pattern pattern = Pattern.compile("^/?[^/]+/");
-            Matcher matcher = pattern.matcher(pPathInfo);
-            if (matcher.find()) {
-                String prefix = matcher.group();
-                String pathInfoEncoded = pUri.replaceFirst("^.*?" + prefix,prefix);
-                try {
-                    pathInfo = URLDecoder.decode(pathInfoEncoded,"UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    // Should not happen at all ... so we silently fall through
-                }
-            }
-        }
+        String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JmxRequest jmxReq =
                 JmxRequestFactory.createGetRequest(pathInfo,pParameterMap);
@@ -318,5 +303,30 @@ public class HttpRequestHandler {
         return getErrorJSON(code,cause, pJmxReq);
     }
 
+    // Path info might need some special handling in case when the URL
+    // contains two following slashes. These slashes get collapsed
+    // when calling getPathInfo() but are still present in the URI.
+    // This situation can happen, when slashes are escaped and the last char
+    // of an path part is such an escaped slash
+    // (e.g. "read/domain:type=name!//attribute")
+    // In this case, we extract the path info on our own
 
+    private static Pattern PATH_PREFIX_PATTERN = Pattern.compile("^/?[^/]+/");
+
+    private String extractPathInfo(String pUri, String pPathInfo) {
+        if (pUri.contains("!//")) {
+            // Special treatment for trailing slashes in pathes
+            Matcher matcher = PATH_PREFIX_PATTERN.matcher(pPathInfo);
+            if (matcher.find()) {
+                String prefix = matcher.group();
+                String pathInfoEncoded = pUri.replaceFirst("^.*?" + prefix, prefix);
+                try {
+                    pPathInfo = URLDecoder.decode(pathInfoEncoded, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    // Should not happen at all ... so we silently fall through
+                }
+            }
+        }
+        return pPathInfo;
+    }
 }
