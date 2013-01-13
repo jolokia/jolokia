@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend;
+package org.jolokia.jmx;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
+import java.lang.annotation.*;
 
 /**
+ * Annotation for marking an MBean as a "JsonMBean", which instead of exporting
+ * complex data structure JSON strings. So any non-trivial argument and return value
+ * gets parsed from/translated into a JSON string.
+ *
  * @author roland
- * @since 11.01.13
+ * @since 13.01.13
  */
-public class JolokiaMBeanServer {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface JsonMBean {
 
-    MBeanServer mBeanServer = MBeanServerFactory.createMBeanServer();
-
-    public MBeanServer getMBeanServer() {
-        return mBeanServer;
-    }
 }

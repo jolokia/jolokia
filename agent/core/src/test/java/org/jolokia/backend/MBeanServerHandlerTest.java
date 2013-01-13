@@ -86,7 +86,7 @@ public class MBeanServerHandlerTest {
         JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(false);
-        expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e);
+        expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(reqHandler);
         handler.dispatchRequest(reqHandler, request);
     }

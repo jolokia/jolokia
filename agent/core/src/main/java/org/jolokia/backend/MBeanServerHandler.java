@@ -8,6 +8,7 @@ import javax.management.*;
 
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.jmx.JolokiaMBeanServer;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.*;
 
@@ -38,11 +39,13 @@ import org.jolokia.util.*;
 public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistration {
 
     // The MBeanServers to use
-    private Set<MBeanServer>
-            mBeanServers;
+    private Set<MBeanServer>           mBeanServers;
     private Set<MBeanServerConnection> mBeanServerConnections;
 
-    // Optional domain for registering this handler as a mbean
+    // Private JolokaMBeanServer not exposed to JSR-160
+    private JolokiaMBeanServer jolokiaMBeanServer;
+
+    // Optional domain for registering this handler as a MBean
     private String qualifier;
 
     // Information about the server environment
@@ -60,13 +63,24 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @param pLogHandler log handler used for logging purposes
      */
-    public MBeanServerHandler(Map<ConfigKey,String> pConfig,LogHandler pLogHandler) {
+    public MBeanServerHandler(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+        // A qualifier, if given, is used to add the MBean Name of this MBean
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         List<ServerDetector> detectors = lookupDetectors();
         initMBeanServers(detectors);
-        serverHandle = detectServers(detectors, pLogHandler);
-        serverHandle.postDetect(mBeanServers, pConfig, pLogHandler);
+        initServerHandle(pConfig, pLogHandler, detectors);
         initMBean();
+    }
+
+    /**
+     * Initialize the server handle.
+     * @param pConfig configuration passed through to the server detectors
+     * @param pLogHandler used for putting out diagnostic messags
+     * @param pDetectors all detectors known
+     */
+    private void initServerHandle(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
+        serverHandle = detectServers(pDetectors, pLogHandler);
+        serverHandle.postDetect(mBeanServers, pConfig, pLogHandler);
     }
 
     /**
@@ -91,7 +105,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     }
 
     /**
-     * Register a MBean under a certain name to the first available MBeans server
+     * Register a MBean under a certain name to the first platform MBeanServer
      *
      * @param pMBean MBean to register
      * @param pOptionalName optional name under which the bean should be registered. If not provided,
@@ -102,27 +116,19 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      */
     public ObjectName registerMBean(Object pMBean,String ... pOptionalName)
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
-        if (mBeanServers.size() > 0) {
-            synchronized (mBeanHandles) {
-                Exception lastExp = null;
-                for (MBeanServer server : mBeanServers) {
-                    try {
-                        String name = pOptionalName != null && pOptionalName.length > 0 ? pOptionalName[0] : null;
-                        ObjectName registeredName = serverHandle.registerMBeanAtServer(server, pMBean, name);
-                        mBeanHandles.add(new MBeanHandle(server,registeredName));
-                        return registeredName;
-                    } catch (RuntimeException exp) {
-                        lastExp = exp;
-                    } catch (MBeanRegistrationException exp) {
-                        lastExp = exp;
-                    }
-                }
-                if (lastExp != null) {
-                    throw new IllegalStateException("Could not register " + pMBean + ": " + lastExp,lastExp);
-                }
+        synchronized (mBeanHandles) {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            try {
+                String name = pOptionalName != null && pOptionalName.length > 0 ? pOptionalName[0] : null;
+                ObjectName registeredName = serverHandle.registerMBeanAtServer(server, pMBean, name);
+                mBeanHandles.add(new MBeanHandle(server,registeredName));
+                return registeredName;
+            } catch (RuntimeException exp) {
+                throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
+                } catch (MBeanRegistrationException exp) {
+                throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
             }
         }
-        throw new IllegalStateException("No MBeanServer initialized yet");
     }
 
     /**
@@ -180,6 +186,14 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         return serverHandle;
     }
 
+    /**
+     * Return our private JolokiaMBeanServer
+     * @return mbean server
+     */
+    public MBeanServer getJolokiaMBeanServer() {
+        return jolokiaMBeanServer;
+    }
+
     // =================================================================================
 
     // Handle a given request
@@ -206,20 +220,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         throw objNotFoundException;
     }
 
-
-    /**
-     * Initialize the server handle. This method is either called
-     * @param pConfig configuration passed through to the server detectors
-     * @param pLogHandler used for putting out diagnostic messags
-     */
-    private void initServerHandle(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
-        qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
-        List<ServerDetector> detectors = lookupDetectors();
-        initMBeanServers(detectors);
-        serverHandle = detectServers(detectors,pLogHandler);
-        serverHandle.postDetect(mBeanServers, pConfig,pLogHandler);
-        initMBean();
-    }
 
     /**
      * Initialise this server handler and register as an MBean
@@ -269,15 +269,22 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         // Check for JBoss MBeanServer via its utility class
         mBeanServers = new LinkedHashSet<MBeanServer>();
 
+        // Create and add our own JolokiaMBeanServer first
+        jolokiaMBeanServer = new JolokiaMBeanServerImpl();
+        mBeanServers.add(jolokiaMBeanServer);
+
         // Let every detector add its own MBeanServer
         for (ServerDetector detector : pDetectors) {
             detector.addMBeanServers(mBeanServers);
         }
 
+        // All MBean Server known by the MBeanServerFactory
         List<MBeanServer> beanServers = MBeanServerFactory.findMBeanServer(null);
         if (beanServers != null) {
             mBeanServers.addAll(beanServers);
         }
+
+        // Last entry is always the platform MBeanServer
         mBeanServers.add(ManagementFactory.getPlatformMBeanServer());
 
         // Copy over servers into connection set. Required for proper generic usage
@@ -348,10 +355,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
                 .append(ManagementFactory.getPlatformMBeanServer())
                 .append("\n");
         return ret.toString();
-    }
-
-    public MBeanServer getJolokiaMBeanServer() {
-        return null;
     }
 
     private void appendDomainInfo(StringBuffer pRet, MBeanServer pServer, String pDomain) {
