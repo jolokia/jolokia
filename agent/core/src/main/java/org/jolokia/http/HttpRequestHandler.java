@@ -80,7 +80,6 @@ public class HttpRequestHandler {
             logHandler.debug("Path-Info: " + pathInfo);
             logHandler.debug("Request: " + jmxReq.toString());
         }
-
         return executeRequest(jmxReq);
     }
 
