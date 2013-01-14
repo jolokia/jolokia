@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend;
+package org.jolokia.jmx;
 
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
@@ -22,8 +22,8 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.jmx.JolokiaMBeanServer;
-import org.jolokia.jmx.JolokiaMBeanServerUtil;
+import org.jolokia.backend.MBeanServerHandler;
+import org.jolokia.backend.MBeanServerHandlerMBean;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.testng.annotations.*;
@@ -41,8 +41,8 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
     @BeforeTest
     public void setup() {
         Map<ConfigKey, String> config = new HashMap<ConfigKey, String>();
-        config.put(ConfigKey.DEBUG,"true");
-        handler = new MBeanServerHandler(config,this);
+        config.put(ConfigKey.DEBUG, "true");
+        handler = new MBeanServerHandler(config, this);
     }
 
     @AfterTest
@@ -59,23 +59,20 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
     @Test
     public void checkNotRegistered() throws MalformedObjectNameException {
         MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
-        assertNotEquals(ManagementFactory.getPlatformMBeanServer(),jolokiaServer);
-        for (MBeanServer server : MBeanServerFactory.findMBeanServer(null) ) {
-            assertNotEquals(server,jolokiaServer);
+        assertNotEquals(ManagementFactory.getPlatformMBeanServer(), jolokiaServer);
+        for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
+            assertNotEquals(server, jolokiaServer);
         }
     }
 
     @Test
     public void registerMBean() throws MalformedObjectNameException, NotCompliantMBeanException,
                                        InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
-        JolokiaMBeanServer jolokiaServer = (JolokiaMBeanServer) JolokiaMBeanServerUtil.getJolokiaMBeanServer();
-
-        // TODO: Still needs to be implemented
-        assertNull(jolokiaServer.getJsonBeanServer());
+        MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
 
         Dummy test = new Dummy();
         ObjectName name = new ObjectName("jolokia.test:name=test");
-        JolokiaMBeanServerUtil.registerMBean(test,name);
+        JolokiaMBeanServerUtil.registerMBean(test, name);
         assertTrue(jolokiaServer.isRegistered(name));
         JolokiaMBeanServerUtil.unregisterMBean(name);
         assertFalse(jolokiaServer.isRegistered(name));

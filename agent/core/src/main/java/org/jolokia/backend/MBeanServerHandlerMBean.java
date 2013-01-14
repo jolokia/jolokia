@@ -16,8 +16,6 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
-import javax.management.MBeanServer;
-
 /**
  * MBean interface for accessing the {@link MBeanServerHandler}
  *
@@ -26,22 +24,15 @@ import javax.management.MBeanServer;
  */
 public interface MBeanServerHandlerMBean {
 
-    // Name of MBean used for registration
+    /**
+     * Name of MBean used for registration
+     */
     String OBJECT_NAME = "jolokia:type=ServerHandler";
-    
+
     /**
      * Get a summary information of all MBeans found on the server
      *
      * @return the servers information.
      */
     String mBeanServersInfo();
-
-    /**
-     * Get the Jolokia special MBeanServer, which
-     * is not exported via JSR-160.
-     *
-     * @return the Jolokia MBeanServer or null
-     *         if none is set
-     */
-    MBeanServer getJolokiaMBeanServer();
 }

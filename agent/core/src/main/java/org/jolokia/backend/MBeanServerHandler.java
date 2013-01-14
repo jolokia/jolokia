@@ -8,7 +8,7 @@ import javax.management.*;
 
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.jmx.JolokiaMBeanServer;
+import org.jolokia.jmx.JolokiaMBeanServerUtil;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.*;
 
@@ -43,7 +43,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     private Set<MBeanServerConnection> mBeanServerConnections;
 
     // Private JolokaMBeanServer not exposed to JSR-160
-    private JolokiaMBeanServer jolokiaMBeanServer;
+    private MBeanServer jolokiaMBeanServer;
 
     // Optional domain for registering this handler as a MBean
     private String qualifier;
@@ -143,8 +143,8 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
             List<MBeanHandle> unregistered = new ArrayList<MBeanHandle>();
             for (MBeanHandle handle : mBeanHandles) {
                 try {
-                    handle.server.unregisterMBean(handle.objectName);
                     unregistered.add(handle);
+                    handle.server.unregisterMBean(handle.objectName);
                 } catch (InstanceNotFoundException e) {
                     exceptions.add(e);
                 } catch (MBeanRegistrationException e) {
@@ -186,14 +186,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         return serverHandle;
     }
 
-    /**
-     * Return our private JolokiaMBeanServer
-     * @return mbean server
-     */
-    public MBeanServer getJolokiaMBeanServer() {
-        return jolokiaMBeanServer;
-    }
-
     // =================================================================================
 
     // Handle a given request
@@ -219,7 +211,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         // Must be there, otherwise we would not have left the loop
         throw objNotFoundException;
     }
-
 
     /**
      * Initialise this server handler and register as an MBean
@@ -270,7 +261,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         mBeanServers = new LinkedHashSet<MBeanServer>();
 
         // Create and add our own JolokiaMBeanServer first
-        jolokiaMBeanServer = new JolokiaMBeanServerImpl();
+        jolokiaMBeanServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         mBeanServers.add(jolokiaMBeanServer);
 
         // Let every detector add its own MBeanServer

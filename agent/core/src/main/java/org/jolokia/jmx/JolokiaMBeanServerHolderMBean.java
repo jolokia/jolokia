@@ -17,26 +17,24 @@
 package org.jolokia.jmx;
 
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 
 /**
- * Dedicate MBeanServer for registering Jolokia-only MBeans
+ * Holder for a Jolokia MBeanServer
  *
  * @author roland
- * @since 11.01.13
+ * @since 13.01.13
  */
-class JolokiaMBeanServer extends MBeanServerProxy implements MBeanServer {
+public interface JolokiaMBeanServerHolderMBean {
 
     /**
-     * Create a private MBean server
+     * Name of MBean used for registration
      */
-    public JolokiaMBeanServer() {
-        MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
-        init(mBeanServer);
-    }
+    String OBJECT_NAME = "jolokia:type=MBeanServer";
 
-    /** {@inheritDoc} */
-    public MBeanServer getJsonBeanServer() {
-        return null;
-    }
+    /**
+     * Get the Jolokia MBeanServer
+     *
+     * @return Jolokia's (JSR-160 hidden) MBeanServer
+     */
+    MBeanServer getJolokiaMBeanServer();
 }

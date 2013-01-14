@@ -24,7 +24,6 @@ import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -46,7 +45,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
             J4pExecResponse resp = j4pClient.execute(request);
             assertEquals(0L,resp.getValue());
             resp = j4pClient.execute(request);
-            assertEquals(1L,resp.getValue());            
+            assertEquals(1L,resp.getValue());
         }
     }
 

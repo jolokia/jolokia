@@ -20,8 +20,6 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerHandlerMBean;
-
 /**
  * Utility class for looking up the Jolokia-internal MBeanServer which never gets exposed via JSR-160
  *
@@ -30,25 +28,32 @@ import org.jolokia.backend.MBeanServerHandlerMBean;
  */
 public class JolokiaMBeanServerUtil {
 
+    public static final String JOLOKIA_MBEAN_SERVER_ATTRIBUTE = "JolokiaMBeanServer";
+
     // Only static methods
-    private JolokiaMBeanServerUtil() { }
+    private JolokiaMBeanServerUtil() {
+    }
 
     /**
      * Lookup the JolokiaMBean server via a JMX lookup to the Jolokia-internal MBean exposing this MBeanServer
      *
-     * @return the Jolokia MBeanServer
+     * @return the Jolokia MBeanServer or null if not yet available present
      */
     public static MBeanServer getJolokiaMBeanServer() {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        MBeanServer jolokiaMBeanServer = null;
+        MBeanServer jolokiaMBeanServer;
         try {
             jolokiaMBeanServer =
-                    (MBeanServer) server.getAttribute(new ObjectName(MBeanServerHandlerMBean.OBJECT_NAME),"JolokiaMBeanServer");
+                    (MBeanServer) server.getAttribute(createObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME),
+                                                      JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
+        } catch (InstanceNotFoundException exp) {
+            jolokiaMBeanServer = registerJolokiaMBeanServerHolderMBean(server);
         } catch (JMException e) {
             throw new IllegalStateException("Internal: Cannot get JolokiaMBean server via JMX lookup: " + e,e);
         }
         return jolokiaMBeanServer;
     }
+
 
     /**
      * Register an MBean at the JolokiaMBeanServer. This call is directly delegated
@@ -65,6 +70,7 @@ public class JolokiaMBeanServerUtil {
         return getJolokiaMBeanServer().registerMBean(object, name);
     }
 
+
     /**
      * Unregister an MBean at the JolokiaMBeanServer. This call is directly delegated
      * to the JolokiaMBeanServer
@@ -77,6 +83,34 @@ public class JolokiaMBeanServerUtil {
         getJolokiaMBeanServer().unregisterMBean(name);
     }
 
+    // Create a new JolokiaMBeanServerHolder and return the embedded MBeanServer
+    private static MBeanServer registerJolokiaMBeanServerHolderMBean(MBeanServer pServer) {
+        JolokiaMBeanServerHolder holder = new JolokiaMBeanServerHolder();
+        ObjectName holderName = createObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        MBeanServer jolokiaMBeanServer;
+        try {
+            pServer.registerMBean(holder,holderName);
+            jolokiaMBeanServer = holder.getJolokiaMBeanServer();
+        } catch (InstanceAlreadyExistsException e) {
+            // If the instance already exist, we look it up and fetch the MBeanServerHolder from there.
+            // Might happen in race conditions.
+            try {
+                jolokiaMBeanServer = (MBeanServer) pServer.getAttribute(holderName,JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
+            } catch (JMException e1) {
+                throw new IllegalStateException("Internal: Cannot get JolokiaMBean server in fallback JMX lookup " +
+                                                "while trying to register the holder MBean: " + e,e);
+            }
+        } catch (JMException e) {
+            throw new IllegalStateException("Internal: JolokiaMBeanHolder cannot be registered to JMX: " + e,e);
+        }
+        return jolokiaMBeanServer;
+    }
 
-
+    private static ObjectName createObjectName(String pName) {
+        try {
+            return new ObjectName(pName);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException("Invalid object name " + pName);
+        }
+    }
 }

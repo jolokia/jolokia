@@ -28,8 +28,7 @@ import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.*;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -51,6 +50,11 @@ public class MBeanServerHandlerTest {
         config.put(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
         handler = new MBeanServerHandler(config,getEmptyLogHandler());
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
+    }
+
+    @AfterMethod
+    public void tearDown() throws JMException {
+        handler.unregisterMBeans();
     }
 
     @Test

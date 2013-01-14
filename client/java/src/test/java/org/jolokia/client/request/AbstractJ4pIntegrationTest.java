@@ -90,12 +90,12 @@ abstract public class AbstractJ4pIntegrationTest {
 
     @AfterClass
 	public void stop() throws Exception {
-		if (jettyServer != null) {
-			jettyServer.stop();
-		}
         if (itSetup != null) {
             itSetup.stop();
         }
+		if (jettyServer != null) {
+			jettyServer.stop();
+		}
 	}
 
     public String getJ4pUrl() {

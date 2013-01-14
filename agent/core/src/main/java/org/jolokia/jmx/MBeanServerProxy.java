@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend;
+package org.jolokia.jmx;
 
 import java.io.ObjectInputStream;
 import java.util.Set;

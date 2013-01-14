@@ -14,31 +14,23 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend;
+package org.jolokia.jmx;
 
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-
-import org.jolokia.jmx.JolokiaMBeanServer;
 
 /**
- * Dedicate MBeanServer for registering Jolokia-only MBeans
- *
  * @author roland
- * @since 11.01.13
+ * @since 14.01.13
  */
-public class JolokiaMBeanServerImpl extends MBeanServerProxy implements JolokiaMBeanServer {
+class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
-    /**
-     * Create a private MBean server
-     */
-    public JolokiaMBeanServerImpl() {
-        MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
-        init(mBeanServer);
+    private MBeanServer jolokiaMBeanServer;
+
+    public JolokiaMBeanServerHolder() {
+        jolokiaMBeanServer = new JolokiaMBeanServer();
     }
 
-    /** {@inheritDoc} */
-    public MBeanServer getJsonBeanServer() {
-        return null;
+    public MBeanServer getJolokiaMBeanServer() {
+        return jolokiaMBeanServer;
     }
 }
