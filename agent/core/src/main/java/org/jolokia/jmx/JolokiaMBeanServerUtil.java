@@ -26,7 +26,7 @@ import javax.management.*;
  * @author roland
  * @since 13.01.13
  */
-public class JolokiaMBeanServerUtil {
+final public class JolokiaMBeanServerUtil {
 
     public static final String JOLOKIA_MBEAN_SERVER_ATTRIBUTE = "JolokiaMBeanServer";
 
@@ -110,7 +110,7 @@ public class JolokiaMBeanServerUtil {
         try {
             return new ObjectName(pName);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid object name " + pName);
+            throw new IllegalArgumentException("Invalid object name " + pName,e);
         }
     }
 }

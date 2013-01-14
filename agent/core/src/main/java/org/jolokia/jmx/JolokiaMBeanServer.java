@@ -25,7 +25,7 @@ import javax.management.MBeanServerFactory;
  * @author roland
  * @since 11.01.13
  */
-class JolokiaMBeanServer extends MBeanServerProxy implements MBeanServer {
+class JolokiaMBeanServer extends MBeanServerProxy {
 
     /**
      * Create a private MBean server

@@ -310,7 +310,7 @@ public class HttpRequestHandler {
     // (e.g. "read/domain:type=name!//attribute")
     // In this case, we extract the path info on our own
 
-    private static Pattern PATH_PREFIX_PATTERN = Pattern.compile("^/?[^/]+/");
+    private final static Pattern PATH_PREFIX_PATTERN = Pattern.compile("^/?[^/]+/");
 
     private String extractPathInfo(String pUri, String pPathInfo) {
         if (pUri.contains("!//")) {
@@ -320,7 +320,7 @@ public class HttpRequestHandler {
                 String prefix = matcher.group();
                 String pathInfoEncoded = pUri.replaceFirst("^.*?" + prefix, prefix);
                 try {
-                    pPathInfo = URLDecoder.decode(pathInfoEncoded, "UTF-8");
+                    return URLDecoder.decode(pathInfoEncoded, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     // Should not happen at all ... so we silently fall through
                 }

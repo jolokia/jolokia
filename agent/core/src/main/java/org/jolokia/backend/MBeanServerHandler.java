@@ -42,9 +42,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     private Set<MBeanServer>           mBeanServers;
     private Set<MBeanServerConnection> mBeanServerConnections;
 
-    // Private JolokaMBeanServer not exposed to JSR-160
-    private MBeanServer jolokiaMBeanServer;
-
     // Optional domain for registering this handler as a MBean
     private String qualifier;
 
@@ -114,7 +111,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @return the name under which the MBean is registered.
      */
-    public ObjectName registerMBean(Object pMBean,String ... pOptionalName)
+    public final ObjectName registerMBean(Object pMBean,String ... pOptionalName)
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
         synchronized (mBeanHandles) {
             MBeanServer server = ManagementFactory.getPlatformMBeanServer();
@@ -137,7 +134,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @throws JMException if an exception occurs during unregistration
      */
-    public void unregisterMBeans() throws JMException {
+    public final void unregisterMBeans() throws JMException {
         synchronized (mBeanHandles) {
             List<JMException> exceptions = new ArrayList<JMException>();
             List<MBeanHandle> unregistered = new ArrayList<MBeanHandle>();
@@ -225,10 +222,10 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         } catch (MalformedObjectNameException e) {
             // Cannot happen, otherwise this is a bug. We should be always provide our own name in correct
             // form.
-            throw new RuntimeException("Internal Error: Own ObjectName " + getObjectName() + " is malformed",e);
+            throw new IllegalStateException("Internal Error: Own ObjectName " + getObjectName() + " is malformed",e);
         } catch (NotCompliantMBeanException e) {
             // Same here
-            throw new RuntimeException("Internal Error: " + this.getClass().getName() + " is not a compliant MBean",e);
+            throw new IllegalStateException("Internal Error: " + this.getClass().getName() + " is not a compliant MBean",e);
         }
     }
 
@@ -261,7 +258,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         mBeanServers = new LinkedHashSet<MBeanServer>();
 
         // Create and add our own JolokiaMBeanServer first
-        jolokiaMBeanServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+        MBeanServer jolokiaMBeanServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         mBeanServers.add(jolokiaMBeanServer);
 
         // Let every detector add its own MBeanServer

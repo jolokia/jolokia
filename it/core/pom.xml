@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-osgi</artifactId>
       <version>${project.version}</version>
     </dependency>
 
