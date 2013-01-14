@@ -239,7 +239,7 @@ public class BackendManager {
 
         private Map<ConfigKey, String> config;
 
-        public Initializer(Map<ConfigKey, String> pConfig) {
+        private Initializer(Map<ConfigKey, String> pConfig) {
             config = pConfig;
         }
 

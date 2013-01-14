@@ -28,6 +28,7 @@ import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.testng.annotations.*;
 
+import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
 
 /**
@@ -77,6 +78,41 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
         JolokiaMBeanServerUtil.unregisterMBean(name);
         assertFalse(jolokiaServer.isRegistered(name));
     }
+
+    @Test
+    void registerMBean2() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException {
+        MBeanServer server = createMock(MBeanServer.class);
+        MBeanServer ret = MBeanServerFactory.newMBeanServer();
+        ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new InstanceAlreadyExistsException());
+        expect(server.getAttribute(eq(oName),eq(JolokiaMBeanServerUtil.JOLOKIA_MBEAN_SERVER_ATTRIBUTE))).andReturn(ret);
+        replay(server);
+
+        MBeanServer m = JolokiaMBeanServerUtil.registerJolokiaMBeanServerHolderMBean(server);
+        assertEquals(ret,m);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    void registerMBeanFailed() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException {
+        MBeanServer server = createMock(MBeanServer.class);
+        ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new MBeanRegistrationException(new Exception()));
+        replay(server);
+
+        MBeanServer m = JolokiaMBeanServerUtil.registerJolokiaMBeanServerHolderMBean(server);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    void registerMBeanFailed2() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException {
+        MBeanServer server = createMock(MBeanServer.class);
+        ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new InstanceAlreadyExistsException());
+        expect(server.getAttribute(eq(oName),eq(JolokiaMBeanServerUtil.JOLOKIA_MBEAN_SERVER_ATTRIBUTE))).andThrow(new AttributeNotFoundException());
+        replay(server);
+
+        MBeanServer m = JolokiaMBeanServerUtil.registerJolokiaMBeanServerHolderMBean(server);
+    }
+
 
     public void debug(String message) {
     }

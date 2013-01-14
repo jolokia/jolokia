@@ -84,7 +84,8 @@ public final class JolokiaMBeanServerUtil {
     }
 
     // Create a new JolokiaMBeanServerHolder and return the embedded MBeanServer
-    private static MBeanServer registerJolokiaMBeanServerHolderMBean(MBeanServer pServer) {
+    // package visible for unit testing
+    static MBeanServer registerJolokiaMBeanServerHolderMBean(MBeanServer pServer) {
         JolokiaMBeanServerHolder holder = new JolokiaMBeanServerHolder();
         ObjectName holderName = createObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
         MBeanServer jolokiaMBeanServer;

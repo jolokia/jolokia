@@ -19,6 +19,8 @@ package org.jolokia.jmx;
 import javax.management.MBeanServer;
 
 /**
+ * A wrapper class for holding the Jolokia JSR-160 private MBeanServer
+ *
  * @author roland
  * @since 14.01.13
  */
@@ -26,10 +28,18 @@ class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
     private MBeanServer jolokiaMBeanServer;
 
+    /**
+     * Create a new holder
+     */
     public JolokiaMBeanServerHolder() {
         jolokiaMBeanServer = new JolokiaMBeanServer();
     }
 
+    /**
+     * Get the managed JolokiaMBeanServer
+     *
+     * @return the Jolokia MBean Server
+     */
     public MBeanServer getJolokiaMBeanServer() {
         return jolokiaMBeanServer;
     }

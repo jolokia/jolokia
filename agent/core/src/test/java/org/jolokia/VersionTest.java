@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package org.jolokia.jmx;
+package org.jolokia;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
- * Dedicate MBeanServer for registering Jolokia-only MBeans
+ * Check whether the pom.xml version and the code version is
+ * the same
  *
  * @author roland
- * @since 11.01.13
+ * @since 14.01.13
  */
-class JolokiaMBeanServer extends MBeanServerProxy {
+public class VersionTest {
 
-    /**
-     * Create a private MBean server
-     */
-    public JolokiaMBeanServer() {
-        MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
-        init(mBeanServer);
+    @Test
+    public void verifyVersion() {
+        assertEquals(Version.getAgentVersion(),System.getProperty("project.version"));
+        assertNotNull(Version.getProtocolVersion());
     }
 }
