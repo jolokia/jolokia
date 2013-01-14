@@ -235,7 +235,7 @@ public class BackendManager {
 
     // Initialized used for late initialisation as it is required for the agent when used
     // as startup options
-    private class Initializer {
+    private final class Initializer {
 
         private Map<ConfigKey, String> config;
 
