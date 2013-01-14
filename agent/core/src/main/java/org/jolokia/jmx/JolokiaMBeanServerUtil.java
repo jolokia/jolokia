@@ -26,7 +26,7 @@ import javax.management.*;
  * @author roland
  * @since 13.01.13
  */
-final public class JolokiaMBeanServerUtil {
+public final class JolokiaMBeanServerUtil {
 
     public static final String JOLOKIA_MBEAN_SERVER_ATTRIBUTE = "JolokiaMBeanServer";
 

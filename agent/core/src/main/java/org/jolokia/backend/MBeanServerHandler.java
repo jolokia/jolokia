@@ -367,7 +367,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     }
 
     /** {@inheritDoc} */
-    public String getObjectName() {
+    public final String getObjectName() {
         return OBJECT_NAME + (qualifier != null ? "," + qualifier : "");
     }
 

@@ -310,7 +310,7 @@ public class HttpRequestHandler {
     // (e.g. "read/domain:type=name!//attribute")
     // In this case, we extract the path info on our own
 
-    private final static Pattern PATH_PREFIX_PATTERN = Pattern.compile("^/?[^/]+/");
+    private static final Pattern PATH_PREFIX_PATTERN = Pattern.compile("^/?[^/]+/");
 
     private String extractPathInfo(String pUri, String pPathInfo) {
         if (pUri.contains("!//")) {
