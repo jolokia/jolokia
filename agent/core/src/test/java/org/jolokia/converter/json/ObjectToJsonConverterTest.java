@@ -79,7 +79,7 @@ public class ObjectToJsonConverterTest {
         JsonConvertOptions opts = (JsonConvertOptions) field.get(ctx);
         field = JsonConvertOptions.class.getDeclaredField("maxDepth");
         field.setAccessible(true);
-        field.set(opts,1);
+        field.set(opts,2);
         Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
         String c = (String) ((Map) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));

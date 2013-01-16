@@ -292,7 +292,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
         for (J4pReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-            params.put(J4pQueryParameter.MAX_DEPTH,"0");
+            params.put(J4pQueryParameter.MAX_DEPTH,"1");
             params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
             for (String method : new String[] { "GET", "POST" }) {
                 if (request.getTargetConfig() != null && method.equals("GET")) {

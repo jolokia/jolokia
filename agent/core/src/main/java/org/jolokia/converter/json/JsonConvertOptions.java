@@ -63,12 +63,12 @@ public class JsonConvertOptions {
     }
 
     /**
-     * Check whether the maximum depth has been exceeded
+     * Check whether the maximum depth has been reached
      * @param pDepth current depth to check
      * @return true if the maximum depth has been exceeded, false otherwise
      */
-    public boolean maxDepthExceeded(int pDepth) {
-        return maxDepth != 0 && pDepth > maxDepth;
+    public boolean maxDepthReached(int pDepth) {
+        return maxDepth != 0 && pDepth >= maxDepth;
     }
 
     /**

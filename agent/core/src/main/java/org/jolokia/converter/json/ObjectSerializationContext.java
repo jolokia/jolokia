@@ -69,8 +69,8 @@ class ObjectSerializationContext {
      *
      * @return true if the max depth limit has been reached
      */
-    public boolean maxDepthExceeded() {
-        return options.maxDepthExceeded(objectsInCallStack.size());
+    public boolean maxDepthReached() {
+        return options.maxDepthReached(objectsInCallStack.size());
     }
 
     /**

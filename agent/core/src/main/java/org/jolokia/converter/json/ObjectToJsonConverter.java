@@ -266,7 +266,7 @@ public final class ObjectToJsonConverter {
 
     private String checkForLimits(Object pValue, ObjectSerializationContext pStackContext) {
         if (pValue != null) {
-            if (pStackContext.maxDepthExceeded()) {
+            if (pStackContext.maxDepthReached()) {
                 // We use its string representation.
                 return pValue.toString();
             }
