@@ -175,7 +175,7 @@ public class BackendManager {
      * @return true if remote access is allowed
      */
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
-        return restrictor.isRemoteAccessAllowed(pRemoteHost,pRemoteAddr);
+        return restrictor.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
     }
 
     /**
@@ -371,7 +371,7 @@ public class BackendManager {
 
         Object jsonResult =
                 converters.getToJsonConverter()
-                          .convertToJson(retValue, opts, useValueWithPath ? pJmxReq.getPathParts() : null);
+                          .convertToJson(retValue, useValueWithPath ? pJmxReq.getPathParts() : null, opts);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);

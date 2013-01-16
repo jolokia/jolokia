@@ -113,9 +113,9 @@ public class ObjectToJsonConverterTest {
                 new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").
                         pathParts("name").build();
         File file = new File("myFile");
-        Map ret = (Map) converter.convertToJson(file, JsonConvertOptions.DEFAULT,null);
+        Map ret = (Map) converter.convertToJson(file, null, JsonConvertOptions.DEFAULT);
         assertEquals(ret.get("name"),"myFile");
-        String name = (String) converter.convertToJson(file, JsonConvertOptions.DEFAULT, req.getPathParts());
+        String name = (String) converter.convertToJson(file, req.getPathParts(), JsonConvertOptions.DEFAULT);
         assertEquals(name,"myFile");
     }
     // ============================================================================

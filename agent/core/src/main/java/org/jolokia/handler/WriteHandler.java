@@ -9,6 +9,7 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 
 import org.jolokia.converter.*;
+import org.jolokia.converter.json.JsonConvertOptions;
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -163,9 +164,9 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
 
             String lastPathElement = pathParts.remove(pathParts.size()-1);
             Stack<String> extraStack = EscapeUtil.reversePath(pathParts);
-            // Get the object pointed to do with path-1
 
-            Object inner = toJsonConverter.extractObject(pCurrentValue, extraStack, false);
+            // Get the object pointed to do with path-1
+            Object inner = toJsonConverter.extractObjectWithContext(pCurrentValue, extraStack, JsonConvertOptions.DEFAULT, false);
 
             // Set the attribute pointed to by the path elements
             // (depending of the parent object's type)

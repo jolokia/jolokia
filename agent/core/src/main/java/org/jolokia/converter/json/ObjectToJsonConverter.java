@@ -98,16 +98,17 @@ public final class ObjectToJsonConverter {
      * Convert the return value to a JSON object.
      *
      *
+     *
      * @param pValue the value to convert
-     * @param pOptions options used for parsing
      * @param pPathParts path parts to use for extraction
+     * @param pOptions options used for parsing
      * @return the converter object. This either a subclass of {@link JSONAware} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within an path an attribute could not be found
      */
-    public Object convertToJson(Object pValue, JsonConvertOptions pOptions, List<String> pPathParts)
+    public Object convertToJson(Object pValue, List<String> pPathParts, JsonConvertOptions pOptions)
             throws AttributeNotFoundException {
         Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<String>();
-        return extractObjectWithContext(pOptions, pValue, extraStack, true);
+        return extractObjectWithContext(pValue, extraStack, pOptions, true);
     }
 
 
@@ -116,16 +117,17 @@ public final class ObjectToJsonConverter {
      * (if <code>pExtraArgs</code> is not null) and/or to convert
      * it to JSON (if <code>pJsonify</code> is true).
      *
+     *
+     * @param pValue value to extract from
+     * @param pExtraArgs stack used for diving in to the value
      * @param pOpts options from which various processing
      *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
      *        into context in order to influence the object traversal.
-     * @param pValue value to extract from
-     * @param pExtraArgs stack used for diving in to the value
      * @param pJsonify whether the result should be returned as an JSON object
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
-    private Object extractObjectWithContext(JsonConvertOptions pOpts, Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
+    public Object extractObjectWithContext(Object pValue, Stack<String> pExtraArgs, JsonConvertOptions pOpts, boolean pJsonify)
             throws AttributeNotFoundException {
         Object jsonResult;
         setupContext(pOpts);
@@ -138,9 +140,9 @@ public final class ObjectToJsonConverter {
     }
 
     /**
-     * Related to {@link #extractObjectWithContext(JsonConvertOptions, Object, Stack, boolean)} except that
+     * Related to {@link #extractObjectWithContext(Object, Stack} except that
      * it does not setup a context. This method is used from the
-     * various extractors for recursively continuing the extraction
+     * various extractors to recursively continue the extraction
      *
      * @param pValue value to extract from
      * @param pExtraArgs stack for diving into the object
