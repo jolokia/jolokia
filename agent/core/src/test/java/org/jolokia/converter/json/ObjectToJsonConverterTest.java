@@ -10,7 +10,6 @@ import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
-import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
 import static org.testng.AssertJUnit.*;
@@ -75,9 +74,12 @@ public class ObjectToJsonConverterTest {
     @Test
     public void maxDepth() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException {
         ObjectSerializationContext ctx = converter.getStackContextLocal().get();
-        Field field = ObjectSerializationContext.class.getDeclaredField("maxDepth");
+        Field field = ObjectSerializationContext.class.getDeclaredField("options");
         field.setAccessible(true);
-        field.set(ctx, 1);
+        JsonConvertOptions opts = (JsonConvertOptions) field.get(ctx);
+        field = JsonConvertOptions.class.getDeclaredField("maxDepth");
+        field.setAccessible(true);
+        field.set(opts,1);
         Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
         String c = (String) ((Map) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));
@@ -111,10 +113,10 @@ public class ObjectToJsonConverterTest {
                 new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").
                         pathParts("name").build();
         File file = new File("myFile");
-        JSONObject ret = converter.convertToJson(file, JsonConvertOptions.DEFAULT,req.getPathParts());
-        assertEquals( ((Map) ret.get("value")).get("name"),"myFile");
-        ret = converter.convertToJson(file, JsonConvertOptions.DEFAULT, req.getPathParts());
-        assertEquals(ret.get("value"),"myFile");
+        Map ret = (Map) converter.convertToJson(file, JsonConvertOptions.DEFAULT,null);
+        assertEquals(ret.get("name"),"myFile");
+        String name = (String) converter.convertToJson(file, JsonConvertOptions.DEFAULT, req.getPathParts());
+        assertEquals(name,"myFile");
     }
     // ============================================================================
     // TestBeans:

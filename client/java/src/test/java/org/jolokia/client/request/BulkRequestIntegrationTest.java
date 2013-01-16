@@ -53,7 +53,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
         J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
         J4pVersionRequest req2 = new J4pVersionRequest();
         Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-        params.put(J4pQueryParameter.MAX_DEPTH,"0");
+        params.put(J4pQueryParameter.MAX_DEPTH,"1");
         List resps = j4pClient.execute(Arrays.asList(req1,req2),params);
         assertEquals(resps.size(),2);
         J4pReadResponse resp = (J4pReadResponse) resps.get(0);

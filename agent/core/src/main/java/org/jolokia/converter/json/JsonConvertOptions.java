@@ -209,7 +209,7 @@ public class JsonConvertOptions {
 
         // Check with the given hard limit
         private int checkWithHardLimit(int pLimit, int pHardLimit) {
-            return pLimit < pHardLimit && pHardLimit > 0 ? pLimit : pHardLimit;
+            return pLimit < pHardLimit || pHardLimit == 0 ? pLimit : pHardLimit;
         }
 
     }

@@ -10,6 +10,7 @@ import org.jolokia.converter.ValueFaultHandler;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.ServiceObjectFactory;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
 /*
@@ -100,12 +101,13 @@ public final class ObjectToJsonConverter {
      * @param pValue the value to convert
      * @param pOptions options used for parsing
      * @param pPathParts path parts to use for extraction
+     * @return the converter object. This either a subclass of {@link JSONAware} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within an path an attribute could not be found
      */
-    public JSONObject convertToJson(Object pValue, JsonConvertOptions pOptions, List<String> pPathParts)
+    public Object convertToJson(Object pValue, JsonConvertOptions pOptions, List<String> pPathParts)
             throws AttributeNotFoundException {
         Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<String>();
-        return (JSONObject) extractObjectWithContext(pOptions, pValue, extraStack, true);
+        return extractObjectWithContext(pOptions, pValue, extraStack, true);
     }
 
 
