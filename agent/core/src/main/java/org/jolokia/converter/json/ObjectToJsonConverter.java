@@ -114,16 +114,17 @@ public final class ObjectToJsonConverter {
     /**
      * Set an inner value of a complex object. A given path must point to the attribute/index to set within the outer object.
      *
-     * @param pNewValue the value to set
+     *
      * @param pOuterObject the object to dive in
-     * @param pPathParts the path within the outer object
+     * @param pNewValue the value to set
+     * @param pPathParts the path within the outer object. This object will be modified and be a modifiable list.
      * @return the old value
      *
      * @throws AttributeNotFoundException
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public Object setInnerValue(Object pNewValue, Object pOuterObject, List<String> pPathParts)
+    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         String lastPathElement = pPathParts.remove(pPathParts.size()-1);
         Stack<String> extraStack = EscapeUtil.reversePath(pPathParts);
@@ -333,18 +334,6 @@ public final class ObjectToJsonConverter {
     // Used for testing only. Hence final and package local
     ThreadLocal<ObjectSerializationContext> getStackContextLocal() {
         return stackContextLocal;
-    }
-
-
-    private Integer getLimit(Integer pReqValue, Integer pHardLimit) {
-        if (pReqValue == null) {
-            return pHardLimit;
-        }
-        if (pHardLimit != null) {
-            return pReqValue > pHardLimit ? pHardLimit : pReqValue;
-        } else {
-            return pReqValue;
-        }
     }
 
     // Simplifiers are added either explicitely or by reflection from a subpackage

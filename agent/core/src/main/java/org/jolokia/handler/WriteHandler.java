@@ -161,7 +161,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
             // it later back via JMX
             return new Object[] {
                     pCurrentValue,
-                    converters.getToJsonConverter().setInnerValue(newValue, pCurrentValue, pathParts)
+                    converters.getToJsonConverter().setInnerValue(pCurrentValue, newValue, pathParts)
             };
 
         } else {
