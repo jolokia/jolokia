@@ -165,7 +165,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
             Stack<String> extraStack = EscapeUtil.reversePath(pathParts);
             // Get the object pointed to do with path-1
 
-            Object inner = toJsonConverter.extractObjectWithContext(pRequest, pCurrentValue, extraStack, false);
+            Object inner = toJsonConverter.extractObject(pCurrentValue, extraStack, false);
 
             // Set the attribute pointed to by the path elements
             // (depending of the parent object's type)

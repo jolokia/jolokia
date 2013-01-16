@@ -18,13 +18,11 @@ package org.jolokia.request;
 
 import java.util.*;
 
-import org.jolokia.request.*;
-import org.jolokia.request.JmxRequestFactory;
 import org.jolokia.util.*;
 import org.testng.annotations.Test;
 
 import static org.jolokia.request.JmxRequestBuilder.createMap;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -91,7 +89,7 @@ public class JmxRequestFactoryTest {
         JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,param);
         assertEquals(req.getAttributeName(),"HeapMemoryUsage");
         assertEquals(req.getProcessingConfig(ConfigKey.MAX_DEPTH),"10");
-        assertEquals(req.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS), new Integer(100));
+        assertEquals(req.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS), 100);
     }
 
     @Test

@@ -8,6 +8,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.converter.Converters;
+import org.jolokia.converter.json.JsonConvertOptions;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JmxRequest;
@@ -51,6 +52,9 @@ public class BackendManager {
     // a JSON representation
     private Converters converters;
 
+    // Hard limits for conversion
+    private JsonConvertOptions.Builder convertOptionsBuilder;
+
     // Handling access restrictions
     private Restrictor restrictor;
 
@@ -69,7 +73,7 @@ public class BackendManager {
     // Initialize used for late initialization
     // ("volatile: because we use double-checked locking later on
     // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
-    private volatile Initializer initializer;
+    private volatile Initializer                initializer;
 
     /**
      * Constrcuct a new backend manager with the given configuration and which allows
@@ -78,7 +82,7 @@ public class BackendManager {
      * @param pConfig configuration map used for tuning this handler's behaviour
      * @param pLogHandler logger
      */
-    public BackendManager(Map<ConfigKey,String> pConfig, LogHandler pLogHandler) {
+    public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
         this(pConfig, pLogHandler, null);
     }
 
@@ -102,6 +106,7 @@ public class BackendManager {
      * @param pLazy whether the initialisation should be done lazy
      */
     public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor, boolean pLazy) {
+
         // Access restrictor
         restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
 
@@ -263,7 +268,8 @@ public class BackendManager {
     // Initialize this object;
     private void init(Map<ConfigKey, String> pConfig) {
         // Central objects
-        converters = new Converters(pConfig);
+        converters = new Converters();
+        initLimits(pConfig);
 
         // Create and remember request dispatchers
         localDispatcher = new LocalRequestDispatcher(converters,
@@ -277,6 +283,23 @@ public class BackendManager {
 
         // Backendstore for remembering agent state
         initStores(pConfig);
+    }
+
+    private void initLimits(Map<ConfigKey, String> pConfig) {
+        // Max traversal depth
+        if (pConfig != null) {
+            convertOptionsBuilder = new JsonConvertOptions.Builder(
+                    getNullSaveIntLimit(MAX_DEPTH.getValue(pConfig)),
+                    getNullSaveIntLimit(MAX_COLLECTION_SIZE.getValue(pConfig)),
+                    getNullSaveIntLimit(MAX_OBJECTS.getValue(pConfig))
+            );
+        } else {
+            convertOptionsBuilder = new JsonConvertOptions.Builder();
+        }
+    }
+
+    private int getNullSaveIntLimit(String pValue) {
+        return pValue != null ? Integer.parseInt(pValue) : 0;
     }
 
     // Construct configured dispatchers by reflection. Returns always
@@ -338,7 +361,22 @@ public class BackendManager {
         if (!found) {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }
-        return converters.getToJsonConverter().convertToJson(retValue, pJmxReq, useValueWithPath);
+
+        JsonConvertOptions opts = convertOptionsBuilder.
+                maxDepth(pJmxReq.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH)).
+                maxCollectionSize(pJmxReq.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE)).
+                maxObjects(pJmxReq.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS)).
+                faultHandler(pJmxReq.getValueFaultHandler()).
+                build();
+
+        Object jsonResult =
+                converters.getToJsonConverter()
+                          .convertToJson(retValue, opts, useValueWithPath ? pJmxReq.getPathParts() : null);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("value",jsonResult);
+        jsonObject.put("request",pJmxReq.toJSON());
+        return jsonObject;
     }
 
     // init various application wide stores for handling history and debug output.

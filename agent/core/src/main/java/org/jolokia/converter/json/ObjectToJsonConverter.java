@@ -6,13 +6,11 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.converter.ValueFaultHandler;
 import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.request.JmxRequest;
-import org.jolokia.request.ValueFaultHandler;
-import org.jolokia.util.*;
+import org.jolokia.util.EscapeUtil;
+import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
-
-import static org.jolokia.util.ConfigKey.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -32,9 +30,9 @@ import static org.jolokia.util.ConfigKey.*;
 
 
 /**
- * A converter which convert attribute and return values
+ * A converter which converts attribute and return values
  * into a JSON representation. It uses certain handlers for this which
- * are registered programatically in the constructor.
+ * are registered in the constructor.
  *
  * Each handler gets a reference to this converter object so that it
  * can use it for a recursive solution of nested objects.
@@ -55,22 +53,18 @@ public final class ObjectToJsonConverter {
     // Used for converting string to objects when setting attributes
     private StringToObjectConverter stringToObjectConverter;
 
-    private Integer hardMaxDepth,hardMaxCollectionSize,hardMaxObjects;
-
     // Definition of simplifiers
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/simplifiers-default";
-    private static final String SIMPLIFIERS_DEF = "META-INF/simplifiers";
+    private static final String SIMPLIFIERS_DEF         = "META-INF/simplifiers";
 
     /**
      * New object-to-json converter
      *
      * @param pStringToObjectConverter used when setting values
-     * @param pConfig configuration for setting limits
      * @param pSimplifyHandlers a bunch of simplifiers used for mangling the conversion result
      */
     public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter,
-                                 Map<ConfigKey,String> pConfig, Extractor... pSimplifyHandlers) {
-        initLimits(pConfig);
+                                 Extractor... pSimplifyHandlers) {
 
         handlers = new ArrayList<Extractor>();
 
@@ -102,23 +96,16 @@ public final class ObjectToJsonConverter {
     /**
      * Convert the return value to a JSON object.
      *
+     *
      * @param pValue the value to convert
-     * @param pRequest the original request
-     * @param pUseValueWithPath if set, use the path given within the request to extract the inner value.
-     *        Otherwise, use the path directly
-     * @return the converted value
+     * @param pOptions options used for parsing
+     * @param pPathParts path parts to use for extraction
      * @throws AttributeNotFoundException if within an path an attribute could not be found
      */
-    public JSONObject convertToJson(Object pValue, JmxRequest pRequest, boolean pUseValueWithPath)
+    public JSONObject convertToJson(Object pValue, JsonConvertOptions pOptions, List<String> pPathParts)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pUseValueWithPath ? EscapeUtil.reversePath(pRequest.getPathParts()) : new Stack<String>();
-
-        Object jsonResult = extractObjectWithContext(pRequest, pValue, extraStack, true);
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("value",jsonResult);
-        jsonObject.put("request",pRequest.toJSON());
-        return jsonObject;
+        Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<String>();
+        return (JSONObject) extractObjectWithContext(pOptions, pValue, extraStack, true);
     }
 
 
@@ -127,7 +114,7 @@ public final class ObjectToJsonConverter {
      * (if <code>pExtraArgs</code> is not null) and/or to convert
      * it to JSON (if <code>pJsonify</code> is true).
      *
-     * @param pRequest request from which various processing
+     * @param pOpts options from which various processing
      *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
      *        into context in order to influence the object traversal.
      * @param pValue value to extract from
@@ -136,10 +123,10 @@ public final class ObjectToJsonConverter {
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
-    public Object extractObjectWithContext(JmxRequest pRequest, Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
+    private Object extractObjectWithContext(JsonConvertOptions pOpts, Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
             throws AttributeNotFoundException {
         Object jsonResult;
-        setupContext(pRequest);
+        setupContext(pOpts);
         try {
             jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
         } finally {
@@ -149,7 +136,7 @@ public final class ObjectToJsonConverter {
     }
 
     /**
-     * Related to {@link #extractObjectWithContext(JmxRequest, Object, Stack, boolean)} except that
+     * Related to {@link #extractObjectWithContext(JsonConvertOptions, Object, Stack, boolean)} except that
      * it does not setup a context. This method is used from the
      * various extractors for recursively continuing the extraction
      *
@@ -225,12 +212,7 @@ public final class ObjectToJsonConverter {
      */
     int getCollectionLength(int originalLength) {
         ObjectSerializationContext ctx = stackContextLocal.get();
-        Integer maxSize = ctx.getMaxCollectionSize();
-        if (maxSize != null && originalLength > maxSize) {
-            return maxSize;
-        } else {
-            return originalLength;
-        }
+        return ctx.getCollectionSizeTruncated(originalLength);
     }
 
     /**
@@ -254,39 +236,17 @@ public final class ObjectToJsonConverter {
      * Setup the context with hard limits
      */
     void setupContext() {
-        setupContext(null);
+        setupContext(new JsonConvertOptions.Builder().build());
     }
 
     /**
      * Setup the context with the limits given in the request or with the default limits if not. In all cases,
      * hard limits as defined in the servlet configuration are never exceeded.
      *
-     * @param pRequest request from which to extract the limit parameters
+     * @param pOpts options used for parsing.
      */
-    void setupContext(JmxRequest pRequest) {
-        if (pRequest != null) {
-            Integer maxDepth = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH),hardMaxDepth);
-            Integer maxCollectionSize = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE),hardMaxCollectionSize);
-            Integer maxObjects = getLimit(pRequest.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS),hardMaxObjects);
-
-            setupContext(maxDepth, maxCollectionSize, maxObjects, pRequest.getValueFaultHandler());
-        } else {
-            // Use defaults:
-            setupContext(hardMaxDepth,hardMaxCollectionSize,hardMaxObjects,JmxRequest.THROWING_VALUE_FAULT_HANDLER);
-        }
-    }
-
-    /**
-     * Setup context with limits
-     *
-     * @param pMaxDepth maximum serialization level
-     * @param pMaxCollectionSize maximum collection size
-     * @param pMaxObjects maximum number of objects to serialize
-     * @param pValueFaultHandler a value fault handler used during extraction
-     */
-    void setupContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects,
-                      ValueFaultHandler pValueFaultHandler) {
-        ObjectSerializationContext stackContext = new ObjectSerializationContext(pMaxDepth,pMaxCollectionSize,pMaxObjects,pValueFaultHandler);
+    void setupContext(JsonConvertOptions pOpts) {
+        ObjectSerializationContext stackContext = new ObjectSerializationContext(pOpts);
         stackContextLocal.set(stackContext);
     }
 
@@ -302,34 +262,9 @@ public final class ObjectToJsonConverter {
         return null;
     }
 
-
-    private void initLimits(Map<ConfigKey, String> pConfig) {
-        // Max traversal depth
-        if (pConfig != null) {
-            hardMaxDepth = getNullSaveIntLimit(MAX_DEPTH.getValue(pConfig));
-
-            // Max size of collections
-            hardMaxCollectionSize = getNullSaveIntLimit(MAX_COLLECTION_SIZE.getValue(pConfig));
-
-            // Maximum of overal objects returned by one traversal.
-            hardMaxObjects = getNullSaveIntLimit(MAX_OBJECTS.getValue(pConfig));
-        } else {
-            hardMaxDepth = getNullSaveIntLimit(MAX_DEPTH.getDefaultValue());
-            hardMaxCollectionSize = getNullSaveIntLimit(MAX_COLLECTION_SIZE.getDefaultValue());
-            hardMaxObjects = getNullSaveIntLimit(MAX_OBJECTS.getDefaultValue());
-        }
-    }
-
-    private Integer getNullSaveIntLimit(String pValue) {
-        Integer ret = pValue != null ? Integer.parseInt(pValue) : null;
-        // "0" is interpreted as no limit
-        return (ret != null && ret == 0) ? null : ret;
-    }
-
-
     private String checkForLimits(Object pValue, ObjectSerializationContext pStackContext) {
         if (pValue != null) {
-            if (pStackContext.exceededMaxDepth()) {
+            if (pStackContext.maxDepthExceeded()) {
                 // We use its string representation.
                 return pValue.toString();
             }
@@ -337,7 +272,7 @@ public final class ObjectToJsonConverter {
                 return "[Reference " + pValue.getClass().getName() + "@" + Integer.toHexString(pValue.hashCode()) + "]";
             }
         }
-        if (pStackContext.exceededMaxObjects()) {
+        if (pStackContext.maxObjectsExceeded()) {
             return "[Object limit exceeded]";
         }
         return null;

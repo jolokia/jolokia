@@ -1,11 +1,8 @@
 package org.jolokia.converter;
 
-import java.util.Map;
-
 import org.jolokia.converter.json.ObjectToJsonConverter;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.converter.object.StringToOpenTypeConverter;
-import org.jolokia.util.ConfigKey;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -41,12 +38,11 @@ public class Converters {
     /**
      * Create converters (string-to-object, string-to-openType and object-to-json)
      *
-     * @param pConfig configuration for converters
      */
-    public Converters(Map<ConfigKey, String> pConfig) {
+    public Converters() {
         toObjectConverter = new StringToObjectConverter();
         toOpenTypeConverter = new StringToOpenTypeConverter(toObjectConverter);
-        toJsonConverter = new ObjectToJsonConverter(toObjectConverter,pConfig);
+        toJsonConverter = new ObjectToJsonConverter(toObjectConverter);
     }
 
     /**

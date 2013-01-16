@@ -2,7 +2,7 @@ package org.jolokia.converter.json;
 
 import java.util.*;
 
-import org.jolokia.request.ValueFaultHandler;
+import org.jolokia.converter.ValueFaultHandler;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -37,30 +37,21 @@ class ObjectSerializationContext {
             Integer.class,
             Boolean.class,
             Date.class
-    ));
+                                                                                   ));
 
     private Set   objectsInCallStack = new HashSet();
-    private Stack callStack = new Stack();
-    private Integer maxDepth;
-    private Integer maxCollectionSize;
-    private Integer maxObjects;
+    private Stack callStack          = new Stack();
+    private final JsonConvertOptions options;
 
     private int objectCount = 0;
-    private ValueFaultHandler valueFaultHandler;
 
     /**
      * Constructor for the stack context providing processing options
      *
-     * @param pMaxDepth max serialization depth
-     * @param pMaxCollectionSize max size of collections before they get truncated
-     * @param pMaxObjects maximum number of objects
-     * @param pValueFaultHandler handler for dealing with faults
+     * @param pOpts options used for parsing
      */
-    ObjectSerializationContext(Integer pMaxDepth, Integer pMaxCollectionSize, Integer pMaxObjects, ValueFaultHandler pValueFaultHandler) {
-        maxDepth = pMaxDepth;
-        maxCollectionSize = pMaxCollectionSize;
-        maxObjects = pMaxObjects;
-        valueFaultHandler = pValueFaultHandler;
+    ObjectSerializationContext(JsonConvertOptions pOpts) {
+        options = pOpts;
     }
 
     /**
@@ -78,8 +69,8 @@ class ObjectSerializationContext {
      *
      * @return true if the max depth limit has been reached
      */
-    public boolean exceededMaxDepth() {
-        return maxDepth != null && objectsInCallStack.size() > maxDepth;
+    public boolean maxDepthExceeded() {
+        return options.maxDepthExceeded(objectsInCallStack.size());
     }
 
     /**
@@ -87,17 +78,19 @@ class ObjectSerializationContext {
      *
      * @return true if the number of extracted objects exceeds the maximum number of objects
      */
-    public boolean exceededMaxObjects() {
-        return maxObjects != null && objectCount > maxObjects;
+    public boolean maxObjectsExceeded() {
+        return options.maxObjectExceeded(objectCount);
     }
 
     /**
-     * Configured maximum size of collections
+     * Get the size of a collection trimmed to the maximum size of collections as configured
      *
-     * @return the maximum collection size
+     * @param pCollectionSize the original collection size
+     * @return the original collection size if smalled than the maximum collection size,
+     *         otherwise the maximum collection size
      */
-    public Integer getMaxCollectionSize() {
-        return maxCollectionSize;
+    public int getCollectionSizeTruncated(int pCollectionSize) {
+        return options.getCollectionSizeTruncated(pCollectionSize);
     }
 
     /**
@@ -106,7 +99,7 @@ class ObjectSerializationContext {
      * @return the value fault handler
      */
     public ValueFaultHandler getValueFaultHandler() {
-        return valueFaultHandler;
+        return options.getValueFaultHandler();
     }
 
     // =====================================================

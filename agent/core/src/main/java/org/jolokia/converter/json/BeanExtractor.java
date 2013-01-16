@@ -1,17 +1,16 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.request.ValueFaultHandler;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
-
-import javax.management.AttributeNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.converter.ValueFaultHandler;
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss

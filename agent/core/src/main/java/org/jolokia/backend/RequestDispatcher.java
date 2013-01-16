@@ -58,8 +58,8 @@ public interface RequestDispatcher {
      * (using the path would return the new value)
      *
      * @param pJmxRequest request for getting the handler
-     * @return true if the value should be directly returned, false if the path within
-     *         the request should be respected.
+     * @return true if the path within the request should be respected, false
+     *         if the value should be directly returned
      */
     boolean useReturnValueWithPath(JmxRequest pJmxRequest);
 }

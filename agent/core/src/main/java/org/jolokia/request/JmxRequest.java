@@ -18,6 +18,7 @@ package org.jolokia.request;
 
 import java.util.*;
 
+import org.jolokia.converter.ValueFaultHandler;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
@@ -114,14 +115,14 @@ public abstract class JmxRequest {
      * if not set
      *
      * @param pConfigKey configuration to lookup
-     * @return integer value of configuration or null if not set.
+     * @return integer value of configuration or 0 if not set.
      */
-    public Integer getProcessingConfigAsInt(ConfigKey pConfigKey) {
+    public int getProcessingConfigAsInt(ConfigKey pConfigKey) {
         String intValueS = processingConfig.get(pConfigKey);
         if (intValueS != null) {
             return Integer.parseInt(intValueS);
         } else {
-            return null;
+            return 0;
         }
     }
 
@@ -234,40 +235,10 @@ public abstract class JmxRequest {
         }
         String ignoreErrors = processingConfig.get(ConfigKey.IGNORE_ERRORS);
         if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
-            valueFaultHandler = IGNORING_VALUE_FAULT_HANDLER;
+            valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;
         } else {
-            valueFaultHandler = THROWING_VALUE_FAULT_HANDLER;
+            valueFaultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
         }
     }
-
-    // =================================================================================================
-    // Available fault handlers
-
-    public static final ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
-        /**
-         * Ignores any exeception and records them as a string which can be used for business
-         *
-         * @param exception exception to ignore
-         * @return a descriptive string of the exception
-         */
-        public <T extends Throwable> Object handleException(T exception) throws T {
-            return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
-        }
-    };
-
-    public static final ValueFaultHandler THROWING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
-
-        /**
-         * Ret-throws the given exception
-         * @param exception exception given
-         * @return nothing
-         * @throws T always
-         */
-        public <T extends Throwable> Object handleException(T exception) throws T {
-            // Dont handle exception on our own, we rethrow it
-            throw exception;
-        }
-    };
-
 
 }

@@ -23,20 +23,15 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.converter.*;
-import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.converter.object.StringToOpenTypeConverter;
-import org.jolokia.request.*;
+import org.jolokia.converter.Converters;
+import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.testng.annotations.BeforeTest;
-
-import static org.jolokia.util.RequestType.*;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
-
 import org.testng.annotations.*;
+
+import static org.jolokia.util.RequestType.WRITE;
+import static org.testng.Assert.*;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author roland
@@ -50,7 +45,7 @@ public class WriteHandlerTest {
 
     @BeforeTest
     public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        handler = new WriteHandler(new AllowAllRestrictor(),new Converters(null));
+        handler = new WriteHandler(new AllowAllRestrictor(),new Converters());
 
         oName = new ObjectName("jolokia:test=write");
 

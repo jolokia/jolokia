@@ -74,7 +74,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             throws IOException {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
 
-        int maxDepth = getMaxDepth(pRequest);
+        int maxDepth = pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getProcessingConfigAsBoolean(ConfigKey.CANONICAL_NAMING);
 
         ObjectName oName = null;
@@ -173,8 +173,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     private int getMaxDepth(JmxListRequest pRequest) {
-        Integer maxDepthI = pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
-        return maxDepthI == null ? 0 : maxDepthI;
+        return pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
     }
 
     /**

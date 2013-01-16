@@ -38,7 +38,7 @@ public class OpenExecHandlerTest {
 	
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ExecHandler(new AllowAllRestrictor(),new Converters(null));
+        handler = new ExecHandler(new AllowAllRestrictor(),new Converters());
     }
 
     @BeforeTest

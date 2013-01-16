@@ -1,16 +1,17 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.request.*;
-import org.jolokia.util.RequestType;
-import org.json.simple.JSONObject;
-import org.testng.annotations.*;
-
-import javax.management.*;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
+
+import javax.management.*;
+
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.util.RequestType;
+import org.json.simple.JSONObject;
+import org.testng.annotations.*;
 
 import static org.testng.AssertJUnit.*;
 
@@ -110,9 +111,9 @@ public class ObjectToJsonConverterTest {
                 new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").
                         pathParts("name").build();
         File file = new File("myFile");
-        JSONObject ret = converter.convertToJson(file,req,false);
+        JSONObject ret = converter.convertToJson(file, JsonConvertOptions.DEFAULT,req.getPathParts());
         assertEquals( ((Map) ret.get("value")).get("name"),"myFile");
-        ret = converter.convertToJson(file,req,true);
+        ret = converter.convertToJson(file, JsonConvertOptions.DEFAULT, req.getPathParts());
         assertEquals(ret.get("value"),"myFile");
     }
     // ============================================================================

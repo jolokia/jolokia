@@ -6,7 +6,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.request.JmxReadRequest;
-import org.jolokia.request.ValueFaultHandler;
+import org.jolokia.converter.ValueFaultHandler;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
 
