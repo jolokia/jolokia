@@ -111,38 +111,43 @@ public final class ObjectToJsonConverter {
         return extractObjectWithContext(pValue, extraStack, pOptions, true);
     }
 
-
     /**
-     * Handle a value which means to dive into the internal of a complex object
-     * (if <code>pExtraArgs</code> is not null) and/or to convert
-     * it to JSON (if <code>pJsonify</code> is true).
+     * Set an inner value of a complex object. A given path must point to the attribute/index to set within the outer object.
      *
+     * @param pNewValue the value to set
+     * @param pOuterObject the object to dive in
+     * @param pPathParts the path within the outer object
+     * @return the old value
      *
-     * @param pValue value to extract from
-     * @param pExtraArgs stack used for diving in to the value
-     * @param pOpts options from which various processing
-     *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
-     *        into context in order to influence the object traversal.
-     * @param pJsonify whether the result should be returned as an JSON object
-     * @return extracted value, either natively or as JSON
-     * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
+     * @throws AttributeNotFoundException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
      */
-    public Object extractObjectWithContext(Object pValue, Stack<String> pExtraArgs, JsonConvertOptions pOpts, boolean pJsonify)
-            throws AttributeNotFoundException {
-        Object jsonResult;
-        setupContext(pOpts);
-        try {
-            jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
-        } finally {
-            clearContext();
-        }
-        return jsonResult;
+    public Object setInnerValue(Object pNewValue, Object pOuterObject, List<String> pPathParts)
+            throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+        String lastPathElement = pPathParts.remove(pPathParts.size()-1);
+        Stack<String> extraStack = EscapeUtil.reversePath(pPathParts);
+
+        // Get the object pointed to do with path-1
+        // We are using no limits here, since a path must have been given (see above), and hence we should
+        // be save anyway.
+        Object inner = extractObjectWithContext(pOuterObject, extraStack, JsonConvertOptions.DEFAULT, false);
+
+        // Set the attribute pointed to by the path elements
+        // (depending of the parent object's type)
+        return setObjectValue(inner, lastPathElement, pNewValue);
     }
 
+    // =================================================================================================
+
     /**
-     * Related to {@link #extractObjectWithContext(Object, Stack} except that
-     * it does not setup a context. This method is used from the
-     * various extractors to recursively continue the extraction
+     * Related to {@link #extractObjectWithContext} except that
+     * it does not setup a context. This method is called back from the
+     * various extractors to recursively continue the extraction, hence it is public.
+     *
+     * This method must not be used as entry point for serialization.
+     * Use {@link #convertToJson(Object, List, JsonConvertOptions)} or
+     * {@link #setInnerValue(Object, Object, List)} instead.
      *
      * @param pValue value to extract from
      * @param pExtraArgs stack for diving into the object
@@ -153,7 +158,7 @@ public final class ObjectToJsonConverter {
     public Object extractObject(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
             throws AttributeNotFoundException {
         ObjectSerializationContext stackContext = stackContextLocal.get();
-        String limitReached = checkForLimits(pValue,stackContext);
+        String limitReached = checkForLimits(pValue, stackContext);
         Stack<String> pathStack = pExtraArgs != null ? pExtraArgs : new Stack<String>();
         if (limitReached != null) {
             return limitReached;
@@ -176,6 +181,33 @@ public final class ObjectToJsonConverter {
     }
 
     /**
+     * Handle a value which means to dive into the internal of a complex object
+     * (if <code>pExtraArgs</code> is not null) and/or to convert
+     * it to JSON (if <code>pJsonify</code> is true).
+     *
+     *
+     * @param pValue value to extract from
+     * @param pExtraArgs stack used for diving in to the value
+     * @param pOpts options from which various processing
+     *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
+     *        into context in order to influence the object traversal.
+     * @param pJsonify whether the result should be returned as an JSON object
+     * @return extracted value, either natively or as JSON
+     * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
+     */
+    private Object extractObjectWithContext(Object pValue, Stack<String> pExtraArgs, JsonConvertOptions pOpts, boolean pJsonify)
+            throws AttributeNotFoundException {
+        Object jsonResult;
+        setupContext(pOpts);
+        try {
+            jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
+        } finally {
+            clearContext();
+        }
+        return jsonResult;
+    }
+
+    /**
      * Set an value of an inner object
      *
      * @param pInner the inner object
@@ -185,7 +217,7 @@ public final class ObjectToJsonConverter {
      * @throws IllegalAccessException if the reflection code fails during setting of the value
      * @throws InvocationTargetException reflection error
      */
-    public Object setObjectValue(Object pInner, String pAttribute, Object pValue)
+    private Object setObjectValue(Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
 
         // Call various handlers depending on the type of the inner object, as is extract Object
@@ -282,6 +314,8 @@ public final class ObjectToJsonConverter {
         return null;
     }
 
+
+
     private Object callHandler(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
             throws AttributeNotFoundException {
         Class pClazz = pValue.getClass();
@@ -294,7 +328,6 @@ public final class ObjectToJsonConverter {
                 "Internal error: No handler found for class " + pClazz +
                     " (object: " + pValue + ", extraArgs: " + pExtraArgs + ")");
     }
-
 
 
     // Used for testing only. Hence final and package local
@@ -314,7 +347,6 @@ public final class ObjectToJsonConverter {
         }
     }
 
-
     // Simplifiers are added either explicitely or by reflection from a subpackage
     private void addSimplifiers(List<Extractor> pHandlers, Extractor[] pSimplifyHandlers) {
         if (pSimplifyHandlers != null && pSimplifyHandlers.length > 0) {
@@ -324,5 +356,4 @@ public final class ObjectToJsonConverter {
             pHandlers.addAll(ServiceObjectFactory.<Extractor>createServiceObjects(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
         }
     }
-
 }

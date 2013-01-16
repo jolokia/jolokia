@@ -3,17 +3,13 @@ package org.jolokia.handler;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Stack;
 
 import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 
-import org.jolokia.converter.*;
-import org.jolokia.converter.json.JsonConvertOptions;
-import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.Converters;
 import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 
 /*
@@ -153,8 +149,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
     private Object[] getValues(String pType, Object pCurrentValue, JmxWriteRequest pRequest)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         List<String> pathParts = pRequest.getPathParts();
-
-        ObjectToJsonConverter toJsonConverter = converters.getToJsonConverter();
+        Object newValue = pRequest.getValue();
 
         if (pathParts != null && pathParts.size() > 0) {
             if (pCurrentValue == null ) {
@@ -162,26 +157,17 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
                         "Cannot set value with path when parent object is not set");
             }
 
-            String lastPathElement = pathParts.remove(pathParts.size()-1);
-            Stack<String> extraStack = EscapeUtil.reversePath(pathParts);
-
-            // Get the object pointed to do with path-1
-            Object inner = toJsonConverter.extractObjectWithContext(pCurrentValue, extraStack, JsonConvertOptions.DEFAULT, false);
-
-            // Set the attribute pointed to by the path elements
-            // (depending of the parent object's type)
-            Object oldValue = toJsonConverter.setObjectValue(inner, lastPathElement, pRequest.getValue());
-
-            // We set an inner value, hence we have to return provided value itself.
+            // We set an inner value, hence we have to return provided value itself for resetting
+            // it later back via JMX
             return new Object[] {
                     pCurrentValue,
-                    oldValue
+                    converters.getToJsonConverter().setInnerValue(newValue, pCurrentValue, pathParts)
             };
 
         } else {
             // Return the objectified value
             return new Object[] {
-                    converters.getToObjectConverter().prepareValue(pType, pRequest.getValue()),
+                    converters.getToObjectConverter().prepareValue(pType, newValue),
                     pCurrentValue
             };
         }
