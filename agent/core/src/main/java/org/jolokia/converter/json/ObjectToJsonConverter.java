@@ -6,12 +6,9 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.ServiceObjectFactory;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -102,7 +99,7 @@ public final class ObjectToJsonConverter {
      * @param pValue the value to convert
      * @param pPathParts path parts to use for extraction
      * @param pOptions options used for parsing
-     * @return the converter object. This either a subclass of {@link JSONAware} or a basic data type like String or Long.
+     * @return the converter object. This either a subclass of {@link org.json.simple.JSONAware} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within an path an attribute could not be found
      */
     public Object convertToJson(Object pValue, List<String> pPathParts, JsonConvertOptions pOptions)
@@ -152,8 +149,8 @@ public final class ObjectToJsonConverter {
      *
      * @param pValue value to extract from
      * @param pExtraArgs stack for diving into the object
-     * @param pJsonify whether a JSON representation {@link JSONObject}
-     * @return extracted object either in native format or as {@link JSONObject}
+     * @param pJsonify whether a JSON representation {@link org.json.simple.JSONObject}
+     * @return extracted object either in native format or as {@link org.json.simple.JSONObject}
      * @throws AttributeNotFoundException if an attribute is not found during traversal
      */
     public Object extractObject(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
