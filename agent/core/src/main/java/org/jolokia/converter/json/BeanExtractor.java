@@ -7,7 +7,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.converter.ValueFaultHandler;
+import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;

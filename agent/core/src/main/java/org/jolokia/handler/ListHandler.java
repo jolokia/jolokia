@@ -172,10 +172,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         }
     }
 
-    private int getMaxDepth(JmxListRequest pRequest) {
-        return pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
-    }
-
     /**
      * Prepare an objectname patttern from a path (or "null" if no path is given)
      * @param pPathStack path

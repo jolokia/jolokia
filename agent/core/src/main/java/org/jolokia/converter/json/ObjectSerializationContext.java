@@ -2,7 +2,7 @@ package org.jolokia.converter.json;
 
 import java.util.*;
 
-import org.jolokia.converter.ValueFaultHandler;
+import org.jolokia.converter.json.ValueFaultHandler;
 
 /*
  * Copyright 2009-2011 Roland Huss

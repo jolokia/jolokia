@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.converter;
+package org.jolokia.converter.json;
 
 /**
  *  Interface in order to deal with value exception
@@ -39,7 +39,7 @@ public interface ValueFaultHandler {
     /**
      * Fault handler which returns a simple string representation of the exception
      */
-    public static final ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
+    static final ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
         /**
          * Ignores any exeception and records them as a string which can be used for business
          *
@@ -54,7 +54,7 @@ public interface ValueFaultHandler {
     /**
      * Fault handler for simply rethrowing a given exception.
      */
-    public static final ValueFaultHandler THROWING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
+    static final ValueFaultHandler THROWING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
 
         /**
          * Ret-throws the given exception
@@ -63,7 +63,7 @@ public interface ValueFaultHandler {
          * @throws T always
          */
         public <T extends Throwable> Object handleException(T exception) throws T {
-            // Dont handle exception on our own, we rethrow it
+            // Don't handle exception on our own, we rethrow it
             throw exception;
         }
     };

@@ -16,7 +16,7 @@
 
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.ValueFaultHandler;
+import org.jolokia.converter.json.ValueFaultHandler;
 
 /**
  * Options object influencing the serializing of JSON objects.
@@ -33,7 +33,7 @@ import org.jolokia.converter.ValueFaultHandler;
  * @author roland
  * @since 15.01.13
  */
-public class JsonConvertOptions {
+public final class JsonConvertOptions {
 
     /**
      * Default JsonConvertOptions filled with the default values as defined in ConfigKey
@@ -201,7 +201,9 @@ public class JsonConvertOptions {
          */
         public JsonConvertOptions build() {
             JsonConvertOptions opts = new JsonConvertOptions(maxDepth,maxCollectionSize,maxObjects,faultHandler);
-            maxDepth = maxCollectionSize = maxObjects = 0;
+            maxDepth = 0;
+            maxCollectionSize = 0;
+            maxObjects = 0;
             return opts;
         }
 
