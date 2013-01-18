@@ -1,12 +1,13 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.*;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.RequestType;
+import java.io.IOException;
 
 import javax.management.*;
-import java.io.IOException;
-import java.util.Set;
+
+import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.request.JmxRequest;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.RequestType;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -56,7 +57,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @return whether you want to have
      * {@link #doHandleRequest(MBeanServerConnection, JmxRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(java.util.Set, JmxRequest)} (<code>true</code>) called.
+     * {@link #doHandleRequest(MBeanServerManager, JmxRequest)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(R pRequest) {
         return false;
@@ -142,7 +143,8 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * (like need for merging info as for a <code>list</code> command). This method
      * is only called when {@link #handleAllServersAtOnce(JmxRequest)} returns <code>true</code>
      *
-     * @param servers all MBeans servers detected
+     *
+     * @param pServerManager server manager holding all MBeans servers detected
      * @param request request to process
      * @return the object found
      * @throws IOException
@@ -151,17 +153,18 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object handleRequest(Set<MBeanServerConnection> servers, R request)
+    public Object handleRequest(MBeanServerManager pServerManager, R request)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
         checkForRestriction(request);
-        return doHandleRequest(servers,request);
+        return doHandleRequest(pServerManager,request);
     }
 
     /**
      * Default implementation fo handling a request for multiple servers at once. A subclass, which returns,
      * <code>true</code> on {@link #handleAllServersAtOnce(JmxRequest)}, needs to override this method.
      *
-     * @param servers all MBean servers found in this JVM
+     *
+     * @param serverManager all MBean servers found in this JVM
      * @param request the original request
      * @return the result of the the request.
      * @throws IOException
@@ -170,7 +173,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object doHandleRequest(Set<MBeanServerConnection> servers, R request)
+    public Object doHandleRequest(MBeanServerManager serverManager, R request)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         return null;
     }

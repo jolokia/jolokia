@@ -16,21 +16,21 @@
 
 package org.jolokia.detector;
 
-import org.testng.annotations.Test;
-
-import javax.management.*;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import javax.management.*;
+
+import org.testng.annotations.Test;
+
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
  * @since 29.11.10
  */
-public class WebSphereDetectorTest {
+public class WebSphereDetectorTest extends BaseDetectorTest {
 
     @Test
     public void detect() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
@@ -43,7 +43,7 @@ public class WebSphereDetectorTest {
         expect(mockServer.getAttribute(serverMbean,"serverVersion")).andReturn(SERVER_VERSION_V6);
         replay(mockServer);
 
-        ServerHandle info = detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer)));
+        ServerHandle info = detector.detect(getMBeanServerManager(mockServer));
         assertEquals(info.getVendor(),"IBM");
         assertEquals(info.getProduct(),"websphere");
         assertNotNull(info.getExtraInfo(null));

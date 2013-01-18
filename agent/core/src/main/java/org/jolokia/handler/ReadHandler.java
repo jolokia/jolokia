@@ -5,8 +5,9 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.request.JmxReadRequest;
+import org.jolokia.backend.MBeanServerManager;
 import org.jolokia.converter.json.ValueFaultHandler;
+import org.jolokia.request.JmxReadRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
 
@@ -83,37 +84,37 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxReadRequest pRequest)
+    public Object doHandleRequest(MBeanServerManager pServerManager, JmxReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         ObjectName oName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
         if (oName.isPattern()) {
-            return fetchAttributesForMBeanPattern(pServers, pRequest);
+            return fetchAttributesForMBeanPattern(pServerManager, pRequest);
         } else {
-            return fetchAttributes(pServers,oName,pRequest.getAttributeNames(),faultHandler);
+            return fetchAttributes(pServerManager,oName,pRequest.getAttributeNames(),faultHandler);
         }
     }
 
-    private Object fetchAttributesForMBeanPattern(Set<MBeanServerConnection> pServers, JmxReadRequest pRequest)
+    private Object fetchAttributesForMBeanPattern(MBeanServerManager pServerManager, JmxReadRequest pRequest)
             throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
         ObjectName objectName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
-        Set<ObjectName> names = searchMBeans(pServers, objectName);
+        Set<ObjectName> names = searchMBeans(pServerManager, objectName);
         Map<String,Object> ret = new HashMap<String, Object>();
         List<String> attributeNames = pRequest.getAttributeNames();
         for (ObjectName name : names) {
             if (!pRequest.hasAttribute()) {
-                Map values = (Map) fetchAttributes(pServers,name, null, faultHandler);
+                Map values = (Map) fetchAttributes(pServerManager,name, null, faultHandler);
                 if (values != null && values.size() > 0) {
                     ret.put(pRequest.getOrderedObjectName(name),values);
                 }
             } else {
-                List<String> filteredAttributeNames = filterAttributeNames(pServers,name,attributeNames);
+                List<String> filteredAttributeNames = filterAttributeNames(pServerManager,name,attributeNames);
                 if (filteredAttributeNames.size() == 0) {
                     continue;
                 }
                 ret.put(pRequest.getOrderedObjectName(name),
-                        fetchAttributes(pServers,name,filteredAttributeNames, faultHandler));
+                        fetchAttributes(pServerManager,name,filteredAttributeNames, faultHandler));
             }
         }
         if (ret.size() == 0) {
@@ -123,9 +124,9 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         return ret;
     }
 
-    private Set<ObjectName> searchMBeans(Set<MBeanServerConnection> pServers, ObjectName pObjectName) throws IOException, InstanceNotFoundException {
+    private Set<ObjectName> searchMBeans(MBeanServerManager pServerManager, ObjectName pObjectName) throws IOException, InstanceNotFoundException {
         Set<ObjectName> names = new HashSet<ObjectName>();
-        for (MBeanServerConnection server : pServers) {
+        for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
             Set<ObjectName> found = server.queryNames(pObjectName,null);
             if (found != null) {
                 names.addAll(found);
@@ -139,9 +140,9 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     // Return only those attributes of an mbean which has one of the given names
-    private List<String> filterAttributeNames(Set<MBeanServerConnection> pServers,ObjectName pName, List<String> pNames)
+    private List<String> filterAttributeNames(MBeanServerManager pSeverManager,ObjectName pName, List<String> pNames)
             throws InstanceNotFoundException, IOException, ReflectionException {
-        Set<String> attrs = new HashSet<String>(getAllAttributesNames(pServers,pName));
+        Set<String> attrs = new HashSet<String>(getAllAttributesNames(pSeverManager,pName));
         List<String> ret = new ArrayList<String>();
         for (String name : pNames) {
             if (attrs.contains(name)) {
@@ -151,17 +152,17 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         return ret;
     }
 
-    private Object fetchAttributes(Set<MBeanServerConnection> pServers, ObjectName pMBeanName, List<String> pAttributeNames,
+    private Object fetchAttributes(MBeanServerManager pServerManager, ObjectName pMBeanName, List<String> pAttributeNames,
                                    ValueFaultHandler pFaultHandler)
             throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
 
-        List<String> attributes = resolveAttributes(pServers, pMBeanName, pAttributeNames);
+        List<String> attributes = resolveAttributes(pServerManager, pMBeanName, pAttributeNames);
         Map<String,Object> ret = new HashMap<String, Object>();
 
         for (String attribute : attributes) {
             try {
                 checkRestriction(pMBeanName, attribute);
-                ret.put(attribute,getAttribute(pServers, pMBeanName, attribute));
+                ret.put(attribute,getAttribute(pServerManager, pMBeanName, attribute));
             } catch (MBeanException e) {
                 // The fault handler might to decide to rethrow the
                 // exception in which case nothing is put extra into ret.
@@ -184,7 +185,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     // Resolve attributes and look up attribute names if all attributes need to be fetched.
-    private List<String> resolveAttributes(Set<MBeanServerConnection> pServers, ObjectName pMBeanName, List<String> pAttributeNames)
+    private List<String> resolveAttributes(MBeanServerManager pServers, ObjectName pMBeanName, List<String> pAttributeNames)
             throws InstanceNotFoundException, IOException, ReflectionException {
         List<String> attributes = pAttributeNames;
         if (shouldAllAttributesBeFetched(pAttributeNames)) {
@@ -203,9 +204,9 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     // Get the MBeanInfo from one of the provided MBeanServers
-    private MBeanInfo getMBeanInfo(Set<MBeanServerConnection> pServers, ObjectName pObjectName) throws
+    private MBeanInfo getMBeanInfo(MBeanServerManager pServerManager, ObjectName pObjectName) throws
             IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {
-        for (MBeanServerConnection server : pServers) {
+        for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
             try {
                 return server.getMBeanInfo(pObjectName);
             } catch (InstanceNotFoundException exp) {
@@ -218,9 +219,9 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     // Try multiple servers for fetching an attribute
-    private Object getAttribute(Set<MBeanServerConnection> pServers, ObjectName pMBeanName, String attribute)
+    private Object getAttribute(MBeanServerManager pServerManager, ObjectName pMBeanName, String attribute)
             throws MBeanException, AttributeNotFoundException, ReflectionException, IOException, InstanceNotFoundException {
-        for (MBeanServerConnection server : pServers) {
+        for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
             try {
                 return server.getAttribute(pMBeanName, attribute);
             } catch (InstanceNotFoundException exp) {
@@ -233,10 +234,10 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     // Return a set of attributes as a map with the attribute name as key and their values as values
-    private List<String> getAllAttributesNames(Set<MBeanServerConnection> pServers, ObjectName pObjectName)
+    private List<String> getAllAttributesNames(MBeanServerManager pServerManager, ObjectName pObjectName)
             throws InstanceNotFoundException, IOException, ReflectionException {
         try {
-            MBeanInfo mBeanInfo = getMBeanInfo(pServers, pObjectName);
+            MBeanInfo mBeanInfo = getMBeanInfo(pServerManager, pObjectName);
             List<String> ret = new ArrayList<String>();
             for (MBeanAttributeInfo attrInfo : mBeanInfo.getAttributes()) {
                 if (attrInfo.isReadable()) {

@@ -16,9 +16,7 @@
 
 package org.jolokia.detector;
 
-import java.util.Set;
-
-import javax.management.MBeanServer;
+import org.jolokia.backend.MBeanServerManager;
 
 /**
  * Detector for the Geronimo JEE Server
@@ -28,9 +26,10 @@ import javax.management.MBeanServer;
  */
 public class GeronimoDetector extends AbstractServerDetector {
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String version = getSingleStringAttribute(pMbeanServers,"geronimo:j2eeType=J2EEServer,*","serverVersion");
+    /** {@inheritDoc}
+     * @param pMBeanServerManager*/
+    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+        String version = getSingleStringAttribute(pMBeanServerManager,"geronimo:j2eeType=J2EEServer,*","serverVersion");
         if (version != null) {
             return new ServerHandle("Apache","geronimo",version,null,null);
         } else {

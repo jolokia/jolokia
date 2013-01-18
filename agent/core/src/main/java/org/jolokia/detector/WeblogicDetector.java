@@ -19,8 +19,11 @@ package org.jolokia.detector;
 import java.util.Set;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import org.jolokia.backend.MBeanServerManager;
 
 /**
  * Detector for Weblogic Appservers
@@ -30,11 +33,12 @@ import javax.naming.NamingException;
  */
 public class WeblogicDetector extends AbstractServerDetector {
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String domainConfigMBean = getSingleStringAttribute(pMbeanServers,"*:Name=RuntimeService,*","DomainConfiguration");
+    /** {@inheritDoc}
+     * @param pMBeanServerManager*/
+    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+        String domainConfigMBean = getSingleStringAttribute(pMBeanServerManager,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
-            String version = getSingleStringAttribute(pMbeanServers,domainConfigMBean,"ConfigurationVersion");
+            String version = getSingleStringAttribute(pMBeanServerManager,domainConfigMBean,"ConfigurationVersion");
             return new ServerHandle("Oracle","weblogic",version,null,null);
         }
         return null;
@@ -45,7 +49,7 @@ public class WeblogicDetector extends AbstractServerDetector {
      * @param servers set to add own MBean servers
      */
     @Override
-    public void addMBeanServers(Set<MBeanServer> servers) {
+    public void addMBeanServers(Set<MBeanServerConnection> servers) {
         // Weblogic stores the MBeanServer in a JNDI context
         InitialContext ctx;
         try {

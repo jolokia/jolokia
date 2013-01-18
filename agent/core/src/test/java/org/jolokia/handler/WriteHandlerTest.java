@@ -49,8 +49,8 @@ public class WriteHandlerTest {
 
         oName = new ObjectName("jolokia:test=write");
 
-        MBeanServerConnection conn = getMBeanServer();
-        conn.createMBean(WriteData.class.getName(),oName);
+        MBeanServer server = getMBeanServer();
+        server.createMBean(WriteData.class.getName(), oName);
     }
 
 
@@ -60,7 +60,7 @@ public class WriteHandlerTest {
         conn.unregisterMBean(oName);
     }
 
-    private MBeanServerConnection getMBeanServer() {
+    private MBeanServer getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();
     }
 

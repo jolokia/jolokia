@@ -102,7 +102,7 @@ public class MBeanServerHandlerTest {
         Object result = new Object();
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(reqHandler.handleRequest(isA(Set.class), eq(request))).andReturn(result);
+        expect(reqHandler.handleRequest(isA(MBeanServerManager.class), eq(request))).andReturn(result);
         replay(reqHandler);
         assertEquals(handler.dispatchRequest(reqHandler, request),result);
     }
@@ -114,7 +114,7 @@ public class MBeanServerHandlerTest {
         Object result = new Object();
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(reqHandler.handleRequest(isA(Set.class), eq(request))).andThrow(new IOException());
+        expect(reqHandler.handleRequest(isA(MBeanServerManager.class), eq(request))).andThrow(new IOException());
         replay(reqHandler);
         handler.dispatchRequest(reqHandler, request);
     }
@@ -122,9 +122,11 @@ public class MBeanServerHandlerTest {
 
     @Test
     public void mbeanServers() {
-        Set<MBeanServer> servers = handler.getMBeanServers();
-        assertTrue(servers.size() > 0);
-        assertTrue(servers.contains(ManagementFactory.getPlatformMBeanServer()));
+        MBeanServerManager servers = handler.getMBeanServerManager();
+        assertTrue(servers.getAllMBeanServers().size() > 0);
+        assertTrue(servers.getAllMBeanServers().contains(ManagementFactory.getPlatformMBeanServer()));
+        assertTrue(servers.getActiveMBeanServers().size() > 0);
+        assertTrue(servers.getActiveMBeanServers().contains(ManagementFactory.getPlatformMBeanServer()));
 
         String info = handler.mBeanServersInfo();
         assertTrue(info.contains("Platform MBeanServer"));
@@ -135,13 +137,15 @@ public class MBeanServerHandlerTest {
     public void mbeanRegistration() throws JMException {
         try {
             ObjectName oName = new ObjectName(handler.getObjectName());
-            Set<MBeanServer> servers = handler.getMBeanServers();
+            MBeanServerManager servers = handler.getMBeanServerManager();
             boolean found = false;
-            for (MBeanServer server : servers) {
-                if (server.isRegistered(oName)) {
-                    found = true;
-                    break;
-                }
+            for (MBeanServerConnection server : servers.getAllMBeanServers()) {
+                try {
+                    if (server.isRegistered(oName)) {
+                        found = true;
+                        break;
+                    }
+                } catch (IOException exp) {}
             }
             assertTrue(found,"MBean not registered");
         } finally {
@@ -156,13 +160,15 @@ public class MBeanServerHandlerTest {
         setup();
         try {
             ObjectName oName = new ObjectName(handler.getObjectName());
-            Set<MBeanServer> servers = handler.getMBeanServers();
+            MBeanServerManager servers = handler.getMBeanServerManager();
             boolean found = false;
-            for (MBeanServer server : servers) {
-                if (server.isRegistered(oName)) {
-                    found = true;
-                    break;
-                }
+            for (MBeanServerConnection server : servers.getAllMBeanServers()) {
+                try {
+                    if (server.isRegistered(oName)) {
+                        found = true;
+                        break;
+                    }
+                } catch (IOException e) {}
             }
             assertTrue(found,"MBean not registered");
         } finally {

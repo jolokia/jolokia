@@ -2,10 +2,11 @@ package org.jolokia.handler;
 
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Stack;
 
 import javax.management.*;
 
+import org.jolokia.backend.MBeanServerManager;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -70,7 +71,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(Set<MBeanServerConnection> pServers, JmxListRequest pRequest)
+    public Object doHandleRequest(MBeanServerManager pServerManager, JmxListRequest pRequest)
             throws IOException {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
 
@@ -85,9 +86,9 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             oName = objectNameFromPath(pathStack);
             if (oName == null || oName.isPattern()) {
                 // MBean pattern for an MBean can match at multiple servers
-                addMBeansFromPattern(infoMap,pServers,oName);
+                addMBeansFromPattern(infoMap, pServerManager,oName);
             } else {
-                addSingleMBean(infoMap,pServers,oName);
+                addSingleMBean(infoMap, pServerManager,oName);
             }
             return infoMap.truncate();
         } catch (MalformedObjectNameException e) {
@@ -123,10 +124,10 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     // Lookup MBeans from a pattern, and for each found extract the required information
     private void addMBeansFromPattern(MBeanInfoData pInfoMap,
-                                      Set<MBeanServerConnection> pServers,
+                                      MBeanServerManager pServerManager,
                                       ObjectName pPattern)
             throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
-        for (MBeanServerConnection server : pServers) {
+        for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
             for (Object nameObject : server.queryNames(pPattern,null)) {
                 ObjectName name = (ObjectName) nameObject;
                 if (!pInfoMap.handleFirstOrSecondLevel(name)) {
@@ -137,17 +138,17 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // Add a single named MBean's information to the given map
-    private void addSingleMBean(MBeanInfoData pInfomap,
-                                Set<MBeanServerConnection> pServers,
+    private void addSingleMBean(MBeanInfoData pInfoMap,
+                                MBeanServerManager pServerManager,
                                 ObjectName pName)
             throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
 
-        if (!pInfomap.handleFirstOrSecondLevel(pName)) {
+        if (!pInfoMap.handleFirstOrSecondLevel(pName)) {
             InstanceNotFoundException instanceNotFound = null;
-            for (MBeanServerConnection server : pServers) {
+            for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
                 try {
                     // Only the first MBeanServer holding the MBean wins
-                    addMBeanInfo(pInfomap,server, pName);
+                    addMBeanInfo(pInfoMap,server, pName);
                     return;
                 } catch (InstanceNotFoundException exp) {
                     instanceNotFound = exp;

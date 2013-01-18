@@ -16,15 +16,17 @@ package org.jolokia.handler;
  *  limitations under the License.
  */
 
-import org.jolokia.request.*;
-import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.restrictor.Restrictor;
-import org.testng.annotations.*;
+import java.io.IOException;
+import java.util.*;
 
 import javax.management.*;
 
-import java.io.IOException;
-import java.util.*;
+import org.jolokia.request.JmxReadRequest;
+import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.jolokia.util.RequestType.READ;
@@ -35,7 +37,7 @@ import static org.testng.AssertJUnit.assertEquals;
  * @author roland
  * @since Mar 6, 2010
  */
-public class ReadHandlerTest {
+public class ReadHandlerTest extends BaseHandlerTest {
 
     // handler to test
     private ReadHandler handler;
@@ -69,17 +71,17 @@ public class ReadHandlerTest {
                 build();
 
 
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
+        MBeanServer server = createMock(MBeanServer.class);
         String attrs[] = new String[] {"attr0","atrr1","attr2"};
         String vals[]  = new String[] {"val0", "val1", "val2"};
-        prepareMBeanInfos(connection, testBeanName, attrs);
+        prepareMBeanInfos(server, testBeanName, attrs);
         for (int i=0;i<attrs.length;i++) {
-            expect(connection.getAttribute(testBeanName,attrs[i])).andReturn(vals[i]);
+            expect(server.getAttribute(testBeanName,attrs[i])).andReturn(vals[i]);
         }
-        replay(connection);
+        replay(server);
 
-        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
-        verify(connection);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
+        verify(server);
         for (int i=0;i<attrs.length;i++) {
             assertEquals(vals[i],res.get(attrs[i]));
 
@@ -93,13 +95,13 @@ public class ReadHandlerTest {
                 build();
 
 
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        expect(connection.getAttribute(testBeanName,"attr0")).andReturn("val0");
-        expect(connection.getAttribute(testBeanName,"attr1")).andReturn("val1");
-        replay(connection);
+        MBeanServer server = createMock(MBeanServer.class);
+        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
+        expect(server.getAttribute(testBeanName,"attr1")).andReturn("val1");
+        replay(server);
 
-        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
-        verify(connection);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
+        verify(server);
         assertEquals("val0",res.get("attr0"));
         assertEquals("val1",res.get("attr1"));
     }
@@ -112,11 +114,11 @@ public class ReadHandlerTest {
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
                 attribute("mem1").
                 build();
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        expect(connection.queryNames(patternMBean,null)).andReturn(new HashSet());
-        replay(connection);
+        MBeanServer server = createMock(MBeanServer.class);
+        expect(server.queryNames(patternMBean,null)).andReturn(new HashSet());
+        replay(server);
         try {
-            handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
+            handler.handleRequest(getMBeanServerManager(server),request);
             fail("Exception should be thrown");
         } catch (InstanceNotFoundException exp) {}
     }
@@ -132,12 +134,12 @@ public class ReadHandlerTest {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
-        MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
-        expect(connection.getAttribute(beans[0],"mem1")).andReturn("memval1");
+        MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+        expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
 
-        replay(connection);
-        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
-        verify(connection);
+        replay(server);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        verify(server);
         assertEquals(1,res.size());
         assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
     }
@@ -161,17 +163,17 @@ public class ReadHandlerTest {
                     new ObjectName("java.lang:type=Memory"),
                     new ObjectName("java.lang:type=GarbageCollection")
             };
-            MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
-            expect(connection.getAttribute(beans[0],"mem0")).andReturn("memval0");
-            expect(connection.getAttribute(beans[0],"mem1")).andReturn("memval1");
-            expect(connection.getAttribute(beans[0],"common")).andReturn("commonVal0");
-            expect(connection.getAttribute(beans[1],"gc0")).andReturn("gcval0");
-            expect(connection.getAttribute(beans[1],"gc1")).andReturn("gcval1");
-            expect(connection.getAttribute(beans[1],"gc3")).andReturn("gcval3");
-            expect(connection.getAttribute(beans[1],"common")).andReturn("commonVal1");
-            replay(connection);
+            MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+            expect(server.getAttribute(beans[0],"mem0")).andReturn("memval0");
+            expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
+            expect(server.getAttribute(beans[0],"common")).andReturn("commonVal0");
+            expect(server.getAttribute(beans[1],"gc0")).andReturn("gcval0");
+            expect(server.getAttribute(beans[1],"gc1")).andReturn("gcval1");
+            expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
+            expect(server.getAttribute(beans[1],"common")).andReturn("commonVal1");
+            replay(server);
 
-            Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
+            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
 
             assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
             assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
@@ -181,7 +183,7 @@ public class ReadHandlerTest {
             assertEquals("gcval3",((Map) res.get("java.lang:type=GarbageCollection")).get("gc3"));
             assertEquals("commonVal1",((Map) res.get("java.lang:type=GarbageCollection")).get("common"));
 
-            verify(connection);
+            verify(server);
         }
     }
 
@@ -195,18 +197,18 @@ public class ReadHandlerTest {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        expect(connection.queryNames(patternMBean,null)).andReturn(new HashSet(Arrays.asList(beans)));
-        prepareMBeanInfos(connection,beans[0],new String[0]);
-        prepareMBeanInfos(connection,beans[1],new String[] { "gc0" });
-        expect(connection.getAttribute(beans[1],"gc0")).andReturn("gcval0");
-        replay(connection);
+        MBeanServer server = createMock(MBeanServer.class);
+        expect(server.queryNames(patternMBean,null)).andReturn(new HashSet(Arrays.asList(beans)));
+        prepareMBeanInfos(server,beans[0],new String[0]);
+        prepareMBeanInfos(server,beans[1],new String[] { "gc0" });
+        expect(server.getAttribute(beans[1],"gc0")).andReturn("gcval0");
+        replay(server);
 
-        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
 
         // Only a single entry fetched
         assertEquals(res.size(),1);
-        verify(connection);
+        verify(server);
     }
 
 
@@ -222,14 +224,14 @@ public class ReadHandlerTest {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
-        MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
-        replay(connection);
+        MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+        replay(server);
         try {
-            handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
+            handler.handleRequest(getMBeanServerManager(server), request);
         } catch (IllegalArgumentException exp) {
             // expected
         }
-        verify(connection);
+        verify(server);
     }
 
     @Test(groups = "java6")
@@ -243,13 +245,13 @@ public class ReadHandlerTest {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
-        MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
-        expect(connection.getAttribute(beans[0],"mem0")).andReturn("memval0");
-        expect(connection.getAttribute(beans[1],"gc3")).andReturn("gcval3");
+        MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+        expect(server.getAttribute(beans[0],"mem0")).andReturn("memval0");
+        expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
 
-        replay(connection);
-        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
-        verify(connection);
+        replay(server);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        verify(server);
         assertEquals(2,res.size());
         assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
         assertEquals("gcval3",((Map) res.get("java.lang:type=GarbageCollection")).get("gc3"));
@@ -267,11 +269,11 @@ public class ReadHandlerTest {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
-        MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
-        replay(connection);
+        MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+        replay(server);
 
         try {
-            Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
+            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
             fail("Request should fail since attribute name doesn't match any MBean's attribute");
         } catch (IllegalArgumentException exp) {
             // Expect this since no MBean matches the given attribute
@@ -289,30 +291,30 @@ public class ReadHandlerTest {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
-        MBeanServerConnection connection = prepareMultiAttributeTest(patternMBean, beans);
-        expect(connection.getAttribute(beans[0],"common")).andReturn("com1");
-        expect(connection.getAttribute(beans[1],"common")).andReturn("com2");
+        MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+        expect(server.getAttribute(beans[0],"common")).andReturn("com1");
+        expect(server.getAttribute(beans[1],"common")).andReturn("com2");
 
-        replay(connection);
-        Map res = (Map) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)), request);
-        verify(connection);
+        replay(server);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        verify(server);
         assertEquals(2,res.size());
         assertEquals("com1",((Map) res.get("java.lang:type=Memory")).get("common"));
         assertEquals("com2",((Map) res.get("java.lang:type=GarbageCollection")).get("common"));
     }
 
-    private MBeanServerConnection prepareMultiAttributeTest(ObjectName pPatternMBean, ObjectName[] pBeans)
+    private MBeanServer prepareMultiAttributeTest(ObjectName pPatternMBean, ObjectName[] pBeans)
             throws IOException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IntrospectionException {
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
+        MBeanServer server = createMock(MBeanServer.class);
         String params[][] = {
                 new String[] {"mem0","mem1","common" },
                 new String[] {"gc0","gc1","gc3","common"},
         };
-        expect(connection.queryNames(pPatternMBean,null)).andReturn(new HashSet(Arrays.asList(pBeans)));
+        expect(server.queryNames(pPatternMBean,null)).andReturn(new HashSet(Arrays.asList(pBeans)));
         for (int i=0;i< pBeans.length;i++) {
-            prepareMBeanInfos(connection, pBeans[i],params[i]);
+            prepareMBeanInfos(server, pBeans[i],params[i]);
         }
-        return connection;
+        return server;
     }
 
     // ==============================================================================================================
@@ -348,13 +350,13 @@ public class ReadHandlerTest {
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
                 attribute("attr").
                 build();
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        replay(restrictor,connection);
+        MBeanServer server = createMock(MBeanServer.class);
+        replay(restrictor,server);
         try {
-            handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
+            handler.handleRequest(getMBeanServerManager(server),request);
             fail("Restrictor should forbid access");
         } catch (SecurityException exp) {}
-        verify(restrictor,connection);
+        verify(restrictor,server);
     }
 
     // ==============================================================================================================

@@ -16,10 +16,6 @@
 
 package org.jolokia.osgi.detector;
 
-import java.util.Set;
-
-import javax.management.MBeanServer;
-
 import org.jolokia.detector.ServerHandle;
 
 /**
@@ -30,8 +26,9 @@ import org.jolokia.detector.ServerHandle;
  */
 public class KnopflerfishDetector extends AbstractOsgiServerDetector {
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+    /** {@inheritDoc}
+     * @param pMBeanServerManager*/
+    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
         // Probably a bit unspecific, but that's kopflerfish's fault
         if (checkSystemBundleForSymbolicName("system.bundle")) {
             String version = getSystemBundleVersion();

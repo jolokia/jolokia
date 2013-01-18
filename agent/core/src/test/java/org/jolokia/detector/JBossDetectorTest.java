@@ -20,44 +20,44 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.MBeanServerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
  * @since 02.09.11
  */
-public class JBossDetectorTest {
+public class JBossDetectorTest extends BaseDetectorTest {
 
 
-    private JBossDetector detector;
-    private MBeanServer server;
-    private HashSet<MBeanServer> servers;
+    private JBossDetector      detector;
+    private MBeanServer        server;
+    private MBeanServerManager servers;
 
     @BeforeMethod
     public void setup() {
         detector = new JBossDetector();
 
         server = createMock(MBeanServer.class);
-        servers = new HashSet<MBeanServer>(Arrays.asList(server));
-
+        servers = getMBeanServerManager(server);
     }
 
     @Test
     public void simpleNotFound() throws MalformedObjectNameException {
 
-        for (String name : new String[] {
+        for (String name : new String[]{
                 "jboss.system:type=Server",
                 "jboss.as:management-root=server",
                 "jboss.modules:*"
         }) {
-            expect(server.queryNames(new ObjectName(name),null)).andReturn(null);
+            expect(server.queryNames(new ObjectName(name), null)).andReturn(null);
         }
         replay(server);
         assertNull(detector.detect(servers));
@@ -69,7 +69,7 @@ public class JBossDetectorTest {
 
 
         ObjectName oName = prepareQuery("jboss.system:type=Server");
-        expect(server.getAttribute(oName,"Version")).andReturn("5.1.0");
+        expect(server.getAttribute(oName, "Version")).andReturn("5.1.0");
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"5.1.0");
@@ -137,7 +137,7 @@ public class JBossDetectorTest {
     @Test
     public void addMBeanServers() {
         replay(server);
-        detector.addMBeanServers(servers);
+        detector.addMBeanServers(new HashSet<MBeanServerConnection>());
     }
 
 
