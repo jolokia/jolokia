@@ -18,6 +18,7 @@ package org.jolokia.jvmagent;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import org.jolokia.Version;
 import org.jolokia.test.util.EnvTestUtil;
@@ -79,7 +80,7 @@ public class JolokiaServerTest {
     private String getKeystorePath() {
         URL ksURL = this.getClass().getResource("/keystore");
         if (ksURL != null && "file".equalsIgnoreCase(ksURL.getProtocol())) {
-            return ksURL.getPath();
+            return URLDecoder.decode(ksURL.getPath());
         }
         throw new IllegalStateException(ksURL + " is not a file URL");
     }
