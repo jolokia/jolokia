@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.Version;
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxVersionRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -72,7 +72,7 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
      * @param serverManager
      * @param request*/
     @Override
-    public Object doHandleRequest(MBeanServerManager serverManager, JmxVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JmxVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());

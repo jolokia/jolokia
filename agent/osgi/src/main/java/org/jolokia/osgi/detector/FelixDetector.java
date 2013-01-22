@@ -16,7 +16,7 @@
 
 package org.jolokia.osgi.detector;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 
 /**
@@ -28,8 +28,8 @@ import org.jolokia.detector.ServerHandle;
 public class FelixDetector extends AbstractOsgiServerDetector {
 
     /** {@inheritDoc}
-     * @param pMBeanServerManager*/
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
             String version = getSystemBundleVersion();
             return new ServerHandle("Apache","felix",version,null,null);

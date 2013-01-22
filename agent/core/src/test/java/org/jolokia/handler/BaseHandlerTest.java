@@ -16,13 +16,12 @@
 
 package org.jolokia.handler;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 import javax.management.MBeanServerConnection;
 
-import org.easymock.EasyMock;
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.AbstractMBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * @author roland
@@ -30,11 +29,12 @@ import org.jolokia.backend.MBeanServerManager;
  */
 public class BaseHandlerTest {
 
-    protected MBeanServerManager getMBeanServerManager(MBeanServerConnection ... pServers) {
-        MBeanServerManager servers = EasyMock.createMock(MBeanServerManager.class);
-        EasyMock.expect(servers.getAllMBeanServers()).andReturn(new HashSet<MBeanServerConnection>(Arrays.asList(pServers))).anyTimes();
-        EasyMock.expect(servers.getActiveMBeanServers()).andReturn(new HashSet<MBeanServerConnection>(Arrays.asList(pServers))).anyTimes();
-        EasyMock.replay(servers);
-        return servers;
+    protected MBeanServerExecutor getMBeanServerManager(final MBeanServerConnection... connections) {
+        return new AbstractMBeanServerExecutor() {
+
+            protected Set<MBeanServerConnection> getMBeanServers() {
+                return new HashSet<MBeanServerConnection>(Arrays.asList(connections));
+            }
+        };
     }
 }

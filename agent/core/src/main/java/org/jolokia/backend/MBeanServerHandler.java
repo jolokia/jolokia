@@ -38,7 +38,7 @@ import org.jolokia.util.*;
 public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistration {
 
     // The object dealing with all MBeanServers
-    private MBeanServerManagerLocal mBeanServerManager;
+    private MBeanServerExecutorLocal mBeanServerManager;
 
     // Optional domain for registering this handler as a MBean
     private String qualifier;
@@ -48,7 +48,6 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
 
     // Handles remembered for unregistering
     private final List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
-
 
     /**
      * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
@@ -63,7 +62,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         // A qualifier, if given, is used to add the MBean Name of this MBean
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         List<ServerDetector> detectors = lookupDetectors();
-        mBeanServerManager = new MBeanServerManagerLocal(detectors);
+        mBeanServerManager = new MBeanServerExecutorLocal(detectors);
         initServerHandle(pConfig, pLogHandler, detectors);
         initMBean();
     }
@@ -168,7 +167,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @return set of mbean servers
      */
-    public MBeanServerManagerLocal getMBeanServerManager() {
+    public MBeanServerExecutorLocal getMBeanServerManager() {
         return mBeanServerManager;
     }
 
@@ -295,8 +294,8 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
 
     private static class FallbackServerDetector extends AbstractServerDetector {
         /** {@inheritDoc}
-         * @param pMBeanServerManager*/
-        public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+         * @param pMBeanServerExecutor*/
+        public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
             return new NullServerHandle();
         }
     }

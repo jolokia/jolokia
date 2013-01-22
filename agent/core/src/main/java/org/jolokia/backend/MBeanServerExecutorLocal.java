@@ -26,6 +26,7 @@ import org.jolokia.detector.ServerDetector;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.jmx.JolokiaMBeanServerUtil;
 import org.jolokia.request.JmxRequest;
+import org.jolokia.util.ServersInfo;
 
 /**
  * Singleton responsible for doing the merging of all MBeanServer detected.
@@ -41,7 +42,7 @@ import org.jolokia.request.JmxRequest;
  * @author roland
  * @since 17.01.13
  */
-public class MBeanServerManagerLocal implements MBeanServerManager {
+public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
 
     // Private Jolokia MBeanServer
     private MBeanServer jolokiaMBeanServer;
@@ -57,17 +58,16 @@ public class MBeanServerManagerLocal implements MBeanServerManager {
      *
      * @param pDetectors list of detectors for the MBeanServers. Must not be null.
      */
-    public MBeanServerManagerLocal(List<ServerDetector> pDetectors) {
+    public MBeanServerExecutorLocal(List<ServerDetector> pDetectors) {
         init(pDetectors);
     }
 
     /**
-     * Constructor with not detectors
+     * Constructor with no detectors
      */
-    public MBeanServerManagerLocal() {
+    public MBeanServerExecutorLocal() {
         this(Collections.<ServerDetector>emptyList());
     }
-
 
     /**
      * Use various ways for getting to the MBeanServer which should be exposed via this manager
@@ -129,9 +129,9 @@ public class MBeanServerManagerLocal implements MBeanServerManager {
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
 
-        for (MBeanServerConnection s : getActiveMBeanServers()) {
+        for (MBeanServerConnection conn : getMBeanServers()) {
             try {
-                return pRequestHandler.handleRequest(s, pJmxReq);
+                return pRequestHandler.handleRequest(conn, pJmxReq);
             } catch (InstanceNotFoundException exp) {
                 // Remember exceptions for later use
                 objNotFoundException = exp;
@@ -148,7 +148,8 @@ public class MBeanServerManagerLocal implements MBeanServerManager {
         throw objNotFoundException;
     }
 
-    public Set<MBeanServerConnection> getActiveMBeanServers() {
+    /** {@inheritDoc} */
+    protected Set<MBeanServerConnection> getMBeanServers() {
         // Only add the Jolokia MBean server if at least a single MBean is registered there
         Integer jolokiaMBeanNr = jolokiaMBeanServer.getMBeanCount();
         if (jolokiaMBeanNr != null && jolokiaMBeanNr != 0) {
@@ -158,58 +159,15 @@ public class MBeanServerManagerLocal implements MBeanServerManager {
         }
     }
 
-    /** {@inheritDoc} */
-    public Set<MBeanServerConnection> getAllMBeanServers() {
-        return mBeanServers;
-    }
-
     // ==========================================================================================
 
+    /**
+     * Get a string representation of all servers
+     *
+     * @return string representation of the servers along with some statistics.
+     */
     public String getServersInfo() {
-        StringBuffer ret = new StringBuffer();
-        ret.append("Found ").append(mBeanServers.size()).append(" MBeanServers\n");
-        for (MBeanServerConnection c : mBeanServers) {
-            MBeanServer s = (MBeanServer) c;
-            ret.append("    ")
-               .append("++ ")
-               .append(s.toString())
-               .append(": default domain = ")
-               .append(s.getDefaultDomain())
-               .append(", ")
-               .append(s.getMBeanCount())
-               .append(" MBeans\n");
-
-            ret.append("        Domains:\n");
-            boolean javaLangFound = false;
-            for (String d : s.getDomains()) {
-                if ("java.lang".equals(d)) {
-                    javaLangFound = true;
-                }
-                appendDomainInfo(ret, s, d);
-            }
-            if (!javaLangFound) {
-                // JBoss fails to list java.lang in its domain list
-                appendDomainInfo(ret,s,"java.lang");
-            }
-        }
-        ret.append("\n");
-        ret.append("Platform MBeanServer: ")
-           .append(ManagementFactory.getPlatformMBeanServer())
-           .append("\n");
-        return ret.toString();
+        return ServersInfo.dump(allMBeanServers);
     }
 
-    private void appendDomainInfo(StringBuffer pRet, MBeanServer pServer, String pDomain) {
-        try {
-            pRet.append("         == ").append(pDomain).append("\n");
-            Set<ObjectInstance> beans = pServer.queryMBeans(new ObjectName(pDomain + ":*"),null);
-            for (ObjectInstance o : beans) {
-                String n = o.getObjectName().getCanonicalKeyPropertyListString();
-                pRet.append("              ").append(n).append("\n");
-            }
-        } catch (MalformedObjectNameException e) {
-            // Shouldnt happen
-            pRet.append("              INTERNAL ERROR: ").append(e).append("\n");
-        }
-    }
 }

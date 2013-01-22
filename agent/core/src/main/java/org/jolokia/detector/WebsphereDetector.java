@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 
@@ -49,10 +49,10 @@ public class WebsphereDetector extends AbstractServerDetector {
     private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
     /** {@inheritDoc}
-     * @param pMBeanServerManager*/
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String serverVersion =
-                getSingleStringAttribute(pMBeanServerManager, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
+                getSingleStringAttribute(pMBeanServerExecutor, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
         if (serverVersion != null && serverVersion.contains("WebSphere")) {
             Matcher matcher = SERVER_VERSION_PATTERN.matcher(serverVersion);
             if (matcher.find()) {

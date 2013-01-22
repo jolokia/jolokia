@@ -22,7 +22,7 @@ import javax.management.MBeanServerConnection;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -137,7 +137,7 @@ public class JolokiaServletTest {
 
     public static class CatchAllDetector implements ServerDetector {
 
-        public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+        public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
             return new ServerHandle(null,null,null,null,null);
         }
 

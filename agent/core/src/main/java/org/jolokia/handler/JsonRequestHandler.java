@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -57,7 +57,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @return whether you want to have
      * {@link #doHandleRequest(MBeanServerConnection, JmxRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(MBeanServerManager, JmxRequest)} (<code>true</code>) called.
+     * {@link #doHandleRequest(MBeanServerExecutor, JmxRequest)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(R pRequest) {
         return false;
@@ -153,7 +153,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object handleRequest(MBeanServerManager pServerManager, R request)
+    public Object handleRequest(MBeanServerExecutor pServerManager, R request)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
         checkForRestriction(request);
         return doHandleRequest(pServerManager,request);
@@ -173,7 +173,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object doHandleRequest(MBeanServerManager serverManager, R request)
+    public Object doHandleRequest(MBeanServerExecutor serverManager, R request)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         return null;
     }

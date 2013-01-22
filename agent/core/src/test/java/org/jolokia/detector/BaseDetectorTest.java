@@ -16,26 +16,24 @@
 
 package org.jolokia.detector;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.backend.MBeanServerManager;
-
-import static org.easymock.EasyMock.*;
+import org.jolokia.backend.AbstractMBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * @author roland
  * @since 17.01.13
  */
 public class BaseDetectorTest {
-    protected MBeanServerManager getMBeanServerManager(MBeanServer ... pMockServer) {
-        MBeanServerManager servers = createMock(MBeanServerManager.class);
-        expect(servers.getAllMBeanServers()).andReturn(new HashSet<MBeanServerConnection>(Arrays.asList(pMockServer))).anyTimes();
-        expect(servers.getActiveMBeanServers()).andReturn(new HashSet<MBeanServerConnection>(Arrays.asList(pMockServer))).anyTimes();
-        replay(servers);
-        return servers;
+    protected MBeanServerExecutor getMBeanServerManager(final MBeanServer ... pMockServer) {
+        return new AbstractMBeanServerExecutor() {
+            protected Set<MBeanServerConnection> getMBeanServers() {
+                return new LinkedHashSet<MBeanServerConnection>(Arrays.asList(pMockServer));
+            }
+        };
     }
 }

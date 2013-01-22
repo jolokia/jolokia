@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
@@ -113,7 +113,7 @@ public class ServerHandle {
      * @param pServerManager MBeanServers to query
      * @return a map of extra info or <code>null</code> if no extra information is given.
      */
-    public Map<String,String> getExtraInfo(MBeanServerManager pServerManager) {
+    public Map<String,String> getExtraInfo(MBeanServerExecutor pServerManager) {
         return extraInfo;
     }
 
@@ -121,10 +121,10 @@ public class ServerHandle {
      * Hook for performing certain workarounds/pre processing just before
      * a request gets dispatched
      *
-     * @param pMBeanServerManager the detected MBeanServers
+     * @param pMBeanServerExecutor the detected MBeanServers
      * @param pJmxReq the request to dispatch
      */
-    public void preDispatch(MBeanServerManager pMBeanServerManager, JmxRequest pJmxReq) {
+    public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
         // Do nothing
     }
 
@@ -138,7 +138,7 @@ public class ServerHandle {
      * @param pConfig agent configuration
      * @param pLoghandler logger to use for logging any error.
      */
-    public void postDetect(MBeanServerManager pServerManager, Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
+    public void postDetect(MBeanServerExecutor pServerManager, Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
         // Do nothing
     }
 
@@ -175,7 +175,7 @@ public class ServerHandle {
      * @param pServerManager servers, for which dynamic part might be queried
      * @return this object in JSON representation
      */
-    public JSONObject toJSONObject(MBeanServerManager pServerManager) {
+    public JSONObject toJSONObject(MBeanServerExecutor pServerManager) {
         JSONObject ret = new JSONObject();
         addNullSafe(ret, "vendor", vendor);
         addNullSafe(ret, "product", product);

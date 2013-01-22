@@ -18,7 +18,7 @@ package org.jolokia.detector;
 
 import java.lang.reflect.*;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 
 /**
@@ -31,8 +31,8 @@ public class JettyDetector extends AbstractServerDetector {
 
 
     /** {@inheritDoc}
-     * @param pMBeanServerManager*/
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
         if (serverClass != null) {
             return new ServerHandle("Mortbay", "jetty", getVersion(serverClass), null, null);

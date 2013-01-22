@@ -6,7 +6,7 @@ import java.util.Stack;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -71,31 +71,24 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerManager pServerManager, JmxListRequest pRequest)
+    public Object doHandleRequest(MBeanServerExecutor pServerManager, JmxListRequest pRequest)
             throws IOException {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
-
         int maxDepth = pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getProcessingConfigAsBoolean(ConfigKey.CANONICAL_NAMING);
 
         ObjectName oName = null;
         try {
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
-            MBeanInfoData infoMap = new MBeanInfoData(maxDepth,pathStack,useCanonicalName);
-
             oName = objectNameFromPath(pathStack);
-            if (oName == null || oName.isPattern()) {
-                // MBean pattern for an MBean can match at multiple servers
-                addMBeansFromPattern(infoMap, pServerManager,oName);
-            } else {
-                addSingleMBean(infoMap, pServerManager,oName);
-            }
-            return infoMap.truncate();
+            ListMBeanAction handler = new ListMBeanAction(maxDepth,pathStack,useCanonicalName);
+
+            pServerManager.iterate(oName, handler);
+
+            return handler.getResult();
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
-        } catch (InstanceNotFoundException e) {
-            throw new IllegalArgumentException("Invalid object name '" + oName + "': Instance not found",e);
-         } catch (JMException e) {
+        } catch (JMException e) {
             throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         }
     }
@@ -122,57 +115,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
 
     // ==========================================================================================================
 
-    // Lookup MBeans from a pattern, and for each found extract the required information
-    private void addMBeansFromPattern(MBeanInfoData pInfoMap,
-                                      MBeanServerManager pServerManager,
-                                      ObjectName pPattern)
-            throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
-        for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
-            for (Object nameObject : server.queryNames(pPattern,null)) {
-                ObjectName name = (ObjectName) nameObject;
-                if (!pInfoMap.handleFirstOrSecondLevel(name)) {
-                    addMBeanInfo(pInfoMap,server, name);
-                }
-            }
-        }
-    }
-
-    // Add a single named MBean's information to the given map
-    private void addSingleMBean(MBeanInfoData pInfoMap,
-                                MBeanServerManager pServerManager,
-                                ObjectName pName)
-            throws IntrospectionException, ReflectionException, IOException, InstanceNotFoundException {
-
-        if (!pInfoMap.handleFirstOrSecondLevel(pName)) {
-            InstanceNotFoundException instanceNotFound = null;
-            for (MBeanServerConnection server : pServerManager.getActiveMBeanServers()) {
-                try {
-                    // Only the first MBeanServer holding the MBean wins
-                    addMBeanInfo(pInfoMap,server, pName);
-                    return;
-                } catch (InstanceNotFoundException exp) {
-                    instanceNotFound = exp;
-                }
-            }
-            if (instanceNotFound != null) {
-                throw instanceNotFound;
-            }
-        }
-    }
-
-    // Extract MBean infos for a given MBean and add results to pResult.
-    private void addMBeanInfo(MBeanInfoData pInfoMap, MBeanServerConnection server, ObjectName pName)
-            throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
-        try {
-            MBeanInfo mBeanInfo = server.getMBeanInfo(pName);
-            pInfoMap.addMBeanInfo(mBeanInfo,pName);
-        } catch (IOException exp) {
-            pInfoMap.handleException(pName,exp);
-        } catch (IllegalStateException exp) {
-            pInfoMap.handleException(pName,exp);
-        }
-    }
-
     /**
      * Prepare an objectname patttern from a path (or "null" if no path is given)
      * @param pPathStack path
@@ -193,5 +135,61 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             throw new IllegalArgumentException("Cannot use an MBean pattern as path (given MBean: " + mbean + ")");
         }
         return mbean;
+    }
+
+    // Class for handling list queries
+    private class ListMBeanAction implements MBeanServerExecutor.MBeanAction<Void> {
+
+        // Meta data which will get collected
+        private final MBeanInfoData infoMap;
+
+        /**
+         * Handler used during iterations whe collecting MBean Meta data
+         *
+         * @param pMaxDepth max depth for the list tree to return
+         * @param pPathStack optional stack for picking out a certain path from the list tree
+         * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
+         *                          name
+         */
+        public ListMBeanAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
+            infoMap = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName);
+        }
+
+        /**
+         * Add the given MBean to the collected Meta-Data
+         *
+         *
+         * @param pConn connection from where to obtain the meta data
+         * @param pName object name of the bean
+         * @throws IntrospectionException
+         * @throws ReflectionException
+         * @throws InstanceNotFoundException
+         * @throws IOException
+         */
+        public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
+                throws ReflectionException, IOException, InstanceNotFoundException {
+            if (!infoMap.handleFirstOrSecondLevel(pName)) {
+                try {
+                    MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);
+                    infoMap.addMBeanInfo(mBeanInfo, pName);
+                } catch (IOException exp) {
+                    infoMap.handleException(pName, exp);
+                } catch (IllegalStateException exp) {
+                    infoMap.handleException(pName, exp);
+                } catch (IntrospectionException exp) {
+                    throw new IllegalArgumentException("Cannot extra MBeanInfo for " + pName + ": " + exp,exp);
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Get the overall result
+         *
+         * @return the meta data suitable for JSON serialization
+         */
+        public Object getResult() {
+            return infoMap.truncate();
+        }
     }
 }

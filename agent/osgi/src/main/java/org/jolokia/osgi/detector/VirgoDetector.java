@@ -19,7 +19,7 @@ package org.jolokia.osgi.detector;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 
 /**
@@ -31,8 +31,8 @@ import org.jolokia.detector.ServerHandle;
 public class VirgoDetector extends AbstractOsgiServerDetector {
 
     /** {@inheritDoc}
-     * @param pMBeanServerManager*/
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String version = getBundleVersion("org.eclipse.virgo.kernel.userregion");
         if (version != null) {
             String type = "kernel";

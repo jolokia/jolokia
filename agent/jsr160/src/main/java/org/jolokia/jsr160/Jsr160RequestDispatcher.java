@@ -23,7 +23,7 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -77,7 +77,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
-                MBeanServerManager manager = new MBeanServerManagerRemote(connection);
+                MBeanServerExecutor manager = new MBeanServerExecutorRemote(connection);
                 return handler.handleRequest(manager,pJmxReq);
             } else {
                 return handler.handleRequest(connection,pJmxReq);

@@ -64,7 +64,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
 
-        MBeanServer connection = createMock(MBeanServer.class);
+        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         Set<ObjectName> nameSet = new HashSet<ObjectName>();
         for (String name : new String[] { "java.lang:type=Memory", "java.lang:type=Runtime" }) {
             ObjectName oName = new ObjectName(name);
@@ -72,8 +72,9 @@ public class ListHandlerMockTest extends BaseHandlerTest {
             expect(connection.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
 
         }
-        expect(connection.queryNames(null, null)).andReturn(nameSet);
+        expect(connection.queryNames(null,null)).andReturn(nameSet);
         replay(connection);
+
         Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request);
         assertTrue(res.containsKey("java.lang"));
         Map inner = (Map) res.get("java.lang");
@@ -88,11 +89,15 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         verify(connection);
     }
 
+
+
     @Test
     public void iOException() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
 
-        MBeanServerConnection connection = prepareForIOException();
+        MBeanServerConnection connection = prepareForIOException(false);
+
+
         Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request);
         verify(connection);
         assertEquals(res.size(),1);
@@ -107,17 +112,20 @@ public class ListHandlerMockTest extends BaseHandlerTest {
     public void iOExceptionWithPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Runtime","attr").build();
 
-        MBeanServerConnection server = prepareForIOException();
+        MBeanServerConnection server = prepareForIOException(true);
         Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
     }
 
-    private MBeanServerConnection prepareForIOException() throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+    private MBeanServerConnection prepareForIOException(boolean registerCheck) throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         MBeanServerConnection server = createMock(MBeanServerConnection.class);
         Set<ObjectName> nameSet = new HashSet<ObjectName>();
         ObjectName oName = new ObjectName("java.lang:type=Memory");
         nameSet.add(oName);
         expect(server.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
         oName = new ObjectName("java.lang:type=Runtime");
+        if (registerCheck) {
+            expect(server.isRegistered(oName)).andReturn(true);
+        }
         nameSet.add(oName);
         expect(server.getMBeanInfo(oName)).andThrow(new IOException());
         expect(server.queryNames(null, null)).andReturn(nameSet);

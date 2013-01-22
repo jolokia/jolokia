@@ -23,8 +23,8 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.MBeanServerManager;
-import org.jolokia.backend.MBeanServerManagerLocal;
+import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -87,7 +87,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void descPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
-        String res = (String) handler.handleRequest(new MBeanServerManagerLocal(), request);
+        String res = (String) handler.handleRequest(new MBeanServerExecutorLocal(), request);
         assertNotNull(res);
     }
 
@@ -97,7 +97,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .pathParts("java.lang","type=Memory","desc")
                 .option(ConfigKey.MAX_DEPTH,"4")
                 .build();
-        String res = (String) handler.handleRequest(new MBeanServerManagerLocal(), request);
+        String res = (String) handler.handleRequest(new MBeanServerExecutorLocal(), request);
         assertNotNull(res);
     }
 
@@ -222,7 +222,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
-        return (Map) handler.handleRequest(new MBeanServerManagerLocal(), pRequest);
+        return (Map) handler.handleRequest(new MBeanServerExecutorLocal(), pRequest);
     }
 
 
@@ -231,13 +231,13 @@ public class ListHandlerTest extends BaseHandlerTest {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "op")
                 .build();
-        Map res = (Map) handler.handleRequest(new MBeanServerManagerLocal(),request);
+        Map res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
         assertEquals(res.size(),0);
 
         request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "not")
                 .build();
-        res = (Map) handler.handleRequest(new MBeanServerManagerLocal(),request);
+        res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
         assertEquals(res.size(),0);
     }
 
@@ -253,20 +253,22 @@ public class ListHandlerTest extends BaseHandlerTest {
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        Map res = (Map) handler.handleRequest(new MBeanServerManagerLocal(),request);
+        Map res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
         assertEquals(((Map) res.get("Verbose")).get("type"),"boolean");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*not found.*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
     public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("bullerbue", "country=sweden")
                 .build();
         MBeanServer dummyConn = EasyMock.createMock(MBeanServer.class);
 
-        MBeanServerManager servers = getMBeanServerManager(dummyConn,ManagementFactory.getPlatformMBeanServer());
+        MBeanServerExecutor servers = getMBeanServerManager(dummyConn, ManagementFactory.getPlatformMBeanServer());
 
-        expect(dummyConn.getMBeanInfo(new ObjectName("bullerbue:country=sweden"))).andThrow(new InstanceNotFoundException());
+        ObjectName name = new ObjectName("bullerbue:country=sweden");
+        expect(dummyConn.getMBeanInfo(name)).andThrow(new InstanceNotFoundException());
+        expect(dummyConn.isRegistered(name)).andReturn(false);
         replay(dummyConn);
         handler.handleRequest(servers,request);
     }

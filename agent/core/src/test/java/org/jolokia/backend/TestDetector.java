@@ -48,7 +48,7 @@ public class TestDetector implements ServerDetector {
         nr = instances++;
     }
 
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (nr == 2) {
             throw new RuntimeException();
         } else if (nr == 3 && !fallThrough) {

@@ -23,7 +23,7 @@ import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * Detector for Weblogic Appservers
@@ -34,11 +34,11 @@ import org.jolokia.backend.MBeanServerManager;
 public class WeblogicDetector extends AbstractServerDetector {
 
     /** {@inheritDoc}
-     * @param pMBeanServerManager*/
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
-        String domainConfigMBean = getSingleStringAttribute(pMBeanServerManager,"*:Name=RuntimeService,*","DomainConfiguration");
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        String domainConfigMBean = getSingleStringAttribute(pMBeanServerExecutor,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
-            String version = getSingleStringAttribute(pMBeanServerManager,domainConfigMBean,"ConfigurationVersion");
+            String version = getSingleStringAttribute(pMBeanServerExecutor,domainConfigMBean,"ConfigurationVersion");
             return new ServerHandle("Oracle","weblogic",version,null,null);
         }
         return null;

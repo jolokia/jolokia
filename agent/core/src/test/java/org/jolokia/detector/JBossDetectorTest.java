@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
@@ -37,9 +37,9 @@ import static org.testng.Assert.*;
 public class JBossDetectorTest extends BaseDetectorTest {
 
 
-    private JBossDetector      detector;
-    private MBeanServer        server;
-    private MBeanServerManager servers;
+    private JBossDetector       detector;
+    private MBeanServer         server;
+    private MBeanServerExecutor servers;
 
     @BeforeMethod
     public void setup() {
@@ -57,7 +57,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
                 "jboss.as:management-root=server",
                 "jboss.modules:*"
         }) {
-            expect(server.queryNames(new ObjectName(name), null)).andReturn(null);
+            expect(server.queryNames(new ObjectName(name), null)).andReturn(Collections.<ObjectName>emptySet());
         }
         replay(server);
         assertNull(detector.detect(servers));
@@ -89,7 +89,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
     @Test
     public void version71() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.as:management-root=server");
         expect(server.getAttribute(new ObjectName("jboss.as:management-root=server"),"releaseVersion")).andReturn("7.1.1.Final");
         replay(server);
@@ -114,8 +114,8 @@ public class JBossDetectorTest extends BaseDetectorTest {
     @Test
     public void version7() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
-        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.modules:*");
         replay(server);
         ServerHandle handle = detector.detect(servers);

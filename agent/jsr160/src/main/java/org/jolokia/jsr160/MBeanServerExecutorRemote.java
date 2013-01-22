@@ -16,11 +16,12 @@
 
 package org.jolokia.jsr160;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.AbstractMBeanServerExecutor;
 
 /**
  * MBeanServer Manager wrapping a single remote connection
@@ -28,7 +29,7 @@ import org.jolokia.backend.MBeanServerManager;
  * @author roland
  * @since 17.01.13
  */
-class MBeanServerManagerRemote implements MBeanServerManager {
+class MBeanServerExecutorRemote extends AbstractMBeanServerExecutor {
 
     // wrapped collection
     private final HashSet<MBeanServerConnection> serverConnections;
@@ -37,18 +38,13 @@ class MBeanServerManagerRemote implements MBeanServerManager {
      * Constructor for wrapping a remote connection
      * @param pConnection remote connection to wrap
      */
-    MBeanServerManagerRemote(MBeanServerConnection pConnection) {
+    MBeanServerExecutorRemote(MBeanServerConnection pConnection) {
         serverConnections = new HashSet<MBeanServerConnection>();
         serverConnections.add(pConnection);
     }
 
     /** {@inheritDoc} */
-    public Set<MBeanServerConnection> getActiveMBeanServers() {
-        return serverConnections;
-    }
-
-    /** {@inheritDoc} */
-    public Set<MBeanServerConnection> getAllMBeanServers() {
+    protected Set<MBeanServerConnection> getMBeanServers() {
         return serverConnections;
     }
 }

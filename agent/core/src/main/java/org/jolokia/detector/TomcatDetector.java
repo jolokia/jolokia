@@ -19,7 +19,7 @@ package org.jolokia.detector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jolokia.backend.MBeanServerManager;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * Detector for Tomcat
@@ -33,9 +33,9 @@ public class TomcatDetector extends AbstractServerDetector {
 
 
     /** {@inheritDoc}
-     * @param pMBeanServerManager*/
-    public ServerHandle detect(MBeanServerManager pMBeanServerManager) {
-        String serverInfo = getSingleStringAttribute(pMBeanServerManager, "*:type=Server", "serverInfo");
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        String serverInfo = getSingleStringAttribute(pMBeanServerExecutor, "*:type=Server", "serverInfo");
         if (serverInfo == null) {
             return null;
         }
