@@ -1,23 +1,23 @@
 package org.jolokia.detector;
 
-import java.io.IOException;
 import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNull;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author roland
  * @since 06.06.12
  */
-public class GlassfishDetectorTest {
+public class GlassfishDetectorTest extends BaseDetectorTest {
 
     ServerDetector detector = new GlassfishDetector();
 
@@ -44,20 +44,20 @@ public class GlassfishDetectorTest {
     private void detectDeep(String property,String version) throws MalformedObjectNameException {
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("com.sun.appserv:j2eeType=J2EEServer,*"), null)).
-                andReturn(null).anyTimes();
+                andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).
-                andReturn(null).anyTimes();
+                andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         replay(mockServer);
         if (property != null) {
             System.setProperty("glassfish.version",property);
             if (version == null) {
-                assertNull(detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer))));
+                assertNull(detector.detect(getMBeanServerManager(mockServer)));
             } else {
-                assertEquals(detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer))).getVersion(),version);
+                assertEquals(detector.detect(getMBeanServerManager(mockServer)).getVersion(),version);
             }
             System.clearProperty("glassfish.version");
         } else {
-            assertNull(detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer))));
+            assertNull(detector.detect(getMBeanServerManager(mockServer)));
         }
         verify(mockServer);
     }
@@ -74,7 +74,7 @@ public class GlassfishDetectorTest {
                 andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
         replay(mockServer);
 
-        ServerHandle info = detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer)));
+        ServerHandle info = detector.detect(getMBeanServerManager(mockServer));
         assertEquals(info.getVersion(), "3");
         assertEquals(info.getProduct(),"glassfish");
     }
@@ -98,7 +98,7 @@ public class GlassfishDetectorTest {
         expect(mockServer.getAttribute(serverMbean,"ApplicationServerFullVersion")).andReturn(" GlassFish v3.1 ");
         replay(mockServer);
 
-        HashSet<MBeanServer> mbeanServers = new HashSet<MBeanServer>(Arrays.asList(mockServer));
+        MBeanServerExecutor mbeanServers = getMBeanServerManager(mockServer);
         ServerHandle info = detector.detect(mbeanServers);
         assertEquals(info.getVersion(), "3.1");
         assertEquals(info.getProduct(),"glassfish");
@@ -127,19 +127,19 @@ public class GlassfishDetectorTest {
         replay(mockServer);
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         config.put(ConfigKey.DETECTOR_OPTIONS,"{\"glassfish\": {\"bootAmx\" : false}}");
-        handle.postDetect(new HashSet<MBeanServer>(Arrays.asList(mockServer)), config, null);
+        handle.postDetect(getMBeanServerManager(mockServer), config, null);
         verify(mockServer);
     }
 
     private void postDetectPositive(String opts) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         ServerHandle handle = doPlainDetect();
         MBeanServer mockServer = createMock(MBeanServer.class);
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(null).anyTimes();
+        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         expect(mockServer.invoke(new ObjectName("amx-support:type=boot-amx"),"bootAMX",null,null)).andReturn(null);
         replay(mockServer);
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         config.put(ConfigKey.DETECTOR_OPTIONS,opts);
-        HashSet<MBeanServer> servers = new HashSet<MBeanServer>(Arrays.asList(mockServer));
+        MBeanServerExecutor servers = getMBeanServerManager(mockServer);
         handle.postDetect(servers, config, null);
         handle.preDispatch(servers,null);
         verify(mockServer);
@@ -158,13 +158,13 @@ public class GlassfishDetectorTest {
     private void detectExceptionDuringPostProcess(String regexp,Exception exp) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         ServerHandle handle = doPlainDetect();
         MBeanServer mockServer = createMock(MBeanServer.class);
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(null).anyTimes();
+        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         expect(mockServer.invoke(new ObjectName("amx-support:type=boot-amx"), "bootAMX", null, null)).andThrow(exp);
         LogHandler log = createMock(LogHandler.class);
         log.error(matches(regexp),isA(exp.getClass()));
         replay(mockServer,log);
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
-        HashSet<MBeanServer> servers = new HashSet<MBeanServer>(Arrays.asList(mockServer));
+        MBeanServerExecutor servers = getMBeanServerManager(mockServer);
         handle.postDetect(servers,config ,log);
         handle.preDispatch(servers,null);
         verify(mockServer);

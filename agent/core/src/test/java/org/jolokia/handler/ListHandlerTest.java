@@ -23,6 +23,8 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -32,14 +34,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.test.util.EnvTestUtil.asSet;
 import static org.testng.Assert.*;
 
 /**
  * @author roland
  * @since 11.04.11
  */
-public class ListHandlerTest {
+public class ListHandlerTest extends BaseHandlerTest {
 
     private ListHandler handler;
 
@@ -86,8 +87,7 @@ public class ListHandlerTest {
     @Test
     public void descPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        String res = (String) handler.handleRequest(asSet(conn), request);
+        String res = (String) handler.handleRequest(new MBeanServerExecutorLocal(), request);
         assertNotNull(res);
     }
 
@@ -97,8 +97,7 @@ public class ListHandlerTest {
                 .pathParts("java.lang","type=Memory","desc")
                 .option(ConfigKey.MAX_DEPTH,"4")
                 .build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        String res = (String) handler.handleRequest(asSet(conn), request);
+        String res = (String) handler.handleRequest(new MBeanServerExecutorLocal(), request);
         assertNotNull(res);
     }
 
@@ -223,8 +222,7 @@ public class ListHandlerTest {
     }
 
     private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        return (Map) handler.handleRequest(asSet(conn), pRequest);
+        return (Map) handler.handleRequest(new MBeanServerExecutorLocal(), pRequest);
     }
 
 
@@ -233,15 +231,13 @@ public class ListHandlerTest {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "op")
                 .build();
-        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
-        Map res = (Map) handler.handleRequest(asSet(conn),request);
+        Map res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
         assertEquals(res.size(),0);
 
         request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "not")
                 .build();
-        conn = ManagementFactory.getPlatformMBeanServer();
-        res = (Map) handler.handleRequest(asSet(conn),request);
+        res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
         assertEquals(res.size(),0);
     }
 
@@ -257,23 +253,24 @@ public class ListHandlerTest {
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        Map res = (Map) handler.handleRequest(conns,request);
+        Map res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
         assertEquals(((Map) res.get("Verbose")).get("type"),"boolean");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*not found.*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
     public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("bullerbue", "country=sweden")
                 .build();
-        MBeanServerConnection dummyConn = EasyMock.createMock(MBeanServerConnection.class);
-        Set<MBeanServerConnection> conns = new LinkedHashSet<MBeanServerConnection>();
-        conns.add(dummyConn);
-        conns.add(ManagementFactory.getPlatformMBeanServer());
+        MBeanServer dummyConn = EasyMock.createMock(MBeanServer.class);
 
-        expect(dummyConn.getMBeanInfo(new ObjectName("bullerbue:country=sweden"))).andThrow(new InstanceNotFoundException());
+        MBeanServerExecutor servers = getMBeanServerManager(dummyConn, ManagementFactory.getPlatformMBeanServer());
+
+        ObjectName name = new ObjectName("bullerbue:country=sweden");
+        expect(dummyConn.getMBeanInfo(name)).andThrow(new InstanceNotFoundException());
+        expect(dummyConn.isRegistered(name)).andReturn(false);
         replay(dummyConn);
-        handler.handleRequest(conns,request);
+        handler.handleRequest(servers,request);
     }
 
 

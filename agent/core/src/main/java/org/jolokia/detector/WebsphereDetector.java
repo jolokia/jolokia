@@ -16,11 +16,6 @@
 
 package org.jolokia.detector;
 
-import org.jolokia.util.ClassUtil;
-import org.json.simple.JSONObject;
-
-import javax.management.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -28,6 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.management.*;
+
+import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.util.ClassUtil;
+import org.json.simple.JSONObject;
 
 /**
  * Detector for IBM Websphere 6 & 7 & 8
@@ -47,10 +48,11 @@ public class WebsphereDetector extends AbstractServerDetector {
     private boolean isWebsphere7 = ClassUtil.checkForClass("com.ibm.websphere.management.AdminContext");
     private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+    /** {@inheritDoc}
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String serverVersion =
-                getSingleStringAttribute(pMbeanServers, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
+                getSingleStringAttribute(pMBeanServerExecutor, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
         if (serverVersion != null && serverVersion.contains("WebSphere")) {
             Matcher matcher = SERVER_VERSION_PATTERN.matcher(serverVersion);
             if (matcher.find()) {
@@ -69,9 +71,10 @@ public class WebsphereDetector extends AbstractServerDetector {
         return null;
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc}
+     * @param servers*/
     @Override
-    public void addMBeanServers(Set<MBeanServer> servers) {
+    public void addMBeanServers(Set<MBeanServerConnection> servers) {
         try {
             /*
 			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();

@@ -16,9 +16,11 @@
 
 package org.jolokia.detector;
 
-import javax.management.MBeanServer;
-
 import java.util.Set;
+
+import javax.management.MBeanServerConnection;
+
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting
@@ -35,15 +37,17 @@ public interface ServerDetector {
      * in case of a successful detection, <code>null</code> otherwise.
      *
      *
-     * @param pMbeanServers a set of MBeanServers which can be used for detecting server informations
+     *
+     *
+     * @param pMBeanServerExecutor a set of MBeanServers which can be used for detecting server informations
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
-    ServerHandle detect(Set<MBeanServer> pMbeanServers);
+    ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor);
 
     /**
      * Add server specific MBeanServers
      *
      * @param pMBeanServers set to add detected MBeanServers to
      */
-    void addMBeanServers(Set<MBeanServer> pMBeanServers);
+    void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
 }

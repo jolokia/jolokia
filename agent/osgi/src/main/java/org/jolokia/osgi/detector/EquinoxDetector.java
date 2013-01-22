@@ -16,10 +16,7 @@
 
 package org.jolokia.osgi.detector;
 
-import java.util.Set;
-
-import javax.management.MBeanServer;
-
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 
 /**
@@ -30,8 +27,9 @@ import org.jolokia.detector.ServerHandle;
  */
 public class EquinoxDetector extends AbstractOsgiServerDetector {
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+    /** {@inheritDoc}
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (checkSystemBundleForSymbolicName("org.eclipse.osgi")) {
             String version = getSystemBundleVersion();
             version = version.replaceFirst("\\.v\\d+$","");

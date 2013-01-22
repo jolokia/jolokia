@@ -16,22 +16,22 @@ package org.jolokia.jsr160;
  *  limitations under the License.
  */
 
-import org.jolokia.converter.*;
-import org.jolokia.request.JmxRequest;
+import java.io.IOException;
+import java.util.*;
+
+import javax.management.*;
+import javax.management.remote.*;
+import javax.naming.Context;
+
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
 import org.jolokia.restrictor.Restrictor;
-
-import javax.management.*;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
-import javax.naming.Context;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Dispatcher for calling JSR-160 connectors
@@ -77,7 +77,8 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
-                return handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),pJmxReq);
+                MBeanServerExecutor manager = new MBeanServerExecutorRemote(connection);
+                return handler.handleRequest(manager,pJmxReq);
             } else {
                 return handler.handleRequest(connection,pJmxReq);
             }

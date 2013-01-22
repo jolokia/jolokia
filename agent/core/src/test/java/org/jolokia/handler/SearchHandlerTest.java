@@ -36,12 +36,12 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 12.09.11
  */
-public class SearchHandlerTest {
+public class SearchHandlerTest extends BaseHandlerTest {
 
 
     private SearchHandler handler;
 
-    private MBeanServerConnection connection;
+    private MBeanServer server;
 
     @BeforeMethod
     public void setup() {
@@ -51,7 +51,7 @@ public class SearchHandlerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
         handler.handleRequest((MBeanServerConnection) null,
-                              new JmxRequestBuilder(RequestType.SEARCH,"java.lang:*").<JmxSearchRequest>build());
+                              new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JmxSearchRequest>build());
     }
 
     @Test
@@ -62,10 +62,10 @@ public class SearchHandlerTest {
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         List<String> res = doSearch("java.lang:*", null, "java.lang:type=Memory", "java.lang:type=Runtime");
-        assertEquals(res.size(),2);
+        assertEquals(res.size(), 2);
         assertTrue(res.contains("java.lang:type=Memory"));
         assertTrue(res.contains("java.lang:type=Runtime"));
-        verify(connection);
+        verify(server);
     }
 
 
@@ -75,7 +75,7 @@ public class SearchHandlerTest {
         List<String> res = doSearch("java.lang:*", null, attr);
         assertEquals(res.size(),1);
         assertTrue(res.contains(attr));
-        verify(connection);
+        verify(server);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class SearchHandlerTest {
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:name=bla,type=Memory"));
         assertTrue(res.contains("java.lang:mode=run,type=Runtime"));
-        verify(connection);
+        verify(server);
     }
 
     @Test
@@ -93,20 +93,20 @@ public class SearchHandlerTest {
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:type=Memory,name=bla"));
         assertTrue(res.contains("java.lang:type=Runtime,mode=run"));
-        verify(connection);
+        verify(server);
     }
 
     private List<String> doSearch(String pPattern, String pUseCanonicalName, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         ObjectName oName = new ObjectName(pPattern);
         JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.CANONICAL_NAMING,pUseCanonicalName).build();
 
-        connection = createMock(MBeanServerConnection.class);
+        server = createMock(MBeanServer.class);
         Set<ObjectName> names = new HashSet<ObjectName>();
         for (String name : pFoundNames) {
             names.add(new ObjectName(name));
         }
-        expect(connection.queryNames(oName,null)).andReturn(names);
-        replay(connection);
-        return (List<String>) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
+        expect(server.queryNames(oName,null)).andReturn(names);
+        replay(server);
+        return (List<String>) handler.handleRequest(getMBeanServerManager(server),request);
     }
 }

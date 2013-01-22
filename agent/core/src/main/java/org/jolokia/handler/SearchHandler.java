@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -54,18 +55,18 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         checkType();
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc}
+     * @param serverManager
+     * @param request*/
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxSearchRequest request)
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JmxSearchRequest request)
             throws MBeanException, IOException {
-        Set<String> ret = new HashSet<String>();
+        Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
+        Set<String> ret = new LinkedHashSet<String>();
 
-        for (MBeanServerConnection server : servers) {
-            Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
-            for (ObjectName name : names) {
-                ret.add(request.getOrderedObjectName(name));
-            }
+        for (ObjectName name : names) {
+            ret.add(request.getOrderedObjectName(name));
         }
         return new ArrayList<String>(ret);
     }

@@ -102,7 +102,7 @@ public class MBeanServerHandlerTest {
         Object result = new Object();
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(reqHandler.handleRequest(isA(Set.class), eq(request))).andReturn(result);
+        expect(reqHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andReturn(result);
         replay(reqHandler);
         assertEquals(handler.dispatchRequest(reqHandler, request),result);
     }
@@ -114,17 +114,15 @@ public class MBeanServerHandlerTest {
         Object result = new Object();
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(reqHandler.handleRequest(isA(Set.class), eq(request))).andThrow(new IOException());
+        expect(reqHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andThrow(new IOException());
         replay(reqHandler);
         handler.dispatchRequest(reqHandler, request);
     }
 
 
     @Test
-    public void mbeanServers() {
-        Set<MBeanServer> servers = handler.getMBeanServers();
-        assertTrue(servers.size() > 0);
-        assertTrue(servers.contains(ManagementFactory.getPlatformMBeanServer()));
+    public void mbeanServers() throws MBeanException, IOException, ReflectionException, MalformedObjectNameException {
+        checkMBeans(new ObjectName("java.lang:type=Memory"));
 
         String info = handler.mBeanServersInfo();
         assertTrue(info.contains("Platform MBeanServer"));
@@ -132,39 +130,39 @@ public class MBeanServerHandlerTest {
     }
 
     @Test
-    public void mbeanRegistration() throws JMException {
-        try {
-            ObjectName oName = new ObjectName(handler.getObjectName());
-            Set<MBeanServer> servers = handler.getMBeanServers();
-            boolean found = false;
-            for (MBeanServer server : servers) {
-                if (server.isRegistered(oName)) {
-                    found = true;
-                    break;
-                }
+    public void mbeanRegistration() throws JMException, IOException {
+        checkMBeans(new ObjectName(handler.getObjectName()));
+    }
+
+    private void checkMBeans(ObjectName oName) throws MBeanException, IOException, ReflectionException {
+        MBeanServerExecutor servers = handler.getMBeanServerManager();
+        final List<Boolean> result = new ArrayList<Boolean>();
+        servers.iterate(oName,new MBeanServerExecutor.MBeanAction<Object>() {
+            public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
+                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+                result.add(pConn.isRegistered(pName));
+                return null;
             }
-            assertTrue(found,"MBean not registered");
-        } finally {
-            handler.unregisterMBeans();
-        }
+        });
+        assertTrue(result.contains(Boolean.TRUE),"MBean not registered");
     }
 
     @Test
-    public void mbeanRegistrationWithFailingTestDetector() throws JMException {
+    public void mbeanRegistrationWithFailingTestDetector() throws JMException, IOException {
         TestDetector.setThrowAddException(true);
         // New setup because detection happens at construction time
         setup();
         try {
             ObjectName oName = new ObjectName(handler.getObjectName());
-            Set<MBeanServer> servers = handler.getMBeanServers();
-            boolean found = false;
-            for (MBeanServer server : servers) {
-                if (server.isRegistered(oName)) {
-                    found = true;
-                    break;
+            MBeanServerExecutor servers = handler.getMBeanServerManager();
+            final List<Boolean> results = new ArrayList<Boolean>();
+            servers.iterate(oName,new MBeanServerExecutor.MBeanAction<Void>() {
+                public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+                    results.add(pConn.isRegistered(pName));
+                    return null;
                 }
-            }
-            assertTrue(found,"MBean not registered");
+            });
+            assertTrue(results.contains(Boolean.TRUE),"MBean not registered");
         } finally {
             TestDetector.setThrowAddException(false);
             handler.unregisterMBeans();
@@ -185,7 +183,7 @@ public class MBeanServerHandlerTest {
 
     @Test(expectedExceptions = InstanceNotFoundException.class)
     public void mbeanUnregistrationFailed1() throws JMException {
-        handler.registerMBean(new Dummy(false,"test:type=dummy"));
+        handler.registerMBean(new Dummy(false, "test:type=dummy"));
         ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy"));
         handler.unregisterMBeans();
     }

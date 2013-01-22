@@ -48,7 +48,7 @@ public class TestDetector implements ServerDetector {
         nr = instances++;
     }
 
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (nr == 2) {
             throw new RuntimeException();
         } else if (nr == 3 && !fallThrough) {
@@ -59,7 +59,7 @@ public class TestDetector implements ServerDetector {
         }
     }
 
-    public void addMBeanServers(Set<MBeanServer> pMBeanServers) {
+    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
         if (throwAddException) {
             MBeanServer server = createMock(MBeanServer.class);
             try {

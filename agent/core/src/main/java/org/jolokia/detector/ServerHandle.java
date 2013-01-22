@@ -18,10 +18,10 @@ package org.jolokia.detector;
 
 import java.net.URL;
 import java.util.Map;
-import java.util.Set;
 
 import javax.management.*;
 
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
@@ -108,10 +108,12 @@ public class ServerHandle {
      * to provide dynamice information on the server which gets calculated afresh
      * on each invokation.
      *
-     * @param pServers MBeanServers to query
+     *
+     *
+     * @param pServerManager MBeanServers to query
      * @return a map of extra info or <code>null</code> if no extra information is given.
      */
-    public Map<String,String> getExtraInfo(Set<? extends MBeanServerConnection> pServers) {
+    public Map<String,String> getExtraInfo(MBeanServerExecutor pServerManager) {
         return extraInfo;
     }
 
@@ -119,10 +121,10 @@ public class ServerHandle {
      * Hook for performing certain workarounds/pre processing just before
      * a request gets dispatched
      *
-     * @param pMBeanServers the detected MBeanServers
+     * @param pMBeanServerExecutor the detected MBeanServers
      * @param pJmxReq the request to dispatch
      */
-    public void preDispatch(Set<MBeanServer> pMBeanServers, JmxRequest pJmxReq) {
+    public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
         // Do nothing
     }
 
@@ -132,11 +134,11 @@ public class ServerHandle {
      *
      * The default is a no-op.
      *
-     * @param pServers
+     * @param pServerManager
      * @param pConfig agent configuration
      * @param pLoghandler logger to use for logging any error.
      */
-    public void postDetect(Set<? extends MBeanServerConnection> pServers, Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
+    public void postDetect(MBeanServerExecutor pServerManager, Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
         // Do nothing
     }
 
@@ -168,16 +170,18 @@ public class ServerHandle {
     /**
      * Return this info as an JSONObject
      *
-     * @param pServers servers, for which dynamic part might be queried
+     *
+     *
+     * @param pServerManager servers, for which dynamic part might be queried
      * @return this object in JSON representation
      */
-    public JSONObject toJSONObject(Set<MBeanServerConnection> pServers) {
+    public JSONObject toJSONObject(MBeanServerExecutor pServerManager) {
         JSONObject ret = new JSONObject();
         addNullSafe(ret, "vendor", vendor);
         addNullSafe(ret, "product", product);
         addNullSafe(ret, "version", version);
         addNullSafe(ret, "agent-url", agentUrl != null ? agentUrl.toExternalForm() : null);
-        Map<String,String> extra = getExtraInfo(pServers);
+        Map<String,String> extra = getExtraInfo(pServerManager);
         if (extra != null) {
             JSONObject jsonExtra = new JSONObject();
             for (Map.Entry<String,String> entry : extra.entrySet()) {

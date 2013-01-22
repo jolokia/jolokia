@@ -16,11 +16,10 @@
 
 package org.jolokia.detector;
 
-import javax.management.MBeanServer;
-
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * Detector for Tomcat
@@ -33,9 +32,10 @@ public class TomcatDetector extends AbstractServerDetector {
     private static final Pattern SERVER_INFO_PATTERN = Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+)");
 
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String serverInfo = getSingleStringAttribute(pMbeanServers, "*:type=Server", "serverInfo");
+    /** {@inheritDoc}
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        String serverInfo = getSingleStringAttribute(pMBeanServerExecutor, "*:type=Server", "serverInfo");
         if (serverInfo == null) {
             return null;
         }
