@@ -16,6 +16,7 @@
 
 package org.jolokia.osgi.detector;
 
+import org.jolokia.backend.MBeanServerManager;
 import org.jolokia.detector.ServerHandle;
 
 /**

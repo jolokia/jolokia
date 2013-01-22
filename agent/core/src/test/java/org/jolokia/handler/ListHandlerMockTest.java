@@ -92,7 +92,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
     public void iOException() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
 
-        MBeanServer connection = prepareForIOException();
+        MBeanServerConnection connection = prepareForIOException();
         Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request);
         verify(connection);
         assertEquals(res.size(),1);
@@ -107,12 +107,12 @@ public class ListHandlerMockTest extends BaseHandlerTest {
     public void iOExceptionWithPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Runtime","attr").build();
 
-        MBeanServer server = prepareForIOException();
+        MBeanServerConnection server = prepareForIOException();
         Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
     }
 
-    private MBeanServer prepareForIOException() throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
-        MBeanServer server = createMock(MBeanServer.class);
+    private MBeanServerConnection prepareForIOException() throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+        MBeanServerConnection server = createMock(MBeanServerConnection.class);
         Set<ObjectName> nameSet = new HashSet<ObjectName>();
         ObjectName oName = new ObjectName("java.lang:type=Memory");
         nameSet.add(oName);

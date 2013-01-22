@@ -16,8 +16,10 @@
 
 package org.jolokia.osgi.detector;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.jolokia.backend.MBeanServerManager;
 import org.jolokia.detector.ServerHandle;
 
 /**
