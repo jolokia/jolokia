@@ -25,6 +25,7 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.*;

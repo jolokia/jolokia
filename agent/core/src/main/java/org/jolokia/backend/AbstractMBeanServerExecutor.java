@@ -5,6 +5,8 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.jmx.MBeanServerExecutor;
+
 /**
  * @author roland
  * @since 22.01.13

@@ -18,7 +18,7 @@ package org.jolokia.detector;
 
 import java.lang.reflect.*;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 
 /**

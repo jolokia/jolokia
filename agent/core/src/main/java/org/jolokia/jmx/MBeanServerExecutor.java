@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend;
+package org.jolokia.jmx;
 
 import java.io.IOException;
 import java.util.Set;
@@ -83,7 +83,6 @@ public interface MBeanServerExecutor {
      * @param <R> return type for the execute methode
      */
     public interface MBeanAction<R> {
-
         /**
          * Execute the action either via {@link #callFirst(ObjectName, MBeanAction, Object...)} or
          * {@link #iterate(ObjectName, MBeanAction, Object...)}.

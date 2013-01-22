@@ -23,7 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;

@@ -8,6 +8,7 @@ import javax.management.*;
 
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.*;
 

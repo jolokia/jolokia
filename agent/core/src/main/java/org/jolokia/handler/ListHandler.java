@@ -6,7 +6,7 @@ import java.util.Stack;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;

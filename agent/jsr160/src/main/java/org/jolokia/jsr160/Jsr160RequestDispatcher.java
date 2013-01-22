@@ -23,7 +23,7 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
