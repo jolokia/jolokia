@@ -22,8 +22,12 @@ import java.util.Set;
 import javax.management.*;
 
 /**
- * An MBeanSever executor is responsible to perform actions on one or more MBeanServers. It encapsulates
- * completely all available MBeanServers.
+ * An MBeanSever executor is responsible to perform actions on one or more MBeanServers which involve
+ * operations on one or more MBeans. It encapsulates completely all available MBeanServers, so no direct
+ * access to the MBeanServers are required. This interface is also suitable for implementations with
+ * remote {@link MBeanServerConnection}s, e.g. for implementing it with JSR-160 connections.
+ *
+ * A {@link MBeanServerExecutor} is used
  *
  * @author roland
  * @since 17.01.13
@@ -77,12 +81,12 @@ public interface MBeanServerExecutor {
 
     /**
      * A MBeanAction represent a single action on a MBeanServer for a given object name. The action is free
-     * to throw a {@see InstanceNotFoundException} if the object name is not contained in the give MBeanServer.
+     * to throw a {@link InstanceNotFoundException} if the object name is not contained in the give MBeanServer.
      * In this case the next MBeanServer is tried. How this is done depends on the method this action is used in
      *
      * @param <R> return type for the execute methode
      */
-    public interface MBeanAction<R> {
+    interface MBeanAction<R> {
         /**
          * Execute the action either via {@link #callFirst(ObjectName, MBeanAction, Object...)} or
          * {@link #iterate(ObjectName, MBeanAction, Object...)}.

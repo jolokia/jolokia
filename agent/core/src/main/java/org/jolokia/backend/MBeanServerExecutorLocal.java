@@ -85,7 +85,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
      * @throws IllegalStateException if no MBeanServer could be found.
      * @param pDetectors detectors which might have extra possibilities to add MBeanServers
      */
-    public synchronized void init(List<ServerDetector> pDetectors) {
+    private synchronized void init(List<ServerDetector> pDetectors) {
 
         // Check for JBoss MBeanServer via its utility class
         mBeanServers = new LinkedHashSet<MBeanServerConnection>();

@@ -32,7 +32,7 @@ import org.jolokia.backend.AbstractMBeanServerExecutor;
 class MBeanServerExecutorRemote extends AbstractMBeanServerExecutor {
 
     // wrapped collection
-    private final HashSet<MBeanServerConnection> serverConnections;
+    private final Set<MBeanServerConnection> serverConnections;
 
     /**
      * Constructor for wrapping a remote connection

@@ -138,7 +138,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // Class for handling list queries
-    private class ListMBeanAction implements MBeanServerExecutor.MBeanAction<Void> {
+    private static class ListMBeanAction implements MBeanServerExecutor.MBeanAction<Void> {
 
         // Meta data which will get collected
         private final MBeanInfoData infoMap;

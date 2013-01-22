@@ -23,24 +23,11 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
 
     public <R> void iterate(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object ... pExtraArgs) throws IOException, ReflectionException, MBeanException {
         try {
-        if (pObjectName == null || pObjectName.isPattern()) {
-            // MBean pattern for an MBean can match at multiple servers
-            for (MBeanServerConnection server : getMBeanServers()) {
-                for (Object nameObject : server.queryNames(pObjectName,null)) {
-                    pMBeanAction.execute(server, (ObjectName) nameObject, pExtraArgs);
-                }
+            if (pObjectName == null || pObjectName.isPattern()) {
+                handleMultipleMBeans(pObjectName, pMBeanAction, pExtraArgs);
+            } else {
+                handleSingleMBean(pObjectName, pMBeanAction);
             }
-        } else {
-            // Add a single named MBean's information to the handler
-            for (MBeanServerConnection server : getMBeanServers()) {
-                // Only the first MBeanServer holding the MBean wins
-                if (server.isRegistered(pObjectName)) {
-                    pMBeanAction.execute(server, pObjectName);
-                    return;
-                }
-            }
-            throw new IllegalArgumentException("No MBean with ObjectName " + pObjectName + " is registered");
-        }
         } catch (InstanceNotFoundException exp) {
             throw new IllegalArgumentException("Cannot find MBean " +
                                                (pObjectName != null ? "(MBean " + pObjectName + ")" : "") + ": " + exp,exp);
@@ -48,6 +35,29 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             throw new IllegalArgumentException("Cannot handle MBean attribute " +
                                                (pObjectName != null ? "(MBean " + pObjectName + ")" : "") + ": " + exp,exp);
         }
+    }
+
+    private <R> void handleMultipleMBeans(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object[] pExtraArgs)
+            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException {
+        // MBean pattern for an MBean can match at multiple servers
+        for (MBeanServerConnection server : getMBeanServers()) {
+            for (Object nameObject : server.queryNames(pObjectName,null)) {
+                pMBeanAction.execute(server, (ObjectName) nameObject, pExtraArgs);
+            }
+        }
+    }
+
+    private <R> void handleSingleMBean(ObjectName pObjectName, MBeanAction<R> pMBeanAction)
+            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException {
+        // Add a single named MBean's information to the handler
+        for (MBeanServerConnection server : getMBeanServers()) {
+            // Only the first MBeanServer holding the MBean wins
+            if (server.isRegistered(pObjectName)) {
+                pMBeanAction.execute(server, pObjectName);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("No MBean with ObjectName " + pObjectName + " is registered");
     }
 
     public <T> T callFirst(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object... pExtraArgs)
