@@ -21,6 +21,8 @@ import java.util.Set;
 import javax.management.MBeanServerConnection;
 
 /**
+ * A dedicated managed for handling various kinds of MBeanServer related requests.
+ *
  * @author roland
  * @since 17.01.13
  */
