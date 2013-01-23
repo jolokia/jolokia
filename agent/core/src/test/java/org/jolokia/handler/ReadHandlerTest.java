@@ -96,6 +96,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
 
         MBeanServer server = createMock(MBeanServer.class);
+        expect(server.isRegistered(testBeanName)).andStubReturn(true);
         expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
         expect(server.getAttribute(testBeanName,"attr1")).andReturn("val1");
         replay(server);
@@ -364,6 +365,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     private MBeanAttributeInfo[] prepareMBeanInfos(MBeanServerConnection pConnection, ObjectName pObjectName, String pAttrs[])
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException, IntrospectionException {
         MBeanInfo mBeanInfo = createMock(MBeanInfo.class);
+        expect(pConnection.isRegistered(pObjectName)).andStubReturn(true);
         expect(pConnection.getMBeanInfo(pObjectName)).andReturn(mBeanInfo);
         MBeanAttributeInfo[] infos = new MBeanAttributeInfo[pAttrs.length];
         for (int i=0;i<pAttrs.length;i++) {

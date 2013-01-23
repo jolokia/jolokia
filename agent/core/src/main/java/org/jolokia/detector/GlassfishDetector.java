@@ -93,8 +93,9 @@ public class GlassfishDetector extends AbstractServerDetector {
             // Cannot happen ....
         }
         try {
-            pServers.callFirst(bootMBean,new MBeanServerExecutor.MBeanAction<Void>() {
-                public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+            pServers.call(bootMBean, new MBeanServerExecutor.MBeanAction<Void>() {
+                public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... extraArgs)
+                        throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                     pConn.invoke(pName, "bootAMX", null, null);
                     return null;
                 }

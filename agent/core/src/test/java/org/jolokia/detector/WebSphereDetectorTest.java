@@ -38,7 +38,8 @@ public class WebSphereDetectorTest extends BaseDetectorTest {
         ObjectName serverMbean = new ObjectName(SERVER_MBEAN);
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("*:j2eeType=J2EEServer,type=Server,*"),null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
+                andStubReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean)));
+        expect(mockServer.isRegistered(serverMbean)).andStubReturn(true);
         expect(mockServer.getAttribute(serverMbean,"platformName")).andReturn("IBM WebSphere Application Server");
         expect(mockServer.getAttribute(serverMbean,"serverVersion")).andReturn(SERVER_VERSION_V6);
         replay(mockServer);

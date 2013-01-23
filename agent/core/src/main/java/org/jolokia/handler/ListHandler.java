@@ -81,11 +81,15 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         try {
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
             oName = objectNameFromPath(pathStack);
-            ListMBeanAction handler = new ListMBeanAction(maxDepth,pathStack,useCanonicalName);
 
-            pServerManager.iterate(oName, handler);
+            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth,pathStack,useCanonicalName);
+            if (oName == null || oName.isPattern()) {
+                pServerManager.each(oName, action);
+            } else {
+                pServerManager.call(oName,action);
+            }
 
-            return handler.getResult();
+            return action.getResult();
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         } catch (JMException e) {
@@ -138,7 +142,7 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // Class for handling list queries
-    private static class ListMBeanAction implements MBeanServerExecutor.MBeanAction<Void> {
+    private static class ListMBeanEachAction implements MBeanServerExecutor.MBeanEachCallback, MBeanServerExecutor.MBeanAction<Void> {
 
         // Meta data which will get collected
         private final MBeanInfoData infoMap;
@@ -151,23 +155,44 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
          * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
          *                          name
          */
-        public ListMBeanAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
+        public ListMBeanEachAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
             infoMap = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName);
         }
 
         /**
-         * Add the given MBean to the collected Meta-Data
-         *
+         * Add the given MBean to the collected Meta-Data for an iteration
          *
          * @param pConn connection from where to obtain the meta data
          * @param pName object name of the bean
-         * @throws IntrospectionException
          * @throws ReflectionException
          * @throws InstanceNotFoundException
          * @throws IOException
          */
+        public void callback(MBeanServerConnection pConn, ObjectName pName)
+                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+            lookupMBeanInfo(pConn, pName);
+        }
+
+        /**
+         * Add the MBeanInfo for a single MBean
+         *
+         * @param pConn MBeanServer on which the action should be performed
+         * @param pName an objectname interpreted specifically by the action
+         * @param extraArgs any extra args given as context from the outside
+         * @return
+         * @throws ReflectionException
+         * @throws InstanceNotFoundException
+         * @throws IOException
+         * @throws MBeanException
+         * @throws AttributeNotFoundException
+         */
         public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-                throws ReflectionException, IOException, InstanceNotFoundException {
+                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+            lookupMBeanInfo(pConn, pName);
+            return null;
+        }
+
+        private void lookupMBeanInfo(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, ReflectionException, IOException {
             if (!infoMap.handleFirstOrSecondLevel(pName)) {
                 try {
                     MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);
@@ -180,8 +205,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                     throw new IllegalArgumentException("Cannot extra MBeanInfo for " + pName + ": " + exp,exp);
                 }
             }
-            return null;
         }
+
 
         /**
          * Get the overall result
@@ -191,5 +216,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
         public Object getResult() {
             return infoMap.truncate();
         }
+
     }
 }

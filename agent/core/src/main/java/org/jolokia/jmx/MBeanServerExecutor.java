@@ -35,20 +35,20 @@ import javax.management.*;
 public interface MBeanServerExecutor {
 
     /**
-     * Iterate over all MBeanServers managed and call the handler for each MBean found on every server.
-     * Please note, that the return value of the action is ignored and the action should collect their
-     * the values on its own if required.
+     * Iterate over all MBeanServers managed and call the handler via a callback.
+     *
+     * If {@param pObjectName} is null or a pattern, the MBean names are queried on each MBeanServer and
+     * feed into the callback. If it is a full object name, then all MBeanServers are called with this object
+     * name in turn.
      *
      * @param pObjectName object name to lookup, which can be a pattern in which case a query is performed.
-     * @param pMBeanAction the action to be called for each MBean found on every server
-     * @param pExtraArgs any extra args given through to the action
-     * @param <R> return type, which gets ignored.
+     * @param pCallback the action to be called for each MBean found on every server
      *
      * @throws IOException
      * @throws ReflectionException
      * @throws MBeanException
      */
-    <R> void iterate(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object ... pExtraArgs)
+    void each(ObjectName pObjectName, MBeanEachCallback pCallback)
             throws IOException, ReflectionException, MBeanException;
 
     /**
@@ -67,7 +67,7 @@ public interface MBeanServerExecutor {
      * @throws ReflectionException
      * @throws MBeanException if the JMX call causes an issue
      */
-    <R> R callFirst(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object... pExtraArgs)
+    <R> R call(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object... pExtraArgs)
             throws IOException, ReflectionException, MBeanException;
 
     /**
@@ -80,16 +80,37 @@ public interface MBeanServerExecutor {
     Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException;
 
     /**
+     * This callback is used together with {@link #each(ObjectName, MBeanEachCallback)} for iterating over all
+     * active MBeanServers. The callback is responsible on its own to collect the information queried.
+     */
+    interface MBeanEachCallback {
+        /**
+         * Callback call for a specific MBeanServer for a given object name.
+         *
+         * @param pConn MBeanServer
+         * @param pName object name as given by the surrounding {@link #each(ObjectName, MBeanEachCallback)} call, which
+         *              can be either a pattern or null (in which case the names are searched for before) or a direct name.
+         *
+         * @throws ReflectionException
+         * @throws InstanceNotFoundException if the provided full-ObjectName is not registered at the MBeanServer
+         * @throws IOException
+         * @throws MBeanException if an operation of an MBean fails
+         */
+        void callback(MBeanServerConnection pConn, ObjectName pName)
+                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException;
+    }
+
+    /**
      * A MBeanAction represent a single action on a MBeanServer for a given object name. The action is free
-     * to throw a {@link InstanceNotFoundException} if the object name is not contained in the give MBeanServer.
-     * In this case the next MBeanServer is tried. How this is done depends on the method this action is used in
+     * to throw a {@link InstanceNotFoundException} or {@link AttributeNotFoundException} if the object name or attribute
+     * is not contained in the give MBeanServer. In this case the next MBeanServer is tried, otherwise the result
+     * from the action is returned and no other MBeanServers are tried
      *
-     * @param <R> return type for the execute methode
+     * @param <R> return type for the execute method
      */
     interface MBeanAction<R> {
         /**
-         * Execute the action either via {@link #callFirst(ObjectName, MBeanAction, Object...)} or
-         * {@link #iterate(ObjectName, MBeanAction, Object...)}.
+         * Execute the action given to {@link #call(ObjectName, MBeanAction, Object...)}.
          *
          * @param pConn MBeanServer on which the action should be performed
          * @param pName an objectname interpreted specifically by the action
@@ -97,7 +118,7 @@ public interface MBeanServerExecutor {
          * @return the return value
          *
          * @throws ReflectionException
-         * @throws InstanceNotFoundException if the MBean does not exist. For {@link #callFirst(ObjectName, MBeanAction, Object...)} this
+         * @throws InstanceNotFoundException if the MBean does not exist. For {@link #call(ObjectName, MBeanAction, Object...)} this
          *         implies to try the next MBeanServer.
          * @throws IOException
          * @throws MBeanException

@@ -118,7 +118,7 @@ public class JBossDetector extends AbstractServerDetector {
             if (pRequest.getObjectName() != null &&
                 "java.lang".equals(pRequest.getObjectName().getDomain())) {
                 try {
-                   pMBeanServerExecutor.callFirst(pRequest.getObjectName(), JBOSS_WORKAROUND_HANDLER);
+                   pMBeanServerExecutor.call(pRequest.getObjectName(), JBOSS_WORKAROUND_HANDLER);
                 } catch (ReflectionException e) {
                     throw new IllegalStateException("Workaround for JBoss failed for object " + pRequest.getObjectName() + ": " + e);
                 } catch (MBeanException e) {
@@ -130,9 +130,9 @@ public class JBossDetector extends AbstractServerDetector {
         }
 
         // Handler used for calling getMBeanInfo() in order to avoid a nasty bug when doing a lookuo
-        private static final MBeanServerExecutor.MBeanAction JBOSS_WORKAROUND_HANDLER = new MBeanServerExecutor.MBeanAction<Void>() {
-            public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+        private static final MBeanServerExecutor.MBeanAction<Void> JBOSS_WORKAROUND_HANDLER = new MBeanServerExecutor.MBeanAction<Void>() {
+            public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... pExtraArgs)
+                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 try {
                     pConn.getMBeanInfo(pName);
                 } catch (IntrospectionException e) {

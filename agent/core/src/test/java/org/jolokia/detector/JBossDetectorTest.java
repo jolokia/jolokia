@@ -69,6 +69,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
 
         ObjectName oName = prepareQuery("jboss.system:type=Server");
+        expect(server.isRegistered(oName)).andStubReturn(true);
         expect(server.getAttribute(oName, "Version")).andReturn("5.1.0");
         replay(server);
         ServerHandle handle = detector.detect(servers);
@@ -80,6 +81,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
         // Verify workaround
         reset(server);
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
+        expect(server.isRegistered(memoryBean)).andStubReturn(true);
         expect(server.getMBeanInfo(memoryBean)).andReturn(null);
         replay(server);
         handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
@@ -91,7 +93,9 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
         expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.as:management-root=server");
-        expect(server.getAttribute(new ObjectName("jboss.as:management-root=server"),"releaseVersion")).andReturn("7.1.1.Final");
+        ObjectName oName = new ObjectName("jboss.as:management-root=server");
+        expect(server.isRegistered(oName)).andStubReturn(true);
+        expect(server.getAttribute(oName,"releaseVersion")).andReturn("7.1.1.Final");
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"7.1.1.Final");

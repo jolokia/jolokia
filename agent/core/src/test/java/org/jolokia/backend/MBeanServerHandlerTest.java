@@ -138,14 +138,13 @@ public class MBeanServerHandlerTest {
     private void checkMBeans(ObjectName oName) throws MBeanException, IOException, ReflectionException {
         MBeanServerExecutor servers = handler.getMBeanServerManager();
         final List<Boolean> result = new ArrayList<Boolean>();
-        servers.iterate(oName,new MBeanServerExecutor.MBeanAction<Object>() {
-            public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+        servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
+            public void callback(MBeanServerConnection pConn, ObjectName pName)
+                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 result.add(pConn.isRegistered(pName));
-                return null;
             }
         });
-        assertTrue(result.contains(Boolean.TRUE),"MBean not registered");
+        assertTrue(result.contains(Boolean.TRUE), "MBean not registered");
     }
 
     @Test
@@ -157,16 +156,16 @@ public class MBeanServerHandlerTest {
             ObjectName oName = new ObjectName(handler.getObjectName());
             MBeanServerExecutor servers = handler.getMBeanServerManager();
             final List<Boolean> results = new ArrayList<Boolean>();
-            servers.iterate(oName,new MBeanServerExecutor.MBeanAction<Void>() {
-                public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+            servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
+                public void callback(MBeanServerConnection pConn, ObjectName pName)
+                        throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                     results.add(pConn.isRegistered(pName));
-                    return null;
                 }
             });
             assertTrue(results.contains(Boolean.TRUE),"MBean not registered");
         } finally {
             TestDetector.setThrowAddException(false);
-            handler.unregisterMBeans();
+            tearDown();
         }
     }
 

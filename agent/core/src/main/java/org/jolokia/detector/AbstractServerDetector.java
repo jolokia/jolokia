@@ -91,7 +91,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
      */
     protected String getAttributeValue(MBeanServerExecutor pMBeanServerExecutor, final ObjectName pMBean, final String pAttribute) {
         try {
-            return pMBeanServerExecutor.callFirst(pMBean, GET_ATTRIBUTE_HANDLER, pAttribute);
+            return pMBeanServerExecutor.call(pMBean, GET_ATTRIBUTE_HANDLER, pAttribute);
         } catch (IOException e) {
             return null;
         } catch (ReflectionException e) {
@@ -112,12 +112,8 @@ public abstract class AbstractServerDetector implements ServerDetector {
         }
     };
 
-
     /**
      * Get a single attribute for a given MBeanName pattern.
-     *
-     *
-     *
      *
      * @param pMBeanServerExecutor MBeanServer manager to query
      * @param pMBeanName a MBean name or pattern. If multiple MBeans are found, each is queried for the attribute
@@ -142,7 +138,6 @@ public abstract class AbstractServerDetector implements ServerDetector {
         }
         return attributeValues.iterator().next();
     }
-
 
     /**
      * Get the version number from a JSR-77 compliant server

@@ -16,11 +16,12 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
-import java.util.Set;
+import java.util.*;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.jmx.MBeanServerExecutor;
@@ -66,6 +67,13 @@ public class TestDetector implements ServerDetector {
             try {
                 expect(server.registerMBean(EasyMock.<Object>anyObject(), EasyMock.<ObjectName>anyObject()))
                         .andThrow(exps[nr % exps.length]).anyTimes();
+                expect(server.queryNames(EasyMock.<ObjectName>anyObject(), (QueryExp) isNull())).andStubAnswer(
+                        new IAnswer<Set<ObjectName>>() {
+                            public Set<ObjectName> answer() throws Throwable {
+                                Object[] args = EasyMock.getCurrentArguments();
+                                return new HashSet<ObjectName>(Arrays.asList((ObjectName) args[0]));
+                            }
+                        });
                 expect(server.isRegistered(EasyMock.<ObjectName>anyObject())).andReturn(false);
                 replay(server);
                 pMBeanServers.add(server);

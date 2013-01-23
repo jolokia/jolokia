@@ -38,9 +38,9 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     // MBean Handler used for extracting MBean Meta data
     private static final MBeanServerExecutor.MBeanAction<MBeanInfo> MBEAN_INFO_HANDLER =
-
             new MBeanServerExecutor.MBeanAction<MBeanInfo>() {
-                public MBeanInfo execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException {
+                public MBeanInfo execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
+                        throws ReflectionException, InstanceNotFoundException, IOException {
                     try {
                         return pConn.getMBeanInfo(pName);
                     } catch (IntrospectionException e) {
@@ -51,7 +51,6 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     // MBean Handler for getting an attribute
     private static final MBeanServerExecutor.MBeanAction<Object> MBEAN_ATTRIBUTE_READ_HANDLER =
-
             new MBeanServerExecutor.MBeanAction<Object>() {
                 public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
@@ -222,13 +221,13 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     // Get the MBeanInfo from one of the provided MBeanServers
     private MBeanInfo getMBeanInfo(MBeanServerExecutor pServerManager, ObjectName pObjectName)
             throws IOException, ReflectionException, MBeanException {
-        return pServerManager.callFirst(pObjectName, MBEAN_INFO_HANDLER);
+        return pServerManager.call(pObjectName, MBEAN_INFO_HANDLER);
     }
 
     // Try multiple servers for fetching an attribute
     private Object getAttribute(MBeanServerExecutor pServerManager, ObjectName pMBeanName, String attribute)
             throws MBeanException, ReflectionException, IOException {
-        return pServerManager.callFirst(pMBeanName, MBEAN_ATTRIBUTE_READ_HANDLER, attribute);
+        return pServerManager.call(pMBeanName, MBEAN_ATTRIBUTE_READ_HANDLER, attribute);
     }
 
     // Return a set of attributes as a map with the attribute name as key and their values as values

@@ -21,55 +21,41 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
      */
     protected abstract Set<MBeanServerConnection> getMBeanServers();
 
-    public <R> void iterate(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object ... pExtraArgs) throws IOException, ReflectionException, MBeanException {
+    /** {@inheritDoc} */
+    public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
         try {
-            if (pObjectName == null || pObjectName.isPattern()) {
-                handleMultipleMBeans(pObjectName, pMBeanAction, pExtraArgs);
-            } else {
-                handleSingleMBean(pObjectName, pMBeanAction);
+            // MBean pattern for an MBean can match at multiple servers
+            for (MBeanServerConnection server : getMBeanServers()) {
+                // Query for a full name is the same as a direct lookup
+                for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
+                    pCallback.callback(server, nameObject);
+                }
             }
         } catch (InstanceNotFoundException exp) {
+            // Well, should not happen, since we do a query before and the returned value are supposed to exist
+            // on the mbean-server. But, who knows ...
             throw new IllegalArgumentException("Cannot find MBean " +
                                                (pObjectName != null ? "(MBean " + pObjectName + ")" : "") + ": " + exp,exp);
-        } catch (AttributeNotFoundException exp) {
-            throw new IllegalArgumentException("Cannot handle MBean attribute " +
-                                               (pObjectName != null ? "(MBean " + pObjectName + ")" : "") + ": " + exp,exp);
         }
     }
 
-    private <R> void handleMultipleMBeans(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object[] pExtraArgs)
-            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException {
-        // MBean pattern for an MBean can match at multiple servers
-        for (MBeanServerConnection server : getMBeanServers()) {
-            for (Object nameObject : server.queryNames(pObjectName,null)) {
-                pMBeanAction.execute(server, (ObjectName) nameObject, pExtraArgs);
-            }
-        }
-    }
-
-    private <R> void handleSingleMBean(ObjectName pObjectName, MBeanAction<R> pMBeanAction)
-            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException {
-        // Add a single named MBean's information to the handler
-        for (MBeanServerConnection server : getMBeanServers()) {
-            // Only the first MBeanServer holding the MBean wins
-            if (server.isRegistered(pObjectName)) {
-                pMBeanAction.execute(server, pObjectName);
-                return;
-            }
-        }
-        throw new IllegalArgumentException("No MBean with ObjectName " + pObjectName + " is registered");
-    }
-
-    public <T> T callFirst(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object... pExtraArgs)
+    /** {@inheritDoc} */
+    public <T> T call(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object ... pExtraArgs)
             throws IOException, ReflectionException, MBeanException {
         Exception exception = null;
         for (MBeanServerConnection server : getMBeanServers()) {
             // Only the first MBeanServer holding the MBean wins
             try {
-                return pMBeanAction.execute(server, pObjectName, pExtraArgs);
+                // Still to decide: Should we check eagerly or let an InstanceNotFound Exception
+                // bubble ? Exception bubbling was the former behaviour, so it is left in. However,
+                // it would be interesting how the performance impact is here. All tests BTW are
+                // prepared for switching the guard below on.
+                //if (server.isRegistered(pObjectName)) {
+                    return pMBeanAction.execute(server, pObjectName, pExtraArgs);
+                //}
             } catch (InstanceNotFoundException exp) {
+                // Should not happen, since we check beforehand
                 exception = exp;
-                // Try next one ...
             } catch (AttributeNotFoundException exp) {
                 // Try next one, too ..
                 exception = exp;
@@ -77,10 +63,14 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
         }
         // When we reach this, no MBeanServer know about the requested MBean.
         // Hence, we throw our own InstanceNotFoundException here
-        throw new IllegalArgumentException("No MBean with ObjectName " + pObjectName + " and attribute is registered: " + exception,
-                                           exception);
+
+        String errorMsg = "No MBean with ObjectName " + pObjectName + " and attribute is registered";
+        throw exception != null ?
+                new IllegalArgumentException(errorMsg + ": " + exception,exception) :
+                new IllegalArgumentException(errorMsg);
     }
 
+    /** {@inheritDoc} */
     public Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException {
         Set<ObjectName> names = new LinkedHashSet<ObjectName>();
         for (MBeanServerConnection server : getMBeanServers()) {
