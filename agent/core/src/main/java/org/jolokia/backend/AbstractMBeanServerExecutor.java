@@ -39,24 +39,8 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
         try {
             // MBean pattern for an MBean can match at multiple servers
-            MBeanServerConnection jolokiaServer = getJolokiaMBeanServer();
-            Set<ObjectName> jolokiaMBeans = null;
-            if (jolokiaServer != null) {
-                jolokiaMBeans = new HashSet<ObjectName>();
-                for (ObjectName nameObject : jolokiaServer.queryNames(pObjectName,null)) {
-                    pCallback.callback(jolokiaServer, nameObject);
-                    jolokiaMBeans.add(pObjectName);
-                }
-            }
-            for (MBeanServerConnection server : getMBeanServers(false)) {
-                // Query for a full name is the same as a direct lookup
-                for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
-                    // Dont add if already present in the Jolokia MBeanServer
-                    if (jolokiaMBeans == null || !jolokiaMBeans.contains(pObjectName)) {
-                        pCallback.callback(server, nameObject);
-                    }
-                }
-            }
+            Set<ObjectName> jolokiaMBeans = eachAtJolokiaServer(pObjectName, pCallback);
+            eachAtMBeanServers(pObjectName, pCallback, jolokiaMBeans);
         } catch (InstanceNotFoundException exp) {
             // Well, should not happen, since we do a query before and the returned value are supposed to exist
             // on the mbean-server. But, who knows ...
@@ -103,5 +87,36 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             names.addAll(server.queryNames(pObjectName,null));
         }
         return names;
+    }
+
+    // ====================================================================================================
+    // Search on JolokiaMBean Server, perform the callback and return the MBeans processed
+    private Set<ObjectName> eachAtJolokiaServer(ObjectName pObjectName, MBeanEachCallback pCallback)
+            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException {
+        MBeanServerConnection jolokiaServer = getJolokiaMBeanServer();
+        Set<ObjectName> jolokiaMBeans = null;
+        if (jolokiaServer != null) {
+            jolokiaMBeans = new HashSet<ObjectName>();
+            for (ObjectName nameObject : jolokiaServer.queryNames(pObjectName,null)) {
+                pCallback.callback(jolokiaServer, nameObject);
+                jolokiaMBeans.add(pObjectName);
+            }
+        }
+        return jolokiaMBeans;
+    }
+
+    // Iterate over all other MBeanServers (without the JolokiaMBeanServer) and call the callback on every MBean
+    // not already contained in the JolokiaMBeanServer (this is taken from the last argument)
+    private void eachAtMBeanServers(ObjectName pObjectName, MBeanEachCallback pCallback, Set<ObjectName> pJolokiaMBeans)
+            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException {
+        for (MBeanServerConnection server : getMBeanServers(false)) {
+            // Query for a full name is the same as a direct lookup
+            for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
+                // Dont add if already present in the Jolokia MBeanServer
+                if (pJolokiaMBeans == null || !pJolokiaMBeans.contains(pObjectName)) {
+                    pCallback.callback(server, nameObject);
+                }
+            }
+        }
     }
 }
