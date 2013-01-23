@@ -44,7 +44,7 @@ class MBeanServerExecutorRemote extends AbstractMBeanServerExecutor {
     }
 
     /** {@inheritDoc} */
-    protected Set<MBeanServerConnection> getMBeanServers() {
+    protected Set<MBeanServerConnection> getMBeanServers(boolean flag) {
         return serverConnections;
     }
 }

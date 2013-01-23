@@ -129,7 +129,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
 
-        for (MBeanServerConnection conn : getMBeanServers()) {
+        for (MBeanServerConnection conn : getMBeanServers(true)) {
             try {
                 return pRequestHandler.handleRequest(conn, pJmxReq);
             } catch (InstanceNotFoundException exp) {
@@ -149,14 +149,28 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
     }
 
     /** {@inheritDoc} */
-    protected Set<MBeanServerConnection> getMBeanServers() {
+    @Override
+    protected Set<MBeanServerConnection> getMBeanServers(boolean withJolokiaMBeanServer) {
         // Only add the Jolokia MBean server if at least a single MBean is registered there
-        Integer jolokiaMBeanNr = jolokiaMBeanServer.getMBeanCount();
-        if (jolokiaMBeanNr != null && jolokiaMBeanNr != 0) {
+        if (withJolokiaMBeanServer && hasJolokiaMBeans()) {
             return allMBeanServers;
         } else {
             return mBeanServers;
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected MBeanServerConnection getJolokiaMBeanServer() {
+        return hasJolokiaMBeans() ? jolokiaMBeanServer : null;
+    }
+
+    // Check if at least one MBean is registered in the Jolokia MBean Server
+    private boolean hasJolokiaMBeans() {
+        // The MBeanServer delegate is always registered. So we skip the JolokiaMBeanServer
+        // if there is only 1 MBean within it.
+        Integer jolokiaMBeanNr = jolokiaMBeanServer.getMBeanCount();
+        return jolokiaMBeanNr != null && jolokiaMBeanNr > 1;
     }
 
     // ==========================================================================================

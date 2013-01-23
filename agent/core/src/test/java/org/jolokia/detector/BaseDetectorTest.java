@@ -31,7 +31,7 @@ import org.jolokia.jmx.MBeanServerExecutor;
 public class BaseDetectorTest {
     protected MBeanServerExecutor getMBeanServerManager(final MBeanServer ... pMockServer) {
         return new AbstractMBeanServerExecutor() {
-            protected Set<MBeanServerConnection> getMBeanServers() {
+            protected Set<MBeanServerConnection> getMBeanServers(boolean flag) {
                 return new LinkedHashSet<MBeanServerConnection>(Arrays.asList(pMockServer));
             }
         };
