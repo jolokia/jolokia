@@ -53,6 +53,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     public <T> T call(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object ... pExtraArgs)
             throws IOException, ReflectionException, MBeanException {
         Exception exception = null;
+        String errorMsg = null;
         for (MBeanServerConnection server : getMBeanServers(true)) {
             // Only the first MBeanServer holding the MBean wins
             try {
@@ -64,17 +65,17 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
                     return pMBeanAction.execute(server, pObjectName, pExtraArgs);
                 //}
             } catch (InstanceNotFoundException exp) {
-                // Should not happen, since we check beforehand
                 exception = exp;
+                errorMsg = "No MBean with ObjectName " + pObjectName + " is registered";
             } catch (AttributeNotFoundException exp) {
                 // Try next one, too ..
+                errorMsg = "Invalid attribute on " + pObjectName + " queried";
                 exception = exp;
             }
         }
         // When we reach this, no MBeanServer know about the requested MBean.
         // Hence, we throw our own InstanceNotFoundException here
 
-        String errorMsg = "No MBean with ObjectName " + pObjectName + " and attribute is registered";
         throw exception != null ?
                 new IllegalArgumentException(errorMsg + ": " + exception,exception) :
                 new IllegalArgumentException(errorMsg);
@@ -99,7 +100,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             jolokiaMBeans = new HashSet<ObjectName>();
             for (ObjectName nameObject : jolokiaServer.queryNames(pObjectName,null)) {
                 pCallback.callback(jolokiaServer, nameObject);
-                jolokiaMBeans.add(pObjectName);
+                jolokiaMBeans.add(nameObject);
             }
         }
         return jolokiaMBeans;
@@ -113,7 +114,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             // Query for a full name is the same as a direct lookup
             for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
                 // Dont add if already present in the Jolokia MBeanServer
-                if (pJolokiaMBeans == null || !pJolokiaMBeans.contains(pObjectName)) {
+                if (pJolokiaMBeans == null || !pJolokiaMBeans.contains(nameObject)) {
                     pCallback.callback(server, nameObject);
                 }
             }
