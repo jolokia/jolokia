@@ -79,7 +79,6 @@ public class StringToObjectConverter {
      * Prepare a value from a either a given object or its string representation.
      * If the value is already assignable to the given class name it is returned directly.
      *
-     *
      * @param pExpectedClassName type name of the expected type
      * @param pValue value to either take directly or to convert from its string representation.
      * @return the prepared / converted object
@@ -155,7 +154,7 @@ public class StringToObjectConverter {
      * @param pValue the value to convert from
      * @return the converted value
      */
-    Object convertFromString(String pType, String pValue) {
+    public Object convertFromString(String pType, String pValue) {
         String value = convertSpecialStringTags(pValue);
 
         if (value == null) {
