@@ -7,7 +7,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.0.7-SNAPSHOT" description="Release 1.0.7-SNAPSHOT">
+    <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
+      <action dev="roland" type="add" date="2013-01-27">
+        Added support for JSON-MBean. A dedicated @JsonMBean annotation can be used
+        to export complex arguments/attributes/return values as JSON String to the Platform
+        MBeanServer. Jolokia now offers an own MBeanServer as well for registering MBeans which
+        won't show up in any other (exported) MBeanServer (except for the delegation of @JsonMBeans
+        which are delegated and translated).
+      </action>
       <action dev="roland" type="fix" date="2013-01-13">
         Fixed issues with GET requests and MBean ObjectNames which end with a "/".
         Added to integration tests to deal with these issues.
