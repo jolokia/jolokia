@@ -311,15 +311,15 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     // ======================================================
-    // Lifecycle method for cleaning ub
-    public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
+    // Lifecycle method for cleaning up
+    public ObjectName preRegister(MBeanServer server, ObjectName name) {
         return name;
     }
 
     public void postRegister(Boolean registrationDone) {
     }
 
-    public void preDeregister() throws Exception {
+    public void preDeregister() {
     }
 
     // Cleanup, release all references
@@ -333,7 +333,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     // ==========================================
 
-    private static class OperationMapInfo {
+    private static final class OperationMapInfo {
 
         private boolean    retTypeMapped;
         private String[]   signature;
