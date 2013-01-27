@@ -94,6 +94,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         }
         try {
             pServers.call(bootMBean, new MBeanServerExecutor.MBeanAction<Void>() {
+                /** {@inheritDoc} */
                 public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                     pConn.invoke(pName, "bootAMX", null, null);
@@ -157,8 +158,8 @@ public class GlassfishDetector extends AbstractServerDetector {
             }
         }
 
-        /** {@inheritDoc} */
         @Override
+        /** {@inheritDoc} */
         public void postDetect(MBeanServerExecutor pServerManager,
                                Map<ConfigKey, String> pConfig, LogHandler pLoghandler) {
             JSONObject opts = getDetectorOptions(pConfig,pLoghandler);
