@@ -18,8 +18,7 @@
 package org.jolokia.it;
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.management.*;
 
@@ -31,10 +30,11 @@ import org.jolokia.jmx.JolokiaMBeanServerUtil;
  */
 public class ItSetup {
 
-    public static final String JOLOKIA_IT_DOMAIN = "jolokia.it";
-    public static final String JOLOKIA_IT_DOMAIN_HIDDEN = "jolokia.it.hidden";
+    public static final  String JOLOKIA_IT_DOMAIN           = "jolokia.it";
+    public static final  String JOLOKIA_IT_DOMAIN_HIDDEN    = "jolokia.it.hidden";
+    private static final String JOLOKIA_IT_JSONMBEAN_DOMAIN = "jolokia.it.jsonmbean";
 
-    private String[] strangeNamesShort = {
+    private String[]     strangeNamesShort = {
             "\\/",
             "simple",
             "/slash-simple/",
@@ -47,49 +47,50 @@ public class ItSetup {
             "n!a!m!e with !/!",
 //            "äöüßÄÖÜ"
     };
-    private List<String> strangeNames = new ArrayList<String>();
+    private List<String> strangeNames      = new ArrayList<String>();
 
     private String[] fullNames = {
             "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor"
     };
 
-    private String[] escapedNamesShort = {
+    private String[]     escapedNamesShort = {
 //            "name*with?strange=\"chars"
-              "name*withstrange=chars",
-              "name?withstrange=chars",
-              "namewithstrange=\"chars\"",
-              "namewithstrange:\"chars\"",
-              ",,,",
-              ",,/,,",
-              "===",
-              "***",
-              "\"\"\"",
-              ":::",
-              "???",
-              "!!!"
+            "name*withstrange=chars",
+            "name?withstrange=chars",
+            "namewithstrange=\"chars\"",
+            "namewithstrange:\"chars\"",
+            ",,,",
+            ",,/,,",
+            "===",
+            "***",
+            "\"\"\"",
+            ":::",
+            "???",
+            "!!!"
     };
-    private List<String> escapedNames = new ArrayList<String>();
+    private List<String> escapedNames      = new ArrayList<String>();
 
 
     private List<ObjectName> registeredMBeans;
-    private List<ObjectName> registeredHiddenMBeans;
+    private List<ObjectName> registeredJolokiaMBeans;
 
     public ItSetup() {
     }
 
     public void start() {
-        registeredMBeans = registerMBeans(ManagementFactory.getPlatformMBeanServer(),JOLOKIA_IT_DOMAIN);
+        registeredMBeans = registerMBeans(ManagementFactory.getPlatformMBeanServer(), JOLOKIA_IT_DOMAIN);
         MBeanServer jolokiaServer = getJolokiaMBeanServer();
         if (jolokiaServer != null) {
-            registeredHiddenMBeans = registerMBeans(jolokiaServer,JOLOKIA_IT_DOMAIN_HIDDEN);
+            registeredJolokiaMBeans = registerMBeans(jolokiaServer, JOLOKIA_IT_DOMAIN_HIDDEN);
+            registeredJolokiaMBeans.addAll(registerJsonMBeans(jolokiaServer, JOLOKIA_IT_JSONMBEAN_DOMAIN));
         }
     }
 
     public void stop() {
-        unregisterMBeans(registeredMBeans,ManagementFactory.getPlatformMBeanServer());
+        unregisterMBeans(registeredMBeans, ManagementFactory.getPlatformMBeanServer());
         MBeanServer jolokiaServer = getJolokiaMBeanServer();
         if (jolokiaServer != null) {
-            unregisterMBeans(registeredHiddenMBeans,jolokiaServer);
+            unregisterMBeans(registeredJolokiaMBeans, jolokiaServer);
         }
     }
 
@@ -133,6 +134,17 @@ public class ItSetup {
             throw new RuntimeException("Error",exp);
         }
         return ret;
+    }
+
+    private List<ObjectName> registerJsonMBeans(MBeanServer pServer, String pDomain) {
+        try {
+            return Arrays.asList(
+                    registerMBean(pServer,new JsonChecking(),pDomain + ":type=json")
+                    );
+        } catch (Exception e) {
+            throw new RuntimeException("Error",e);
+        }
+
     }
 
     private boolean hasMxBeanSupport() {

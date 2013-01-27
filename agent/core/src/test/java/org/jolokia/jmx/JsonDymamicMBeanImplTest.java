@@ -1,8 +1,7 @@
 package org.jolokia.jmx;
 
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 
 import javax.management.*;
 
@@ -12,8 +11,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.*;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -53,6 +51,40 @@ public class JsonDymamicMBeanImplTest {
         JSONObject userJ = (JSONObject) toJSON(user);
         assertEquals(userJ.get("firstName"),"Hans");
         assertEquals(userJ.get("lastName"),"Kalb");
+    }
+
+    @Test
+    public void checkMBeanInfo() throws Exception {
+        MBeanInfo info = platformServer.getMBeanInfo(testName);
+        MBeanAttributeInfo aInfo[] = info.getAttributes();
+        Map<String,MBeanAttributeInfo> attributes = new HashMap<String, MBeanAttributeInfo>();
+        for (MBeanAttributeInfo a : aInfo) {
+            attributes.put(a.getName(),a);
+        }
+
+        assertEquals(attributes.get("Chili").getType(), String.class.getName());
+        assertEquals(attributes.get("Numbers").getType(), String.class.getName());
+        assertEquals(attributes.get("User").getType(), String.class.getName());
+
+        MBeanOperationInfo oInfo[] = info.getOperations();
+        Map<String,MBeanOperationInfo> ops = new HashMap<String, MBeanOperationInfo>();
+        for (MBeanOperationInfo o : oInfo) {
+            ops.put(o.getName(), o);
+        }
+
+        assertEquals(ops.get("lookup").getReturnType(),String.class.getName());
+        assertEquals(ops.get("epoch").getReturnType(),"long");
+        assertEquals(ops.get("charTest").getReturnType(),"char");
+
+        MBeanParameterInfo p[] = ops.get("lookup").getSignature();
+        assertEquals(p[0].getType(),String.class.getName());
+        assertEquals(p[1].getType(),String.class.getName());
+
+        p = ops.get("epoch").getSignature();
+        assertEquals(p[0].getType(),String.class.getName());
+
+        p = ops.get("charTest").getSignature();
+        assertEquals(p[0].getType(),Character.class.getName());
 
     }
 

@@ -229,8 +229,8 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             }
             attrInfo[i] =
                     new MBeanAttributeInfo(
+                            aInfo.getName(),
                             attrType,
-                            aInfo.getType(),
                             aInfo.getDescription(),
                             aInfo.isReadable(),
                             aInfo.isWritable(),
