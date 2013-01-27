@@ -57,14 +57,14 @@ class JolokiaMBeanServer extends MBeanServerProxy {
         // Register MBean first on this MBean Server
         ObjectInstance ret = super.registerMBean(object, name);
 
-        // The real name can be different than the given one in case the default
-        // domain was omitted and/or the MBean implements MBeanRegistration
-        ObjectName realName = ret.getObjectName();
-
         // Check, whether it is annotated with @JsonMBean. Only the outermost class of an inheritance is
         // considered.
         JsonMBean anno = object.getClass().getAnnotation(JsonMBean.class);
         if (anno != null) {
+            // The real name can be different than the given one in case the default
+            // domain was omitted and/or the MBean implements MBeanRegistration
+            ObjectName realName = ret.getObjectName();
+
             try {
                 // Fetch real MBeanInfo and create a dynamic MBean with modified signature
                 MBeanInfo info = super.getMBeanInfo(realName);
