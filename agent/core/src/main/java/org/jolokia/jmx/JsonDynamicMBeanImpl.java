@@ -12,19 +12,21 @@ import javax.management.openmbean.*;
  * @author roland
  * @since 24.01.13
  */
-public class JsonDynamicMBeanImpl implements DynamicMBean {
+public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
-    public static final String STRING_TYPE = String.class.getName();
-    // The original MBeanInfo as it has been registered
-    private MBeanInfo originalMBeanInfo;
+    // String type used for announcing registration infos
+    public static final  String STRING_TYPE  = String.class.getName();
 
-    private final MBeanInfo          wrappedMBeanInfo;
-    private final JolokiaMBeanServer jolokiaMBeanServer;
-    private final ObjectName         objectName;
+    // Set containing all types which are directly supported and are not converted
+    private static final Set<String> DIRECT_TYPES = new HashSet<String>();
+
+    private MBeanInfo          wrappedMBeanInfo;
+    private JolokiaMBeanServer jolokiaMBeanServer;
+    private ObjectName         objectName;
 
     // Maps holding all attribute and operations infos
-    private final Map<String, MBeanAttributeInfo>       attributeInfoMap;
-    private final Map<String, List<OperationMapInfo>> operationInfoMap;
+    private Map<String, MBeanAttributeInfo>     attributeInfoMap;
+    private Map<String, List<OperationMapInfo>> operationInfoMap;
 
     /**
      * Construct a DynamicMBean wrapping an original MBean object. For attributes
@@ -37,10 +39,9 @@ public class JsonDynamicMBeanImpl implements DynamicMBean {
                                 MBeanInfo pInfo) {
         jolokiaMBeanServer = pJolokiaMBeanServer;
         objectName = pObjectName;
-        originalMBeanInfo = pInfo;
         attributeInfoMap = new HashMap<String, MBeanAttributeInfo>();
         operationInfoMap = new HashMap<String, List<OperationMapInfo>>();
-        wrappedMBeanInfo = getWrappedInfo(originalMBeanInfo);
+        wrappedMBeanInfo = getWrappedInfo(pInfo);
     }
 
     /**
@@ -102,24 +103,18 @@ public class JsonDynamicMBeanImpl implements DynamicMBean {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public AttributeList getAttributes(String[] attributes) {
-        if (attributes != null) {
-            final AttributeList ret = new AttributeList(attributes.length);
-            for (String attrName : attributes) {
-                try {
-                    final Object attrValue = getAttribute(attrName);
-                    ret.add(new Attribute(attrName, attrValue));
-                } catch (Exception e) {
+    /** {@inheritDoc} */
+    public AttributeList getAttributes(String[] attributes /* cannot be null */) {
+        final AttributeList ret = new AttributeList(attributes.length);
+        for (String attrName : attributes) {
+            try {
+                final Object attrValue = getAttribute(attrName);
+                ret.add(new Attribute(attrName, attrValue));
+            } catch (Exception e) {
                     // Ignore this attribute. As specified in the JMX Spec
-                }
             }
-            return ret;
-        } else {
-            return new AttributeList();
         }
+        return ret;
     }
 
     /**
@@ -199,9 +194,8 @@ public class JsonDynamicMBeanImpl implements DynamicMBean {
         return opMapInfo;
     }
 
-    // TODO
     private boolean isDirectlySupported(String pType) {
-        return false;
+        return DIRECT_TYPES.contains(pType);
     }
 
 
@@ -316,29 +310,45 @@ public class JsonDynamicMBeanImpl implements DynamicMBean {
         return paramInfo;
     }
 
+    // ======================================================
+    // Lifecycle method for cleaning ub
+    public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
+        return name;
+    }
+
+    public void postRegister(Boolean registrationDone) {
+    }
+
+    public void preDeregister() throws Exception {
+    }
+
+    // Cleanup, release all references
+    public void postDeregister() {
+        jolokiaMBeanServer = null;
+        wrappedMBeanInfo = null;
+        objectName = null;
+        attributeInfoMap = null;
+        operationInfoMap = null;
+    }
+
     // ==========================================
 
     private static class OperationMapInfo {
 
-        private MBeanOperationInfo info;
-        private boolean            retTypeMapped;
-        private String[]           signature;
-        private String[]           origTypes;
-        private OpenType[]         openMBeanTypes;
-        private int                iex;
-        private int                idx;
+        private boolean    retTypeMapped;
+        private String[]   signature;
+        private String[]   origTypes;
+        private OpenType[] openMBeanTypes;
+        private int        idx;
+        private boolean    paramMapped;
 
         private OperationMapInfo(MBeanOperationInfo pInfo, boolean pRetTypeMapped) {
-            info = pInfo;
             retTypeMapped = pRetTypeMapped;
             origTypes = new String[pInfo.getSignature().length];
             openMBeanTypes = new OpenType[pInfo.getSignature().length];
             signature = new String[pInfo.getSignature().length];
             idx = 0;
-        }
-
-        public MBeanOperationInfo getInfo() {
-            return info;
+            paramMapped = false;
         }
 
         private void pushParamTypes(String pNewType, String pOrigType, OpenType pOpenType) {
@@ -346,6 +356,9 @@ public class JsonDynamicMBeanImpl implements DynamicMBean {
             origTypes[idx] = pOrigType;
             openMBeanTypes[idx] = pOpenType;
             idx++;
+            if (pOrigType != null || pOpenType != null) {
+                paramMapped = true;
+            }
         }
 
         private boolean isParamMapped(int pIdx) {
@@ -365,11 +378,27 @@ public class JsonDynamicMBeanImpl implements DynamicMBean {
         }
 
         private boolean containsMapping() {
-            return retTypeMapped || iex > 0;
+            return retTypeMapped || paramMapped;
         }
 
         private boolean matchSignature(String pSignature[]) {
             return Arrays.equals(signature, pSignature);
         }
+    }
+
+    // =======================================================
+
+    // Static initialized for filling in the set for all directly used types
+    static {
+        Collections.addAll(DIRECT_TYPES,
+                           Byte.class.getName(), "byte",
+                           Integer.class.getName(), "int",
+                           Long.class.getName(), "long",
+                           Short.class.getName(), "short",
+                           Double.class.getName(), "double",
+                           Float.class.getName(), "float",
+                           Boolean.class.getName(), "boolean",
+                           Character.class.getName(), "char",
+                           String.class.getName());
     }
 }

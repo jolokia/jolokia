@@ -55,6 +55,7 @@ public class StringToObjectConverter {
         PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
         PARSER_MAP.put("boolean",new BooleanParser());
         PARSER_MAP.put("char",new CharParser());
+        PARSER_MAP.put(Character.class.getName(),new CharParser());
         PARSER_MAP.put(String.class.getName(),new StringParser());
         PARSER_MAP.put(Date.class.getName(),new DateParser());
         PARSER_MAP.put(ObjectName.class.getName(), new ObjectNameParser());
