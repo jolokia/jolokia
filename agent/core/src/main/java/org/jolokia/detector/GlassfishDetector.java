@@ -138,9 +138,8 @@ public class GlassfishDetector extends AbstractServerDetector {
             super("Oracle", "glassfish", version, agentUrl, extraInfo);
         }
 
-        /** {@inheritDoc}
-         * @param pServerManager*/
         @Override
+        /** {@inheritDoc} */
         public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
             Map<String,String> extra = super.getExtraInfo(pServerManager);
             if (extra != null && getVersion().startsWith("3")) {
@@ -150,6 +149,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         }
 
         @Override
+        /** {@inheritDoc} */
         public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
             if (amxShouldBeBooted) {
                 bootAmx(pMBeanServerExecutor,logHandler);

@@ -38,8 +38,7 @@ import org.jolokia.util.ClassUtil;
  */
 public class JBossDetector extends AbstractServerDetector {
 
-    /** {@inheritDoc}
-     * @param pMBeanServerExecutor*/
+    /** {@inheritDoc} */
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JSR77 call
@@ -48,57 +47,56 @@ public class JBossDetector extends AbstractServerDetector {
                 int idx = version.indexOf(' ');
                 if (idx >= 0) {
                     // Strip off boilerplate
-                    version = version.substring(0,idx);
+                    version = version.substring(0, idx);
                 }
-                return new JBossServerHandle(version,null,null,true);
+                return new JBossServerHandle(version, null, null, true);
             }
         }
         if (mBeanExists(pMBeanServerExecutor, "jboss.system:type=Server")) {
-            String versionFull = getAttributeValue(pMBeanServerExecutor, "jboss.system:type=Server","Version");
+            String versionFull = getAttributeValue(pMBeanServerExecutor, "jboss.system:type=Server", "Version");
             String version = null;
             if (versionFull != null) {
                 version = versionFull.replaceAll("\\(.*", "").trim();
             }
-            return new JBossServerHandle(version,null,null,true);
+            return new JBossServerHandle(version, null, null, true);
         }
-        String version = getSingleStringAttribute(pMBeanServerExecutor,"jboss.as:management-root=server","releaseVersion");
+        String version = getSingleStringAttribute(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
         if (version != null) {
-            return new JBossServerHandle(version,null,null,false);
+            return new JBossServerHandle(version, null, null, false);
         }
-        if (mBeanExists(pMBeanServerExecutor,"jboss.modules:*")) {
+        if (mBeanExists(pMBeanServerExecutor, "jboss.modules:*")) {
             // It's a JBoss 7, probably a 7.0.x one ...
-            return new JBossServerHandle("7",null,null,false);
+            return new JBossServerHandle("7", null, null, false);
         }
         return null;
     }
 
     // Special handling for JBoss
-    /** {@inheritDoc}
-     * @param servers*/
+
     @Override
+    /** {@inheritDoc} */
     public void addMBeanServers(Set<MBeanServerConnection> servers) {
         try {
             Class locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
             Method method = locatorClass.getMethod("locateJBoss");
             servers.add((MBeanServer) method.invoke(null));
+        } catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException e) {
         }
-        catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ }
-        catch (NoSuchMethodException e) { }
-        catch (IllegalAccessException e) { }
-        catch (InvocationTargetException e) { }
     }
 
     // ========================================================================
     private static class JBossServerHandle extends ServerHandle {
 
-        private boolean                         workaroundRequired     = true;
+        private boolean workaroundRequired = true;
 
         /**
          * JBoss server handle
          *
-         * @param version JBoss version
-         * @param agentUrl URL to the agent
-         * @param extraInfo extra ifo to return
+         * @param version             JBoss version
+         * @param agentUrl            URL to the agent
+         * @param extraInfo           extra ifo to return
          * @param pWorkaroundRequired if the workaround is required
          */
         JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo, boolean pWorkaroundRequired) {
@@ -106,7 +104,9 @@ public class JBossDetector extends AbstractServerDetector {
             workaroundRequired = pWorkaroundRequired;
         }
 
-        /** {@inheritDoc} */
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
             if (workaroundRequired && pJmxReq instanceof JmxObjectNameRequest) {
@@ -118,7 +118,7 @@ public class JBossDetector extends AbstractServerDetector {
             if (pRequest.getObjectName() != null &&
                 "java.lang".equals(pRequest.getObjectName().getDomain())) {
                 try {
-                   pMBeanServerExecutor.call(pRequest.getObjectName(), JBOSS_WORKAROUND_HANDLER);
+                    pMBeanServerExecutor.call(pRequest.getObjectName(), JBOSS_WORKAROUND_HANDLER);
                 } catch (ReflectionException e) {
                     throw new IllegalStateException("Workaround for JBoss failed for object " + pRequest.getObjectName() + ": " + e);
                 } catch (MBeanException e) {
@@ -129,9 +129,10 @@ public class JBossDetector extends AbstractServerDetector {
             }
         }
 
-        // Handler used for calling getMBeanInfo() in order to avoid a nasty bug when doing a lookuo
+        // Handler used for calling getMBeanInfo() in order to avoid a nasty bug when doing a lookup
         private static final MBeanServerExecutor.MBeanAction<Void> JBOSS_WORKAROUND_HANDLER = new MBeanServerExecutor.MBeanAction<Void>() {
-            public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... pExtraArgs)
+            /** {@inheritDoc} */
+            public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... pExtraArgs)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 try {
                     pConn.getMBeanInfo(pName);

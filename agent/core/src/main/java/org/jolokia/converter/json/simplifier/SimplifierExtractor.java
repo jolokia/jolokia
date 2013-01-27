@@ -1,15 +1,14 @@
 package org.jolokia.converter.json.simplifier;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.converter.json.Extractor;
-import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.json.simple.JSONObject;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import javax.management.AttributeNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+
+import org.jolokia.converter.json.Extractor;
+import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -148,6 +147,9 @@ abstract class SimplifierExtractor<T> implements Extractor {
          */
         Object extract(T value) throws AttributeExtractor.SkipAttributeException;
 
+        /**
+         * Exception to be thrown when the result of this extractor should be ommitted in the response
+         */
         class SkipAttributeException extends Exception {}
     }
 

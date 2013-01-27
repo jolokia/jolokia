@@ -39,6 +39,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     // MBean Handler used for extracting MBean Meta data
     private static final MBeanServerExecutor.MBeanAction<MBeanInfo> MBEAN_INFO_HANDLER =
             new MBeanServerExecutor.MBeanAction<MBeanInfo>() {
+                /** {@inheritDoc} */
                 public MBeanInfo execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException {
                     try {
@@ -52,6 +53,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     // MBean Handler for getting an attribute
     private static final MBeanServerExecutor.MBeanAction<Object> MBEAN_ATTRIBUTE_READ_HANDLER =
             new MBeanServerExecutor.MBeanAction<Object>() {
+                /** {@inheritDoc} */
                 public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
                     String attribute = (String) extraArgs[0];
@@ -68,8 +70,8 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         super(pRestrictor);
     }
 
-    /** {@inheritDoc} */
     @Override
+    /** {@inheritDoc} */
     public RequestType getType() {
         return RequestType.READ;
     }
@@ -105,8 +107,8 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
     }
 
-    /** {@inheritDoc} */
     @Override
+    /** {@inheritDoc} */
     public Object doHandleRequest(MBeanServerExecutor pServerManager, JmxReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         ObjectName oName = pRequest.getObjectName();

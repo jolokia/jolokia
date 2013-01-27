@@ -15,16 +15,21 @@ import javax.management.openmbean.*;
 public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     // String type used for announcing registration infos
-    public static final  String STRING_TYPE  = String.class.getName();
+    public static final String STRING_TYPE = String.class.getName();
 
     // Set containing all types which are directly supported and are not converted
     private static final Set<String> DIRECT_TYPES = new HashSet<String>();
 
-    private MBeanInfo          wrappedMBeanInfo;
-    private JolokiaMBeanServer jolokiaMBeanServer;
-    private ObjectName         objectName;
+    // MBeanInfo for the MBean registered at the delegate server, where complex types are replaced with strings
+    private MBeanInfo wrappedMBeanInfo;
 
-    // Maps holding all attribute and operations infos
+    // The hosting Jolokia MBean Server for accessing the serializers
+    private JolokiaMBeanServer jolokiaMBeanServer;
+
+    // Name of this MBean
+    private ObjectName objectName;
+
+    // Maps holding all attribute and operations infos used during the mapping phase
     private Map<String, MBeanAttributeInfo>     attributeInfoMap;
     private Map<String, List<OperationMapInfo>> operationInfoMap;
 
@@ -33,10 +38,11 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
      * and operations all non-trivial data types are translated into Strings
      * for a JSON representation
      *
-     * @param pInfo the original MBeanInfo
+     * @param pJolokiaMBeanServer the hosting Jolokia MBean Server
+     * @param pObjectName         object name of this MBean
+     * @param pInfo               the original MBeanInfo
      */
-    public JsonDynamicMBeanImpl(JolokiaMBeanServer pJolokiaMBeanServer, ObjectName pObjectName,
-                                MBeanInfo pInfo) {
+    public JsonDynamicMBeanImpl(JolokiaMBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo) {
         jolokiaMBeanServer = pJolokiaMBeanServer;
         objectName = pObjectName;
         attributeInfoMap = new HashMap<String, MBeanAttributeInfo>();
@@ -44,9 +50,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         wrappedMBeanInfo = getWrappedInfo(pInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public Object getAttribute(String pAttribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
         try {
             if (!attributeInfoMap.containsKey(pAttribute)) {
@@ -59,9 +63,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void setAttribute(Attribute pAttribute)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
         try {
@@ -84,9 +86,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public Object invoke(String pOperation, Object[] pParams, String[] pSignature)
             throws MBeanException, ReflectionException {
         OperationMapInfo opMapInfo = getOperationMapInfo(pOperation, pSignature);
@@ -99,7 +99,8 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         } catch (InstanceNotFoundException e) {
             // Should not happen, since the Jolokia MBeanServer and the delegate MBeanServer this bean is registered
             // at are in sync.
-            throw new IllegalStateException("Internal: Could find MBean " + objectName + " on Jolokia MBeanServer. Should be in sync");
+            throw new IllegalStateException("Internal: Could find MBean " + objectName +
+                                            " on Jolokia MBeanServer. Should be in sync");
         }
     }
 
@@ -111,15 +112,13 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
                 final Object attrValue = getAttribute(attrName);
                 ret.add(new Attribute(attrName, attrValue));
             } catch (Exception e) {
-                    // Ignore this attribute. As specified in the JMX Spec
+                // Ignore this attribute. As specified in the JMX Spec
             }
         }
         return ret;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public AttributeList setAttributes(AttributeList attributes) {
         final AttributeList ret = new AttributeList(attributes.size());
         for (Object o : attributes) {
@@ -134,15 +133,14 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         return ret;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public MBeanInfo getMBeanInfo() {
         return wrappedMBeanInfo;
     }
 
     // =================================================================================================
 
+    // Delegate serialization/deserialization the Jolokia MBeanServer
     private Object toJson(Object pValue) {
         return jolokiaMBeanServer.toJson(pValue);
     }
@@ -156,7 +154,8 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     // Map the parameters and the return value if required
-    private Object mapAndInvoke(String pOperation, Object[] pParams, String[] pSignature, OperationMapInfo pOpMapInfo) throws InstanceNotFoundException, MBeanException, ReflectionException {
+    private Object mapAndInvoke(String pOperation, Object[] pParams, String[] pSignature, OperationMapInfo pOpMapInfo)
+            throws InstanceNotFoundException, MBeanException, ReflectionException {
         // Map parameters
         Object realParams[] = new Object[pSignature.length];
         String realSignature[] = new String[pSignature.length];
@@ -165,9 +164,9 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
                 String origType = pOpMapInfo.getOriginalType(i);
                 OpenType openType = pOpMapInfo.getOpenMBeanType(i);
                 if (openType != null) {
-                    realParams[i] =  fromJson(openType,(String) pParams[i]);
+                    realParams[i] = fromJson(openType, (String) pParams[i]);
                 } else {
-                    realParams[i] = fromJson(origType,(String) pParams[i]);
+                    realParams[i] = fromJson(origType, (String) pParams[i]);
                 }
                 realSignature[i] = origType;
             } else {
@@ -175,7 +174,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
                 realSignature[i] = pSignature[i];
             }
         }
-        Object ret = jolokiaMBeanServer.invoke(objectName,pOperation,realParams,realSignature);
+        Object ret = jolokiaMBeanServer.invoke(objectName, pOperation, realParams, realSignature);
         return pOpMapInfo.isRetTypeMapped() ? toJson(ret) : ret;
     }
 
@@ -194,10 +193,10 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         return opMapInfo;
     }
 
+    // Check for all type which should *not* be mapped
     private boolean isDirectlySupported(String pType) {
         return DIRECT_TYPES.contains(pType);
     }
-
 
     // Wrap the given MBeanInfo, modified for translated signatures
     private MBeanInfo getWrappedInfo(MBeanInfo pMBeanInfo) {
@@ -251,12 +250,12 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             OperationMapInfo opMapInfo;
             if (isDirectlySupported(oInfo.getReturnType())) {
                 retType = oInfo.getReturnType();
-                opMapInfo = new OperationMapInfo(oInfo,false);
+                opMapInfo = new OperationMapInfo(oInfo, false);
             } else {
                 retType = STRING_TYPE;
-                opMapInfo = new OperationMapInfo(oInfo,true);
+                opMapInfo = new OperationMapInfo(oInfo, true);
             }
-            MBeanParameterInfo[] paramInfo = getWrappedParameterInfo(oInfo,opMapInfo);
+            MBeanParameterInfo[] paramInfo = getWrappedParameterInfo(oInfo, opMapInfo);
 
             // Remember that we mapped this operation info
             if (opMapInfo.containsMapping()) {
@@ -312,17 +311,21 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     // ======================================================
     // Lifecycle method for cleaning up
+    /** {@inheritDoc} */
     public ObjectName preRegister(MBeanServer server, ObjectName name) {
         return name;
     }
 
+    /** {@inheritDoc} */
     public void postRegister(Boolean registrationDone) {
     }
 
+    /** {@inheritDoc} */
     public void preDeregister() {
     }
 
     // Cleanup, release all references
+    /** {@inheritDoc} */
     public void postDeregister() {
         jolokiaMBeanServer = null;
         wrappedMBeanInfo = null;
