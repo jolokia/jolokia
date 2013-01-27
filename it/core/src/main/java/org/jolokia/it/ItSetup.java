@@ -139,7 +139,8 @@ public class ItSetup {
     private List<ObjectName> registerJsonMBeans(MBeanServer pServer, String pDomain) {
         try {
             return Arrays.asList(
-                    registerMBean(pServer,new JsonChecking(),pDomain + ":type=json")
+                    registerMBean(pServer,new JsonChecking(),pDomain + ":type=plain"),
+                    registerMBean(pServer,new JsonChecking2(),pDomain + ":type=mx")
                     );
         } catch (Exception e) {
             throw new RuntimeException("Error",e);
