@@ -25,7 +25,7 @@ import java.util.Set;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxObjectNameRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ClassUtil;

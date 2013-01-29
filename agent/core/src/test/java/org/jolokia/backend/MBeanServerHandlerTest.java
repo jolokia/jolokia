@@ -25,7 +25,6 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.*;
@@ -55,7 +54,7 @@ public class MBeanServerHandlerTest {
 
     @AfterMethod
     public void tearDown() throws JMException {
-        handler.unregisterMBeans();
+        handler.destroy();
     }
 
     @Test
@@ -178,6 +177,7 @@ public class MBeanServerHandlerTest {
             handler.registerMBean(new Dummy(true,"test:type=dummy"));
         } finally {
             TestDetector.setThrowAddException(false);
+            tearDown();
         }
     }
 
@@ -185,7 +185,7 @@ public class MBeanServerHandlerTest {
     public void mbeanUnregistrationFailed1() throws JMException {
         handler.registerMBean(new Dummy(false, "test:type=dummy"));
         ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy"));
-        handler.unregisterMBeans();
+        handler.destroy();
     }
 
     @Test(expectedExceptions = JMException.class,expectedExceptionsMessageRegExp = ".*(dummy[12].*){2}.*")
@@ -194,7 +194,7 @@ public class MBeanServerHandlerTest {
         handler.registerMBean(new Dummy(false,"test:type=dummy2"));
         ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy1"));
         ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy2"));
-        handler.unregisterMBeans();
+        handler.destroy();
     }
 
     @Test
@@ -205,7 +205,7 @@ public class MBeanServerHandlerTest {
 
 
     @Test
-    public void fallThrough() throws MalformedObjectNameException {
+    public void fallThrough() throws JMException {
         TestDetector.setFallThrough(true);
         setup();
         try {
@@ -213,6 +213,7 @@ public class MBeanServerHandlerTest {
             assertNull(handle.getProduct());
         } finally {
             TestDetector.setFallThrough(false);
+            tearDown();
         }
     }
 

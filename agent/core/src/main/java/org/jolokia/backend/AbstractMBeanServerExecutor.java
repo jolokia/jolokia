@@ -5,8 +5,6 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
-
 /**
  * Base class for providing access to the list of MBeanServer handled by this agent.
  *

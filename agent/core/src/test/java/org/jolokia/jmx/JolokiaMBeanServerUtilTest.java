@@ -48,7 +48,7 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
 
     @AfterTest
     public void tearDown() throws JMException {
-        handler.unregisterMBeans();
+        handler.destroy();
     }
 
     @Test

@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.backend.AbstractMBeanServerExecutor;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * @author roland

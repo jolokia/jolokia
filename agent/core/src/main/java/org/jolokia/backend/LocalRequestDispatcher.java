@@ -140,7 +140,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @throws JMException if unregistration fails
      */
     public void destroy() throws JMException {
-        mBeanServerHandler.unregisterMBeans();
+        mBeanServerHandler.destroy();
     }
 
     /**

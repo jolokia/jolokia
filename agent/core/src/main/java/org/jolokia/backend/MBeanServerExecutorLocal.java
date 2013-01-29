@@ -21,10 +21,10 @@ import java.lang.management.ManagementFactory;
 import java.util.*;
 
 import javax.management.*;
+import javax.management.relation.MBeanServerNotificationFilter;
 
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.jmx.JolokiaMBeanServerUtil;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ServersInfo;
 
@@ -42,7 +42,7 @@ import org.jolokia.util.ServersInfo;
  * @author roland
  * @since 17.01.13
  */
-public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
+public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implements NotificationListener {
 
     // Private Jolokia MBeanServer
     private MBeanServer jolokiaMBeanServer;
@@ -91,7 +91,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
         mBeanServers = new LinkedHashSet<MBeanServerConnection>();
 
         // Create and add our own JolokiaMBeanServer first
-        jolokiaMBeanServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+        jolokiaMBeanServer = lookupJolokiaMBeanServer();
 
         // Let every detector add its own MBeanServer
         for (ServerDetector detector : pDetectors) {
@@ -108,7 +108,9 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
         mBeanServers.add(ManagementFactory.getPlatformMBeanServer());
 
         allMBeanServers = new LinkedHashSet<MBeanServerConnection>();
-        allMBeanServers.add(jolokiaMBeanServer);
+        if (jolokiaMBeanServer != null) {
+            allMBeanServers.add(jolokiaMBeanServer);
+        }
         allMBeanServers.addAll(mBeanServers);
     }
 
@@ -152,7 +154,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
     @Override
     protected Set<MBeanServerConnection> getMBeanServers(boolean withJolokiaMBeanServer) {
         // Only add the Jolokia MBean server if at least a single MBean is registered there
-        if (withJolokiaMBeanServer && hasJolokiaMBeans()) {
+        if (withJolokiaMBeanServer && jolokiaMBeanServer != null) {
             return allMBeanServers;
         } else {
             return mBeanServers;
@@ -162,18 +164,72 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
     /** {@inheritDoc} */
     @Override
     protected MBeanServerConnection getJolokiaMBeanServer() {
-        return hasJolokiaMBeans() ? jolokiaMBeanServer : null;
-    }
-
-    // Check if at least one MBean is registered in the Jolokia MBean Server
-    private boolean hasJolokiaMBeans() {
-        // The MBeanServer delegate is always registered. So we skip the JolokiaMBeanServer
-        // if there is only 1 MBean within it.
-        Integer jolokiaMBeanNr = jolokiaMBeanServer.getMBeanCount();
-        return jolokiaMBeanNr != null && jolokiaMBeanNr > 1;
+        return jolokiaMBeanServer;
     }
 
     // ==========================================================================================
+
+    // Check, whether the Jolokia MBean Server is available. If not, register
+    // at the Platform MBeanServer delegate to get notified when it gets registered
+    private MBeanServer lookupJolokiaMBeanServer() {
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+        ObjectName holderMBeanName = null;
+        try {
+            holderMBeanName = new ObjectName("jolokia:type=MBeanServer");
+            return (MBeanServer) server.getAttribute(holderMBeanName,"JolokiaMBeanServer");
+        } catch (InstanceNotFoundException exp) {
+            // Not yet available. Register for when it comes been available.
+            MBeanServerNotificationFilter filter = new MBeanServerNotificationFilter();
+            filter.enableObjectName(holderMBeanName);
+            try {
+                server.addNotificationListener(MBeanServerDelegate.DELEGATE_NAME, this, filter, null);
+            } catch (InstanceNotFoundException e) {
+                // Will not happen, since a delegate is always created during the creation
+                // of an MBeanServer
+                throw new IllegalStateException("Internal: Cannot lookup " +
+                                                MBeanServerDelegate.DELEGATE_NAME + ": " + e,e);
+            }
+            return null;
+        } catch (JMException e) {
+            throw new IllegalStateException("Internal: Cannot get Jolokia MBeanServer via JMX lookup: " + e,e);
+        }
+    }
+
+    /**
+     * Fetch Jolokia MBeanServer when it gets registered
+     *
+     * @param notification notification emitted
+     * @param handback not used here
+     */
+    public synchronized void handleNotification(Notification notification, Object handback) {
+        MBeanServerNotification mbs = (MBeanServerNotification) notification;
+        if (MBeanServerNotification.REGISTRATION_NOTIFICATION.equals(mbs.getType())) {
+            jolokiaMBeanServer = lookupJolokiaMBeanServer();
+        } else if (MBeanServerNotification.UNREGISTRATION_NOTIFICATION.equals(mbs.getType())) {
+            jolokiaMBeanServer = null;
+        }
+        allMBeanServers.clear();
+        allMBeanServers.add(jolokiaMBeanServer);
+        allMBeanServers.addAll(mBeanServers);
+    }
+
+    /**
+     * Lifecycle method called at the end of life for this object.
+     * If registered for Jolokia MBeanServer registration notifications the registration will be removed
+     */
+    public void destroy() {
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            server.removeNotificationListener(MBeanServerDelegate.DELEGATE_NAME, this);
+        } catch (InstanceNotFoundException e) {
+            // Will not happen, since a delegate is always created during the creation
+            // of an MBeanServer
+            throw new IllegalStateException("Internal: Cannot lookup " + MBeanServerDelegate.DELEGATE_NAME + ": " + e,e);
+        } catch (ListenerNotFoundException e) {
+            // Ignored, but we tried it.
+        }
+
+    }
 
     /**
      * Get a string representation of all servers
@@ -183,5 +239,4 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor {
     public String getServersInfo() {
         return ServersInfo.dump(allMBeanServers);
     }
-
 }

@@ -22,7 +22,7 @@ import java.util.Set;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * Base class for server detectors

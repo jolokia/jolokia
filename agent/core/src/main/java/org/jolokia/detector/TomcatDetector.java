@@ -19,7 +19,7 @@ package org.jolokia.detector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 
 /**
  * Detector for Tomcat

@@ -8,7 +8,6 @@ import javax.management.*;
 
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.jmx.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.*;
 
@@ -133,7 +132,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @throws JMException if an exception occurs during unregistration
      */
-    public final void unregisterMBeans() throws JMException {
+    public final void destroy() throws JMException {
         synchronized (mBeanHandles) {
             List<JMException> exceptions = new ArrayList<JMException>();
             List<MBeanHandle> unregistered = new ArrayList<MBeanHandle>();
@@ -161,6 +160,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
                 throw new JMException(ret.substring(0, ret.length() - 2));
             }
         }
+
+        // Unregister any notification listener
+        mBeanServerManager.destroy();
     }
 
     /**

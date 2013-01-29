@@ -5,7 +5,6 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

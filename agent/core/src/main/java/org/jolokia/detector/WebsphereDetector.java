@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 

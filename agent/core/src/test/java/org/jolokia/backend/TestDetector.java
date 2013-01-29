@@ -24,7 +24,6 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.jmx.MBeanServerExecutor;
 
 import static org.easymock.EasyMock.*;
 

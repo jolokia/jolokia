@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;

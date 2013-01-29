@@ -23,15 +23,14 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.MBeanServerExecutor;
 import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -42,16 +41,23 @@ import static org.testng.Assert.*;
  */
 public class ListHandlerTest extends BaseHandlerTest {
 
-    private ListHandler handler;
+    private ListHandler              handler;
+    private MBeanServerExecutorLocal executor;
 
     @BeforeMethod
     private void createHandler() {
         handler = new ListHandler(new AllowAllRestrictor());
+        executor = new MBeanServerExecutorLocal();
+    }
+
+    @AfterMethod
+    private void destroy() {
+        executor.destroy();
     }
 
     @Test
     public void singleSlashPath() throws Exception {
-        for (String p : new String[] { null, "", "/" }) {
+        for (String p : new String[]{null, "", "/"}) {
             JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).path(p).build();
             Map res = execute(request);
             assertTrue(res.containsKey("java.lang"));
@@ -69,9 +75,9 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void propertiesPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory").build();
+        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
         Map res = execute(request);
-        for (String k : new String[] { "desc", "op", "attr"}) {
+        for (String k : new String[]{"desc", "op", "attr"}) {
             assertTrue(res.containsKey(k));
         }
         assertEquals(res.size(), 3);
@@ -87,7 +93,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void descPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
-        String res = (String) handler.handleRequest(new MBeanServerExecutorLocal(), request);
+        String res = (String) handler.handleRequest(executor, request);
         assertNotNull(res);
     }
 
@@ -97,7 +103,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .pathParts("java.lang","type=Memory","desc")
                 .option(ConfigKey.MAX_DEPTH,"4")
                 .build();
-        String res = (String) handler.handleRequest(new MBeanServerExecutorLocal(), request);
+        String res = (String) handler.handleRequest(executor, request);
         assertNotNull(res);
     }
 
@@ -222,7 +228,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
-        return (Map) handler.handleRequest(new MBeanServerExecutorLocal(), pRequest);
+        return (Map) handler.handleRequest(executor, pRequest);
     }
 
 
@@ -231,13 +237,13 @@ public class ListHandlerTest extends BaseHandlerTest {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "op")
                 .build();
-        Map res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
+        Map res = (Map) handler.handleRequest(executor,request);
         assertEquals(res.size(),0);
 
         request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "not")
                 .build();
-        res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
+        res = (Map) handler.handleRequest(executor,request);
         assertEquals(res.size(),0);
     }
 
@@ -253,7 +259,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        Map res = (Map) handler.handleRequest(new MBeanServerExecutorLocal(),request);
+        Map res = (Map) handler.handleRequest(executor,request);
         assertEquals(((Map) res.get("Verbose")).get("type"),"boolean");
     }
 
