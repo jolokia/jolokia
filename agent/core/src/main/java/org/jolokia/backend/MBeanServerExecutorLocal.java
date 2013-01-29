@@ -202,10 +202,9 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * @param handback not used here
      */
     public synchronized void handleNotification(Notification notification, Object handback) {
-        MBeanServerNotification mbs = (MBeanServerNotification) notification;
-        if (MBeanServerNotification.REGISTRATION_NOTIFICATION.equals(mbs.getType())) {
+        if (MBeanServerNotification.REGISTRATION_NOTIFICATION.equals(notification.getType())) {
             jolokiaMBeanServer = lookupJolokiaMBeanServer();
-        } else if (MBeanServerNotification.UNREGISTRATION_NOTIFICATION.equals(mbs.getType())) {
+        } else if (MBeanServerNotification.UNREGISTRATION_NOTIFICATION.equals(notification.getType())) {
             jolokiaMBeanServer = null;
         }
         allMBeanServers.clear();

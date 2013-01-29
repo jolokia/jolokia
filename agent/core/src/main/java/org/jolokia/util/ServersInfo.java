@@ -36,7 +36,6 @@ public final class ServersInfo {
            .append(" MBeans\n");
 
             ret.append("        Domains:\n");
-            boolean javaLangFound = false;
             for (String d : s.getDomains()) {
                 appendDomainInfo(ret, s, d);
             }
