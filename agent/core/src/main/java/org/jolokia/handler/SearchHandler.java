@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;

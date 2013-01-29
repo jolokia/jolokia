@@ -6,6 +6,8 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutorLocal;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;

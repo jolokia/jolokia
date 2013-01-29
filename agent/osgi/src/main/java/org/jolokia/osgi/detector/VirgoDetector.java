@@ -19,7 +19,7 @@ package org.jolokia.osgi.detector;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 
 /**

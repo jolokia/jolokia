@@ -20,7 +20,7 @@ import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting

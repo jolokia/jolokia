@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend;
+package org.jolokia.backend.executor;
 
 import java.io.IOException;
 import java.util.Set;

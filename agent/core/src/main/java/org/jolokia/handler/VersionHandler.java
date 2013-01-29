@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.Version;
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxVersionRequest;
 import org.jolokia.restrictor.Restrictor;

@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.testng.annotations.Test;

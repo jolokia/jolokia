@@ -1,4 +1,4 @@
-package org.jolokia.mbean;
+package org.jolokia.backend;
 
 import javax.management.*;
 

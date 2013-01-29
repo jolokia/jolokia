@@ -26,7 +26,6 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.history.HistoryStore;
-import org.jolokia.mbean.Config;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.*;
@@ -90,7 +89,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
     }
 
     /**
-     * Initialise this reques dispatcher, which will register a {@link org.jolokia.mbean.ConfigMBean} for easy external
+     * Initialise this reques dispatcher, which will register a {@link ConfigMBean} for easy external
      * access to the {@link HistoryStore} and {@link DebugStore}.
      *
      * @param pHistoryStore history store to be managed from within an MBean

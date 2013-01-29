@@ -21,7 +21,7 @@ import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.backend.AbstractMBeanServerExecutor;
+import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 
 /**
  * MBeanServer Manager wrapping a single remote connection

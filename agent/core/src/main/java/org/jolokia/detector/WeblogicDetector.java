@@ -23,7 +23,7 @@ import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jolokia.backend.MBeanServerExecutor;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
  * Detector for Weblogic Appservers

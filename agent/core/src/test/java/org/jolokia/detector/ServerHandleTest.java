@@ -10,8 +10,7 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import static org.easymock.EasyMock.*;
 
-import org.jolokia.mbean.Config;
-import org.jolokia.mbean.ConfigMBean;
+import org.jolokia.backend.Config;
 import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
