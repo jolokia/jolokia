@@ -38,14 +38,7 @@ public final class ServersInfo {
             ret.append("        Domains:\n");
             boolean javaLangFound = false;
             for (String d : s.getDomains()) {
-                if ("java.lang".equals(d)) {
-                    javaLangFound = true;
-                }
                 appendDomainInfo(ret, s, d);
-            }
-            if (!javaLangFound) {
-                // JBoss fails to list java.lang in its domain list
-                appendDomainInfo(ret,s,"java.lang");
             }
         }
         ret.append("\n");
