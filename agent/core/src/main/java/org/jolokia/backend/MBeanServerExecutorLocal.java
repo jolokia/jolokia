@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.backend.executor;
+package org.jolokia.backend;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -23,6 +23,7 @@ import java.util.*;
 import javax.management.*;
 import javax.management.relation.MBeanServerNotificationFilter;
 
+import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;

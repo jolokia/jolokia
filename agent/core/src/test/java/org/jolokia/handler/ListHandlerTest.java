@@ -24,7 +24,7 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.backend.executor.MBeanServerExecutorLocal;
+import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
