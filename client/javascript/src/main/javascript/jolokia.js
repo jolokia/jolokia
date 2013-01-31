@@ -69,6 +69,9 @@
             // Registered requests for fetching periodically
             var jobs = [];
 
+            // Options used by the scheduler when requesting Jolokia
+            var schedulerOptions = {};
+
             // State of the scheduler
             var pollerIsRunning = false;
 
@@ -226,7 +229,7 @@
             };
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Schedule related methods
+            // Scheduler related methods
 
             /**
              * Register one or more requests for periodically polling the agent along with a callback to call on receipt
@@ -236,12 +239,12 @@
              *        with the two attributes <code>success</code> and <code>error</code> for two callbacks, one for a
              *        successful call, one in case on an error. If given only a single callback function, then this
              *        function is called with all responses received as argument, regardless whether the response indicates
-             *        a success or error stat. For the second case, when an object with an success and error function is
+             *        a success or error state. For the second case, when an object with an success and error function is
              *        given, these callback are called with with a single response object as argument. If multiple requests
              *        have been registered along with this callback object, the callback is called multiple times, one for
              *        each request in the same order as the request are given.
              *        As second argument, the handle which is returned by this method is given and as third argument the index
-             *        within the list of requests
+             *        within the list of requests.
              * @param request, request, .... One or more requests to be registered for this single callback
              * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
              */
@@ -265,7 +268,8 @@
                         callback: callback
                     };
                 } else {
-                    throw "First argument must be either a callback func " + "or an object with 'success' and 'error' attrs";
+                    throw "First argument must be either a callback func " +
+                          "or an object with 'success' and 'error' attributes";
                 }
                 job.requests = requests;
                 var idx = jobs.length;
@@ -300,6 +304,21 @@
             };
 
             /**
+             * Set or get the scheduler options. These options are sent with the request when
+             * the scheduler fires.
+             *
+             * @param opts options to be set, if any.
+             * @return current options
+             */
+            this.schedulerOptions = function(opts) {
+                // Defensive copy for arg and return
+                if (opts) {
+                    schedulerOptions = $.extend({},opts);
+                }
+                return $.extend({},schedulerOptions);
+            };
+
+            /**
              * Start the poller. The interval between two polling attempts can be optionally given or are taken from
              * the parameter <code>fetchInterval</code> given at construction time. If no interval is given at all,
              * 30 seconds is the default.
@@ -320,7 +339,7 @@
                     this.stop();
                 }
                 this.fetchInterval = interval;
-                this.timerId = setInterval(callJolokia(this,jobs), interval);
+                this.timerId = setInterval(callJolokia(this,jobs,schedulerOptions), interval);
 
                 pollerIsRunning = true;
             };
@@ -355,7 +374,7 @@
 
         // Create a function called by a timer, which requests the registered requests
         // calling the stored callback on receipt. jolokia and jobs are put into the closure
-        function callJolokia(jolokia,jobs) {
+        function callJolokia(jolokia,jobs,globalOpts) {
             return function() {
                 var errorCbs = [],
                     successCbs = [],
@@ -363,7 +382,6 @@
                     i, j,
                     len = jobs.length;
                 var requests = [];
-                var opts;
                 for (i = 0; i < len; i++) {
                     var job = jobs[i];
                     if (!job) {
@@ -395,14 +413,14 @@
                         errorCbs.push(dCb.lcb);
                     }
                 }
-                opts = {
+                var opts = $.extend(globalOpts,{
                     success: function(resp, j) {
                         return successCbs[j].apply(jolokia, [resp, j]);
                     },
                     error: function(resp, j) {
                         return errorCbs[j].apply(jolokia, [resp, j]);
                     }
-                };
+                });
                 return jolokia.request(requests, opts);
             };
         }
