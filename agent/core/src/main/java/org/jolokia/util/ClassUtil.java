@@ -30,7 +30,7 @@ public final class ClassUtil {
     private ClassUtil() {}
 
     /**
-     * Load a certain class. Several class loader are tried: Firs the current thread's context
+     * Load a certain class. Several class loader are tried: Fires the current thread's context
      * class loader, then its parents. If this doesn't work, the class loader which
      * loaded this class is used (and its parents)
      *
@@ -45,7 +45,7 @@ public final class ClassUtil {
                 ClassUtil.class.getClassLoader()
         } ) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
-            // hide the the server classes loaded by the parent class loader.
+            // hide the server classes loaded by the parent class loader.
             do {
                 try {
                     if (!tried.contains(loader)) {

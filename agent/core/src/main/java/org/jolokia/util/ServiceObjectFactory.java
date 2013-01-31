@@ -48,7 +48,7 @@ public final class ServiceObjectFactory {
      * Create a list of services ordered according to the ordering given in the
      * service descriptor files. Note, that the descriptor will be looked up
      * in the whole classpath space, which can result in reading in multiple
-     * descriptors with a single path. Note, that the reading order for mutiple
+     * descriptors with a single path. Note, that the reading order for multiple
      * resources with the same name is not defined.
      *
      * @param pDescriptorPaths a list of resource paths which are handle in the given order.

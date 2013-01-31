@@ -57,8 +57,9 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             try {
                 // Still to decide: Should we check eagerly or let an InstanceNotFound Exception
                 // bubble ? Exception bubbling was the former behaviour, so it is left in. However,
-                // it would be interesting how the performance impact is here. All tests BTW are
-                // prepared for switching the guard below on.
+                // it would be interesting how large the performance impact is here. All unit tests BTW are
+                // prepared for switching the guard below on or off.
+
                 //if (server.isRegistered(pObjectName)) {
                     return pMBeanAction.execute(server, pObjectName, pExtraArgs);
                 //}
