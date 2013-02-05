@@ -24,6 +24,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-jmx</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>4.2.0</version>

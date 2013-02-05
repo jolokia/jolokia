@@ -25,6 +25,7 @@
     <module>mule</module>
     <module>osgi</module>
     <module>osgi-bundle</module>
+    <module>jmx</module>
   </modules>
 
   <profiles>

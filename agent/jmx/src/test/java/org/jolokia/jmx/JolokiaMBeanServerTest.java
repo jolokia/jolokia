@@ -8,10 +8,10 @@ import javax.management.openmbean.CompositeData;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 
 /**
  * @author roland
@@ -26,18 +26,18 @@ public class JolokiaMBeanServerTest {
         ObjectName oName = new ObjectName("test:type=jsonMBean");
         server.registerMBean(new JsonAnnoTest(),oName);
         CompositeData chiliCD = (CompositeData) server.getAttribute(oName,"Chili");
-        assertEquals((String) chiliCD.get("name"),"Bhut Jolokia");
-        assertEquals(chiliCD.get("scoville"),1000000L);
+        assertEquals((String) chiliCD.get("name"), "Bhut Jolokia");
+        assertEquals(chiliCD.get("scoville"), 1000000L);
 
         MBeanServer pServer = ManagementFactory.getPlatformMBeanServer();
         String chiliS = (String) pServer.getAttribute(oName,"Chili");
         JSONObject chiliJ = (JSONObject) new JSONParser().parse(chiliS);
-        assertEquals(chiliJ.get("name"),"Bhut Jolokia");
-        assertEquals(chiliJ.get("scoville"),1000000L);
+        assertEquals(chiliJ.get("name"), "Bhut Jolokia");
+        assertEquals(chiliJ.get("scoville"), 1000000L);
 
         server.unregisterMBean(oName);
-        assertFalse(pServer.isRegistered(oName));
-        assertFalse(server.isRegistered(oName));
+        Assert.assertFalse(pServer.isRegistered(oName));
+        Assert.assertFalse(server.isRegistered(oName));
     }
 
 

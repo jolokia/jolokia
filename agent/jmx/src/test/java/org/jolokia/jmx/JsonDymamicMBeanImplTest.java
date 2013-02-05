@@ -9,9 +9,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.testng.Assert;
 import org.testng.annotations.*;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -46,11 +47,11 @@ public class JsonDymamicMBeanImplTest {
 
     @Test
     public void getAttribute() throws Exception {
-        assertEquals(platformServer.getAttribute(testName,"Chili"),"jolokia");
+        assertEquals(platformServer.getAttribute(testName, "Chili"), "jolokia");
         String user = (String) platformServer.getAttribute(testName,"User");
         JSONObject userJ = (JSONObject) toJSON(user);
-        assertEquals(userJ.get("firstName"),"Hans");
-        assertEquals(userJ.get("lastName"),"Kalb");
+        assertEquals(userJ.get("firstName"), "Hans");
+        assertEquals(userJ.get("lastName"), "Kalb");
     }
 
     @Test
@@ -72,19 +73,19 @@ public class JsonDymamicMBeanImplTest {
             ops.put(o.getName(), o);
         }
 
-        assertEquals(ops.get("lookup").getReturnType(),String.class.getName());
-        assertEquals(ops.get("epoch").getReturnType(),"long");
-        assertEquals(ops.get("charTest").getReturnType(),"char");
+        assertEquals(ops.get("lookup").getReturnType(), String.class.getName());
+        assertEquals(ops.get("epoch").getReturnType(), "long");
+        assertEquals(ops.get("charTest").getReturnType(), "char");
 
         MBeanParameterInfo p[] = ops.get("lookup").getSignature();
-        assertEquals(p[0].getType(),String.class.getName());
-        assertEquals(p[1].getType(),String.class.getName());
+        assertEquals(p[0].getType(), String.class.getName());
+        assertEquals(p[1].getType(), String.class.getName());
 
         p = ops.get("epoch").getSignature();
-        assertEquals(p[0].getType(),String.class.getName());
+        assertEquals(p[0].getType(), String.class.getName());
 
         p = ops.get("charTest").getSignature();
-        assertEquals(p[0].getType(),Character.class.getName());
+        assertEquals(p[0].getType(), Character.class.getName());
 
     }
 
@@ -100,8 +101,8 @@ public class JsonDymamicMBeanImplTest {
         platformServer.setAttribute(testName,new Attribute("Numbers","8,15"));
         String nums = (String) platformServer.getAttribute(testName,"Numbers");
         JSONArray numsJ = (JSONArray) toJSON(nums);
-        assertEquals(numsJ.get(0),8L);
-        assertEquals(numsJ.get(1),15L);
+        assertEquals(numsJ.get(0), 8L);
+        assertEquals(numsJ.get(1), 15L);
         assertEquals(numsJ.size(), 2);
     }
 
@@ -109,15 +110,15 @@ public class JsonDymamicMBeanImplTest {
     public void exec() throws Exception {
         String res = (String) platformServer.invoke(testName,"lookup",new Object[] { "Bumbes", "Eins, Zwei" }, new String[] { "java.lang.String", "java.lang.String" });
         JSONObject user = (JSONObject) toJSON(res);
-        assertEquals(user.get("firstName"),"Hans");
-        assertEquals(user.get("lastName"),"Kalb");
+        assertEquals(user.get("firstName"), "Hans");
+        assertEquals(user.get("lastName"), "Kalb");
 
         Date date = new Date();
         long millis = (Long) platformServer.invoke(testName,"epoch", new Object[] { date.getTime() + "" }, new String[] { "java.lang.String"});
-        assertEquals(date.getTime(),millis);
+        assertEquals(date.getTime(), millis);
 
         char c = (Character) platformServer.invoke(testName,"charTest", new Object[] { 'y' }, new String[] { Character.class.getName() });
-        assertEquals(c,'y');
+        assertEquals(c, 'y');
     }
 
     @Test
@@ -130,15 +131,15 @@ public class JsonDymamicMBeanImplTest {
         AttributeList ret =  platformServer.getAttributes(testName,new String[] { "Chili", "Numbers" });
         Attribute chili = (Attribute) ret.get(0);
         Attribute num = (Attribute) ret.get(1);
-        assertEquals(chili.getValue(),"aji");
+        assertEquals(chili.getValue(), "aji");
 
         JSONArray numsJ = (JSONArray) toJSON((String) num.getValue());
-        assertEquals(numsJ.get(0),16L);
-        assertEquals(numsJ.get(1),11L);
-        assertEquals(numsJ.get(2),68L);
+        assertEquals(numsJ.get(0), 16L);
+        assertEquals(numsJ.get(1), 11L);
+        assertEquals(numsJ.get(2), 68L);
         assertEquals(numsJ.size(), 3);
 
-        assertTrue(platformServer.getAttributes(testName,new String[0]).size() == 0);
+        Assert.assertTrue(platformServer.getAttributes(testName, new String[0]).size() == 0);
 
     }
 
@@ -154,8 +155,8 @@ public class JsonDymamicMBeanImplTest {
         platformServer.setAttribute(userManagerName,new Attribute("User","{\"firstName\": \"Bumbes\", \"lastName\": \"Schmidt\"}"));
         String user = (String) platformServer.getAttribute(userManagerName,"User");
         JSONObject userJ = (JSONObject) toJSON(user);
-        assertEquals(userJ.get("firstName"),"Bumbes");
-        assertEquals(userJ.get("lastName"),"Schmidt");
+        assertEquals(userJ.get("firstName"), "Bumbes");
+        assertEquals(userJ.get("lastName"), "Schmidt");
 
         user = (String) platformServer.invoke(userManagerName,"lookup",
                               new Object[] {
@@ -164,7 +165,7 @@ public class JsonDymamicMBeanImplTest {
                                        "{\"firstName\": \"Papa\", \"lastName\": \"Schmidt\"}]"},
                               new String[] { String.class.getName(), String.class.getName() });
         userJ = (JSONObject) toJSON(user);
-        assertEquals(userJ.get("firstName"),"Bumbes");
+        assertEquals(userJ.get("firstName"), "Bumbes");
         assertEquals(userJ.get("lastName"), "Schmidt");
     }
 
