@@ -49,9 +49,12 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
 
     /** {@inheritDoc} */
     public <T> T call(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object ... pExtraArgs)
-            throws IOException, ReflectionException, MBeanException {
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         Exception exception = null;
         String errorMsg = null;
+        InstanceNotFoundException objNotFoundException = null;
+        AttributeNotFoundException attrException = null;
+
         for (MBeanServerConnection server : getMBeanServers(true)) {
             // Only the first MBeanServer holding the MBean wins
             try {
@@ -64,20 +67,27 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
                     return pMBeanAction.execute(server, pObjectName, pExtraArgs);
                 //}
             } catch (InstanceNotFoundException exp) {
-                exception = exp;
-                errorMsg = "No MBean with ObjectName " + pObjectName + " is registered";
+                // Remember exceptions for later use
+                objNotFoundException = exp;
             } catch (AttributeNotFoundException exp) {
+                attrException = new AttributeNotFoundException(pObjectName + ": " + exp.getMessage());
                 // Try next one, too ..
-                errorMsg = "Invalid attribute on " + pObjectName + " queried";
-                exception = exp;
             }
         }
+
+        if (attrException != null) {
+            throw attrException;
+        }
+
+        // Must be there, otherwise we would not have left the loop
+        throw objNotFoundException;
+
         // When we reach this, no MBeanServer know about the requested MBean.
         // Hence, we throw our own InstanceNotFoundException here
 
-        throw exception != null ?
-                new IllegalArgumentException(errorMsg + ": " + exception,exception) :
-                new IllegalArgumentException(errorMsg);
+        //throw exception != null ?
+        //        new IllegalArgumentException(errorMsg + ": " + exception,exception) :
+        //        new IllegalArgumentException(errorMsg);
     }
 
     /** {@inheritDoc} */

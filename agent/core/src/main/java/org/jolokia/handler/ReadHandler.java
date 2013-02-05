@@ -160,7 +160,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     // Return only those attributes of an mbean which has one of the given names
     private List<String> filterAttributeNames(MBeanServerExecutor pSeverManager,ObjectName pName, List<String> pNames)
-            throws IOException, ReflectionException, MBeanException {
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         Set<String> attrs = new HashSet<String>(getAllAttributesNames(pSeverManager,pName));
         List<String> ret = new ArrayList<String>();
         for (String name : pNames) {
@@ -203,7 +203,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     // Resolve attributes and look up attribute names if all attributes need to be fetched.
     private List<String> resolveAttributes(MBeanServerExecutor pServers, ObjectName pMBeanName, List<String> pAttributeNames)
-            throws IOException, ReflectionException, MBeanException {
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         List<String> attributes = pAttributeNames;
         if (shouldAllAttributesBeFetched(pAttributeNames)) {
             // All attributes are requested, we look them up now
@@ -222,19 +222,19 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
 
     // Get the MBeanInfo from one of the provided MBeanServers
     private MBeanInfo getMBeanInfo(MBeanServerExecutor pServerManager, ObjectName pObjectName)
-            throws IOException, ReflectionException, MBeanException {
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         return pServerManager.call(pObjectName, MBEAN_INFO_HANDLER);
     }
 
     // Try multiple servers for fetching an attribute
     private Object getAttribute(MBeanServerExecutor pServerManager, ObjectName pMBeanName, String attribute)
-            throws MBeanException, ReflectionException, IOException {
+            throws MBeanException, ReflectionException, IOException, AttributeNotFoundException, InstanceNotFoundException {
         return pServerManager.call(pMBeanName, MBEAN_ATTRIBUTE_READ_HANDLER, attribute);
     }
 
     // Return a set of attributes as a map with the attribute name as key and their values as values
     private List<String> getAllAttributesNames(MBeanServerExecutor pServerManager, ObjectName pObjectName)
-            throws IOException, ReflectionException, MBeanException {
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         MBeanInfo mBeanInfo = getMBeanInfo(pServerManager, pObjectName);
         List<String> ret = new ArrayList<String>();
         for (MBeanAttributeInfo attrInfo : mBeanInfo.getAttributes()) {

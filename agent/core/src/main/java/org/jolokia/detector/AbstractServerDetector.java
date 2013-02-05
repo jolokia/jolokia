@@ -96,7 +96,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
             return null;
         } catch (ReflectionException e) {
             return null;
-        } catch (MBeanException e) {
+        } catch (JMException e) {
             return null;
         }
     }

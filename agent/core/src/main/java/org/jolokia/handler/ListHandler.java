@@ -92,6 +92,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
             return action.getResult();
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
+        } catch (InstanceNotFoundException e) {
+            throw new IllegalArgumentException("No MBean '" + oName + "' found",e);
         } catch (JMException e) {
             throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         }

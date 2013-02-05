@@ -149,26 +149,4 @@ $(document).ready(function() {
         },500);
     });
 
-    asyncTest("Scheduler options",function() {
-        var j4p = new Jolokia("/jolokia");
-        var count = 0;
-        j4p.schedulerOptions({maxDepth: 1});
-        j4p.register({
-                success: function(resp) {
-                    equals(resp.status,200);
-                    equals(typeof resp.value["HeapMemoryUsage"],'string',"HeapMemoryUsage should be truncated according " +
-                                                                          "to schedule options");
-                    count++;
-                }
-            },
-            { type: "READ", mbean: "java.lang:type=Memory" }
-            );
-        j4p.start(200);
-        setTimeout(function() {
-            j4p.stop();
-            equals(count,1,"Req should be called once");
-            start();
-        },300);
-
-    });
 });

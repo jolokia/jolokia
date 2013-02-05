@@ -101,12 +101,10 @@ public class GlassfishDetector extends AbstractServerDetector {
                     return null;
                 }
             });
+        } catch (InstanceNotFoundException e) {
+            pLoghandler.error("No bootAmx MBean found: " + e,e);
         } catch (IllegalArgumentException e) {
-            if (e.getCause() instanceof InstanceNotFoundException) {
-                pLoghandler.error("No bootAmx MBean found: " + e,e.getCause());
-            } else {
-                pLoghandler.error("Exception while booting AMX: " + e,e);
-            }
+            pLoghandler.error("Exception while booting AMX: " + e,e);
         } catch (Exception e) {
             pLoghandler.error("Exception while executing bootAmx: " + e, e);
         }

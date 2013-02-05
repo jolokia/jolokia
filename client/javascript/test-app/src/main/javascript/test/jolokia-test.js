@@ -57,6 +57,10 @@ $(document).ready(function() {
                              ok(response.value != null, "Value must be set: " + JSON.stringify(response.value));
                              ok(response.value.used != null, "Composite data returned: ");
                              start();
+                         },
+                         error: function(resp) {
+                            fail("error");
+                             start();
                          }
                      })
                     );

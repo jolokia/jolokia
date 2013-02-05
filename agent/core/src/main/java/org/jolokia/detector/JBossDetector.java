@@ -121,7 +121,7 @@ public class JBossDetector extends AbstractServerDetector {
                     pMBeanServerExecutor.call(pRequest.getObjectName(), JBOSS_WORKAROUND_HANDLER);
                 } catch (ReflectionException e) {
                     throw new IllegalStateException("Workaround for JBoss failed for object " + pRequest.getObjectName() + ": " + e);
-                } catch (MBeanException e) {
+                } catch (JMException e) {
                     throw new IllegalStateException("Workaround for JBoss failed for object " + pRequest.getObjectName() + ": " + e);
                 } catch (IOException e) {
                     // Must not happen, since this method is only called for local detections ...

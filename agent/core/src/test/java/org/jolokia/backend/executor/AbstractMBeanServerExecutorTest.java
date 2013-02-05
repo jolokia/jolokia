@@ -56,14 +56,14 @@ public class AbstractMBeanServerExecutorTest {
     }
 
     @Test
-    public void call() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, NotCompliantMBeanException, IOException, ReflectionException {
+    public void call() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, NotCompliantMBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
         AbstractMBeanServerExecutor executor = new TestExecutor();
 
         String name = getAttribute(executor,"test:type=one","Name");
         assertEquals(name,"jolokia");
     }
 
-    private String getAttribute(AbstractMBeanServerExecutor pExecutor, String name, String attribute) throws IOException, ReflectionException, MBeanException, MalformedObjectNameException {
+    private String getAttribute(AbstractMBeanServerExecutor pExecutor, String name, String attribute) throws IOException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException {
         return (String) pExecutor.call(new ObjectName(name),new MBeanServerExecutor.MBeanAction<Object>() {
                 public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
                     return pConn.getAttribute(pName, (String) extraArgs[0]);
@@ -71,15 +71,15 @@ public class AbstractMBeanServerExecutorTest {
             },attribute);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*test:type=bla.*InstanceNotFound.*")
-    public void callWithInvalidObjectName() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, IOException, ReflectionException {
+    @Test(expectedExceptions = InstanceNotFoundException.class,expectedExceptionsMessageRegExp = ".*test:type=bla.*")
+    public void callWithInvalidObjectName() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
         AbstractMBeanServerExecutor executor = new TestExecutor();
 
         getAttribute(executor,"test:type=bla","Name");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*test:type=one.*AttributeNotFound.*")
-    public void callWithInvalidAttributeName() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, IOException, ReflectionException {
+    @Test(expectedExceptions = AttributeNotFoundException.class,expectedExceptionsMessageRegExp = ".*test:type=one.*")
+    public void callWithInvalidAttributeName() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
         AbstractMBeanServerExecutor executor = new TestExecutor();
 
         getAttribute(executor,"test:type=one","Bla");

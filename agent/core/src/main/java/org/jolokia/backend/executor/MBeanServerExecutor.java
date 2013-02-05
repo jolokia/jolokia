@@ -68,7 +68,7 @@ public interface MBeanServerExecutor {
      * @throws MBeanException if the JMX call causes an issue
      */
     <R> R call(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object... pExtraArgs)
-            throws IOException, ReflectionException, MBeanException;
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException;
 
     /**
      * Query all MBeanServer and return the union of all results

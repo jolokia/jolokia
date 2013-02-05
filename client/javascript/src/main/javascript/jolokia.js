@@ -69,8 +69,8 @@
             // Registered requests for fetching periodically
             var jobs = [];
 
-            // Options used by the scheduler when requesting Jolokia
-            var schedulerOptions = {};
+            // Options used for every request
+            var agentOptions = {};
 
             // State of the scheduler
             var pollerIsRunning = false;
@@ -79,7 +79,7 @@
             if (typeof param === "string") {
                 param = {url:param};
             }
-            $.extend(this, DEFAULT_CLIENT_PARAMS, param);
+            $.extend(agentOptions, DEFAULT_CLIENT_PARAMS, param);
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Public methods
@@ -164,7 +164,7 @@
              * @return the response object if called synchronously or nothing if called for asynchronous operation.
              */
             this.request = function (request, params) {
-                var opts = $.extend({}, this, params);
+                var opts = $.extend({}, agentOptions, params);
                 assertNotNull(opts.url, "No URL given");
 
                 var ajaxParams = {};
@@ -304,21 +304,6 @@
             };
 
             /**
-             * Set or get the scheduler options. These options are sent with the request when
-             * the scheduler fires.
-             *
-             * @param opts options to be set, if any.
-             * @return current options
-             */
-            this.schedulerOptions = function(opts) {
-                // Defensive copy for arg and return
-                if (opts) {
-                    schedulerOptions = $.extend({},opts);
-                }
-                return $.extend({},schedulerOptions);
-            };
-
-            /**
              * Start the poller. The interval between two polling attempts can be optionally given or are taken from
              * the parameter <code>fetchInterval</code> given at construction time. If no interval is given at all,
              * 30 seconds is the default.
@@ -329,17 +314,17 @@
              * @param interval interval in milliseconds between two polling attempts
              */
             this.start = function(interval) {
-                interval = interval || this.fetchInterval || 30000;
+                interval = interval || agentOptions.fetchInterval || 30000;
                 if (pollerIsRunning) {
-                    if (interval === this.fetchInterval) {
+                    if (interval === agentOptions.fetchInterval) {
                         // Nothing to do
                         return;
                     }
                     // Re-start with new interval
                     this.stop();
                 }
-                this.fetchInterval = interval;
-                this.timerId = setInterval(callJolokia(this,jobs,schedulerOptions), interval);
+                agentOptions.fetchInterval = interval;
+                this.timerId = setInterval(callJolokia(this,jobs), interval);
 
                 pollerIsRunning = true;
             };
@@ -374,7 +359,7 @@
 
         // Create a function called by a timer, which requests the registered requests
         // calling the stored callback on receipt. jolokia and jobs are put into the closure
-        function callJolokia(jolokia,jobs,globalOpts) {
+        function callJolokia(jolokia,jobs) {
             return function() {
                 var errorCbs = [],
                     successCbs = [],
@@ -413,14 +398,14 @@
                         errorCbs.push(dCb.lcb);
                     }
                 }
-                var opts = $.extend(globalOpts,{
+                var opts = {
                     success: function(resp, j) {
                         return successCbs[j].apply(jolokia, [resp, j]);
                     },
                     error: function(resp, j) {
                         return errorCbs[j].apply(jolokia, [resp, j]);
                     }
-                });
+                };
                 return jolokia.request(requests, opts);
             };
         }

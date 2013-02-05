@@ -189,9 +189,9 @@ $(document).ready(function() {
         value = j4p.list(["java.lang","type=Memory","op"]);
         ok(value["gc"], "Garbage collection (with array path)");
         equals(value.gc.args, 0);
-        value = j4p.list("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!/attr");
+        value = j4p.list("jolokia.it/name=n!!a!!m!!e with !!!/!!,type=naming!//attr");
         ok(value["Ok"], "Path with /");
-        value = j4p.list(["jolokia.it","type=naming,name=n!a!m!e with !/!","attr"]);
+        value = j4p.list(["jolokia.it","type=naming/,name=n!a!m!e with !/!","attr"]);
         ok(value["Ok"], "Path with / (path elements)");
         raises(function() {
             j4p.list("java.lang/type=Bla");
