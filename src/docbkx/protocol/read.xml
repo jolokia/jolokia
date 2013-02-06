@@ -32,7 +32,7 @@
     in which case the attributes are read on all matching MBeans. If a
     MBean pattern and multiple attributes are requestes, then only the
     value of attributes which matches both are returned, the others
-    are ignored. Pathes cannot be used with multi value reads, though.
+    are ignored. Paths cannot be used with multi value reads, though.
   </para>
   <section id="get-read">
     <title>GET read request</title>
@@ -76,7 +76,7 @@
         <td><literal>&lt;inner path&gt;</literal></td>
         <td>
           This optional part describes an <emphasis>inner
-          path</emphasis> as described in <xref linkend="pathes"/>
+          path</emphasis> as described in <xref linkend="paths"/>
         </td>
         <td><literal>used</literal></td>
       </tr>
@@ -125,7 +125,7 @@
       <tr>
         <td><constant>path</constant></td>
         <td>Inner path for accessing the value of a complex value
-        (<xref linkend="pathes"/>)</td>
+        (<xref linkend="paths"/>)</td>
         <td><constant>used</constant></td>
       </tr>
     </table>

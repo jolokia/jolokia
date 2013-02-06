@@ -200,7 +200,7 @@
          * provided partially, in which case the remaining map/array is returned. The path given must
          * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exlamation
          * marks like <code>!!</code>.
-         * See also the Jolokia Reference Manual for a more detailed discussion of inner pathes and escaping.
+         * See also the Jolokia Reference Manual for a more detailed discussion of inner paths and escaping.
          *
          *
          * @param path optional path for diving into the list

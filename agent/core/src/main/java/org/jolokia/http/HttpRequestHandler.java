@@ -314,7 +314,7 @@ public class HttpRequestHandler {
 
     private String extractPathInfo(String pUri, String pPathInfo) {
         if (pUri.contains("!//")) {
-            // Special treatment for trailing slashes in pathes
+            // Special treatment for trailing slashes in paths
             Matcher matcher = PATH_PREFIX_PATTERN.matcher(pPathInfo);
             if (matcher.find()) {
                 String prefix = matcher.group();

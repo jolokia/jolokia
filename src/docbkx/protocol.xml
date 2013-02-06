@@ -364,8 +364,8 @@
         </para>
       </section>
       
-      <section id="pathes">
-        <title>Pathes</title>
+      <section id="paths">
+        <title>Paths</title>
         <para>
           An <emphasis>inner path</emphasis> points to a certain
           substructure (plain value, array, hash) within a a complex
@@ -397,7 +397,7 @@
           traverse into this array.
         </para>    
         <para>
-          For both, GET and POST requests, pathes must be escaped as
+          For both, GET and POST requests, paths must be escaped as
           described in <xref linkend="escape-rules"/> when they
           contain slashes (<literal>/</literal>) or exclamation marks
           (<literal>!</literal>).

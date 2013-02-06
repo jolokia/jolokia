@@ -15,7 +15,7 @@
     </para>
     <synopsis><![CDATA[<base-url>/list/<inner path>]]></synopsis>
     <para>
-      The <literal>&lt;inner path&gt;</literal>, as described in <xref linkend="pathes"/> 
+      The <literal>&lt;inner path&gt;</literal>, as described in <xref linkend="paths"/> 
       specifies a subset of the complete response. You can
       use this to select a specific domain, MBean or
       attribute/operation. See the next section for the format of the
@@ -46,7 +46,7 @@
         <td><constant>path</constant></td>
         <td>
           Inner path for accessing the value of a subset of the complete list
-          (<xref linkend="pathes"/>). 
+          (<xref linkend="paths"/>). 
         </td>
         <td><literal>java.lang/type=Memory/attr</literal></td>
       </tr>

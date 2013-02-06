@@ -216,7 +216,7 @@ public abstract class JmxRequest {
             try {
                 ret.put("path",getPath());
             } catch (UnsupportedOperationException exp) {
-                // Happens when request doesnt support pathes
+                // Happens when request doesnt support paths
             }
         }
         return ret;

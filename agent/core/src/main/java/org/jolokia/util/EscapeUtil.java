@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Utility class for handling escaping of strings and pathes.
+ * Utility class for handling escaping of strings and paths.
  *
  * @author roland
  * @since 15.03.11
