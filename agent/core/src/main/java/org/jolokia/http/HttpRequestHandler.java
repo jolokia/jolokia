@@ -16,8 +16,6 @@ import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-//import org.json.simple.parser.JSONParser;
-
 /*
  *  Copyright 2009-2010 Roland Huss
  *

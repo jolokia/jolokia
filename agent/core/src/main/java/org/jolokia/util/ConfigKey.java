@@ -78,12 +78,26 @@ public enum ConfigKey {
     IGNORE_ERRORS("ignoreErrors", false, true),
 
     /**
+     * Whether to include a stack trace in the response when an error occurs.
+     * The allowed values are "true" for inclusion, "false" if no stacktrace
+     * should be included or "runtime" if only {@link RuntimeException}s should
+     * be included. Default is "true"
+     */
+    INCLUDE_STACKTRACE("includeStackTrace", true, true, "true"),
+
+    /**
+     * Whether to include a JSON serialized version of the exception. If set
+     * to "true", the exception is added under the key "error_value" in
+     * the response. Default is false.
+     */
+    SERIALIZE_EXCEPTION("serializeException", true, true, "false"),
+    /**
      * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
      * are created.
      * The allowed values are either "true" in which case the canonical key order (== alphabetical
      * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
-    CANONICAL_NAMING("canonicalNaming",true,true,"true"),
+    CANONICAL_NAMING("canonicalNaming", true, true, "true"),
 
     /**
      * Optional domain name for registering own MBeans
@@ -103,7 +117,7 @@ public enum ConfigKey {
      * <code>application/json</code>, too. A request parameter overrides a global
      * configuration.
      */
-    MIME_TYPE("mimeType", true, true,"text/plain"),
+    MIME_TYPE("mimeType", true, true, "text/plain"),
 
     // ================================================================================
     // Configuration relevant for OSGI container
@@ -122,20 +136,20 @@ public enum ConfigKey {
      * Context used for agent, used e.g. in the OSGi activator
      * (but not for the servlet, this is done in web.xml)
      */
-    AGENT_CONTEXT("agentContext",true, false, "/jolokia"),
+    AGENT_CONTEXT("agentContext", true, false, "/jolokia"),
 
     /**
      * For OSGi, if set to true, the agent uses a restrictor service when it kicks in,
      * but denies access otherwise.
      */
-    USE_RESTRICTOR_SERVICE("useRestrictorService",true,false,"false"),
+    USE_RESTRICTOR_SERVICE("useRestrictorService", true, false, "false"),
 
     /**
      * By default, the OSGi Agent listens for an OSGi HttpService to which it will register
      * an agent servlet. Set this to false if you want to instantiate the
      * servlet on your own (either declaratively within another war or programmatically)
      */
-    LISTEN_FOR_HTTP_SERVICE("listenForHttpService",true,false,"true"),
+    LISTEN_FOR_HTTP_SERVICE("listenForHttpService", true, false, "true"),
 
     /**
      * By default, the OSGi Agent will bind to all HttpService implementations.
