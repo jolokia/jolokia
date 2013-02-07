@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.BackendManager;
+import org.jolokia.config.Configuration;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
 import org.jolokia.util.LogHandler;
@@ -48,6 +50,9 @@ public class HttpRequestHandler {
     // Logging abstraction
     private LogHandler logHandler;
 
+    // Global configuration
+    private Configuration config;
+
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
      * request handler (with help of the backend manager)
@@ -55,9 +60,10 @@ public class HttpRequestHandler {
      * @param pBackendManager backend manager to user
      * @param pLogHandler log handler to where to put out logging
      */
-    public HttpRequestHandler(BackendManager pBackendManager, LogHandler pLogHandler) {
+    public HttpRequestHandler(Configuration pConfig, BackendManager pBackendManager, LogHandler pLogHandler) {
         backendManager = pBackendManager;
         logHandler = pLogHandler;
+        config = pConfig;
     }
 
     /**
@@ -71,7 +77,7 @@ public class HttpRequestHandler {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JmxRequest jmxReq =
-                JmxRequestFactory.createGetRequest(pathInfo,pParameterMap);
+                JmxRequestFactory.createGetRequest(pathInfo,getProcessingParameter(pParameterMap));
 
         if (backendManager.isDebug()) {
             logHandler.debug("URI: " + pUri);
@@ -79,6 +85,19 @@ public class HttpRequestHandler {
             logHandler.debug("Request: " + jmxReq.toString());
         }
         return executeRequest(jmxReq);
+    }
+
+    private ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) {
+        Map<String,String> ret = new HashMap<String, String>();
+        if (pParameterMap != null) {
+            for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
+                String values[] = entry.getValue();
+                if (values != null && values.length > 0) {
+                        ret.put(entry.getKey(), values[0]);
+                }
+            }
+        }
+        return config.getProcessingParameters(ret);
     }
 
     /**
@@ -102,7 +121,7 @@ public class HttpRequestHandler {
 
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof JSONArray) {
-            List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,pParameterMap);
+            List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,getProcessingParameter(pParameterMap));
 
             JSONArray responseList = new JSONArray();
             for (JmxRequest jmxReq : jmxRequests) {
@@ -115,7 +134,7 @@ public class HttpRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof JSONObject) {
-            JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,pParameterMap);
+            JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,getProcessingParameter(pParameterMap));
             return executeRequest(jmxReq);
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);

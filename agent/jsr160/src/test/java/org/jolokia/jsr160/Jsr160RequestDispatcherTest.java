@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.config.Configuration;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.*;
@@ -39,27 +41,29 @@ import static org.testng.Assert.*;
 public class Jsr160RequestDispatcherTest {
 
     private Jsr160RequestDispatcher dispatcher;
+    private ProcessingParameters procParams;
 
     @BeforeTest
     private void setup() {
         dispatcher = createDispatcherPointingToLocalMBeanServer();
+        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
     }
 
     @Test
     public void canHandle() {
-        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", null)));
+        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
         JmxRequest req = preparePostReadRequest(null);
         assertTrue(dispatcher.canHandle(req));
     }
 
     @Test
     public void useReturnValue() {
-        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", null)));
+        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", null));
+        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", procParams));
     }
 
     @Test(expectedExceptions = IOException.class)
@@ -111,7 +115,7 @@ public class Jsr160RequestDispatcherTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, null);
+        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, procParams);
     }
 
     private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer() {

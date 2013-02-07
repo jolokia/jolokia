@@ -77,7 +77,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      */
     public void start(boolean pLazy) {
         backendManager = new BackendManager(configuration, this, createRestrictor(configuration), pLazy);
-        requestHandler = new HttpRequestHandler(backendManager, this);
+        requestHandler = new HttpRequestHandler(configuration,backendManager, this);
     }
 
     /**

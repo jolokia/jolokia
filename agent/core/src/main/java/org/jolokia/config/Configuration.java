@@ -78,6 +78,15 @@ public class Configuration {
         return ret;
     }
 
+    /**
+     * Get processing parameters from a string-string map
+     *
+     * @param pParams params to extra. A parameter "p" is used as extra path info
+     * @return the processing parameters
+     */
+    public ProcessingParameters getProcessingParameters(Map<String,String> pParams) {
+        return new ProcessingParameters(ProcessingParameters.convertToConfigMap(pParams),pParams.get("p"));
+    }
 
     /**
      * Get an configuration value as boolean value. The value must

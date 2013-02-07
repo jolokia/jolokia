@@ -24,6 +24,7 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.jolokia.config.Configuration;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
@@ -51,7 +52,7 @@ public class HttpRequestHandlerTest {
         backend = createMock(BackendManager.class);
         expect(backend.isDebug()).andReturn(true).anyTimes();
 
-        handler = new HttpRequestHandler(backend, createDummyLogHandler());
+        handler = new HttpRequestHandler(new Configuration(),backend, createDummyLogHandler());
     }
 
     @AfterMethod

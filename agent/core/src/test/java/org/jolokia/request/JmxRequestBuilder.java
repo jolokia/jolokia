@@ -21,8 +21,9 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.*;
+import org.jolokia.config.*;
+import org.jolokia.util.EscapeUtil;
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**
@@ -54,13 +55,14 @@ public class JmxRequestBuilder {
 
     public <R extends JmxRequest> R build() throws MalformedObjectNameException {
         RequestType type = RequestType.getTypeByName((String) request.get("type"));
+        ProcessingParameters params = new Configuration().getProcessingParameters(procConfig);
         switch (type) {
-            case READ: return (R) new JmxReadRequest(request,procConfig);
-            case WRITE: return (R) new JmxWriteRequest(request,procConfig);
-            case EXEC: return (R) new JmxExecRequest(request,procConfig);
-            case VERSION: return (R) new JmxVersionRequest(request,procConfig);
-            case SEARCH: return (R) new JmxSearchRequest(request,procConfig);
-            case LIST: return (R) new JmxListRequest(request,procConfig);
+            case READ: return (R) new JmxReadRequest(request,params);
+            case WRITE: return (R) new JmxWriteRequest(request,params);
+            case EXEC: return (R) new JmxExecRequest(request,params);
+            case VERSION: return (R) new JmxVersionRequest(request,params);
+            case SEARCH: return (R) new JmxSearchRequest(request,params);
+            case LIST: return (R) new JmxListRequest(request,params);
         }
         throw new IllegalArgumentException("Unknown type " + type);
     }

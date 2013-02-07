@@ -23,6 +23,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -46,7 +47,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pProcessingParams optional init params
      * @throws MalformedObjectNameException if the given MBean name is not a valid object name
      */
-    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, Map<String, String> pProcessingParams)
+    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, ProcessingParameters pProcessingParams)
             throws MalformedObjectNameException {
         super(pType,pPathParts,pProcessingParams);
         initObjectName(pObjectName);
@@ -59,7 +60,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the given MBean name (key: "mbean") is not a valid object name.
      */
-    public JmxObjectNameRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         initObjectName((String) pRequestMap.get("mbean"));
     }

@@ -145,7 +145,7 @@ public class AgentServlet extends HttpServlet {
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
         backendManager = new BackendManager(config,logHandler, restrictor);
-        requestHandler = new HttpRequestHandler(backendManager,logHandler);
+        requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
     }
 
 

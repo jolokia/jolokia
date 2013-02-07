@@ -18,8 +18,8 @@ package org.jolokia.request;
 
 import java.util.*;
 
+import org.jolokia.config.*;
 import org.jolokia.converter.json.ValueFaultHandler;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 
@@ -40,7 +40,7 @@ public abstract class JmxRequest {
     private ProxyTargetConfig targetConfig = null;
 
     // Processing configuration for tis request object
-    private Map<ConfigKey, String> processingConfig = new HashMap<ConfigKey, String>();
+    private ProcessingParameters processingConfig;
 
     // A value fault handler for dealing with exception when extracting values
     private ValueFaultHandler valueFaultHandler;
@@ -60,7 +60,7 @@ public abstract class JmxRequest {
      * @param pProcessingParams init parameters provided as query params for a GET request. They are used to
      *                    to influence the processing.
      */
-    protected JmxRequest(RequestType pType, List<String> pPathParts, Map<String, String> pProcessingParams) {
+    protected JmxRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams) {
         this(pType, HttpMethod.GET, pPathParts, pProcessingParams);
     }
 
@@ -71,7 +71,7 @@ public abstract class JmxRequest {
      * @param pInitParams optional processing parameters (obtained as query parameters or from within the
      *        JSON request)
      */
-    public JmxRequest(Map<String, ?> pMap, Map<String, String> pInitParams) {
+    public JmxRequest(Map<String, ?> pMap, ProcessingParameters pInitParams) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
              EscapeUtil.parsePath((String) pMap.get("path")),
@@ -84,7 +84,7 @@ public abstract class JmxRequest {
     }
 
     // Common parts of both constructors
-    private JmxRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, Map<String, String> pProcessingParams) {
+    private JmxRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams) {
         method = pMethod;
         type = pType;
         pathParts = pPathParts;
@@ -223,16 +223,8 @@ public abstract class JmxRequest {
     }
 
     // Init parameters and value fault handler
-    private void initParameters(Map<String, String> pParams) {
-        if (pParams != null) {
-            for (Map.Entry<String,?> entry : pParams.entrySet()) {
-                ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
-                Object value = entry.getValue();
-                if (cKey != null) {
-                    processingConfig.put(cKey, value != null ? value.toString() : null);
-                }
-            }
-        }
+    private void initParameters(ProcessingParameters pParams) {
+        processingConfig = pParams;
         String ignoreErrors = processingConfig.get(ConfigKey.IGNORE_ERRORS);
         if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
             valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;

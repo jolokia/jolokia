@@ -20,6 +20,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.RequestType;
 
 /**
@@ -36,7 +37,7 @@ public class JmxListRequest extends JmxRequest {
      * @param pPathParts parts of a path to restrict on the return value
      * @param pParams processing parameters
      */
-    JmxListRequest(List<String> pPathParts, Map<String, String> pParams) {
+    JmxListRequest(List<String> pPathParts, ProcessingParameters pParams) {
         super(RequestType.LIST,pPathParts,pParams);
     }
 
@@ -46,7 +47,7 @@ public class JmxListRequest extends JmxRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JmxListRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) {
+    JmxListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
         super(pRequestMap, pParams);
     }
 
@@ -71,14 +72,14 @@ public class JmxListRequest extends JmxRequest {
     static RequestCreator<JmxListRequest> newCreator() {
         return new RequestCreator<JmxListRequest>() {
             /** {@inheritDoc} */
-            public JmxListRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxListRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JmxListRequest(
                         prepareExtraArgs(pStack), // path
                         pParams);
             }
 
             /** {@inheritDoc} */
-            public JmxListRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JmxListRequest(requestMap,pParams);
             }

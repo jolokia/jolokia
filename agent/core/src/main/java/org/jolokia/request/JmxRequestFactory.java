@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 
@@ -78,13 +79,13 @@ public final class JmxRequestFactory {
      *        Parameters: <code>param1</code> = MBean name pattern
      * </ul>
      * @param pPathInfo path info of HTTP request
-     * @param pParameterMap HTTP Query parameters
+     * @param pProcessingParameters processing parameters. Must not be null/
      * @return a newly created {@link JmxRequest}
      */
-    public static <R extends JmxRequest> R createGetRequest(String pPathInfo, Map<String,String[]> pParameterMap) {
+    public static <R extends JmxRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters) {
         RequestType type = null;
         try {
-            String pathInfo = extractPathInfo(pPathInfo, pParameterMap);
+            String pathInfo = extractPathInfo(pPathInfo, pProcessingParameters);
 
             // Get all path elements as a reverse stack
             Stack<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
@@ -93,7 +94,7 @@ public final class JmxRequestFactory {
             type = elements.size() != 0 ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
 
             // Parse request
-            return (R) getCreator(type).create(elements, extractParameters(pParameterMap));
+            return (R) getCreator(type).create(elements, pProcessingParameters);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
         } catch (EmptyStackException exp) {
@@ -106,15 +107,14 @@ public final class JmxRequestFactory {
      * Create a single {@link JmxRequest}s from a JSON map representation of a request
      *
      * @param pRequestMap JSON representation of a {@link JmxRequest}
-     * @param pParameterMap additional map of opertional parameters
+     * @param pProcessingParams additional map of operational parameters. Must not be null.
      * @return the created {@link JmxRequest}
      */
-    public static <R extends JmxRequest> R createPostRequest(Map<String, ?> pRequestMap, Map<String, String[]> pParameterMap) {
+    public static <R extends JmxRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
         try {
-            Map<String,String> params = mergeMaps((Map<String,String>) pRequestMap.get("config"),
-                                                  extractParameters(pParameterMap));
+            ProcessingParameters paramsMerged = pProcessingParams.mergedParams((Map<String,String>) pRequestMap.get("config"));
             RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
-            return (R) getCreator(type).create(pRequestMap, params);
+            return (R) getCreator(type).create(pRequestMap, paramsMerged);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
         }
@@ -123,19 +123,18 @@ public final class JmxRequestFactory {
     /**
      * Create a list of {@link JmxRequest}s from a JSON list representing jmx requests
      *
-     *
      * @param pJsonRequests JSON representation of a list of {@link JmxRequest}
-     * @param pParameterMap processing options
+     * @param pProcessingParams processing options. Must not be null.
      * @return list with one or more {@link JmxRequest}
      */
-    public static List<JmxRequest> createPostRequests(List pJsonRequests, Map<String, String[]> pParameterMap) {
+    public static List<JmxRequest> createPostRequests(List pJsonRequests, ProcessingParameters pProcessingParams) {
         List<JmxRequest> ret = new ArrayList<JmxRequest>();
         for (Object o : pJsonRequests) {
             if (!(o instanceof Map)) {
                 throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
                         ". Expected map, but found: " + o);
             }
-            ret.add(createPostRequest((Map<String,?>) o,pParameterMap));
+            ret.add(createPostRequest((Map<String,?>) o,pProcessingParams));
         }
         return ret;
     }
@@ -143,73 +142,20 @@ public final class JmxRequestFactory {
     // ========================================================================================================
 
     // Extract path info either from the 'real' URL path, or from an request parameter
-    private static String extractPathInfo(String pPathInfo, Map<String, String[]> pParameterMap) {
+    private static String extractPathInfo(String pPathInfo, ProcessingParameters pProcessingParams) {
         String pathInfo = pPathInfo;
 
         // If no pathinfo is given directly, we look for a query parameter named 'p'.
         // This variant is helpful, if there are problems with the server mangling
         // up the pathinfo (e.g. for security concerns, often '/','\',';' and other are not
         // allowed in encoded form within the pathinfo)
-        if (pParameterMap != null && (pPathInfo == null || pPathInfo.length() == 0 || pathInfo.matches("^/+$"))) {
-            String[] vals = pParameterMap.get("p");
-            if (vals != null && vals.length > 0) {
-                pathInfo = vals[0];
-            }
+        if (pProcessingParams != null && (pPathInfo == null || pPathInfo.length() == 0 || pathInfo.matches("^/+$"))) {
+            pathInfo = pProcessingParams.getPathInfo();
         }
         return normalizePathInfo(pathInfo);
     }
 
-    private static Map<String,String> extractParameters(Map<String,String[]> pParameterMap) {
-        Map<String,String> ret = new HashMap<String, String>();
-        if (pParameterMap != null) {
-            for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
-                String values[] = entry.getValue();
-                if (values != null && values.length > 0) {
-                    ret.put(entry.getKey(), values[0]);
-                }
-            }
-        }
-        return ret;
-    }
 
-
-    // Merge multiple maps to a single map, with the former taking precedence over later maps.
-    // Has some optimizations for null map arguments
-    private static Map<String,String> mergeMaps(Map<String,String> ... pMaps) {
-
-        // No map to merge
-        if (pMaps.length == 0) {
-            return null;
-        }
-
-        // Single map is returned directly
-        if (pMaps.length == 1) {
-            return pMaps[0];
-        }
-
-        // If one of two maps is null return the other (saves a copy
-        if (pMaps.length == 2) {
-            if (pMaps[0] == null) {
-                return pMaps[1];
-            }
-            if (pMaps[1] == null) {
-                return pMaps[0];
-            }
-        }
-
-        return plainMergeMaps(pMaps);
-    }
-
-    // merge together with former map having precedence
-    private static Map<String, String> plainMergeMaps(Map<String, String>[] pMaps) {
-        Map<String, String> pRet = new HashMap<String, String>();
-        for (int i = pMaps.length - 1;i >= 0;i--) {
-            if (pMaps[i] != null) {
-                pRet.putAll(pMaps[i]);
-            }
-        }
-        return pRet;
-    }
 
     // Return always a non-null string and strip of leading slash
     private static String normalizePathInfo(String pPathInfo) {
