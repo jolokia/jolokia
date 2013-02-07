@@ -28,9 +28,10 @@ import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
-import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -55,14 +56,14 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Configuration of this handler
-    private Map<ConfigKey, String> configuration;
+    private Configuration configuration;
 
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pConfig jolokia specific config tuning the processing behaviour
      */
-    public JolokiaHttpHandler(Map<ConfigKey,String> pConfig) {
+    public JolokiaHttpHandler(Configuration pConfig) {
         configuration = pConfig;
         context = pConfig.get(ConfigKey.AGENT_CONTEXT);
         if (!context.endsWith("/")) {
@@ -75,8 +76,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        backendManager = new BackendManager(configuration,this, createRestrictor(configuration),pLazy);
-        requestHandler = new HttpRequestHandler(backendManager,this);
+        backendManager = new BackendManager(configuration, this, createRestrictor(configuration), pLazy);
+        requestHandler = new HttpRequestHandler(backendManager, this);
     }
 
     /**
@@ -96,7 +97,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @throws IllegalStateException if the handler has not yet been started
      */
     @Override
-    @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
+    @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
     public void handle(HttpExchange pExchange) throws IOException {
         if (requestHandler == null) {
             throw new IllegalStateException("Handler not yet started");
@@ -135,8 +136,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     }
 
 
-    private Restrictor createRestrictor(Map<ConfigKey, String> pConfig) {
-        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
+    private Restrictor createRestrictor(Configuration pConfig) {
+        String location = pConfig.get(ConfigKey.POLICY_LOCATION);
         try {
             Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
             if (ret != null) {

@@ -28,7 +28,7 @@ import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;
 

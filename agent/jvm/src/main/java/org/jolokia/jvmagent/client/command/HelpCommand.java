@@ -20,8 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 
 /**
  * Print out usage information

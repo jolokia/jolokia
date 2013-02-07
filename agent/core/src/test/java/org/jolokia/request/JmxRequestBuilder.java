@@ -21,6 +21,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 

@@ -19,7 +19,7 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.util.*;
 
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.EscapeUtil;
 
 /**

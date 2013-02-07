@@ -17,18 +17,21 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
+import org.jolokia.util.LogHandler;
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -39,10 +42,16 @@ import static org.testng.Assert.*;
  */
 public class BackendManagerTest implements LogHandler {
 
+    Configuration config;
+
+    @BeforeTest
+    public void setup() {
+        config = new Configuration();
+    }
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        Map config = new HashMap();
-        config.put(ConfigKey.DEBUG,"true");
+        config = new Configuration(ConfigKey.DEBUG,"true");
+
         BackendManager backendManager = new BackendManager(config, this);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
@@ -54,7 +63,6 @@ public class BackendManagerTest implements LogHandler {
 
     @Test
     public void lazyInit() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        Map config = new HashMap();
         BackendManager backendManager = new BackendManager(config, this, null, true /* Lazy Init */ );
 
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
@@ -68,8 +76,7 @@ public class BackendManagerTest implements LogHandler {
 
     @Test
     public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
-        config.put(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
+        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
         BackendManager backendManager = new BackendManager(config, this);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         backendManager.handleRequest(req);
@@ -79,22 +86,20 @@ public class BackendManagerTest implements LogHandler {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*invalid constructor.*")
     public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
-        config.put(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
+        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
         BackendManager backendManager = new BackendManager(config,this);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
     public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
-        config.put(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
+        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
         BackendManager backendManager = new BackendManager(config,this);
     }
 
     @Test
     public void debugging() {
         RecordingLogHandler lhandler = new RecordingLogHandler();
-        BackendManager backendManager = new BackendManager(new HashMap(),lhandler);
+        BackendManager backendManager = new BackendManager(config,lhandler);
         lhandler.error = 0;
         lhandler.debug = 0;
         lhandler.info = 0;
@@ -110,30 +115,29 @@ public class BackendManagerTest implements LogHandler {
 
     @Test
     public void defaultConfig() {
-        Map config = new HashMap();
-        config.put(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
+        config = new Configuration(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
         BackendManager backendManager = new BackendManager(config,this);
         backendManager.destroy();
     }
 
     @Test
     public void doubleInit() {
-        BackendManager b1 = new BackendManager(new HashMap<ConfigKey, String>(),this);
-        BackendManager b2 = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        BackendManager b1 = new BackendManager(config,this);
+        BackendManager b2 = new BackendManager(config,this);
         b2.destroy();
         b1.destroy();
     }
 
     @Test
     public void remoteAccessCheck() {
-        BackendManager backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        BackendManager backendManager = new BackendManager(config,this);
         assertTrue(backendManager.isRemoteAccessAllowed("localhost","127.0.0.1"));
         backendManager.destroy();
     }
 
     @Test
     public void corsAccessCheck() {
-        BackendManager backendManager = new BackendManager(new HashMap<ConfigKey, String>(),this);
+        BackendManager backendManager = new BackendManager(config,this);
         assertTrue(backendManager.isCorsAccessAllowed("http://bla.com"));
         backendManager.destroy();
     }

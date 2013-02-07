@@ -16,14 +16,18 @@ package org.jolokia.request;
  *  limitations under the License.
  */
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.backend.BackendManager;
-import org.jolokia.util.*;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+import org.jolokia.util.LogHandler;
+import org.jolokia.util.RequestType;
 import org.json.simple.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -34,8 +38,8 @@ import static org.testng.Assert.*;
 /**
  */
 public class RawObjectNameTest {
-    private Map config = new HashMap();
-    private LogHandler logHandler = new LogHandler() {
+    private Configuration config     = new Configuration();
+    private LogHandler    logHandler = new LogHandler() {
         public void debug(String message) {
             System.out.println("[DEBUG] " + message);
         }
@@ -50,35 +54,36 @@ public class RawObjectNameTest {
         }
     };
 
-    private BackendManager backendManager = new BackendManager(config, logHandler, null, true /* Lazy Init */ );
+    private BackendManager backendManager = new BackendManager(config, logHandler, null, true /* Lazy Init */);
 
     @Test
     public void testListRawObjectNameAccess() throws Exception {
-        assertPropertyNamesOrderedCorrectly(listRequestBuilder(),false);
+        assertPropertyNamesOrderedCorrectly(listRequestBuilder(), false);
     }
 
     @Test
     public void testListCanonicalNameAccess() throws Exception {
-        assertPropertyNamesOrderedCorrectly(listRequestBuilder(),true);
+        assertPropertyNamesOrderedCorrectly(listRequestBuilder(), true);
     }
 
     @Test
     public void testReadRawObjectNameAccess() throws Exception {
-        assertPropertyNamesOrderedCorrectly(readRequestBuilder(),false);
+        assertPropertyNamesOrderedCorrectly(readRequestBuilder(), false);
     }
 
     @Test
     public void testReadCanonicalNameAccess() throws Exception {
-        assertPropertyNamesOrderedCorrectly(readRequestBuilder(),true);
+        assertPropertyNamesOrderedCorrectly(readRequestBuilder(), true);
     }
+
     @Test
     public void testSearchRawObjectNameAccess() throws Exception {
-        assertPropertyNamesOrderedCorrectly(searchRequestBuilder(),false);
+        assertPropertyNamesOrderedCorrectly(searchRequestBuilder(), false);
     }
 
     @Test
     public void testSearchCanonicalNameAccess() throws Exception {
-        assertPropertyNamesOrderedCorrectly(searchRequestBuilder(),true);
+        assertPropertyNamesOrderedCorrectly(searchRequestBuilder(), true);
     }
 
 

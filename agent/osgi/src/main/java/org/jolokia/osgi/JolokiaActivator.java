@@ -8,14 +8,14 @@ import javax.servlet.ServletException;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import static org.jolokia.util.ConfigKey.*;
+import static org.jolokia.config.ConfigKey.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss

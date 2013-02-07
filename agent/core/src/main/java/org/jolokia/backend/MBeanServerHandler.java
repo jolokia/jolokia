@@ -7,6 +7,8 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
@@ -59,7 +61,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @param pLogHandler log handler used for logging purposes
      */
-    public MBeanServerHandler(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+    public MBeanServerHandler(Configuration pConfig, LogHandler pLogHandler) {
         // A qualifier, if given, is used to add the MBean Name of this MBean
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         List<ServerDetector> detectors = lookupDetectors();
@@ -74,7 +76,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      * @param pLogHandler used for putting out diagnostic messags
      * @param pDetectors all detectors known
      */
-    private void initServerHandle(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
+    private void initServerHandle(Configuration pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
         serverHandle = detectServers(pDetectors, pLogHandler);
         serverHandle.postDetect(mBeanServerManager, pConfig, pLogHandler);
     }

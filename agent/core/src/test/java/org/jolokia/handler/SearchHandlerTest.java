@@ -24,7 +24,7 @@ import javax.management.*;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

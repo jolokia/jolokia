@@ -7,6 +7,8 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.json.JsonConvertOptions;
 import org.jolokia.detector.ServerHandle;
@@ -17,7 +19,7 @@ import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 
-import static org.jolokia.util.ConfigKey.*;
+import static org.jolokia.config.ConfigKey.*;
 
 /*
  *  Copyright 2009-2010 Roland Huss
@@ -73,27 +75,27 @@ public class BackendManager {
     // Initialize used for late initialization
     // ("volatile: because we use double-checked locking later on
     // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
-    private volatile Initializer                initializer;
+    private volatile Initializer initializer;
 
     /**
      * Constrcuct a new backend manager with the given configuration and which allows
      * every operation (no restrictor)
      *
-     * @param pConfig configuration map used for tuning this handler's behaviour
+     * @param pConfig configuration used for tuning this handler's behaviour
      * @param pLogHandler logger
      */
-    public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+    public BackendManager(Configuration pConfig, LogHandler pLogHandler) {
         this(pConfig, pLogHandler, null);
     }
 
     /**
      * Construct a new backend manager with the given configuration.
      *
-     * @param pConfig configuration map used for tuning this handler's behaviour
+     * @param pConfig configuration used for tuning this handler's behaviour
      * @param pLogHandler logger
      * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
      */
-    public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
+    public BackendManager(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
         this(pConfig,pLogHandler,pRestrictor,false);
     }
 
@@ -105,7 +107,7 @@ public class BackendManager {
      * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
      * @param pLazy whether the initialisation should be done lazy
      */
-    public BackendManager(Map<ConfigKey, String> pConfig, LogHandler pLogHandler, Restrictor pRestrictor, boolean pLazy) {
+    public BackendManager(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor, boolean pLazy) {
 
         // Access restrictor
         restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
@@ -212,7 +214,6 @@ public class BackendManager {
         }
     }
 
-
     /**
      * Log at error level.
      *
@@ -242,9 +243,9 @@ public class BackendManager {
     // as startup options
     private final class Initializer {
 
-        private Map<ConfigKey, String> config;
+        private Configuration config;
 
-        private Initializer(Map<ConfigKey, String> pConfig) {
+        private Initializer(Configuration pConfig) {
             config = pConfig;
         }
 
@@ -266,7 +267,7 @@ public class BackendManager {
     }
 
     // Initialize this object;
-    private void init(Map<ConfigKey, String> pConfig) {
+    private void init(Configuration pConfig) {
         // Central objects
         converters = new Converters();
         initLimits(pConfig);
@@ -277,7 +278,7 @@ public class BackendManager {
                                                      pConfig,
                                                      logHandler);
         ServerHandle serverHandle = localDispatcher.getServerInfo();
-        requestDispatchers = createRequestDispatchers(DISPATCHER_CLASSES.getValue(pConfig),
+        requestDispatchers = createRequestDispatchers(pConfig.get(DISPATCHER_CLASSES),
                                                       converters,serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);
 
@@ -285,13 +286,13 @@ public class BackendManager {
         initStores(pConfig);
     }
 
-    private void initLimits(Map<ConfigKey, String> pConfig) {
+    private void initLimits(Configuration pConfig) {
         // Max traversal depth
         if (pConfig != null) {
             convertOptionsBuilder = new JsonConvertOptions.Builder(
-                    getNullSaveIntLimit(MAX_DEPTH.getValue(pConfig)),
-                    getNullSaveIntLimit(MAX_COLLECTION_SIZE.getValue(pConfig)),
-                    getNullSaveIntLimit(MAX_OBJECTS.getValue(pConfig))
+                    getNullSaveIntLimit(pConfig.get(MAX_DEPTH)),
+                    getNullSaveIntLimit(pConfig.get(MAX_COLLECTION_SIZE)),
+                    getNullSaveIntLimit(pConfig.get(MAX_OBJECTS))
             );
         } else {
             convertOptionsBuilder = new JsonConvertOptions.Builder();
@@ -380,19 +381,13 @@ public class BackendManager {
     }
 
     // init various application wide stores for handling history and debug output.
-    private void initStores(Map<ConfigKey, String> pConfig) {
-        int maxEntries = getIntConfigValue(pConfig, HISTORY_MAX_ENTRIES);
-        int maxDebugEntries = getIntConfigValue(pConfig,DEBUG_MAX_ENTRIES);
-
-        String doDebug = DEBUG.getValue(pConfig);
-        boolean debug = false;
-        if (doDebug != null && Boolean.valueOf(doDebug)) {
-            debug = true;
-        }
+    private void initStores(Configuration pConfig) {
+        int maxEntries = pConfig.getAsInt(HISTORY_MAX_ENTRIES);
+        int maxDebugEntries = pConfig.getAsInt(DEBUG_MAX_ENTRIES);
 
 
         historyStore = new HistoryStore(maxEntries);
-        debugStore = new DebugStore(maxDebugEntries,debug);
+        debugStore = new DebugStore(maxDebugEntries, pConfig.getAsBoolean(DEBUG));
 
         try {
             localDispatcher.initMBeans(historyStore, debugStore);
@@ -410,17 +405,4 @@ public class BackendManager {
         logHandler.error(message, t);
         debugStore.log(message, t);
     }
-
-
-    private int getIntConfigValue(Map<ConfigKey, String> pConfig, ConfigKey pKey) {
-        int ret;
-        try {
-            ret = Integer.parseInt(pKey.getValue(pConfig));
-        } catch (NumberFormatException exp) {
-            ret = Integer.parseInt(pKey.getDefaultValue());
-        }
-        return ret;
-    }
-
-
 }

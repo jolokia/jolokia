@@ -16,9 +16,11 @@ package org.jolokia.mule;
  *  limitations under the License.
  */
 
+import org.jolokia.config.ConfigKey;
+
 /**
  * Agent Configuration. For documentation of the configuration
- * parameters please refer to {@link org.jolokia.util.ConfigKey}
+ * parameters please refer to {@link ConfigKey}
  *
 
  * @author roland

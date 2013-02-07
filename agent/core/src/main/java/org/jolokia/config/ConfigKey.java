@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.util;
+package org.jolokia.config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -275,18 +275,6 @@ public enum ConfigKey {
      */
     public boolean isRequestConfig() {
         return requestConfig;
-    }
-
-    /**
-     * Extract value from map, including a default value if
-     * value is not set
-     */
-    public String getValue(Map<ConfigKey, String> pConfig) {
-        String value = pConfig.get(this);
-        if (value == null) {
-            value = this.getDefaultValue();
-        }
-        return value;
     }
 
     /**

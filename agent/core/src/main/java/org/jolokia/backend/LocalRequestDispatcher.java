@@ -16,11 +16,12 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
-import java.util.Map;
 import java.util.UUID;
 
 import javax.management.*;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
@@ -28,7 +29,8 @@ import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
+import org.jolokia.util.DebugStore;
+import org.jolokia.util.LogHandler;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -57,7 +59,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @param pConfig agent configuration
      * @param pLogHandler local handler used for logging out errors and warnings
      */
-    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Configuration pConfig, LogHandler pLogHandler) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
         mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);

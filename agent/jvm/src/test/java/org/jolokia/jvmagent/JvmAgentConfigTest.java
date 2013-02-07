@@ -21,7 +21,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

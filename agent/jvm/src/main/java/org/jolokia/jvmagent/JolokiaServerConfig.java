@@ -22,7 +22,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 
 /**
  * Configuration required for the JolokiaServer
@@ -34,7 +35,7 @@ public class JolokiaServerConfig {
 
     // Jolokia configuration is used for general jolokia config, the untyped configuration
     // is used for this agent only
-    private Map<ConfigKey, String> jolokiaConfig;
+    private Configuration jolokiaConfig;
 
     private String      protocol;
     private int         port;
@@ -54,7 +55,8 @@ public class JolokiaServerConfig {
      * @param pConfig map holding the configuration in string representation. A reference to the map will be kept
      */
     protected void init(Map<String, String> pConfig) {
-        jolokiaConfig = ConfigKey.extractConfig(pConfig);
+        jolokiaConfig = new Configuration();
+        jolokiaConfig.updateGlobalConfiguration(pConfig);
         initConfigAndValidate(pConfig);
     }
 
@@ -68,7 +70,7 @@ public class JolokiaServerConfig {
      * Get the Jolokia runtime configuration
      * @return jolokia configuration
      */
-    public Map<ConfigKey, String> getJolokiaConfig() {
+    public Configuration getJolokiaConfig() {
         return jolokiaConfig;
     }
 

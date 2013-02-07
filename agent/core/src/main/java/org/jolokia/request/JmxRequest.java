@@ -19,7 +19,7 @@ package org.jolokia.request;
 import java.util.*;
 
 import org.jolokia.converter.json.ValueFaultHandler;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 

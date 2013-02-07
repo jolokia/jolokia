@@ -17,15 +17,14 @@
 package org.jolokia.jmx;
 
 import java.lang.management.ManagementFactory;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.MBeanServerHandler;
 import org.jolokia.backend.MBeanServerHandlerMBean;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.util.LogHandler;
 import org.testng.Assert;
 import org.testng.annotations.*;
@@ -43,8 +42,7 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
 
     @BeforeTest
     public void setup() {
-        Map<ConfigKey, String> config = new HashMap<ConfigKey, String>();
-        config.put(ConfigKey.DEBUG, "true");
+        Configuration config = new Configuration(ConfigKey.DEBUG, "true");
         handler = new MBeanServerHandler(config, this);
     }
 

@@ -8,8 +8,8 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
+import org.jolokia.config.*;
 import org.jolokia.restrictor.*;
-import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -137,16 +137,13 @@ public class AgentServlet extends HttpServlet {
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
 
-        Map<ConfigKey,String> config = configAsMap(pServletConfig);
+        Configuration config = initConfig(pServletConfig);
         if (restrictor == null) {
-            restrictor = createRestrictor(ConfigKey.POLICY_LOCATION.getValue(config));
+            restrictor = createRestrictor(config.get(ConfigKey.POLICY_LOCATION));
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
-        if (configMimeType == null) {
-            configMimeType = ConfigKey.MIME_TYPE.getDefaultValue();
-        }
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(backendManager,logHandler);
     }
@@ -319,36 +316,15 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    // Examines servlet config and servlet context for configurtion parameters.
-    // Configuration from the servlet context overrides servlet parameters defined in web.xn
-    Map<ConfigKey, String> configAsMap(ServletConfig pConfig) {
-        Map<ConfigKey,String> ret = new HashMap<ConfigKey, String>();
-        extractConfigFromServletConfig(ret, pConfig);
-        extractConfigFromServletContext(ret,getServletContext());
-        return ret;
-    }
-
-
-    // From ServletContext ....
-    private void extractConfigFromServletContext(Map<ConfigKey, String> pRet, final ServletContext pServletContext) {
-        extractConfig(pRet, new ServletContextFacade(pServletContext));
-    }
-
-    // ... and ServletConfig
-    private void extractConfigFromServletConfig(Map<ConfigKey, String> pRet, final ServletConfig pConfig) {
-        extractConfig(pRet, new ServletConfigFacade(pConfig));
-    }
-
-    // Do the real work
-    private void extractConfig(Map<ConfigKey, String> pRet, ConfigFacade pConfig) {
-        Enumeration e = pConfig.getNames();
-        while (e.hasMoreElements()) {
-            String keyS = (String) e.nextElement();
-            ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
-            if (key != null) {
-                pRet.put(key,pConfig.getParameter(keyS));
-            }
-        }
+    // Examines servlet config and servlet context for configuration parameters.
+    // Configuration from the servlet context overrides servlet parameters defined in web.xml
+    Configuration initConfig(ServletConfig pConfig) {
+        Configuration config = new Configuration();
+        // From ServletContext ....
+        config.updateGlobalConfiguration(new ServletConfigFacade(pConfig));
+        // ... and ServletConfig
+        config.updateGlobalConfiguration(new ServletContextFacade(getServletContext()));
+        return config;
     }
 
     private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {
@@ -383,26 +359,9 @@ public class AgentServlet extends HttpServlet {
     // =======================================================================================
     // Helper classes for extracting configuration from servlet classes
 
-    /**
-     * Interface for abstracting ServletConfig and ServletContext's configuration parameters
-     */
-    private interface ConfigFacade {
-        /**
-         * Get all configuration name
-         * @return enumeration of config names
-         */
-        Enumeration getNames();
-
-        /**
-         * Get the parameter for a certain
-         * @param pKeyS string representation of the config key to fetch
-         * @return the value of the configuration parameter or <code>null</code> if no such parameter exists
-         */
-        String getParameter(String pKeyS);
-    }
 
     // Implementation for the ServletConfig
-    private static final class ServletConfigFacade implements ConfigFacade {
+    private static final class ServletConfigFacade implements ConfigExtractor {
         private final ServletConfig config;
 
         private ServletConfigFacade(ServletConfig pConfig) {
@@ -421,7 +380,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Implementation for ServletContextFacade
-    private static final class ServletContextFacade implements ConfigFacade {
+    private static final class ServletContextFacade implements ConfigExtractor {
         private final ServletContext servletContext;
 
         private ServletContextFacade(ServletContext pServletContext) {

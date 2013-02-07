@@ -8,15 +8,15 @@ import java.util.Map;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import static org.easymock.EasyMock.*;
-
 import org.jolokia.backend.Config;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
 
 /**
@@ -72,15 +72,14 @@ public class ServerHandleTest {
 
     @Test
     public void detectorOptions() {
-        Map<ConfigKey,String> opts = new HashMap<ConfigKey, String>();
-        opts.put(ConfigKey.DETECTOR_OPTIONS,"{\"dukeNukem\" : {\"doIt\" : true }}");
+        Configuration opts = new Configuration(ConfigKey.DETECTOR_OPTIONS, "{\"dukeNukem\" : {\"doIt\" : true }}");
         JSONObject config = serverHandle.getDetectorOptions(opts,null);
         assertTrue((Boolean) config.get("doIt"));
     }
 
     @Test
     public void detectorOptionsEmpty() {
-        JSONObject config = serverHandle.getDetectorOptions(new HashMap<ConfigKey, String>(),null);
+        JSONObject config = serverHandle.getDetectorOptions(new Configuration(),null);
         assertNull(config);
     }
 
@@ -90,8 +89,7 @@ public class ServerHandleTest {
         handler.error(matches("^.*parse options.*"),isA(Exception.class));
         replay(handler);
 
-        Map<ConfigKey,String> opts = new HashMap<ConfigKey, String>();
-        opts.put(ConfigKey.DETECTOR_OPTIONS,"blub: bla");
+        Configuration opts = new Configuration(ConfigKey.DETECTOR_OPTIONS,"blub: bla");
         JSONObject config = serverHandle.getDetectorOptions(opts,handler);
         assertNull(config);
         verify(handler);
