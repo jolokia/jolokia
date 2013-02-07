@@ -8,6 +8,9 @@
   </properties>
   <body>
     <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
+      <action dev="roland" type="fix" date="2013-02-07" issue="63">
+        Fixed Glassfish detector which failed to boot AMX in certain circumstanes.
+      </action>
       <action dev="roland" type="add" date="2013-01-27">
         Added support for JSON-MBean. A dedicated @JsonMBean annotation can be used
         to export complex arguments/attributes/return values as JSON String to the Platform

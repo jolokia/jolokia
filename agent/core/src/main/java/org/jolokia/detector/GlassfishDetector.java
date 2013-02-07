@@ -85,7 +85,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         return mBeanExists(pServerManager,"amx:type=domain-root,*");
     }
 
-    private void bootAmx(MBeanServerExecutor pServers, final LogHandler pLoghandler) {
+    private synchronized boolean bootAmx(MBeanServerExecutor pServers, final LogHandler pLoghandler) {
         ObjectName bootMBean = null;
         try {
             bootMBean = new ObjectName("amx-support:type=boot-amx");
@@ -101,12 +101,20 @@ public class GlassfishDetector extends AbstractServerDetector {
                     return null;
                 }
             });
+            return true;
         } catch (InstanceNotFoundException e) {
             pLoghandler.error("No bootAmx MBean found: " + e,e);
+            // Can happen, when a call to bootAmx comes to early before the bean
+            // is registered
+            return false;
         } catch (IllegalArgumentException e) {
             pLoghandler.error("Exception while booting AMX: " + e,e);
+            // We dont try it again
+            return true;
         } catch (Exception e) {
             pLoghandler.error("Exception while executing bootAmx: " + e, e);
+            // dito
+            return true;
         }
     }
 
@@ -151,8 +159,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         /** {@inheritDoc} */
         public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
             if (amxShouldBeBooted) {
-                bootAmx(pMBeanServerExecutor,logHandler);
-                amxShouldBeBooted = false;
+                amxShouldBeBooted = bootAmx(pMBeanServerExecutor,logHandler);
             }
         }
 
