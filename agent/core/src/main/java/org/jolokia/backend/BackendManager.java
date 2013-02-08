@@ -168,7 +168,10 @@ public class BackendManager {
     public Object convertExceptionToJson(Throwable pExp, JmxRequest pJmxReq)  {
         JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
         try {
-            return converters.getToJsonConverter().convertToJson(pExp,null,opts);
+            JSONObject expObj =
+                    (JSONObject) converters.getToJsonConverter().convertToJson(pExp,null,opts);
+            return expObj;
+
         } catch (AttributeNotFoundException e) {
             // Cannot happen, since we dont use a path
             return null;

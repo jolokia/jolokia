@@ -7,7 +7,6 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
@@ -50,7 +49,9 @@ public class BeanExtractor implements Extractor {
     ));
 
     private static final Set<String> IGNORE_METHODS = new HashSet<String>(Arrays.asList(
-            "getClass"
+            "getClass",
+            // For exceptions we ommit stacktraces
+            "getStackTrace"
     ));
 
     private static final String[] GETTER_PREFIX = new String[] { "get", "is", "has"};

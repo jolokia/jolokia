@@ -20,7 +20,7 @@ import java.util.Map;
 
 
 /**
- * Simplifier for class objects. It adds a <code>name</code> vaue and a list of
+ * Simplifier for class objects. It adds a <code>name</code> value and a list of
  * implementing interfaces under the <code>interfaces</code> key.
  *
  * @author roland
