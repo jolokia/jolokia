@@ -50,8 +50,6 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     /** {@inheritDoc} */
     public <T> T call(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object ... pExtraArgs)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
-        Exception exception = null;
-        String errorMsg = null;
         InstanceNotFoundException objNotFoundException = null;
         AttributeNotFoundException attrException = null;
 
@@ -71,6 +69,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
                 objNotFoundException = exp;
             } catch (AttributeNotFoundException exp) {
                 attrException = new AttributeNotFoundException(pObjectName + ": " + exp.getMessage());
+                attrException.initCause(exp);
                 // Try next one, too ..
             }
         }

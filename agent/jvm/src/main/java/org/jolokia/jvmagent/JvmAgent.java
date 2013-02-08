@@ -18,14 +18,12 @@ package org.jolokia.jvmagent;
 
 import java.io.IOException;
 
-import org.jolokia.config.ConfigKey;
-
 
 /**
  * A JVM level agent using the JDK6 HTTP Server {@link com.sun.net.httpserver.HttpServer} or
  * its SSL variant {@link com.sun.net.httpserver.HttpsServer}.
  *
- * Beside the configuration defined in {@link ConfigKey}, this agent honors the following
+ * Beside the configuration defined in {@link org.jolokia.config.ConfigKey}, this agent honors the following
  * additional configuration keys:
  *
  * <ul>

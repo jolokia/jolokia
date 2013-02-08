@@ -59,7 +59,9 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
                 return toJson(jolokiaMBeanServer.getAttribute(objectName, pAttribute));
             }
         } catch (InstanceNotFoundException e) {
-            throw new AttributeNotFoundException("MBean " + objectName + " not found for attribute " + pAttribute);
+            AttributeNotFoundException exp = new AttributeNotFoundException("MBean " + objectName + " not found for attribute " + pAttribute);
+            exp.initCause(e);
+            throw exp;
         }
     }
 
@@ -82,7 +84,9 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
                 jolokiaMBeanServer.setAttribute(objectName, attr);
             }
         } catch (InstanceNotFoundException e) {
-            throw new AttributeNotFoundException("MBean " + objectName + " not found for attribute " + pAttribute);
+            AttributeNotFoundException exp = new AttributeNotFoundException("MBean " + objectName + " not found for attribute " + pAttribute);
+            exp.initCause(e);
+            throw exp;
         }
     }
 
@@ -100,7 +104,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             // Should not happen, since the Jolokia MBeanServer and the delegate MBeanServer this bean is registered
             // at are in sync.
             throw new IllegalStateException("Internal: Could find MBean " + objectName +
-                                            " on Jolokia MBeanServer. Should be in sync");
+                                            " on Jolokia MBeanServer. Should be in sync",e);
         }
     }
 
