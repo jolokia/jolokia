@@ -61,8 +61,7 @@ public class JolokiaServerConfig {
     }
 
     protected Map<String, String> getDefaultConfig() {
-        InputStream is =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("default-jolokia-agent.properties");
+        InputStream is = getClass().getResourceAsStream("/default-jolokia-agent.properties");
         return readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
     }
 

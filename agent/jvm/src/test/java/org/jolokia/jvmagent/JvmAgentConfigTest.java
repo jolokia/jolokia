@@ -19,9 +19,9 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Map;
 
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -44,7 +44,7 @@ public class JvmAgentConfigTest {
     @Test
     public void detectorArgs() {
         JvmAgentConfig config = new JvmAgentConfig("bootAmx=true");
-        Map<ConfigKey,String> jConfig = config.getJolokiaConfig();
+        Configuration jConfig = config.getJolokiaConfig();
         String detectorOpts = jConfig.get(ConfigKey.DETECTOR_OPTIONS);
         assertEquals(detectorOpts.replaceAll("\\s*",""),"{\"glassfish\":{\"bootAmx\":true}}");
     }
@@ -76,7 +76,8 @@ public class JvmAgentConfigTest {
     @Test
     public void jolokiaConfig() {
         JvmAgentConfig config = new JvmAgentConfig("maxDepth=42");
-        Map<ConfigKey,String> jolokiaConfig = config.getJolokiaConfig();
+
+        Configuration jolokiaConfig = config.getJolokiaConfig();
         assertEquals(jolokiaConfig.get(ConfigKey.MAX_DEPTH),"42");
     }
 

@@ -17,7 +17,6 @@
 package org.jolokia.jvmagent.client.util;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -61,7 +60,11 @@ public class VirtualMachineHandlerTest {
         assertTrue(procs.size() > 0);
         boolean foundAtLeastOne = false;
         for (ProcessDescription p : procs) {
-            foundAtLeastOne |= tryAttach(p.getId());
+            try {
+                foundAtLeastOne |= tryAttach(p.getId());
+            } catch (Exception exp) {
+                System.err.println("ERROR: " + p.getId() + " " + p.getDisplay() + ": " + exp);
+            }
         }
         assertTrue(foundAtLeastOne);
     }
@@ -78,7 +81,7 @@ public class VirtualMachineHandlerTest {
             }
         }
 
-        assertFalse(tryAttach("RobertMakClaudiPizarro",".*No.*process.*"));
+        assertFalse(tryAttach("RobertMakClaudioPizarro",".*No.*process.*"));
         if (procs.size() >= 2) {
             assertFalse(tryAttach(".",procs.get(0).getId()));
         }
