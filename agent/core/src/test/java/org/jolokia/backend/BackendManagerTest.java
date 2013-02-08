@@ -151,6 +151,7 @@ public class BackendManagerTest implements LogHandler {
         assertTrue(!jsonError.containsKey("stackTrace"));
         assertEquals(jsonError.get("message"),"Hans");
         assertEquals(((JSONObject) jsonError.get("cause")).get("message"),"Kalb");
+        backendManager.destroy();
     }
     public void debug(String message) {
         System.out.println("D> " + message);

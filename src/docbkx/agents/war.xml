@@ -181,6 +181,54 @@
         </td>
       </tr>
       <tr>
+        <td><constant>canonicalNaming</constant></td>
+        <td>
+          This option specifies in which order the key-value
+          properties within ObjectNames as returned by
+          <constant>list</constant> or <constant>search</constant> are
+          returned. By default this is the so called 'canonical order'
+          in which the keys are sorted alphabetically. If this option
+          is set to <constant>false</constant>, then the natural order
+          is used, i.e. the object name as it was registered. This
+          option can be overridden with a query parameter of the same
+          name.
+        </td>
+        <td>
+          Default: <constant>true</constant>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>includeStackTrace</constant></td>
+        <td>
+          Whether to include a stacktrace of an exception in case of
+          an error. By default it it set to <constant>true</constant>
+          in which case the stacktrace is always included. If set to
+          <constant>false</constant>, no stacktrace is included. If
+          the value is <constant>runtime</constant> a stacktrace is
+          only included for RuntimeExceptions. This global option can
+          be overridden with a query parameter.
+        </td>
+        <td>
+          Default: <constant>true</constant>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>serializeException</constant></td>
+        <td>
+          When this parameter is set to <constant>true</constant>,
+          then an exception thrown will be serialized as JSON and
+          included in the response under the key
+          <constant>error_value</constant>. No stactrace infornmation
+          will be included, though. This global option can be
+          overridden by a query parameter of the same name.
+        </td>
+        <td>
+          Default: <constant>false</constant>
+        </td>
+      </tr>
+
+
+      <tr>
         <td><constant>detectorOptions</constant></td>
         <td>
           Extra options passed to an detector after successful
