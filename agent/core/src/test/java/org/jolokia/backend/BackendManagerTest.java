@@ -142,6 +142,16 @@ public class BackendManagerTest implements LogHandler {
         backendManager.destroy();
     }
 
+    @Test
+    public void convertError() throws MalformedObjectNameException {
+        BackendManager backendManager = new BackendManager(config,this);
+        Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
+        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
+        JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
+        assertTrue(!jsonError.containsKey("stackTrace"));
+        assertEquals(jsonError.get("message"),"Hans");
+        assertEquals(((JSONObject) jsonError.get("cause")).get("message"),"Kalb");
+    }
     public void debug(String message) {
         System.out.println("D> " + message);
     }
