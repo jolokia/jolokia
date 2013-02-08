@@ -20,7 +20,6 @@ package org.jolokia.mule;
  * Agent Configuration. For documentation of the configuration
  * parameters please refer to {@link org.jolokia.config.ConfigKey}
  *
-
  * @author roland
  * @since 30.08.11
  */
@@ -88,4 +87,6 @@ public interface MuleAgentConfig {
      * @return true if debug is switched on
      */
     boolean isDebug();
+
+
 }

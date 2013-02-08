@@ -504,8 +504,33 @@
           <term><literal>canonicalNaming</literal></term>
           <listitem>
             <para>
-              Defaults to "true" to return the canonical format of property lists.
-              If set to "false" then the default unsorted property list is returned.
+              Defaults to <constant>true</constant> to return the canonical format of property lists.
+              If set to <constant>false</constant> then the default unsorted property list is returned.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>includeStackTrace</literal></term>
+          <listitem>
+            <para>
+              If set to <constant>true</constant>, then in case of an error the stack trace is included. 
+              With <constant>false</constant> no stack trace will be returned, and when this parameter
+              is set to <constant>runtime</constant> only for RuntimeExceptions a stack trace is put into 
+              the error response. Default is <constant>true</constant> if not set otherwise in the global
+              agent configuration.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>serializeException</literal></term>
+          <listitem>
+            <para>
+              If this parameter is set to <constant>true</constant> then a serialized version of the 
+              exception is included in an error response. This value
+              is put under the key <constant>error_value</constant> in
+              the response value. By default this is set to
+              <constant>false</constant> except when the agent global
+              configuration option is configured otherwise. 
             </para>
           </listitem>
         </varlistentry>

@@ -252,7 +252,7 @@ $ java -jar jolokia-jvm-1.0.1-agent.jar --help
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.0.1-SNAPSHOT-agent.jar [options] <command> <pid/regexp>
+Usage: java -jar jolokia-jvm-1.1.0-SNAPSHOT-agent.jar [options] <command> <pid/regexp>
 
 where <command> is one of
     start     -- Start a Jolokia agent for the process specified
@@ -263,33 +263,41 @@ where <command> is one of
 
 [options] are used for providing runtime information for attaching the agent:
 
-    --host <host>                 Hostname or IP address to which to bind on
-                                  (default: InetAddress.getLocalHost())
-    --port <port>                 Port to listen on (default: 8778)
-    --agentContext <context>      HTTP Context under which the agent is reachable (default: /jolokia)
-    --user <user>                 User used for Basic-Authentication
-    --password <password>         Password used for Basic-Authentication
-    --quiet                       No output. "status" will exit with code 0 if the agent is running, 1 otherwise
-    --verbose                     Verbose output
-    --executor <executor>         Executor policy for HTTP Threads to use (default: single)
-                                  "fixed"  -- Thread pool with a fixed number of threads (default: 5)
-                                  "cached" -- Cached Thread Pool, creates threads on demand
-                                  "single" -- Single Thread
-    --threadNr <nr threads>       Number of fixed threads if "fixed" is used as executor
-    --backlog <backlog>           How many request to keep in the backlog (default: 10)
-    --protocol <http|https>       Protocol which must be either "http" or "https" (default: http)
-    --keystore <keystore>         Path to keystore (https only)
-    --keystorePassword <pwd>      Password to the keystore (https only)
-    --useSslClientAuthentication  Use client certificate authentication (https only)
-    --debug                       Switch on agent debugging
-    --debugMaxEntries <nr>        Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
-    --maxDepth <depth>            Maximum number of levels for serialization of beans (default: null)
-    --maxCollectionSize <size>    Maximum number of element in collections to keep when serializing the response (default: null)
-    --maxObjects <nr>             Maximum number of objects to consider for serialization (default: maxObjects)
-    --policyLocation <url>        Location of a Jolokia policy file
-    --mbeanQualifier <qualifier>  Qualifier to use when registering Jolokia internal MBeans
-    --config <configfile>         Path to a property file from where to read the configuration
-    --help                        This help documentation
+    --host <host>                  Hostname or IP address to which to bind on
+                                   (default: InetAddress.getLocalHost())
+    --port <port>                  Port to listen on (default: 8778)
+    --agentContext <context>       HTTP Context under which the agent is reachable (default: /jolokia)
+    --user <user>                  User used for Basic-Authentication
+    --password <password>          Password used for Basic-Authentication
+    --quiet                        No output. "status" will exit with code 0 if the agent is running, 1 otherwise
+    --verbose                      Verbose output
+    --executor <executor>          Executor policy for HTTP Threads to use (default: single)
+                                    "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                    "cached" -- Cached Thread Pool, creates threads on demand
+                                    "single" -- Single Thread
+    --threadNr <nr threads>        Number of fixed threads if "fixed" is used as executor
+    --backlog <backlog>            How many request to keep in the backlog (default: 10)
+    --protocol <http|https>        Protocol which must be either "http" or "https" (default: http)
+    --keystore <keystore>          Path to keystore (https only)
+    --keystorePassword <pwd>       Password to the keystore (https only)
+    --useSslClientAuthentication   Use client certificate authentication (https only)
+    --debug                        Switch on agent debugging
+    --debugMaxEntries <nr>         Number of debug entries to keep in memory which can be fetched from the 
+                                   Jolokia MBean
+    --maxDepth <depth>             Maximum number of levels for serialization of beans (default: null)
+    --maxCollectionSize <size>     Maximum number of element in collections to keep when serializing the response 
+                                   (default: null)
+    --maxObjects <nr>              Maximum number of objects to consider for serialization (default: maxObjects)
+    --policyLocation <url>         Location of a Jolokia policy file
+    --mbeanQualifier <qualifier>   Qualifier to use when registering Jolokia internal MBeans
+    --canonicalNaming <t|f>        whether to use canonicalName for ObjectNames in 'list' or 'search' 
+                                   (default: true)
+    --includeStackTrace <t|f>      whether to include StackTraces for error messages (default: true)
+    --serializeException <t|f>     whether to add a serialized version of the exception in the Jolokia response 
+                                   (default: false)
+    --config <configfile>          Path to a property file from where to read the configuration
+    --help                         This help documentation
+    --version                      Version of this agent
 
 <pid/regexp> can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -299,6 +307,11 @@ between "start" and "stop"
 
 If neither <command> nor <pid> is given, a list of Java processes along with their IDs
 is printed
+
+There are several possible reasons, why attaching to a process can fail:
+   * The UID of this launcher must be the very *same*as the process to attach too. It not sufficient to be root.
+   * The JVM must have HotSpot enabled and be a JVM 1.6 or larger.
+   * It must be a Java process ;-)
 
 For more documentation please visit www.jolokia.org]]></programlisting>
     <para>

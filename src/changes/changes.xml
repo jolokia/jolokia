@@ -8,6 +8,14 @@
   </properties>
   <body>
     <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
+      <action dev="roland" type="fix" date="2013-02-07" issue="59">
+        Added new global and process configuration options "includeStackTrace" (true,false,runtime)
+        and "serializeException" (true, false) which can be used to tune the
+        error responses.
+      </action>
+      <action dev="roland" type="fix" date="2013-02-07" issue="59">
+        "canonicalNaming" option can be as global agent configuration, too.
+      </action>
       <action dev="roland" type="fix" date="2013-02-07" issue="63">
         Fixed Glassfish detector which failed to boot AMX in certain circumstanes.
       </action>

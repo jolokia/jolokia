@@ -45,6 +45,7 @@ public final class OptionsAndArgs {
                 "historyMaxEntries","debug!","debugMaxEntries",
                 "dispatcherClasses", "maxDepth", "maxCollectionSize",
                 "maxObjects", "policyLocation", "mbeanQualifier",
+                "canonicalNaming","includeStackTrace","serializeException",
                 // Others:
                 "config", "help!"));
 
@@ -80,7 +81,6 @@ public final class OptionsAndArgs {
 
     // Jar file where this class is in
     private File jarFile;
-
 
     /**
      * Parse a list of arguments. Options start with '--' (long form) or '-' (short form) and are
