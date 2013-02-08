@@ -71,9 +71,8 @@ abstract class SimplifierExtractor<T> implements Extractor {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue);
             }
 
-            Object attributeValue = null;
             try {
-                attributeValue = extractor.extract((T) pValue);
+                Object attributeValue = extractor.extract((T) pValue);
                 return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
             } catch (AttributeExtractor.SkipAttributeException e) {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue,e);
@@ -82,15 +81,13 @@ abstract class SimplifierExtractor<T> implements Extractor {
             if (jsonify) {
                 JSONObject ret = new JSONObject();
                 for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
-                    Object value = null;
                     try {
-                        value = entry.getValue().extract((T) pValue);
+                        Object value = entry.getValue().extract((T) pValue);
+                        ret.put(entry.getKey(),pConverter.extractObject(value, pExtraArgs, jsonify));
                     } catch (AttributeExtractor.SkipAttributeException e) {
                         // Skip this one ...
                         continue;
                     }
-                    ret.put(entry.getKey(),
-                            pConverter.extractObject(value, pExtraArgs, jsonify));
                 }
                 return ret;
             } else {

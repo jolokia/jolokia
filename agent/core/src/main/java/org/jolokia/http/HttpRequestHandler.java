@@ -9,8 +9,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.BackendManager;
-import org.jolokia.config.Configuration;
-import org.jolokia.config.ProcessingParameters;
+import org.jolokia.config.*;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
 import org.jolokia.util.LogHandler;
@@ -251,17 +250,15 @@ public class HttpRequestHandler {
      *
      * @param pErrorCode the HTTP error code to return
      * @param pExp the exception or error occured
-     * @param pJmxReq
+     * @param pJmxReq request from where to get processing options
      * @return the json representation
      */
     public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JmxRequest pJmxReq) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status",pErrorCode);
         jsonObject.put("error",getExceptionMessage(pExp));
-        jsonObject.put("error_type",pExp.getClass().getName());
-        StringWriter writer = new StringWriter();
-        pExp.printStackTrace(new PrintWriter(writer));
-        jsonObject.put("stacktrace",writer.toString());
+        jsonObject.put("error_type", pExp.getClass().getName());
+        addErrorInfo(jsonObject, pExp, pJmxReq);
         if (backendManager.isDebug()) {
             backendManager.error("Error " + pErrorCode,pExp);
         }
@@ -270,6 +267,7 @@ public class HttpRequestHandler {
         }
         return jsonObject;
     }
+
 
 
     /**
@@ -303,6 +301,20 @@ public class HttpRequestHandler {
             }
         }
         return null;
+    }
+
+    private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JmxRequest pJmxReq) {
+        String includeStackTrace = pJmxReq != null ?
+                pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
+        if (includeStackTrace.equalsIgnoreCase("true") ||
+            (includeStackTrace.equalsIgnoreCase("runtime") && pExp instanceof RuntimeException)) {
+            StringWriter writer = new StringWriter();
+            pExp.printStackTrace(new PrintWriter(writer));
+            pErrorResp.put("stacktrace",writer.toString());
+        }
+        if (pJmxReq != null && pJmxReq.getParameterAsBool(ConfigKey.SERIALIZE_EXCEPTION)) {
+            pErrorResp.put("error_value",backendManager.convertExceptionToJson(pExp,pJmxReq));
+        }
     }
 
     // Extract class and exception message for an error message

@@ -10,7 +10,11 @@ import java.util.*;
  */
 public class Configuration {
 
-    private Map<ConfigKey,String> globalConfig;
+    // Alternative query parameter for providing path info
+    public static final String PATH_QUERY_PARAM = "p";
+
+    // The global configuration given during startup
+    private Map<ConfigKey, String> globalConfig;
 
     /**
      * Convenience constructor for setting up base configuration with key values pairs. This constructor
@@ -25,7 +29,11 @@ public class Configuration {
         }
     }
 
-
+    /**
+     * Update the configuration hold by this object
+     *
+     * @param pExtractor an extractor for retrieving the configuration from some external object
+     */
     public void updateGlobalConfiguration(ConfigExtractor pExtractor) {
         Enumeration e = pExtractor.getNames();
         while (e.hasMoreElements()) {
@@ -38,6 +46,12 @@ public class Configuration {
 
     }
 
+    /**
+     * Update this global configuration from a string-string. Only the known keys are taken
+     * from this map
+     *
+     * @param pConfig config map from where to take the configuration
+     */
     public void updateGlobalConfiguration(Map<String, String> pConfig) {
         for (ConfigKey c : ConfigKey.values()) {
             String value = pConfig.get(c.getKeyValue());
@@ -85,7 +99,14 @@ public class Configuration {
      * @return the processing parameters
      */
     public ProcessingParameters getProcessingParameters(Map<String,String> pParams) {
-        return new ProcessingParameters(ProcessingParameters.convertToConfigMap(pParams),pParams.get("p"));
+        Map<ConfigKey,String> procParams = ProcessingParameters.convertToConfigMap(pParams);
+        for (Map.Entry<ConfigKey,String> entry : globalConfig.entrySet()) {
+            ConfigKey key = entry.getKey();
+            if (key.isRequestConfig() && !procParams.containsKey(key)) {
+                procParams.put(key,entry.getValue());
+            }
+        }
+        return new ProcessingParameters(procParams,pParams.get(PATH_QUERY_PARAM));
     }
 
     /**

@@ -31,6 +31,8 @@ public interface OperationCheckingMBean {
 
     public void throwCheckedException() throws Exception;
 
+    public void throwRuntimeException();
+
     int overloadedMethod();
 
     int overloadedMethod(String arg);

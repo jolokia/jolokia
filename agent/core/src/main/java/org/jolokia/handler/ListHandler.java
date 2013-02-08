@@ -75,8 +75,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     public Object doHandleRequest(MBeanServerExecutor pServerManager, JmxListRequest pRequest)
             throws IOException {
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
-        int maxDepth = pRequest.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH);
-        boolean useCanonicalName = pRequest.getProcessingConfigAsBoolean(ConfigKey.CANONICAL_NAMING);
+        int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
+        boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
 
         ObjectName oName = null;
         try {

@@ -159,6 +159,23 @@ public class BackendManager {
     }
 
     /**
+     * Convert a Throwable to a JSON object so that it can be included in an error response
+     *
+     * @param pExp throwable to convert
+     * @param pJmxReq the request from where to take the serialization options
+     * @return the exception.
+     */
+    public Object convertExceptionToJson(Throwable pExp, JmxRequest pJmxReq)  {
+        JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
+        try {
+            return converters.getToJsonConverter().convertToJson(pExp,null,opts);
+        } catch (AttributeNotFoundException e) {
+            // Cannot happen, since we dont use a path
+            return null;
+        }
+    }
+
+    /**
      * Remove MBeans
      */
     public void destroy() {
@@ -236,6 +253,7 @@ public class BackendManager {
     public boolean isDebug() {
         return debugStore != null && debugStore.isDebug();
     }
+
 
     // ==========================================================================================================
 
@@ -363,12 +381,7 @@ public class BackendManager {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }
 
-        JsonConvertOptions opts = convertOptionsBuilder.
-                maxDepth(pJmxReq.getProcessingConfigAsInt(ConfigKey.MAX_DEPTH)).
-                maxCollectionSize(pJmxReq.getProcessingConfigAsInt(ConfigKey.MAX_COLLECTION_SIZE)).
-                maxObjects(pJmxReq.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS)).
-                faultHandler(pJmxReq.getValueFaultHandler()).
-                build();
+        JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
                 converters.getToJsonConverter()
@@ -378,6 +391,15 @@ public class BackendManager {
         jsonObject.put("value",jsonResult);
         jsonObject.put("request",pJmxReq.toJSON());
         return jsonObject;
+    }
+
+    private JsonConvertOptions getJsonConvertOptions(JmxRequest pJmxReq) {
+        return convertOptionsBuilder.
+                    maxDepth(pJmxReq.getParameterAsInt(ConfigKey.MAX_DEPTH)).
+                    maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).
+                    maxObjects(pJmxReq.getParameterAsInt(ConfigKey.MAX_OBJECTS)).
+                    faultHandler(pJmxReq.getValueFaultHandler()).
+                    build();
     }
 
     // init various application wide stores for handling history and debug output.

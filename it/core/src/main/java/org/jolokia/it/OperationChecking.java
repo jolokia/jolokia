@@ -50,6 +50,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
         throw new Exception("Inner exception");
     }
 
+    public void throwRuntimeException() {
+        throw new IllegalArgumentException("Illegal Argument", new IllegalStateException("Illegal State"));
+    }
+
     public boolean nullArgumentCheck(String arg1,Object arg2) {
         return arg1 == null && arg2 == null;
     }
@@ -85,13 +89,6 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
     }
 
     public Map mapArgument(Map arg) {
-        return arg;
-    }
-
-    public Map ArmapArgument(Map arg) {
-        if (arg == null) {
-            return null;
-        }
         return arg;
     }
 

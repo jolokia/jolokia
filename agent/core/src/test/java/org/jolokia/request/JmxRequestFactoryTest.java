@@ -97,8 +97,8 @@ public class JmxRequestFactoryTest {
         param.put("maxObjects","100");
         JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,new Configuration().getProcessingParameters(param));
         assertEquals(req.getAttributeName(),"HeapMemoryUsage");
-        assertEquals(req.getProcessingConfig(ConfigKey.MAX_DEPTH),"10");
-        assertEquals(req.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS), 100);
+        assertEquals(req.getParameter(ConfigKey.MAX_DEPTH),"10");
+        assertEquals(req.getParameterAsInt(ConfigKey.MAX_OBJECTS), 100);
     }
 
     @Test

@@ -106,7 +106,7 @@ public abstract class JmxRequest {
      * @param pConfigKey configuration key to fetch
      * @return string value or <code>null</code> if not set
      */
-    public String getProcessingConfig(ConfigKey pConfigKey) {
+    public String getParameter(ConfigKey pConfigKey) {
         return processingConfig.get(pConfigKey);
     }
 
@@ -117,7 +117,7 @@ public abstract class JmxRequest {
      * @param pConfigKey configuration to lookup
      * @return integer value of configuration or 0 if not set.
      */
-    public int getProcessingConfigAsInt(ConfigKey pConfigKey) {
+    public int getParameterAsInt(ConfigKey pConfigKey) {
         String intValueS = processingConfig.get(pConfigKey);
         if (intValueS != null) {
             return Integer.parseInt(intValueS);
@@ -132,8 +132,8 @@ public abstract class JmxRequest {
      * @param pConfigKey configuration to lookup
      * @return boolean value of the configuration, the default value or false if the default value is null
      */
-    public Boolean getProcessingConfigAsBoolean(ConfigKey pConfigKey) {
-        String booleanS = getProcessingConfig(pConfigKey);
+    public Boolean getParameterAsBool(ConfigKey pConfigKey) {
+        String booleanS = getParameter(pConfigKey);
         return Boolean.parseBoolean(booleanS != null ? booleanS : pConfigKey.getDefaultValue());
     }
 

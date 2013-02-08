@@ -276,21 +276,4 @@ public enum ConfigKey {
     public boolean isRequestConfig() {
         return requestConfig;
     }
-
-    /**
-     * Extract config options from a given map
-     *
-     * @param pMap map to extract the configuration from
-     * @return map with keys mapped to {@link ConfigKey}
-     */
-    public static Map<ConfigKey,String> extractConfig(Map<String,String> pMap) {
-        Map<ConfigKey,String> ret = new HashMap<ConfigKey, String>();
-        for (ConfigKey c : ConfigKey.values()) {
-            String value = pMap.get(c.getKeyValue());
-            if (value != null) {
-                ret.put(c,value);
-            }
-        }
-        return ret;
-    }
 }
