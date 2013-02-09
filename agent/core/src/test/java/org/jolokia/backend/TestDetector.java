@@ -74,7 +74,7 @@ public class TestDetector implements ServerDetector {
                                 return new HashSet<ObjectName>(Arrays.asList((ObjectName) args[0]));
                             }
                         });
-                expect(server.isRegistered(EasyMock.<ObjectName>anyObject())).andReturn(false);
+                expect(server.isRegistered(EasyMock.<ObjectName>anyObject())).andReturn(true);
                 replay(server);
                 pMBeanServers.add(server);
             } catch (JMException e) {

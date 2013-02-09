@@ -144,6 +144,8 @@ public class MBeanServerHandlerTest {
         servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+                // Throws an InstanceNotFoundException
+                pConn.getObjectInstance(pName);
                 result.add(pConn.isRegistered(pName));
             }
         });

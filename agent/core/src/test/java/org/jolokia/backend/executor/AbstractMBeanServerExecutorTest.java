@@ -22,7 +22,7 @@ public class AbstractMBeanServerExecutorTest {
 
         executor = new AbstractMBeanServerExecutor() {
             @Override
-            protected Set<MBeanServerConnection> getMBeanServers(boolean withJolokiaMBeanServer) {
+            protected Set<MBeanServerConnection> getMBeanServers() {
                 return null;
             }
         };
@@ -78,7 +78,7 @@ public class AbstractMBeanServerExecutorTest {
         getAttribute(executor,"test:type=bla","Name");
     }
 
-    @Test(expectedExceptions = AttributeNotFoundException.class,expectedExceptionsMessageRegExp = ".*test:type=one.*")
+    @Test(expectedExceptions = AttributeNotFoundException.class,expectedExceptionsMessageRegExp = ".*Bla.*")
     public void callWithInvalidAttributeName() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
         AbstractMBeanServerExecutor executor = new TestExecutor();
 
@@ -115,9 +115,8 @@ public class AbstractMBeanServerExecutorTest {
     }
     class TestExecutor extends AbstractMBeanServerExecutor {
         private       MBeanServer                jolokiaMBeanServer;
-        private final Set<MBeanServerConnection> allServers;
-        private final MBeanServer                otherMBeanServer;
         private final Set<MBeanServerConnection> servers;
+        private final MBeanServer                otherMBeanServer;
 
         private Testing jOne = new Testing(), oTwo = new Testing();
         private Hidden hidden = new Hidden();
@@ -126,8 +125,7 @@ public class AbstractMBeanServerExecutorTest {
 
             jolokiaMBeanServer = MBeanServerFactory.newMBeanServer();
             otherMBeanServer = MBeanServerFactory.newMBeanServer();
-            allServers = new LinkedHashSet<MBeanServerConnection>(Arrays.asList(jolokiaMBeanServer, otherMBeanServer));
-            servers = new LinkedHashSet<MBeanServerConnection>(Arrays.asList(otherMBeanServer));
+            servers = new LinkedHashSet<MBeanServerConnection>(Arrays.asList(jolokiaMBeanServer, otherMBeanServer));
 
             jolokiaMBeanServer.registerMBean(jOne, new ObjectName("test:type=one"));
             otherMBeanServer.registerMBean(hidden, new ObjectName("test:type=one"));
@@ -135,8 +133,8 @@ public class AbstractMBeanServerExecutorTest {
         }
 
         @Override
-        protected Set<MBeanServerConnection> getMBeanServers(boolean withJolokiaMBeanServer) {
-            return withJolokiaMBeanServer ? allServers : servers;
+        protected Set<MBeanServerConnection> getMBeanServers() {
+            return servers;
         }
 
         @Override

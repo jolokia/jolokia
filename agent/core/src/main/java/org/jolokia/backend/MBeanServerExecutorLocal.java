@@ -132,7 +132,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
 
-        for (MBeanServerConnection conn : getMBeanServers(true)) {
+        for (MBeanServerConnection conn : getMBeanServers()) {
             try {
                 return pRequestHandler.handleRequest(conn, pJmxReq);
             } catch (InstanceNotFoundException exp) {
@@ -153,13 +153,8 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
 
     /** {@inheritDoc} */
     @Override
-    protected Set<MBeanServerConnection> getMBeanServers(boolean withJolokiaMBeanServer) {
-        // Only add the Jolokia MBean server if at least a single MBean is registered there
-        if (withJolokiaMBeanServer && jolokiaMBeanServer != null) {
-            return allMBeanServers;
-        } else {
-            return mBeanServers;
-        }
+    protected Set<MBeanServerConnection> getMBeanServers() {
+        return allMBeanServers;
     }
 
     /** {@inheritDoc} */

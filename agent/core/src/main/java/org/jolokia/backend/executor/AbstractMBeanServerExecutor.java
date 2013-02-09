@@ -16,11 +16,9 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     /**
      * Get all MBeanServers
      *
-     * @param withJolokiaMBeanServer whether to include the Jolokia MBeanServer in the set or not. However, the
-     *                               Jolokia MBeanServer is only included if there are MBeans registered there.
-     * @return all MBeanServers possibly with the Jolokia MBean Server included.
+     * @return all MBeanServers in the merge order
      */
-    protected abstract Set<MBeanServerConnection> getMBeanServers(boolean withJolokiaMBeanServer);
+    protected abstract Set<MBeanServerConnection> getMBeanServers();
 
     /**
      * Override this method if you want to provide a Jolokia private MBeanServer. Note, that
@@ -36,9 +34,17 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     /** {@inheritDoc} */
     public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
         try {
-            // MBean pattern for an MBean can match at multiple servers
-            Set<ObjectName> jolokiaMBeans = eachAtJolokiaServer(pObjectName, pCallback);
-            eachAtMBeanServers(pObjectName, pCallback, jolokiaMBeans);
+            Set<ObjectName> visited = new HashSet<ObjectName>();
+            for (MBeanServerConnection server : getMBeanServers()) {
+                // Query for a full name is the same as a direct lookup
+                for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
+                    // Don't add if already visited previously
+                    if (!visited.contains(nameObject)) {
+                        pCallback.callback(server, nameObject);
+                        visited.add(nameObject);
+                    }
+                }
+            }
         } catch (InstanceNotFoundException exp) {
             // Well, should not happen, since we do a query before and the returned value are supposed to exist
             // on the mbean-server. But, who knows ...
@@ -51,9 +57,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     public <T> T call(ObjectName pObjectName, MBeanAction<T> pMBeanAction, Object ... pExtraArgs)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         InstanceNotFoundException objNotFoundException = null;
-        AttributeNotFoundException attrException = null;
-
-        for (MBeanServerConnection server : getMBeanServers(true)) {
+        for (MBeanServerConnection server : getMBeanServers()) {
             // Only the first MBeanServer holding the MBean wins
             try {
                 // Still to decide: Should we check eagerly or let an InstanceNotFound Exception
@@ -62,20 +66,12 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
                 // prepared for switching the guard below on or off.
 
                 //if (server.isRegistered(pObjectName)) {
-                    return pMBeanAction.execute(server, pObjectName, pExtraArgs);
+                return pMBeanAction.execute(server, pObjectName, pExtraArgs);
                 //}
             } catch (InstanceNotFoundException exp) {
                 // Remember exceptions for later use
                 objNotFoundException = exp;
-            } catch (AttributeNotFoundException exp) {
-                attrException = new AttributeNotFoundException(pObjectName + ": " + exp.getMessage());
-                attrException.initCause(exp);
-                // Try next one, too ..
             }
-        }
-
-        if (attrException != null) {
-            throw attrException;
         }
 
         // Must be there, otherwise we would not have left the loop
@@ -92,40 +88,10 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     /** {@inheritDoc} */
     public Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException {
         Set<ObjectName> names = new LinkedHashSet<ObjectName>();
-        for (MBeanServerConnection server : getMBeanServers(true)) {
+        for (MBeanServerConnection server : getMBeanServers()) {
             names.addAll(server.queryNames(pObjectName,null));
         }
         return names;
     }
 
-    // ====================================================================================================
-    // Search on JolokiaMBean Server, perform the callback and return the MBeans processed
-    private Set<ObjectName> eachAtJolokiaServer(ObjectName pObjectName, MBeanEachCallback pCallback)
-            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException {
-        MBeanServerConnection jolokiaServer = getJolokiaMBeanServer();
-        Set<ObjectName> jolokiaMBeans = null;
-        if (jolokiaServer != null) {
-            jolokiaMBeans = new HashSet<ObjectName>();
-            for (ObjectName nameObject : jolokiaServer.queryNames(pObjectName,null)) {
-                pCallback.callback(jolokiaServer, nameObject);
-                jolokiaMBeans.add(nameObject);
-            }
-        }
-        return jolokiaMBeans;
-    }
-
-    // Iterate over all other MBeanServers (without the JolokiaMBeanServer) and call the callback on every MBean
-    // not already contained in the JolokiaMBeanServer (this is taken from the last argument)
-    private void eachAtMBeanServers(ObjectName pObjectName, MBeanEachCallback pCallback, Set<ObjectName> pJolokiaMBeans)
-            throws IOException, ReflectionException, InstanceNotFoundException, MBeanException {
-        for (MBeanServerConnection server : getMBeanServers(false)) {
-            // Query for a full name is the same as a direct lookup
-            for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
-                // Dont add if already present in the Jolokia MBeanServer
-                if (pJolokiaMBeans == null || !pJolokiaMBeans.contains(nameObject)) {
-                    pCallback.callback(server, nameObject);
-                }
-            }
-        }
-    }
 }

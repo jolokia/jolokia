@@ -90,7 +90,6 @@ public interface MBeanServerExecutor {
          * @param pConn MBeanServer
          * @param pName object name as given by the surrounding {@link #each(ObjectName, MBeanEachCallback)} call, which
          *              can be either a pattern or null (in which case the names are searched for before) or a direct name.
-         *
          * @throws ReflectionException
          * @throws InstanceNotFoundException if the provided full-ObjectName is not registered at the MBeanServer
          * @throws IOException

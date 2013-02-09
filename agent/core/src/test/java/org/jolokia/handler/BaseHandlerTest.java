@@ -32,7 +32,7 @@ public class BaseHandlerTest {
     protected MBeanServerExecutor getMBeanServerManager(final MBeanServerConnection... connections) {
         return new AbstractMBeanServerExecutor() {
 
-            protected Set<MBeanServerConnection> getMBeanServers(boolean flag) {
+            protected Set<MBeanServerConnection> getMBeanServers() {
                 return new HashSet<MBeanServerConnection>(Arrays.asList(connections));
             }
         };

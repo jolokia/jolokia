@@ -4,43 +4,42 @@
   
   <para>
     The main focus of Jolokia is to allow an easy access to JMX MBeans
-    from everywhere. These MBean come from multiple origins. MBeans
-    can be provided by the JVM itself, by an application server or an
-    application itself. Each MBean is registered at a specific
-    MBeanServer. In a single JVM can co-exist multiple
-    MBeanServers. The so called
-    <emphasis>Platform-MBeanServer</emphasis> is always present and
-    is created by the JVM during startup. Especially application
-    servers often create additional MBeanServers for various
-    purposes. When accessing an MBean remotely via JSR-160, the
-    MBeanServer holding the requested MBean must be known
-    before. Jolokia instead <emphasis>merges</emphasis> all
-    MBeanServers it can find to give a single view on all MBeans. The
-    merging algorithm is described in <xref
-    linkend="mbeanserver-merging"/>. 
+    from everywhere. MBeans can be provided by the JVM itself, by an
+    application server or an application itself, where each MBean is
+    registered at a specific MBeanServer.  Multiple MBeanServers can
+    co-exist in a single JVM. The so called
+    <emphasis>Platform-MBeanServer</emphasis> is always present and is
+    created by the JVM during startup. Especially application servers
+    often create additional MBeanServers for various purposes. When
+    accessing an MBean remotely via JSR-160, the MBeanServer holding
+    the requested MBean must be known before. Jolokia instead
+    <emphasis>merges</emphasis> all MBeanServers it can find to give a
+    single view on all MBeans. The merging algorithm is described in
+    <xref linkend="mbeanserver-merging"/>.
   </para>
   <para>
-    For application specific MBeans Jolokia provides an own, so called
-    <emphasis>Jolokia MBeanServer</emphasis> which it treated
-    specially by the Jolokia agents. The Jolokia MBeanServer is
+    For application specific MBeans, Jolokia provides an own, so called
+    <emphasis>Jolokia MBeanServer</emphasis> which is treated
+    specially by the Jolokia agent. The Jolokia MBeanServer is
     explained in <xref linkend="jolokia-mbeanserver"/>. 
   </para>
   <para>
-    Creating and using application specific MBean is easy, especially if <ulink
-    url="">Standard MBeans</ulink> are implemented. However, for
+    Developing application specific MBeans is easy, especially if <ulink
+    url="http://docs.oracle.com/javase/tutorial/jmx/mbeans/standard.html">Standard
+    MBeans</ulink> are used. However, for 
     Spring users there is even a easier, more <ulink
-    url="">declarative way</ulink> for turning POJOs into MBeans. In
+    url="http://static.springsource.org/spring/docs/3.2.1.RELEASE/spring-framework-reference/html/jmx.html">declarative
+    way</ulink> for turning POJOs into MBeans. In 
     addition Jolokia provides an easy, declarative way for firing up a
     Jolokia JVM agent merely by including some Jolokia specific Spring
-    configuration. This is described in <xref linkend="jvm-spring"/>
+    configuration. This is described in <xref linkend="jvm-spring"/>.
   </para>
 
   <section id="jolokia-mbeanserver">
     <title>Jolokia MBeanServer</title>
     
     <para>
-      The Jolokia MBeanServer can be easily created and used by an
-      application using a locator:
+      The Jolokia MBeanServer can be easily created and used with a locator:
     </para>
     <programlisting language="java"><![CDATA[
 MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
@@ -70,8 +69,9 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
     <section id="mbeanserver-merging">
       <title>MBeanServer merging</title>
       <para>
-        Jolokia tries hard to detect as many MBeanServer available in
-        a JVM. Beside the always present PlatformMBeanServer many
+        Jolokia tries hard to detect as many MBeanServer as available
+        in a JVM. Beside the always present
+        <classname>PlatformMBeanServer</classname> many 
         application servers create own MBeanServer which not always
         can be found with standard mechanisms. Therefore Jolokia comes
         with so called <classname>ServerDetector</classname>s for many
@@ -93,7 +93,7 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         </listitem>
         <listitem>
           Next every MBeanServer as detected by the <strong>server
-          detectors</strong> a queried.
+          detectors</strong> a queried in turn.
         </listitem>
         <listitem>
           All MBeanServers returned by
@@ -107,6 +107,43 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         </listitem>
       </itemizedlist>
       
+      <para>
+        All MBeans contained in all detected MBeanServers are merged
+        to give a single view on the set of available MBeans. 
+        For MBeans registered with the same name at different
+        MBeanServers, the following conflict resolution algorithm is
+        performed. 
+      </para>
+
+      <itemizedlist>
+        <listitem>
+          For Jolokia operations targeting single MBeans
+          (<constant>READ</constant>, <constant>WRITE</constant> and
+          <constant>EXEC) only the first MBean found is used. I.e.
+          each MBeanServer is tried with the given ObjectName and
+          attribute. The first having the MBean registered will be
+          called and the request returns. If the ObjectName matches
+          but not the attribute, an error is raised. 
+        </listitem>
+        <listitem>
+          For <constant>LIST</constant> and
+          <constant>SEARCH</constant> requests, the information of all
+          MBeanServers is merged together. Different MBeans registered
+          at different MBean Server but with the same ObjectName will
+          have their attributes and operations merged in the
+          output. Except for every MBean found on the Jolokia
+          MBeanServer. In this case the information only for this
+          MBean is returned, effectively hiding every other
+          attribute/operation in the output on any other MBeanServer.
+        </listitem>
+        <listitem>
+          For <constant>READ</constant> requests using ObjectName
+          patterns or provide multiple attributes only the first found
+          MBean is used. The same is valid for
+          <constant>EXEC</constant> requests.
+        </listitem>
+      </itemizedlist>
+
       <itemizedlist>
         <listitem>
           For <constant>READ</constant> and <constant>WRITE</constant>,

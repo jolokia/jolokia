@@ -106,10 +106,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
         /** {@inheritDoc} */
         public String execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
             Object attr = pConn.getAttribute(pName, (String) extraArgs[0]);
-            if (attr != null) {
-                return attr.toString();
-            }
-            return null;
+            return attr != null ? attr.toString() : null;
         }
     };
 
