@@ -17,6 +17,8 @@ package org.jolokia.jmx;
  */
 
 import java.lang.management.ManagementFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
@@ -28,6 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -56,18 +59,66 @@ public class JolokiaMBeanServerTest {
         Assert.assertFalse(server.isRegistered(oName));
     }
 
+    @Test
+    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException {
+        JolokiaMBeanServer server = new JolokiaMBeanServer();
+
+        ObjectName oName = new ObjectName("test:type=jsonMBean");
+        server.registerMBean(new JsonAnnoPlainTest(),oName);
+
+        MBeanServer pServer = ManagementFactory.getPlatformMBeanServer();
+
+        String deepDive = (String) pServer.getAttribute(oName,"DeepDive");
+        JSONObject deepDiveS = (JSONObject) new JSONParser().parse(deepDive);
+        assertEquals(deepDiveS.size(),1);
+        // Serialization is truncated because of maxDepth = 1
+        assertTrue(deepDiveS.get("map") instanceof String);
+        assertTrue(deepDiveS.get("map").toString().matches(".*hot=.*Chili.*"));
+
+        server.unregisterMBean(oName);
+        Assert.assertFalse(pServer.isRegistered(oName));
+        Assert.assertFalse(server.isRegistered(oName));
+    }
+
 
     // ============================================================================================
 
-    @JsonMBean
+    @JsonMBean(maxDepth = 1)
+    public static class JsonAnnoPlainTest implements JsonAnnoPlainTestMBean {
+        public DeepDive getDeepDive() {
+            return new DeepDive();
+        }
+
+    }
+
+    public interface JsonAnnoPlainTestMBean {
+        DeepDive getDeepDive();
+    }
+
+    @JsonMBean()
     public static class JsonAnnoTest implements JsonAnnoTestMXBean {
 
         public Chili getChili() {
             return new Chili("Bhut Jolokia",1000000);
         }
+
     }
     public interface JsonAnnoTestMXBean {
         Chili getChili();
+    }
+
+    public static class DeepDive {
+        private Chili chili;
+        private Map map;
+        public DeepDive() {
+            chili = new Chili("Aji",700000);
+            map = new HashMap();
+            map.put("hot",chili);
+        }
+
+        public Map getMap() {
+            return map;
+        }
     }
 
     public static class Chili {

@@ -25,6 +25,7 @@ import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.json.JsonConvertOptions;
+import org.jolokia.converter.json.ValueFaultHandler;
 
 /**
  * Dedicate MBeanServer for registering Jolokia-only MBeans
@@ -68,7 +69,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
             try {
                 // Fetch real MBeanInfo and create a dynamic MBean with modified signature
                 MBeanInfo info = super.getMBeanInfo(realName);
-                JsonDynamicMBeanImpl mbean = new JsonDynamicMBeanImpl(this,realName,info);
+                JsonDynamicMBeanImpl mbean = new JsonDynamicMBeanImpl(this,realName,info,getJsonConverterOptions(anno));
 
                 // Register MBean on delegate MBeanServer
                 delegatedMBeans.add(realName);
@@ -95,12 +96,14 @@ class JolokiaMBeanServer extends MBeanServerProxy {
 
     /**
      * Converter used by JsonMBean for converting from Object to JSON representation
+     *
      * @param object object to serialize
+     * @param pConvertOptions options used for conversion
      * @return serialized object
      */
-    String toJson(Object object) {
+    String toJson(Object object, JsonConvertOptions pConvertOptions) {
         try {
-            Object ret = converters.getToJsonConverter().convertToJson(object,null, JsonConvertOptions.DEFAULT);
+            Object ret = converters.getToJsonConverter().convertToJson(object,null,pConvertOptions);
             return ret.toString();
         } catch (AttributeNotFoundException exp) {
             // Cannot happen, since we dont use a path
@@ -129,6 +132,25 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      */
     Object fromJson(OpenType type, String json) {
         return converters.getToOpenTypeConverter().convertToObject(type,json);
+    }
+
+    // Extract convert options from annotation
+    private JsonConvertOptions getJsonConverterOptions(JsonMBean pAnno) {
+        // Extract conversion options from the annotation
+        if (pAnno == null) {
+            return JsonConvertOptions.DEFAULT;
+        } else {
+            ValueFaultHandler faultHandler =
+                    pAnno.faultHandling() == JsonMBean.FaultHandler.IGNORE_ERRORS ?
+                            ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER :
+                            ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
+            return new JsonConvertOptions.Builder()
+                    .maxCollectionSize(pAnno.maxCollectionSize())
+                    .maxDepth(pAnno.maxDepth())
+                    .maxObjects(pAnno.maxObjects())
+                    .faultHandler(faultHandler)
+                    .build();
+        }
     }
 
 

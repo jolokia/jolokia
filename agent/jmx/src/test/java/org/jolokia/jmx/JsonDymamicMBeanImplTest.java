@@ -197,7 +197,7 @@ public class JsonDymamicMBeanImplTest {
     private JsonDynamicMBeanImpl register(ObjectName oName, Object bean) throws Exception {
         server.registerMBean(bean, oName);
 
-        JsonDynamicMBeanImpl jsonMBean = new JsonDynamicMBeanImpl(server,oName,server.getMBeanInfo(oName));
+        JsonDynamicMBeanImpl jsonMBean = new JsonDynamicMBeanImpl(server,oName,server.getMBeanInfo(oName),null);
         platformServer.registerMBean(jsonMBean,oName);
 
         return jsonMBean;
