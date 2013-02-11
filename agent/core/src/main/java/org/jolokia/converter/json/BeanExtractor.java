@@ -1,5 +1,7 @@
 package org.jolokia.converter.json;
 
+import java.io.OutputStream;
+import java.io.Writer;
 import java.lang.reflect.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -50,11 +52,17 @@ public class BeanExtractor implements Extractor {
 
     private static final Set<String> IGNORE_METHODS = new HashSet<String>(Arrays.asList(
             "getClass",
-            // For exceptions we ommit stacktraces
-            "getStackTrace"
+            // Ommit internal stuff
+            "getStackTrace",
+            "getClassLoader"
     ));
 
-    private static final String[] GETTER_PREFIX = new String[] { "get", "is", "has"};
+    private static final Class[] IGNORED_RETURN_TYPES = new Class[] {
+            OutputStream.class,
+            Writer.class
+    };
+
+    private static final String[] GETTER_PREFIX = new String[]{"get", "is", "has"};
 
     /** {@inheritDoc} */
     public Class getType() {
@@ -64,13 +72,13 @@ public class BeanExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pExtraArgs,boolean jsonify)
+                                Stack<String> pExtraArgs, boolean jsonify)
             throws AttributeNotFoundException {
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
         if (!pExtraArgs.isEmpty()) {
             // Still some path elements available, so dive deeper
             String attribute = pExtraArgs.pop();
-            Object attributeValue = extractBeanPropertyValue(pValue,attribute,faultHandler);
+            Object attributeValue = extractBeanPropertyValue(pValue, attribute, faultHandler);
             return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
         } else {
             if (jsonify) {
@@ -174,7 +182,9 @@ public class BeanExtractor implements Extractor {
     private List<String> extractBeanAttributes(Object pValue) {
         List<String> attrs = new ArrayList<String>();
         for (Method method : pValue.getClass().getMethods()) {
-            if (!Modifier.isStatic(method.getModifiers()) && !IGNORE_METHODS.contains(method.getName())) {
+            if (!Modifier.isStatic(method.getModifiers()) &&
+                !IGNORE_METHODS.contains(method.getName()) &&
+                !isIgnoredType(method.getReturnType())) {
                 addAttributes(attrs, method);
             }
         }
@@ -248,8 +258,8 @@ public class BeanExtractor implements Extractor {
      * Privileged action for setting the accesibility mode for a method to true
      */
     private static class SetMethodAccessibleAction implements PrivilegedAction<Void> {
-        private final Method getMethod;
 
+        private final Method getMethod;
         /**
          * Which method to set accessible
          *
@@ -264,5 +274,18 @@ public class BeanExtractor implements Extractor {
             getMethod.setAccessible(true);
             return null;
         }
+
+    }
+    // Ignore certain return types, since their getter tend to have bad
+    // side effects like nuking files etc. See Jetty FileResource.getOutputStream() as a bad example
+    // This method is not necessarily cheap (since it called quite often), however necessary
+    // as safety net. I messed up my complete local Maven repository only be serializing a Jetty ServletContext
+    private boolean isIgnoredType(Class<?> pReturnType) {
+        for (Class<?> type : IGNORED_RETURN_TYPES) {
+            if (type.isAssignableFrom(pReturnType)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
