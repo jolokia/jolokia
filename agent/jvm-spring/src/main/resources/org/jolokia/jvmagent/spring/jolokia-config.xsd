@@ -22,10 +22,15 @@
            attributeFormDefault="unqualified">
 
   <!-- Declaration of a Jolokia server -->
-  <xs:element name="server">
+  <xs:element name="agent">
+    <xs:annotation>
+      <xs:documentation source="org.jolokia.jvmagent.spring.SpringJolokiaAgent">
+        A JVM Jolokia agent for exposing JMX via Jolokia.
+      </xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <!-- Configuration used -->
+      <!-- Configuration used -->
         <xs:element name="config" type="tns:Config" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:attribute name="id" type="xs:ID" use="optional">
@@ -72,9 +77,34 @@
   <!-- Configuration for the Jolokia server -->
   <xs:element name="config" type="tns:Config"/>
 
+  <!-- Jolokia MBeanServer-->
+  <xs:element name="mbean-server">
+    <xs:annotation>
+      <xs:documentation source="org.jolokia.jvmagent.spring.SpringJolokiaMBeanServerFactory">
+        The Jolokia MBeanServer which can be used to hide MBean from JSR-160 exports and for
+        handling @JsonMBeans.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="id" type="xs:ID">
+        <xs:annotation>
+          <xs:documentation>
+            Id for specifying this servers name as it
+            can be referenced from the Spring application context.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <!-- ============================================================================== -->
   <!-- Type definition for the configuration -->
   <xs:complexType name="Config">
+    <xs:annotation>
+      <xs:documentation source="org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder">
+        Configuration for a Jolokia JVM agent
+      </xs:documentation>
+    </xs:annotation>
     <xs:attribute name="id" type="xs:ID" use="optional"/>
     <xs:attribute name="order" type="xs:int">
       <xs:annotation>
@@ -107,7 +137,7 @@
     <xs:attribute name="autoStart" type="xs:boolean">
       <xs:annotation>
         <xs:documentation>
-          Whether to start the Jolokia server automatically. Default is false.
+          Whether to start the Jolokia server automatically. Default is true.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
@@ -115,8 +145,6 @@
     <!--
     private String      context;
     -->
-
-
 
     <xs:attribute name="protocol">
       <xs:annotation>
@@ -270,6 +298,56 @@
       <xs:annotation>
         <xs:documentation>
           Maximum number of objects returned by serialization
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="canonicalNaming" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          This option specifies in which order the key-value
+          properties within ObjectNames as returned by
+          "list" or "search" are
+          returned. By default this is the so called 'canonical order'
+          in which the keys are sorted alphabetically. If this option
+          is set to false, then the natural order
+          is used, i.e. the object name as it was registered. This
+          option can be overridden with a query parameter of the same
+          name. By default this option is set to 'true'.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="includeStackTrace">
+      <xs:annotation>
+        <xs:documentation>
+          Whether to include a stacktrace of an exception in case of
+          an error. By default it it set to "true"
+          in which case the stacktrace is always included. If set to
+          "false", no stacktrace is included. If
+          the value is "runtime" a stacktrace is
+          only included for RuntimeExceptions. This global option can
+          be overridden with a query parameter.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="true"/>
+          <xs:enumeration value="false"/>
+          <xs:enumeration value="runtime"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+
+    <xs:attribute name="serializeException" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          When this parameter is set to "true",
+          then an exception thrown will be serialized as JSON and
+          included in the response under the key
+          "error_value". No stack trace information
+          will be included, though. This global option can be
+          overridden by a query parameter of the same name.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>

@@ -234,7 +234,7 @@
           When this parameter is set to <constant>true</constant>,
           then an exception thrown will be serialized as JSON and
           included in the response under the key
-          <constant>error_value</constant>. No stactrace infornmation
+          <constant>error_value</constant>. No stacktrace information
           will be included, though. This global option can be
           overridden by a query parameter of the same name.
         </td>

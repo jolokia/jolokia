@@ -24,6 +24,12 @@
   </properties>
   <body>
     <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
+      <action dev="roland" type="fix" date="2013-02-11">
+        Added safety net for serialization, so that OutputStreams and Writers are never
+        obtained from get-methods if they declare a subclass as return value. It happens e.g. for
+        Jetty 8.1 that FileResource.getOutputStream() opens a new FileOutputStream nuking the
+        existing date. Nice side effect ;-)
+      </action>
       <action dev="roland" type="fix" date="2013-02-07" issue="59">
         Added new global and process configuration options "includeStackTrace" (true,false,runtime)
         and "serializeException" (true, false) which can be used to tune the

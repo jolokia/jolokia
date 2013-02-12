@@ -17,7 +17,7 @@ package org.jolokia.jvmagent.spring;
  */
 
 /**
- * Enumeration for how to handle system properties when configuring a {@link SpringJolokiaServer}.
+ * Enumeration for how to handle system properties when configuring a {@link SpringJolokiaAgent}.
  *
  *
  * @author roland

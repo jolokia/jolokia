@@ -27,6 +27,8 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.*;
 
 /**
+ * Definition parser for "config"
+ *
 * @author roland
 * @since 29.12.12
 */

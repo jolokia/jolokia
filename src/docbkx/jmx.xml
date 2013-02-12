@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!--
-  ~ Copyright 2009-2013 Roland Huss
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~       http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <chapter id="jmx">
   
   <para>
@@ -127,74 +111,18 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         All MBeans contained in all detected MBeanServers are merged
         to give a single view on the set of available MBeans. 
         For MBeans registered with the same name at different
-        MBeanServers, the following conflict resolution algorithm is
-        performed. 
+        MBeanServers, MBeans registered in later MBeanServers are not
+        visible. These hidden MBeans will never be called on
+        <constant>READ</constant>, <constant>WRITE</constant> or
+        <constant>EXEC</constant> operations. Also, for
+        <constant>LIST</constant> operations only the meta data of the
+        visible MBeans is returned. 
       </para>
 
-      <itemizedlist>
-        <listitem>
-          For Jolokia operations targeting single MBeans
-          (<constant>READ</constant>, <constant>WRITE</constant> and
-          <constant>EXEC) only the first MBean found is used. I.e.
-          each MBeanServer is tried with the given ObjectName and
-          attribute. The first having the MBean registered will be
-          called and the request returns. If the ObjectName matches
-          but not the attribute, an error is raised. 
-        </listitem>
-        <listitem>
-          For <constant>LIST</constant> and
-          <constant>SEARCH</constant> requests, the information of all
-          MBeanServers is merged together. Different MBeans registered
-          at different MBean Server but with the same ObjectName will
-          have their attributes and operations merged in the
-          output. Except for every MBean found on the Jolokia
-          MBeanServer. In this case the information only for this
-          MBean is returned, effectively hiding every other
-          attribute/operation in the output on any other MBeanServer.
-        </listitem>
-        <listitem>
-          For <constant>READ</constant> requests using ObjectName
-          patterns or provide multiple attributes only the first found
-          MBean is used. The same is valid for
-          <constant>EXEC</constant> requests.
-        </listitem>
-      </itemizedlist>
-
-      <itemizedlist>
-        <listitem>
-          For <constant>READ</constant> and <constant>WRITE</constant>,
-          each MBeanServer is tried with the given ObjectName and
-          attribute. The first one holding the MBean
-          <emphasis>and</emphasis> attribute will be called and the
-          request returns. If the ObjectName matches but not the
-          attribute, then the next MBeanServer is tried.
-        </listitem>
-        <listitem>
-          For <constant>LIST</constant> and
-          <constant>SEARCH</constant> requests, the information of all
-          MBeanServers is merged together. Different MBeans registered
-          at different MBean Server but with the same ObjectName will
-          have their attributes and operations merged in the
-          output. Except for every MBean found on the Jolokia
-          MBeanServer. In this case the information only for this
-          MBean is returned, effectively hiding every other
-          attribute/operation in the output on any other MBeanServer.
-        </listitem>
-        <listitem>
-          For <constant>READ</constant> requests using ObjectName
-          patterns or provide multiple attributes only the first found
-          MBean is used. The same is valid for
-          <constant>EXEC</constant> requests.
-        </listitem>
-      </itemizedlist>
       <para>
-        As it can seen from the list above, the merging algorithm is
-        quite complicate for MBeans with the same name but located in
-        different MBeanServers. This complexity is mainly due to the
-        way how JSON MBeans work. It is recommended to avoid issues
-        with this sort of "conflict" resolution by using orthogonal
-        object names, i.e. to not use MBeans with the same name in
-        different MBeanServers. 
+        This hiding mechanism is used by
+        <constant>@JsonMBean</constant> to provide a different view of
+        an MBean for JSR-160 (see below) connectors.
       </para>
     </section>
   </section>
@@ -262,19 +190,19 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
              http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
        ">
 
-  <jolokia:server lookupConfig="false" systemPropertiesMode="never">
+  <jolokia:agent lookupConfig="false" systemPropertiesMode="never">
     <jolokia:config
             autoStart="true"
             host="0.0.0.0"
             port="8778"
             ....
             />
-  </jolokia:server>
+  </jolokia:agent>
 </beans>
 ]]></programlisting>
     <para>
       There are two directives available:
-      <constant>&lt;jolokia:server&gt;</constant> declares a Jolokia
+      <constant>&lt;jolokia:agent&gt;</constant> declares a Jolokia
       server with a configuration as defined in an embedded
       <constant>&lt;jolokia:config&gt;</constant> configuration
       section.<sidebar>
@@ -287,7 +215,7 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
     </sidebar>
     </para>
     <para>
-      <constant>&lt;jolokia:server&gt;</constant> has an attribute
+      <constant>&lt;jolokia:agent&gt;</constant> has an attribute
       <constant>lookupConfig</constant>. If set to
       <constant>true</constant>, externally defined 
       <constant>&lt;jolokia:config&gt;</constant> sections will be
@@ -352,8 +280,8 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
       attribute <constant>autoStart</constant> which allows for
       automatically starting the HTTP server during the initialization
       of the application context. By default this is set to
-      <constant>false</constant>, so the server needs to be started
-      manually. 
+      <constant>true</constant>, so the server starts up automatically
+      by default.
     </para>
   </section>
   
@@ -411,7 +339,7 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         present: the higher the order, the higher the priority. But
         then again, instead of using the plugin with an external
         configuration it is probably better to us an explicite
-        <constant>&lt;jolokia:server&gt;</constant> declaration, since
+        <constant>&lt;jolokia:agent&gt;</constant> declaration, since
         you have to add to a Spring configuration file anyway. 
       </para>
     </section>

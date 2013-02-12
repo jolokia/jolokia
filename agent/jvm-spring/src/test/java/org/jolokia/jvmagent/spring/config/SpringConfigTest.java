@@ -21,8 +21,8 @@ import java.util.Map;
 
 import javax.xml.parsers.*;
 
+import org.jolokia.jvmagent.spring.SpringJolokiaAgent;
 import org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder;
-import org.jolokia.jvmagent.spring.SpringJolokiaServer;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.testng.annotations.Test;
@@ -47,10 +47,10 @@ public class SpringConfigTest {
     @Test
     public void simpleServer() throws ParserConfigurationException, IOException, SAXException {
         Element element = getElement("/simple-server.xml");
-        ServerBeanDefinitionParser parser = new ServerBeanDefinitionParser();
+        AgentBeanDefinitionParser parser = new AgentBeanDefinitionParser();
         assertTrue(parser.shouldGenerateIdAsFallback());
         BeanDefinition bd = parser.parseInternal(element, null);
-        assertEquals(bd.getBeanClassName(), SpringJolokiaServer.class.getName());
+        assertEquals(bd.getBeanClassName(), SpringJolokiaAgent.class.getName());
         MutablePropertyValues props = bd.getPropertyValues();
         assertEquals(props.size(),2);
         assertEquals(props.getPropertyValue("lookupConfig").getValue(), false);

@@ -57,7 +57,7 @@ public class BeanExtractor implements Extractor {
             "getClassLoader"
     ));
 
-    private static final Class[] IGNORED_RETURN_TYPES = new Class[] {
+    private static final Class[] IGNORED_RETURN_TYPES = new Class[]{
             OutputStream.class,
             Writer.class
     };

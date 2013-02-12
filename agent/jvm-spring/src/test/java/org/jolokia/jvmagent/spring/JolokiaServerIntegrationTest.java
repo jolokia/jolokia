@@ -16,12 +16,14 @@ package org.jolokia.jvmagent.spring;
  * limitations under the License.
  */
 
+import javax.management.MBeanServer;
+
 import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.jolokia.test.util.EnvTestUtil;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -34,9 +36,12 @@ public class JolokiaServerIntegrationTest extends BaseServerTest {
         System.setProperty("jolokia.port", "" + EnvTestUtil.getFreePort());
         System.out.println("Port selected: " + System.getProperty("jolokia.port"));
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("/spring-jolokia-context.xml");
-        SpringJolokiaServer server = (SpringJolokiaServer) ctx.getBean("jolokia");
+        SpringJolokiaAgent server = (SpringJolokiaAgent) ctx.getBean("jolokia");
         JolokiaServerConfig cfg = server.getServerConfig();
         assertEquals(cfg.getContextPath(),"/j4p/");
+
+        MBeanServer mbeanServer = (MBeanServer) ctx.getBean("jolokiaMBeanServer");
+        assertNotNull(mbeanServer);
         checkServerAndStop(server);
     }
 }

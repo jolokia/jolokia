@@ -26,7 +26,8 @@ public class JolokiaNamespaceHandler extends NamespaceHandlerSupport {
 
     /** {@inheritDoc} */
     public void init() {
-        registerBeanDefinitionParser("server",new ServerBeanDefinitionParser());
+        registerBeanDefinitionParser("agent",new AgentBeanDefinitionParser());
+        registerBeanDefinitionParser("mbean-server",new MBeanServerBeanDefinitionParser());
         registerBeanDefinitionParser("config",new ConfigBeanDefinitionParser());
     }
 

@@ -29,7 +29,7 @@ import static org.testng.Assert.assertTrue;
  */
 class BaseServerTest {
 
-    protected void checkServerAndStop(SpringJolokiaServer server) throws Exception {
+    protected void checkServerAndStop(SpringJolokiaAgent server) throws Exception {
         //Thread.sleep(2000);
         try {
             URL url = new URL(server.getUrl());

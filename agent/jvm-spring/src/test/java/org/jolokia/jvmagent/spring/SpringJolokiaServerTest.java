@@ -36,7 +36,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
 
     @Test
     public void withoutStart() throws Exception {
-        SpringJolokiaServer server = new SpringJolokiaServer();
+        SpringJolokiaAgent server = new SpringJolokiaAgent();
         server.setConfig(getConfig(false,100));
         server.afterPropertiesSet();
         server.start();
@@ -60,7 +60,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         if (propContext != null) {
             System.setProperty("jolokia.agentContext", propContext);
         }
-        SpringJolokiaServer server = new SpringJolokiaServer();
+        SpringJolokiaAgent server = new SpringJolokiaAgent();
         server.setConfig(getConfig(true,100,"agentContext", configContext));
         server.setSystemPropertiesMode(mode);
         server.afterPropertiesSet();
@@ -71,7 +71,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
 
     @Test
     public void withStart() throws Exception {
-        SpringJolokiaServer server = new SpringJolokiaServer();
+        SpringJolokiaAgent server = new SpringJolokiaAgent();
         server.setConfig(getConfig(true,100));
         server.afterPropertiesSet();
         checkServerAndStop(server);
@@ -79,7 +79,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
 
     @Test
     public void withMultiConfigAndStart() throws Exception {
-        SpringJolokiaServer server = new SpringJolokiaServer();
+        SpringJolokiaAgent server = new SpringJolokiaAgent();
         server.setLookupConfig(true);
         server.setConfig(getConfig(true,100));
 

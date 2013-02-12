@@ -27,15 +27,19 @@
 
   <context:property-placeholder system-properties-mode="ENVIRONMENT"/>
 
+  <context:mbean-export server="jolokiaMBeanServer"/>
+
+  <jolokia:mbean-server id="jolokiaMBeanServer"/>
+
   <jolokia:config id="bla" agentContext="/bla/" order="5"/>
 
   <jolokia:config agentContext="/j4p/" order="10"/>
 
-  <jolokia:server id="jolokia" lookupConfig="true">
+  <jolokia:agent id="jolokia" lookupConfig="true">
     <jolokia:config
             autoStart="true"
             port="${jolokia.port}"
             host="127.0.0.1"
             />
-  </jolokia:server>
+  </jolokia:agent>
 </beans>

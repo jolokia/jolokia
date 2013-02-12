@@ -16,7 +16,7 @@ package org.jolokia.jvmagent.spring.config;
  * limitations under the License.
  */
 
-import org.jolokia.jvmagent.spring.SpringJolokiaServer;
+import org.jolokia.jvmagent.spring.SpringJolokiaAgent;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
@@ -26,14 +26,14 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
- * Bean definition parser for a &lt;jolokia:server&gt; spring configuration
+ * Bean definition parser for a &lt;jolokia:agent&gt; spring configuration
  *
  */
-public class ServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public class AgentBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaServer.class);
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaAgent.class);
         Element config = DomUtils.getChildElementByTagName(element,"config");
         if (config != null) {
             ConfigBeanDefinitionParser configParser = new ConfigBeanDefinitionParser();

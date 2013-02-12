@@ -33,13 +33,19 @@
   </parent>
 
   <properties>
-    <spring.version>3.2.0.RELEASE</spring.version>
+    <spring.version>3.2.1.RELEASE</spring.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-jvm</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-jmx</artifactId>
       <version>${project.version}</version>
     </dependency>
 

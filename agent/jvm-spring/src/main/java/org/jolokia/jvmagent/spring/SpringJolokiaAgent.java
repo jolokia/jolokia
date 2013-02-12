@@ -33,7 +33,7 @@ import org.springframework.core.OrderComparator;
  * @author roland
  * @since 26.12.12
  */
-public class SpringJolokiaServer extends JolokiaServer implements ApplicationContextAware, InitializingBean, DisposableBean {
+public class SpringJolokiaAgent extends JolokiaServer implements ApplicationContextAware, InitializingBean, DisposableBean {
 
     // Default configuration to use
     private SpringJolokiaConfigHolder config;
@@ -71,7 +71,7 @@ public class SpringJolokiaServer extends JolokiaServer implements ApplicationCon
             finalConfig.putAll(lookupSystemProperties());
         }
         String autoStartS = finalConfig.remove("autoStart");
-        boolean autoStart = false;
+        boolean autoStart = true;
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
