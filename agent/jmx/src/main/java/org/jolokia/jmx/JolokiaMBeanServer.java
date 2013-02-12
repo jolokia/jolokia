@@ -17,10 +17,12 @@ package org.jolokia.jmx;
  */
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.management.*;
+import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.Converters;
@@ -60,7 +62,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
 
         // Check, whether it is annotated with @JsonMBean. Only the outermost class of an inheritance is
         // considered.
-        JsonMBean anno = object.getClass().getAnnotation(JsonMBean.class);
+        JsonMBean anno = extractJsonMBeanAnnotation(object);
         if (anno != null) {
             // The real name can be different than the given one in case the default
             // domain was omitted and/or the MBean implements MBeanRegistration
@@ -83,6 +85,49 @@ class JolokiaMBeanServer extends MBeanServerProxy {
             }
         }
         return ret;
+    }
+
+    // Lookup a JsonMBean annotation
+    private JsonMBean extractJsonMBeanAnnotation(Object object) {
+        // Try directly
+        Class<?> clazz = object.getClass();
+        JsonMBean anno =  clazz.getAnnotation(JsonMBean.class);
+        if (anno == null && ModelMBean.class.isAssignableFrom(object.getClass())) {
+            // For ModelMBean we try some heuristic to get to the managed resource
+            // This works for all subclasses of RequiredModelMBean as provided by the JDK
+            // but maybe for other ModelMBean classes as well
+            Boolean isAccessible = null;
+            Field field = null;
+            try {
+                field = findField(clazz, "managedResource");
+                if (field != null) {
+                    isAccessible = field.isAccessible();
+                    field.setAccessible(true);
+                    Object managedResource = field.get(object);
+                    anno = managedResource.getClass().getAnnotation(JsonMBean.class);
+                }
+            } catch (IllegalAccessException e) {
+                // Ignored silently, but we tried it at least
+            } finally {
+                if (isAccessible != null) {
+                    field.setAccessible(isAccessible);
+                }
+            }
+        }
+        return anno;
+    }
+
+    // Find a field in an inheritance hierarchy
+    private Field findField(Class<?> pClazz, String pField) {
+        Class c = pClazz;
+        do {
+            try {
+                return c.getDeclaredField(pField);
+            } catch (NoSuchFieldException e) {
+                c = pClazz.getSuperclass();
+            }
+        } while (c != null);
+        return null;
     }
 
     @Override

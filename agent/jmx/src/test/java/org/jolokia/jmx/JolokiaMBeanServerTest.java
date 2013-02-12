@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.*;
+import javax.management.modelmbean.*;
 import javax.management.openmbean.CompositeData;
 
 import org.json.simple.JSONObject;
@@ -29,8 +30,7 @@ import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -39,47 +39,81 @@ import static org.testng.Assert.assertTrue;
 public class JolokiaMBeanServerTest {
 
     @Test
-    public void simple() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException {
+    public void simple() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
         JolokiaMBeanServer server = new JolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
-        server.registerMBean(new JsonAnnoTest(),oName);
-        CompositeData chiliCD = (CompositeData) server.getAttribute(oName,"Chili");
-        assertEquals((String) chiliCD.get("name"), "Bhut Jolokia");
-        assertEquals(chiliCD.get("scoville"), 1000000L);
+            server.registerMBean(new JsonAnnoTest(),oName);
 
-        MBeanServer pServer = ManagementFactory.getPlatformMBeanServer();
-        String chiliS = (String) pServer.getAttribute(oName,"Chili");
-        JSONObject chiliJ = (JSONObject) new JSONParser().parse(chiliS);
-        assertEquals(chiliJ.get("name"), "Bhut Jolokia");
-        assertEquals(chiliJ.get("scoville"), 1000000L);
+            CompositeData chiliCD = (CompositeData) server.getAttribute(oName,"Chili");
+            assertEquals((String) chiliCD.get("name"), "Bhut Jolokia");
+            assertEquals(chiliCD.get("scoville"), 1000000L);
 
-        server.unregisterMBean(oName);
-        Assert.assertFalse(pServer.isRegistered(oName));
-        Assert.assertFalse(server.isRegistered(oName));
+            MBeanServer pServer = ManagementFactory.getPlatformMBeanServer();
+            String chiliS = (String) pServer.getAttribute(oName,"Chili");
+            JSONObject chiliJ = (JSONObject) new JSONParser().parse(chiliS);
+            assertEquals(chiliJ.get("name"), "Bhut Jolokia");
+            assertEquals(chiliJ.get("scoville"), 1000000L);
+
+            server.unregisterMBean(oName);
+            Assert.assertFalse(pServer.isRegistered(oName));
+            Assert.assertFalse(server.isRegistered(oName));
     }
 
     @Test
-    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException {
+    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
         JolokiaMBeanServer server = new JolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
+
         server.registerMBean(new JsonAnnoPlainTest(),oName);
 
-        MBeanServer pServer = ManagementFactory.getPlatformMBeanServer();
+        MBeanServer plattformServer = ManagementFactory.getPlatformMBeanServer();
 
-        String deepDive = (String) pServer.getAttribute(oName,"DeepDive");
+        String deepDive = (String) plattformServer.getAttribute(oName,"DeepDive");
         JSONObject deepDiveS = (JSONObject) new JSONParser().parse(deepDive);
         assertEquals(deepDiveS.size(),1);
         // Serialization is truncated because of maxDepth = 1
         assertTrue(deepDiveS.get("map") instanceof String);
         assertTrue(deepDiveS.get("map").toString().matches(".*hot=.*Chili.*"));
-
         server.unregisterMBean(oName);
-        Assert.assertFalse(pServer.isRegistered(oName));
+        Assert.assertFalse(plattformServer.isRegistered(oName));
         Assert.assertFalse(server.isRegistered(oName));
     }
 
+    @Test
+    public void withModelMBean() throws MBeanException, InvalidTargetObjectTypeException, InstanceNotFoundException, InstanceAlreadyExistsException, NotCompliantMBeanException, MalformedObjectNameException, NoSuchMethodException, IntrospectionException {
+
+        RequiredModelMBean modelMBean = new RequiredModelMBean();
+
+        ModelMBeanInfo mbi = new ModelMBeanInfoSupport(
+                JsonAnnoPlainTest.class.getName(),
+                "JsonMBean Test",
+                new ModelMBeanAttributeInfo[]{
+                        new ModelMBeanAttributeInfo("DeepDive","description",JsonAnnoPlainTest.class.getDeclaredMethod("getDeepDive"),null)
+                },
+                new ModelMBeanConstructorInfo[]{},
+                new ModelMBeanOperationInfo[]{},
+                new ModelMBeanNotificationInfo[]{}
+        );
+        modelMBean.setModelMBeanInfo(mbi);
+        modelMBean.setManagedResource(new JsonAnnoPlainTest(), "ObjectReference");
+
+        JolokiaMBeanServer server = new JolokiaMBeanServer();
+
+        ObjectName oName = new ObjectName("test:type=jsonMBean");
+
+        server.registerMBean(modelMBean,oName);
+        MBeanServer plattformServer = ManagementFactory.getPlatformMBeanServer();
+
+        Assert.assertTrue(plattformServer.isRegistered(oName));
+        Assert.assertTrue(server.isRegistered(oName));
+
+        server.unregisterMBean(oName);
+        Assert.assertFalse(plattformServer.isRegistered(oName));
+        Assert.assertFalse(server.isRegistered(oName));
+
+    }
 
     // ============================================================================================
 
