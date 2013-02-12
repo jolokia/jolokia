@@ -620,7 +620,7 @@
 
         // Escape a path part, can be used as a static method outside this function too
         Jolokia.prototype.escape = Jolokia.escape = function (part) {
-            return part.replace(/!/g, "!!").replace(/\//g, "!/");
+            return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"));
         };
 
         /**

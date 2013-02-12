@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
+      <action dev="roland" type="fix" date="2013-02-12" issue="64">
+        Fixed URI encoding for GET requests in the JavaScript client library.
+      </action>
       <action dev="roland" type="fix" date="2013-02-11">
         Added safety net for serialization, so that OutputStreams and Writers are never
         obtained from get-methods if they declare a subclass as return value. It happens e.g. for
@@ -52,6 +55,9 @@
         Fixed issues with GET requests and MBean ObjectNames which end with a "/".
         Added to integration tests to deal with these issues.
       </action>
+      <action dev="twhite" type="fix" date="2013-01-04">
+        Fixed timestamp in the Java client library's response.
+      </action>
       <action dev="roland" type="add" date="2012-12-30">
         New module "jolokia-spring" with Spring integration for the
         JVM agent has been added. It contains an own Spring
@@ -60,9 +66,6 @@
         dependency (works for containers which automatically lookup
         META-INF/spring/*.xml). Kudos to James Strachan for the
         initial idea.
-      </action>
-      <action dev="twhite" type="fix" date="2013-01-04">
-        Fixed timestamp in the Java client library's response.
       </action>
     </release>
     <release version="1.0.6" description="Release 1.0.6" date="2012-11-26">

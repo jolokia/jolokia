@@ -4,7 +4,7 @@
 # Workflow:
 # mvn clean install
 # sh makeLinks.sh
-# mvn jetty:war-exploded
+# mvn jetty:run-exploded
 
 cd target/
 dir=`ls -d jolokia-client* | grep -v .war`

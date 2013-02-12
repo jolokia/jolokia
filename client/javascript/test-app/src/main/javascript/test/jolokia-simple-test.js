@@ -103,8 +103,10 @@ $(document).ready(function() {
         equals(value, 1);
         value = j4p.execute("jolokia.it:type=operation", "overloadedMethod(java.lang.String,int)", "bla", 1);
         equals(value, 2);
-        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "bla,blub", "x");
-        equals(value, "bla");
+        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "Max\nMorlock,blub", "x", { method: "POST" });
+        equals(value, "Max\nMorlock");
+        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", [ "Max\nMorlock", "blub"], "x", { method: "POST"});
+        equals(value, "Max\nMorlock");
         value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null);
         equals(value, true);
         j4p.execute("jolokia.it:type=operation", "reset");

@@ -34,6 +34,10 @@ public interface AttributeCheckingMBean {
 
     String getString();
 
+    String getName();
+
+    void setName(String name);
+
     String getNull();
 
     long getBytes();

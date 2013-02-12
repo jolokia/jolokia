@@ -242,6 +242,22 @@ $(document).ready(function() {
                 { jsonp: true });
             }, "Must throw an ERROR");
         });
+
+        test("GET Write test with newlines", function() {
+            var value = "Max\nMorlock";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "Name", value: value},{method: "GET"});
+            equals(resp.status,200);
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "Name"});
+            equals(resp.value,value);
+        });
+
+        test("GET Exec test with newlines", function() {
+            var args = [ [ "Max\nMorlock", "dummy"] ,"extra"];
+            var resp = j4p.request({ type: "EXEC", mbean: "jolokia.it:type=operation", operation: "arrayArguments", arguments: args},{method: "GET"});
+            equals(resp.status,200);
+            equals(resp.value,"Max\nMorlock");
+        });
+
     }
 
     // ==========================================================================================

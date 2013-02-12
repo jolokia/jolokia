@@ -33,6 +33,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     private boolean state = false;
     private int idx = 0;
+    private String name = null;
     private String strings[] = {
             "Started",
             "Stopped"
@@ -100,6 +101,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public String getString() {
         return strings[idx++ % 2];
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getNull() {
