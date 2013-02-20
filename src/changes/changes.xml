@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
+      <action dev="roland" type="fix" date="2013-02-20" issue="66">
+        Added additional query parameters (serializeException, canonicalNaming and includeStacktrace)
+        to the set of allowed query parameters for the Java client lib.
+      </action>
       <action dev="roland" type="fix" date="2013-02-12" issue="64">
         Fixed URI encoding for GET requests in the JavaScript client library.
       </action>
