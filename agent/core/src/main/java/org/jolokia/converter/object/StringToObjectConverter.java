@@ -88,9 +88,22 @@ public class StringToObjectConverter {
         if (pValue == null) {
             return null;
         } else {
-            Object param = prepareForDirectUsage(pExpectedClassName, pValue);
+            Class expectedClass = ClassUtil.classForName(pExpectedClassName);
+            Object param = null;
+            if (expectedClass != null) {
+                if (Enum.class.isAssignableFrom(expectedClass)) {
+                    param = Enum.valueOf(expectedClass,pValue.toString());
+                } else {
+                    param = prepareForDirectUsage(expectedClass, pValue);
+                }
+            }
             if (param == null) {
                 // Ok, we try to convert it from a string
+                // If expectedClass is null, it is probably a native type, so we
+                // let happen the string conversion
+                // later on (e.g. conversion of pArgument.toString()) which will throw
+                // an exception at this point if conversion can not be done
+
                 return convertFromString(pExpectedClassName, pValue.toString());
             }
             return param;
@@ -132,14 +145,7 @@ public class StringToObjectConverter {
 
     // Check whether an argument can be used directly or whether it needs some sort
     // of conversion. Returns null if a string conversion should happen
-    private Object prepareForDirectUsage(String pExpectedClassName, Object pArgument) {
-        Class expectedClass = ClassUtil.classForName(pExpectedClassName);
-        if (expectedClass == null) {
-            // It is probably a native type, so we let happen the string conversion
-            // later on (e.g. conversion of pArgument.toString()) which will throw
-            // an exception at this point if conversion can not be done
-            return null;
-        }
+    private Object prepareForDirectUsage(Class expectedClass, Object pArgument) {
         Class givenClass = pArgument.getClass();
         if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
             return convertListToArray(expectedClass, (List) pArgument);

@@ -79,6 +79,9 @@ public final class ObjectToJsonConverter {
         // Special, well known objects
         addSimplifiers(handlers, pSimplifyHandlers);
 
+        // Enum handling
+        handlers.add(new EnumExtractor());
+
         // Special date handling
         handlers.add(new DateExtractor());
 

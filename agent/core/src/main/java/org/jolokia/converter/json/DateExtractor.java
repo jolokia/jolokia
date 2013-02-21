@@ -50,7 +50,7 @@ public class DateExtractor implements Extractor {
             String attribute = pExtraArgs.pop();
             if (!"time".equals(attribute)) {
                 throw new IllegalArgumentException("A date accepts only a single inner path element " +
-                                                           "of value 'time' (and not '" + attribute + "'");
+                                                   "of value 'time' (and not '" + attribute + "'");
             }
             return date.getTime();
         } else {
