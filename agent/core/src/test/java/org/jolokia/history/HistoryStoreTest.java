@@ -93,6 +93,17 @@ public class HistoryStoreTest {
         store.configure(new HistoryKey(req), null);
         assertEquals("History disabled",null,updateNTimesAsList(req,12));
     }
+
+    @Test
+    public void reconfigure() throws MalformedObjectNameException {
+        JmxExecRequest req =
+                new JmxRequestBuilder(EXEC,"test:type=exec")
+                        .operation("op")
+                        .build();
+
+        store.configure(new HistoryKey(req), new HistoryLimit(2, 100L));
+        store.configure(new HistoryKey(req), new HistoryLimit(2, 100L));
+    }
     
     @Test
     public void durationBasedEvicting() throws MalformedObjectNameException {
@@ -283,8 +294,18 @@ public class HistoryStoreTest {
 
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxEntries.*maxDuration.*")
-    public void invalidHistoryLimit() {
+     public void invalidHistoryLimit() {
         new HistoryLimit(0,0L);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxEntries.*")
+    public void invalidMaxEntriesHistoryLimit() {
+        new HistoryLimit(-1,0L);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxDuration.*")
+    public void invalidMaxDurationHistoryLimit() {
+        new HistoryLimit(0,-1L);
     }
 
     @Test
