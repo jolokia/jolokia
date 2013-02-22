@@ -67,6 +67,28 @@
       </ul>
     </subsection>
     <section name="News">
+      <subsection name="1.1.0 ">
+
+@JsonMBean
+
+Jolokia Spring integraton
+
+Refactoring 
+
+new processiong and configuration parameters:
+* serializeExceptions
+* canonicalNaming
+* includeStackTrace
+        
+hawt.io
+
+jmx4perl schulung
+
+github issues 
+
+Next stop: 2.0
+
+      </subsection>
       <subsection name="1.0.6 cosmetics">
         <div class="news-date">2012-11-23</div>
         <p>
@@ -236,42 +258,6 @@ jolokia.start(1000);</pre>
           single-page-application with an MBeanBrowser and a
           Dashboard. I'm still looking for helping hands, there is
           quite a lot to do here ;-)
-        </p>
-      </subsection>
-      <subsection name="1.0.2 released">
-        <div class="news-date">2012-01-06</div>
-        <p>
-          The first release of this year brings some updates and minor features:
-        </p>
-        <ul>
-          <li>The Java client library supports now using a JSR-160
-          proxy, too. The <a
-          href="reference/html/clients.html#client-java">reference
-          manual</a> tells you how to 
-          provide a proxy either as a default to a
-          <code>J4pClient</code> or per request.</li>
-
-          <li>A configuration parameter <code>mimeType</code> can be
-          either used in the global configuration or as request
-          parameter in order to explicitely set the mime type of the
-          returned JSON answer. By default this is <code>text/plain</code>,
-          but for some environments a mime type
-          <code>application/json</code> might be more
-          appropriate.</li>
-
-          <li>In case of an error on the server side, the Jolokia request
-          leading to this error is included into the response the same
-          way as it is done for successful responses.</li>
-          
-          <li>The Roo plugin has been updated for Roo 1.2 and the
-          Jolokia Javascript library has been tested with the latest
-          jQuery version 1.7.1</li>
-        </ul>
-        <p>
-          The complete changes are listed in the <a
-          href="changes-report.html">change log</a>. BTW, Jolokia is
-          available now on <a href="http://search.maven.org">Maven
-          central</a>, too. 
         </p>
       </subsection>
   </section>
