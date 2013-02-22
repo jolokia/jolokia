@@ -107,7 +107,7 @@ class HistoryEntry implements Serializable {
         }
 
         // Trim according to duration
-        if (limit.getMaxDuration() > 0) {
+        if (limit.getMaxDuration() > 0 && !values.isEmpty()) {
             long duration = limit.getMaxDuration();
             long start = values.getFirst().getTimestamp();
             while (start - values.getLast().getTimestamp() > duration) {

@@ -44,6 +44,12 @@ public class HistoryLimit implements Serializable {
         if (pMaxEntries == 0 && pMaxDuration == 0) {
             throw new IllegalArgumentException("Invalid limit, either maxEntries or maxDuration must be != 0");
         }
+        if (pMaxEntries < 0) {
+            throw new IllegalArgumentException("Invalid limit, maxEntries must be >= 0");
+        }
+        if (pMaxDuration < 0) {
+            throw new IllegalArgumentException("Invalid limit, maxDuration must be >= 0");
+        }
         maxEntries = pMaxEntries;
         maxDuration = pMaxDuration;
     }
