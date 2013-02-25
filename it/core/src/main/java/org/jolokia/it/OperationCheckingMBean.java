@@ -18,6 +18,7 @@ package org.jolokia.it;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author roland
@@ -62,4 +63,6 @@ public interface OperationCheckingMBean {
     public int sleep(int seconds) throws InterruptedException;
 
     public String echo(String pEcho);
+
+    TimeUnit findTimeUnit(TimeUnit unit);
 }

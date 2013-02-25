@@ -45,7 +45,7 @@ public interface RequestDispatcher {
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
 
     /**
-     * Check wether current dispatcher can handle the given request
+     * Check whether current dispatcher can handle the given request
      *
      * @param pJmxRequest request to check
      * @return true if this dispatcher can handle the request

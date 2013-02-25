@@ -35,12 +35,6 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-osgi</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-jmx</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -79,7 +73,6 @@
               org.osgi.framework;version="[1.0.0,2.0.0)",
               *
             </Import-Package>
-
           </instructions>
         </configuration>
       </plugin>

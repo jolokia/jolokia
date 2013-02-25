@@ -18,6 +18,7 @@ package org.jolokia.it;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.*;
 
@@ -145,5 +146,9 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
 
     public String echo(String pEcho) {
         return pEcho;
+    }
+
+    public TimeUnit findTimeUnit(TimeUnit unit) {
+        return unit;
     }
 }

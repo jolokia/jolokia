@@ -91,11 +91,7 @@ public class StringToObjectConverter {
             Class expectedClass = ClassUtil.classForName(pExpectedClassName);
             Object param = null;
             if (expectedClass != null) {
-                if (Enum.class.isAssignableFrom(expectedClass)) {
-                    param = Enum.valueOf(expectedClass,pValue.toString());
-                } else {
-                    param = prepareForDirectUsage(expectedClass, pValue);
-                }
+                param = prepareValue(expectedClass,pValue);
             }
             if (param == null) {
                 // Ok, we try to convert it from a string
@@ -110,6 +106,19 @@ public class StringToObjectConverter {
         }
     }
 
+    public Object prepareValue(Class expectedClass, Object pValue) {
+        if (pValue == null) {
+            return null;
+        }
+        if (expectedClass == null) {
+            throw new IllegalArgumentException("Internal Cannot set a value without a given type");
+        }
+        if (Enum.class.isAssignableFrom(expectedClass)) {
+            return Enum.valueOf(expectedClass,pValue.toString());
+        } else {
+            return prepareForDirectUsage(expectedClass, pValue);
+        }
+    }
 
     /**
      * For GET requests, where operation arguments and values to write are given in

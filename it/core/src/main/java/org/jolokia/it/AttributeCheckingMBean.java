@@ -98,4 +98,14 @@ public interface AttributeCheckingMBean {
 
 
     String getUtf8Content();
+
+    Chili getChili();
+
+    void setChili(Chili chili);
+
+    public static enum Chili {
+        JOLOKIA,
+        AJI,
+        FATALII
+    }
 }

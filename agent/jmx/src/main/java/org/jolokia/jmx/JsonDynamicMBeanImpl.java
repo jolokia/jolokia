@@ -253,6 +253,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
                 // Remember type for later conversion when setting an attribute
                 attributeInfoMap.put(aInfo.getName(), aInfo);
             }
+
             attrInfo[i] =
                     new MBeanAttributeInfo(
                             aInfo.getName(),
