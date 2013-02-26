@@ -103,9 +103,4 @@ public interface AttributeCheckingMBean {
 
     void setChili(Chili chili);
 
-    public static enum Chili {
-        JOLOKIA,
-        AJI,
-        FATALII
-    }
 }

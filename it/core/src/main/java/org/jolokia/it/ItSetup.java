@@ -139,13 +139,14 @@ public class ItSetup {
         try {
             return Arrays.asList(
                     registerMBean(pServer,new JsonChecking(),pDomain + ":type=plain"),
-                    registerMBean(pServer,new JsonChecking2(),pDomain + ":type=mx")
+                    registerMXBean(pServer, new JsonChecking2(), JsonChecking2MXBean.class, pDomain + ":type=mx")
                     );
         } catch (Exception e) {
             throw new RuntimeException("Error",e);
         }
 
     }
+
 
     private boolean hasMxBeanSupport() {
         return checkForClass("javax.management.MXBean") && ! checkForClass("org.jboss.mx.util.MBeanServerLocator");
@@ -178,6 +179,17 @@ public class ItSetup {
                 pServer.registerMBean(pObject,null).getObjectName();
         System.out.println("Registered " + registeredName);
         return registeredName;
+    }
+
+    // Needed, because the JBoss MBeanServer cannot parse MXBean interfaces
+    // Hence we wrap it with a StandardMBean
+    // See https://community.jboss.org/thread/167796 for details
+    private ObjectName registerMXBean(MBeanServer pServer, Object pObject, Class pManagementInterface, String pName) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
+        ObjectName objectName = new ObjectName(pName);
+        final StandardMBean mxBean = new StandardMBean(pObject, pManagementInterface, true /* MXBean */);
+        pServer.registerMBean(mxBean, objectName);
+        System.out.println("Registered MXBean " + objectName);
+        return objectName;
     }
 
     public List<String> getStrangeNames() {
