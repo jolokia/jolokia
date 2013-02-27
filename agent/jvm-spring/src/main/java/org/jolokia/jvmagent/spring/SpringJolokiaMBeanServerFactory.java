@@ -22,21 +22,30 @@ import org.jolokia.jmx.JolokiaMBeanServerUtil;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Factory bean for looking up the jolokia MBeanServer
+ * Simple Factory bean for looking up the jolokia MBeanServer
  *
  * @author roland
  * @since 11.02.13
  */
 public class SpringJolokiaMBeanServerFactory implements FactoryBean<MBeanServer> {
 
-    public MBeanServer getObject() throws Exception {
+    /**
+     * Get the Jolokia MBeanServer. This call is delegated to the corresponding
+     * static utility method and will register a new MBeanServer if not already
+     * present
+     *
+     * @return the Jolokia MBeanServer
+     */
+    public MBeanServer getObject() {
         return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
     }
 
+    /** {@inheritDoc} */
     public Class<?> getObjectType() {
         return MBeanServer.class;
     }
 
+    /** {@inheritDoc} */
     public boolean isSingleton() {
         return true;
     }

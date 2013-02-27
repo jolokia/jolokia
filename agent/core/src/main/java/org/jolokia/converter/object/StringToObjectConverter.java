@@ -106,12 +106,12 @@ public class StringToObjectConverter {
         }
     }
 
-    public Object prepareValue(Class expectedClass, Object pValue) {
+    // Extract a type version of the method above. This might be useful later
+    // on, e.g. when setting enums should be supported for certain
+    // use cases
+    private Object prepareValue(Class expectedClass, Object pValue) {
         if (pValue == null) {
             return null;
-        }
-        if (expectedClass == null) {
-            throw new IllegalArgumentException("Internal Cannot set a value without a given type");
         }
         if (Enum.class.isAssignableFrom(expectedClass)) {
             return Enum.valueOf(expectedClass,pValue.toString());

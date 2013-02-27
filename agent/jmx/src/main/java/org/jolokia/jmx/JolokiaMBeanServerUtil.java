@@ -47,6 +47,9 @@ public final class JolokiaMBeanServerUtil {
                     (MBeanServer) server.getAttribute(createObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME),
                                                       JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
         } catch (InstanceNotFoundException exp) {
+            // should be probably locked, but for simplicity reasons and because
+            // the probability of a clash is fairly low (can happen only once), it's omitted
+            // here. Note, that server.getAttribute() itself is threadsafe.
             jolokiaMBeanServer = registerJolokiaMBeanServerHolderMBean(server);
         } catch (JMException e) {
             throw new IllegalStateException("Internal: Cannot get JolokiaMBean server via JMX lookup: " + e,e);
