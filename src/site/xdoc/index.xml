@@ -28,6 +28,7 @@
           type="application/rss+xml" 
           title="Jolokia" 
           href="http://labs.consol.de/tags/jolokia/feed" />
+    <script type="text/javascript" src="js/flattr.js"></script>
   </head>
 
   <body>
@@ -44,6 +45,12 @@
       security policies. 
     </p>
     <subsection name="Starting points">
+      <div style="float:right; margin-right: 5px; margin-left: 5px">
+        <div style="float: right; margin-left: 5px; margin-right: 5px;">
+          <a class="FlattrButton" style="display:none; float: right;"
+             href="http://www.jolokia.org"></a> 
+        </div>
+      </div>        
       <ul>
         <li>
           Overview of <a href="features-nb.html">features</a> which
@@ -59,35 +66,81 @@
           platforms (JEE, OSGi, Mule, JVM).          
         </li>
         <li>
-          <a href="support.html">Support</a> channels are available in both <a
-          href="support.html#Your_Support_for_Jolokia">directions</a>.
-          You are also welcome to add to the <a
-          href="support.html#Source">evolution</a> of Jolokia.
+          <a href="support.html">Support</a> is available through various channels.
+        </li>
+        <li>
+          <a  href="support.html#Source">Contributions</a> are highly appreciated, too.
         </li>
       </ul>
+      <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
-      <subsection name="1.1.0 ">
-
-@JsonMBean
-
-Jolokia Spring integraton
-
-Refactoring 
-
-new processiong and configuration parameters:
-* serializeExceptions
-* canonicalNaming
-* includeStackTrace
-        
-hawt.io
-
-jmx4perl schulung
-
-github issues 
-
-Next stop: 2.0
-
+      <subsection name="1.1.0 is here">
+        <div class="news-date">2013-02-26</div>
+        <p>
+          It took some time, but I think it's worth. Along with the usual bug fix parade,
+          several new features has been added to Jolokia.
+        </p>
+        <p>
+          A new module<code>jolokia-spring</code> has been added which makes integration of Jolokia in
+          Spring applications even easier. Simply add the following (along with the corresponding namespace) to you
+          Spring application context and agent will be fired up during:
+        </p>
+        <pre class="prettyprint lang-xml"><![CDATA[<jolokia:agent>
+   <jolokia:config
+           autoStart="true"
+           host="0.0.0.0"
+           port="8778"
+   ....
+   />
+</jolokia:agent>]]></pre>
+        <p>
+          More details can be found in the <a href="reference/html/jmx.html#jvm-spring">reference manual</a>.
+        </p>
+        <p>
+          The new <code>jolokia-jmx</code> module provides an own MBeanServer which never gets exposed via
+          JSR-160. By registering your MBeans at the Jolokia MBeanServer you can make them exclusively available
+          for Jolokia without worrying about JSR-160 access e.g. via <code>jconsole</code>. However, if you annotate
+          your MBeans with <code>@JsonMBean</code> and register it at the Jolokia MBeanServer your get automatic
+          translation of complex data types to JSON even for JSR-160 connections:
+        </p>
+        <div>
+          <img src="images/jconsole-json-mbean.png"/>
+        </div>
+        <p>
+          The details can be found <a href="reference/html/jmx.html">here</a>.
+        </p>
+        <p>
+          Several new processing options enter the scene. This can be given either as global configuration parameters
+          or as query parameters:
+        </p>
+        <ul>
+          <li><strong>canonicalNaming</strong> influences the order of key properties in object names</li>
+          <li><strong>serializeExceptions</strong> adds a JSON representation of exceptions in an error case</li>
+          <li><strong>includeStackTrace</strong> can switch on/off the sending of an lengthy stack trace in an error case</li>
+        </ul>
+        <p>
+          That's it for now, all change are summarized as always in the <a href="change-report.html">change report</a>.
+        </p>
+        <p>Some other, more organizational stuff for now:</p>
+        <ul>
+          <li>
+            Bugtracking and feature requests switch over completely to <a href="https://github.com/rhuss/jolokia/issues">Github</a>.
+            Since I'm currently collecting features for 2.0, it's a good time for feature requests ;-). All ideas entered
+            at <a href="http://jolokia.idea.informer.com/">jolokia.idea.informer.com</a> has been transformed into Github issues.
+          </li>
+          <li>
+            If you are close to Germany it might be of interest to you, that I'm giving a training on Jolokia and Jmx4Perl,
+            with focus on Java Monitoring with Nagios. This will happen on 16./17.04.2013 in Munich, details can be
+            found on our <a href="http://www.consol.de/open-source-monitoring/schulungen/java-monitoring-mit-nagios/">web site</a>
+            (in german).
+          </li>
+        </ul>
+        <p>
+          And finally a very <strong>hot</strong> recommendation: Please have a look at <a href="http://hawt.io">hawt.io</a> a super cool
+          HTML5 console which uses Jolokia for backend communication exclusively. Most of the new ideas included in this
+          Jolokia release were inspired by discussions with James Strachan, one of the driving forces behind hawt. Thanks for that ;-)
+        </p>
       </subsection>
       <subsection name="1.0.6 cosmetics">
         <div class="news-date">2012-11-23</div>
@@ -175,7 +228,7 @@ Next stop: 2.0
         </p>
         <pre class="prettyprint lang-javascript">var jolokia = new Jolokia("http://localhost:8080/jolokia");
 
-// Register request along with callback printing out 
+          // Register request along with callback printing out
 // the heap memory usage
 jolokia.register(function(resp) {
    console.log("Memory: " + resp.value);

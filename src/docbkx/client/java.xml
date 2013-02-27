@@ -364,6 +364,39 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           or <literal>false</literal>. 
         </td>
       </tr>
+      <tr>
+        <td><constant>INCLUDE_STACKTRACE</constant></td>
+        <td>
+          Whether to include a stack trace in the response when an
+          error occurs.  The allowed values are
+          <literal>true</literal> for inclusion,
+          <literal>false</literal> if no stacktrace should be
+          included or <constant>runtime</constant> if only
+          <constant>RuntimeException</constant>s should be
+          included. Default is <literal>true</literal>.
+        </td>
+      </tr>
+      <tr>
+        <td><constant>SERIALIZE_EXCEPTION</constant></td>
+        <td>
+          Whether to include a JSON serialized version of the
+          exception. If set to <literal>true</literal>, the exception
+          is added under the key <constant>error_value</constant> in
+          the response. Default is <literal>false</literal>.
+        </td>
+      </tr>
+      <tr>
+        <td><constant>CANONICAL_NAMING</constant></td>
+        <td>
+          Whether property keys of <classname>ObjectNames</classname>
+          should be ordered in the canonical way or in the way that
+          they are created. The allowed values are either
+          <literal>true</literal> in which case the canonical key
+          order (== alphabetical sorted) is used or
+          <literal>false</literal> for getting the keys as
+          registered. Default is <literal>true</literal>
+        </td>
+      </tr>
     </table>
   </section>
 

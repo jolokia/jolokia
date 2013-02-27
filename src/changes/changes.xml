@@ -25,7 +25,7 @@
   <body>
     <release version="1.1.0-SNAPSHOT" description="Release 1.1.0-SNAPSHOT">
       <action dev="mjr5749" type="fix" date="2013-02-22" issue="67">
-        Fix a bug HistoryEntry.trim when the list of values is empty and max duration is > 0
+        Fix a bug HistoryEntry.trim() when the list of values is empty and max duration is > 0
       </action>
       <action dev="roland" type="add" date="2013-02-21">
         Added enums for serialization/deserialization. It's really surprising how long

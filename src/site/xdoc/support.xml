@@ -24,9 +24,7 @@
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
   <head>
-<script type="text/javascript" src="js/idea.js"></script>
-<script type="text/javascript" src="js/flattr.js"></script>
-<script type="text/javascript" language="JavaScript" src="http://widget.idea.informer.com/tabn2v3.js"></script><noscript><a href="http://jolokia.useridea.com">Feature Requests feedback</a> <a href="http://useridea.com"> Powered by <img src="http://widget.useridea.com/i/reformal_ru.png" /></a></noscript>
+    <script type="text/javascript" src="js/flattr.js"></script>
   </head>
   <body>
     <section name="Support">
@@ -62,23 +60,12 @@
             world. You can use this <a href="./irc.html">web chat</a> 
             for a quick contact.
           </dd>
-          <dt>Bug Reports</dt>
+          <dt>Bug Reports and Feature Requests</dt>
           <dd>
-            Jolokia uses GitHub's <a
+            Jolokia uses GitHub for <a
             href="http://github.com/rhuss/jolokia/issues">bug
-            tracker</a> for dealing with bugs. Please fill in any
-            issue you find.
-          </dd>
-          <dt>Feature Requests</dt>
-          <dd>
-            Feature Requests are collected via <a
-            href="http://jolokia.idea.informer.com/">jolokia.idea.informer.com</a>. They
-            can be added and voted for <a
-            href="javascript:MyOtziv.mo_show_box();">inline</a>,
-            too. Even if you don't have a new feature idea, please
-            have a look at the existing requests and vote for them if
-            you want to influence Jolokia's roadmap. We need your
-            feedback !
+            tracking</a> and release management. Please fill in any
+            issue you find or feature requests you have.
           </dd>
         </dl>
       </subsection>
@@ -182,6 +169,10 @@
       </p>
       </subsection>
       <subsection name="Your Support for Jolokia">
+        <div style="float:right; margin-right: 50px; margin-top: 20px;">
+          <a class="FlattrButton" style="display:none;"
+             href="http://www.jolokia.org"></a> 
+        </div>                
         <p>
           Jolokia is free software, released under the business friendly
           Apache License. That's mostly because I believe that open
@@ -191,36 +182,13 @@
           work. I love this.
         </p>
         <p>
-          You should probably stop reading here at this
-          point ;-)
+          Nevertheless, if you want to support the development of
+          Jolokia and you like this software you can <a
+          href="http://www.flattr.com">flattr</a> it.
         </p>
         <p>
-          Nevertheless, there's a way for financially supporting this
-          project. I have been asked for this possibility. Donations
-          will help keeping up the motivation for further enhancements
-          of Jolokia (and to honor the past development which took some
-          efforts). The motivation is high anyway, though.
         </p>
-        <p>
-          There are two possibilities: Either via a direct donation with <a href="http://pledgie.com/">Pledgie</a>
-          or via <a href="http://www.flattr.com">Flattr</a>, which is
-          a real new revolutionary way of
-          give-and-take and much fun, too. Enough said, here are the buttons:
-        </p>
-        <div align="center">
-          <div style="float:right; margin: 30px 150px 50px 100px;">
-            <a href='http://www.pledgie.com/campaigns/13618'
-               style="background: none; padding: 0"><img
-            alt='Click here to lend your support to: jolokia and make a donation at www.pledgie.com !'
-            src='http://www.pledgie.com/campaigns/13618.png?skin_name=chrome'
-            border='0' /></a>
-          </div>
-          <div style="float:right; margin-right: 50px; margin-top: 20px;">
-           <a class="FlattrButton" style="display:none;"
-              href="http://www.jolokia.org"></a> 
-          </div>        
-          <span style="clear: both;"></span>
-        </div>
+        <span style="clear: both;"></span>
       </subsection>
     </section>
   </body>

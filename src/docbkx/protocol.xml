@@ -142,7 +142,9 @@
           for escaping. Any other characted preceded by an exclamation
           mark is taken literally. Table <xref
           linkend="escape-rules"/> illustrates the escape rules as
-          used in GET requests.
+          used in GET requests. Also, if quotes are part of an GET
+          request the need to be escaped  with
+          <constant>!"</constant>. 
         </para>
         <table id="escape-rules">
           <title>Escaping rules</title>
@@ -158,7 +160,11 @@
           </tr>
           <tr>
             <td><constant>!!</constant></td>
-          <td><constant>!</constant></td>
+            <td><constant>!</constant></td>
+          </tr>
+          <tr>
+            <td><constant>!"</constant></td>
+            <td><constant>"</constant></td>
           </tr>
           <tr>
             <td><constant>!</constant><emphasis>(anything else)</emphasis></td>
@@ -189,6 +195,9 @@
           <informalexample>
             <literallayout class="monospaced">http://localhost:8080/jolokia?p=/read/jboss.jmx:alias=jmx%2Frmi%2FRMIAdaptor/State</literallayout>
           </informalexample>
+          This format <emphasis>must</emphasis> be used for GET
+          requests containing backslashes (<literal>\</literal>) since
+          backslashes can not be sent as part of an URL at all.          
         </para>
       </section>
 
@@ -597,6 +606,19 @@
               Object keys are <emphasis>always strings</emphasis>.
             </listitem>
             <listitem>
+              Enums are converted to their canonical name.<footnote id="enum-serial-jboss">
+              <para>
+                For JBoss older than version 7, there might be uses
+                when custom enums need to be serialized. In this case,
+                the type information must be available to the agent,
+                too. For the stantard PlatformMBeanServer
+                serialization should work always, regardless whether
+                the customer enum type is accessible by the agent or
+                not.
+              </para>
+            </footnote>
+            </listitem>
+            <listitem>
               <classname>javax.management.openmbean.CompositeData</classname>
               is converted in a JSON object, with the keys taken from
               the <classname>CompositeData</classname>'s key set and
@@ -619,7 +641,7 @@
               maps, see <xref linkend="serialization-mxbean"/>
             </listitem>
             <listitem>
-              <classname>java.lang.Class</classname> gets converted to
+              <classname>java.lang.Class</classname> is converted to
               a JSON object with keys <literal>name</literal> (the class
               name) and <literal>interfaces</literal> (the implemented
               interfaces, if any)
@@ -765,6 +787,8 @@
               <listitem>char</listitem>
               <listitem>Boolean / boolean</listitem>
               <listitem>Date</listitem>
+              <listitem>Enums (whose type is accessible to the agent,
+              see below)</listitem>
             </itemizedlist>
           </para>
           <para>
@@ -814,6 +838,16 @@
             to the MBean's signature. In case of an overflow
             (e.g. when trying to treat a long with a too large value
             as int), an exception is raised.
+          </para>
+          <para>
+            Enums can be converted from their canonical name. The
+            prerequisite for this is, that the Jolokia agent has
+            access to the Enum's class. This is true for all Enums
+            shipped with the JDK (like
+            <classname>TimeUnit</classname>). Custom enums can not be
+            used for upstream serialization by default since the
+            Jolokia Agent is not able to contruct an instance of it
+            because of missing type information.
           </para>
           <para>
             Upstream serialization also supports <ulink
@@ -1015,18 +1049,40 @@
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">6.1</emphasis>
+        protocol version <emphasis role="bold">7.0</emphasis>
       </para>
       <variablelist>
         <varlistentry>
           <term><emphasis role="bold">7.0</emphasis> (since 1.1.0)</term>
           <listitem>
             <para>
-              The <emphasis role="bold"><constant>maxDepth</constant></emphasis> parameter (either as processing
-              parameter or as configuration value) is now 1 based. I.e. 0 means always "no limit" (be careful with this,
-              though), 1 implies truncating the value on the first level for READ request. This was already true
-              for LIST requests and the other limit values (maxCollectionSize and maxObjects) so this change is used
-              in order to harmonize the overall behaviour with regard to limits.
+              The <emphasis
+              role="bold"><constant>maxDepth</constant></emphasis>
+              parameter (either as processing parameter or as
+              configuration value) is now 1 based. I.e. 0 means always
+              "no limit" (be careful with this, though), 1 implies
+              truncating the value on the first level for READ
+              request. This was already true for LIST requests and the
+              other limit values (maxCollectionSize and maxObjects) so
+              this change is used in order to harmonize the overall
+              behaviour with regard to limits.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Enums are now serialized downstream (full support)
+              and upstream (for type accessible to the agent).
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              New query parameter options
+              <constant>serializeException</constant> (for setting an
+              <constant>error_value</constant> in case of an
+              exception), <constant>canonicalNaming</constant>
+              (influences how object names are returned) and
+              <constant>includeStackTrace</constant> (for adding or
+              omitting stacktraces in error responses).
             </para>
           </listitem>
         </varlistentry>
