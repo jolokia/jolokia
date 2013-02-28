@@ -136,15 +136,17 @@ public class ItSetup {
     }
 
     private List<ObjectName> registerJsonMBeans(MBeanServer pServer, String pDomain) {
+        List<ObjectName> ret = new ArrayList<ObjectName>();
         try {
-            return Arrays.asList(
-                    registerMBean(pServer,new JsonChecking(),pDomain + ":type=plain"),
-                    registerMXBean(pServer, new JsonChecking2(), JsonChecking2MXBean.class, pDomain + ":type=mx")
-                    );
+            ret.add(registerMBean(pServer,new JsonChecking(),pDomain + ":type=plain"));
+            ret.add(registerMXBean(pServer, new JsonChecking2(), JsonChecking2MXBean.class, pDomain + ":type=mx"));
+            return ret;
         } catch (Exception e) {
             throw new RuntimeException("Error",e);
+        } catch (NoSuchMethodError e) {
+            // Happens for Java 5 .. will ignore it here
+            return ret;
         }
-
     }
 
 

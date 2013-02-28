@@ -41,21 +41,21 @@ Agents
 
   * JBoss 4.2.3, 5.1.0, 6.1.0, 7.0.2, 7.1.1
 
-  * Oracle WebLogic 9.2.3.0, 10.0.2.0, 10.3.5.0
+  * Oracle WebLogic 9.2.3.0, 10.0.2.0, 10.3.6.0
 
   * Glassfish 2.1.1, 3.0.1, 3.1.2
 
   * IBM Websphere 6.1.0.33, 7.0.0.11, 8.0.0.1
 
-  * Apache Tomcat 5.5.35, 6.0.35, 7.0.27
+  * Apache Tomcat 5.5.35, 6.0.35, 7.0.33
 
-  * Jetty 5.1.15, 6.1.26, 7.5.1, 8.0.1, 8.1.4
+  * Jetty 5.1.15, 6.1.26, 7.6.9, 8.1.9, 9.0.0.RC1
 
   * Resin 3.1.9
 
   * Jonas 4.10.7, 5.1.1, 5.2.1
 
-  * Apache Geronimo 2.1.6, 2.2.1, 3.0 M1
+  * Apache Geronimo 2.1.6, 2.2.1, 3.0.0
 
   * Spring dm Server 2.0.0.RELEASE
 
@@ -82,9 +82,11 @@ Agents
 
   The OSGi agent has been tested with the following containers:
 
-  * Felix 2.0.5, 3.0.8, 3.2.2, 4.0.0
+  * Felix 2.0.5, 3.0.8, 3.2.2, 4.2.0
 
-  * Equinox 3.5.2, 3.6.1, 3.7.1, 3.8 M2
+  * Equinox 3.5.2, 3.6.1, 3.7.1, 3.8.1
+
+  * Karaf 2.3.0
 
   * Virgo 2.1.0, 3.0.1
 

@@ -175,15 +175,18 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
             return (MBeanServer) server.getAttribute(holderMBeanName,"JolokiaMBeanServer");
         } catch (InstanceNotFoundException exp) {
             // Not yet available. Register for when it comes been available.
+
             MBeanServerNotificationFilter filter = new MBeanServerNotificationFilter();
             filter.enableObjectName(holderMBeanName);
             try {
-                server.addNotificationListener(MBeanServerDelegate.DELEGATE_NAME, this, filter, null);
+                server.addNotificationListener(getMBeanServerDelegateName(), this, filter, null);
             } catch (InstanceNotFoundException e) {
                 // Will not happen, since a delegate is always created during the creation
                 // of an MBeanServer
                 throw new IllegalStateException("Internal: Cannot lookup " +
-                                                MBeanServerDelegate.DELEGATE_NAME + ": " + e,e);
+                                                getMBeanServerDelegateName() + ": " + e,e);
+            } catch (NoSuchFieldError error) {
+                // Might happen e.g. on Java 1.5, which doesn't know about MBeanServerDelegate.DELEGATE_NAME ...
             }
             return null;
         } catch (JMException e) {
@@ -215,7 +218,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
     public void destroy() {
         try {
             MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            server.removeNotificationListener(MBeanServerDelegate.DELEGATE_NAME, this);
+            server.removeNotificationListener(getMBeanServerDelegateName(), this);
         } catch (InstanceNotFoundException e) {
             // Will not happen, since a delegate is always created during the creation
             // of an MBeanServer
@@ -233,5 +236,22 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      */
     public String getServersInfo() {
         return ServersInfo.dump(allMBeanServers);
+    }
+
+    // =====================================================================================================
+
+    // Lookup the server delegate name, which works for sure for Java 1.6 but maye not for Java 1.5
+    // JAVA15
+    private ObjectName getMBeanServerDelegateName() {
+        try {
+            return MBeanServerDelegate.DELEGATE_NAME;
+        } catch (NoSuchFieldError error) {
+            // For Java 1.5 we return the fixed name
+            try {
+                return new ObjectName("JMImplementation:type=MBeanServerDelegate");
+            } catch (MalformedObjectNameException e) {
+                throw new IllegalArgumentException("Internal: Server delegate object name could not be created");
+            }
+        }
     }
 }

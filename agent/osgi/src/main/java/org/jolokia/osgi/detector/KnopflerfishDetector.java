@@ -31,7 +31,7 @@ public class KnopflerfishDetector extends AbstractOsgiServerDetector {
      * @param pMBeanServerExecutor*/
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         // Probably a bit unspecific, but that's kopflerfish's fault
-        if (checkSystemBundleForSymbolicName("system.bundle")) {
+        if (checkSystemBundleForSymbolicName("org.knopflerfish.framework")) {
             String version = getSystemBundleVersion();
             return new ServerHandle("Knopflerfish","knopflerfish",version,null,null);
         } else {

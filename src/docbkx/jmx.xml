@@ -150,7 +150,8 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
       JSON format. This is true for attributes, operation return
       values and arguments. That way, a JSR-160 based console (like
       <command>jconsole</command>) can easily access complex data
-      type exposed by custom MBeans.
+      type exposed by custom MBeans. Json MBeans work for Java 6 and
+      newer. 
     </para>
     
     <figure id="fig-jconsole-json-mbean">
