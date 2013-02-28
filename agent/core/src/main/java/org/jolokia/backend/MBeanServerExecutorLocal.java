@@ -250,7 +250,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
             try {
                 return new ObjectName("JMImplementation:type=MBeanServerDelegate");
             } catch (MalformedObjectNameException e) {
-                throw new IllegalArgumentException("Internal: Server delegate object name could not be created");
+                throw new IllegalArgumentException("Internal: Server delegate object name could not be created",e);
             }
         }
     }
