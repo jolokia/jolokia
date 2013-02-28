@@ -84,10 +84,9 @@
         </p>
         <ul>
           <li>
-            Check for an open <a
-            href="javascript:MyOtziv.mo_show_box();">feature request</a>
-            you like or unresolved (and open) <a
-            href="http://github.com/rhuss/jolokia/issues">bug</a>.
+            Check for an open feature request
+            you like or open bug at <a
+            href="http://github.com/rhuss/jolokia/issues">GitHub</a>.
           </li>
           <li>
             Fork Jolokia by visiting the <a
