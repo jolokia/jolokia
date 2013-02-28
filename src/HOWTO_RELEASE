@@ -24,16 +24,17 @@ Check in and push
 # ========================================================================
 # Build release and deploy it on labs
 git clone git@github.com:rhuss/jolokia.git
+# Move .m2/repository temporarily away
 cd jolokia
 mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:prepare
 mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:perform
 
 # Copy assembly to labs:
-ssh jolokia@labs.consol.de mkdir -p www/dist/1.0.0/js
+ssh jolokia@labs.consol.de mkdir -p www/dist/1.x.0/js
 cd target/checkout/target
-scp *gz *zip jolokia@labs.consol.de:www/dist/1.0.0/
+scp *gz *zip jolokia@labs.consol.de:www/dist/1.x.0/
 cd ../client/javascript/target 
-scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/1.0.0/js/
+scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/1.x.0/js/
 cd ../../../../..
 
 # Deploy to Sonatype staging
