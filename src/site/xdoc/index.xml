@@ -75,7 +75,7 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
-      <subsection name="1.1.0 is here">
+      <subsection name="1.1.0 with Spring support and @JsonMBean">
         <div class="news-date">2013-02-26</div>
         <p>
           It took some time, but it was worth it. Along with the usual bug fix parade,
