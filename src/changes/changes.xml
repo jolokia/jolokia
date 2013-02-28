@@ -209,7 +209,7 @@
       </action>
     </release>
     <release version="1.0.1" description="Release 1.0.1" date="2011-10-31">
-      <action dev="senthilnest" type="fix" date="2011-10-29" issue="GIT-37">
+      <action dev="senthilnest" type="fix" date="2011-10-29" issue="37">
         Daemonized threads created by the thread pool for the JVM agent.
       </action>
       <action dev="roland" type="add" date="2011-10-18">
@@ -373,7 +373,7 @@
         as it was before.
       </action>
     </release>
-    <release version="0.83" description="Release 0.83" date="2001-02-19">
+    <release version="0.83" description="Release 0.83" date="2011-02-19">
       <action dev="roland" type="update" date="2011-02-15">
         Reference Manual updated with sections about the OSGi agent
         and the new Roo addon.
@@ -445,7 +445,7 @@
         to "jolokia:type=Config" for backwards compatibility with jmx4perl
         clients &lt; 0.80
       </action>
-      <action dev="roland" type="fix" date="2010-11-27" issue="GIT-14">
+      <action dev="roland" type="fix" date="2010-11-27" issue="14">
         Change HttpClient to a thread safe connection manager by default,
         extended J4pClient construction with a builder pattern
       </action>

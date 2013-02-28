@@ -78,13 +78,13 @@
       <subsection name="1.1.0 is here">
         <div class="news-date">2013-02-26</div>
         <p>
-          It took some time, but I think it's worth. Along with the usual bug fix parade,
+          It took some time, but it was worth it. Along with the usual bug fix parade,
           several new features has been added to Jolokia.
         </p>
         <p>
-          A new module<code>jolokia-spring</code> has been added which makes integration of Jolokia in
-          Spring applications even easier. Simply add the following (along with the corresponding namespace) to you
-          Spring application context and agent will be fired up during:
+          A new module <code>jolokia-spring</code> has been added which makes integration of Jolokia in
+          Spring applications even easier. Simply add the following line (along with the corresponding namespace) to you
+          application context and agent will be fired up during startup:
         </p>
         <pre class="prettyprint lang-xml"><![CDATA[<jolokia:agent>
    <jolokia:config
@@ -95,14 +95,18 @@
    />
 </jolokia:agent>]]></pre>
         <p>
-          More details can be found in the <a href="reference/html/jmx.html#jvm-spring">reference manual</a>.
+          More details can be found here in the <a href="reference/html/jmx.html#jvm-spring">reference manual</a>.
         </p>
         <p>
-          The new <code>jolokia-jmx</code> module provides an own MBeanServer which never gets exposed via
-          JSR-160. By registering your MBeans at the Jolokia MBeanServer you can make them exclusively available
-          for Jolokia without worrying about JSR-160 access e.g. via <code>jconsole</code>. However, if you annotate
-          your MBeans with <code>@JsonMBean</code> and register it at the Jolokia MBeanServer your get automatic
-          translation of complex data types to JSON even for JSR-160 connections:
+          The new <code>jolokia-jmx</code> module provides an own
+          MBeanServer which never gets exposed via JSR-160
+          remoting. By registering your MBeans at the Jolokia
+          MBeanServer you can make them exclusively available for
+          Jolokia without worrying about JSR-160 access e.g. via
+          <code>jconsole</code>. However, if you annotate your MBeans
+          with <code>@JsonMBean</code> and register it at the Jolokia
+          MBeanServer your get automatic translation of complex data
+          types to JSON even for JSR-160 connections:
         </p>
         <div>
           <img src="images/jconsole-json-mbean.png"/>
@@ -111,8 +115,9 @@
           The details can be found <a href="reference/html/jmx.html">here</a>.
         </p>
         <p>
-          Several new processing options enter the scene. This can be given either as global configuration parameters
-          or as query parameters:
+          Several new processing options enter the scene. These can be
+          given either as global configuration parameters or as query
+          parameters:
         </p>
         <ul>
           <li><strong>canonicalNaming</strong> influences the order of key properties in object names</li>
@@ -120,7 +125,7 @@
           <li><strong>includeStackTrace</strong> can switch on/off the sending of an lengthy stack trace in an error case</li>
         </ul>
         <p>
-          That's it for now, all change are summarized as always in the <a href="change-report.html">change report</a>.
+          That's it for now, all changes are summarized as always in the <a href="changes-report.html">change report</a>.
         </p>
         <p>Some other, more organizational stuff for now:</p>
         <ul>
@@ -131,7 +136,7 @@
           </li>
           <li>
             If you are close to Germany it might be of interest to you, that I'm giving a training on Jolokia and Jmx4Perl,
-            with focus on Java Monitoring with Nagios. This will happen on 16./17.04.2013 in Munich, details can be
+            with focus on Java Monitoring with Nagios. This will happen at 16./17.04.2013 in Munich, details can be
             found on our <a href="http://www.consol.de/open-source-monitoring/schulungen/java-monitoring-mit-nagios/">web site</a>
             (in german).
           </li>

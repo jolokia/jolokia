@@ -324,8 +324,8 @@
 
   <!-- ===========================================================  -->
   <issueManagement>
-    <system>JIRA</system>
-    <url>http://jolokia.jira.com</url>
+    <system>GitHub</system>
+    <url>https://github.com/rhuss/jolokia/issues/</url>
   </issueManagement>
 
   <scm>
