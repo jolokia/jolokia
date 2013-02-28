@@ -32,7 +32,7 @@
   </parent>
 
   <properties>
-    <roo.version>1.2.0.RELEASE</roo.version>
+    <roo.version>1.2.3.RELEASE</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jolokia.version>${project.version}</jolokia.version>
   </properties>
