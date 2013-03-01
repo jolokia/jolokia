@@ -1,5 +1,7 @@
 package org.jolokia.converter.object;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -77,6 +79,10 @@ public class StringToObjectConverterTest {
         assertEquals("Double conversion",10.5d,obj);
         obj = converter.convertFromString(double.class.getCanonicalName(),"21.3");
         assertEquals("double conversion",21.3d,obj);
+        obj = converter.convertFromString(BigDecimal.class.getCanonicalName(),"83.4e+4");
+        assertEquals("BigDecimal conversion", new BigDecimal("8.34e+5"), obj);
+        obj = converter.convertFromString(BigInteger.class.getCanonicalName(),"47110815471108154711");
+        assertEquals("BigInteger conversion", new BigInteger("47110815471108154711"), obj);
 
         obj = converter.convertFromString(Boolean.class.getCanonicalName(),"false");
         assertEquals("Boolean conversion",false,obj);
@@ -116,8 +122,8 @@ public class StringToObjectConverterTest {
 
     @Test
     public void enumConversion() {
-        ConfigKey key = (ConfigKey) converter.prepareValue(ConfigKey.class.getName(),"MAX_DEPTH");
-        assertEquals(key,ConfigKey.MAX_DEPTH);
+        ConfigKey key = (ConfigKey) converter.prepareValue(ConfigKey.class.getName(), "MAX_DEPTH");
+        assertEquals(key, ConfigKey.MAX_DEPTH);
     }
 
 

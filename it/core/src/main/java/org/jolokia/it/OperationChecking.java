@@ -16,6 +16,7 @@ package org.jolokia.it;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -105,6 +106,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
             return -1.0;
         }
         return arg1 + arg2;
+    }
+
+    public BigDecimal addBigDecimal(int first,BigDecimal second) {
+        return second.add(BigDecimal.valueOf(first));
     }
 
     public int overloadedMethod() {

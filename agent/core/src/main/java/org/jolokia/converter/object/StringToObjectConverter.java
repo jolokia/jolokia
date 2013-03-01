@@ -1,6 +1,8 @@
 package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 import javax.management.ObjectName;
@@ -52,6 +54,9 @@ public class StringToObjectConverter {
         PARSER_MAP.put("double",new DoubleParser());
         PARSER_MAP.put(Float.class.getName(),new FloatParser());
         PARSER_MAP.put("float",new FloatParser());
+        PARSER_MAP.put(BigDecimal.class.getName(),new BigDecimalParser());
+        PARSER_MAP.put(BigInteger.class.getName(),new BigIntegerParser());
+
         PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
         PARSER_MAP.put("boolean",new BooleanParser());
         PARSER_MAP.put("char",new CharParser());
@@ -289,6 +294,16 @@ public class StringToObjectConverter {
     private static class ShortParser implements Parser {
         /** {@inheritDoc} */
         public Object extract(String pValue) { return Short.parseShort(pValue); }
+    }
+
+    private static class BigDecimalParser implements Parser {
+        /** {@inheritDoc} */
+        public Object extract(String pValue) { return new BigDecimal(pValue); }
+    }
+
+    private static class BigIntegerParser implements Parser {
+        /** {@inheritDoc} */
+        public Object extract(String pValue) { return new BigInteger(pValue); }
     }
 
     private static class DateParser implements Parser {

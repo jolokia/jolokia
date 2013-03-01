@@ -16,6 +16,7 @@ package org.jolokia.it;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -65,4 +66,6 @@ public interface OperationCheckingMBean {
     public String echo(String pEcho);
 
     TimeUnit findTimeUnit(TimeUnit unit);
+
+    BigDecimal addBigDecimal(int first, BigDecimal second);
 }
