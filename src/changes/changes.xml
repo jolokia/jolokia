@@ -23,6 +23,15 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.1.1-SNAPSHOT" description="Release 1.1.1-SNAPSHOT">
+      <action dev="roland" type="fix" issue="76" date="2013-03-01">
+        Check whether the Jolokia MBeanServerHolder is registered in advance instead of relying on
+        an InstanceNotFoundException
+      </action>
+      <action dev="roland" type="add" issue="79" date="2013-03-01">
+        Added BigDecimal and BigInteger converters for input parameters
+      </action>
+    </release>
     <release version="1.1.0" description="Release 1.1.0" date="2013-02-28">
       <action dev="mjr5749" type="fix" date="2013-02-22" issue="67">
         Fix a bug HistoryEntry.trim() when the list of values is empty and max duration is > 0
