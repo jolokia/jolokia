@@ -75,16 +75,16 @@ $(document).ready(function() {
         var id2 = j4p.register(function(resp) {
             counter2++;
         },{ type: "EXEC", mbean: "java.lang:type=Memory", operation: "gc"});
-        j4p.start(200);
+        j4p.start(300);
         equals(j4p.jobs().length,2,"2 jobs registered");
         setTimeout(function() {
-            equals(counter1,3,"Req1 should be called 3 times");
-            equals(counter2,3,"Req2 should be called 3 times");
+            equals(counter1,3,"Req1 should be called 2 times");
+            equals(counter2,3,"Req2 should be called 2 times");
             j4p.unregister(id1);
             equals(j4p.jobs().length,1,"1 job remaining");
             setTimeout(function() {
-                equals(counter1,3,"Req1 stays at 3 times since it was unregistered");
-                equals(counter2,4,"Req2 should continue to be requested, now for 4 times");
+                equals(counter1,3,"Req1 stays at 2 times since it was unregistered");
+                equals(counter2,5,"Req2 should continue to be requested, now for 4 times");
                 j4p.unregister(id2);
                 equals(j4p.jobs().length,0,"No job remaining");
                 // Handles should stay stable, so the previous unregister of id1 should not change
@@ -93,11 +93,11 @@ $(document).ready(function() {
                 setTimeout(function() {
                     j4p.stop();
                     equals(counter1,3,"Req1 stays at 3 times since it was unregistered");
-                    equals(counter2,4,"Req2 stays at 4 times since it was unregistered");
+                    equals(counter2,5,"Req2 stays at 4 times since it was unregistered");
                     start();
                 },300);
-            },300);
-        },500)
+            },650);
+        },750)
     });
 
     asyncTest("Multiple requests",function() {

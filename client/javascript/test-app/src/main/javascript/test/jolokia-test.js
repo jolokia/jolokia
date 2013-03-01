@@ -42,6 +42,9 @@ $(document).ready(function() {
     // Advanced READ tests
     advancedReadTests();
 
+    // Testing the list functionality
+    listTest();
+
     // ==========================================================================================
 
     // Single Request Tests
@@ -311,17 +314,17 @@ $(document).ready(function() {
         module("Advanced READ");
         asyncTest("Multiple Attribute Read Request", function() {
             j4p.request(
-            { type: "READ", mbean: "java.lang:type=Memory", attribute: ["HeapMemoryUsage","NonHeapMemoryUsage"]},
-            {
-                success: function(response) {
-                    equals(response.request.type, "read", "Type must be read");
-                    ok(response.value != null, "Value must be set: " + JSON.stringify(response.value));
-                    ok(response.value.HeapMemoryUsage, "HeapMemoryUsage set");
-                    ok(response.value.HeapMemoryUsage.used, "HeapMemoryUsage.used set");
-                    ok(response.value.NonHeapMemoryUsage, "NonHeapMemoryUsage set");
-                    start();
-                }
-            });
+                { type: "READ", mbean: "java.lang:type=Memory", attribute: ["HeapMemoryUsage","NonHeapMemoryUsage"]},
+                {
+                    success: function(response) {
+                        equals(response.request.type, "read", "Type must be read");
+                        ok(response.value != null, "Value must be set: " + JSON.stringify(response.value));
+                        ok(response.value.HeapMemoryUsage, "HeapMemoryUsage set");
+                        ok(response.value.HeapMemoryUsage.used, "HeapMemoryUsage.used set");
+                        ok(response.value.NonHeapMemoryUsage, "NonHeapMemoryUsage set");
+                        start();
+                    }
+                });
         });
         asyncTest("All Attribute Read Request", function() {
             j4p.request(
@@ -353,6 +356,48 @@ $(document).ready(function() {
             });
         });
     }
+
+    // =================================================================================
+
+    function listTest() {
+        module("LIST");
+        asyncTest("List with maxDepth 1", function() {
+            j4p.request(
+                { type: "LIST" },
+                {
+                    maxDepth: 1,
+                    success: function(response) {
+                        equals(response.request.type, "list", "Type must be 'list'");
+                        ok(response.value != null, "Value must be set");
+                        for (var key in response.value) {
+                            equals(response.value[key],1,"List must be truncated");
+                        }
+                        start();
+                    }
+                });
+        });
+
+        asyncTest("List with maxDepth 2", function() {
+            j4p.request(
+                { type: "LIST" },
+                {
+                    maxDepth: 2,
+                    success: function(response) {
+                        equals(response.request.type, "list", "Type must be 'list'");
+                        ok(response.value != null, "Value must be set");
+                        for (var key1 in response.value) {
+                            for (var key2 in response.value[key1]) {
+                                equals(response.value[key1][key2],1);
+                            }
+                        }
+                        //log(response);
+                        start();
+                    }
+                });
+        });
+
+    }
+
 
     function log(response) {
         console.log(JSON.stringify(response));

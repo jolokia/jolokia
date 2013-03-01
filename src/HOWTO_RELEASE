@@ -39,7 +39,7 @@ cd ../../../../..
 
 # Deploy to Sonatype staging
 cd target/checkout
-mvn -Pdist deploy
+mvn -Pdist,roo deploy
 cd ../..
 
 # Release on central maven repo
