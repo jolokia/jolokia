@@ -53,6 +53,11 @@ public class JolokiaServerTest {
 
     }
 
+    @Test
+    public void serverPicksThePort() throws IOException, InterruptedException {
+        roundtrip("host=localhost,port=0",true);
+    }
+
 
     @Test
     public void ssl() throws IOException {
@@ -86,9 +91,14 @@ public class JolokiaServerTest {
     }
 
     private void roundtrip(String pConfig, boolean pDoRequest) throws IOException {
-        int port = EnvTestUtil.getFreePort();
         String c = pConfig != null ? pConfig + "," : "";
-        JvmAgentConfig config = new JvmAgentConfig(c + "host=localhost,port=" + port);
+        boolean portSpecified = c.contains("port=");
+        c = c + "host=localhost,";
+        if (!portSpecified) {
+            int port = EnvTestUtil.getFreePort();
+            c = c + "port=" + port;
+        }
+        JvmAgentConfig config = new JvmAgentConfig(c);
         JolokiaServer server = new JolokiaServer(config,false);
         server.start();
         //Thread.sleep(2000);
