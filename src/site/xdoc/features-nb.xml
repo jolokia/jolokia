@@ -71,7 +71,7 @@
               href="http://code.google.com/p/json-simple/">json-simple</a>
               for parsing requests and creating responses. Although
               the binary protocols (JRMP or IIOP) used by the standard
-              JSR-160 connectors are naturally much compacter than a
+              JSR-160 connectors are naturally much more compact than a
               textual representation like JSON and although they have
               some performance advantages, Jolokia balances this for
               many use cases with advanced features like bulk requests

@@ -40,7 +40,7 @@
         target server. The following diagrams gives an illustration of
         this setup.
       </p>
-      <div align="center" style="margin: 20px 0px;">
+      <div align="center" style="margin: 20px 120px;">
         <img src="../images/jolokia_proxy.png" alt="Proxy Mode"/>
       </div>
       <p>
