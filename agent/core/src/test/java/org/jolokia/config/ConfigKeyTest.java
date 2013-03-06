@@ -1,4 +1,4 @@
-package org.jolokia.util;
+package org.jolokia.config;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -19,8 +19,6 @@ package org.jolokia.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

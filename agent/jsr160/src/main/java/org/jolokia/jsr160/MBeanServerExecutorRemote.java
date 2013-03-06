@@ -41,6 +41,12 @@ class MBeanServerExecutorRemote extends AbstractMBeanServerExecutor {
     MBeanServerExecutorRemote(MBeanServerConnection pConnection) {
         serverConnections = new HashSet<MBeanServerConnection>();
         serverConnections.add(pConnection);
+
+        // We dont register for notifications since this a very
+        // short lived objects. So, for @link hasUpdatedSince()
+        // returns always true here. So be careful for now that
+        // there is no optimizations for JSR-160 connections yet.
+        // Should be added when pooling is implemented.
     }
 
     /** {@inheritDoc} */

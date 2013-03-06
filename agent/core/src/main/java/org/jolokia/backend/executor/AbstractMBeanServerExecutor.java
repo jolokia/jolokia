@@ -21,13 +21,18 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.util.JmxUtil;
+
 /**
  * Base class for providing access to the list of MBeanServer handled by this agent.
  *
  * @author roland
  * @since 22.01.13
  */
-public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor {
+public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor, NotificationListener {
+
+    // Timestamp of last MBeanServer change in milliseconds
+    private long lastMBeanServerChange;
 
     /**
      * Get all MBeanServers
@@ -53,7 +58,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             Set<ObjectName> visited = new HashSet<ObjectName>();
             for (MBeanServerConnection server : getMBeanServers()) {
                 // Query for a full name is the same as a direct lookup
-                for (ObjectName nameObject : server.queryNames(pObjectName,null)) {
+                for (ObjectName nameObject : server.queryNames(pObjectName, null)) {
                     // Don't add if already visited previously
                     if (!visited.contains(nameObject)) {
                         pCallback.callback(server, nameObject);
@@ -110,4 +115,76 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
         return names;
     }
 
+    /**
+     * Add this executor as listener for MBeanServer notification so that we can update
+     * the local timestamp for when the set of registered MBeans has changed last.
+     *
+     * @throws IOException
+     * @throws InstanceNotFoundException
+     */
+    protected void registerForMBeanNotifications() {
+        Set<MBeanServerConnection> servers = getMBeanServers();
+        Exception lastExp = null;
+        StringBuilder errors = new StringBuilder();
+        for (MBeanServerConnection server : servers) {
+            try {
+                JmxUtil.addMBeanRegistrationListener(server,this,null);
+            } catch (IllegalStateException e) {
+                lastExp = updateErrorMsg(errors,e);
+            }
+        }
+        if (lastExp != null) {
+            throw new IllegalStateException(errors.substring(0,errors.length()-1),lastExp);
+        }
+    }
+
+    /**
+     * Deregister ourself as listener from every registered server
+     */
+    public void destroy() {
+        Set<MBeanServerConnection> servers = getMBeanServers();
+        Exception lastExp = null;
+        StringBuilder errors = new StringBuilder();
+        for (MBeanServerConnection server : servers) {
+            try {
+                JmxUtil.removeMBeanRegistrationListener(server,this);
+            } catch (IllegalStateException e) {
+                lastExp = updateErrorMsg(errors, e);
+            }
+        }
+        if (lastExp != null) {
+            throw new IllegalStateException(errors.substring(0,errors.length()-1),lastExp);
+        }
+    }
+
+    private Exception updateErrorMsg(StringBuilder pErrors, Exception exp) {
+        pErrors.append(exp.getClass()).append(": ").append(exp.getMessage()).append("\n");
+        return exp;
+    }
+
+    /** {@inheritDoc} */
+    // Remember current timestamp
+    public void handleNotification(Notification pNotification, Object pHandback) {
+        // Update timestamp
+        lastMBeanServerChange = System.currentTimeMillis();
+    }
+
+    /**
+     * Check whether the set of MBeans in all managed MBeanServer has been changed
+     * since the given time. The input is the epoch time in seconds, however, milliseconds
+     * would be much more appropriate. However, the Jolokia responses contain
+     * currently time measured in seconds. This should be changed in a future version,
+     * but this implies a quite heavy API changed (and if this is changed, the key 
+     * "timestamp" should be changed to "time", too, in order to fail early in case of
+     * problems).
+     *
+     * In order to avoid inconsistencies for sub-second updates, we are comparing
+     * conservatively (so hasBeenUpdated might return "true" more often than required).
+     *
+     * @param pTimestamp seconds since 1.1.1970
+     * @return true if the MBeans has been updated since this time, false otherwise
+     */
+    public boolean hasBeenUpdatedSince(long pTimestamp) {
+        return (lastMBeanServerChange / 1000) >= pTimestamp;
+    }
 }

@@ -80,6 +80,12 @@ public interface MBeanServerExecutor {
     Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException;
 
     /**
+     * Destructor method. After this method has been called, this executor is out of service and
+     * must not be used anymore
+     */
+    void destroy();
+
+    /**
      * This callback is used together with {@link #each(ObjectName, MBeanEachCallback)} for iterating over all
      * active MBeanServers. The callback is responsible on its own to collect the information queried.
      */

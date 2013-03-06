@@ -119,6 +119,15 @@ public enum ConfigKey {
      */
     MIME_TYPE("mimeType", true, true, "text/plain"),
 
+    /**
+     * For LIST requests, this option can be used to return
+     * the result only if they set of registered MBeans has
+     * been changed since the timestamp given in this option.
+     * The timestamp has to be given in seconds since 1.1.1970
+     * (epoch time).
+     */
+    IF_MODIFIED_SINCE("ifModifiedSince",false,true),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 

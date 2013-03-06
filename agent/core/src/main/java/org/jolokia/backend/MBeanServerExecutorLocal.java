@@ -17,17 +17,14 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.*;
 
 import javax.management.*;
-import javax.management.relation.MBeanServerNotificationFilter;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.util.ServersInfo;
 
 /**
  * Singleton responsible for doing the merging of all MBeanServer detected.
@@ -45,14 +42,8 @@ import org.jolokia.util.ServersInfo;
  */
 public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implements NotificationListener {
 
-    // Private Jolokia MBeanServer
-    private MBeanServer jolokiaMBeanServer;
-
-    // Set of detected MBeanSevers
-    private Set<MBeanServerConnection> mBeanServers;
-
-    // All MBeanServers including the JolokiaMBeanServer
-    private Set<MBeanServerConnection> allMBeanServers;
+    // Set of MBeanServers found
+    private MBeanServers mbeanServers;
 
     /**
      * Constructor with a given list of destectors
@@ -88,33 +79,11 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      */
     private synchronized void init(List<ServerDetector> pDetectors) {
 
-        // Check for JBoss MBeanServer via its utility class
-        mBeanServers = new LinkedHashSet<MBeanServerConnection>();
+        // Create the MBeanServerList
+        mbeanServers = new MBeanServers(pDetectors,this);
 
-        // Create and add our own JolokiaMBeanServer first and
-        // add us for registration/deregestration of the MBeanServer
-        jolokiaMBeanServer = lookupJolokiaMBeanServer();
-        addMBeanServerNotificationHandler();
-
-        // Let every detector add its own MBeanServer
-        for (ServerDetector detector : pDetectors) {
-            detector.addMBeanServers(mBeanServers);
-        }
-
-        // All MBean Server known by the MBeanServerFactory
-        List<MBeanServer> beanServers = MBeanServerFactory.findMBeanServer(null);
-        if (beanServers != null) {
-            mBeanServers.addAll(beanServers);
-        }
-
-        // Last entry is always the platform MBeanServer
-        mBeanServers.add(ManagementFactory.getPlatformMBeanServer());
-
-        allMBeanServers = new LinkedHashSet<MBeanServerConnection>();
-        if (jolokiaMBeanServer != null) {
-            allMBeanServers.add(jolokiaMBeanServer);
-        }
-        allMBeanServers.addAll(mBeanServers);
+        // Register for registers/deregister of MBean changes in order to update lastUpdateTime
+        registerForMBeanNotifications();
     }
 
     /**
@@ -129,7 +98,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * @throws AttributeNotFoundException
      * @throws InstanceNotFoundException
      */
-    public Object handleRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
+    public <R extends JmxRequest> Object handleRequest(JsonRequestHandler<R> pRequestHandler, R pJmxReq)
             throws MBeanException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
@@ -153,55 +122,12 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
         throw objNotFoundException;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected Set<MBeanServerConnection> getMBeanServers() {
-        return allMBeanServers;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected MBeanServerConnection getJolokiaMBeanServer() {
-        return jolokiaMBeanServer;
-    }
-
-    // ==========================================================================================
-
-    // Check, whether the Jolokia MBean Server is available and return it.
-    private MBeanServer lookupJolokiaMBeanServer() {
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        try {
-            ObjectName oName = new ObjectName("jolokia:type=MBeanServer");
-            return server.isRegistered(oName) ?
-                    (MBeanServer) server.getAttribute(oName,"JolokiaMBeanServer") :
-                    null;
-        } catch (JMException e) {
-            throw new IllegalStateException("Internal: Cannot get Jolokia MBeanServer via JMX lookup: " + e,e);
-        }
-    }
-
-    /**
-     * Fetch Jolokia MBeanServer when it gets registered
-     *
-     * @param notification notification emitted
-     * @param handback not used here
-     */
-    public synchronized void handleNotification(Notification notification, Object handback) {
-        if (MBeanServerNotification.REGISTRATION_NOTIFICATION.equals(notification.getType())) {
-            jolokiaMBeanServer = lookupJolokiaMBeanServer();
-        } else if (MBeanServerNotification.UNREGISTRATION_NOTIFICATION.equals(notification.getType())) {
-            jolokiaMBeanServer = null;
-        }
-        allMBeanServers.clear();
-        allMBeanServers.add(jolokiaMBeanServer);
-        allMBeanServers.addAll(mBeanServers);
-    }
-
     /**
      * Lifecycle method called at the end of life for this object.
      */
     public void destroy() {
-        removeMBeanServerNotificationListener();
+        super.destroy();
+        mbeanServers.destroy();
     }
 
     /**
@@ -210,56 +136,22 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * @return string representation of the servers along with some statistics.
      */
     public String getServersInfo() {
-        return ServersInfo.dump(allMBeanServers);
+        return mbeanServers.dump();
     }
 
-    // =====================================================================================================
+    // ==============================================================================
 
-    // Register this executor as notification listener for the JolokiaMBeanServer at the PlatformMBeanServer
-    private void addMBeanServerNotificationHandler() {
-        MBeanServerNotificationFilter filter = new MBeanServerNotificationFilter();
-        try {
-            filter.enableObjectName(new ObjectName("jolokia:type=MBeanServer"));
-            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            server.addNotificationListener(getMBeanServerDelegateName(), this, filter, null);
-        } catch (InstanceNotFoundException e) {
-            // Will not happen, since a delegate is always created during the creation
-            // of an MBeanServer
-            throw new IllegalStateException("Internal: Cannot lookup " +
-                                            getMBeanServerDelegateName() + ": " + e,e);
-        } catch (MalformedObjectNameException e) {
-            // How I hate this MalformedObjectNameException to be a checked one. Probably the one biggest mistake
-            // in JMX ...
-            throw new IllegalStateException("Internal: jolokia:type=MBeanServer is invalid ?!? ");
-        }
+    /** {@inheritDoc} */
+    @Override
+    protected Set<MBeanServerConnection> getMBeanServers() {
+        return mbeanServers.getMBeanServers();
     }
 
-    // Unregister as listener for MBeanServer registrations
-    private void removeMBeanServerNotificationListener() {
-        try {
-            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            server.removeNotificationListener(getMBeanServerDelegateName(), this);
-        } catch (InstanceNotFoundException e) {
-            // Will not happen, since a delegate is always created during the creation
-            // of an MBeanServer
-            throw new IllegalStateException("Internal: Cannot lookup " + MBeanServerDelegate.DELEGATE_NAME + ": " + e,e);
-        } catch (ListenerNotFoundException e) {
-            // Ignored, but we tried it.
-        }
-    }
-
-    // Lookup the server delegate name, which works for sure for Java 1.6 but maye not for Java 1.5
-    // JAVA15
-    private ObjectName getMBeanServerDelegateName() {
-        try {
-            return MBeanServerDelegate.DELEGATE_NAME;
-        } catch (NoSuchFieldError error) {
-            // For Java 1.5 we return the fixed name
-            try {
-                return new ObjectName("JMImplementation:type=MBeanServerDelegate");
-            } catch (MalformedObjectNameException e) {
-                throw new IllegalArgumentException("Internal: Server delegate object name could not be created",e);
-            }
-        }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected MBeanServerConnection getJolokiaMBeanServer() {
+        return mbeanServers.getJolokiaMBeanServer();
     }
 }

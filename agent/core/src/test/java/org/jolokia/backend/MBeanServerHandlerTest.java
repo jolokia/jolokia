@@ -115,8 +115,6 @@ public class MBeanServerHandlerTest {
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
 
-        Object result = new Object();
-
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(reqHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andThrow(new IOException());
         replay(reqHandler);
@@ -152,41 +150,6 @@ public class MBeanServerHandlerTest {
         assertTrue(result.contains(Boolean.TRUE), "MBean not registered");
     }
 
-    @Test
-    public void mbeanRegistrationWithFailingTestDetector() throws JMException, IOException {
-        TestDetector.setThrowAddException(true);
-        // New setup because detection happens at construction time
-        setup();
-        try {
-            ObjectName oName = new ObjectName(handler.getObjectName());
-            MBeanServerExecutor servers = handler.getMBeanServerManager();
-            final List<Boolean> results = new ArrayList<Boolean>();
-            servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
-                public void callback(MBeanServerConnection pConn, ObjectName pName)
-                        throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                    results.add(pConn.isRegistered(pName));
-                }
-            });
-            assertTrue(results.contains(Boolean.TRUE),"MBean not registered");
-        } finally {
-            TestDetector.setThrowAddException(false);
-            tearDown();
-        }
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not register.*")
-    public void mbeanRegistrationFailed() throws JMException {
-        TestDetector.setThrowAddException(true);
-        // New setup because detection happens at construction time
-        setup();
-        try {
-            handler.registerMBean(new Dummy(true,"test:type=dummy"));
-        } finally {
-            TestDetector.setThrowAddException(false);
-            tearDown();
-        }
-    }
-
     @Test(expectedExceptions = InstanceNotFoundException.class)
     public void mbeanUnregistrationFailed1() throws JMException {
         handler.registerMBean(new Dummy(false, "test:type=dummy"));
@@ -209,19 +172,11 @@ public class MBeanServerHandlerTest {
         assertNotNull(handle);
     }
 
-
-    @Test
-    public void fallThrough() throws JMException {
-        TestDetector.setFallThrough(true);
-        setup();
-        try {
-            ServerHandle handle = handler.getServerHandle();
-            assertNull(handle.getProduct());
-        } finally {
-            TestDetector.setFallThrough(false);
-            tearDown();
-        }
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not register.*")
+    public void mbeanRegistrationFailed() throws JMException {
+        handler.registerMBean(new Dummy(true,"test:type=dummy"));
     }
+
 
     // ===================================================================================================
 
