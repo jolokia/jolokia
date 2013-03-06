@@ -127,6 +127,8 @@ public class ItSetup {
             if (hasMxBeanSupport()) {
                 ret.add(registerMBean(pServer, new MxBeanSample(), isWebsphere ? null : pDomain + ":type=mxbean"));
             }
+            // Tabular Data MBean
+            ret.add(registerMBean(pServer, new TabularMBean(), pDomain + ":type=tabularData"));
         } catch (RuntimeException e) {
             throw new RuntimeException("Error",e);
         } catch (Exception exp) {

@@ -160,7 +160,7 @@ public class TabularDataExtractor implements Extractor {
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
         if (indexNames.size() > pPathStack.size()) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             for (int i = 0; i < indexNames.size(); i++) {
                 buf.append(indexNames.get(i));
                 if (i < indexNames.size() - 1) {
@@ -172,19 +172,23 @@ public class TabularDataExtractor implements Extractor {
         }
         Object keys[] = new Object[indexNames.size()];
         CompositeType rowType = type.getRowType();
-        for (int i = indexNames.size() - 1; i >= 0; i--) {
-            // Maybe even convert to proper typs. For now it is assumed,
-            // that every key is of type string and an exception is thrown
-            // if this is not the case.
-            OpenType keyType = rowType.getType(indexNames.get(i));
-            if (SimpleType.STRING != keyType) {
-                throw new IllegalArgumentException("All keys must be a string type for accessing TabularData via a path. " +
-                                                   "This is not the case for '"
-                                                   + indexNames.get(i) + "' which is of type " + keyType);
-            }
+        for (int i = 0; i < indexNames.size(); i++) {
+            validateRowType(rowType, indexNames.get(i));
             keys[i] = pPathStack.pop();
         }
         return pTd.get(keys);
+    }
+
+    // Maybe even convert to proper types. For now it is assumed,
+    // that every key is of type string and an exception is thrown
+    // if this is not the case.
+    private void validateRowType(CompositeType rowType, String key) {
+        OpenType keyType = rowType.getType(key);
+        if (SimpleType.STRING != keyType) {
+            throw new IllegalArgumentException("All keys must be a string type for accessing TabularData via a path. " +
+                                               "This is not the case for '"
+                                               + key + "' which is of type " + keyType);
+        }
     }
 
     private Object convertMxBeanMapToJson(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)

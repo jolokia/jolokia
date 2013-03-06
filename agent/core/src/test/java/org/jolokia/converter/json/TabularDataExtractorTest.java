@@ -17,6 +17,7 @@ package org.jolokia.converter.json;
  */
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
@@ -193,6 +194,7 @@ public class TabularDataExtractorTest {
                 extra.push(p);
             }
         }
+        Collections.reverse(extra);
         return extractor.extractObject(converter,pValue,extra,pJson);
     }
 }
