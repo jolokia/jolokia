@@ -11,7 +11,7 @@ import javax.management.relation.MBeanServerNotificationFilter;
  * @author roland
  * @since 05.03.13
  */
-public class JmxUtil {
+public final class JmxUtil {
 
     // Utility class with static methods
     private JmxUtil() {}
@@ -26,7 +26,7 @@ public class JmxUtil {
         try {
             return new ObjectName(pName);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid object name " + pName);
+            throw new IllegalArgumentException("Invalid object name " + pName,e);
         }
     }
 
