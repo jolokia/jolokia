@@ -25,6 +25,7 @@ import javax.naming.Context;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
@@ -69,7 +70,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
      * @throws IOException
      */
     public Object dispatchRequest(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);

@@ -32,7 +32,7 @@ import org.jolokia.util.JmxUtil;
 public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor, NotificationListener {
 
     // Timestamp of last MBeanServer change in milliseconds
-    private long lastMBeanServerChange;
+    private long lastMBeanRegistrationChange;
 
     /**
      * Get all MBeanServers
@@ -118,9 +118,6 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     /**
      * Add this executor as listener for MBeanServer notification so that we can update
      * the local timestamp for when the set of registered MBeans has changed last.
-     *
-     * @throws IOException
-     * @throws InstanceNotFoundException
      */
     protected void registerForMBeanNotifications() {
         Set<MBeanServerConnection> servers = getMBeanServers();
@@ -139,7 +136,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     }
 
     /**
-     * Deregister ourself as listener from every registered server
+     * Unregister us as listener from every registered server
      */
     public void destroy() {
         Set<MBeanServerConnection> servers = getMBeanServers();
@@ -157,34 +154,21 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
         }
     }
 
-    private Exception updateErrorMsg(StringBuilder pErrors, Exception exp) {
-        pErrors.append(exp.getClass()).append(": ").append(exp.getMessage()).append("\n");
-        return exp;
-    }
-
     /** {@inheritDoc} */
     // Remember current timestamp
     public void handleNotification(Notification pNotification, Object pHandback) {
         // Update timestamp
-        lastMBeanServerChange = System.currentTimeMillis();
+        lastMBeanRegistrationChange = System.currentTimeMillis();
     }
 
-    /**
-     * Check whether the set of MBeans in all managed MBeanServer has been changed
-     * since the given time. The input is the epoch time in seconds, however, milliseconds
-     * would be much more appropriate. However, the Jolokia responses contain
-     * currently time measured in seconds. This should be changed in a future version,
-     * but this implies a quite heavy API changed (and if this is changed, the key 
-     * "timestamp" should be changed to "time", too, in order to fail early in case of
-     * problems).
-     *
-     * In order to avoid inconsistencies for sub-second updates, we are comparing
-     * conservatively (so hasBeenUpdated might return "true" more often than required).
-     *
-     * @param pTimestamp seconds since 1.1.1970
-     * @return true if the MBeans has been updated since this time, false otherwise
-     */
-    public boolean hasBeenUpdatedSince(long pTimestamp) {
-        return (lastMBeanServerChange / 1000) >= pTimestamp;
+    /** {@inheritDoc} */
+    public boolean hasMBeansListChangedSince(long pTimestamp) {
+        return (lastMBeanRegistrationChange / 1000) >= pTimestamp;
+    }
+
+    // Helper method for adding the exception for an appropriate error message
+    private Exception updateErrorMsg(StringBuilder pErrors, Exception exp) {
+        pErrors.append(exp.getClass()).append(": ").append(exp.getMessage()).append("\n");
+        return exp;
     }
 }

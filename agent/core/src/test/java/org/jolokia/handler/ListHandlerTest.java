@@ -25,6 +25,7 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.MBeanServerExecutorLocal;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -227,7 +228,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         execute(request);
     }
 
-    private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
+    private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         return (Map) handler.handleRequest(executor, pRequest);
     }
 
@@ -248,7 +249,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException {
+    public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "attr")
                 .build();
@@ -264,7 +265,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
-    public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException {
+    public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("bullerbue", "country=sweden")
                 .build();

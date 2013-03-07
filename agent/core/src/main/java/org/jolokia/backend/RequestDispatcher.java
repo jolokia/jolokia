@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequest;
 
 /*
@@ -42,7 +43,7 @@ public interface RequestDispatcher {
      * @throws MBeanException
      */
     Object dispatchRequest(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
 
     /**
      * Check whether current dispatcher can handle the given request

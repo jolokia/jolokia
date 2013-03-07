@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.Configuration;
 import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.Converters;
@@ -62,31 +63,31 @@ public class Jsr160RequestDispatcherTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", procParams));
     }
 
     @Test(expectedExceptions = IOException.class)
-    public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxRequest req = preparePostReadRequest(null);
         getOriginalDispatcher().dispatchRequest(req);
     }
 
     @Test
-    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxReadRequest req = (JmxReadRequest) preparePostReadRequest(null);
         Map result = (Map) dispatcher.dispatchRequest(req);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
     @Test
-    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
         assertNotNull(dispatcher.dispatchRequest(req));
     }
 
     @Test
-    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JmxRequest req = preparePostReadRequest("roland");

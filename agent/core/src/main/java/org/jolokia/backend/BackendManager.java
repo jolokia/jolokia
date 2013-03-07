@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
@@ -144,11 +145,21 @@ public class BackendManager {
         if (debug) {
             time = System.currentTimeMillis();
         }
-        JSONObject json = callRequestDispatcher(pJmxReq);
+        JSONObject json = null;
+        try {
+            json = callRequestDispatcher(pJmxReq);
 
-        // Update global history store
-        historyStore.updateAndAdd(pJmxReq,json);
-        json.put("status",200 /* success */);
+            // Update global history store, add timestamp and possibly history information to the request
+            historyStore.updateAndAdd(pJmxReq,json);
+            json.put("status",200 /* success */);
+        } catch (NotChangedException exp) {
+            // A handled indicates that its value hasn't changed. We return an status with
+            //"304 Not Modified" similar to the HTTP status code (http://en.wikipedia.org/wiki/HTTP_status)
+            json = new JSONObject();
+            json.put("request",pJmxReq.toJSON());
+            json.put("status",304);
+            json.put("timestamp",System.currentTimeMillis() / 1000);
+        }
 
         if (debug) {
             debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
@@ -368,7 +379,7 @@ public class BackendManager {
 
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         Object retValue = null;
         boolean useValueWithPath = false;
         boolean found = false;

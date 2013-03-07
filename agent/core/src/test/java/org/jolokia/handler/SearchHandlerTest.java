@@ -21,6 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -49,7 +50,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         handler.handleRequest((MBeanServerConnection) null,
                               new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JmxSearchRequest>build());
     }
@@ -60,7 +61,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         List<String> res = doSearch("java.lang:*", null, "java.lang:type=Memory", "java.lang:type=Runtime");
         assertEquals(res.size(), 2);
         assertTrue(res.contains("java.lang:type=Memory"));
@@ -70,7 +71,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
 
     @Test
-    public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         String attr = "java.lang:type=\"m:e*m\\\"?o\\\\y\\n\"";
         List<String> res = doSearch("java.lang:*", null, attr);
         assertEquals(res.size(),1);
@@ -79,7 +80,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         List<String> res = doSearch("java.lang:*", "true", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:name=bla,type=Memory"));
@@ -88,7 +89,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         List<String> res = doSearch("java.lang:*", "false", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
         assertEquals(res.size(),2);
         assertTrue(res.contains("java.lang:type=Memory,name=bla"));
@@ -96,7 +97,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
         verify(server);
     }
 
-    private List<String> doSearch(String pPattern, String pUseCanonicalName, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    private List<String> doSearch(String pPattern, String pUseCanonicalName, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         ObjectName oName = new ObjectName(pPattern);
         JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.CANONICAL_NAMING,pUseCanonicalName).build();
 

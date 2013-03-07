@@ -78,18 +78,18 @@ public class AbstractMBeanServerExecutorTest {
     public void updateChangeTest() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException, InterruptedException, IOException {
         executor.registerForMBeanNotifications();
         try {
-            assertTrue(executor.hasBeenUpdatedSince(0),"updatedSince: When 0 is given, always return true");
+            assertTrue(executor.hasMBeansListChangedSince(0),"updatedSince: When 0 is given, always return true");
             long time = currentTime();
-            assertFalse(executor.hasBeenUpdatedSince(time), "No update yet");
+            assertFalse(executor.hasMBeansListChangedSince(time), "No update yet");
             for (int id = 1; id <=2; id++) {
                 time = currentTime();
                 executor.addMBean(id);
                 try {
-                    assertTrue(executor.hasBeenUpdatedSince(0),"updatedSince: For 0, always return true");
-                    assertTrue(executor.hasBeenUpdatedSince(time),"MBean has been added in the same second, hence it has been updated");
+                    assertTrue(executor.hasMBeansListChangedSince(0),"updatedSince: For 0, always return true");
+                    assertTrue(executor.hasMBeansListChangedSince(time),"MBean has been added in the same second, hence it has been updated");
                     // Wait at a least a second
                     time = currentTime() + 1;
-                    assertFalse(executor.hasBeenUpdatedSince(time),"No updated since the last call");
+                    assertFalse(executor.hasMBeansListChangedSince(time),"No updated since the last call");
                 } finally {
                     executor.rmMBean(id);
                 }

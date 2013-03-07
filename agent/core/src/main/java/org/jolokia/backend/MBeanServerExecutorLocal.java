@@ -22,6 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
@@ -99,7 +100,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * @throws InstanceNotFoundException
      */
     public <R extends JmxRequest> Object handleRequest(JsonRequestHandler<R> pRequestHandler, R pJmxReq)
-            throws MBeanException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
+            throws MBeanException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException, NotChangedException {
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
 

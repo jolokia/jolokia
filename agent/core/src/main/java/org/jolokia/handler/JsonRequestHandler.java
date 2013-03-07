@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -81,7 +82,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws java.io.IOException
      */
     public Object handleRequest(MBeanServerConnection pServer, R pRequest)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         checkForRestriction(pRequest);
         checkHttpMethod(pRequest);
         return doHandleRequest(pServer, pRequest);
@@ -136,7 +137,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws IOException
      */
     protected abstract Object doHandleRequest(MBeanServerConnection server, R request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
 
     /**
      * Override this if you want to have all servers at once for processing the request
@@ -154,7 +155,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws ReflectionException
      */
     public Object handleRequest(MBeanServerExecutor pServerManager, R request)
-            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
+            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         checkForRestriction(request);
         return doHandleRequest(pServerManager,request);
     }
@@ -174,7 +175,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws ReflectionException
      */
     public Object doHandleRequest(MBeanServerExecutor serverManager, R request)
-                throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+                throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return null;
     }
 

@@ -7,6 +7,7 @@ import java.util.Stack;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
@@ -73,7 +74,10 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(MBeanServerExecutor pServerManager, JmxListRequest pRequest)
-            throws IOException {
+            throws IOException, NotChangedException {
+        // Throw an exception if list has not changed
+        checkForModifiedSince(pServerManager, pRequest);
+
         Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
         int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
@@ -101,14 +105,15 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // will not be called
+
     /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
-
     @Override
+
     /**
      * Path handling is done directly within this handler to avoid
      * excessive memory consumption by building up the whole list
@@ -121,6 +126,14 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // ==========================================================================================================
+
+    // check for freshness
+    private void checkForModifiedSince(MBeanServerExecutor pServerManager, JmxListRequest pRequest) throws NotChangedException {
+        int ifModifiedSince = pRequest.getParameterAsInt(ConfigKey.IF_MODIFIED_SINCE);
+        if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {
+            throw new NotChangedException(pRequest);
+        }
+    }
 
     /**
      * Prepare an objectname patttern from a path (or "null" if no path is given)

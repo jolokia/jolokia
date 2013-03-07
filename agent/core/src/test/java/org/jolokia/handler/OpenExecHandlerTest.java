@@ -6,6 +6,7 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.converter.*;
 import org.jolokia.request.JmxExecRequest;
 import org.jolokia.request.JmxRequestBuilder;
@@ -59,7 +60,7 @@ public class OpenExecHandlerTest {
      * If a field in the argument is not set it will be set to its default value
      */
     @Test
-    public void missingField() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void missingField() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
     	// set a value just for stringField, leave out intField
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("compositeData").
@@ -75,7 +76,7 @@ public class OpenExecHandlerTest {
      * set a non-existing field 
      */
     @Test(expectedExceptions={IllegalArgumentException.class})
-    public void invalidField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void invalidField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
     	// set a value just for stringField, leave out intField
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("compositeData").
@@ -88,7 +89,7 @@ public class OpenExecHandlerTest {
      * Give an invalid value (wrong type) for the field 
      */
     @Test(expectedExceptions={ NumberFormatException.class })
-    public void invalidValueForField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void invalidValueForField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"intField\":\"aString\" }").
@@ -100,7 +101,7 @@ public class OpenExecHandlerTest {
      * The operation argument is an array
      */
     @Test
-    public void arrayOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void arrayOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("arrayData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -112,7 +113,7 @@ public class OpenExecHandlerTest {
      * The operation argument is a List
      */
     @Test
-    public void listOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void listOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("listData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -124,7 +125,7 @@ public class OpenExecHandlerTest {
      * The operation argument is a Set
      */
     @Test
-    public void setOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void setOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("opSetData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -136,7 +137,7 @@ public class OpenExecHandlerTest {
      * The operation argument is a Map
      */
     @Test
-    public void mapOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void mapOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("mapData").
                 arguments("{ \"aKey\":{ \"stringField\":\"aString\" } }").
@@ -148,7 +149,7 @@ public class OpenExecHandlerTest {
      * Set a nested field inside the composite argument
      */
     @Test
-    public void nested() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void nested() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
 				operation("compositeData").
 				arguments("{ \"nestedClass\":{\"nestedField\":\"aString\"} }").
@@ -160,7 +161,7 @@ public class OpenExecHandlerTest {
      * Set an array field inside the composite argument
      */
     @Test
-    public void compositeWithArrayField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void compositeWithArrayField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"array\":[\"one\", \"two\"] }").
@@ -173,7 +174,7 @@ public class OpenExecHandlerTest {
      * the list element type
      */
     @Test(expectedExceptions={NumberFormatException.class})
-    public void invalidTypeCompositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void invalidTypeCompositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"list\":[\"one\", \"two\"] }").
@@ -185,7 +186,7 @@ public class OpenExecHandlerTest {
      * Set a List field inside the composite argument
      */
     @Test
-    public void compositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void compositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"list\":[\"1\", \"2\"] }").
@@ -197,7 +198,7 @@ public class OpenExecHandlerTest {
      * Set a Map field inside the composite argument
      */
     @Test
-    public void compositeWithMapField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void compositeWithMapField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"map\":{ \"5\":{\"nestedField\":\"value1\"}, \"7\":{\"nestedField\":\"value2\"} } }").
@@ -209,7 +210,7 @@ public class OpenExecHandlerTest {
      * Set a Set field inside the composite argument 
      */
     @Test
-    public void compositeWithSetField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void compositeWithSetField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
         		operation("compositeData").
         		arguments("{ \"set\": [\"value1\",\"value2\"] }").
@@ -219,7 +220,7 @@ public class OpenExecHandlerTest {
     
     
     @Test
-    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
 				operation("overloaded(javax.management.openmbean.CompositeData)").
 				arguments("{ \"stringField\": \"aString\" }").

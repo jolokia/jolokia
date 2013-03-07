@@ -86,6 +86,23 @@ public interface MBeanServerExecutor {
     void destroy();
 
     /**
+     * Check whether the set of MBeans in all managed MBeanServer has been changed
+     * since the given time. The input is the epoch time in seconds, however, milliseconds
+     * would be much more appropriate. However, the Jolokia responses contain
+     * currently time measured in seconds. This should be changed in a future version,
+     * but this implies a quite heavy API changed (and if this is changed, the key
+     * "timestamp" should be changed to "time", too, in order to fail early in case of
+     * problems).
+     *
+     * In order to avoid inconsistencies for sub-second updates, we are comparing
+     * conservatively (so hasBeenUpdated might return "true" more often than required).
+     *
+     * @param pTimestamp seconds since 1.1.1970
+     * @return true if the MBeans has been updated since this time, false otherwise
+     */
+    boolean hasMBeansListChangedSince(long pTimestamp);
+
+    /**
      * This callback is used together with {@link #each(ObjectName, MBeanEachCallback)} for iterating over all
      * active MBeanServers. The callback is responsible on its own to collect the information queried.
      */

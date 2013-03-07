@@ -7,6 +7,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.detector.*;
@@ -89,7 +90,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      * @return the result of the request
      */
     public Object dispatchRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         serverHandle.preDispatch(mBeanServerManager,pJmxReq);
         if (pRequestHandler.handleAllServersAtOnce(pJmxReq)) {
             try {
