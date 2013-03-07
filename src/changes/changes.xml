@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="1.1.1-SNAPSHOT" description="Release 1.1.1-SNAPSHOT">
+      <action dev="roland" type="add" issue="77" date="2013-03-07">
+        Added support for "ifModifiedSince" processing parameter.
+      </action>
       <action dev="roland" type="fix" issue="83" date="2013-03-06">
         Fixed wrong key order in path when diving into tabular data values.
       </action>

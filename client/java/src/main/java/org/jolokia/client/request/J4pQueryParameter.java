@@ -71,8 +71,15 @@ public enum J4pQueryParameter {
      * The allowed values are either "true" in which case the canonical key order (== alphabetical
      * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
-    CANONICAL_NAMING("canonicalNaming");
+    CANONICAL_NAMING("canonicalNaming"),
 
+    /**
+     * For LIST request this property can be used to obtain the result (which can be
+     * quite lengthy) only if the set of registered MBeans has been changed since
+     * the last time (given as epoch time in seconds since 1.1.1970) provided with
+     * this parameterd
+     */
+    IF_MODIFIED_SINCE("ifModifiedSince");
     // =======================================================================
 
     // Query parameter

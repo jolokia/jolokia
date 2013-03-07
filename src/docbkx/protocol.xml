@@ -284,7 +284,11 @@
           payload contains details about the error
           occured (e.g. 404 means "not found"). (See
           <ulink url="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">this page</ulink>
-          for more information about HTTP error codes..)
+          for more information about HTTP error codes..). If the processing option
+          <constant>ifModifiedSince</constant> is given and the requested
+          value as been not changed since then, a response code of 304 is returned.
+          This option is currently only supported by the <constant>LIST</constant> request, for
+          other request types the value is always fetched.
         </para>
         <para>
           In the non-error case a JSON response looks mostly the same
@@ -550,12 +554,24 @@
           <term><literal>serializeException</literal></term>
           <listitem>
             <para>
-              If this parameter is set to <constant>true</constant> then a serialized version of the 
+              If this parameter is set to <constant>true</constant> then a serialized version of the
               exception is included in an error response. This value
               is put under the key <constant>error_value</constant> in
               the response value. By default this is set to
               <constant>false</constant> except when the agent global
-              configuration option is configured otherwise. 
+              configuration option is configured otherwise.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>ifModifiedSince</literal></term>
+          <listitem>
+            <para>
+              If this parameter is given, its value is interpreted as epoch time (seconds since 1.1.1970) and
+              if the requested value did not change since this time, an empty response (with no <constant>value</constant>)
+              is returned and the response status code is set to 304 ("Not modified"). This
+              option is currently only supported for <literal>LIST</literal> requests. The time value can be
+              extracted from a previous' response <constant>timestamp</constant>.
             </para>
           </listitem>
         </varlistentry>
