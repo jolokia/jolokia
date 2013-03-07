@@ -154,6 +154,10 @@ public class JolokiaServer {
         addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);
         initializeExecutor();
 
+        if (port == 0) {
+            port = httpServer.getAddress().getPort();
+        }
+
         url = String.format("%s://%s:%d%s",protocol,address.getCanonicalHostName(),port,contextPath);
     }
 
@@ -218,6 +222,14 @@ public class JolokiaServer {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
         }
+    }
+
+    /**
+     * @return the address that the server is listening on. Thus, a program can initialize the server
+     * with 'port 0' and then retrieve the actual running port that was bound.
+     */
+    public InetSocketAddress getAddress() {
+        return httpServer.getAddress();
     }
 
     // ======================================================================================
