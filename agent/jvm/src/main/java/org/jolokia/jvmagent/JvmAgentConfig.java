@@ -43,12 +43,24 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      *        for an agent parameter
      */
     public JvmAgentConfig(String pArgs) {
-        Map<String,String> agentConfig = parseArgs(pArgs);
+        init(split(pArgs));
+    }
 
-        init(agentConfig);
+    /**
+     * Constructor with a preparsed configuration
+     *
+     * @param pConfig config map with key value pairs
+     */
+    public JvmAgentConfig(Map<String,String> pConfig) {
+        init(pConfig);
+    }
 
+    @Override
+    /** {@inheritDoc} */
+    protected void init(Map<String, String> pConfig) {
+        super.init(prepareConfig(pConfig));
         // Special mode used by the client in order to indicate whether to stop/start the server.
-        initMode(agentConfig);
+        initMode(pConfig);
     }
 
     /**
@@ -73,7 +85,20 @@ public class JvmAgentConfig extends JolokiaServerConfig {
     // ======================================================================================
     // Parse argument
 
-    private Map<String, String> parseArgs(String pAgentArgs) {
+    // Prepare configuration with filling up default values
+    private Map<String, String> prepareConfig(Map<String, String> pRet) {
+        Map<String,String> config = getDefaultConfig();
+        if (pRet.containsKey("config")) {
+            Map<String,String> userConfig = readConfig(pRet.get("config"));
+            config.putAll(userConfig);
+        }
+        config.putAll(pRet);
+        prepareDetectorOptions(config);
+        return config;
+    }
+
+    // Split arguments into a map
+    private Map<String, String> split(String pAgentArgs) {
         Map<String,String> ret = new HashMap<String, String>();
         if (pAgentArgs != null && pAgentArgs.length() > 0) {
             for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
@@ -85,14 +110,7 @@ public class JvmAgentConfig extends JolokiaServerConfig {
                 }
             }
         }
-        Map<String,String> config = getDefaultConfig();
-        if (ret.containsKey("config")) {
-            Map<String,String> userConfig = readConfig(ret.get("config"));
-            config.putAll(userConfig);
-        }
-        config.putAll(ret);
-        prepareDetectorOptions(config);
-        return config;
+        return ret;
     }
 
     // Add detector specific options if given on the command line

@@ -39,7 +39,7 @@ import org.springframework.core.Ordered;
  * @author roland
  * @since 28.12.12
  */
-public class SpringJolokiaConfigHolder extends JolokiaServerConfig implements Ordered {
+public class SpringJolokiaConfigHolder implements Ordered {
 
     // configuration
     private Map<String, String> config = new HashMap<String, String>();

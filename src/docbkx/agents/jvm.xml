@@ -85,16 +85,18 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
         <td><constant>host</constant></td>
         <td>
-          Hostaddress to which the HTTP server should bind to. 
+          Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
+          given, the servers binds to every network interface.
         </td>        
         <td>
-          <constant>InetAddress.getLocalHost()</constant>
+          <constant>localhost</constant>
         </td>
         </tr>
         <tr>
           <td><constant>port</constant></td>
           <td>
-            Port the HTTP server should listen to.
+            Port the HTTP server should listen to. If set to 0, then an arbitrary free port
+            will be selected.
           </td>        
           <td>
             <constant>8778</constant>

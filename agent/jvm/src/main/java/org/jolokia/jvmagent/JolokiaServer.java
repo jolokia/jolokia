@@ -154,11 +154,10 @@ public class JolokiaServer {
         addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);
         initializeExecutor();
 
-        if (port == 0) {
-            port = httpServer.getAddress().getPort();
-        }
-
-        url = String.format("%s://%s:%d%s",protocol,address.getCanonicalHostName(),port,contextPath);
+        InetSocketAddress realSocketAddress = httpServer.getAddress();
+        InetAddress realAddress = realSocketAddress.getAddress() != null ? realSocketAddress.getAddress() : address;
+        url = String.format("%s://%s:%d%s",
+                            protocol,realAddress.getCanonicalHostName(),realSocketAddress.getPort(),contextPath);
     }
 
     private void addAuthenticatorIfNeeded(final String user, final String password, HttpContext pContext) {

@@ -19,6 +19,8 @@ package org.jolokia.jvmagent;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jolokia.Version;
 import org.jolokia.test.util.EnvTestUtil;
@@ -49,8 +51,10 @@ public class JolokiaServerTest {
 
     @Test(expectedExceptions = IOException.class,expectedExceptionsMessageRegExp = ".*401.*")
     public void httpWithAuthenticationRejected() throws IOException {
-        roundtrip("user=roland,password=s!cr!t",true);
-
+        Map config = new HashMap();
+        config.put("user","roland");
+        config.put("password","s!cr!t");
+        roundtrip(config,true);
     }
 
     @Test
@@ -90,7 +94,16 @@ public class JolokiaServerTest {
         throw new IllegalStateException(ksURL + " is not a file URL");
     }
 
+    private void roundtrip(Map<String,String> pConfig, boolean pDoRequest) throws IOException {
+        checkServer(new JvmAgentConfig(pConfig),pDoRequest);
+    }
+
     private void roundtrip(String pConfig, boolean pDoRequest) throws IOException {
+        JvmAgentConfig config = new JvmAgentConfig(prepareConfigString(pConfig));
+        checkServer(config, pDoRequest);
+    }
+
+    private String prepareConfigString(String pConfig) throws IOException {
         String c = pConfig != null ? pConfig + "," : "";
         boolean portSpecified = c.contains("port=");
         c = c + "host=localhost,";
@@ -98,8 +111,11 @@ public class JolokiaServerTest {
             int port = EnvTestUtil.getFreePort();
             c = c + "port=" + port;
         }
-        JvmAgentConfig config = new JvmAgentConfig(c);
-        JolokiaServer server = new JolokiaServer(config,false);
+        return c;
+    }
+
+    private void checkServer(JvmAgentConfig pConfig, boolean pDoRequest) throws IOException {
+        JolokiaServer server = new JolokiaServer(pConfig,false);
         server.start();
         //Thread.sleep(2000);
         try {
