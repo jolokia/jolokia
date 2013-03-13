@@ -242,7 +242,7 @@ public class JolokiaServerConfig {
     private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
         try {
-            if ("*".equals(host)) {
+            if ("*".equals(host) || "0.0.0.0".equals(host)) {
                 address = null; // null is the wildcard
             } else if (host != null) {
                 address = InetAddress.getByName(host); // some specific host
