@@ -95,7 +95,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
             }
         }
 
-        // Must be there, otherwise we would not have left the loop
+        // Must be != null, otherwise we would not have left the loop
         throw objNotFoundException;
 
         // When we reach this, no MBeanServer know about the requested MBean.

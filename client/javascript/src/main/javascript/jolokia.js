@@ -45,7 +45,8 @@
 
         // Processing parameters which are added to the
         // URL as query parameters if given as options
-        var PROCESSING_PARAMS = ["maxDepth", "maxCollectionSize", "maxObjects", "ignoreErrors", "canonicalNaming", "ifModifiedSince"];
+        var PROCESSING_PARAMS = ["maxDepth", "maxCollectionSize", "maxObjects", "ignoreErrors", "canonicalNaming",
+                                 "serializeException", "includeStackTrace", "ifModifiedSince"];
 
         /**
          * Constructor for creating a client to the Jolokia agent.
@@ -259,6 +260,7 @@
                     job = {
                         success: callback.success,
                         error: callback.error,
+                        config: callback.config,
                         callback: null
                     };
                 } else if (typeof callback === 'function') {
@@ -374,12 +376,13 @@
                     }
                     reqs = job != null ? job.requests : void 0;
                     var reqsLen = reqs.length;
+                    var config = job.config;
                     if (job.success) {
                         // Success/error pair of callbacks
                         var successCb = cbSuccessErrorClosure("success",job,i);
                         var errorCb = cbSuccessErrorClosure("error",job,i);
                         for (j = 0; j < reqsLen; j++) {
-                            requests.push(reqs[j]);
+                            requests.push(mergeConfig(reqs[j],config));
                             successCbs.push(successCb);
                             errorCbs.push(errorCb);
                         }
@@ -388,12 +391,12 @@
                         var dCb = cbCallbackClosure(job,jolokia);
                         // Add callbacks which collect the responses
                         for (j = 0; j < reqsLen - 1; j++) {
-                            requests.push(reqs[j]);
+                            requests.push(mergeConfig(reqs[j],config));
                             successCbs.push(dCb.cb);
                             errorCbs.push(dCb.cb);
                         }
                         // Add final callback which calls the last method
-                        requests.push(reqs[reqsLen-1]);
+                        requests.push(mergeConfig(reqs[reqsLen-1],config));
                         successCbs.push(dCb.lcb);
                         errorCbs.push(dCb.lcb);
                     }
@@ -408,6 +411,15 @@
                 };
                 return jolokia.request(requests, opts);
             };
+        }
+
+        // Merge in options provided when a job is registered. Request options take
+        // priority
+        function mergeConfig(request,config) {
+            if (config != null) {
+                request.config = $.extend({}, config, request.config);
+            }
+            return request;
         }
 
         // Closure for a full callback which stores the responses in an (closed) array
@@ -470,11 +482,15 @@
                     if (request.target) {
                         throw new Error("Cannot use GET request with proxy mode");
                     }
+                    if (request.config) {
+                        throw new Error("Cannot use GET with request specific config");
+                    }
                 }
                 method = methodGiven;
             } else {
                 // Determine method dynamically
                 method = $.isArray(request) ||
+                         request.config ||
                          (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) ||
                          request.target ?
                         "post" : "get";

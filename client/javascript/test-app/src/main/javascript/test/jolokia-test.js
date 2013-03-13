@@ -119,10 +119,12 @@ $(document).ready(function() {
                          error: function(response) {
                              equals(response.status, 404, "Instance not (404 status code)");
                              equals(response.error_type, "javax.management.InstanceNotFoundException", "javax.management.InstanceNotFoundException");
+                             ok(response.error_value != null,"Serialized exception should be contained");
                              ok(response.error != null, "Error description");
                              ok(response.stacktrace != null, "Stacktrace");
                              start();
-                         }
+                         },
+                         serializeException: true
                      }));
         });
         asyncTest("Invalid URL", function() {

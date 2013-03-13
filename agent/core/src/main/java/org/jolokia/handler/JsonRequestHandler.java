@@ -96,7 +96,6 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      */
     protected abstract void checkForRestriction(R pRequest);
 
-
     /**
      * Check whether a command of the given type is allowed
      */

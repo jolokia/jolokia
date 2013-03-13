@@ -473,6 +473,11 @@
                } 
   }]]></programlisting>
       <para>
+        If a POST request carries also query parameters in the URL, these processing parameters
+        are merged with the ones given within the request. Configuration options given in the
+        request take precedence over the ones given as query parameters.
+      </para>
+      <para>
         The list of known processing parameters is:
       </para>
       <variablelist>
