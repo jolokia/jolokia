@@ -147,15 +147,28 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = config.getContextPath();
-        jolokiaHttpHandler = new JolokiaHttpHandler(config.getJolokiaConfig());
+        jolokiaHttpHandler = newJolokiaHttpHandler();
         HttpContext context = httpServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Special customizations
         addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);
         initializeExecutor();
 
+        if (port == 0) {
+            port = httpServer.getAddress().getPort();
+        }
+
         url = String.format("%s://%s:%d%s",protocol,address.getCanonicalHostName(),port,contextPath);
     }
+
+    /**
+     * A subclass may override this to customize the handler; for example, to arrange for CORS headers.
+     * @return some instance of JolokiaHttpHandler or a subclass.
+     */
+    protected JolokiaHttpHandler newJolokiaHttpHandler() {
+        return new JolokiaHttpHandler(config.getJolokiaConfig());
+    }
+
 
     private void addAuthenticatorIfNeeded(final String user, final String password, HttpContext pContext) {
         if (user != null) {
@@ -218,6 +231,14 @@ public class JolokiaServer {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
         }
+    }
+
+    /**
+     * @return the address that the server is listening on. Thus, a program can initialize the server
+     * with 'port 0' and then retrieve the actual running port that was bound.
+     */
+    public InetSocketAddress getAddress() {
+        return httpServer.getAddress();
     }
 
     // ======================================================================================
