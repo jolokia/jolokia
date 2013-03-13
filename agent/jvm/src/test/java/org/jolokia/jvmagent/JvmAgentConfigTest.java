@@ -52,7 +52,7 @@ public class JvmAgentConfigTest {
     @Test
     public void defaults() throws UnknownHostException {
         JvmAgentConfig config = new JvmAgentConfig("");
-        assertEquals(config.getAddress(), InetAddress.getLocalHost());
+        assertEquals(config.getAddress(), InetAddress.getByName(null));
         assertFalse(config.isModeStop());
         assertEquals(config.getProtocol(), "http");
         assertEquals(config.getPort(), 8778);
