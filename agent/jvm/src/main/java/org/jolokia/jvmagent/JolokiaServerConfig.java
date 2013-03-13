@@ -242,9 +242,15 @@ public class JolokiaServerConfig {
     private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
         try {
-            address = host != null ? InetAddress.getByName(host) : InetAddress.getLocalHost();
+            if ("*".equals(host)) {
+                address = null; // null is the wildcard
+            } else if (host != null) {
+                address = InetAddress.getByName(host); // some specific host
+            } else {
+                InetAddress.getByName(null); // secure alternative -- if no host, use *loopback*
+            }
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "localhost") + ": " + e,e);
+            throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "loopback interface") + ": " + e,e);
         }
     }
 
