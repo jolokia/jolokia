@@ -247,7 +247,7 @@ public class JolokiaServerConfig {
             } else if (host != null) {
                 address = InetAddress.getByName(host); // some specific host
             } else {
-                InetAddress.getByName(null); // secure alternative -- if no host, use *loopback*
+                address = InetAddress.getByName(null); // secure alternative -- if no host, use *loopback*
             }
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "loopback interface") + ": " + e,e);
