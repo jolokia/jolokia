@@ -17,6 +17,7 @@ package org.jolokia.client.exception;
  */
 
 import org.jolokia.client.request.J4pRequest;
+import org.json.simple.JSONObject;
 
 /**
  * Exception occured on the remote side (i.e the server).
@@ -37,6 +38,9 @@ public class J4pRemoteException extends J4pException {
 
     // Java class of remote error
     private String errorType;
+    
+    // JSONObject containing value of the remote error
+    private JSONObject errorValue;
 
     /**
      * Constructor for a remote exception
@@ -46,12 +50,13 @@ public class J4pRemoteException extends J4pException {
      * @param pStatus status code
      * @param pStacktrace stacktrace of the remote exception
      */
-    public J4pRemoteException(J4pRequest pJ4pRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace) {
+    public J4pRemoteException(J4pRequest pJ4pRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace, JSONObject pErrorValue) {
         super(pMessage);
         status = pStatus;
         errorType = pErrorType;
         remoteStacktrace = pStacktrace;
         request = pJ4pRequest;
+        errorValue = pErrorValue;
     }
 
     /**
@@ -91,4 +96,14 @@ public class J4pRemoteException extends J4pException {
     public J4pRequest getRequest() {
         return request;
     }
+
+    /**
+     * Get value of the remote error.
+     * 
+     * @return value of the remote error as JSON
+     */
+	public JSONObject getErrorValue() {
+		return errorValue;
+	}
+    
 }

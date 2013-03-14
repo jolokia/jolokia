@@ -586,9 +586,9 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             Generic exception thrown when an exception occured on the
             remote side. This is the case when the JSON response
             obtained is an error response as described in <xref
-            linkend="responses"/>. The error type, the status, the
-            request leading to this error and the remote stacktrace
-            (as string) can be obtained from this exception. 
+            linkend="responses"/>. The error type, error value, the 
+			status, the request leading to this error and the remote 
+			stacktrace as string) can be obtained from this exception. 
           </para>
         </listitem>
       </varlistentry>
