@@ -227,7 +227,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             // an error and prepare the proper J4pException
             StatusLine statusLine = pResponse.getStatusLine();
             if (HttpStatus.SC_OK != statusLine.getStatusCode()) {
-                throw new J4pRemoteException(pRequest,statusLine.getReasonPhrase(), null, statusLine.getStatusCode(),null);
+                throw new J4pRemoteException(pRequest,statusLine.getReasonPhrase(), null, statusLine.getStatusCode(),null, null);
             }
             throw new J4pException("Could not parse answer: " + e,e);
         }
@@ -311,10 +311,11 @@ public class J4pClient extends J4pClientBuilderFactory {
     private <T extends J4pRequest> J4pRemoteException validate(T pRequest, JSONObject pJsonRespObject) {
         Long status = (Long) pJsonRespObject.get("status");
         if (status == null) {
-            return new J4pRemoteException(pRequest,"Invalid response received: " + pJsonRespObject.toJSONString(), null, 500,null);
+            return new J4pRemoteException(pRequest,"Invalid response received: " + pJsonRespObject.toJSONString(), null, 500,null, null);
         } else if (status != 200) {
             return new J4pRemoteException(pRequest,(String) pJsonRespObject.get("error"), (String) pJsonRespObject.get("error_type"),
-                                          status.intValue(),(String) pJsonRespObject.get("stacktrace"));
+                                          status.intValue(),(String) pJsonRespObject.get("stacktrace"),
+                                          (JSONObject) pJsonRespObject.get("error_value"));
         } else {
             return null;
         }
