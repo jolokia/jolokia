@@ -24,6 +24,11 @@
   </properties>
   <body>
     <release version="1.1.1-SNAPSHOT" description="Release 1.1.1-SNAPSHOT">
+      <action dev="marosmars" type="add" issue="85" date="2013-03-14">
+        Added property errorValue to J4pRemoteException which contains a serialized
+        version of the exception if the 'serializeException' processing parameter
+        is switched on.
+      </action>
       <action dev="benson-basis" type="add" issue="86" date="2013-03-13">
         If no host is given, the JVM agent will now bind to localhost. If a
         host of "0.0.0.0" or "*" is given, then the agent will listen on
