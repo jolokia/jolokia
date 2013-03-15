@@ -65,7 +65,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.1.0";
+            this.CLIENT_VERSION = "1.1.1-SNAPSHOT";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -236,16 +236,25 @@
              * Register one or more requests for periodically polling the agent along with a callback to call on receipt
              * of the response.
              *
-             * @param callback either a function which will be called on a successful performed request or an object
-             *        with the two attributes <code>success</code> and <code>error</code> for two callbacks, one for a
-             *        successful call, one in case on an error. If given only a single callback function, then this
-             *        function is called with all responses received as argument, regardless whether the response indicates
-             *        a success or error state. For the second case, when an object with an success and error function is
-             *        given, these callback are called with with a single response object as argument. If multiple requests
-             *        have been registered along with this callback object, the callback is called multiple times, one for
-             *        each request in the same order as the request are given.
-             *        As second argument, the handle which is returned by this method is given and as third argument the index
-             *        within the list of requests.
+             * The first argument can be either an object or a function. The remaining arguments are interpreted
+             * as Jolokia request objects
+             *
+             * If a function is given or an object with an attribute <code>callback</code> holding a function, then
+             * this function is called with all responses received as argument, regardless whether the individual response
+             * indicates a success or error state.
+             *
+             * If the first argument is an object with two callback attributes <code>success</code> and <code>error</code>,
+             * these functions are called for <em>each</em> response separately, depending whether the response
+             * indicates success or an error state. If multiple requests have been registered along with this callback object,
+             * the callback is called multiple times, one for each request in the same order as the request are given.
+             * As second argument, the handle which is returned by this method is given and as third argument the index
+             * within the list of requests.
+             *
+             * If the first argument is an object, an additional 'config' attribute with processing parameters can
+             * be given which is used as default for the registered requests.
+             * Request with a 'config' section take precedence.
+             *
+             * @param callback and options specification.
              * @param request, request, .... One or more requests to be registered for this single callback
              * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
              */
@@ -257,13 +266,23 @@
                     requests = Array.prototype.slice.call(arguments,1),
                     job;
                 if (typeof callback === 'object') {
-                    job = {
-                        success: callback.success,
-                        error: callback.error,
-                        config: callback.config,
-                        callback: null
-                    };
+                    if (callback.success && callback.error) {
+                        job = {
+                            success: callback.success,
+                            error: callback.error,
+                            config: callback.config
+                        };
+                    } else if (callback.callback) {
+                        job = {
+                            callback: callback.callback,
+                            config: callback.config
+                        };
+                    } else {
+                        throw "Either 'callback' or ('success' and 'error') callback must be provided " +
+                              "when registering a Jolokia job";
+                    }
                 } else if (typeof callback === 'function') {
+                    // Simplest version without config possibility
                     job = {
                         success: null,
                         error: null,
@@ -378,7 +397,8 @@
                     var reqsLen = reqs.length;
                     var config = job.config;
                     if (job.success) {
-                        // Success/error pair of callbacks
+                        // Success/error pair of callbacks. For multiple request,
+                        // these callback will be called multiple times
                         var successCb = cbSuccessErrorClosure("success",job,i);
                         var errorCb = cbSuccessErrorClosure("error",job,i);
                         for (j = 0; j < reqsLen; j++) {
@@ -387,7 +407,8 @@
                             errorCbs.push(errorCb);
                         }
                     } else {
-                        // Pure callback getting all requests at once
+                        // Job should have a single callback (job.callback) which will be
+                        // called once with all responses at once as an array
                         var dCb = cbCallbackClosure(job,jolokia);
                         // Add callbacks which collect the responses
                         for (j = 0; j < reqsLen - 1; j++) {
@@ -395,13 +416,15 @@
                             successCbs.push(dCb.cb);
                             errorCbs.push(dCb.cb);
                         }
-                        // Add final callback which calls the last method
+                        // Add final callback which finally will call the job.callback with all
+                        // collected responses.
                         requests.push(mergeConfig(reqs[reqsLen-1],config));
                         successCbs.push(dCb.lcb);
                         errorCbs.push(dCb.lcb);
                     }
                 }
                 var opts = {
+                    // Dispatch to the build up callbacks, request by request
                     success: function(resp, j) {
                         return successCbs[j].apply(jolokia, [resp, j]);
                     },
@@ -423,6 +446,7 @@
         }
 
         // Closure for a full callback which stores the responses in an (closed) array
+        // which the finally is feed in to the callback as array
         function cbCallbackClosure(job,jolokia) {
             var responses = [],
                 callback = job.callback;

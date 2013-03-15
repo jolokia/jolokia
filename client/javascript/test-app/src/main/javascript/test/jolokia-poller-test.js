@@ -124,6 +124,29 @@ $(document).ready(function() {
         },500);
     })
 
+    asyncTest("Config merging",function() {
+        var j4p = new Jolokia("/jolokia");
+        j4p.register({
+                callback: function(resp1,resp2) {
+                    ok(!resp1.error_value);
+                    ok(resp1.stacktrace);
+                    ok(resp2.error_value);
+                    ok(!resp2.stackTrace);
+                },
+                config: {
+                        serializeException: true
+                }
+            },
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { serializeException: false}},
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { includeStackTrace: false}}
+        );
+        j4p.start(200);
+        setTimeout(function() {
+            j4p.stop();
+            start();
+        },300);
+    });
+
     asyncTest("Multiple requests with success/error callbacks",function() {
         var j4p = new Jolokia("/jolokia");
         var counterS = 1,

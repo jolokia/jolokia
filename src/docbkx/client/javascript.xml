@@ -164,8 +164,10 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
         Each request can be influenced by a set of optional options
         provided either as default during construction of the
         <classname>Jolokia</classname> object or as optional last
-        parameter for the request object. The known options are
-        summarized in <xref linkend="js-request-options-table"/>
+        parameter for the request object. Also a request can carry a
+        <constant>config</constant> attribute, which can be used for all
+        processing parameters (<xref linkend="processing-parameters"/>).
+        The known options are summarized in <xref linkend="js-request-options-table"/>
       </para>      
       <table id="js-request-options-table">
         <title>Request options</title>
@@ -282,6 +284,38 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
             deserialization fails, the whole request returns with an
             error. This works only for certain operations like pattern
             reads.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>serializeException</constant></td>
+          <td>
+            If true then in case of an error, the exception itself is returned in 
+            it JSON representation under the key <constant>error_value</constant> 
+            in the response object.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>includeStackTrace</constant></td>
+          <td>
+            By default, a stacktrace is returned with every error (key: <constant>stacktrace</constant>)
+            This can be ommitted by setting the value of this option to false.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>ifModifiedSince</constant></td>
+          <td>
+            The <constant>LIST</constant> operations provides an
+            optimization in that it remembers, when the set of
+            registered MBeans has been changes last. If a timestamp
+            (in epoch seconds) is provided with this parameter, then
+            the LIST operation returns an empty response
+            (i.e. <constant>value</constant> is null) and a
+            <constant>status</constant> code of 304 (Not Modified) if
+            the MBeans haven't changed. If you use the request
+            scheduler (<xref linkend="js-request-options-table"/>)
+            then this feature can be used to get the callbacks called
+            only if a value is returned. For the normal request, the
+            error callback is called which must check the status itself.
           </td>
         </tr>
       </table>
@@ -603,15 +637,26 @@ j4p.start(10000);
           <para>
             This method registers one or more request for being
             periodically fetched. <code>callback</code> is either a
-            function which will be called with all responses as
-            arguments (in the same order as the requests). Or it is an
-            object with two attributes <code>success</code> and
-            <code>error</code> which have a functions as value. In the
-            later case these functions are called for successful and
-            failed requests, respectively. If multiple requests have
-            been registered, the success- and/or error-function is called
-            multiple times, once for each request.             
+            function or an object.
+          </para>          
+          <para>
+            If a function is given or an object with an attribute <code>callback</code> holding a function, then
+            this function is called with all responses received as argument, regardless whether the individual response
+            indicates a success or error state.
           </para>
+          <para>
+              If the first argument is an object with two callback attributes <code>success</code> and <code>error</code>,
+              these functions are called for <em>each</em> response separately, depending whether the response
+              indicates success or an error state. If multiple requests have been registered along with this callback object,
+             the callback is called multiple times, one for each request in the same order as the request are given.
+              As second argument, the handle which is returned by this method is given and as third argument the index
+              within the list of requests.
+          </para>
+          <para>
+              If the first argument is an object, an additional 'config' attribute with processing parameters can
+              be given which is used as default for the registered requests.
+              Request with a 'config' section take precedence.
+          </para>            
           <para>
             This method returns a handle which can be used later for
             unregistering these requests. 
@@ -644,10 +689,13 @@ j4p.register(
     },
     error: function(resp) {
        console.log("Error: " + resp.error_text);
+    },
+    config: {
+       serializeException: true
     }
   },
   { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
-  { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
+  { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount", config: { ignoreErrors: true }},
   { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
 ]]>
           </programlisting>
