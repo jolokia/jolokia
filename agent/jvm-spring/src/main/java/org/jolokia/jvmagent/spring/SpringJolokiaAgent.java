@@ -75,7 +75,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
-        init(new SpringServerConfig(finalConfig),false);
+        init(new JolokiaServerConfig(finalConfig),false);
         if (autoStart) {
             start();
         }
@@ -155,13 +155,4 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
 
     // ===================================================================
 
-    // Simple extension to the JolokiaServerConfig in order to do the proper initialization
-    private static final class SpringServerConfig extends JolokiaServerConfig {
-
-        private SpringServerConfig(Map<String, String> config) {
-            Map<String, String> finalCfg = getDefaultConfig();
-            finalCfg.putAll(config);
-            init(finalCfg);
-        }
-    }
 }

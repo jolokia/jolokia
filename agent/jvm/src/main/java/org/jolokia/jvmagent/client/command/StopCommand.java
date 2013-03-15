@@ -46,7 +46,7 @@ public class StopCommand extends AbstractBaseCommand {
         if (agentUrl != null) {
             loadAgent(pVm,pOpts,"mode=stop");
             if (!quiet) {
-                System.out.println("Stopped Jolokia for PID " + getProcessDescription(pOpts,pHandler));
+                System.out.println("Stopped Jolokia for " + getProcessDescription(pOpts,pHandler));
             }
             return 0;
         } else {

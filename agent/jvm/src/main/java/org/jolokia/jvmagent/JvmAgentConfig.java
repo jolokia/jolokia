@@ -17,9 +17,9 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.EscapeUtil;
 
 /**
@@ -43,7 +43,7 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      *        for an agent parameter
      */
     public JvmAgentConfig(String pArgs) {
-        init(split(pArgs));
+        this(split(pArgs));
     }
 
     /**
@@ -52,13 +52,13 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      * @param pConfig config map with key value pairs
      */
     public JvmAgentConfig(Map<String,String> pConfig) {
-        init(pConfig);
+        super(pConfig);
     }
 
     @Override
     /** {@inheritDoc} */
     protected void init(Map<String, String> pConfig) {
-        super.init(prepareConfig(pConfig));
+        super.init(pConfig);
         // Special mode used by the client in order to indicate whether to stop/start the server.
         initMode(pConfig);
     }
@@ -82,23 +82,28 @@ public class JvmAgentConfig extends JolokiaServerConfig {
     }
 
 
-    // ======================================================================================
-    // Parse argument
-
-    // Prepare configuration with filling up default values
-    private Map<String, String> prepareConfig(Map<String, String> pRet) {
-        Map<String,String> config = getDefaultConfig();
-        if (pRet.containsKey("config")) {
-            Map<String,String> userConfig = readConfig(pRet.get("config"));
-            config.putAll(userConfig);
+    /**
+     * Beside reading the default configuration from an internal property file,
+     * also add extra configuration given in an external properties where the path
+     * to this property file is given under the key "config"
+     *
+     * @param pConfig the configuration provided during construction
+     * @return the default configuration used as fallback
+     */
+    @Override
+    protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
+        Map<String,String> config = super.getDefaultConfig(pConfig);
+        if (pConfig.containsKey("config")) {
+            config.putAll(readConfig(pConfig.get("config")));
         }
-        config.putAll(pRet);
-        prepareDetectorOptions(config);
         return config;
     }
 
+    // ======================================================================================
+    // Parse argument
+
     // Split arguments into a map
-    private Map<String, String> split(String pAgentArgs) {
+    private static Map<String, String> split(String pAgentArgs) {
         Map<String,String> ret = new HashMap<String, String>();
         if (pAgentArgs != null && pAgentArgs.length() > 0) {
             for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
@@ -111,18 +116,6 @@ public class JvmAgentConfig extends JolokiaServerConfig {
             }
         }
         return ret;
-    }
-
-    // Add detector specific options if given on the command line
-    private void prepareDetectorOptions(Map<String, String> pConfig) {
-        StringBuffer detectorOpts = new StringBuffer("{");
-        if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
-            detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");
-        }
-        if (detectorOpts.length() > 1) {
-            detectorOpts.append("}");
-            pConfig.put(ConfigKey.DETECTOR_OPTIONS.getKeyValue(),detectorOpts.toString());
-        }
     }
 
     private Map<String, String> readConfig(String pFilename) {

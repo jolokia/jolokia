@@ -74,7 +74,7 @@ public abstract class AbstractBaseCommand {
 
     /**
      * Check whether an agent is registered by checking the existance of the system property
-     * {@link JvmAgent#JOLOKIA_AGENT_URL}. This can be used to check, whether a Joloki agent
+     * {@link JvmAgent#JOLOKIA_AGENT_URL}. This can be used to check, whether a Jolokia agent
      * has been already attached and started. ("start" will set this property, "stop" will remove it).
      *
      * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless

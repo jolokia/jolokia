@@ -48,6 +48,25 @@ public class JolokiaServerConfig {
     private boolean     useClientAuthentication;
     private char[]      keystorePassword;
 
+    /**
+     * Constructor which prepares the server configuration from a map
+     * of given config options (key: option name, value: option value).
+     * Also, default values are used for any
+     * parameter not provided ({@link #getDefaultConfig(Map)}).
+     *
+     * The given configuration consist of two parts: Any global options
+     * as defined in {@link ConfigKey} are used for setting up the agent.
+     * All other options are taken for preparing the HTTP server under
+     * which the agent is served. The known properties are described in
+     * the reference manual.
+     *
+     * All other options are ignored.
+     *
+     * @param pConfig the configuration options to use.
+     */
+    public JolokiaServerConfig(Map<String, String> pConfig) {
+        init(pConfig);
+    }
 
     /**
      * Initialize the configuration with the given map
@@ -55,12 +74,17 @@ public class JolokiaServerConfig {
      * @param pConfig map holding the configuration in string representation. A reference to the map will be kept
      */
     protected void init(Map<String, String> pConfig) {
+        Map<String, String> finalCfg = getDefaultConfig(pConfig);
+        finalCfg.putAll(pConfig);
+
+        prepareDetectorOptions(finalCfg);
+
         jolokiaConfig = new Configuration();
-        jolokiaConfig.updateGlobalConfiguration(pConfig);
-        initConfigAndValidate(pConfig);
+        jolokiaConfig.updateGlobalConfiguration(finalCfg);
+        initConfigAndValidate(finalCfg);
     }
 
-    protected Map<String, String> getDefaultConfig() {
+    protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
         InputStream is = getClass().getResourceAsStream("/default-jolokia-agent.properties");
         return readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
     }
@@ -268,5 +292,17 @@ public class JolokiaServerConfig {
             throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e,e);
         }
         return ret;
+    }
+
+    // Add detector specific options if given on the command line
+    protected void prepareDetectorOptions(Map<String, String> pConfig) {
+        StringBuffer detectorOpts = new StringBuffer("{");
+        if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
+            detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");
+        }
+        if (detectorOpts.length() > 1) {
+            detectorOpts.append("}");
+            pConfig.put(ConfigKey.DETECTOR_OPTIONS.getKeyValue(),detectorOpts.toString());
+        }
     }
 }

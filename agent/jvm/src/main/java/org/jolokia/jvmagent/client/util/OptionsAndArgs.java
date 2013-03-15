@@ -204,7 +204,7 @@ public final class OptionsAndArgs {
     /**
      * Lookup the JAR File from where this class is loaded
      *
-     * @return File pointint to the JAR-File from where this class was loaded.
+     * @return File pointing to the JAR-File from where this class was loaded.
      */
     public static File lookupJarFile() {
         try {

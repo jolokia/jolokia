@@ -32,7 +32,6 @@ import static org.testng.Assert.*;
  */
 public class JvmAgentConfigTest {
 
-
     @Test
     public void simple() {
         JvmAgentConfig config = new JvmAgentConfig("port=4711,mode=stop");
