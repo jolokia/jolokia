@@ -134,7 +134,7 @@ $(document).ready(function() {
                     ok(!resp2.stackTrace);
                 },
                 config: {
-                        serializeException: true
+                    serializeException: true
                 }
             },
             { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { serializeException: false}},
@@ -145,6 +145,49 @@ $(document).ready(function() {
             j4p.stop();
             start();
         },300);
+    });
+
+    asyncTest("OnlyIfModified test - callback",function() {
+        var j4p = new Jolokia("/jolokia");
+        var counter = 0;
+        j4p.register({
+                callback: function(resp1) {
+                    counter++;
+                },
+                onlyIfModified: true
+            },
+            { type: "LIST", config: { maxDepth: 2}}
+        );
+        j4p.start(200);
+        setTimeout(function() {
+            j4p.stop();
+            // Should have been called only once
+            equals(counter,1);
+            start();
+        },600);
+    });
+
+    asyncTest("OnlyIfModified test - success and error ",function() {
+        var j4p = new Jolokia("/jolokia");
+        var counter = 0;
+        j4p.register({
+                success: function(resp1) {
+                    counter++;
+                },
+                error: function(resp1) {
+                    counter++;
+                },
+                onlyIfModified: true
+            },
+            { type: "LIST", config: { maxDepth: 2}}
+        );
+        j4p.start(200);
+        setTimeout(function() {
+            j4p.stop();
+            // Should have been called only once
+            equals(counter,1);
+            start();
+        },600);
     });
 
     asyncTest("Multiple requests with success/error callbacks",function() {

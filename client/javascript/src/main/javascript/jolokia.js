@@ -269,18 +269,20 @@
                     if (callback.success && callback.error) {
                         job = {
                             success: callback.success,
-                            error: callback.error,
-                            config: callback.config
+                            error: callback.error
                         };
                     } else if (callback.callback) {
                         job = {
-                            callback: callback.callback,
-                            config: callback.config
+                            callback: callback.callback
                         };
                     } else {
                         throw "Either 'callback' or ('success' and 'error') callback must be provided " +
                               "when registering a Jolokia job";
                     }
+                    job = $.extend(job,{
+                        config: callback.config,
+                        onlyIfModified: callback.onlyIfModified
+                    });
                 } else if (typeof callback === 'function') {
                     // Simplest version without config possibility
                     job = {
@@ -291,6 +293,9 @@
                 } else {
                     throw "First argument must be either a callback func " +
                           "or an object with 'success' and 'error' attributes";
+                }
+                if (!requests) {
+                    throw "No requests given";
                 }
                 job.requests = requests;
                 var idx = jobs.length;
@@ -390,37 +395,35 @@
                 var requests = [];
                 for (i = 0; i < len; i++) {
                     var job = jobs[i];
-                    if (!job) {
-                        continue;
-                    }
-                    reqs = job != null ? job.requests : void 0;
-                    var reqsLen = reqs.length;
-                    var config = job.config;
+                    // Can happen when job has been deleted
+                    // TODO: Can be probably optimized so that only the existing keys of jobs can be visited
+                    if (!job) { continue;  }
+                    var reqsLen = job.requests.length;
                     if (job.success) {
                         // Success/error pair of callbacks. For multiple request,
                         // these callback will be called multiple times
-                        var successCb = cbSuccessErrorClosure("success",job,i);
-                        var errorCb = cbSuccessErrorClosure("error",job,i);
+                        var successCb = cbSuccessClosure(job,i);
+                        var errorCb = cbErrorClosure(job,i);
                         for (j = 0; j < reqsLen; j++) {
-                            requests.push(mergeConfig(reqs[j],config));
+                            requests.push(prepareRequest(job,j));
                             successCbs.push(successCb);
                             errorCbs.push(errorCb);
                         }
                     } else {
                         // Job should have a single callback (job.callback) which will be
                         // called once with all responses at once as an array
-                        var dCb = cbCallbackClosure(job,jolokia);
+                        var callback = cbCallbackClosure(job,jolokia);
                         // Add callbacks which collect the responses
                         for (j = 0; j < reqsLen - 1; j++) {
-                            requests.push(mergeConfig(reqs[j],config));
-                            successCbs.push(dCb.cb);
-                            errorCbs.push(dCb.cb);
+                            requests.push(prepareRequest(job,j));
+                            successCbs.push(callback.cb);
+                            errorCbs.push(callback.cb);
                         }
                         // Add final callback which finally will call the job.callback with all
                         // collected responses.
-                        requests.push(mergeConfig(reqs[reqsLen-1],config));
-                        successCbs.push(dCb.lcb);
-                        errorCbs.push(dCb.lcb);
+                        requests.push(prepareRequest(job,reqsLen-1));
+                        successCbs.push(callback.lcb);
+                        errorCbs.push(callback.lcb);
                     }
                 }
                 var opts = {
@@ -436,12 +439,14 @@
             };
         }
 
-        // Merge in options provided when a job is registered. Request options take
-        // priority
-        function mergeConfig(request,config) {
-            if (config != null) {
-                request.config = $.extend({}, config, request.config);
-            }
+        // Prepare a request with the proper configuration
+        function prepareRequest(job,idx) {
+            var request = job.requests[idx],
+                config = job.config || {},
+                // Add the proper ifModifiedSince parameter if already called at least once
+                extra = job.onlyIfModified && job.lastModified ? { ifModifiedSince: job.lastModified } : {};
+
+            request.config = $.extend({}, config, request.config, extra);
             return request;
         }
 
@@ -463,10 +468,28 @@
         }
 
         // Own function for creating a closure to avoid reference to mutable state in the loop
-        function cbSuccessErrorClosure(type, job, i) {
+        function cbErrorClosure(job, i) {
+            var callback = job.error;
             return function(resp,j) {
-                if (job[type]) {
-                    job[type](resp,i,j)
+                // If we get a "304 - Not Modified" 'error', we do nothing
+                if (resp.status == 304) {
+                    return;
+                }
+                if (callback) {
+                    callback(resp,i,j)
+                }
+            }
+        }
+
+        function cbSuccessClosure(job, i) {
+            var callback = job.success;
+            return function(resp,j) {
+                if (callback) {
+                    // Remember last success callback
+                    if (job.onlyIfModified) {
+                        job.lastModified = resp.timestamp;
+                    }
+                    callback(resp,i,j)
                 }
             }
         }
@@ -476,7 +499,7 @@
         function constructCallbackDispatcher(callback) {
             if (callback == null) {
                 return function (response) {
-                    console.log("Ignoring response " + JSON.stringify(response));
+                    console.warn("Ignoring response " + JSON.stringify(response));
                 };
             } else if (callback === "ignore") {
                 // Ignore the return value
