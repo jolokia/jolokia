@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.1.1-SNAPSHOT" description="Release 1.1.1-SNAPSHOT">
+      <action dev="roland" type="add" issue="78" date="2013-03-15">
+        Added the possibility to use the attributes "callback" and "config" in j4p.register()
+        in the JS library.
+      </action>
       <action dev="marosmars" type="add" issue="85" date="2013-03-14">
         Added property errorValue to J4pRemoteException which contains a serialized
         version of the exception if the 'serializeException' processing parameter
