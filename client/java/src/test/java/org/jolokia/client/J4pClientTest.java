@@ -31,8 +31,10 @@ import org.apache.http.message.BasicHeader;
 import org.easymock.EasyMock;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
+import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.testng.collections.Maps;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -52,6 +54,12 @@ public class J4pClientTest {
 
     private static String ARRAY_RESPONSE = "[ " + MEMORY_RESPONSE + "]";
     public static final String TEST_URL = "http://localhost:8080/jolokia";
+
+	private static final String ERROR_VALUE_RESPONSE = "{" +
+			"\"error_type\":\"errorType\"" +
+			"\"status\":500" +
+			"\"error_value\":{\"test\":\"ok\"}" +
+			"}";
 
     public J4pReadRequest TEST_REQUEST,TEST_REQUEST_2;
 
@@ -131,6 +139,25 @@ public class J4pClientTest {
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         j4p.execute(TEST_REQUEST);
+    }
+    
+    @Test(expectedExceptions = J4pRemoteException.class)
+    public void remoteExceptionErrorValue() throws IOException, J4pException {
+        HttpClient client = prepareMocks("utf-8", ERROR_VALUE_RESPONSE);
+
+        J4pClient j4p = new J4pClient(TEST_URL,client);
+        Map<J4pQueryParameter, String> options = Maps.newHashMap();
+        options.put(J4pQueryParameter.SERIALIZE_EXCEPTION, "true");
+        options.put(J4pQueryParameter.INCLUDE_STACKTRACE, "false");
+
+		try {
+			j4p.execute(TEST_REQUEST, options);
+		} catch (J4pRemoteException e) {
+			assertEquals(e.getErrorValue().toJSONString(), "{\"test\":\"ok\"}");
+			throw e;
+		}
+		
+		fail("No exception was thrown");
     }
 
     private void throwException(boolean bulk,Exception exp) throws IOException, J4pException {
