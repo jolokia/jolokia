@@ -24,6 +24,11 @@
   </properties>
   <body>
     <release version="1.1.1-SNAPSHOT" description="Release 1.1.1-SNAPSHOT">
+      <action dev="roland" type="add" issue="77" date="2013-03-15">
+        JS: j4p.register() can now use a 'onlyIfModified' attribute to call the callback only
+        if some changes has happened on the server side. This works currently
+        only for list requests.
+      </action>
       <action dev="roland" type="add" issue="78" date="2013-03-15">
         Added the possibility to use the attributes "callback" and "config" in j4p.register()
         in the JS library.
