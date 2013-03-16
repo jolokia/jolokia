@@ -19,13 +19,12 @@ package org.jolokia.jvmagent.spring;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.springframework.core.Ordered;
 
 /**
  * Configuration wrapper for a spring based configuration. It simply wraps a string-string map
  * for values.
- * The content of this object is used for building up a {@link JolokiaServerConfig} for
+ * The content of this object is used for building up a {@link org.jolokia.jvmagent.JolokiaServerConfig} for
  * the server to start.
  * <p>
  * Multiple config objects can be present in a context, their precedence in decided

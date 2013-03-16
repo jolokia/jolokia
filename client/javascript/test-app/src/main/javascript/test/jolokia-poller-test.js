@@ -149,22 +149,27 @@ $(document).ready(function() {
 
     asyncTest("OnlyIfModified test - callback",function() {
         var j4p = new Jolokia("/jolokia");
-        var counter = 0;
+        var counter = {
+            1: 0,
+            3: 0
+        };
         j4p.register({
-                callback: function(resp1) {
-                    counter++;
+                callback: function() {
+                    counter[arguments.length]++;
                 },
                 onlyIfModified: true
             },
-            { type: "LIST", config: { maxDepth: 2}}
+            { type: "LIST", config: { maxDepth: 2}},
+            { type: "LIST", config: { maxDepth: 1}},
+            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"}
         );
         j4p.start(200);
         setTimeout(function() {
             j4p.stop();
-            // Should have been called only once
-            equals(counter,1);
+            equals(counter[3],1);
+            equals(counter[1],1);
             start();
-        },600);
+        },500);
     });
 
     asyncTest("OnlyIfModified test - success and error ",function() {

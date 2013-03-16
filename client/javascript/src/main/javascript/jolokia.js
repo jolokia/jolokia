@@ -389,7 +389,6 @@
             return function() {
                 var errorCbs = [],
                     successCbs = [],
-                    reqs,
                     i, j,
                     len = jobs.length;
                 var requests = [];
@@ -454,17 +453,31 @@
         // which the finally is feed in to the callback as array
         function cbCallbackClosure(job,jolokia) {
             var responses = [],
-                callback = job.callback;
+                callback = job.callback,
+                lastModified = 0;
 
             return {
-                cb : function(resp,j) {
-                    responses.push(resp);
-                },
+                cb : addResponse,
                 lcb : function(resp,j) {
-                    responses.push(resp);
-                    callback.apply(jolokia,responses);
+                    addResponse(resp);
+                    // Callback is called only if at least one non-cached response
+                    // is obtained. Update job's timestamp internally
+                    if (responses.length > 0) {
+                        job.lastModified = lastModified;
+                        callback.apply(jolokia,responses);
+                    }
                 }
             };
+
+            function addResponse(resp,j) {
+                // Only remember responses with values and remember lowest timetamp, too.
+                if (resp.status != 304) {
+                    if (lastModified == 0 || resp.timestamp < lastModified ) {
+                        lastModified = resp.timestamp;
+                    }
+                    responses.push(resp);
+                }
+            }
         }
 
         // Own function for creating a closure to avoid reference to mutable state in the loop
