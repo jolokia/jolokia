@@ -24,6 +24,14 @@
   </properties>
   <body>
     <release version="1.1.1-SNAPSHOT" description="Release 1.1.1-SNAPSHOT">
+      <action dev="roland" type="fix" issue="71">
+        "Expires" header contains now the same value as the "Date" HTTP response header,
+        following the recommendation of RFC-2616.
+      </action>
+      <action dev="roland" type="fix" issue="84" date="2013-03-17">
+        Fixed assembly of distribution packages where the JMX and Spring packages were
+        missing.
+      </action>
       <action dev="roland" type="add" issue="77" date="2013-03-15">
         JS: j4p.register() can now use a 'onlyIfModified' attribute to call the callback only
         if some changes has happened on the server side. This works currently

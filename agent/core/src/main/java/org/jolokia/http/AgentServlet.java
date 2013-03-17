@@ -338,7 +338,18 @@ public class AgentServlet extends HttpServlet {
     private void setNoCacheHeaders(HttpServletResponse pResp) {
         pResp.setHeader("Cache-Control", "no-cache");
         pResp.setHeader("Pragma","no-cache");
-        pResp.setHeader("Expires","-1");
+        // Check for a date header and set it accordingly to the recommendations of
+        // RFC-2616 (http://tools.ietf.org/html/rfc2616#section-14.21)
+        //
+        //   "To mark a response as "already expired," an origin server sends an
+        //    Expires date that is equal to the Date header value. (See the rules
+        //  for expiration calculations in section 13.2.4.)"
+        //
+        // See also #71
+
+        long now = System.currentTimeMillis();
+        pResp.setDateHeader("Date",now);
+        pResp.setDateHeader("Expires",now);
     }
 
     private void setContentType(HttpServletResponse pResp, String pContentType) {

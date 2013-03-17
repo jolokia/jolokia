@@ -18,7 +18,8 @@ package org.jolokia.jvmagent;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -72,7 +73,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void testCallbackPost() throws URISyntaxException, IOException {
+    public void testCallbackPost() throws URISyntaxException, IOException, java.text.ParseException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data",
                                                 "Content-Type","text/plain; charset=UTF-8",
                                                 "Origin",null
@@ -93,7 +94,14 @@ public class JolokiaHttpHandlerTest {
 
         assertEquals(header.getFirst("Cache-Control"),"no-cache");
         assertEquals(header.getFirst("Pragma"),"no-cache");
-        assertEquals(header.getFirst("Expires"),"-1");
+        String expires = header.getFirst("Expires");
+        String date = header.getFirst("Date");
+        assertEquals(expires,date);
+        SimpleDateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        Date parsedDate = rfc1123Format.parse(expires);
+        Date now = new Date();
+        assertTrue(parsedDate.before(now) || parsedDate.equals(now));
     }
 
     @Test

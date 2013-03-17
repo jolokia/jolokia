@@ -19,7 +19,8 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,10 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Configuration of this handler
-    private Configuration configuration;
+    private       Configuration    configuration;
+
+    // Formatted for formatting Date response headers
+    private final SimpleDateFormat rfc1123Format;
 
     /**
      * Create a new HttpHandler for processing HTTP request
@@ -69,6 +73,9 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         if (!context.endsWith("/")) {
             context += "/";
         }
+
+        rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     /**
@@ -77,7 +84,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      */
     public void start(boolean pLazy) {
         backendManager = new BackendManager(configuration, this, createRestrictor(configuration), pLazy);
-        requestHandler = new HttpRequestHandler(configuration,backendManager, this);
+        requestHandler = new HttpRequestHandler(configuration, backendManager, this);
     }
 
     /**
@@ -194,7 +201,13 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         // Avoid caching at all costs
         headers.set("Cache-Control", "no-cache");
         headers.set("Pragma","no-cache");
-        headers.set("Expires","-1");
+
+        // Check for a date header and set it accordingly to the recommendations of
+        // RFC-2616. See also {@link AgentServlet#setNoCacheHeaders()}
+        // Issue: #71
+        String now = rfc1123Format.format(new Date());
+        headers.set("Date",now);
+        headers.set("Expires",now);
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
