@@ -12,7 +12,8 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
+import org.jolokia.util.EscapeUtil;
+import org.jolokia.util.RequestType;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -126,14 +127,6 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     }
 
     // ==========================================================================================================
-
-    // check for freshness
-    private void checkForModifiedSince(MBeanServerExecutor pServerManager, JmxListRequest pRequest) throws NotChangedException {
-        int ifModifiedSince = pRequest.getParameterAsInt(ConfigKey.IF_MODIFIED_SINCE);
-        if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {
-            throw new NotChangedException(pRequest);
-        }
-    }
 
     /**
      * Prepare an objectname patttern from a path (or "null" if no path is given)

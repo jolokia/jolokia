@@ -6,6 +6,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -61,7 +62,8 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
     public Object doHandleRequest(MBeanServerExecutor serverManager, JmxSearchRequest request)
-            throws MBeanException, IOException {
+            throws MBeanException, IOException, NotChangedException {
+        checkForModifiedSince(serverManager,request);
         Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
         Set<String> ret = new LinkedHashSet<String>();
 

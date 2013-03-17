@@ -6,6 +6,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
@@ -196,4 +197,18 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
         return restrictor;
     }
 
+    /**
+     * Check, whether the set of MBeans for any managed MBeanServer has been change since the timestamp
+     * provided in the given request
+     * @param pServerManager manager for all MBeanServers
+     * @param pRequest the request from where to fetch the timestamp
+     * @throws NotChangedException if there has been no REGISTER/UNREGISTER notifications in the meantime
+     */
+    protected void checkForModifiedSince(MBeanServerExecutor pServerManager, JmxRequest pRequest)
+            throws NotChangedException {
+        int ifModifiedSince = pRequest.getParameterAsInt(ConfigKey.IF_MODIFIED_SINCE);
+        if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {
+            throw new NotChangedException(pRequest);
+        }
+    }
 }
