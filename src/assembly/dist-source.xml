@@ -36,6 +36,7 @@
         <exclude>*.pl</exclude>
         <exclude>.gitignore</exclude>
         <exclude>.gitshots/**</exclude>
+        <exclude>roo-repository.xml</exclude>
       </excludes>
     </fileSet>
   </fileSets>
