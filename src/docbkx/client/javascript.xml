@@ -636,30 +636,55 @@ j4p.start(10000);
         <listitem>
           <para>
             This method registers one or more request for being
-            periodically fetched. <code>callback</code> is either a
+            periodically fetched. <code>callback</code> can be either a
             function or an object.
-          </para>          
+          </para>
           <para>
-            If a function is given or an object with an attribute <code>callback</code> holding a function, then
-            this function is called with all responses received as argument, regardless whether the individual response
+            If a function is given or an object with an attribute
+            <code>callback</code> holding a function, then this
+            function is called with all responses received as
+            argument, regardless whether the individual response
             indicates a success or error state.
           </para>
           <para>
-              If the first argument is an object with two callback attributes <code>success</code> and <code>error</code>,
-              these functions are called for <em>each</em> response separately, depending whether the response
-              indicates success or an error state. If multiple requests have been registered along with this callback object,
-             the callback is called multiple times, one for each request in the same order as the request are given.
-              As second argument, the handle which is returned by this method is given and as third argument the index
-              within the list of requests.
+            If the first argument is an object with two callback
+            attributes <code>success</code> and <code>error</code>,
+            these functions are called for <emphasis>each</emphasis> response
+            separately, depending whether the response indicates
+            success or an error state. If multiple requests have been
+            registered along with this callback object, the callback
+            is called multiple times, one for each request in the same
+            order as the request are given.  As second argument, the
+            handle which is returned by this method is given and as
+            third argument the index within the list of requests.
           </para>
           <para>
-              If the first argument is an object, an additional 'config' attribute with processing parameters can
-              be given which is used as default for the registered requests.
-              Request with a 'config' section take precedence.
+            If the first argument is an object, an additional
+            <constant>config</constant> attribute with processing
+            parameters can be given which is used as default for the
+            registered requests. Requests with a
+            <constant>config</constant> section take precedence.
           </para>            
           <para>
-            This method returns a handle which can be used later for
-            unregistering these requests. 
+            Furthermore, if a <constant>onlyIfModified:
+            true</constant> exists in the callback object, then the
+            <constant>sucess</constant> and <constant>error</constant>
+            callbacks are called only if the result changed on the
+            server side. Currently, this is supported for the
+            <constant>list</constant> operation only in which case the
+            callback is only called when MBean has been registered or
+            deregistered since the last call of the scheduler. If a
+            single <constant>callback</constant> function is used
+            which gets all responses for a job at once, then this
+            function is called only with the responses, which carry a
+            value. If none of the registered requests produced a
+            response with value (i.e. the server decided that there
+            was no update for any request), then a call to the callback function is
+            skipped competely.
+          </para>
+          <para>
+            <code>register()</code> returns a handle which can be used
+            later for unregistering these requests.
           </para>
           <para>
             In the following example two requests are registered along
@@ -692,10 +717,12 @@ j4p.register(
     },
     config: {
        serializeException: true
-    }
+    },
+    onlyIfModified: true
   },
-  { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
-  { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount", config: { ignoreErrors: true }},
+  { type: "LIST", config: { maxDepth: 2}},
+  { type: "READ", mbean: "java.lang:type=Threading", 
+    attribute: "ThreadCount", config: { ignoreErrors: true }},
   { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
 ]]>
           </programlisting>
