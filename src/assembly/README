@@ -27,6 +27,14 @@ Multiple agents are provided for different environments:
 All agents can be found in the agents/ subdirectory. For installation
 instructions, please refer to http://www.jolokia.org/agent.html
 
+JMX Support Libraries
+---------------------
+
+Below jmx/ there are support libraries when using the JMX
+ agent programatically. I.e. there is Spring support including
+an own jolokia Configuration Syntax and extended JMX support
+like @JsonMBean.
+
 Client Library
 --------------
 
