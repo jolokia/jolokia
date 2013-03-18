@@ -29,11 +29,7 @@ public enum RequestType {
     WRITE("write"),
     EXEC("exec"),
     VERSION("version"),
-    SEARCH("search"),
-
-    // Unsupported:
-    REGNOTIF("regnotif"),
-    REMNOTIF("remnotif");
+    SEARCH("search");
 
     private String name;
 
@@ -66,7 +62,7 @@ public enum RequestType {
         }
         RequestType type = typesByNameMap.get(pName.toLowerCase());
         if (type == null) {
-            throw new IllegalArgumentException("No type with name '" + pName + "' exists");
+            throw new UnsupportedOperationException("No type with name '" + pName + "' exists");
         }
         return type;
     }
