@@ -68,14 +68,14 @@ public abstract class JmxRequest {
      * Constructor used for {@link HttpMethod#POST} requests, which receive a JSON payload.
      *
      * @param pMap map containing requests parameters
-     * @param pInitParams optional processing parameters (obtained as query parameters or from within the
+     * @param pProcessingParams optional processing parameters (obtained as query parameters or from within the
      *        JSON request)
      */
-    public JmxRequest(Map<String, ?> pMap, ProcessingParameters pInitParams) {
+    public JmxRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
              EscapeUtil.parsePath((String) pMap.get("path")),
-             pInitParams);
+             pProcessingParams);
 
         Map target = (Map) pMap.get("target");
         if (target != null) {

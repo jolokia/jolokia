@@ -29,15 +29,16 @@ public enum RequestType {
     WRITE("write"),
     EXEC("exec"),
     VERSION("version"),
-    SEARCH("search");
+    SEARCH("search"),
+    NOTIFICATION("notif");
 
     private String name;
 
-    private static Map<String,RequestType> typesByNameMap = new HashMap<String, RequestType>();
+    private static Map<String, RequestType> typesByNameMap = new HashMap<String, RequestType>();
 
     static {
         for (RequestType t : RequestType.values()) {
-            typesByNameMap.put(t.getName(),t);
+            typesByNameMap.put(t.getName(), t);
         }
     }
 

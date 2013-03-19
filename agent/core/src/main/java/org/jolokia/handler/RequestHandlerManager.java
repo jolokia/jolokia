@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.notification.NotificationDispatcher;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
 
@@ -50,7 +51,8 @@ public class RequestHandlerManager {
                 new ExecHandler(pRestrictor, pConverters),
                 new ListHandler(pRestrictor),
                 new VersionHandler(pRestrictor, pServerHandle),
-                new SearchHandler(pRestrictor)
+                new SearchHandler(pRestrictor),
+                new NotificationHandler(pRestrictor)
         };
         for (JsonRequestHandler handler : handlers) {
             requestHandlerMap.put(handler.getType(),handler);

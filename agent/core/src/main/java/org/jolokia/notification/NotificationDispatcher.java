@@ -12,7 +12,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 18.03.13
  */
-public class NotificationHandler {
+public class NotificationDispatcher {
 
     private final NotificationBackend[] BACKENDS = new NotificationBackend[]{
 
@@ -22,7 +22,7 @@ public class NotificationHandler {
 
     private NotificationListenerDelegate listenerDelegate;
 
-    public NotificationHandler(MBeanServerExecutor executor) {
+    public NotificationDispatcher(MBeanServerExecutor executor) {
         for (NotificationBackend backend : BACKENDS) {
             backendMap.put(backend.getType(), backend);
         }

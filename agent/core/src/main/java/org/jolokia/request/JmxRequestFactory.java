@@ -188,6 +188,7 @@ public final class JmxRequestFactory {
         CREATOR_MAP.put(RequestType.LIST, JmxListRequest.newCreator());
         CREATOR_MAP.put(RequestType.VERSION, JmxVersionRequest.newCreator());
         CREATOR_MAP.put(RequestType.SEARCH, JmxSearchRequest.newCreator());
+        CREATOR_MAP.put(RequestType.NOTIFICATION, JmxNotificationRequest.newCreator());
     }
 
 }

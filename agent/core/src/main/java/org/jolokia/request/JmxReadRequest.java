@@ -201,7 +201,8 @@ public class JmxReadRequest extends JmxObjectNameRequest {
             attributeNames = null;
             multiAttributeMode = false;
         } else {
-            throw new IllegalArgumentException("Attribute names must be either a String, Collection or null (and not " + pAttrval.getClass() + ")");
+            throw new IllegalArgumentException("Attribute names must be either a String, " +
+                                               "Collection or null (and not " + pAttrval.getClass() + ")");
         }
     }
 }
