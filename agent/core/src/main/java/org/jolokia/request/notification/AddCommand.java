@@ -18,23 +18,36 @@ package org.jolokia.request.notification;
 
 import java.util.*;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.management.*;
 
 import org.jolokia.util.EscapeUtil;
 
 /**
+ * Command for adding a notification listener for a client with optional
+ * filter and handback.
+ *
  * @author roland
  * @since 19.03.13
  */
 public class AddCommand extends ClientCommand {
 
+    // MBean on which to register a notification listener
     private final ObjectName objectName;
 
+    // List of filter on notification types which are ORed together
     private List<String> filter;
 
+    // An arbitrary handback returned for every notification received
     private Object handback;
 
+    /**
+     * Add for GET requests, which mus have the path part '/client/mbean'.
+     * Optionally an '/filter1,filter2/handback' part can be provided.
+     * (an handback works only with filters given)
+     *
+     * @param pStack path stack from where to extract the information
+     * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
+     */
     AddCommand(Stack<String> pStack) throws MalformedObjectNameException {
         super(CommandType.ADD, pStack);
         if (pStack.isEmpty()) {
@@ -49,6 +62,14 @@ public class AddCommand extends ClientCommand {
         }
     }
 
+    /**
+     * For POST requests, the key 'client' and 'mbean' must be given in the request payload.
+     * Optionally, a 'filter' element with an array of string filters (or a single filter as string)
+     * can be given. This filter gets applied for the notification type (see {@link NotificationFilterSupport})
+     *
+     * @param pMap request map
+     * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
+     */
     AddCommand(Map<String,?> pMap) throws MalformedObjectNameException {
         super(CommandType.ADD, pMap);
         if (!pMap.containsKey("mbean")) {
@@ -62,14 +83,29 @@ public class AddCommand extends ClientCommand {
         handback = pMap.get("handback");
     }
 
+    /**
+     * Objectname of the MBean the listener should connect to
+     * @return mbean name
+     */
     public ObjectName getObjectName() {
         return objectName;
     }
 
+    /**
+     * A list of string filters or <code>null</code> if no
+     * filters has been provided
+     * @return list of filters
+     */
     public List<String> getFilter() {
         return filter;
     }
 
+    /**
+     * A handback object. For GET requests this is a String, for POSTS it can be
+     * an arbitrary JSON structure.
+     *
+     * @return handback object or null if none has been provided
+     */
     public Object getHandback() {
         return handback;
     }

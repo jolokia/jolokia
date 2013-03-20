@@ -17,6 +17,8 @@
 package org.jolokia.request.notification;
 
 /**
+ * Register a new client
+ *
  * @author roland
  * @since 19.03.13
  */

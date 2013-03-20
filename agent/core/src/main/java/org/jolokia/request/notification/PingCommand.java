@@ -20,15 +20,29 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
+ * Ping commands are used for updating a clients freshness. If
+ * a client is not refreshed within a certain time interval,
+ * it will be removed in order so save resources. Each successful
+ * delivered notification will update the freshness automatically,
+ * though.
+ *
  * @author roland
  * @since 19.03.13
  */
 public class PingCommand extends ClientCommand {
 
+    /**
+     * Constructor for GET requests
+     * @param pStack path stack
+     */
     PingCommand(Stack<String> pStack) {
         super(CommandType.PING, pStack);
     }
 
+    /**
+     * Constructor for POST requests
+     * @param pMap request map
+     */
     PingCommand(Map<String, ?> pMap) {
         super(CommandType.PING, pMap);
     }

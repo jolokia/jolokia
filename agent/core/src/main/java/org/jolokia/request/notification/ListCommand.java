@@ -20,14 +20,26 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
+ * List command for getting all registered notification for a client.
+ * Only the client id is required.
+ *
  * @author roland
  * @since 19.03.13
  */
 public class ListCommand extends ClientCommand {
+
+    /**
+     * Constructor for GET requests
+     * @param pStack path stack
+     */
     ListCommand(Stack<String> pStack) {
         super(CommandType.LIST, pStack);
     }
 
+    /**
+     * Constructor for POST requests
+     * @param pMap request map
+     */
     ListCommand(Map<String, ?> pMap) {
         super(CommandType.LIST, pMap);
     }

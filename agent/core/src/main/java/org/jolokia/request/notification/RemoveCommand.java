@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
+ * Remove a listener by its handle
+ *
  * @author roland
  * @since 19.03.13
  */
@@ -27,6 +29,12 @@ public class RemoveCommand extends ClientCommand {
 
     private String handle;
 
+    /**
+     * Remove a listener for GET requests. The handle must be given (after the client path part),
+     * otherwise an {@link IllegalArgumentException} is thrown.
+     *
+     * @param pStack path stack
+     */
     RemoveCommand(Stack<String> pStack) {
         super(CommandType.REMOVE, pStack);
         if (pStack.isEmpty()) {
@@ -35,6 +43,12 @@ public class RemoveCommand extends ClientCommand {
         handle = pStack.pop();
     }
 
+    /**
+     * Remove a listener for POST requests. The map must contain a key "handle" for specifying the
+     * notification registration to be removed.
+     *
+     * @param pMap request map
+     */
     RemoveCommand(Map<String, ?> pMap) {
         super(CommandType.REMOVE, pMap);
         handle = (String) pMap.get("handle");

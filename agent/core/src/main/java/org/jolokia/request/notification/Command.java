@@ -17,6 +17,8 @@
 package org.jolokia.request.notification;
 
 /**
+ * Base command class holding the command type
+ *
  * @author roland
  * @since 19.03.13
  */
@@ -25,6 +27,11 @@ public abstract class Command {
     // Command action
     private CommandType type;
 
+    /**
+     * Constructor with type
+     *
+     * @param pType type of this command
+     */
     protected Command(CommandType pType) {
         type = pType;
     }

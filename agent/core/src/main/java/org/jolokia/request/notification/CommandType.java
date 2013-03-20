@@ -20,20 +20,42 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Enum specifying the possible notification command types
+ *
  * @author roland
  * @since 19.03.13
  */
 public enum CommandType {
 
+    /**
+     * Register a new client
+     */
     REGISTER("register"),
+    /**
+     * Unregister a client and remove all listeners
+     */
     UNREGISTER("unregister"),
+    /**
+     * Add a new listener for a certain client
+     */
     ADD("add"),
+    /**
+     * Remove a listener for a certain client
+     */
     REMOVE("remove"),
+    /**
+     * Ping to update the freshness of a client
+     */
     PING("ping"),
+    /**
+     * List all notifications for a client
+     */
     LIST("list");
 
+    // type as given in the request
     private String type;
 
+    // lookup for name-to-type
     private final static Map<String, CommandType> commandsByName =
             new HashMap<String, CommandType>();
 
@@ -44,14 +66,13 @@ public enum CommandType {
         }
     }
 
-    //
-    CommandType(String pPType) {
+    private CommandType(String pPType) {
         type = pPType;
     }
 
     /**
-     * Return the name of the typs
-     * @return
+     * Return the name of the type
+     * @return name of type
      */
     public String getType() {
         return type;

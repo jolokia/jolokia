@@ -20,13 +20,25 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
+ * A base command which should be subclassed by every command
+ * requiring  'client' attribute.
+ *
  * @author roland
  * @since 19.03.13
  */
 abstract public class ClientCommand extends Command {
 
+    // Client which is typically a UUID
     private String client;
 
+    /**
+     * Constructor used for GET requests. If no client id is given
+     * as first part of the path an {@link IllegalArgumentException}
+     * is thrown.
+     *
+     * @param pType command type
+     * @param pStack stack which on top must hold the client id
+     */
     protected ClientCommand(CommandType pType, Stack<String> pStack) {
         super(pType);
         if (pStack.isEmpty()) {
@@ -35,6 +47,13 @@ abstract public class ClientCommand extends Command {
         client = pStack.pop();
     }
 
+    /**
+     * Constructor for POST requests. If no client is given under the
+     * key "client" an {@link IllegalArgumentException} is thrown
+     *
+     * @param pType command type
+     * @param pMap map holding the request
+     */
     protected ClientCommand(CommandType pType, Map<String, ?> pMap) {
         super(pType);
         client = (String) pMap.get("client");

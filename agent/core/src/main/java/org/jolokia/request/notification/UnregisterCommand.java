@@ -20,15 +20,25 @@ import java.util.Map;
 import java.util.Stack;
 
 /**
+ * Unregister a client
+ *
  * @author roland
  * @since 19.03.13
  */
 public class UnregisterCommand extends ClientCommand {
 
+    /**
+     * Constructor for GET requests
+     * @param pStack path stack
+     */
     UnregisterCommand(Stack<String> pStack) {
         super(CommandType.UNREGISTER, pStack);
     }
 
+    /**
+     * Constructor for POST requests
+     * @param pMap request map
+     */
     UnregisterCommand(Map<String,?> pMap) {
         super(CommandType.UNREGISTER,pMap);
     }
