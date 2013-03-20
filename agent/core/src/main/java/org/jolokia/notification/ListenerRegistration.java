@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.management.*;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
@@ -16,34 +17,30 @@ import org.json.simple.JSONObject;
 class ListenerRegistration {
 
     // the callback to be called when notifications come in
-    private BackendCallback callback;
+    private final BackendCallback callback;
 
     // An optional filter extracted from the configuration
-    private NotificationFilter filter;
+    private final NotificationFilterSupport filter;
 
     // Name of the MBean to register to
-    private ObjectName mbeanName;
+    private final ObjectName mbeanName;
 
-    // The overall configuration, used for adding this config to a list
-    private JSONObject config;
+    // optional handback returned to a client when a notification arrives
+    private final Object handback;
 
     /**
      * Create a new configuration object for an addListener() request
      *
      * @param pMBeanName name of the MBean to register for
-     * @param pConfig listener configuration
+     * @param pFilters optional list of filters (might be null)
+     * @param pHandback handback returned to the listeners
      * @param pCallback callback to call when a notification arrives
      */
-    ListenerRegistration(ObjectName pMBeanName, JSONObject pConfig, BackendCallback pCallback) {
+    ListenerRegistration(ObjectName pMBeanName, List<String> pFilters, Object pHandback, BackendCallback pCallback) {
         callback = pCallback;
         mbeanName = pMBeanName;
-        config = pConfig;
-        if (pConfig.containsKey("filter")) {
-            Object filters = pConfig.get("filter");
-            filter = createFilter(filters);
-        } else {
-            filter = null;
-        }
+        handback = pHandback;
+        filter = createFilter(pFilters);
     }
 
     /**
@@ -52,8 +49,13 @@ class ListenerRegistration {
      */
     public JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        ret.putAll(config);
         ret.put("mbean", mbeanName.toString());
+        if (filter != null) {
+            ret.put("filter",filterToJSON(filter));
+        }
+        if (handback != null) {
+            ret.put("handback",handback);
+        }
         return ret;
     }
 
@@ -74,24 +76,28 @@ class ListenerRegistration {
 
     /** Get the handback used for the JMX listener */
     public Object getHandback() {
-        return config.get("handback");
+        return handback;
     }
 
     // ====================================================================================
     // Filters are always on the notification type, but there can be multiple given, which are ORed together
-    private NotificationFilter createFilter(Object pFilters) {
-        NotificationFilterSupport filter = new NotificationFilterSupport();
-        if (pFilters instanceof List) {
-            for (Object f : (List) pFilters) {
-                if (f instanceof String) {
-                    filter.enableType((String) f);
-                } else throw new IllegalArgumentException("Not a valid type filter: " + f);
+    private NotificationFilterSupport createFilter(List<String> pFilters) {
+        if (pFilters != null) {
+            NotificationFilterSupport filter = new NotificationFilterSupport();
+            for (String f :  pFilters) {
+                filter.enableType(f);
             }
-        } else if (pFilters instanceof String) {
-            filter.enableType((String) pFilters);
+            return filter;
         } else {
-            throw new IllegalArgumentException("Not a valid type filter: " + pFilters);
+            return null;
         }
-        return filter;
+    }
+
+    private JSONArray filterToJSON(NotificationFilterSupport pFilter) {
+        JSONArray ret = new JSONArray();
+        for (String f : pFilter.getEnabledTypes()) {
+            ret.add(f);
+        }
+        return ret;
     }
 }

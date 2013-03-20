@@ -42,19 +42,14 @@ import org.json.simple.JSONObject;
 public class NotificationListenerDelegate implements NotificationListener {
 
     // Managed clients
-    private Map<String,ClientConfig> clients;
-
-    // Executor used for registering JMX notification listeners
-    private MBeanServerExecutor executor;
+    private Map<String, ClientState> clients;
 
     /**
      * Build up this delegate.
      *
-     * @param pExecutor executor to used for doing the JMX registrations
      */
-    public NotificationListenerDelegate(MBeanServerExecutor pExecutor) {
-        executor = pExecutor;
-        clients = new HashMap<String, ClientConfig>();
+    public NotificationListenerDelegate() {
+        clients = new HashMap<String, ClientState>();
     }
 
     /**
@@ -64,25 +59,26 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @return client id
      */
     public String register() {
-        String uuid = findUuid();
-        clients.put(uuid,new ClientConfig());
+        String uuid = createClientId();
+        clients.put(uuid, new ClientState());
         return uuid;
     }
 
     /**
      * Unregister the client. All notifications added will be removed from the MBeanServers.
      *
+     * @param pExecutor the executor used for unregistering listeners
      * @param pClient client to unregister
      *
      * @throws MBeanException
      * @throws IOException
      * @throws ReflectionException
      */
-    public void unregister(String pClient)
+    public void unregister(MBeanServerExecutor pExecutor, String pClient)
             throws MBeanException, IOException, ReflectionException {
-        ClientConfig clientConfig = getClientConfig(pClient);
-        for (String handle : clientConfig.getHandles()) {
-            removeListener(pClient,handle);
+        ClientState clientState = getClientState(pClient);
+        for (String handle : clientState.getHandles()) {
+            removeListener(pExecutor, pClient, handle);
         }
         clients.remove(pClient);
     }
@@ -91,22 +87,23 @@ public class NotificationListenerDelegate implements NotificationListener {
      * Add a notification listener on behalf of a client. A JMX listener will be added with
      * the filter and handback given in the provided listener configuration.
      *
+     * @param pExecutor executor for registering JMX notification listeners
      * @param pClient client for which to add a listener
-     * @param pConfig the listener's configuration
+     * @param pRegistration the listener's configuration
      * @return a handle identifying the registered listener. This handle can be used later for removing the listener.
      *
      * @throws MBeanException
      * @throws IOException
      * @throws ReflectionException
      */
-    public String addListener(String pClient, final ListenerRegistration pConfig)
+    public String addListener(MBeanServerExecutor pExecutor, String pClient, final ListenerRegistration pRegistration)
             throws MBeanException, IOException, ReflectionException {
-        ClientConfig clientConfig = getClientConfig(pClient);
-        String handle = clientConfig.add(pConfig);
-        executor.each(pConfig.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+        ClientState clientState = getClientState(pClient);
+        String handle = clientState.add(pRegistration);
+        pExecutor.each(pRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                pConn.addNotificationListener(pName,NotificationListenerDelegate.this,pConfig.getFilter(),pConfig);
+                pConn.addNotificationListener(pName,NotificationListenerDelegate.this,pRegistration.getFilter(),pRegistration);
             }
         });
         return handle;
@@ -115,18 +112,19 @@ public class NotificationListenerDelegate implements NotificationListener {
     /**
      * Remove a listener for a given client and for the given handle.
      *
+     * @param pExecutor executor for removing JMX notifications listeners
      * @param pClient client for wich to remove the listener
-     * @param pHandle the handle as obtained from {@link #addListener(String, ListenerRegistration)}
+     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerExecutor, String, ListenerRegistration)}
      *
      * @throws MBeanException
      * @throws IOException
      * @throws ReflectionException
      */
-    public void removeListener(String pClient, String pHandle)
+    public void removeListener(MBeanServerExecutor pExecutor, String pClient, String pHandle)
             throws MBeanException, IOException, ReflectionException {
-        ClientConfig clientConfig = getClientConfig(pClient);
-        final ListenerRegistration config = clientConfig.get(pHandle);
-        executor.each(config.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+        ClientState clientState = getClientState(pClient);
+        final ListenerRegistration config = clientState.get(pHandle);
+        pExecutor.each(config.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 try {
@@ -136,7 +134,7 @@ public class NotificationListenerDelegate implements NotificationListener {
                 }
             }
         });
-        clientConfig.remove(pHandle);
+        clientState.remove(pHandle);
     }
 
     /**
@@ -145,19 +143,21 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param pClient client to refresh
      */
     public void refresh(String pClient) {
-        ClientConfig clientConfig = getClientConfig(pClient);
-        clientConfig.refresh();
+        ClientState clientState = getClientState(pClient);
+        clientState.refresh();
     }
 
     /**
      * Cleanup all clients which has been refreshed last before the given
      * time in epoch milliseconds
-     * @param oldest last refresh timestamp which should be kept
+     *
+     * @param pExecutor executor used for unregistering
+     * @param pOldest last refresh timestamp which should be kept
      */
-    public void cleanup(long oldest) throws MBeanException, IOException, ReflectionException {
-        for (Map.Entry<String,ClientConfig> client : clients.entrySet()) {
-            if (client.getValue().getLastRefresh() < oldest) {
-                unregister(client.getKey());
+    public void cleanup(MBeanServerExecutor pExecutor, long pOldest) throws MBeanException, IOException, ReflectionException {
+        for (Map.Entry<String,ClientState> client : clients.entrySet()) {
+            if (client.getValue().getLastRefresh() < pOldest) {
+                unregister(pExecutor, client.getKey());
             }
         }
     }
@@ -169,8 +169,8 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @return map with handle as keys and listener configs as objects.
      */
     public JSONObject list(String pClient) {
-        ClientConfig clientConfig = getClientConfig(pClient);
-        return clientConfig.list();
+        ClientState clientState = getClientState(pClient);
+        return clientState.list();
     }
 
     /**
@@ -189,21 +189,17 @@ public class NotificationListenerDelegate implements NotificationListener {
     // =========================================================================================================
 
     // Create a unique client ID
-    private String findUuid() {
-        UUID uuid;
-        do {
-            uuid = UUID.randomUUID();
-        } while (clients.containsKey(uuid.toString()));
-        return uuid.toString();
+    private String createClientId() {
+        return UUID.randomUUID().toString();
     }
 
     // Extract the client config from the internal map and throw and exception
     // if not present
-    private ClientConfig getClientConfig(String pClient) {
-        ClientConfig clientConfig = clients.get(pClient);
-        if (clientConfig == null) {
+    private ClientState getClientState(String pClient) {
+        ClientState clientState = clients.get(pClient);
+        if (clientState == null) {
             throw new IllegalArgumentException("No client " + pClient + " registered");
         }
-        return clientConfig;
+        return clientState;
     }
 }

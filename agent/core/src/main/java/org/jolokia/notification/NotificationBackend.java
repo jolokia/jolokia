@@ -1,7 +1,5 @@
 package org.jolokia.notification;
 
-import org.json.simple.JSONObject;
-
 /**
  * A notification backend which is responsible for the final delivery. This final
  * delivery is done by a callback which a backend needs to create out of a given
@@ -24,9 +22,8 @@ public interface NotificationBackend {
      * Create a specific callback for the given configuration. This
      * callback will be called for every notification received
      *
-     * @param pConfig configuration needed for creating the callback
      * @return callback which is stored in the {@link NotificationListenerDelegate} for
      *         triggering when the appropriate notification arrives.
      */
-    BackendCallback getBackendCallback(JSONObject pConfig);
+    BackendCallback getBackendCallback();
 }

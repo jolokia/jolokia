@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 18.03.13
  */
-public class ClientConfig {
+public class ClientState {
 
     // Map of all registrations for a client
     private Map<String, ListenerRegistration> listenerConfigMap;
@@ -27,7 +27,7 @@ public class ClientConfig {
     /**
      * Initialize
      */
-    public ClientConfig() {
+    public ClientState() {
         listenerConfigMap = new HashMap<String, ListenerRegistration>();
         lastRefresh = System.currentTimeMillis();
     }
