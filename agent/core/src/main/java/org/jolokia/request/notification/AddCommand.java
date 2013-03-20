@@ -34,6 +34,9 @@ public class AddCommand extends ClientCommand {
     // MBean on which to register a notification listener
     private final ObjectName objectName;
 
+    // Backend mode
+    private final String mode;
+
     // List of filter on notification types which are ORed together
     private List<String> filter;
 
@@ -41,7 +44,7 @@ public class AddCommand extends ClientCommand {
     private Object handback;
 
     /**
-     * Add for GET requests, which mus have the path part '/client/mbean'.
+     * Add for GET requests, which mus have the path part '/client/mode/mbean'.
      * Optionally an '/filter1,filter2/handback' part can be provided.
      * (an handback works only with filters given)
      *
@@ -50,6 +53,10 @@ public class AddCommand extends ClientCommand {
      */
     AddCommand(Stack<String> pStack) throws MalformedObjectNameException {
         super(CommandType.ADD, pStack);
+        if (pStack.isEmpty()) {
+            throw new IllegalArgumentException("No mode give for " + CommandType.ADD);
+        }
+        mode = pStack.pop();
         if (pStack.isEmpty()) {
             throw new IllegalArgumentException("No MBean name given for " + CommandType.ADD);
         }
@@ -63,7 +70,7 @@ public class AddCommand extends ClientCommand {
     }
 
     /**
-     * For POST requests, the key 'client' and 'mbean' must be given in the request payload.
+     * For POST requests, the key 'client','mode' and 'mbean' must be given in the request payload.
      * Optionally, a 'filter' element with an array of string filters (or a single filter as string)
      * can be given. This filter gets applied for the notification type (see {@link NotificationFilterSupport})
      *
@@ -72,6 +79,10 @@ public class AddCommand extends ClientCommand {
      */
     AddCommand(Map<String,?> pMap) throws MalformedObjectNameException {
         super(CommandType.ADD, pMap);
+        if (!pMap.containsKey("mode")) {
+            throw new IllegalArgumentException("No mode give for " + CommandType.ADD);
+        }
+        mode = (String) pMap.get("mode");
         if (!pMap.containsKey("mbean")) {
             throw new IllegalArgumentException("No MBean name given for " + CommandType.ADD);
         }
@@ -81,6 +92,16 @@ public class AddCommand extends ClientCommand {
             filter = f instanceof List ? (List<String>) f : Arrays.asList(f.toString());
         }
         handback = pMap.get("handback");
+    }
+
+    /**
+     * The backend mode specifies which backend is used for delivering a notification.
+     * E.g. "pull" will store notification server side which must be fetched actively
+     * by a client
+     * @return backend mode
+     */
+    public String getMode() {
+        return mode;
     }
 
     /**

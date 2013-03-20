@@ -115,6 +115,7 @@ public class CommandTest {
                     new Object[] {
                             "command", "add",
                             "client", uuid,
+                            "mode", "pull",
                             "mbean", mbean.toString(),
                             "filter", getFilterArrayList(filter),
                             "handback", handback
@@ -122,6 +123,7 @@ public class CommandTest {
                     new Checkable<AddCommand>() {
                         public void check(AddCommand cmd) {
                             assertEquals(cmd.getType(),CommandType.ADD);
+                            assertEquals(cmd.getMode(),"pull");
                             assertEquals(cmd.getClient(),uuid);
                             assertEquals(cmd.getObjectName(),mbean);
                             assertEquals(cmd.getFilter().size(),filter.length);
@@ -143,11 +145,13 @@ public class CommandTest {
                 new Object[]{
                         "command", "add",
                         "client", uuid,
+                        "mode", "pull",
                         "mbean", mbean.toString(),
                 },
                 new Checkable<AddCommand>() {
                     public void check(AddCommand cmd) {
                         assertEquals(cmd.getType(), CommandType.ADD);
+                        assertEquals(cmd.getMode(),"pull");
                         assertEquals(cmd.getClient(), uuid);
                         assertEquals(cmd.getObjectName(), mbean);
                     }
@@ -157,6 +161,7 @@ public class CommandTest {
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanStack() throws Exception {
         Stack<String> args = new Stack<String>();
+        args.push("pull");
         args.push(UUID.randomUUID().toString());
         args.push("add");
         CommandFactory.createCommand(args);
@@ -164,6 +169,22 @@ public class CommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanMap() throws Exception {
+        Map<String,String> args = new HashMap();
+        args.put("client",UUID.randomUUID().toString());
+        args.put("command","add");
+        args.put("mode","pull");
+        CommandFactory.createCommand(args);
+    }
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
+    public void addWithoutModeStack() throws Exception {
+        Stack<String> args = new Stack<String>();
+        args.push(UUID.randomUUID().toString());
+        args.push("add");
+        CommandFactory.createCommand(args);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
+    public void addWithoutModeMap() throws Exception {
         Map<String,String> args = new HashMap();
         args.put("client",UUID.randomUUID().toString());
         args.put("command","add");
