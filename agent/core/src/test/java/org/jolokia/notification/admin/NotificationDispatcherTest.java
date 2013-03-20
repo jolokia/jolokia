@@ -1,0 +1,153 @@
+package org.jolokia.notification.admin;
+
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.util.*;
+
+import javax.management.*;
+
+import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
+import org.jolokia.request.notification.*;
+import org.json.simple.JSONObject;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import static org.easymock.EasyMock.*;
+import static org.testng.Assert.*;
+
+/**
+ * @author roland
+ * @since 20.03.13
+ */
+public class NotificationDispatcherTest {
+
+    private static ObjectName TEST_NAME;
+
+    static {
+        try {
+            TEST_NAME = new ObjectName("test:type=test");
+        } catch (MalformedObjectNameException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    private NotificationDispatcher      dispatcher;
+    private MBeanServerConnection       connection;
+    private AbstractMBeanServerExecutor executor;
+
+    @BeforeMethod
+    public void setup() {
+        dispatcher = new NotificationDispatcher();
+        connection = createMock(MBeanServerConnection.class);
+        executor = new AbstractMBeanServerExecutor() {
+            @Override
+            protected Set<MBeanServerConnection> getMBeanServers() {
+                return new HashSet<MBeanServerConnection>(Arrays.asList(connection));
+            }
+        };
+    }
+
+    @Test
+    public void testRegister() throws Exception {
+        String ret = registerClient();
+        assertNotNull(ret);
+    }
+
+    private String registerClient() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, MBeanException, IOException, ReflectionException {
+        RegisterCommand cmd = createCommand(RegisterCommand.class);
+        return dispatch(cmd);
+    }
+
+    @Test
+    public void testUnregisterAndPing() throws Exception {
+        String id = registerClient();
+
+        UnregisterCommand uregCmd = createCommand(UnregisterCommand.class, "client", id);
+        PingCommand pingCmd = createCommand(PingCommand.class, "client", id);
+        dispatch(pingCmd);
+        dispatch(uregCmd);
+        try {
+            dispatch(pingCmd);
+            fail("Client with id " + id + " should be unregistered");
+        } catch (IllegalArgumentException exp) {
+
+        }
+    }
+
+    @Test
+    public void testUnregisterWithListeners() throws Exception {
+        String id = registerClient();
+        setupConnectionForAdd();
+        AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","pull");
+        String handle = dispatch(addCmd);
+        UnregisterCommand uregCmd = createCommand(UnregisterCommand.class,"client",id);
+        dispatch(uregCmd);
+    }
+
+    @Test
+    public void testAddAndRemove() throws Exception {
+        String id = registerClient();
+        setupConnectionForAdd();
+        AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","pull");
+        String handle = dispatch(addCmd);
+        ListCommand listCmd = createCommand(ListCommand.class,"client",id);
+        JSONObject list = dispatch(listCmd);
+        assertEquals(list.size(),1);
+        assertEquals( ((JSONObject) list.get("1")).get("mbean"),TEST_NAME.toString());
+        assertNotNull(handle);
+        RemoveCommand removeCommand = createCommand(RemoveCommand.class,"client",id,"handle",handle);
+        dispatch(removeCommand);
+    }
+
+    private void setupConnectionForAdd() throws IOException, InstanceNotFoundException, NoSuchFieldException, IllegalAccessException, ListenerNotFoundException {
+        expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
+        connection.addNotificationListener(eq(TEST_NAME), eq(getNotificationListener()), (NotificationFilter) isNull(), isA(ListenerRegistration.class));
+        connection.removeNotificationListener(eq(TEST_NAME), eq(getNotificationListener()), (NotificationFilter) isNull(), isA(ListenerRegistration.class));
+        replay(connection);
+    }
+
+    @Test
+    public void testList() throws Exception {
+        String id = registerClient();
+        ListCommand cmd = createCommand(ListCommand.class,"client",id);
+        JSONObject list = dispatch(cmd);
+        assertEquals(list.size(),0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla.*")
+    public void testUnknownBackend() throws Exception {
+        String id = registerClient();
+        AddCommand cmd = createCommand(AddCommand.class,"client",id,"mode","bla","mbean",TEST_NAME.toString());
+        dispatch(cmd);
+    }
+
+    private NotificationListener getNotificationListener() throws NoSuchFieldException, IllegalAccessException {
+        return (NotificationListener) getField(dispatcher,"listenerDelegate");
+    }
+
+    private <T> T getField(Object pObject, String pField) throws NoSuchFieldException, IllegalAccessException {
+        Field field = pObject.getClass().getDeclaredField(pField);
+        field.setAccessible(true);
+        return (T) field.get(pObject);
+    }
+
+    private <T> T dispatch(NotificationCommand cmd) throws MBeanException, IOException, ReflectionException {
+        return (T) dispatcher.dispatch(executor,cmd);
+    }
+    private <T extends NotificationCommand> T createCommand(Class<T> pClass, Object ... keyValues) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Constructor<T> constructor;
+        if (keyValues.length == 0) {
+            constructor = pClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } else {
+            constructor = pClass.getDeclaredConstructor(Map.class);
+            constructor.setAccessible(true);
+            Map args = new HashMap();
+            for (int i = 0; i < keyValues.length; i+=2) {
+                args.put(keyValues[i],keyValues[i+1]);
+            }
+            return constructor.newInstance(args);
+        }
+    }
+}

@@ -22,6 +22,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.config.*;
+import org.jolokia.request.notification.NotificationCommandFactory;
+import org.jolokia.request.notification.NotificationCommandType;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
@@ -63,6 +65,8 @@ public class JmxRequestBuilder {
             case VERSION: return (R) new JmxVersionRequest(request,params);
             case SEARCH: return (R) new JmxSearchRequest(request,params);
             case LIST: return (R) new JmxListRequest(request,params);
+            case NOTIFICATION: return (R) new JmxNotificationRequest(NotificationCommandFactory.createCommand(request),
+                                                                     params);
         }
         throw new IllegalArgumentException("Unknown type " + type);
     }
@@ -109,6 +113,36 @@ public class JmxRequestBuilder {
 
     public JmxRequestBuilder arguments(Object ... pArguments) {
         request.put("arguments", Arrays.asList(pArguments));
+        return this;
+    }
+
+    public JmxRequestBuilder command(NotificationCommandType pType) {
+        request.put("command",pType.getType());
+        return this;
+    }
+
+    public JmxRequestBuilder client(String client) {
+        request.put("client",client);
+        return this;
+    }
+
+    public JmxRequestBuilder handle(String handle) {
+        request.put("handle",handle);
+        return this;
+    }
+
+    public JmxRequestBuilder mode(String mode) {
+        request.put("mode",mode);
+        return this;
+    }
+
+    public JmxRequestBuilder handback(String handback) {
+        request.put("handback",handback);
+        return this;
+    }
+
+    public JmxRequestBuilder filter(String ...filter) {
+        request.put("filter", Arrays.asList(filter));
         return this;
     }
 

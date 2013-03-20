@@ -77,7 +77,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public void unregister(MBeanServerExecutor pExecutor, String pClient)
             throws MBeanException, IOException, ReflectionException {
-        Client client = getClientState(pClient);
+        Client client = getClient(pClient);
         for (String handle : client.getHandles()) {
             removeListener(pExecutor, pClient, handle);
         }
@@ -99,7 +99,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public String addListener(MBeanServerExecutor pExecutor, String pClient, final ListenerRegistration pRegistration)
             throws MBeanException, IOException, ReflectionException {
-        Client client = getClientState(pClient);
+        Client client = getClient(pClient);
         String handle = client.add(pRegistration);
         pExecutor.each(pRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
@@ -123,13 +123,13 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public void removeListener(MBeanServerExecutor pExecutor, String pClient, String pHandle)
             throws MBeanException, IOException, ReflectionException {
-        Client client = getClientState(pClient);
-        final ListenerRegistration config = client.get(pHandle);
-        pExecutor.each(config.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+        Client client = getClient(pClient);
+        final ListenerRegistration registration = client.get(pHandle);
+        pExecutor.each(registration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 try {
-                    pConn.removeNotificationListener(pName,NotificationListenerDelegate.this,config.getFilter(),config);
+                    pConn.removeNotificationListener(pName, NotificationListenerDelegate.this, registration.getFilter(), registration);
                 } catch (ListenerNotFoundException e) {
                     // We tried it. If not there, thats ok, too.
                 }
@@ -144,7 +144,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param pClient client to refresh
      */
     public void refresh(String pClient) {
-        Client client = getClientState(pClient);
+        Client client = getClient(pClient);
         client.refresh();
     }
 
@@ -170,7 +170,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @return map with handle as keys and listener configs as objects.
      */
     public JSONObject list(String pClient) {
-        Client client = getClientState(pClient);
+        Client client = getClient(pClient);
         return client.list();
     }
 
@@ -182,9 +182,9 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param handback as handback which use the listener configuration.
      */
     public void handleNotification(Notification notification, Object handback) {
-        ListenerRegistration config = (ListenerRegistration) handback;
-        BackendCallback callback = config.getCallback();
-        callback.handleNotification(notification,config.getHandback());
+        ListenerRegistration registration = (ListenerRegistration) handback;
+        BackendCallback callback = registration.getCallback();
+        callback.handleNotification(notification, registration.getHandback());
     }
 
     // =========================================================================================================
@@ -196,7 +196,7 @@ public class NotificationListenerDelegate implements NotificationListener {
 
     // Extract the client config from the internal map and throw and exception
     // if not present
-    private Client getClientState(String pClient) {
+    private Client getClient(String pClient) {
         Client client = clients.get(pClient);
         if (client == null) {
             throw new IllegalArgumentException("No client " + pClient + " registered");
