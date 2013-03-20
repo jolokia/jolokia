@@ -47,7 +47,6 @@ public class NotificationListenerDelegate implements NotificationListener {
 
     /**
      * Build up this delegate.
-     *
      */
     public NotificationListenerDelegate() {
         clients = new HashMap<String, Client>();
@@ -102,6 +101,7 @@ public class NotificationListenerDelegate implements NotificationListener {
         Client client = getClient(pClient);
         String handle = client.add(pRegistration);
         pExecutor.each(pRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+            /** {@inheritDoc} */
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 pConn.addNotificationListener(pName,NotificationListenerDelegate.this,pRegistration.getFilter(),pRegistration);
@@ -126,6 +126,7 @@ public class NotificationListenerDelegate implements NotificationListener {
         Client client = getClient(pClient);
         final ListenerRegistration registration = client.get(pHandle);
         pExecutor.each(registration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+            /** {@inheritDoc} */
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 try {

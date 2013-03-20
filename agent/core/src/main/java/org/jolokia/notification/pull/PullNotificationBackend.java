@@ -6,15 +6,19 @@ import org.jolokia.notification.BackendCallback;
 import org.jolokia.notification.NotificationBackend;
 
 /**
+ * Dummy implementation
+ *
  * @author roland
  * @since 20.03.13
  */
 public class PullNotificationBackend implements NotificationBackend {
 
+    /** {@inheritDoc} */
     public String getType() {
         return "pull";
     }
 
+    /** {@inheritDoc} */
     public BackendCallback getBackendCallback() {
         return new BackendCallback() {
             public void handleNotification(Notification notification, Object handback) {

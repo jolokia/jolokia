@@ -84,31 +84,37 @@ public final class NotificationCommandFactory {
     // Build up the lookup map
     static {
         CREATORS.put(REGISTER,new Creator() {
+            /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack,Map<String,?> pMap) {
                 return new RegisterCommand();
             }
         });
         CREATORS.put(UNREGISTER,new Creator() {
+            /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack,Map<String, ?> pMap) {
                 return pStack != null ? new UnregisterCommand(pStack) : new UnregisterCommand(pMap);
             }
         });
         CREATORS.put(ADD,new Creator() {
+            /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new AddCommand(pStack) : new AddCommand(pMap);
             }
         });
         CREATORS.put(REMOVE,new Creator() {
+            /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new RemoveCommand(pStack) : new RemoveCommand(pMap);
             }
         });
         CREATORS.put(PING,new Creator() {
+            /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new PingCommand(pStack) : new PingCommand(pMap);
             }
         });
         CREATORS.put(LIST,new Creator() {
+            /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new ListCommand(pStack) : new ListCommand(pMap);
             }
