@@ -26,8 +26,8 @@ public class JmxNotificationRequestTest {
 
         assertEquals(request.getType(), RequestType.NOTIFICATION);
         assertEquals(request.getHttpMethod(), HttpMethod.GET);
-        Command command = request.getCommand();
-        assertEquals(command.getType(), CommandType.REGISTER);
+        NotificationCommand command = request.getCommand();
+        assertEquals(command.getType(), NotificationCommandType.REGISTER);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class JmxNotificationRequestTest {
         assertEquals(request.getType(), RequestType.NOTIFICATION);
         assertEquals(request.getHttpMethod(), HttpMethod.POST);
         PingCommand command = request.getCommand();
-        assertEquals(command.getType(), CommandType.PING);
+        assertEquals(command.getType(), NotificationCommandType.PING);
         assertEquals(command.getClient(),"dummy");
     }
 

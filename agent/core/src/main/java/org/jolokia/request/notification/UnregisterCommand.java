@@ -32,7 +32,7 @@ public class UnregisterCommand extends ClientCommand {
      * @param pStack path stack
      */
     UnregisterCommand(Stack<String> pStack) {
-        super(CommandType.UNREGISTER, pStack);
+        super(NotificationCommandType.UNREGISTER, pStack);
     }
 
     /**
@@ -40,6 +40,6 @@ public class UnregisterCommand extends ClientCommand {
      * @param pMap request map
      */
     UnregisterCommand(Map<String,?> pMap) {
-        super(CommandType.UNREGISTER,pMap);
+        super(NotificationCommandType.UNREGISTER,pMap);
     }
 }

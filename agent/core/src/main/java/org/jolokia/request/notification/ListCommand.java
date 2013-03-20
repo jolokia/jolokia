@@ -33,7 +33,7 @@ public class ListCommand extends ClientCommand {
      * @param pStack path stack
      */
     ListCommand(Stack<String> pStack) {
-        super(CommandType.LIST, pStack);
+        super(NotificationCommandType.LIST, pStack);
     }
 
     /**
@@ -41,6 +41,6 @@ public class ListCommand extends ClientCommand {
      * @param pMap request map
      */
     ListCommand(Map<String, ?> pMap) {
-        super(CommandType.LIST, pMap);
+        super(NotificationCommandType.LIST, pMap);
     }
 }

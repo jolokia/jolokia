@@ -22,21 +22,21 @@ package org.jolokia.request.notification;
  * @author roland
  * @since 19.03.13
  */
-public abstract class Command {
+public abstract class NotificationCommand {
 
     // Command action
-    private CommandType type;
+    private NotificationCommandType type;
 
     /**
      * Constructor with type
      *
      * @param pType type of this command
      */
-    protected Command(CommandType pType) {
+    protected NotificationCommand(NotificationCommandType pType) {
         type = pType;
     }
 
-    public CommandType getType() {
+    public NotificationCommandType getType() {
         return type;
     }
 

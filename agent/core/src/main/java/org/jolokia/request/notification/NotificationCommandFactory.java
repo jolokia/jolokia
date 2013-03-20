@@ -20,10 +20,10 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import static org.jolokia.request.notification.CommandType.*;
+import static org.jolokia.request.notification.NotificationCommandType.*;
 
 /**
- * This factory produces {@link Command} objects which specify a certain aspect
+ * This factory produces {@link NotificationCommand} objects which specify a certain aspect
  * during notification listener registration. I.e. when a request type is
  * <code>NOTIFICATION</code> then there are several commands like 'register', 'add', 'list'
  * or 'ping' responsible for the correct listener management.
@@ -31,13 +31,13 @@ import static org.jolokia.request.notification.CommandType.*;
  * @author roland
  * @since 19.03.13
  */
-public class CommandFactory {
+public class NotificationCommandFactory {
 
     // Only static methods
-    private CommandFactory() {}
+    private NotificationCommandFactory() {}
 
-    private final static Map<CommandType, Creator> CREATORS =
-            new HashMap<CommandType, Creator>();
+    private final static Map<NotificationCommandType, Creator> CREATORS =
+            new HashMap<NotificationCommandType, Creator>();
 
     /**
      * Create a command out of the request path. The command type must be on top
@@ -48,9 +48,9 @@ public class CommandFactory {
      * @return the created command
      * @throws MalformedObjectNameException if an objectname part has an invalid format
      */
-    public static Command createCommand(Stack<String> pStack) throws MalformedObjectNameException {
+    public static NotificationCommand createCommand(Stack<String> pStack) throws MalformedObjectNameException {
         String command = pStack.pop();
-        CommandType type = CommandType.getTypeByName(command);
+        NotificationCommandType type = NotificationCommandType.getTypeByName(command);
         return CREATORS.get(type).create(pStack, null);
     }
 
@@ -63,9 +63,9 @@ public class CommandFactory {
      * @return the created command
      * @throws MalformedObjectNameException if an objectname part has an invalid format
      */
-    public static Command createCommand(Map<String, ?> pCommandMap) throws MalformedObjectNameException {
+    public static NotificationCommand createCommand(Map<String, ?> pCommandMap) throws MalformedObjectNameException {
         String command = (String) pCommandMap.get("command");
-        CommandType type = CommandType.getTypeByName(command);
+        NotificationCommandType type = NotificationCommandType.getTypeByName(command);
         return CREATORS.get(type).create(null,pCommandMap);
     }
 
@@ -78,38 +78,38 @@ public class CommandFactory {
         /**
          * Create the command either from the given stack (checked first) or a given map
          */
-        Command create(Stack<String> pStack,Map<String,?> pMap) throws MalformedObjectNameException;
+        NotificationCommand create(Stack<String> pStack,Map<String,?> pMap) throws MalformedObjectNameException;
     }
 
     // Build up the lookup map
     static {
         CREATORS.put(REGISTER,new Creator() {
-            public Command create(Stack<String> pStack,Map<String,?> pMap) {
+            public NotificationCommand create(Stack<String> pStack,Map<String,?> pMap) {
                 return new RegisterCommand();
             }
         });
         CREATORS.put(UNREGISTER,new Creator() {
-            public Command create(Stack<String> pStack,Map<String, ?> pMap) {
+            public NotificationCommand create(Stack<String> pStack,Map<String, ?> pMap) {
                 return pStack != null ? new UnregisterCommand(pStack) : new UnregisterCommand(pMap);
             }
         });
         CREATORS.put(ADD,new Creator() {
-            public Command create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
+            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new AddCommand(pStack) : new AddCommand(pMap);
             }
         });
         CREATORS.put(REMOVE,new Creator() {
-            public Command create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
+            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new RemoveCommand(pStack) : new RemoveCommand(pMap);
             }
         });
         CREATORS.put(PING,new Creator() {
-            public Command create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
+            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new PingCommand(pStack) : new PingCommand(pMap);
             }
         });
         CREATORS.put(LIST,new Creator() {
-            public Command create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
+            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
                 return pStack != null ? new ListCommand(pStack) : new ListCommand(pMap);
             }
         });

@@ -1,4 +1,4 @@
-package org.jolokia.notification;
+package org.jolokia.notification.admin;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -6,14 +6,17 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.json.simple.JSONObject;
 
 /**
- * A ClientConfig holds all listener registration for a specific client. Also, it knows
+ * A Client holds all listener registration for a specific client. Also, it knows
  * how to create handles for new listener registrations and remembers the last ping of
  * a client.
  *
  * @author roland
  * @since 18.03.13
  */
-public class ClientState {
+public class Client {
+
+    // Client ID
+    private String id;
 
     // Map of all registrations for a client
     private Map<String, ListenerRegistration> listenerConfigMap;
@@ -27,7 +30,8 @@ public class ClientState {
     /**
      * Initialize
      */
-    public ClientState() {
+    public Client(String pId) {
+        id = pId;
         listenerConfigMap = new HashMap<String, ListenerRegistration>();
         lastRefresh = System.currentTimeMillis();
     }
@@ -108,4 +112,11 @@ public class ClientState {
         return lastRefresh;
     }
 
+    /**
+     * UUID of this client
+     * @return id
+     */
+    public String getId() {
+        return id;
+    }
 }

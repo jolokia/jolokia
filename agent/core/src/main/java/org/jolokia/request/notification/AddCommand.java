@@ -52,13 +52,13 @@ public class AddCommand extends ClientCommand {
      * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
      */
     AddCommand(Stack<String> pStack) throws MalformedObjectNameException {
-        super(CommandType.ADD, pStack);
+        super(NotificationCommandType.ADD, pStack);
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No mode give for " + CommandType.ADD);
+            throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = pStack.pop();
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No MBean name given for " + CommandType.ADD);
+            throw new IllegalArgumentException("No MBean name given for " + NotificationCommandType.ADD);
         }
         objectName = new ObjectName(pStack.pop());
         if (!pStack.isEmpty()) {
@@ -78,13 +78,13 @@ public class AddCommand extends ClientCommand {
      * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
      */
     AddCommand(Map<String,?> pMap) throws MalformedObjectNameException {
-        super(CommandType.ADD, pMap);
+        super(NotificationCommandType.ADD, pMap);
         if (!pMap.containsKey("mode")) {
-            throw new IllegalArgumentException("No mode give for " + CommandType.ADD);
+            throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = (String) pMap.get("mode");
         if (!pMap.containsKey("mbean")) {
-            throw new IllegalArgumentException("No MBean name given for " + CommandType.ADD);
+            throw new IllegalArgumentException("No MBean name given for " + NotificationCommandType.ADD);
         }
         objectName = new ObjectName((String) pMap.get("mbean"));
         Object f = pMap.get("filter");

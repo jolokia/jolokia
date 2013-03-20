@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.notification.NotificationDispatcher;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
 

@@ -1,9 +1,10 @@
-package org.jolokia.notification;
+package org.jolokia.notification.admin;
 
 import java.util.List;
 
 import javax.management.*;
 
+import org.jolokia.notification.BackendCallback;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 

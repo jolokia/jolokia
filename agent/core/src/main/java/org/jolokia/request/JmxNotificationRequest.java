@@ -6,8 +6,8 @@ import java.util.Stack;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.config.ProcessingParameters;
-import org.jolokia.request.notification.Command;
-import org.jolokia.request.notification.CommandFactory;
+import org.jolokia.request.notification.NotificationCommand;
+import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.util.RequestType;
 
 /**
@@ -17,7 +17,7 @@ import org.jolokia.util.RequestType;
 public class JmxNotificationRequest extends JmxRequest {
 
     // Command to execute
-    private Command command;
+    private NotificationCommand command;
 
     /**
      * Constructor for GET requests.
@@ -25,7 +25,7 @@ public class JmxNotificationRequest extends JmxRequest {
      * @param pCommand command to use
      * @param pParams processing parameters
      */
-    JmxNotificationRequest(Command pCommand, ProcessingParameters pParams) {
+    JmxNotificationRequest(NotificationCommand pCommand, ProcessingParameters pParams) {
         super(RequestType.NOTIFICATION, null, pParams);
         command = pCommand;
     }
@@ -37,7 +37,7 @@ public class JmxNotificationRequest extends JmxRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JmxNotificationRequest(Command pCommand, Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JmxNotificationRequest(NotificationCommand pCommand, Map<String, ?> pRequestMap, ProcessingParameters pParams) {
         super(pRequestMap, pParams);
         command = pCommand;
     }
@@ -47,7 +47,7 @@ public class JmxNotificationRequest extends JmxRequest {
      *
      * @return notification command
      */
-    public <T extends Command> T getCommand() {
+    public <T extends NotificationCommand> T getCommand() {
         return (T) command;
     }
 
@@ -60,14 +60,14 @@ public class JmxNotificationRequest extends JmxRequest {
         return new RequestCreator<JmxNotificationRequest>() {
             /** {@inheritDoc} */
             public JmxNotificationRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                Command command = CommandFactory.createCommand(pStack);
+                NotificationCommand command = NotificationCommandFactory.createCommand(pStack);
                 return new JmxNotificationRequest(command,pParams);
             }
 
             /** {@inheritDoc} */
             public JmxNotificationRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                Command command = CommandFactory.createCommand(requestMap);
+                NotificationCommand command = NotificationCommandFactory.createCommand(requestMap);
                 return new JmxNotificationRequest(command,requestMap,pParams);
             }
         };

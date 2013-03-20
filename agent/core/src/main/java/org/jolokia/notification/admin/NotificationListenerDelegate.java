@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.notification;
+package org.jolokia.notification.admin;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,6 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.notification.BackendCallback;
 import org.json.simple.JSONObject;
 
 /**
@@ -42,14 +43,14 @@ import org.json.simple.JSONObject;
 public class NotificationListenerDelegate implements NotificationListener {
 
     // Managed clients
-    private Map<String, ClientState> clients;
+    private Map<String, Client> clients;
 
     /**
      * Build up this delegate.
      *
      */
     public NotificationListenerDelegate() {
-        clients = new HashMap<String, ClientState>();
+        clients = new HashMap<String, Client>();
     }
 
     /**
@@ -60,7 +61,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public String register() {
         String uuid = createClientId();
-        clients.put(uuid, new ClientState());
+        clients.put(uuid, new Client(uuid));
         return uuid;
     }
 
@@ -76,8 +77,8 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public void unregister(MBeanServerExecutor pExecutor, String pClient)
             throws MBeanException, IOException, ReflectionException {
-        ClientState clientState = getClientState(pClient);
-        for (String handle : clientState.getHandles()) {
+        Client client = getClientState(pClient);
+        for (String handle : client.getHandles()) {
             removeListener(pExecutor, pClient, handle);
         }
         clients.remove(pClient);
@@ -98,8 +99,8 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public String addListener(MBeanServerExecutor pExecutor, String pClient, final ListenerRegistration pRegistration)
             throws MBeanException, IOException, ReflectionException {
-        ClientState clientState = getClientState(pClient);
-        String handle = clientState.add(pRegistration);
+        Client client = getClientState(pClient);
+        String handle = client.add(pRegistration);
         pExecutor.each(pRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
@@ -122,8 +123,8 @@ public class NotificationListenerDelegate implements NotificationListener {
      */
     public void removeListener(MBeanServerExecutor pExecutor, String pClient, String pHandle)
             throws MBeanException, IOException, ReflectionException {
-        ClientState clientState = getClientState(pClient);
-        final ListenerRegistration config = clientState.get(pHandle);
+        Client client = getClientState(pClient);
+        final ListenerRegistration config = client.get(pHandle);
         pExecutor.each(config.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
@@ -134,7 +135,7 @@ public class NotificationListenerDelegate implements NotificationListener {
                 }
             }
         });
-        clientState.remove(pHandle);
+        client.remove(pHandle);
     }
 
     /**
@@ -143,8 +144,8 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param pClient client to refresh
      */
     public void refresh(String pClient) {
-        ClientState clientState = getClientState(pClient);
-        clientState.refresh();
+        Client client = getClientState(pClient);
+        client.refresh();
     }
 
     /**
@@ -155,7 +156,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param pOldest last refresh timestamp which should be kept
      */
     public void cleanup(MBeanServerExecutor pExecutor, long pOldest) throws MBeanException, IOException, ReflectionException {
-        for (Map.Entry<String,ClientState> client : clients.entrySet()) {
+        for (Map.Entry<String,Client> client : clients.entrySet()) {
             if (client.getValue().getLastRefresh() < pOldest) {
                 unregister(pExecutor, client.getKey());
             }
@@ -169,8 +170,8 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @return map with handle as keys and listener configs as objects.
      */
     public JSONObject list(String pClient) {
-        ClientState clientState = getClientState(pClient);
-        return clientState.list();
+        Client client = getClientState(pClient);
+        return client.list();
     }
 
     /**
@@ -195,11 +196,11 @@ public class NotificationListenerDelegate implements NotificationListener {
 
     // Extract the client config from the internal map and throw and exception
     // if not present
-    private ClientState getClientState(String pClient) {
-        ClientState clientState = clients.get(pClient);
-        if (clientState == null) {
+    private Client getClientState(String pClient) {
+        Client client = clients.get(pClient);
+        if (client == null) {
             throw new IllegalArgumentException("No client " + pClient + " registered");
         }
-        return clientState;
+        return client;
     }
 }

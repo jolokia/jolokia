@@ -26,7 +26,7 @@ import java.util.Stack;
  * @author roland
  * @since 19.03.13
  */
-abstract public class ClientCommand extends Command {
+abstract public class ClientCommand extends NotificationCommand {
 
     // Client which is typically a UUID
     private String client;
@@ -39,7 +39,7 @@ abstract public class ClientCommand extends Command {
      * @param pType command type
      * @param pStack stack which on top must hold the client id
      */
-    protected ClientCommand(CommandType pType, Stack<String> pStack) {
+    protected ClientCommand(NotificationCommandType pType, Stack<String> pStack) {
         super(pType);
         if (pStack.isEmpty()) {
             throw new IllegalArgumentException("No notification client given for '" + pType + "'");
@@ -54,7 +54,7 @@ abstract public class ClientCommand extends Command {
      * @param pType command type
      * @param pMap map holding the request
      */
-    protected ClientCommand(CommandType pType, Map<String, ?> pMap) {
+    protected ClientCommand(NotificationCommandType pType, Map<String, ?> pMap) {
         super(pType);
         client = (String) pMap.get("client");
         if (client == null) {

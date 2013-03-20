@@ -25,7 +25,7 @@ import java.util.Map;
  * @author roland
  * @since 19.03.13
  */
-public enum CommandType {
+public enum NotificationCommandType {
 
     /**
      * Register a new client
@@ -56,17 +56,17 @@ public enum CommandType {
     private String type;
 
     // lookup for name-to-type
-    private final static Map<String, CommandType> commandsByName =
-            new HashMap<String, CommandType>();
+    private final static Map<String, NotificationCommandType> commandsByName =
+            new HashMap<String, NotificationCommandType>();
 
     // Initialise lookup map
     static {
-        for (CommandType t : CommandType.values()) {
+        for (NotificationCommandType t : NotificationCommandType.values()) {
             commandsByName.put(t.getType(), t);
         }
     }
 
-    private CommandType(String pPType) {
+    private NotificationCommandType(String pPType) {
         type = pPType;
     }
 
@@ -86,11 +86,11 @@ public enum CommandType {
      * @throws IllegalArgumentException if the argument is either <code>null</code> or
      *         does not map to a type.
      */
-    public static CommandType getTypeByName(String pName) {
+    public static NotificationCommandType getTypeByName(String pName) {
         if (pName == null) {
             throw new IllegalArgumentException("No command given");
         }
-        CommandType command = commandsByName.get(pName.toLowerCase());
+        NotificationCommandType command = commandsByName.get(pName.toLowerCase());
         if (command == null) {
             throw new UnsupportedOperationException("No command with name '" + pName + "' exists");
         }

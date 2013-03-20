@@ -6,7 +6,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.notification.NotificationDispatcher;
+import org.jolokia.notification.admin.NotificationDispatcher;
 import org.jolokia.request.JmxNotificationRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;

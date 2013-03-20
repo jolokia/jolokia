@@ -22,9 +22,9 @@ package org.jolokia.request.notification;
  * @author roland
  * @since 19.03.13
  */
-public class RegisterCommand extends Command {
+public class RegisterCommand extends NotificationCommand {
 
     RegisterCommand() {
-        super(CommandType.REGISTER);
+        super(NotificationCommandType.REGISTER);
     }
 }

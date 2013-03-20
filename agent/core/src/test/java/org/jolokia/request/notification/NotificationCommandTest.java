@@ -30,7 +30,7 @@ import static org.testng.Assert.assertEquals;
  * @author roland
  * @since 19.03.13
  */
-public class CommandTest {
+public class NotificationCommandTest {
 
     @Test
     public void register() throws Exception {
@@ -41,7 +41,7 @@ public class CommandTest {
                 },
                 new Checkable<RegisterCommand>() {
                     public void check(RegisterCommand cmd) {
-                        assertEquals(cmd.getType(), CommandType.REGISTER);
+                        assertEquals(cmd.getType(), NotificationCommandType.REGISTER);
                     }
                 });
     }
@@ -56,7 +56,7 @@ public class CommandTest {
                 },
                 new Checkable<UnregisterCommand>() {
                     public void check(UnregisterCommand cmd) {
-                        assertEquals(cmd.getType(), CommandType.UNREGISTER);
+                        assertEquals(cmd.getType(), NotificationCommandType.UNREGISTER);
                         assertEquals(cmd.getClient(), uuid);
                     }
                 }
@@ -74,7 +74,7 @@ public class CommandTest {
                 },
                 new Checkable<PingCommand>() {
                     public void check(PingCommand cmd) {
-                        assertEquals(cmd.getType(), CommandType.PING);
+                        assertEquals(cmd.getType(), NotificationCommandType.PING);
                         assertEquals(cmd.getClient(), uuid);
                     }
                 }
@@ -92,7 +92,7 @@ public class CommandTest {
                 },
                 new Checkable<ListCommand>() {
                     public void check(ListCommand cmd) {
-                        assertEquals(cmd.getType(), CommandType.LIST);
+                        assertEquals(cmd.getType(), NotificationCommandType.LIST);
                         assertEquals(cmd.getClient(), uuid);
                     }
                 }
@@ -122,7 +122,7 @@ public class CommandTest {
                     },
                     new Checkable<AddCommand>() {
                         public void check(AddCommand cmd) {
-                            assertEquals(cmd.getType(),CommandType.ADD);
+                            assertEquals(cmd.getType(), NotificationCommandType.ADD);
                             assertEquals(cmd.getMode(),"pull");
                             assertEquals(cmd.getClient(),uuid);
                             assertEquals(cmd.getObjectName(),mbean);
@@ -150,7 +150,7 @@ public class CommandTest {
                 },
                 new Checkable<AddCommand>() {
                     public void check(AddCommand cmd) {
-                        assertEquals(cmd.getType(), CommandType.ADD);
+                        assertEquals(cmd.getType(), NotificationCommandType.ADD);
                         assertEquals(cmd.getMode(),"pull");
                         assertEquals(cmd.getClient(), uuid);
                         assertEquals(cmd.getObjectName(), mbean);
@@ -164,7 +164,7 @@ public class CommandTest {
         args.push("pull");
         args.push(UUID.randomUUID().toString());
         args.push("add");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
@@ -173,14 +173,14 @@ public class CommandTest {
         args.put("client",UUID.randomUUID().toString());
         args.put("command","add");
         args.put("mode","pull");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
     public void addWithoutModeStack() throws Exception {
         Stack<String> args = new Stack<String>();
         args.push(UUID.randomUUID().toString());
         args.push("add");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
@@ -188,7 +188,7 @@ public class CommandTest {
         Map<String,String> args = new HashMap();
         args.put("client",UUID.randomUUID().toString());
         args.put("command","add");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test
@@ -203,7 +203,7 @@ public class CommandTest {
                 },
                 new Checkable<RemoveCommand>() {
                     public void check(RemoveCommand cmd) {
-                        assertEquals(cmd.getType(),CommandType.REMOVE);
+                        assertEquals(cmd.getType(), NotificationCommandType.REMOVE);
                         assertEquals(cmd.getClient(),uuid);
                         assertEquals(cmd.getHandle(),handle);
                     }
@@ -215,7 +215,7 @@ public class CommandTest {
         Stack<String> args = new Stack<String>();
         args.push(UUID.randomUUID().toString());
         args.push("remove");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
@@ -223,31 +223,31 @@ public class CommandTest {
         Map<String,String> args = new HashMap();
         args.put("client",UUID.randomUUID().toString());
         args.put("command","remove");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*client.*")
     public void removeNoClientStack() throws Exception {
         Stack<String> args = new Stack<String>();
         args.push("remove");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*client.*")
     public void removeNoClientMap() throws Exception {
         Map<String,String> args = new HashMap();
         args.put("command","remove");
-        CommandFactory.createCommand(args);
+        NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class,expectedExceptionsMessageRegExp = ".*blub.*")
     public void negativeLookup() throws Exception {
-        CommandType.getTypeByName("blub");
+        NotificationCommandType.getTypeByName("blub");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void nullLookup() throws Exception {
-        CommandType.getTypeByName(null);
+        NotificationCommandType.getTypeByName(null);
     }
 
 
@@ -261,9 +261,9 @@ public class CommandTest {
 
     // ========================================================================================================
 
-    private <T extends Command> void check(Object[] pArgs, Checkable<T> pCheckable) throws MalformedObjectNameException {
-        pCheckable.check((T) CommandFactory.createCommand(getMap(pArgs)));
-        pCheckable.check((T) CommandFactory.createCommand(getStack(pArgs)));
+    private <T extends NotificationCommand> void check(Object[] pArgs, Checkable<T> pCheckable) throws MalformedObjectNameException {
+        pCheckable.check((T) NotificationCommandFactory.createCommand(getMap(pArgs)));
+        pCheckable.check((T) NotificationCommandFactory.createCommand(getStack(pArgs)));
     }
 
     private Stack<String> getStack(Object[] pArgs) {
@@ -292,7 +292,7 @@ public class CommandTest {
         return st;
     }
 
-    private interface Checkable<T extends Command> {
+    private interface Checkable<T extends NotificationCommand> {
         void check(T cmd);
     }
 

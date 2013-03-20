@@ -1,5 +1,7 @@
 package org.jolokia.notification;
 
+import org.jolokia.notification.admin.NotificationListenerDelegate;
+
 /**
  * A notification backend which is responsible for the final delivery. This final
  * delivery is done by a callback which a backend needs to create out of a given

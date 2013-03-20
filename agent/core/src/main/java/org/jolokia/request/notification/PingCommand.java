@@ -36,7 +36,7 @@ public class PingCommand extends ClientCommand {
      * @param pStack path stack
      */
     PingCommand(Stack<String> pStack) {
-        super(CommandType.PING, pStack);
+        super(NotificationCommandType.PING, pStack);
     }
 
     /**
@@ -44,6 +44,6 @@ public class PingCommand extends ClientCommand {
      * @param pMap request map
      */
     PingCommand(Map<String, ?> pMap) {
-        super(CommandType.PING, pMap);
+        super(NotificationCommandType.PING, pMap);
     }
 }

@@ -36,9 +36,9 @@ public class RemoveCommand extends ClientCommand {
      * @param pStack path stack
      */
     RemoveCommand(Stack<String> pStack) {
-        super(CommandType.REMOVE, pStack);
+        super(NotificationCommandType.REMOVE, pStack);
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No notification handle given for " + CommandType.REMOVE);
+            throw new IllegalArgumentException("No notification handle given for " + NotificationCommandType.REMOVE);
         }
         handle = pStack.pop();
     }
@@ -50,10 +50,10 @@ public class RemoveCommand extends ClientCommand {
      * @param pMap request map
      */
     RemoveCommand(Map<String, ?> pMap) {
-        super(CommandType.REMOVE, pMap);
+        super(NotificationCommandType.REMOVE, pMap);
         handle = (String) pMap.get("handle");
         if (handle == null) {
-            throw new IllegalArgumentException("No notification handle given for " + CommandType.REMOVE);
+            throw new IllegalArgumentException("No notification handle given for " + NotificationCommandType.REMOVE);
         }
     }
 

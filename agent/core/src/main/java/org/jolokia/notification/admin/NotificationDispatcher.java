@@ -1,4 +1,4 @@
-package org.jolokia.notification;
+package org.jolokia.notification.admin;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -7,9 +7,11 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.notification.BackendCallback;
+import org.jolokia.notification.NotificationBackend;
 import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.request.notification.*;
-import static org.jolokia.request.notification.CommandType.*;
+import static org.jolokia.request.notification.NotificationCommandType.*;
 
 /**
  * Dispatcher for notification commands. Commands are dispatcher  to
@@ -29,7 +31,7 @@ public class NotificationDispatcher {
     private final Map<String, NotificationBackend> backendMap = new HashMap<String, NotificationBackend>();
 
     // Map dispatcher action to command typ
-    private final Map<CommandType, Dispatchable> commandMap = new HashMap<CommandType, Dispatchable>();
+    private final Map<NotificationCommandType, Dispatchable> commandMap = new HashMap<NotificationCommandType, Dispatchable>();
 
     // Delegate for doing the actual registration stuff
     private NotificationListenerDelegate listenerDelegate;
@@ -62,7 +64,7 @@ public class NotificationDispatcher {
      * @throws IOException
      * @throws ReflectionException
      */
-    public Object dispatch(MBeanServerExecutor pExecutor,Command pCommand) throws MBeanException, IOException, ReflectionException {
+    public Object dispatch(MBeanServerExecutor pExecutor,NotificationCommand pCommand) throws MBeanException, IOException, ReflectionException {
         Dispatchable dispatchable = commandMap.get(pCommand.getType());
         if (dispatchable == null) {
             throw new IllegalArgumentException("Internal: No dispatch action for " + pCommand.getType() + " registered");
@@ -73,7 +75,7 @@ public class NotificationDispatcher {
     // =======================================================================================
 
     // Internal interface for dispatch actions
-    private interface Dispatchable<T extends Command> {
+    private interface Dispatchable<T extends NotificationCommand> {
         /**
          * Execute a specific command
          * @param executor access to MBeanServers
