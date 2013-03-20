@@ -20,7 +20,9 @@ public class PullNotificationBackend implements NotificationBackend {
 
     /** {@inheritDoc} */
     public BackendCallback getBackendCallback() {
+
         return new BackendCallback() {
+            /** {@inheritDoc} */
             public void handleNotification(Notification notification, Object handback) {
                 System.out.println(">>>> Notif-received: " + notification.getType() + ", "
                                    + notification.getMessage() + ", handback: " + handback);
