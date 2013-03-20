@@ -51,8 +51,7 @@ public class JmxNotificationRequest extends JmxRequest {
         return new RequestCreator<JmxNotificationRequest>() {
             /** {@inheritDoc} */
             public JmxNotificationRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                String action = pStack.pop();
-                Command command = CommandFactory.createCommand(action, pStack);
+                Command command = CommandFactory.createCommand(pStack);
                 return new JmxNotificationRequest(command,pParams);
             }
 
