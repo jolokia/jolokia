@@ -30,7 +30,7 @@ public enum RequestType {
     EXEC("exec"),
     VERSION("version"),
     SEARCH("search"),
-    NOTIFICATION("notif");
+    NOTIFICATION("notification");
 
     private String name;
 

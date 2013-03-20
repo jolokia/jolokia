@@ -43,6 +43,15 @@ public class JmxNotificationRequest extends JmxRequest {
     }
 
     /**
+     * Command encapsulating the concrete notification request
+     *
+     * @return notification command
+     */
+    public <T extends Command> T getCommand() {
+        return (T) command;
+    }
+
+    /**
      * Creator for {@link JmxReadRequest}s
      *
      * @return the creator implementation
