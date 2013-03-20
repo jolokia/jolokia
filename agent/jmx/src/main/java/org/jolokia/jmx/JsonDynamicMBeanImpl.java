@@ -74,6 +74,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public Object getAttribute(String pAttribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
         try {
             if (!attributeInfoMap.containsKey(pAttribute)) {
@@ -89,6 +90,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public void setAttribute(Attribute pAttribute)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
         try {
@@ -146,6 +148,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     /** {@inheritDoc} */
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"REC_CATCH_EXCEPTION","DE_MIGHT_IGNORE"})
     public AttributeList setAttributes(AttributeList attributes) {
         final AttributeList ret = new AttributeList(attributes.size());
         for (Object o : attributes) {

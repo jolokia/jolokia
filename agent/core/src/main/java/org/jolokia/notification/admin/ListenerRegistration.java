@@ -84,11 +84,11 @@ class ListenerRegistration {
     // Filters are always on the notification type, but there can be multiple given, which are ORed together
     private NotificationFilterSupport createFilter(List<String> pFilters) {
         if (pFilters != null) {
-            NotificationFilterSupport filter = new NotificationFilterSupport();
+            NotificationFilterSupport filterSupport = new NotificationFilterSupport();
             for (String f :  pFilters) {
-                filter.enableType(f);
+                filterSupport.enableType(f);
             }
-            return filter;
+            return filterSupport;
         } else {
             return null;
         }

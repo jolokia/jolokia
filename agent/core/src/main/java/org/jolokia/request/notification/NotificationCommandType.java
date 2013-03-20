@@ -56,13 +56,13 @@ public enum NotificationCommandType {
     private String type;
 
     // lookup for name-to-type
-    private final static Map<String, NotificationCommandType> commandsByName =
+    private static final Map<String, NotificationCommandType> COMMANDS_BY_NAME =
             new HashMap<String, NotificationCommandType>();
 
     // Initialise lookup map
     static {
         for (NotificationCommandType t : NotificationCommandType.values()) {
-            commandsByName.put(t.getType(), t);
+            COMMANDS_BY_NAME.put(t.getType(), t);
         }
     }
 
@@ -90,7 +90,7 @@ public enum NotificationCommandType {
         if (pName == null) {
             throw new IllegalArgumentException("No command given");
         }
-        NotificationCommandType command = commandsByName.get(pName.toLowerCase());
+        NotificationCommandType command = COMMANDS_BY_NAME.get(pName.toLowerCase());
         if (command == null) {
             throw new UnsupportedOperationException("No command with name '" + pName + "' exists");
         }

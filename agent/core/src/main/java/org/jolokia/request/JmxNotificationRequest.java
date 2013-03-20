@@ -60,15 +60,15 @@ public class JmxNotificationRequest extends JmxRequest {
         return new RequestCreator<JmxNotificationRequest>() {
             /** {@inheritDoc} */
             public JmxNotificationRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                NotificationCommand command = NotificationCommandFactory.createCommand(pStack);
-                return new JmxNotificationRequest(command,pParams);
+                NotificationCommand notifCommand = NotificationCommandFactory.createCommand(pStack);
+                return new JmxNotificationRequest(notifCommand,pParams);
             }
 
             /** {@inheritDoc} */
             public JmxNotificationRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                NotificationCommand command = NotificationCommandFactory.createCommand(requestMap);
-                return new JmxNotificationRequest(command,requestMap,pParams);
+                NotificationCommand notifCommand = NotificationCommandFactory.createCommand(requestMap);
+                return new JmxNotificationRequest(notifCommand,requestMap,pParams);
             }
         };
     }

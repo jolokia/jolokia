@@ -31,12 +31,12 @@ import static org.jolokia.request.notification.NotificationCommandType.*;
  * @author roland
  * @since 19.03.13
  */
-public class NotificationCommandFactory {
+public final class NotificationCommandFactory {
 
     // Only static methods
     private NotificationCommandFactory() {}
 
-    private final static Map<NotificationCommandType, Creator> CREATORS =
+    private static final Map<NotificationCommandType, Creator> CREATORS =
             new HashMap<NotificationCommandType, Creator>();
 
     /**

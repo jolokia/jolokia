@@ -26,7 +26,7 @@ import java.util.Stack;
  * @author roland
  * @since 19.03.13
  */
-abstract public class ClientCommand extends NotificationCommand {
+public abstract class ClientCommand extends NotificationCommand {
 
     // Client which is typically a UUID
     private String client;

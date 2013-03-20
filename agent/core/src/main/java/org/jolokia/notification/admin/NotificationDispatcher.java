@@ -23,7 +23,7 @@ import static org.jolokia.request.notification.NotificationCommandType.*;
 public class NotificationDispatcher {
 
     // TODO: Currently hard wired, should be looked up later on
-    private final NotificationBackend[] BACKENDS = new NotificationBackend[]{
+    private final NotificationBackend[] backends = new NotificationBackend[]{
             new PullNotificationBackend()
     };
 
@@ -40,7 +40,7 @@ public class NotificationDispatcher {
      * Initialize backends and delegate
      */
     public NotificationDispatcher() {
-        for (NotificationBackend backend : BACKENDS) {
+        for (NotificationBackend backend : backends) {
             backendMap.put(backend.getType(), backend);
         }
         listenerDelegate = new NotificationListenerDelegate();

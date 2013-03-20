@@ -1,7 +1,5 @@
 package org.jolokia.notification;
 
-import org.jolokia.notification.admin.NotificationListenerDelegate;
-
 /**
  * A notification backend which is responsible for the final delivery. This final
  * delivery is done by a callback which a backend needs to create out of a given
@@ -18,13 +16,13 @@ public interface NotificationBackend {
      *
      * @return type
      */
-    public String getType();
+    String getType();
 
     /**
      * Create a specific callback for the given configuration. This
      * callback will be called for every notification received
      *
-     * @return callback which is stored in the {@link NotificationListenerDelegate} for
+     * @return callback which is stored in the {@link org.jolokia.notification.admin.NotificationListenerDelegate} for
      *         triggering when the appropriate notification arrives.
      */
     BackendCallback getBackendCallback();
