@@ -37,13 +37,17 @@ import org.json.simple.parser.JSONParser;
  */
 public class ServerHandle {
 
+    // an unique id of the agent for identifying a
+    // Jolokia agent in a JVM (there can be multiple)
+    private String jolokiaId;
+
     // product name of server running
     private String product;
 
     // version number
     private String version;
 
-    // the aent URL under which this server can be found
+    // the agent URL under which this server can be found
     private URL agentUrl;
 
     // extra information
@@ -116,6 +120,23 @@ public class ServerHandle {
      */
     public Map<String,String> getExtraInfo(MBeanServerExecutor pServerManager) {
         return extraInfo;
+    }
+
+    /**
+     * Get the Jolokia id unique for this agent
+     * @return jolokia id
+     */
+    public String getJolokiaId() {
+        return jolokiaId;
+    }
+
+    /**
+     * Set the jolokia agent id
+     *
+     * @param pJolokiaId jolokia agent id
+     */
+    public void setJolokiaId(String pJolokiaId) {
+        jolokiaId = pJolokiaId;
     }
 
     /**

@@ -148,6 +148,11 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
                 config.put(key.getKeyValue(),value);
             }
         }
+        String jolokiaId = config.get(ConfigKey.JOLOKIA_ID.getKeyValue());
+        if (jolokiaId == null) {
+            config.put(ConfigKey.JOLOKIA_ID.getKeyValue(),
+                       Integer.toHexString(hashCode()) + "-osgi");
+        }
         return config;
     }
 

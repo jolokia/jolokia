@@ -8,6 +8,7 @@ import javax.management.MBeanException;
 import javax.management.ReflectionException;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.*;
 import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.request.notification.*;
@@ -24,10 +25,6 @@ import static org.jolokia.request.notification.NotificationCommandType.*;
  */
 public class NotificationDispatcher {
 
-    // TODO: Currently hard wired, should be looked up later on
-    private final NotificationBackend[] backends = new NotificationBackend[]{
-            new PullNotificationBackend()
-    };
 
     // Map mode to Backend and configs
     private final Map<String, NotificationBackend> backendMap = new HashMap<String, NotificationBackend>();
@@ -42,8 +39,8 @@ public class NotificationDispatcher {
     /**
      * Initialize backends and delegate
      */
-    public NotificationDispatcher() {
-        initBackend();
+    public NotificationDispatcher(ServerHandle pServerHandle) {
+        initBackend(pServerHandle);
         listenerDelegate = new NotificationListenerDelegate();
 
         commandMap.put(REGISTER, new RegisterAction());
@@ -76,11 +73,10 @@ public class NotificationDispatcher {
     // =======================================================================================
 
     // Lookup backends and remember
-    private void initBackend() {
-        for (NotificationBackend backend : backends) {
-            backendMap.put(backend.getType(), backend);
-            backendConfigMap.put(backend.getType(),backend.getConfig());
-        }
+    private void initBackend(ServerHandle pServerHandle) {
+        PullNotificationBackend backend = new PullNotificationBackend(pServerHandle.getJolokiaId());
+        backendMap.put(backend.getType(), backend);
+        backendConfigMap.put(backend.getType(),backend.getConfig());
     }
 
     // Internal interface for dispatch actions

@@ -80,6 +80,21 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     private void initServerHandle(Configuration pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
         serverHandle = detectServers(pDetectors, pLogHandler);
         serverHandle.postDetect(mBeanServerManager, pConfig, pLogHandler);
+        serverHandle.setJolokiaId(extractJolokiaId(pConfig));
+    }
+
+    /**
+     * Extract a unique Id for this agent
+     *
+     * @param pConfig configuration given
+     * @return the unique Jolokia ID
+     */
+    private String extractJolokiaId(Configuration pConfig) {
+        String qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
+        if (qualifier != null) {
+            return qualifier;
+        }
+        return UUID.randomUUID().toString();
     }
 
     /**

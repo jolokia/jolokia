@@ -7,6 +7,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.notification.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
@@ -37,7 +38,7 @@ public class NotificationDispatcherTest {
 
     @BeforeMethod
     public void setup() {
-        dispatcher = new NotificationDispatcher();
+        dispatcher = new NotificationDispatcher(new ServerHandle(null,null,null,null,null));
         connection = createMock(MBeanServerConnection.class);
         executor = new AbstractMBeanServerExecutor() {
             @Override

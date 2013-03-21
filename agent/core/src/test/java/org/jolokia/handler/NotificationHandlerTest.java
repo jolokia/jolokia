@@ -3,6 +3,7 @@ package org.jolokia.handler;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxNotificationRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.notification.NotificationCommandType;
@@ -11,8 +12,7 @@ import org.jolokia.util.RequestType;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.createMock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -22,7 +22,8 @@ public class NotificationHandlerTest extends BaseHandlerTest {
 
     @Test
     public void testSimple() throws Exception {
-        NotificationHandler handler = new NotificationHandler(new AllowAllRestrictor());
+        NotificationHandler handler = new NotificationHandler(new AllowAllRestrictor(),
+                                                              new ServerHandle(null,null,null,null,null));
         assertEquals(handler.getType(), RequestType.NOTIFICATION);
         JmxNotificationRequest request = createRequest();
         // No exception for now
@@ -38,7 +39,8 @@ public class NotificationHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testUnsupported() throws Exception {
-        NotificationHandler handler = new NotificationHandler(new AllowAllRestrictor());
+        NotificationHandler handler = new NotificationHandler(new AllowAllRestrictor(),
+                                                              new ServerHandle(null,null,null,null,null));
         JmxNotificationRequest request = createRequest();
         assertTrue(handler.handleAllServersAtOnce(request));
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);

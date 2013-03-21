@@ -324,6 +324,11 @@ public class AgentServlet extends HttpServlet {
         config.updateGlobalConfiguration(new ServletConfigFacade(pConfig));
         // ... and ServletConfig
         config.updateGlobalConfiguration(new ServletContextFacade(getServletContext()));
+        if (config.get(ConfigKey.JOLOKIA_ID) == null) {
+            config.updateGlobalConfiguration(
+                    Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
+                                             Integer.toHexString(hashCode()) + "-servlet"));
+        }
         return config;
     }
 

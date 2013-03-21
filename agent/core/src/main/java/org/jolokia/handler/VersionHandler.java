@@ -75,6 +75,7 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
     public Object doHandleRequest(MBeanServerExecutor serverManager, JmxVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
+        ret.put("id",serverHandle.getJolokiaId());
         ret.put("protocol",Version.getProtocolVersion());
         if (serverHandle != null) {
             ret.put("info", serverHandle.toJSONObject(serverManager));

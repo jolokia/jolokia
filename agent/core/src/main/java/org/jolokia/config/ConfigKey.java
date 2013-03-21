@@ -186,10 +186,17 @@ public enum ConfigKey {
      *     }
      * </pre>
      */
-    DETECTOR_OPTIONS("detectorOptions",true, false);
+    DETECTOR_OPTIONS("detectorOptions",true, false),
 
-    private String key;
-    private String defaultValue;
+    /**
+     * The ID to uniquely identify this agent within a JVM. There
+     * can be multiple agents registered a JVM. This id is e.g. used to
+     * uniquely create MBean names.
+     */
+    JOLOKIA_ID("jolokiaId", true, false);
+
+    private String  key;
+    private String  defaultValue;
     private boolean globalConfig;
     private boolean requestConfig;
 
@@ -203,19 +210,19 @@ public enum ConfigKey {
         globalKeyByName = new HashMap<String, ConfigKey>();
         requestKeyByName = new HashMap<String, ConfigKey>();
         for (ConfigKey ck : ConfigKey.values()) {
-            keyByName.put(ck.getKeyValue(),ck);
+            keyByName.put(ck.getKeyValue(), ck);
             if (ck.isGlobalConfig()) {
-                globalKeyByName.put(ck.getKeyValue(),ck);
+                globalKeyByName.put(ck.getKeyValue(), ck);
             }
             if (ck.isRequestConfig()) {
-                requestKeyByName.put(ck.getKeyValue(),ck);
+                requestKeyByName.put(ck.getKeyValue(), ck);
             }
         }
     }
 
 
-    ConfigKey(String pValue,boolean pIsGlobalConfig,boolean pIsRequestConfig) {
-        this(pValue,pIsGlobalConfig,pIsRequestConfig,null);
+    ConfigKey(String pValue, boolean pIsGlobalConfig, boolean pIsRequestConfig) {
+        this(pValue, pIsGlobalConfig, pIsRequestConfig, null);
     }
 
     ConfigKey(String pValue, boolean pIsGlobalConfig, boolean pIsRequestConfig, String pDefault) {

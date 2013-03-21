@@ -51,7 +51,7 @@ public class RequestHandlerManager {
                 new ListHandler(pRestrictor),
                 new VersionHandler(pRestrictor, pServerHandle),
                 new SearchHandler(pRestrictor),
-                new NotificationHandler(pRestrictor)
+                new NotificationHandler(pRestrictor, pServerHandle)
         };
         for (JsonRequestHandler handler : handlers) {
             requestHandlerMap.put(handler.getType(),handler);

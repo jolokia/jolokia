@@ -32,7 +32,7 @@ import org.osgi.util.tracker.ServiceTracker;
  *
  * This service also tracks the availability of a log
  * service in order redirect the servlet logging to
- * the log service (if availabled). Otherwise it uses
+ * the log service (if available). Otherwise it uses
  * the servlet's logging facility as fallback.
  *
  * @author roland

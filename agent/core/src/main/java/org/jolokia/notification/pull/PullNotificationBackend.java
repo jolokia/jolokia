@@ -15,24 +15,31 @@ import org.json.simple.JSONObject;
  */
 public class PullNotificationBackend implements NotificationBackend {
 
+    private PullNotificationStore store;
+
+    private String jolokaiId;
+
+    public PullNotificationBackend(String pId) {
+        jolokaiId = pId;
+        store = new PullNotificationStore();
+    }
+
     /** {@inheritDoc} */
     public String getType() {
         return "pull";
     }
 
-    public BackendCallback getBackendCallback(BackendRegistration pRegistration) {
+    public BackendCallback getBackendCallback(final BackendRegistration pRegistration) {
         return new BackendCallback() {
-            /** {@inheritDoc} */
             public void handleNotification(Notification notification, Object handback) {
-                System.out.println(">>>> Notif-received: " + notification.getType() + ", "
-                                   + notification.getMessage() + ", handback: " + handback);
+                store.add(pRegistration,notification);
             }
         };
     }
 
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
-        ret.put("store","jolokia:type=NotificationStore");
+        ret.put("store","jolokia:type=NotificationStore,id=" + jolokaiId);
         return ret;
     }
 }
