@@ -1,5 +1,7 @@
 package org.jolokia.notification;
 
+import java.util.Map;
+
 /**
  * A notification backend which is responsible for the final delivery. This final
  * delivery is done by a callback which a backend needs to create out of a given
@@ -26,4 +28,12 @@ public interface NotificationBackend {
      *         triggering when the appropriate notification arrives.
      */
     BackendCallback getBackendCallback();
+
+    /**
+     * Return the configuration specific for this backend. This can contain URL and
+     * other information. The returned map must be serializable to JSON by Jolokia.
+     *
+     * @return the backend specific configuration
+     */
+    Map<String,?> getConfig();
 }

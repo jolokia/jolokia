@@ -55,7 +55,8 @@ public class NotificationDispatcherTest {
 
     private String registerClient() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, MBeanException, IOException, ReflectionException {
         RegisterCommand cmd = createCommand(RegisterCommand.class);
-        return dispatch(cmd);
+        JSONObject config = dispatch(cmd);
+        return (String) config.get("id");
     }
 
     @Test

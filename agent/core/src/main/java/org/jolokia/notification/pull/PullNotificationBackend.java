@@ -1,9 +1,12 @@
 package org.jolokia.notification.pull;
 
+import java.util.Map;
+
 import javax.management.Notification;
 
 import org.jolokia.notification.BackendCallback;
 import org.jolokia.notification.NotificationBackend;
+import org.json.simple.JSONObject;
 
 /**
  * Dummy implementation
@@ -28,5 +31,11 @@ public class PullNotificationBackend implements NotificationBackend {
                                    + notification.getMessage() + ", handback: " + handback);
             }
         };
+    }
+
+    public Map<String, ?> getConfig() {
+        JSONObject ret = new JSONObject();
+        ret.put("store","jolokia:type=NotificationStore");
+        return ret;
     }
 }

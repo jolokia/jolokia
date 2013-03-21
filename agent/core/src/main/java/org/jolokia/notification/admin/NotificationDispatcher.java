@@ -11,6 +11,8 @@ import org.jolokia.notification.BackendCallback;
 import org.jolokia.notification.NotificationBackend;
 import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.request.notification.*;
+import org.json.simple.JSONObject;
+
 import static org.jolokia.request.notification.NotificationCommandType.*;
 
 /**
@@ -27,8 +29,9 @@ public class NotificationDispatcher {
             new PullNotificationBackend()
     };
 
-    // Map mode to Backend
+    // Map mode to Backend and configs
     private final Map<String, NotificationBackend> backendMap = new HashMap<String, NotificationBackend>();
+    private final Map<String, Map<String, ?>> backendConfigMap = new HashMap<String, Map<String, ?>>();
 
     // Map dispatcher action to command typ
     private final Map<NotificationCommandType, Dispatchable> commandMap = new HashMap<NotificationCommandType, Dispatchable>();
@@ -40,9 +43,7 @@ public class NotificationDispatcher {
      * Initialize backends and delegate
      */
     public NotificationDispatcher() {
-        for (NotificationBackend backend : backends) {
-            backendMap.put(backend.getType(), backend);
-        }
+        initBackend();
         listenerDelegate = new NotificationListenerDelegate();
 
         commandMap.put(REGISTER, new RegisterAction());
@@ -74,6 +75,14 @@ public class NotificationDispatcher {
 
     // =======================================================================================
 
+    // Lookup backends and remember
+    private void initBackend() {
+        for (NotificationBackend backend : backends) {
+            backendMap.put(backend.getType(), backend);
+            backendConfigMap.put(backend.getType(),backend.getConfig());
+        }
+    }
+
     // Internal interface for dispatch actions
     private interface Dispatchable<T extends NotificationCommand> {
         /**
@@ -94,7 +103,11 @@ public class NotificationDispatcher {
          */
         public Object execute(MBeanServerExecutor executor, RegisterCommand command)
                 throws MBeanException, IOException, ReflectionException {
-            return listenerDelegate.register();
+            String id = listenerDelegate.register();
+            JSONObject ret = new JSONObject();
+            ret.put("backend",backendConfigMap);
+            ret.put("id",id);
+            return ret;
         }
 
     }
