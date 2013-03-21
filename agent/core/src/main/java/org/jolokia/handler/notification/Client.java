@@ -48,12 +48,20 @@ public class Client {
      * A a new listener registration to this config
      *
      * @param pRegistration registration to add
-     * @return the newly created handle.
+     * @param pHandle to add to
      */
-    public String add(ListenerRegistration pRegistration) {
-        String handle = Long.toString(handleSequence.incrementAndGet());
-        listenerConfigMap.put(handle,pRegistration);
-        return handle;
+    void add(String pHandle, ListenerRegistration pRegistration) {
+        listenerConfigMap.put(pHandle,pRegistration);
+    }
+
+    /**
+     * Increment handle and return it. This method must be used together with add() in
+     * a synchronized blog.
+     *
+     * @return next handle
+     */
+    String getNextHandle() {
+        return Long.toString(handleSequence.incrementAndGet());
     }
 
     /**
@@ -119,4 +127,5 @@ public class Client {
     public String getId() {
         return id;
     }
+
 }

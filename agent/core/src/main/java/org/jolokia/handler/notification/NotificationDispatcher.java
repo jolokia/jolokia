@@ -149,10 +149,7 @@ public class NotificationDispatcher {
          */
         public Object execute(MBeanServerExecutor executor, AddCommand command) throws MBeanException, IOException, ReflectionException {
             NotificationBackend backend = getBackend(command.getMode());
-            BackendRegistration registration = new BackendRegistrationImpl(command,listenerDelegate);
-            BackendCallback callback = backend.getBackendCallback(registration);
-            ListenerRegistration reg = new ListenerRegistration(command, callback);
-            return listenerDelegate.addListener(executor, command.getClient(),reg);
+            return listenerDelegate.addListener(executor, backend, command);
         }
     }
 

@@ -30,22 +30,40 @@ public class BackendRegistrationImpl implements BackendRegistration {
 
     // Used for updating freshness
     private NotificationListenerDelegate delegate;
-    private String client;
+
+    // Client id
+    private String                       client;
+
+    // Registration handle
+    private String                       handle;
 
     /**
      * Registration used when registering at a notification backend
+     *
+     * @param pHandle handle of the registration
+     * @param pCommand original command used for registration
+     * @param pListenerDelegate delegate for updating freshness
      */
-    BackendRegistrationImpl(AddCommand pCommand, NotificationListenerDelegate pListenerDelegate) {
+    BackendRegistrationImpl(String pHandle, AddCommand pCommand, NotificationListenerDelegate pListenerDelegate) {
         mBean = pCommand.getObjectName();
         filter = pCommand.getFilter();
         handback = pCommand.getHandback();
         config = pCommand.getConfig();
         delegate = pListenerDelegate;
         client = pCommand.getClient();
+        handle = pHandle;
     }
 
     public void ping() {
         delegate.refresh(client);
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public String getHandle() {
+        return handle;
     }
 
     public ObjectName getMBean() {

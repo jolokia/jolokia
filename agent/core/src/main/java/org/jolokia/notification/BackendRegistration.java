@@ -25,6 +25,19 @@ public interface BackendRegistration {
     public void ping();
 
     /**
+     * Get the client id which registered this notification
+     *
+     * @return client id
+     */
+    String getClient();
+
+    /**
+     * Get the handle of the registration. Required for retreiving
+     * the stored notifications
+     */
+    String getHandle();
+
+    /**
      * MBean on which the notification listener is registered
      *
      * @return mbean name

@@ -22,7 +22,8 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.notification.BackendCallback;
+import org.jolokia.notification.*;
+import org.jolokia.request.notification.AddCommand;
 import org.json.simple.JSONObject;
 
 /**
@@ -87,27 +88,47 @@ public class NotificationListenerDelegate implements NotificationListener {
      * Add a notification listener on behalf of a client. A JMX listener will be added with
      * the filter and handback given in the provided listener configuration.
      *
+     *
      * @param pExecutor executor for registering JMX notification listeners
-     * @param pClient client for which to add a listener
-     * @param pRegistration the listener's configuration
+     * @param pBackend backend to call
+     * @param pCommand original AddCommand as received bt Jolokia
      * @return a handle identifying the registered listener. This handle can be used later for removing the listener.
      *
      * @throws MBeanException
      * @throws IOException
      * @throws ReflectionException
      */
-    public String addListener(MBeanServerExecutor pExecutor, String pClient, final ListenerRegistration pRegistration)
+    public String addListener(MBeanServerExecutor pExecutor, NotificationBackend pBackend, final AddCommand pCommand)
             throws MBeanException, IOException, ReflectionException {
-        Client client = getClient(pClient);
-        String handle = client.add(pRegistration);
-        pExecutor.each(pRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
-            /** {@inheritDoc} */
-            public void callback(MBeanServerConnection pConn, ObjectName pName)
-                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                pConn.addNotificationListener(pName,NotificationListenerDelegate.this,pRegistration.getFilter(),pRegistration);
+
+        Client client = getClient(pCommand.getClient());
+
+        synchronized (client) {
+            String handle = client.getNextHandle();
+            BackendRegistration backendRegistration = new BackendRegistrationImpl(handle,pCommand,this);
+            BackendCallback callback = pBackend.getBackendCallback(backendRegistration);
+            final ListenerRegistration listenerRegistration = new ListenerRegistration(pCommand,callback);
+            client.add(handle, listenerRegistration);
+
+            final boolean[] added = new boolean[] { false };
+            try {
+                pExecutor.each(listenerRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+                    /** {@inheritDoc} */
+                    public void callback(MBeanServerConnection pConn, ObjectName pName)
+                            throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+                        pConn.addNotificationListener(pName,NotificationListenerDelegate.this,
+                                                      listenerRegistration.getFilter(),listenerRegistration);
+                        added[0] = true;
+                    }
+                });
+            } finally {
+                if (!added[0]) {
+                    // Remove it if exception has been thrown
+                    client.remove(handle);
+                }
             }
-        });
-        return handle;
+            return handle;
+        }
     }
 
     /**
@@ -115,7 +136,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      *
      * @param pExecutor executor for removing JMX notifications listeners
      * @param pClient client for wich to remove the listener
-     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerExecutor, String, ListenerRegistration)}
+     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerExecutor, NotificationBackend, AddCommand)}
      *
      * @throws MBeanException
      * @throws IOException

@@ -6,8 +6,9 @@ import javax.management.*;
 
 import org.easymock.IArgumentMatcher;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
-import org.jolokia.notification.BackendCallback;
+import org.jolokia.notification.*;
 import org.jolokia.request.notification.AddCommand;
+import org.jolokia.test.util.CollectionTestUtil;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,10 +44,7 @@ public class NotificationListenerDelegateTest {
         expect(cmd.getFilter()).andStubReturn(filter);
         expect(cmd.getHandback()).andStubReturn(handback);
         if (configKeyAndValue.length > 0) {
-            Map config = new HashMap();
-            for (int i = 0; i < configKeyAndValue.length; i +=2) {
-                config.put(configKeyAndValue[i],configKeyAndValue[i+1]);
-            }
+            Map config = CollectionTestUtil.newMap(configKeyAndValue);
             expect(cmd.getConfig()).andStubReturn(config);
         } else {
             expect(cmd.getConfig()).andStubReturn(null);
@@ -54,6 +52,7 @@ public class NotificationListenerDelegateTest {
         replay(cmd);
         return new ListenerRegistration(cmd,callback);
     }
+
 
     @Test
     public void testCleanup() throws Exception {
@@ -66,8 +65,11 @@ public class NotificationListenerDelegateTest {
 
         String id = delegate.register();
         Object handback = new Object();
-        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback,null);
-        delegate.addListener(executor,id,reg);
+        AddCommand command = getAddCommand(id, handback);
+        NotificationBackend backend = createMock(NotificationBackend.class);
+        expect(backend.getBackendCallback((BackendRegistration) anyObject())).andStubReturn(null);
+        replay(command, backend);
+        delegate.addListener(executor, backend, command);
         delegate.cleanup(executor,System.currentTimeMillis() + 10000);
         try {
             delegate.refresh(id);
@@ -75,6 +77,41 @@ public class NotificationListenerDelegateTest {
         } catch (IllegalArgumentException exp) {
 
         }
+    }
+
+    @Test
+    public void testExceptionDuringAdd() throws Exception {
+        Object handback = new Object();
+        NotificationListenerDelegate delegate = new NotificationListenerDelegate();
+        expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
+        connection.addNotificationListener(eq(TEST_NAME), eq(delegate), eqNotificationFilter("type.jmx"), isA(ListenerRegistration.class));
+        expectLastCall().andThrow(new InstanceNotFoundException());
+        replay(connection);
+
+        String id = delegate.register();
+        AddCommand command = getAddCommand(id, handback);
+        NotificationBackend backend = createMock(NotificationBackend.class);
+        expect(backend.getBackendCallback((BackendRegistration) anyObject())).andStubReturn(null);
+        replay(command, backend);
+
+        assertEquals(delegate.list(id).size(),0);
+        try {
+            delegate.addListener(executor,backend,command);
+            fail();
+        } catch (IllegalArgumentException exp) {
+
+        }
+        assertEquals(delegate.list(id).size(),0);
+    }
+
+    private AddCommand getAddCommand(String pId, Object pHandback) {
+        AddCommand command = createMock(AddCommand.class);
+        expect(command.getClient()).andStubReturn(pId);
+        expect(command.getObjectName()).andStubReturn(TEST_NAME);
+        expect(command.getFilter()).andStubReturn(Arrays.asList("type.jmx"));
+        expect(command.getHandback()).andStubReturn(pHandback);
+        expect(command.getConfig()).andStubReturn(null);
+        return command;
     }
 
     @Test
