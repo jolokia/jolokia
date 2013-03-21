@@ -4,8 +4,7 @@ import java.util.Map;
 
 import javax.management.Notification;
 
-import org.jolokia.notification.BackendCallback;
-import org.jolokia.notification.NotificationBackend;
+import org.jolokia.notification.*;
 import org.json.simple.JSONObject;
 
 /**
@@ -21,10 +20,7 @@ public class PullNotificationBackend implements NotificationBackend {
         return "pull";
     }
 
-    /** {@inheritDoc}
-     * @param pConfig*/
-    public BackendCallback getBackendCallback(Map<String, ?> pConfig) {
-
+    public BackendCallback getBackendCallback(BackendRegistration pRegistration) {
         return new BackendCallback() {
             /** {@inheritDoc} */
             public void handleNotification(Notification notification, Object handback) {

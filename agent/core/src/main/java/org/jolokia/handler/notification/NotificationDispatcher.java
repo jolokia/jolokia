@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.*;
+import javax.management.MBeanException;
+import javax.management.ReflectionException;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.notification.BackendCallback;
-import org.jolokia.notification.NotificationBackend;
+import org.jolokia.notification.*;
 import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.request.notification.*;
 import org.json.simple.JSONObject;
@@ -149,7 +149,8 @@ public class NotificationDispatcher {
          */
         public Object execute(MBeanServerExecutor executor, AddCommand command) throws MBeanException, IOException, ReflectionException {
             NotificationBackend backend = getBackend(command.getMode());
-            BackendCallback callback = backend.getBackendCallback(command.getConfig());
+            BackendRegistration registration = new BackendRegistrationImpl(command,listenerDelegate);
+            BackendCallback callback = backend.getBackendCallback(registration);
             ListenerRegistration reg = new ListenerRegistration(command, callback);
             return listenerDelegate.addListener(executor, command.getClient(),reg);
         }
