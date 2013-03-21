@@ -21,8 +21,9 @@ public class PullNotificationBackend implements NotificationBackend {
         return "pull";
     }
 
-    /** {@inheritDoc} */
-    public BackendCallback getBackendCallback() {
+    /** {@inheritDoc}
+     * @param pConfig*/
+    public BackendCallback getBackendCallback(Map<String, ?> pConfig) {
 
         return new BackendCallback() {
             /** {@inheritDoc} */

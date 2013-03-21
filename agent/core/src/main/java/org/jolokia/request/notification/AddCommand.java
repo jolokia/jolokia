@@ -21,6 +21,8 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.util.EscapeUtil;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Command for adding a notification listener for a client with optional
@@ -37,6 +39,9 @@ public class AddCommand extends ClientCommand {
     // Backend mode
     private final String mode;
 
+    // Extra configuration specific for the backend
+    private Map<String,?> config;
+
     // List of filter on notification types which are ORed together
     private List<String> filter;
 
@@ -45,8 +50,12 @@ public class AddCommand extends ClientCommand {
 
     /**
      * Add for GET requests, which mus have the path part '/client/mode/mbean'.
-     * Optionally an '/filter1,filter2/handback' part can be provided.
+     * Optionally an '/filter1,filter2/config/handback' part can be provided.
      * (an handback works only with filters given)
+     *
+     * To add an empty filter (so that the following parameters can be used, too), use a space
+     * for this part (%20). To add an empty config use "{}". But at the end,
+     * you are better off by using the POST variant anyways for adding listeners.
      *
      * @param pStack path stack from where to extract the information
      * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
@@ -62,7 +71,13 @@ public class AddCommand extends ClientCommand {
         }
         objectName = new ObjectName(pStack.pop());
         if (!pStack.isEmpty()) {
-            filter = EscapeUtil.split(pStack.pop(),EscapeUtil.CSV_ESCAPE,",");
+            String element = pStack.pop();
+            if (!element.trim().isEmpty()) {
+                filter = EscapeUtil.split(element,EscapeUtil.CSV_ESCAPE,",");
+            }
+        }
+        if (!pStack.isEmpty()) {
+            config = parseConfig(pStack.pop());
         }
         if (!pStack.isEmpty()) {
             handback = pStack.pop();
@@ -91,6 +106,10 @@ public class AddCommand extends ClientCommand {
         if (f != null) {
             filter = f instanceof List ? (List<String>) f : Arrays.asList(f.toString());
         }
+        Object c = pMap.get("config");
+        if (c != null) {
+            config = c instanceof Map ? (Map<String,?>) c : parseConfig(c.toString());
+        }
         handback = pMap.get("handback");
     }
 
@@ -115,7 +134,7 @@ public class AddCommand extends ClientCommand {
     /**
      * A list of string filters or <code>null</code> if no
      * filters has been provided
-     * @return list of filters
+     * @return list of filters or null if none is given.
      */
     public List<String> getFilter() {
         return filter;
@@ -129,5 +148,26 @@ public class AddCommand extends ClientCommand {
      */
     public Object getHandback() {
         return handback;
+    }
+
+    /**
+     * Get the configuration for an add request
+     * @return map holding extra configuratio. This can be null or empty.
+     */
+    public Map<String, ?> getConfig() {
+        return config;
+    }
+
+    // ==============================================================================================
+
+    // Parse a string as configuration object
+    private Map<String, ?> parseConfig(String pElement) {
+        try {
+            return (Map<String, ?>) new JSONParser().parse(pElement);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
+        }
     }
 }

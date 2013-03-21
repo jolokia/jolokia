@@ -1,4 +1,4 @@
-package org.jolokia.notification.admin;
+package org.jolokia.handler.notification;
 
 import java.io.IOException;
 import java.lang.reflect.*;

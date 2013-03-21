@@ -24,16 +24,17 @@ public interface NotificationBackend {
      * Create a specific callback for the given configuration. This
      * callback will be called for every notification received
      *
-     * @return callback which is stored in the {@link org.jolokia.notification.admin.NotificationListenerDelegate} for
+     * @param pConfig backend specific configuration which can be used to construct the callback
+     * @return callback which is stored in the {@link org.jolokia.handler.notification.NotificationListenerDelegate} for
      *         triggering when the appropriate notification arrives.
      */
-    BackendCallback getBackendCallback();
+    BackendCallback getBackendCallback(Map<String, ?> pConfig);
 
     /**
      * Return the configuration specific for this backend. This can contain URL and
      * other information. The returned map must be serializable to JSON by Jolokia.
      *
-     * @return the backend specific configuration
+     * @return the backend specific global configuration
      */
     Map<String,?> getConfig();
 }

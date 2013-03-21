@@ -1,20 +1,19 @@
-package org.jolokia.notification.admin;
+package org.jolokia.handler.notification;
 
 import java.util.*;
 
 import javax.management.*;
 
-import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.notification.BackendCallback;
+import org.jolokia.request.notification.AddCommand;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -38,8 +37,22 @@ public class NotificationListenerDelegateTest {
         };
     }
 
-    private ListenerRegistration createRegistration(String name,List<String> filter,Object handback, BackendCallback ... callback) throws MalformedObjectNameException {
-        return new ListenerRegistration(new ObjectName(name),filter,handback,callback.length > 0 ? callback[0] : null);
+    private ListenerRegistration createRegistration(String name,List<String> filter,Object handback, BackendCallback callback, String ... configKeyAndValue) throws MalformedObjectNameException {
+        AddCommand cmd = createMock(AddCommand.class);
+        expect(cmd.getObjectName()).andStubReturn(new ObjectName(name));
+        expect(cmd.getFilter()).andStubReturn(filter);
+        expect(cmd.getHandback()).andStubReturn(handback);
+        if (configKeyAndValue.length > 0) {
+            Map config = new HashMap();
+            for (int i = 0; i < configKeyAndValue.length; i +=2) {
+                config.put(configKeyAndValue[i],configKeyAndValue[i+1]);
+            }
+            expect(cmd.getConfig()).andStubReturn(config);
+        } else {
+            expect(cmd.getConfig()).andStubReturn(null);
+        }
+        replay(cmd);
+        return new ListenerRegistration(cmd,callback);
     }
 
     @Test
@@ -53,7 +66,7 @@ public class NotificationListenerDelegateTest {
 
         String id = delegate.register();
         Object handback = new Object();
-        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback);
+        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback,null);
         delegate.addListener(executor,id,reg);
         delegate.cleanup(executor,System.currentTimeMillis() + 10000);
         try {
@@ -67,12 +80,14 @@ public class NotificationListenerDelegateTest {
     @Test
     public void testToJson() throws Exception {
         Object handback = new Object();
-        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback);
+        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback, null, "eins", "zwei");
         JSONObject ret = reg.toJson();
         assertEquals(ret.get("mbean"),TEST_NAME.toString());
         assertEquals(ret.get("handback"),handback);
         assertEquals(((List) ret.get("filter")).get(0),"type.jmx");
         assertEquals(((List) ret.get("filter")).size(),1);
+        Map config = (Map) ret.get("config");
+        assertEquals(config.get("eins"),"zwei");
     }
 
     @Test
@@ -94,7 +109,7 @@ public class NotificationListenerDelegateTest {
     }
 
     public NotificationFilter eqNotificationFilter(final String ... filters) {
-        EasyMock.reportMatcher(new IArgumentMatcher() {
+        reportMatcher(new IArgumentMatcher() {
             public boolean matches(Object argument) {
                 NotificationFilterSupport filter = (NotificationFilterSupport) argument;
                 for (String f : filters) {

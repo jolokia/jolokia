@@ -1,10 +1,12 @@
-package org.jolokia.notification.admin;
+package org.jolokia.handler.notification;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.management.*;
 
 import org.jolokia.notification.BackendCallback;
+import org.jolokia.request.notification.AddCommand;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -27,21 +29,23 @@ class ListenerRegistration {
     private final ObjectName mbeanName;
 
     // optional handback returned to a client when a notification arrives
-    private final Object handback;
+    private final Object         handback;
+
+    // extra backend configuration
+    private final Map<String, ?> config;
 
     /**
      * Create a new configuration object for an addListener() request
      *
-     * @param pMBeanName name of the MBean to register for
-     * @param pFilters optional list of filters (might be null)
-     * @param pHandback handback returned to the listeners
+     * @param pCommand command from where to extract parameters
      * @param pCallback callback to call when a notification arrives
      */
-    ListenerRegistration(ObjectName pMBeanName, List<String> pFilters, Object pHandback, BackendCallback pCallback) {
+    ListenerRegistration(AddCommand pCommand, BackendCallback pCallback) {
         callback = pCallback;
-        mbeanName = pMBeanName;
-        handback = pHandback;
-        filter = createFilter(pFilters);
+        mbeanName = pCommand.getObjectName();
+        handback = pCommand.getHandback();
+        config = pCommand.getConfig();
+        filter = createFilter(pCommand.getFilter());
     }
 
     /**
@@ -56,6 +60,9 @@ class ListenerRegistration {
         }
         if (handback != null) {
             ret.put("handback",handback);
+        }
+        if (config != null) {
+            ret.put("config",config);
         }
         return ret;
     }
@@ -78,6 +85,11 @@ class ListenerRegistration {
     /** Get the handback used for the JMX listener */
     public Object getHandback() {
         return handback;
+    }
+
+    /** Extra backend configuration */
+    public Map<String, ?> getConfig() {
+        return config;
     }
 
     // ====================================================================================

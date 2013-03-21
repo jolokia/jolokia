@@ -25,6 +25,7 @@ import org.json.simple.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 /**
  * @author roland
@@ -118,6 +119,7 @@ public class NotificationCommandTest {
                             "mode", "pull",
                             "mbean", mbean.toString(),
                             "filter", getFilterArrayList(filter),
+                            "config", "{ \"extra\": \"club\" }",
                             "handback", handback
                     },
                     new Checkable<AddCommand>() {
@@ -126,6 +128,9 @@ public class NotificationCommandTest {
                             assertEquals(cmd.getMode(),"pull");
                             assertEquals(cmd.getClient(),uuid);
                             assertEquals(cmd.getObjectName(),mbean);
+                            Map<String,?> config = cmd.getConfig();
+                            assertEquals(config.size(),1);
+                            assertEquals(config.get("extra"),"club");
                             assertEquals(cmd.getFilter().size(),filter.length);
                             assertEquals(cmd.getHandback(),handback);
                             for (int i = 0; i < filter.length; i++) {
@@ -158,6 +163,38 @@ public class NotificationCommandTest {
                 });
     }
 
+    @Test
+    public void addWithConfigMap() throws Exception {
+        Map args = prepareAddTestMap();
+        args.put("config",Collections.singletonMap("fcn","meister"));
+        AddCommand command = (AddCommand) NotificationCommandFactory.createCommand(args);
+        assertEquals(command.getConfig().size(),1);
+        assertEquals(command.getConfig().get("fcn"),"meister");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\{not parsable\\{.*")
+    public void addWithConfigMapUnparsable() throws Exception {
+        Map args = prepareAddTestMap();
+        args.put("config","{not parsable{");
+        NotificationCommandFactory.createCommand(args);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\[\"array\"\\].*")
+    public void addWithConfigMapWrongType() throws Exception {
+        Map args = prepareAddTestMap();
+        args.put("config","[\"array\"]");
+        NotificationCommandFactory.createCommand(args);
+    }
+
+    private Map prepareAddTestMap() {
+        Map args = new HashMap();
+        args.put("client", UUID.randomUUID().toString());
+        args.put("command","add");
+        args.put("mode","pull");
+        args.put("mbean","test:type=test");
+        return args;
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanStack() throws Exception {
         Stack<String> args = new Stack<String>();
@@ -165,6 +202,21 @@ public class NotificationCommandTest {
         args.push(UUID.randomUUID().toString());
         args.push("add");
         NotificationCommandFactory.createCommand(args);
+    }
+
+    @Test
+    public void addWithEmptyFilterAndConfig() throws MalformedObjectNameException {
+        Stack<String> args = new Stack<String>();
+        args.push("{}");
+        args.push(" ");
+        args.push("test:type=test");
+        args.push("pull");
+        args.push(UUID.randomUUID().toString());
+        args.push("add");
+        AddCommand command = (AddCommand) NotificationCommandFactory.createCommand(args);
+        assertNull(command.getFilter());
+        Map config = command.getConfig();
+        assertEquals(config.size(),0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")

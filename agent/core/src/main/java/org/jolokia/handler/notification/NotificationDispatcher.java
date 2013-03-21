@@ -1,4 +1,4 @@
-package org.jolokia.notification.admin;
+package org.jolokia.handler.notification;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -149,9 +149,8 @@ public class NotificationDispatcher {
          */
         public Object execute(MBeanServerExecutor executor, AddCommand command) throws MBeanException, IOException, ReflectionException {
             NotificationBackend backend = getBackend(command.getMode());
-            BackendCallback callback = backend.getBackendCallback();
-            ListenerRegistration reg = new ListenerRegistration(command.getObjectName(), command.getFilter(),
-                                                                command.getHandback(), callback);
+            BackendCallback callback = backend.getBackendCallback(command.getConfig());
+            ListenerRegistration reg = new ListenerRegistration(command, callback);
             return listenerDelegate.addListener(executor, command.getClient(),reg);
         }
     }
