@@ -90,11 +90,11 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      * @return the unique Jolokia ID
      */
     private String extractJolokiaId(Configuration pConfig) {
-        String qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
-        if (qualifier != null) {
-            return qualifier;
+        String id = pConfig.get(ConfigKey.JOLOKIA_ID);
+        if (id != null) {
+            return id;
         }
-        return UUID.randomUUID().toString();
+        return Integer.toHexString(hashCode()) + "-unknown";
     }
 
     /**

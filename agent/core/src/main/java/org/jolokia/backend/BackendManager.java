@@ -195,7 +195,7 @@ public class BackendManager {
     public void destroy() {
         try {
             localDispatcher.destroy();
-        } catch (JMException e) {
+        } catch (Exception e) {
             error("Cannot unregister MBean: " + e,e);
         }
     }

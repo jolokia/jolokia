@@ -9,7 +9,7 @@ import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.notification.NotificationCommandType;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.createMock;
 import static org.testng.Assert.*;
@@ -19,6 +19,20 @@ import static org.testng.Assert.*;
  * @since 20.03.13
  */
 public class NotificationHandlerTest extends BaseHandlerTest {
+
+    private NotificationHandler handler;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        ServerHandle serverHandle = new ServerHandle(null,null,null,null,null);
+        serverHandle.setJolokiaId("test");
+        handler = new NotificationHandler(new AllowAllRestrictor(),serverHandle);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        handler.destroy();
+    }
 
     @Test
     public void testSimple() throws Exception {
@@ -39,8 +53,6 @@ public class NotificationHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testUnsupported() throws Exception {
-        NotificationHandler handler = new NotificationHandler(new AllowAllRestrictor(),
-                                                              new ServerHandle(null,null,null,null,null));
         JmxNotificationRequest request = createRequest();
         assertTrue(handler.handleAllServersAtOnce(request));
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);

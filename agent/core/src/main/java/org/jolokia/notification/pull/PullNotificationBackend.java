@@ -1,10 +1,12 @@
 package org.jolokia.notification.pull;
 
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 
-import javax.management.Notification;
+import javax.management.*;
 
 import org.jolokia.notification.*;
+import org.jolokia.util.JmxUtil;
 import org.json.simple.JSONObject;
 
 /**
@@ -17,11 +19,25 @@ public class PullNotificationBackend implements NotificationBackend {
 
     private PullNotificationStore store;
 
-    private String jolokaiId;
+    private int maxEntries = 100;
 
+    private ObjectName mbeanName;
+
+    /**
+     * Create a pull notification backend which will register an MBean allowing
+     * to pull received notification
+     *
+     * @param pId jolokia id to generate a unique MBean name
+     */
     public PullNotificationBackend(String pId) {
-        jolokaiId = pId;
-        store = new PullNotificationStore();
+        // TODO: Get configuration parameter for maxEntries
+        store = new PullNotificationStore(maxEntries);
+        mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + pId);
+        try {
+            getMBeanServer().registerMBean(store, mbeanName);
+        } catch (JMException e) {
+            throw new IllegalArgumentException("Cannot register MBean " + mbeanName + " as notification pull store: " + e,e);
+        }
     }
 
     /** {@inheritDoc} */
@@ -29,17 +45,39 @@ public class PullNotificationBackend implements NotificationBackend {
         return "pull";
     }
 
-    public BackendCallback getBackendCallback(final BackendRegistration pRegistration) {
+    /** {@inheritDoc} */
+    public BackendCallback subscribe(final NotificationSubscription pSubscription) {
         return new BackendCallback() {
             public void handleNotification(Notification notification, Object handback) {
-                store.add(pRegistration,notification);
+                store.add(pSubscription,notification);
             }
         };
     }
 
+    /** {@inheritDoc} */
+    public void unsubscribe(String pClientId, String pHandle) {
+        store.removeSubscription(pClientId, pHandle);
+    }
+
+    /** {@inheritDoc} */
+    public void unregister(String pClientId) {
+        store.removeClient(pClientId);
+    }
+
+    /** {@inheritDoc} */
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
-        ret.put("store","jolokia:type=NotificationStore,id=" + jolokaiId);
+        ret.put("store",mbeanName.toString());
+        ret.put("maxEntries",maxEntries);
         return ret;
+    }
+
+    /** {@inheritDoc} */
+    public void destroy() throws JMException {
+        getMBeanServer().unregisterMBean(mbeanName);
+    }
+
+    private MBeanServer getMBeanServer() {
+        return ManagementFactory.getPlatformMBeanServer();
     }
 }

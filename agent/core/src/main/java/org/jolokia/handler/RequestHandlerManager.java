@@ -19,6 +19,8 @@ package org.jolokia.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.JMException;
+
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.Restrictor;
@@ -42,8 +44,9 @@ public class RequestHandlerManager {
      * @param pConverters string/object converters
      * @param pServerHandle server handle for obtaining MBeanServer
      * @param pRestrictor handler for access restrictions
+     * @param pUseNotifications whether notifications should be used
      */
-    public RequestHandlerManager(Converters pConverters,ServerHandle pServerHandle, Restrictor pRestrictor) {
+    public RequestHandlerManager(Converters pConverters,ServerHandle pServerHandle, Restrictor pRestrictor, boolean pUseNotifications) {
         JsonRequestHandler handlers[] = {
                 new ReadHandler(pRestrictor),
                 new WriteHandler(pRestrictor, pConverters),
@@ -51,10 +54,12 @@ public class RequestHandlerManager {
                 new ListHandler(pRestrictor),
                 new VersionHandler(pRestrictor, pServerHandle),
                 new SearchHandler(pRestrictor),
-                new NotificationHandler(pRestrictor, pServerHandle)
+                pUseNotifications ? new NotificationHandler(pRestrictor, pServerHandle) : null
         };
         for (JsonRequestHandler handler : handlers) {
-            requestHandlerMap.put(handler.getType(),handler);
+            if (handler != null) {
+                requestHandlerMap.put(handler.getType(),handler);
+            }
         }
     }
 
@@ -72,4 +77,12 @@ public class RequestHandlerManager {
         return handler;
     }
 
+    /**
+     * Lifecycle method called when agent goes down
+     */
+    public void destroy() throws JMException {
+        for (JsonRequestHandler handler : requestHandlerMap.values()) {
+            handler.destroy();
+        }
+    }
 }

@@ -105,8 +105,8 @@ public class NotificationListenerDelegate implements NotificationListener {
 
         synchronized (client) {
             String handle = client.getNextHandle();
-            BackendRegistration backendRegistration = new BackendRegistrationImpl(handle,pCommand,this);
-            BackendCallback callback = pBackend.getBackendCallback(backendRegistration);
+            NotificationSubscription notificationSubscription = new NotificationSubscriptionImpl(handle,pCommand,this);
+            BackendCallback callback = pBackend.subscribe(notificationSubscription);
             final ListenerRegistration listenerRegistration = new ListenerRegistration(pCommand,callback);
             client.add(handle, listenerRegistration);
 

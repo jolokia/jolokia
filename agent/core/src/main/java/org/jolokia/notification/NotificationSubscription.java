@@ -13,7 +13,7 @@ import javax.management.ObjectName;
  * @since 21.03.13
  */
 
-public interface BackendRegistration {
+public interface NotificationSubscription {
 
     /**
      * Method which should be called if a client

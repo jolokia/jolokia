@@ -9,6 +9,7 @@ import org.jolokia.config.ProcessingParameters;
 import org.jolokia.request.notification.NotificationCommand;
 import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.util.RequestType;
+import org.json.simple.JSONObject;
 
 /**
  * @author roland
@@ -49,6 +50,14 @@ public class JmxNotificationRequest extends JmxRequest {
      */
     public <T extends NotificationCommand> T getCommand() {
         return (T) command;
+    }
+
+    /** {@inheritDoc} */
+    public JSONObject toJSON() {
+        JSONObject ret = super.toJSON();
+        JSONObject commandJson = command.toJSON();
+        ret.putAll(commandJson);
+        return ret;
     }
 
     /**

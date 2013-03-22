@@ -21,6 +21,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.util.EscapeUtil;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -156,6 +157,23 @@ public class AddCommand extends ClientCommand {
      */
     public Map<String, ?> getConfig() {
         return config;
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject ret = super.toJSON();
+        ret.put("mbean",objectName.toString());
+        ret.put("mode",mode);
+        if (filter != null && filter.size() > 0) {
+            ret.put("filter",filter);
+        }
+        if (config != null && config.size() > 0) {
+            ret.put("config",config);
+        }
+        if (handback != null) {
+            ret.put("handback",handback);
+        }
+        return ret;
     }
 
     // ==============================================================================================

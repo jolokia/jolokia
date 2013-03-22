@@ -30,8 +30,7 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.json.simple.JSONObject;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
 
@@ -48,6 +47,11 @@ public class Jsr160RequestDispatcherTest {
     private void setup() {
         dispatcher = createDispatcherPointingToLocalMBeanServer();
         procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
+    }
+
+    @AfterTest
+    public void tearDown() throws Exception {
+        dispatcher.destroy();
     }
 
     @Test
@@ -68,14 +72,16 @@ public class Jsr160RequestDispatcherTest {
     }
 
     @Test(expectedExceptions = IOException.class)
-    public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void simpleDispatchFail() throws Exception {
         JmxRequest req = preparePostReadRequest(null);
+        tearDown();
         getOriginalDispatcher().dispatchRequest(req);
+        setup();
     }
 
     @Test
     public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxReadRequest req = (JmxReadRequest) preparePostReadRequest(null);
+        JmxReadRequest req =  preparePostReadRequest(null);
         Map result = (Map) dispatcher.dispatchRequest(req);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }

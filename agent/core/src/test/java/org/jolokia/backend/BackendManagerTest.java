@@ -194,6 +194,9 @@ public class BackendManagerTest implements LogHandler {
         public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
             return false;
         }
+
+        public void destroy() throws JMException {
+        }
     }
 
     // ========================================================
@@ -212,6 +215,9 @@ public class BackendManagerTest implements LogHandler {
 
         public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
             return false;
+        }
+
+        public void destroy() throws JMException {
         }
     }
 

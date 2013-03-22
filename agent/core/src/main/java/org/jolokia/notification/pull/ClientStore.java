@@ -4,33 +4,70 @@ import java.util.*;
 
 import javax.management.Notification;
 
-import org.jolokia.notification.BackendRegistration;
+import org.jolokia.notification.NotificationSubscription;
 
 /**
+ * A Client store is responsible for holding all notifications
+ * for a single client.
+ *
  * @author roland
  * @since 21.03.13
  */
 public class ClientStore  {
 
-    Map<String,NotificationStore> store;
+    // association client to notifications
+    private Map<String,NotificationStore> store;
 
-    public void add(BackendRegistration pRegistration, Notification pNotification) {
-        String key = pRegistration.getHandle();
-        NotificationStore notifStore = store.get(key);
+    // Max notification entries to hold
+    private int maxEntries;
+
+    /**
+     * Init with a maimal entry limit
+     *
+     * @param pMaxEntries max entries to hold
+     */
+    ClientStore(int pMaxEntries) {
+        maxEntries = pMaxEntries;
+        store = new HashMap<String, NotificationStore>();
+    }
+
+    /**
+     * Add a notification for this client
+     *
+     * @param pSubscription the subscription handle
+     * @param pNotification the notification to add
+     */
+    void add(NotificationSubscription pSubscription, Notification pNotification) {
+        NotificationStore notifStore = store.get(pSubscription);
         if (notifStore == null) {
-            notifStore = new NotificationStore(pRegistration);
-            store.put(key,notifStore);
+            notifStore = new NotificationStore(pSubscription,maxEntries);
+            store.put(pSubscription.getHandle(),notifStore);
         }
         notifStore.add(pNotification);
     }
 
-    public List<Notification> pull(String pHandle) {
+    /**
+     * Pull off notification for this client and a given handle. This will
+     * also clear all stored notification.
+     *
+     * @param pHandle subscription handle
+     * @return list of notification or an empty list
+     */
+    List<Notification> pull(String pHandle) {
         NotificationStore notificationStore = store.get(pHandle);
         if (notificationStore != null) {
-            return notificationStore.getNotifications();
+            return notificationStore.fetchAndClear();
         } else {
             return Collections.emptyList();
         }
+    }
 
+    /**
+     * Remove subscription
+     *
+     * @param pHandle notification handle
+     */
+    void removeSubscription(String pHandle) {
+        store.remove(pHandle);
     }
 }

@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.MBeanException;
-import javax.management.ReflectionException;
+import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
@@ -68,6 +67,15 @@ public class NotificationDispatcher {
             throw new IllegalArgumentException("Internal: No dispatch action for " + pCommand.getType() + " registered");
         }
         return dispatchable.execute(pExecutor,pCommand);
+    }
+
+    /**
+     * Lifecycle method when agent goes down
+     */
+    public void destroy() throws JMException {
+        for (NotificationBackend backend : backendMap.values()) {
+            backend.destroy();
+        }
     }
 
     // =======================================================================================

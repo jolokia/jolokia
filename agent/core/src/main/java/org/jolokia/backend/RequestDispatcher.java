@@ -63,4 +63,9 @@ public interface RequestDispatcher {
      *         if the value should be directly returned
      */
     boolean useReturnValueWithPath(JmxRequest pJmxRequest);
+
+    /**
+     * Lifecycle method called when agent goes down.
+     */
+    void destroy() throws JMException;
 }

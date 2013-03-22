@@ -2,6 +2,8 @@ package org.jolokia.notification;
 
 import java.util.Map;
 
+import javax.management.JMException;
+
 /**
  * A notification backend which is responsible for the final delivery. This final
  * delivery is done by a callback which a backend needs to create out of a given
@@ -24,10 +26,27 @@ public interface NotificationBackend {
      * Create a specific callback for the given configuration. This
      * callback will be called for every notification received
      *
-     * @param pRegistration backend specific configuration which can be used for construction  the callback
+     * @param pSubscription backend specific configuration which can be used for construction of
+     *                      the callback
      * @return callback which is called on reception of a notification.
      */
-    BackendCallback getBackendCallback(BackendRegistration pRegistration);
+    BackendCallback subscribe(NotificationSubscription pSubscription);
+
+    /**
+     * Unsubscribe for the given notification. Time to clean up
+     *
+     * @param pClientId client id
+     * @param pHandle handle id for notification to unsubscribe
+     */
+    void unsubscribe(String pClientId, String pHandle);
+
+
+    /**
+     * Unregister a client
+     *
+     * @param pClientId client id
+     */
+    void unregister(String pClientId);
 
     /**
      * Return the global configuration specific for this backend. This can contain URL and
@@ -37,4 +56,9 @@ public interface NotificationBackend {
      * @return the backend specific global configuration
      */
     Map<String,?> getConfig();
+
+    /**
+     * Called when agent shuts down
+     */
+    void destroy() throws JMException;
 }

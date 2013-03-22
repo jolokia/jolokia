@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.management.ObjectName;
 
-import org.jolokia.notification.BackendRegistration;
+import org.jolokia.notification.NotificationSubscription;
 import org.jolokia.request.notification.AddCommand;
 
 /**
@@ -14,7 +14,7 @@ import org.jolokia.request.notification.AddCommand;
  * @author roland
  * @since 21.03.13
  */
-public class BackendRegistrationImpl implements BackendRegistration {
+public class NotificationSubscriptionImpl implements NotificationSubscription {
 
     // MBean on which the notification is registered
     private ObjectName mBean;
@@ -44,7 +44,7 @@ public class BackendRegistrationImpl implements BackendRegistration {
      * @param pCommand original command used for registration
      * @param pListenerDelegate delegate for updating freshness
      */
-    BackendRegistrationImpl(String pHandle, AddCommand pCommand, NotificationListenerDelegate pListenerDelegate) {
+    NotificationSubscriptionImpl(String pHandle, AddCommand pCommand, NotificationListenerDelegate pListenerDelegate) {
         mBean = pCommand.getObjectName();
         filter = pCommand.getFilter();
         handback = pCommand.getHandback();

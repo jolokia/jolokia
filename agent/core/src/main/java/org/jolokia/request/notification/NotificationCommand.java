@@ -16,6 +16,8 @@
 
 package org.jolokia.request.notification;
 
+import org.json.simple.JSONObject;
+
 /**
  * Base command class holding the command type
  *
@@ -40,4 +42,9 @@ public abstract class NotificationCommand {
         return type;
     }
 
+    public JSONObject toJSON() {
+        JSONObject ret = new JSONObject();
+        ret.put("command",type.getType());
+        return ret;
+    }
 }

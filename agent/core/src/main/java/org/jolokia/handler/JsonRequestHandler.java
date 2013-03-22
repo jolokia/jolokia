@@ -189,6 +189,14 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
     }
 
     /**
+     * Lifecycle method called when agent goes down. Should be overridden by
+     * a handler if required.
+     */
+    public void destroy() throws JMException {
+
+    }
+
+    /**
      * Get the restrictor which is currently active
      *
      * @return restrictor

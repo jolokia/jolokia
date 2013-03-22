@@ -54,7 +54,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     public Jsr160RequestDispatcher(Converters pConverters,
                                    ServerHandle serverInfo,
                                    Restrictor restrictor) {
-        requestHandlerManager = new RequestHandlerManager(pConverters, serverInfo, restrictor);
+        requestHandlerManager = new RequestHandlerManager(pConverters, serverInfo, restrictor,false);
     }
 
     /**
@@ -140,5 +140,9 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
+    }
+
+    public void destroy() throws JMException {
+        requestHandlerManager.destroy();
     }
 }

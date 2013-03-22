@@ -19,6 +19,8 @@ package org.jolokia.request.notification;
 import java.util.Map;
 import java.util.Stack;
 
+import org.json.simple.JSONObject;
+
 /**
  * A base command which should be subclassed by every command
  * requiring  'client' attribute.
@@ -64,5 +66,12 @@ public abstract class ClientCommand extends NotificationCommand {
 
     public String getClient() {
         return client;
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject ret = super.toJSON();
+        ret.put("client",client);
+        return ret;
     }
 }

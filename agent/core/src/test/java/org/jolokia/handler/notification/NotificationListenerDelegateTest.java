@@ -67,7 +67,7 @@ public class NotificationListenerDelegateTest {
         Object handback = new Object();
         AddCommand command = getAddCommand(id, handback);
         NotificationBackend backend = createMock(NotificationBackend.class);
-        expect(backend.getBackendCallback((BackendRegistration) anyObject())).andStubReturn(null);
+        expect(backend.subscribe((NotificationSubscription) anyObject())).andStubReturn(null);
         replay(command, backend);
         delegate.addListener(executor, backend, command);
         delegate.cleanup(executor,System.currentTimeMillis() + 10000);
@@ -91,7 +91,7 @@ public class NotificationListenerDelegateTest {
         String id = delegate.register();
         AddCommand command = getAddCommand(id, handback);
         NotificationBackend backend = createMock(NotificationBackend.class);
-        expect(backend.getBackendCallback((BackendRegistration) anyObject())).andStubReturn(null);
+        expect(backend.subscribe((NotificationSubscription) anyObject())).andStubReturn(null);
         replay(command, backend);
 
         assertEquals(delegate.list(id).size(),0);

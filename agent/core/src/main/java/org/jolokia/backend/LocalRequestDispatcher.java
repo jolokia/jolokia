@@ -69,7 +69,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
         // Request handling manager 
         requestHandlerManager =
-                new RequestHandlerManager(pConverters,mBeanServerHandler.getServerHandle(),pRestrictor);
+                new RequestHandlerManager(pConverters,mBeanServerHandler.getServerHandle(),pRestrictor,true);
     }
 
     // Can handle any request
@@ -143,6 +143,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      */
     public void destroy() throws JMException {
         mBeanServerHandler.destroy();
+        requestHandlerManager.destroy();
     }
 
     /**

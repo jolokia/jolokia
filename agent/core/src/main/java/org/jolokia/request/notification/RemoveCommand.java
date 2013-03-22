@@ -19,6 +19,8 @@ package org.jolokia.request.notification;
 import java.util.Map;
 import java.util.Stack;
 
+import org.json.simple.JSONObject;
+
 /**
  * Remove a listener by its handle
  *
@@ -59,5 +61,12 @@ public class RemoveCommand extends ClientCommand {
 
     public String getHandle() {
         return handle;
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject ret = super.toJSON();
+        ret.put("handle",handle);
+        return ret;
     }
 }

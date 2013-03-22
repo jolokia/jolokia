@@ -61,7 +61,13 @@ public class NotificationHandler extends JsonRequestHandler<JmxNotificationReque
     }
 
     @Override
+    /** {@inheritDoc} */
     public Object doHandleRequest(MBeanServerExecutor serverManager, JmxNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return dispatcher.dispatch(serverManager,request.getCommand());
+    }
+
+    /** {@inheritDoc} */
+    public void destroy() throws JMException {
+        dispatcher.destroy();
     }
 }

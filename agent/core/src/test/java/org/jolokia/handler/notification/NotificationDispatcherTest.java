@@ -10,8 +10,7 @@ import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.notification.*;
 import org.json.simple.JSONObject;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -38,7 +37,9 @@ public class NotificationDispatcherTest {
 
     @BeforeMethod
     public void setup() {
-        dispatcher = new NotificationDispatcher(new ServerHandle(null,null,null,null,null));
+        ServerHandle serverHandle = new ServerHandle(null, null, null, null, null);
+        serverHandle.setJolokiaId("test");
+        dispatcher = new NotificationDispatcher(serverHandle);
         connection = createMock(MBeanServerConnection.class);
         executor = new AbstractMBeanServerExecutor() {
             @Override
@@ -46,6 +47,11 @@ public class NotificationDispatcherTest {
                 return new HashSet<MBeanServerConnection>(Arrays.asList(connection));
             }
         };
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        dispatcher.destroy();
     }
 
     @Test
