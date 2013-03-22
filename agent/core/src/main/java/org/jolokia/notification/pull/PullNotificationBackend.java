@@ -17,10 +17,13 @@ import org.json.simple.JSONObject;
  */
 public class PullNotificationBackend implements NotificationBackend {
 
+    // Store for holding the notification
     private PullNotificationStore store;
 
+    // maximal number of entries *per* notification subscription
     private int maxEntries = 100;
 
+    // MBean name of this stored
     private ObjectName mbeanName;
 
     /**
@@ -48,6 +51,7 @@ public class PullNotificationBackend implements NotificationBackend {
     /** {@inheritDoc} */
     public BackendCallback subscribe(final NotificationSubscription pSubscription) {
         return new BackendCallback() {
+            /** {@inheritDoc} */
             public void handleNotification(Notification notification, Object handback) {
                 store.add(pSubscription,notification);
             }
@@ -77,6 +81,7 @@ public class PullNotificationBackend implements NotificationBackend {
         getMBeanServer().unregisterMBean(mbeanName);
     }
 
+    // We use the platform MBeanServer for
     private MBeanServer getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();
     }

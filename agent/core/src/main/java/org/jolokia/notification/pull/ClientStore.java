@@ -38,7 +38,7 @@ public class ClientStore  {
      * @param pNotification the notification to add
      */
     void add(NotificationSubscription pSubscription, Notification pNotification) {
-        NotificationStore notifStore = store.get(pSubscription);
+        NotificationStore notifStore = store.get(pSubscription.getHandle());
         if (notifStore == null) {
             notifStore = new NotificationStore(pSubscription,maxEntries);
             store.put(pSubscription.getHandle(),notifStore);

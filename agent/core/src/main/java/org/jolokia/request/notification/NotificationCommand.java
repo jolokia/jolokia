@@ -38,10 +38,16 @@ public abstract class NotificationCommand {
         type = pType;
     }
 
+    /**
+     * Get the type of this command
+     *
+     * @return command type
+     */
     public NotificationCommandType getType() {
         return type;
     }
 
+    /** {@inheritDoc} */
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("command",type.getType());

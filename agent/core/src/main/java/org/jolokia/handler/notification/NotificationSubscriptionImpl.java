@@ -32,10 +32,10 @@ public class NotificationSubscriptionImpl implements NotificationSubscription {
     private NotificationListenerDelegate delegate;
 
     // Client id
-    private String                       client;
+    private String client;
 
     // Registration handle
-    private String                       handle;
+    private String handle;
 
     /**
      * Registration used when registering at a notification backend
@@ -54,30 +54,37 @@ public class NotificationSubscriptionImpl implements NotificationSubscription {
         handle = pHandle;
     }
 
+    /** {@inheritDoc} */
     public void ping() {
         delegate.refresh(client);
     }
 
+    /** {@inheritDoc} */
     public String getClient() {
         return client;
     }
 
+    /** {@inheritDoc} */
     public String getHandle() {
         return handle;
     }
 
+    /** {@inheritDoc} */
     public ObjectName getMBean() {
         return mBean;
     }
 
+    /** {@inheritDoc} */
     public List<String> getFilter() {
         return filter;
     }
 
+    /** {@inheritDoc} */
     public Object getHandback() {
         return handback;
     }
 
+    /** {@inheritDoc} */
     public Map<String, ?> getConfig() {
         return config;
     }

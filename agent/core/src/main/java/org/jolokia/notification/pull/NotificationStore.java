@@ -42,6 +42,10 @@ public class NotificationStore {
         dropped = 0;
     }
 
+    /**
+     * Add a notification to this store
+     * @param pNotification notification to add
+     */
     synchronized void add(Notification pNotification) {
         if (entries.size() >= maxEntries) {
             entries.remove(entries.last());
@@ -50,6 +54,11 @@ public class NotificationStore {
         entries.add(pNotification);
     }
 
+    /**
+     * Fetch notification and clear the list
+     *
+     * @return list of notifications, ordered by sequence number
+     */
     List<Notification> fetchAndClear() {
         ArrayList<Notification> notifs = new ArrayList<Notification>(entries);
         entries.clear();
@@ -57,6 +66,11 @@ public class NotificationStore {
         return notifs;
     }
 
+    /**
+     * Get the number of dropped notification
+     *
+     * @return dropped notifications
+     */
     int getDropped() {
         return dropped;
     }
@@ -65,6 +79,7 @@ public class NotificationStore {
 
     // Comparator based on sequence number
     private Comparator<? super Notification> getComparator() {
+        /** {@inheritDoc} */
         return new Comparator<Notification>() {
             public int compare(Notification o1, Notification o2) {
                 return (int) (o1.getSequenceNumber() - o2.getSequenceNumber());

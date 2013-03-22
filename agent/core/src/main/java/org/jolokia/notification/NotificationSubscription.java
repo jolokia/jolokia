@@ -22,7 +22,7 @@ public interface NotificationSubscription {
      * active within a certain period are considered as
      * 'stale' and are removed.
      */
-    public void ping();
+    void ping();
 
     /**
      * Get the client id which registered this notification

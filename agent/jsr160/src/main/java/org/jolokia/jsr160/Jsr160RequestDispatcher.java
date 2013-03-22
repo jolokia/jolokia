@@ -42,6 +42,7 @@ import org.jolokia.restrictor.Restrictor;
  */
 public class Jsr160RequestDispatcher implements RequestDispatcher {
 
+    // request handler for specific request types
     private RequestHandlerManager requestHandlerManager;
 
     /**
@@ -142,6 +143,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         return handler.useReturnValueWithPath();
     }
 
+    /** {@inheritDoc} */
     public void destroy() throws JMException {
         requestHandlerManager.destroy();
     }
