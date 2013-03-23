@@ -36,16 +36,16 @@ public class PullNotificationStore implements PullNotificationStoreMBean {
      *
      * @param pClientId client id
      * @param pHandle the subscription handle
-     * @return list of notification stored for the client or an empty list
+     * @return notifications stored for the client or null
      *         if no notification are stored currently.
      */
-    public List<Notification> pull(String pClientId, String pHandle) {
+    public NotificationResult pull(String pClientId, String pHandle) {
         ClientStore clientStore = store.get(pClientId);
 
         if (clientStore != null) {
             return clientStore.pull(pHandle);
         } else {
-            return Collections.emptyList();
+            return null;
         }
     }
 

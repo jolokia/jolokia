@@ -31,6 +31,7 @@ class TestNotificationSubscription implements NotificationSubscription {
 
     private String handle;
     private String client;
+    private Object handback;
 
     TestNotificationSubscription() {
     }
@@ -42,6 +43,12 @@ class TestNotificationSubscription implements NotificationSubscription {
     public TestNotificationSubscription(String pClient, String pHandle) {
         handle = pHandle;
         client = pClient;
+    }
+
+    public TestNotificationSubscription(String pHandle, String pClient, Object pHandback) {
+        handle = pHandle;
+        client = pClient;
+        handback = pHandback;
     }
 
     public void ping() {
@@ -64,7 +71,7 @@ class TestNotificationSubscription implements NotificationSubscription {
     }
 
     public Object getHandback() {
-        return null;
+        return handback;
     }
 
     public Map<String, ?> getConfig() {

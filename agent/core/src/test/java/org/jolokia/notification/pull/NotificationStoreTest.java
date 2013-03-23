@@ -16,8 +16,6 @@
 
 package org.jolokia.notification.pull;
 
-import java.util.List;
-
 import javax.management.Notification;
 
 import org.jolokia.notification.NotificationSubscription;
@@ -32,22 +30,26 @@ import static org.testng.Assert.assertEquals;
 public class NotificationStoreTest {
     @Test
     public void testSimple() throws Exception {
-        NotificationSubscription subcr = createNotificationSubscription();
+        Object handback = new Object();
+        NotificationSubscription subcr = createNotificationSubscription(handback);
         NotificationStore store = new NotificationStore(subcr,1);
         store.add(new Notification("test.test",this,1));
         assertEquals(store.getDropped(),0);
         store.add(new Notification("test.test2",this,2));
         assertEquals(store.getDropped(),1);
-        List<Notification> notifs = store.fetchAndClear();
-        assertEquals(notifs.size(),1);
-        assertEquals(notifs.get(0).getSequenceNumber(),2);
-        assertEquals(notifs.get(0).getType(),"test.test2");
+        NotificationResult notifs = store.fetchAndClear();
+        assertEquals(notifs.getNotifications().size(),1);
+        assertEquals(notifs.getDropped(),1);
+        assertEquals(notifs.getHandback(),handback);
+        assertEquals(notifs.getNotifications().get(0).getSequenceNumber(),2);
+        assertEquals(notifs.getNotifications().get(0).getType(),"test.test2");
         notifs = store.fetchAndClear();
-        assertEquals(notifs.size(),0);
+        assertEquals(notifs.getNotifications().size(),0);
+        assertEquals(notifs.getDropped(),0);
     }
 
-    private NotificationSubscription createNotificationSubscription() {
-        return new TestNotificationSubscription();
+    private NotificationSubscription createNotificationSubscription(Object handback) {
+        return new TestNotificationSubscription("test","1",handback);
     }
 
 }

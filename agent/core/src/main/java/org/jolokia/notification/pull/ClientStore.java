@@ -51,14 +51,14 @@ public class ClientStore  {
      * also clear all stored notification.
      *
      * @param pHandle subscription handle
-     * @return list of notification or an empty list
+     * @return notification result or null
      */
-    List<Notification> pull(String pHandle) {
+    NotificationResult pull(String pHandle) {
         NotificationStore notificationStore = store.get(pHandle);
         if (notificationStore != null) {
             return notificationStore.fetchAndClear();
         } else {
-            return Collections.emptyList();
+            return null;
         }
     }
 

@@ -1,9 +1,5 @@
 package org.jolokia.notification.pull;
 
-import java.util.List;
-
-import javax.management.Notification;
-
 /**
  * MBean for accessing pull requests.
  *
@@ -21,5 +17,5 @@ public interface PullNotificationStoreMBean {
      * @param pHandle the subscription handle
      * @return list of stored notifications or an empty list if there are no notifications.
      */
-    List<Notification> pull(String pClientId, String pHandle);
+    NotificationResult pull(String pClientId, String pHandle);
 }

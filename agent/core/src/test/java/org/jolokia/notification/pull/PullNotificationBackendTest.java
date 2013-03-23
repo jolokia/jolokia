@@ -63,11 +63,11 @@ public class PullNotificationBackendTest {
        Notification notification = new Notification("test.test", this, 1);
        cb.handleNotification(notification,handback);
 
-       List<Notification> notifs = jmxPull(client, handle);
-       assertEquals(notifs.size(),1);
-       assertEquals(notifs.get(0),notification);
+       NotificationResult notifs = jmxPull(client, handle);
+       assertEquals(notifs.getNotifications().size(),1);
+       assertEquals(notifs.getNotifications().get(0),notification);
        notifs = jmxPull(client, handle);
-       assertEquals(notifs.size(),0);
+       assertEquals(notifs.getNotifications().size(),0);
    }
 
     @Test
@@ -85,8 +85,8 @@ public class PullNotificationBackendTest {
 
         backend.unsubscribe(client,handle);
 
-        List<Notification> notifs = jmxPull(client, handle);
-        assertEquals(notifs.size(),0);
+        NotificationResult notifs = jmxPull(client, handle);
+        assertNull(notifs);
     }
 
     @Test
@@ -103,14 +103,14 @@ public class PullNotificationBackendTest {
 
         backend.unregister(client);
 
-        List<Notification> notifs = jmxPull(client, handle);
-        assertEquals(notifs.size(),0);
+        NotificationResult notifs = jmxPull(client, handle);
+        assertNull(notifs);
     }
 
-    private List<Notification> jmxPull(String pClient, String pHandle) throws MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
+    private NotificationResult jmxPull(String pClient, String pHandle) throws MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         Map cfg = backend.getConfig();
         ObjectName name = new ObjectName((String) cfg.get("store"));
-        return (List<Notification>) server.invoke(name,"pull",new Object[] {pClient, pHandle}, new String[] { String.class.getName(), String.class.getName()});
+        return (NotificationResult) server.invoke(name,"pull",new Object[] {pClient, pHandle}, new String[] { String.class.getName(), String.class.getName()});
     }
 }

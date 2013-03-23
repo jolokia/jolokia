@@ -16,13 +16,11 @@
 
 package org.jolokia.notification.pull;
 
-import java.util.List;
-
 import javax.management.Notification;
 
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -34,14 +32,14 @@ public class ClientStoreTest {
         ClientStore clientStore = new ClientStore(5);
         Notification notif = new Notification("test.test", this, 1);
         clientStore.add(new TestNotificationSubscription("handle"),notif);
-        List<Notification> notifs = clientStore.pull("unknown");
-        assertEquals(notifs.size(),0);
+        NotificationResult notifs = clientStore.pull("unknown");
+        assertNull(notifs);
 
         notifs = clientStore.pull("handle");
-        assertEquals(notifs.size(),1);
-        assertEquals(notifs.get(0),notif);
+        assertEquals(notifs.getNotifications().size(),1);
+        assertEquals(notifs.getNotifications().get(0),notif);
         notifs = clientStore.pull("handle");
-        assertEquals(notifs.size(),0);
+        assertEquals(notifs.getNotifications().size(),0);
     }
 
     @Test
@@ -50,7 +48,7 @@ public class ClientStoreTest {
         Notification notif = new Notification("test.test", this, 1);
         clientStore.add(new TestNotificationSubscription("handle"),notif);
         clientStore.removeSubscription("handle");
-        List<Notification> notifs = clientStore.pull("handle");
-        assertEquals(notifs.size(),0);
+        NotificationResult notifs = clientStore.pull("handle");
+        assertNull(notifs);
     }
 }

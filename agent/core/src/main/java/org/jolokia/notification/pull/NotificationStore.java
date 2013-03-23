@@ -55,15 +55,18 @@ public class NotificationStore {
     }
 
     /**
-     * Fetch notification and clear the list
+     * Fetch notification result and clear the list. Also reset the number
+     * of dropped notifications.
      *
      * @return list of notifications, ordered by sequence number
      */
-    List<Notification> fetchAndClear() {
+    NotificationResult fetchAndClear() {
         ArrayList<Notification> notifs = new ArrayList<Notification>(entries);
+        NotificationResult ret = new  NotificationResult(notifs, subscription.getHandback(),dropped);
         entries.clear();
         subscription.ping();
-        return notifs;
+        dropped = 0;
+        return ret;
     }
 
     /**
