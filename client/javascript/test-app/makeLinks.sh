@@ -17,6 +17,8 @@ rm jolokia-poller-test.html
 ln -s ../../src/main/webapp/jolokia-poller-test.html .
 rm jolokia-all-test.html
 ln -s ../../src/main/webapp/jolokia-all-test.html .
+rm jolokia-chat.html
+ln -s ../../src/main/webapp/jolokia-chat.html .
 cd scripts/lib
 rm jolokia.js
 ln -s ../../../../../src/main/javascript/jolokia.js .

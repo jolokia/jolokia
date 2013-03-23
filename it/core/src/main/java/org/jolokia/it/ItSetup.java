@@ -17,10 +17,12 @@ package org.jolokia.it;
  */
 
 import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.management.*;
 
+import org.jolokia.it.notification.Chat;
 import org.jolokia.jmx.JolokiaMBeanServerUtil;
 
 /**
@@ -129,6 +131,9 @@ public class ItSetup {
             }
             // Tabular Data MBean
             ret.add(registerMBean(pServer, new TabularMBean(), pDomain + ":type=tabularData"));
+
+            // Chat MBean used for notifications
+            ret.add(registerMBean(pServer, new Chat(), pDomain + ":type=Chat"));
         } catch (RuntimeException e) {
             throw new RuntimeException("Error",e);
         } catch (Exception exp) {

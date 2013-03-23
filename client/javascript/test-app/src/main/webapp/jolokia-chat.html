@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html>
+<head>
+  <title>JMX Notification Demo - Chat</title>
+  <script type="text/javascript" src="scripts/jquery-1.7.2.js"></script>
+  <script type="text/javascript" src="scripts/lib/jolokia.js"></script>
+  <script type="text/javascript" src="scripts/lib/jolokia-simple.js"></script>
+  <script type="text/javascript" src="scripts/lib/json2.js"></script>
+
+  <script type="text/javascript">
+    $(function() {
+      var j4p = new Jolokia("/jolokia");
+      j4p.registerNotification({
+        mbean: "jolokia.it:type=Chat",
+        filter: "bla.bla",
+        handback: "handback",
+        callback: function(notifs) {
+          var messages = $("#messages");
+          $.each(notifs,function(i,notif) {
+          $("#messages").append("<li><b>" + notif.userData.user + "</b>: " + notif.userData.message + "</li>");
+          });
+        }
+      });
+      j4p.start(1000);
+
+      $('#message').keypress(function (e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          var user = $('#user').val();
+          if (!$.trim(user)) {
+            user = "(unknown)";
+          }
+          var msg = $('#message');
+          j4p.execute("jolokia.it:type=Chat","message",user,msg.val());
+          msg.val("");
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <h3>JMX Notification Demo - Chat</h3>
+  User: <input type="text" id="user"/>
+  <hr/>
+  <ul id="messages">
+
+  </ul>
+  <hr/>
+  Message: <input type="text" id="message"/>
+</body>
+</html>

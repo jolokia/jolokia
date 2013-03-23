@@ -70,6 +70,10 @@
             // Registered requests for fetching periodically
             var jobs = [];
 
+            // Our client id and notification backend config
+            // Is null as long as notification are not used
+            var notifConfig = null;
+
             // Options used for every request
             var agentOptions = {};
 
@@ -298,21 +302,71 @@
                     throw "No requests given";
                 }
                 job.requests = requests;
-                var idx = jobs.length;
-                jobs[idx] = job;
-                return idx;
+                return addJob(job);
+            };
+
+            this.registerNotification = function(opts) {
+                // Check that client is registered
+                checkNotificationRegistration.call(this);
+
+                // Add a notification request
+                var resp = this.request({
+                    type: "notification",
+                    command: "add",
+                    mode: "pull",
+                    client: notifConfig.id,
+                    mbean: opts.mbean,
+                    filter: opts.filter,
+                    config: opts.config,
+                    handback: opts.handback
+                });
+                if (Jolokia.isError(resp)) {
+                    throw new Error("Cannot not add notification subscription for " + opts.mbean +
+                                    " (client: " + notifConfig.id + "): " + resp.error);
+                }
+                var handle = resp.value;
+                // Add a job for periodically fetching the value and calling the callback with the response
+                var job = {
+                    callback: function(resp) {
+                        if (!Jolokia.isError(resp)) {
+                            var notifs = resp.value;
+                            if (notifs.length > 0) {
+                                opts.callback(notifs);
+                            }
+                        }
+                    },
+                    requests: [{
+                            type: "exec",
+                            mbean: notifConfig.backend.pull.store,
+                            operation: "pull",
+                            arguments: [ notifConfig.id, handle ]
+                        }],
+                    pull: { client: notifConfig.id, handle: handle}
+                };
+                return addJob(job);
             };
 
             /**
-             * Unregister a one or more request which has been registered with {@link #registerRequest}. As parameter
+             * Unregister one or more request which has been registered with {@link #register}. As parameter
              * the handle returned during the registration process must be given
-             * @param handle
+             * @param handle the job handle to unregister
              */
             this.unregister = function(handle) {
                 if (handle < jobs.length) {
+                    var job = jobs[handle];
+                    if (job && job.pull) {
+                        // Unregister notification
+                        var resp = this.request({
+                            type: "notification",
+                            command: "remove",
+                            client: job.pull.client,
+                            handle: job.pull.handle
+                        });
+                    }
                     jobs[handle] = undefined;
                 }
             };
+
 
             /**
              * Return an array of handles for currently registered jobs.
@@ -377,8 +431,30 @@
             };
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        }
 
+            // Add a job to the job queue
+            function addJob(job) {
+                var idx = jobs.length;
+                jobs[idx] = job;
+                return idx;
+            }
+
+            // Check that this agent is registered as a notification client.
+            // If not, do a register call
+            function checkNotificationRegistration() {
+                if (!notifConfig) {
+                    var resp = this.request({
+                        type:    "notification",
+                        command: "register"
+                    });
+                    if (Jolokia.isError(resp)) {
+                        throw new Error("Can not register client for notifications: " + resp.error);
+                    } else {
+                        notifConfig = resp.value;
+                    }
+                }
+            }
+        }
 
         // ========================================================================
         // Private Methods:
@@ -611,7 +687,7 @@
         // The return value is an object with two properties: The 'parts' to glue together, where
         // each part gets escaped and a 'path' which is appended literally
         var GET_URL_EXTRACTORS = {
-            "read":function (request) {
+            "read": function(request) {
                 if (request.attribute == null) {
                     // Path gets ignored for multiple attribute fetch
                     return { parts:[ request.mbean ] };
@@ -619,10 +695,10 @@
                     return { parts:[ request.mbean, request.attribute ], path:request.path };
                 }
             },
-            "write":function (request) {
+            "write": function(request) {
                 return { parts:[request.mbean, request.attribute, valueToString(request.value)], path:request.path};
             },
-            "exec":function (request) {
+            "exec": function(request) {
                 var ret = [ request.mbean, request.operation ];
                 if (request.arguments && request.arguments.length > 0) {
                     $.each(request.arguments, function (index, value) {
@@ -631,14 +707,46 @@
                 }
                 return {parts:ret};
             },
-            "version":function () {
+            "version": function() {
                 return {};
             },
-            "search":function (request) {
+            "search": function(request) {
                 return { parts:[request.mbean]};
             },
-            "list":function (request) {
+            "list": function(request) {
                 return { path:request.path};
+            },
+            "notification": function(request) {
+                switch(request.command) {
+                    case "register":
+                        return { parts: [ "register" ] };
+                    case "add":
+                        var ret = [ "add", request.client, request.mode, request.mbean];
+                        var extra = [];
+                        if (request.handback) {
+                            extra.push(valueToString(request.handback));
+                        }
+                        if (request.config) {
+                            extra.push(valueToString(request.config));
+                        } else if (extra.length) {
+                            extra.push("{}");
+                        }
+                        if (request.filter) {
+                            extra.push(valueToString(request.filter));
+                        } else if (extra.length) {
+                            extra.push(" ");
+                        }
+                        return { parts: ret.concat(extra.reverse()) };
+                    case "remove":
+                        return { parts: [ "remove", request.client, request.handle ]};
+                    case "unregister":
+                        return { parts: [ "unregister", request.client ]};
+                    case "list":
+                        return { parts: [ "list", request.client ]};
+                    case "ping":
+                        return { parts: [ "ping", request.client ]};
+                }
+                throw new Error("Unknown command '" + request.command + "'");
             }
         };
 
