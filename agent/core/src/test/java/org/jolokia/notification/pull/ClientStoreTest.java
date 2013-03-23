@@ -31,7 +31,7 @@ import static org.testng.Assert.assertEquals;
 public class ClientStoreTest {
     @Test
     public void testAddAndPull() throws Exception {
-        ClientStore clientStore = new ClientStore("client",5);
+        ClientStore clientStore = new ClientStore(5);
         Notification notif = new Notification("test.test", this, 1);
         clientStore.add(new TestNotificationSubscription("handle"),notif);
         List<Notification> notifs = clientStore.pull("unknown");
@@ -46,7 +46,7 @@ public class ClientStoreTest {
 
     @Test
     public void testRemoveSubscription() throws Exception {
-        ClientStore clientStore = new ClientStore("client",5);
+        ClientStore clientStore = new ClientStore(5);
         Notification notif = new Notification("test.test", this, 1);
         clientStore.add(new TestNotificationSubscription("handle"),notif);
         clientStore.removeSubscription("handle");

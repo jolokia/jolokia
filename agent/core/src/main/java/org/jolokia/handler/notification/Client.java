@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 18.03.13
  */
-public class Client {
+class Client {
 
     // Client ID
     private String id;
@@ -33,7 +33,7 @@ public class Client {
     /**
      * Initialize
      */
-    public Client(String pId) {
+    Client(String pId) {
         id = pId;
         listenerConfigMap = new HashMap<String, ListenerRegistration>();
         usedBackends = new HashSet<String>();
@@ -44,7 +44,7 @@ public class Client {
      * Get a set of all known handles
      * @return handles
      */
-    public Set<String> getHandles() {
+     Set<String> getHandles() {
         return listenerConfigMap.keySet();
     }
 
@@ -75,7 +75,7 @@ public class Client {
      * @param pHandle handle to lookup
      * @return registration object
      */
-    public ListenerRegistration get(String pHandle) {
+     ListenerRegistration get(String pHandle) {
         ListenerRegistration config = listenerConfigMap.get(pHandle);
         if (config == null) {
             throw new IllegalArgumentException("No listener with handle " + pHandle + " created");
@@ -88,7 +88,7 @@ public class Client {
      *
      * @param pHandle handle to remove.
      */
-    public void remove(String pHandle) {
+     void remove(String pHandle) {
         listenerConfigMap.remove(pHandle);
     }
 
@@ -97,7 +97,7 @@ public class Client {
      * to the current time.
      *
      */
-    public void refresh() {
+    void refresh() {
         lastRefresh = System.currentTimeMillis();
     }
 
@@ -107,7 +107,7 @@ public class Client {
      *
      * @return JSON object for this configuration.
      */
-    public JSONObject list() {
+    JSONObject list() {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,ListenerRegistration> entry : listenerConfigMap.entrySet()) {
             ret.put(entry.getKey(),entry.getValue().toJson());
@@ -128,15 +128,23 @@ public class Client {
      * UUID of this client
      * @return id
      */
-    public String getId() {
+    String getId() {
         return id;
     }
 
-    public void addUsedBackend(String mode) {
-        usedBackends.add(mode);
-
+    /**
+     * Add a backend which is used by this client
+     * @param pType backend type
+     */
+    void addUsedBackend(String pType) {
+        usedBackends.add(pType);
     }
-    public Set<String> getUsedBackendModes() {
+
+    /**
+     * Get all used backend types
+     * @return used backedn types
+     */
+    Set<String> getUsedBackendModes() {
         return usedBackends;
     }
 

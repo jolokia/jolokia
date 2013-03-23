@@ -25,47 +25,83 @@ import org.jolokia.notification.NotificationBackend;
 import org.jolokia.notification.pull.PullNotificationBackend;
 
 /**
+ * The notification backend managed is responsible for looking up
+ * backends and managing their lifecycles.
+ *
  * @author roland
  * @since 22.03.13
  */
-public class NotificationBackendManager {
+class NotificationBackendManager {
 
     // Map mode to Backend and configs
-    private final Map<String, NotificationBackend> backendMap       = new HashMap<String, NotificationBackend>();
-    private final Map<String, Map<String, ?>>      backendConfigMap = new HashMap<String, Map<String, ?>>();
+    private final Map<String, NotificationBackend> backendMap = new HashMap<String, NotificationBackend>();
+    private final Map<String, Map<String, ?>> backendConfigMap = new HashMap<String, Map<String, ?>>();
 
-    // Lookup backends and remember
+    /**
+     * Lookup backends and remember
+     *
+     * @param pServerHandle server handle used to identify the agent
+     */
     NotificationBackendManager(ServerHandle pServerHandle) {
         PullNotificationBackend backend = new PullNotificationBackend(pServerHandle.getJolokiaId());
         backendMap.put(backend.getType(), backend);
         backendConfigMap.put(backend.getType(),backend.getConfig());
     }
 
-    public void destroy() throws JMException {
+    /**
+     * Lifecycle method for notifying the backends that the agent goes down
+     *
+     * @throws JMException
+     */
+    void destroy() throws JMException {
         for (NotificationBackend backend : backendMap.values()) {
             backend.destroy();
         }
     }
 
-    public Map<String, ?> getBackendConfig() {
+    /**
+     * Get the global configuration from all registered backends. This
+     * information is returned to the client when he registers.
+     *
+     * @return map with backend types as keys and their configuration as values (which
+     *         is probably also a map)
+     */
+    Map<String, ?> getBackendConfig() {
         return Collections.unmodifiableMap(backendConfigMap);
     }
 
-    // Lookup backend from the pre generated map of backends
-    NotificationBackend getBackend(String type) {
-        NotificationBackend backend = backendMap.get(type);
+    /**
+     * Lookup backend from the pre generated map of backends
+     *
+     * @param pType backend type to lookup
+     */
+    NotificationBackend getBackend(String pType) {
+        NotificationBackend backend = backendMap.get(pType);
         if (backend == null) {
-            throw new IllegalArgumentException("No backend of type '" + type + "' registered");
+            throw new IllegalArgumentException("No backend of type '" + pType + "' registered");
         }
         return backend;
     }
 
-    public void unsubscribe(String pBackendMode, String pClient, String pHandle) {
-        NotificationBackend backend = getBackend(pBackendMode);
+    /**
+     * Unsubscribe a notification from a backend
+     *
+     * @param pType backend type
+     * @param pClient client id
+     * @param pHandle notification handle
+     */
+    void unsubscribe(String pType, String pClient, String pHandle) {
+        NotificationBackend backend = getBackend(pType);
         backend.unsubscribe(pClient,pHandle);
     }
 
-    public void unregister(Client pClient) {
+    /**
+     * Unregister a client completely. Every backend which holds
+     * a notification for this client will get notified.
+     *
+     * @param pClient client to unregister.
+     */
+    void unregister(Client pClient) {
         for (String mode : pClient.getUsedBackendModes()) {
             NotificationBackend backend = getBackend(mode);
             backend.unregister(pClient.getId());

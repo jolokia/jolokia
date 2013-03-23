@@ -56,7 +56,7 @@ class ListenerRegistration {
      * Return a JSON representation of this config (used for list)
      * @return JSON representation
      */
-    public JSONObject toJson() {
+     JSONObject toJson() {
         JSONObject ret = new JSONObject();
         ret.put("mbean", mbeanName.toString());
         if (filter != null) {
@@ -72,32 +72,32 @@ class ListenerRegistration {
     }
 
     /** Get callback */
-    public BackendCallback getCallback() {
+    BackendCallback getCallback() {
         return callback;
     }
 
     /** Get Filter */
-    public NotificationFilter getFilter() {
+    NotificationFilter getFilter() {
         return filter;
     }
 
     /** Get Objectname */
-    public ObjectName getMBeanName() {
+    ObjectName getMBeanName() {
         return mbeanName;
     }
 
     /** Get the handback used for the JMX listener */
-    public Object getHandback() {
+    Object getHandback() {
         return handback;
     }
 
     /** Extra backend configuration */
-    public Map<String, ?> getConfig() {
+    Map<String, ?> getConfig() {
         return config;
     }
 
     /** Backend used */
-    public String getBackendMode() {
+    String getBackendMode() {
         return backendMode;
     }
 

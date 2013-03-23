@@ -41,7 +41,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 18.03.13
  */
-public class NotificationListenerDelegate implements NotificationListener {
+class NotificationListenerDelegate implements NotificationListener {
 
     // Managed clients
     private Map<String, Client> clients;
@@ -53,7 +53,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * Build up this delegate.
      * @param pBackendManager
      */
-    public NotificationListenerDelegate(NotificationBackendManager pBackendManager) {
+    NotificationListenerDelegate(NotificationBackendManager pBackendManager) {
         backendManager = pBackendManager;
         clients = new HashMap<String, Client>();
     }
@@ -64,7 +64,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      *
      * @return client id
      */
-    public String register() {
+    String register() {
         String uuid = createClientId();
         clients.put(uuid, new Client(uuid));
         return uuid;
@@ -80,7 +80,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @throws IOException
      * @throws ReflectionException
      */
-    public void unregister(MBeanServerExecutor pExecutor, String pClient)
+    void unregister(MBeanServerExecutor pExecutor, String pClient)
             throws MBeanException, IOException, ReflectionException {
         Client client = getClient(pClient);
         for (String handle : client.getHandles()) {
@@ -94,17 +94,6 @@ public class NotificationListenerDelegate implements NotificationListener {
      * Add a notification listener on behalf of a client. A JMX listener will be added with
      * the filter and handback given in the provided listener configuration.
      *
-     *
-     * @param pExecutor executor for registering JMX notification listeners
-     * @param pCommand original AddCommand as received bt Jolokia
-     * @return a handle identifying the registered listener. This handle can be used later for removing the listener.
-     *
-     * @throws MBeanException
-     * @throws IOException
-     * @throws ReflectionException
-     */
-    /**
-     * Add a new notification listener for a given client and MBean.
      * The command has the following properties:
      * <ul>
      *     <li>
@@ -121,13 +110,16 @@ public class NotificationListenerDelegate implements NotificationListener {
      *         Optional <b>filter</b> and <b>handback</b>
      *     </li>
      * </ul>
-     * @param executor access to mbean server
-     * @param command add command
-     * @return a map containing the handler id and the freshness interval (i.e. how often ping must be called before
-     *         the listener is considered to be stale.
+     *
+     * @param pExecutor executor for registering JMX notification listeners
+     * @param pCommand original AddCommand as received bt Jolokia
+     * @return a handle identifying the registered listener. This handle can be used later for removing the listener.
+     *
+     * @throws MBeanException
+     * @throws IOException
+     * @throws ReflectionException
      */
-
-    public String addListener(MBeanServerExecutor pExecutor, final AddCommand pCommand)
+    String addListener(MBeanServerExecutor pExecutor, final AddCommand pCommand)
             throws MBeanException, IOException, ReflectionException {
 
         // Fetch client and backend
@@ -179,7 +171,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @throws IOException
      * @throws ReflectionException
      */
-    public void removeListener(MBeanServerExecutor pExecutor, String pClient, String pHandle)
+    void removeListener(MBeanServerExecutor pExecutor, String pClient, String pHandle)
             throws MBeanException, IOException, ReflectionException {
         Client client = getClient(pClient);
         final ListenerRegistration registration = client.get(pHandle);
@@ -207,7 +199,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      *
      * @param pClient client to update.
      */
-    public void refresh(String pClient) {
+    void refresh(String pClient) {
         Client client = getClient(pClient);
         client.refresh();
     }
@@ -219,7 +211,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param pExecutor executor used for unregistering
      * @param pOldest last refresh timestamp which should be kept
      */
-    public void cleanup(MBeanServerExecutor pExecutor, long pOldest)
+    void cleanup(MBeanServerExecutor pExecutor, long pOldest)
             throws MBeanException, IOException, ReflectionException {
         for (Map.Entry<String,Client> client : clients.entrySet()) {
             if (client.getValue().getLastRefresh() < pOldest) {
@@ -236,7 +228,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      *         created during addListener(). Values are the configuration of the
      *         listener jobs.
      */
-    public JSONObject list(String pClient) {
+    JSONObject list(String pClient) {
         Client client = getClient(pClient);
         return client.list();
     }

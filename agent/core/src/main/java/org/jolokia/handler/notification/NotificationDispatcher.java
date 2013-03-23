@@ -19,7 +19,7 @@ import org.json.simple.JSONObject;
 public class NotificationDispatcher {
 
     // Delegate for doing the actual registration stuff
-    private       NotificationListenerDelegate listenerDelegate;
+    private final NotificationListenerDelegate listenerDelegate;
     private final NotificationBackendManager   backendManager;
 
     /**
@@ -41,7 +41,8 @@ public class NotificationDispatcher {
      * @throws IOException
      * @throws ReflectionException
      */
-    public Object dispatch(MBeanServerExecutor pExecutor,NotificationCommand pCommand) throws MBeanException, IOException, ReflectionException {
+    public Object dispatch(MBeanServerExecutor pExecutor,NotificationCommand pCommand)
+            throws MBeanException, IOException, ReflectionException {
 
         // Shortcut for client used later
         String client = pCommand instanceof  ClientCommand ? ((ClientCommand) pCommand).getClient() : null;

@@ -14,7 +14,7 @@ import org.jolokia.request.notification.AddCommand;
  * @author roland
  * @since 21.03.13
  */
-public class NotificationSubscriptionImpl implements NotificationSubscription {
+class NotificationSubscriptionImpl implements NotificationSubscription {
 
     // MBean on which the notification is registered
     private ObjectName mBean;
