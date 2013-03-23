@@ -46,10 +46,15 @@ public class NotificationListenerDelegate implements NotificationListener {
     // Managed clients
     private Map<String, Client> clients;
 
+    // Backendmanager holding the backends
+    private final NotificationBackendManager backendManager;
+
     /**
      * Build up this delegate.
+     * @param pBackendManager
      */
-    public NotificationListenerDelegate() {
+    public NotificationListenerDelegate(NotificationBackendManager pBackendManager) {
+        backendManager = pBackendManager;
         clients = new HashMap<String, Client>();
     }
 
@@ -82,6 +87,7 @@ public class NotificationListenerDelegate implements NotificationListener {
             removeListener(pExecutor, pClient, handle);
         }
         clients.remove(pClient);
+        backendManager.unregister(client);
     }
 
     /**
@@ -90,7 +96,6 @@ public class NotificationListenerDelegate implements NotificationListener {
      *
      *
      * @param pExecutor executor for registering JMX notification listeners
-     * @param pBackend backend to call
      * @param pCommand original AddCommand as received bt Jolokia
      * @return a handle identifying the registered listener. This handle can be used later for removing the listener.
      *
@@ -98,18 +103,50 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @throws IOException
      * @throws ReflectionException
      */
-    public String addListener(MBeanServerExecutor pExecutor, NotificationBackend pBackend, final AddCommand pCommand)
+    /**
+     * Add a new notification listener for a given client and MBean.
+     * The command has the following properties:
+     * <ul>
+     *     <li>
+     *         <b>client</b> client id identifying the current client.
+     *     </li>
+     *     <li>
+     *         <b>mbean</b> the MBean on which to register the listener
+     *     </li>
+     *     <li>
+     *         <b>mode</b> specifies the notification backend/model.
+     *         Something like "pull", "sockjs", "ws" or "push"
+     *     </li>
+     *     <li>
+     *         Optional <b>filter</b> and <b>handback</b>
+     *     </li>
+     * </ul>
+     * @param executor access to mbean server
+     * @param command add command
+     * @return a map containing the handler id and the freshness interval (i.e. how often ping must be called before
+     *         the listener is considered to be stale.
+     */
+
+    public String addListener(MBeanServerExecutor pExecutor, final AddCommand pCommand)
             throws MBeanException, IOException, ReflectionException {
 
+        // Fetch client and backend
         Client client = getClient(pCommand.getClient());
 
+        // Get backend and remember that the client is using it
+        NotificationBackend backend = backendManager.getBackend(pCommand.getMode());
+
+        // The tricky part: Can a handle before, then subscribe with the handle at the backend, then register as JMX
+        // listener
         synchronized (client) {
             String handle = client.getNextHandle();
             NotificationSubscription notificationSubscription = new NotificationSubscriptionImpl(handle,pCommand,this);
-            BackendCallback callback = pBackend.subscribe(notificationSubscription);
+            BackendCallback callback = backend.subscribe(notificationSubscription);
             final ListenerRegistration listenerRegistration = new ListenerRegistration(pCommand,callback);
-            client.add(handle, listenerRegistration);
+            client.addUsedBackend(pCommand.getMode());
+            client.addNotification(handle, listenerRegistration);
 
+            // Register as JMX notification listener
             final boolean[] added = new boolean[] { false };
             try {
                 pExecutor.each(listenerRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
@@ -136,7 +173,7 @@ public class NotificationListenerDelegate implements NotificationListener {
      *
      * @param pExecutor executor for removing JMX notifications listeners
      * @param pClient client for wich to remove the listener
-     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerExecutor, NotificationBackend, AddCommand)}
+     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerExecutor, AddCommand)}
      *
      * @throws MBeanException
      * @throws IOException
@@ -146,7 +183,7 @@ public class NotificationListenerDelegate implements NotificationListener {
             throws MBeanException, IOException, ReflectionException {
         Client client = getClient(pClient);
         final ListenerRegistration registration = client.get(pHandle);
-        pExecutor.each(registration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+        pExecutor.each(registration.getMBeanName(), new MBeanServerExecutor.MBeanEachCallback() {
             /** {@inheritDoc} */
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
@@ -158,12 +195,17 @@ public class NotificationListenerDelegate implements NotificationListener {
             }
         });
         client.remove(pHandle);
+        backendManager.unsubscribe(registration.getBackendMode(), pClient, pHandle);
     }
 
     /**
-     * Refresh a client
+     * Updated freshness of this client. Since we use a stateless model, the server
+     * needs to know somehow, when a client fades away without unregistering all its
+     * listeners. The idea is, that a client have to send a ping within certain
+     * intervals and if this ping is missing, the client is considered as stale and
+     * all its listeners get removed automatically then.
      *
-     * @param pClient client to refresh
+     * @param pClient client to update.
      */
     public void refresh(String pClient) {
         Client client = getClient(pClient);
@@ -177,19 +219,22 @@ public class NotificationListenerDelegate implements NotificationListener {
      * @param pExecutor executor used for unregistering
      * @param pOldest last refresh timestamp which should be kept
      */
-    public void cleanup(MBeanServerExecutor pExecutor, long pOldest) throws MBeanException, IOException, ReflectionException {
+    public void cleanup(MBeanServerExecutor pExecutor, long pOldest)
+            throws MBeanException, IOException, ReflectionException {
         for (Map.Entry<String,Client> client : clients.entrySet()) {
             if (client.getValue().getLastRefresh() < pOldest) {
-                unregister(pExecutor, client.getKey());
+                unregister(pExecutor,client.getKey());
             }
         }
     }
 
     /**
-     * Get all registered listeners for a given client
+     * List all listener registered by a client along with its configuration parameters
      *
      * @param pClient client for which to get the listener
-     * @return map with handle as keys and listener configs as objects.
+     * @return a JSON object describing all listeners. Keys are probably the handles
+     *         created during addListener(). Values are the configuration of the
+     *         listener jobs.
      */
     public JSONObject list(String pClient) {
         Client client = getClient(pClient);

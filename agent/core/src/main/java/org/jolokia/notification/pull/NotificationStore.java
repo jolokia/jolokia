@@ -22,7 +22,7 @@ public class NotificationStore {
     private SortedSet<Notification> entries;
 
     // number of dropped notifications because the max limit has been reached
-    private       int                      dropped;
+    private int dropped;
 
     // subscription for this notification
     private final NotificationSubscription subscription;
@@ -79,8 +79,8 @@ public class NotificationStore {
 
     // Comparator based on sequence number
     private Comparator<? super Notification> getComparator() {
-        /** {@inheritDoc} */
         return new Comparator<Notification>() {
+            /** {@inheritDoc} */
             public int compare(Notification o1, Notification o2) {
                 return (int) (o1.getSequenceNumber() - o2.getSequenceNumber());
             }

@@ -21,13 +21,18 @@ public class ClientStore  {
     // Max notification entries to hold
     private int maxEntries;
 
+    // Id of this client
+    private final String clientId;
+
     /**
      * Init with a maimal entry limit
      *
+     * @param pClientId client
      * @param pMaxEntries max entries to hold
      */
-    ClientStore(int pMaxEntries) {
+    ClientStore(String pClientId, int pMaxEntries) {
         maxEntries = pMaxEntries;
+        clientId = pClientId;
         store = new HashMap<String, NotificationStore>();
     }
 

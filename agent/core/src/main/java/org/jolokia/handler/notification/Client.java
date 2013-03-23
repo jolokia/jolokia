@@ -24,6 +24,9 @@ public class Client {
     // Epoch time in millis since last refresh
     private long lastRefresh;
 
+    // Used backend (content: Backend modes)
+    private Set<String> usedBackends;
+
     // Counter sequence
     private AtomicLong handleSequence = new AtomicLong(0);
 
@@ -33,6 +36,7 @@ public class Client {
     public Client(String pId) {
         id = pId;
         listenerConfigMap = new HashMap<String, ListenerRegistration>();
+        usedBackends = new HashSet<String>();
         lastRefresh = System.currentTimeMillis();
     }
 
@@ -50,7 +54,7 @@ public class Client {
      * @param pRegistration registration to add
      * @param pHandle to add to
      */
-    void add(String pHandle, ListenerRegistration pRegistration) {
+    void addNotification(String pHandle, ListenerRegistration pRegistration) {
         listenerConfigMap.put(pHandle,pRegistration);
     }
 
@@ -126,6 +130,14 @@ public class Client {
      */
     public String getId() {
         return id;
+    }
+
+    public void addUsedBackend(String mode) {
+        usedBackends.add(mode);
+
+    }
+    public Set<String> getUsedBackendModes() {
+        return usedBackends;
     }
 
 }

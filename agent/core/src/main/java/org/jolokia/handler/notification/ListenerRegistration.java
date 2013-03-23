@@ -22,6 +22,9 @@ class ListenerRegistration {
     // the callback to be called when notifications come in
     private final BackendCallback callback;
 
+    // the backend used for this listener
+    private final String backendMode;
+
     // An optional filter extracted from the configuration
     private final NotificationFilterSupport filter;
 
@@ -29,7 +32,7 @@ class ListenerRegistration {
     private final ObjectName mbeanName;
 
     // optional handback returned to a client when a notification arrives
-    private final Object         handback;
+    private final Object handback;
 
     // extra backend configuration
     private final Map<String, ?> config;
@@ -46,6 +49,7 @@ class ListenerRegistration {
         handback = pCommand.getHandback();
         config = pCommand.getConfig();
         filter = createFilter(pCommand.getFilter());
+        backendMode = pCommand.getMode();
     }
 
     /**
@@ -90,6 +94,11 @@ class ListenerRegistration {
     /** Extra backend configuration */
     public Map<String, ?> getConfig() {
         return config;
+    }
+
+    /** Backend used */
+    public String getBackendMode() {
+        return backendMode;
     }
 
     // ====================================================================================

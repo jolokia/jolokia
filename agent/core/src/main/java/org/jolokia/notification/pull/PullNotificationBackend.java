@@ -30,12 +30,12 @@ public class PullNotificationBackend implements NotificationBackend {
      * Create a pull notification backend which will register an MBean allowing
      * to pull received notification
      *
-     * @param pId jolokia id to generate a unique MBean name
+     * @param pJolokiaId jolokia id to generate a unique MBean name
      */
-    public PullNotificationBackend(String pId) {
+    public PullNotificationBackend(String pJolokiaId) {
         // TODO: Get configuration parameter for maxEntries
         store = new PullNotificationStore(maxEntries);
-        mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + pId);
+        mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + pJolokiaId);
         try {
             getMBeanServer().registerMBean(store, mbeanName);
         } catch (JMException e) {
