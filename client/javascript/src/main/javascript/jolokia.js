@@ -330,7 +330,7 @@
                     callback: function(resp) {
                         if (!Jolokia.isError(resp)) {
                             var notifs = resp.value;
-                            if (notifs) {
+                            if (notifs && notifs.notifications.length) {
                                 opts.callback(notifs);
                             }
                         }

@@ -144,7 +144,7 @@ public class AgentServlet extends HttpServlet {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
-        backendManager = new BackendManager(config,logHandler, restrictor);
+        backendManager = new BackendManager(config,logHandler,restrictor);
         requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
     }
 
