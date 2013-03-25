@@ -1,4 +1,4 @@
-package org.jolokia.util;
+package org.jolokia.backend;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -26,10 +26,10 @@ import javax.management.*;
 * @author roland
 * @since 22.01.13
 */
-public final class ServersInfo {
+final class MBeanServerDumper {
 
     // Only utility methods
-    private ServersInfo() {}
+    private MBeanServerDumper() {}
 
     /**
      * Dump out a list of MBeanServer with some statistics.
@@ -37,7 +37,7 @@ public final class ServersInfo {
      * @param servers server to dump
      * @return statistics as strings
      */
-    public static String dump(Set<MBeanServerConnection> servers) {
+    static String dump(Set<MBeanServerConnection> servers) {
             StringBuffer ret = new StringBuffer();
             ret.append("Found ").append(servers.size()).append(" MBeanServers\n");
             for (MBeanServerConnection c : servers) {

@@ -73,9 +73,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
 
     /**
      * Initialize the server handle.
-     * @param pConfig configuration passed through to the server detectors
+     * @param pConfig configuration passed through to the server detectors-default
      * @param pLogHandler used for putting out diagnostic messags
-     * @param pDetectors all detectors known
+     * @param pDetectors all detectors-default known
      */
     private void initServerHandle(Configuration pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
         serverHandle = detectServers(pDetectors, pLogHandler);
@@ -225,16 +225,16 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         }
     }
 
-    // Lookup all registered detectors + a default detector
+    // Lookup all registered detectors-default + a default detector
     private List<ServerDetector> lookupDetectors() {
         List<ServerDetector> detectors =
-                ServiceObjectFactory.createServiceObjects("META-INF/detectors-default", "META-INF/detectors");
+                ServiceFactory.createServices("META-INF/detectors-default", "META-INF/detectors");
         // An detector at the end of the chain in order to get a default handle
         detectors.add(new FallbackServerDetector());
         return detectors;
     }
 
-    // Detect the server by delegating it to a set of predefined detectors. These will be created
+    // Detect the server by delegating it to a set of predefined detectors-default. These will be created
     // by a lookup mechanism, queried and thrown away after this method
     private ServerHandle detectServers(List<ServerDetector> pDetectors, LogHandler pLogHandler) {
         // Now detect the server

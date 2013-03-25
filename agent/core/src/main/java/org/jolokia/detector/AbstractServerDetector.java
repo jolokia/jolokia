@@ -25,7 +25,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
- * Base class for server detectors
+ * Base class for server detectors-default
  * 
  * @author roland
  * @since 05.11.10

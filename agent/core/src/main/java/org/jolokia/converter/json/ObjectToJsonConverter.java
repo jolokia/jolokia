@@ -8,7 +8,7 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.EscapeUtil;
-import org.jolokia.util.ServiceObjectFactory;
+import org.jolokia.util.ServiceFactory;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -59,7 +59,7 @@ public final class ObjectToJsonConverter {
      * New object-to-json converter
      *
      * @param pStringToObjectConverter used when setting values
-     * @param pSimplifyHandlers a bunch of simplifiers used for mangling the conversion result
+     * @param pSimplifyHandlers a bunch of simplifiers-default used for mangling the conversion result
      */
     public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter,
                                  Extractor... pSimplifyHandlers) {
@@ -342,7 +342,7 @@ public final class ObjectToJsonConverter {
             pHandlers.addAll(Arrays.asList(pSimplifyHandlers));
         } else {
             // Add all
-            pHandlers.addAll(ServiceObjectFactory.<Extractor>createServiceObjects(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
+            pHandlers.addAll(ServiceFactory.<Extractor>createServices(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
         }
     }
 }

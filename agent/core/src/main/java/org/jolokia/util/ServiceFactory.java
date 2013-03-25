@@ -40,9 +40,9 @@ import java.util.*;
  * @author roland
  * @since 05.11.10
  */
-public final class ServiceObjectFactory {
+public final class ServiceFactory {
 
-    private ServiceObjectFactory() {}
+    private ServiceFactory() {}
 
     /**
      * Create a list of services ordered according to the ordering given in the
@@ -57,7 +57,7 @@ public final class ServiceObjectFactory {
      * @param <T> type of the service objects to create
      * @return a ordered list of created services.
      */
-    public static <T> List<T> createServiceObjects(String... pDescriptorPaths) {
+    public static <T> List<T> createServices(String... pDescriptorPaths) {
         try {
             ServiceEntry.initDefaultOrder();
             TreeMap<ServiceEntry,T> extractorMap = new TreeMap<ServiceEntry,T>();
@@ -76,7 +76,7 @@ public final class ServiceObjectFactory {
 
     private static <T> void readServiceDefinitions(Map<ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            Enumeration<URL> resUrls = ServiceObjectFactory.class.getClassLoader().getResources(pDefPath);
+            Enumeration<URL> resUrls = ServiceFactory.class.getClassLoader().getResources(pDefPath);
             while (resUrls.hasMoreElements()) {
                 readServiceDefinitionFromUrl(pExtractorMap, resUrls.nextElement());
             }
@@ -133,7 +133,7 @@ public final class ServiceObjectFactory {
                     pExtractorMap.remove(key);
                 }
             } else {
-                Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(entry.getClassName());
+                Class<T> clazz = (Class<T>) ServiceFactory.class.getClassLoader().loadClass(entry.getClassName());
                 T ext = (T) clazz.newInstance();
                 pExtractorMap.put(entry,ext);
             }

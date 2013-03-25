@@ -118,7 +118,7 @@ public class ObjectToJsonConverterTest {
     public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
         Map result = (Map) converter.extractObject(name, new Stack<String>(), true);
-        // Since we removed the objectname simplifier from the list of simplifiers
+        // Since we removed the objectname simplifier from the list of simplifiers-default
         // explicitely, the converter should return the full blown object;
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));
     }

@@ -221,8 +221,8 @@ public class ServerHandle {
     }
 
     /**
-     * Get the optional options used for detectors. This should be a JSON string specifying all options
-     * for all detectors. Keys are the name of the detector's product, the values are JSON object containing
+     * Get the optional options used for detectors-default. This should be a JSON string specifying all options
+     * for all detectors-default. Keys are the name of the detector's product, the values are JSON object containing
      * specific parameters for this agent. E.g.
      *
      * <pre>

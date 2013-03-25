@@ -64,7 +64,7 @@ public class JolokiaServer {
      * @param pConfig configuration for this server
      * @param pLazy lazy initialisation if true. This is required for agents
      *              configured via startup options since at this early boot time
-     *              the JVM is not fully setup for the server detectors to work
+     *              the JVM is not fully setup for the server detectors-default to work
      * @throws IOException if initialization fails
      */
     public JolokiaServer(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {

@@ -7,7 +7,6 @@ import javax.management.*;
 
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.util.JmxUtil;
-import org.jolokia.util.ServersInfo;
 
 import static javax.management.MBeanServerNotification.REGISTRATION_NOTIFICATION;
 import static javax.management.MBeanServerNotification.UNREGISTRATION_NOTIFICATION;
@@ -35,7 +34,7 @@ class MBeanServers implements NotificationListener {
     /**
      * Constructor building up the list of available MBeanServers
      *
-     * @param pDetectors detectors to be used for looking up MBeanServers
+     * @param pDetectors detectors-default to be used for looking up MBeanServers
      * @param pListener listener to register to the Jolokia MBeanServer when this server
      *                  comes in late
      */
@@ -108,7 +107,7 @@ class MBeanServers implements NotificationListener {
      * @return information about the registered MBeanServers
      */
     public String dump() {
-        return ServersInfo.dump(allMBeanServers);
+        return MBeanServerDumper.dump(allMBeanServers);
     }
 
     /**

@@ -49,14 +49,14 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
     /**
      * Constructor with a given list of destectors
      *
-     * @param pDetectors list of detectors for the MBeanServers. Must not be null.
+     * @param pDetectors list of detectors-default for the MBeanServers. Must not be null.
      */
     public MBeanServerExecutorLocal(List<ServerDetector> pDetectors) {
         init(pDetectors);
     }
 
     /**
-     * Constructor with no detectors
+     * Constructor with no detectors-default
      */
     public MBeanServerExecutorLocal() {
         this(Collections.<ServerDetector>emptyList());
@@ -68,7 +68,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      *
      * <ul>
      <li>Add the Jolokia private MBeanServer</li>
-     *   <li>Ask the given server detectors for MBeanServer so that can used container specific lookup
+     *   <li>Ask the given server detectors-default for MBeanServer so that can used container specific lookup
      *       algorithms
      *   <li>Use {@link javax.management.MBeanServerFactory#findMBeanServer(String)} for
      *       registered MBeanServer and take the <b>first</b> one in the returned list
@@ -76,7 +76,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * </ul>
      *
      * @throws IllegalStateException if no MBeanServer could be found.
-     * @param pDetectors detectors which might have extra possibilities to add MBeanServers
+     * @param pDetectors detectors-default which might have extra possibilities to add MBeanServers
      */
     private synchronized void init(List<ServerDetector> pDetectors) {
 
