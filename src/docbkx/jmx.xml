@@ -38,7 +38,14 @@
 
   <section id="jolokia-mbeanserver">
     <title>Jolokia MBeanServer</title>
-    
+    <sidebar>
+      <title>JBoss 7 Gotcha</title>
+      For JBoss 7 there is a slight issue when creating a new MBeanServer. For this to work,
+      a <filename>jboss-deployment-structure</filename> with a dependency on
+      <constant>org.jboss.as.jmx</constant> must be added. For an example see the
+      <xref linkend="">integration test war</xref>, the location
+      to where to put this file is explained in the <xref linkend="">JBoss documentation</xref>
+    </sidebar>
     <para>
       The Jolokia MBeanServer can be easily created and used with a locator:
     </para>

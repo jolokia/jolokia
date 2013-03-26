@@ -75,6 +75,78 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="1.1.1 brings some smalle goodies">
+        <div class="news-date">2013-03-27</div>
+        <p>
+          This last feature release before work on 2.0.0 starts brings
+          some small goodies.  
+        </p>
+        <ul>
+          <li>
+            <code>BigDecimal</code> and <code>BigInteger</code> can
+            now be used for operation arguments and return values.
+          </li>
+          <li>
+            A new processing parameter <code>ifModifiedSince</code>
+            has been introduced. This parameter can be used with a
+            timestamp for fetching the list of available MBeans only
+            when there has been some changes in the MBean registration
+            on any observed MBeanServer since that time. If there has
+            been no changes an answer with status code "302" (Not
+            modified) is returned. This feature is also supported for
+            "search" requests. In a future version of Jolokia, there
+            will be also custom support for own "read" and "exec"
+            request so that expensive operations can be called
+            conditionally. 
+          </li>
+          <li>
+            For the JVM agent, if a port of 0 is given, then it will
+            select an arbitrary free port and prints out on standard
+            output the selected port as part of the Jolokia agent
+            URL. If no host is given, the JVM agent will now bind to
+            localhost and if host of "0.0.0.0" or "*" is provided, the
+            agent will bind on all interfaces.
+          </li>
+          <li>
+            For the Java client an extra property
+            <code>errorValue</code> has been added which holds the
+            JSON serialized exception if the processiong parameter
+            <code>serializeException</code> is active.
+          </li>
+          <li>
+            The JavaScript client's <code>jolokia.register()</code>
+            can now take an optional <code>config</code> element for
+            specifying processing parameters for a certain scheduler
+            job. Also, the new option <code>onlyIfModified</code> can
+            be used so that the callback for list and search request
+            is only called, if the set of registered MBean has
+            changed. This is especially useful for web based client
+            which want to refresh the MBean tree only if there are
+            changes. 
+          </li>
+          <li>
+            The <code>Expires:</code> header of a Jolokia response
+            has now a valid date as value (instead of '-1') which
+            points to one hour in the past. This change should help
+            clients which do not ignore according to RFC-2616 invalid
+            date syntax and treat them as 'already expired'.
+          </li>
+        </ul>
+        <p>
+          Links to the corresponding GitHub issues and the bugs fixed
+          in this release can be found in the <a
+          href="changes-report.html">change report</a>. 
+        </p>
+        <p>
+          Except there are certain bugs, this will be the last release
+          in the 1.x series. Work has already started on exciting new
+          features for Jolokia 2.0. E.g. JMX notification support is
+          coming, an initial pull model has been already implemented
+          (on branch 'notification'). There are even more ideas and
+          some refactorings will happening along with some modest
+          changes in the module structure. So, please stay tuned ...
+        </p>       
+      </subsection>
       <subsection name="1.1.0 with Spring support and @JsonMBean">
         <div class="news-date">2013-02-26</div>
         <p>

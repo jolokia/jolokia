@@ -125,6 +125,7 @@
               !javax.microedition.io,
               org.jolokia.osgi.servlet;version="${project.version}",
               org.jolokia.restrictor;version="${project.version}",
+              org.jolokia.util;version="${project.version}",
               javax.net.ssl;resolution:=optional,
               javax.security.cert;resolution:=optional,
               javax.servlet.*;resolution:=optional;version="2.5",

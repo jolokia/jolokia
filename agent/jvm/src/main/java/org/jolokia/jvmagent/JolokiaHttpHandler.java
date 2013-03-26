@@ -74,7 +74,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             context += "/";
         }
 
-        rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
@@ -205,9 +205,14 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         // Check for a date header and set it accordingly to the recommendations of
         // RFC-2616. See also {@link AgentServlet#setNoCacheHeaders()}
         // Issue: #71
-        String now = rfc1123Format.format(new Date());
-        headers.set("Date",now);
-        headers.set("Expires",now);
+        Calendar cal = Calendar.getInstance();
+        headers.set("Date",rfc1123Format.format(cal.getTime()));
+        // 1h  in the past since it seems, that some servlet set the date header on their
+        // own so that it cannot be guaranteed that these heades are really equals.
+        // It happend on Tomcat that Date: was finally set *before* Expires: in the final
+        // answers some times which seems to be an implementation percularity from Tomcat
+        cal.add(Calendar.HOUR, -1);
+        headers.set("Expires",rfc1123Format.format(cal.getTime()));
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {

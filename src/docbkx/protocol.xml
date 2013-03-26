@@ -22,13 +22,13 @@
       this chapter. The communication is based on a request-response
       paradigm, where each request results in a single response.
     </para>
-    <sidebar>
-      <title>GET URLs are chatty</title>
-      Keep in mind
-      that many web servers log the requested path of every request, including
-      parameters passed to a GET request, so sending messages over GET
-      often bloats server logs.
-    </sidebar>
+  <sidebar>
+    <title>GET URLs are chatty</title>
+    Keep in mind
+    that many web servers log the requested path of every request, including
+    parameters passed to a GET request, so sending messages over GET
+    often bloats server logs.
+  </sidebar>
     <para>
       Jolokia requests can be sent in two ways: Either as a HTTP GET
       request, in which case the request parameters are encoded
