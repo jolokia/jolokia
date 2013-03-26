@@ -1,13 +1,13 @@
 package org.jolokia.detector;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import javax.management.*;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
@@ -70,34 +70,16 @@ public class JBossDetector extends AbstractServerDetector {
 
     // ========================================================================
     private static class JBossServerHandle extends ServerHandle {
-
         /**
          * JBoss server handle
          *
          * @param version             JBoss version
          * @param agentUrl            URL to the agent
          * @param extraInfo           extra ifo to return
-         * @param pWorkaroundRequired if the workaround is required
-         */
+          */
         JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
             super("RedHat", "jboss", version, agentUrl, extraInfo);
         }
-
-        // Handler used for calling getMBeanInfo() in order to avoid a nasty bug when doing a lookup
-        private static final MBeanServerExecutor.MBeanAction<Void> JBOSS_WORKAROUND_HANDLER = new MBeanServerExecutor.MBeanAction<Void>() {
-            /** {@inheritDoc} */
-            public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... pExtraArgs)
-                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                try {
-                    pConn.getMBeanInfo(pName);
-                } catch (IntrospectionException e) {
-                    // Ignore here for now ...
-                }
-                return null;
-            }
-        };
-
-
     }
 }
 /*
