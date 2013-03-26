@@ -223,15 +223,16 @@ public class ItSetup {
 
     public MBeanServer getJolokiaMBeanServer() {
         try {
-            Class.forName("org.jolokia.jmx.JolokiaMBeanServerUtil");
-            return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+            if (this.getClass("org.jolokia.jmx.JolokiaMBeanServerUtil") != null || Class.forName("org.jolokia.jmx.JolokiaMBeanServerUtil") != null) {
+                return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+            }
         } catch (RuntimeException e) {
             System.out.println("No JolokiaServer found: " + e);
             e.printStackTrace();
             return null;
         } catch (ClassNotFoundException e) {
-            System.out.println("No JolokiaServer found, ignoring certain tests ...");
-            return null;
         }
+        System.out.println("No JolokiaServer found, ignoring certain tests ...");
+        return null;
     }
 }

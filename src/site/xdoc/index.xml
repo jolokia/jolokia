@@ -75,7 +75,7 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
-      <subsection name="1.1.1 brings some smalle goodies">
+      <subsection name="Some small goodies served by 1.1.1">
         <div class="news-date">2013-03-27</div>
         <p>
           This last feature release before work on 2.0.0 starts brings
@@ -87,7 +87,7 @@
             now be used for operation arguments and return values.
           </li>
           <li>
-            A new processing parameter <code>ifModifiedSince</code>
+            A new processing parameter <a href="reference/html/protocol.html#processing-parameters"><code>ifModifiedSince</code></a>
             has been introduced. This parameter can be used with a
             timestamp for fetching the list of available MBeans only
             when there has been some changes in the MBean registration
@@ -100,12 +100,12 @@
             conditionally. 
           </li>
           <li>
-            For the JVM agent, if a port of 0 is given, then it will
-            select an arbitrary free port and prints out on standard
-            output the selected port as part of the Jolokia agent
-            URL. If no host is given, the JVM agent will now bind to
-            localhost and if host of "0.0.0.0" or "*" is provided, the
-            agent will bind on all interfaces.
+            For the JVM agent, if a port of 0 is given, then an
+            arbitrary free port will be selected and printed out on
+            standard output as part of the Jolokia agent URL. If no
+            host is given, the JVM agent will now bind to localhost
+            and if host of "0.0.0.0" or "*" is provided, the agent
+            will bind on all interfaces.
           </li>
           <li>
             For the Java client an extra property
@@ -114,7 +114,8 @@
             <code>serializeException</code> is active.
           </li>
           <li>
-            The JavaScript client's <code>jolokia.register()</code>
+            The JavaScript client's <a
+            href="reference/html/clients.html#js-poller"><code>jolokia.register()</code></a>
             can now take an optional <code>config</code> element for
             specifying processing parameters for a certain scheduler
             job. Also, the new option <code>onlyIfModified</code> can
@@ -122,7 +123,7 @@
             is only called, if the set of registered MBean has
             changed. This is especially useful for web based client
             which want to refresh the MBean tree only if there are
-            changes. 
+            changes.
           </li>
           <li>
             The <code>Expires:</code> header of a Jolokia response
@@ -138,13 +139,14 @@
           href="changes-report.html">change report</a>. 
         </p>
         <p>
-          Except there are certain bugs, this will be the last release
-          in the 1.x series. Work has already started on exciting new
-          features for Jolokia 2.0. E.g. JMX notification support is
-          coming, an initial pull model has been already implemented
-          (on branch 'notification'). There are even more ideas and
-          some refactorings will happening along with some modest
-          changes in the module structure. So, please stay tuned ...
+          This is the last feature release in the 1.x series. Work has
+          already started on exciting new features for Jolokia
+          2.0. E.g. JMX notification support is coming, an initial
+          pull model has been already implemented (on branch <a
+          href="https://github.com/rhuss/jolokia/tree/notification">notification</a>). There
+          are even more ideas and some refactorings will happening
+          along with some modest changes in the module structure. So,
+          please stay tuned ...
         </p>       
       </subsection>
       <subsection name="1.1.0 with Spring support and @JsonMBean">

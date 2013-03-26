@@ -629,10 +629,10 @@
             <listitem>
               Enums are converted to their canonical name.<footnote id="enum-serial-jboss">
               <para>
-                For JBoss older than version 7, there might be uses
+                For JBoss older than version 7, there might be use cases
                 when custom enums need to be serialized. In this case,
                 the type information must be available to the agent,
-                too. For the stantard PlatformMBeanServer
+                too. For the standard PlatformMBeanServer
                 serialization should work always, regardless whether
                 the customer enum type is accessible by the agent or
                 not.
