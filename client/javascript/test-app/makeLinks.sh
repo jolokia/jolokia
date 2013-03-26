@@ -1,10 +1,5 @@
 #!/bin/sh -x
 
-# Create symbolic link for fast unit test development
-# Workflow:
-# mvn clean install
-# sh makeLinks.sh
-# mvn jetty:run-exploded
 
 cd target/
 dir=`ls -d jolokia-client* | grep -v .war`
@@ -33,3 +28,10 @@ rm jolokia-poller-test.js
 ln -s ../../../../src/main/javascript/test/jolokia-poller-test.js .
 
 cd ../../../..
+
+# Create symbolic link for fast unit test development
+# Workflow:
+# mvn clean install
+# sh makeLinks.sh
+# mvn jetty:run-exploded
+

@@ -94,14 +94,17 @@ public class JolokiaHttpHandlerTest {
 
         assertEquals(header.getFirst("Cache-Control"),"no-cache");
         assertEquals(header.getFirst("Pragma"),"no-cache");
+        SimpleDateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
+
         String expires = header.getFirst("Expires");
         String date = header.getFirst("Date");
-        assertEquals(expires,date);
-        SimpleDateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyyy HH:mm:ss zzz", Locale.US);
-        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
-        Date parsedDate = rfc1123Format.parse(expires);
+
+        Date parsedExpires = rfc1123Format.parse(expires);
+        Date parsedDate = rfc1123Format.parse(date);
+        assertTrue(parsedExpires.before(parsedDate) || parsedExpires.equals(parsedDate));
         Date now = new Date();
-        assertTrue(parsedDate.before(now) || parsedDate.equals(now));
+        assertTrue(parsedExpires.before(now) || parsedExpires.equals(now));
     }
 
     @Test

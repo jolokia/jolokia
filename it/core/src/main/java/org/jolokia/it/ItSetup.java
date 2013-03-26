@@ -231,7 +231,8 @@ public class ItSetup {
             Class.forName("org.jolokia.jmx.JolokiaMBeanServerUtil");
             return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         } catch (RuntimeException e) {
-            System.out.println("No JolokiaServer found ....");
+            System.out.println("No JolokiaServer found: " + e);
+            e.printStackTrace();
             return null;
         } catch (ClassNotFoundException e) {
             System.out.println("No JolokiaServer found, ignoring certain tests ...");
