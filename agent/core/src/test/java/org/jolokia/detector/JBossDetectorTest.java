@@ -82,7 +82,6 @@ public class JBossDetectorTest extends BaseDetectorTest {
         reset(server);
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
         expect(server.isRegistered(memoryBean)).andStubReturn(true);
-        expect(server.getMBeanInfo(memoryBean)).andReturn(null);
         replay(server);
         handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
         verify(server);

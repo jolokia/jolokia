@@ -10,8 +10,6 @@ import java.util.Set;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.request.JmxObjectNameRequest;
-import org.jolokia.request.JmxRequest;
 import org.jolokia.util.ClassUtil;
 
 /**
@@ -33,7 +31,7 @@ public class JBossDetector extends AbstractServerDetector {
                     // Strip off boilerplate
                     version = version.substring(0, idx);
                 }
-                return new JBossServerHandle(version, null, null, true);
+                return new JBossServerHandle(version, null, null);
             }
         }
         if (mBeanExists(pMBeanServerExecutor, "jboss.system:type=Server")) {
@@ -42,15 +40,15 @@ public class JBossDetector extends AbstractServerDetector {
             if (versionFull != null) {
                 version = versionFull.replaceAll("\\(.*", "").trim();
             }
-            return new JBossServerHandle(version, null, null, true);
+            return new JBossServerHandle(version, null, null);
         }
         String version = getSingleStringAttribute(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
         if (version != null) {
-            return new JBossServerHandle(version, null, null, false);
+            return new JBossServerHandle(version, null, null);
         }
         if (mBeanExists(pMBeanServerExecutor, "jboss.modules:*")) {
             // It's a JBoss 7, probably a 7.0.x one ...
-            return new JBossServerHandle("7", null, null, false);
+            return new JBossServerHandle("7", null, null);
         }
         return null;
     }
@@ -73,8 +71,6 @@ public class JBossDetector extends AbstractServerDetector {
     // ========================================================================
     private static class JBossServerHandle extends ServerHandle {
 
-        private boolean workaroundRequired = true;
-
         /**
          * JBoss server handle
          *
@@ -83,34 +79,8 @@ public class JBossDetector extends AbstractServerDetector {
          * @param extraInfo           extra ifo to return
          * @param pWorkaroundRequired if the workaround is required
          */
-        JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo, boolean pWorkaroundRequired) {
+        JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
             super("RedHat", "jboss", version, agentUrl, extraInfo);
-            workaroundRequired = pWorkaroundRequired;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
-            if (workaroundRequired && pJmxReq instanceof JmxObjectNameRequest) {
-                workaroundForMXBeans(pMBeanServerExecutor, (JmxObjectNameRequest) pJmxReq);
-            }
-        }
-
-        private void workaroundForMXBeans(MBeanServerExecutor pMBeanServerExecutor, JmxObjectNameRequest pRequest) {
-            if (pRequest.getObjectName() != null &&
-                "java.lang".equals(pRequest.getObjectName().getDomain())) {
-                try {
-                    pMBeanServerExecutor.call(pRequest.getObjectName(), JBOSS_WORKAROUND_HANDLER);
-                } catch (ReflectionException e) {
-                    throw new IllegalStateException("Workaround for JBoss failed for object " + pRequest.getObjectName() + ": " + e);
-                } catch (JMException e) {
-                    throw new IllegalStateException("Workaround for JBoss failed for object " + pRequest.getObjectName() + ": " + e);
-                } catch (IOException e) {
-                    // Must not happen, since this method is only called for local detections ...
-                }
-            }
         }
 
         // Handler used for calling getMBeanInfo() in order to avoid a nasty bug when doing a lookup
