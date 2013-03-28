@@ -44,7 +44,7 @@ var gcCount2 = jolokia.metric(
 );
 
 var agentRequest = jolokia.metric(
-    {type:        "read", mbean:"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
+    {type:        "read", mbean:"Jolokia:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
         attribute:"requestCount"}, {name:"Jolokia", delta:10 * 1000});
 var hudsonRequest = jolokia.metric(
     {type:        "read", mbean:"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/hudson,j2eeType=Servlet,name=Stapler",

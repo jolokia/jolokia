@@ -27,9 +27,9 @@
   <head>
     <script type="text/javascript" src="../js/d3.v2.min.js"></script>
     <script type="text/javascript" src="../js/jquery-1.7.2-min.js"></script>
-    <script type="text/javascript" src="../js/jolokia-min.js"></script>
+    <script type="text/javascript" src="../js/jolokia.js"></script>
     <script type="text/javascript" src="../js/cubism.v1.min.js"></script>
-    <script type="text/javascript" src="../js/jolokia-cubism-min.js"></script>
+    <script type="text/javascript" src="../js/jolokia-cubism.js"></script>
     <script type="text/javascript" src="../js/javascript-cubism.js"></script>    
     <link rel="stylesheet" type="text/css" href="../css/style.css" />
   </head>
