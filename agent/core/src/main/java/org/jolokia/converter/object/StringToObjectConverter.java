@@ -111,18 +111,30 @@ public class StringToObjectConverter {
         }
     }
 
-    // Extract a type version of the method above. This might be useful later
-    // on, e.g. when setting enums should be supported for certain
-    // use cases
-    private Object prepareValue(Class expectedClass, Object pValue) {
-        if (pValue == null) {
+    /**
+     * Deserialize a string representation to an object for a given type
+     *
+     * @param pType type to convert to
+     * @param pValue the value to convert from
+     * @return the converted value
+     */
+    public Object convertFromString(String pType, String pValue) {
+        String value = convertSpecialStringTags(pValue);
+
+        if (value == null) {
             return null;
         }
-        if (Enum.class.isAssignableFrom(expectedClass)) {
-            return Enum.valueOf(expectedClass,pValue.toString());
-        } else {
-            return prepareForDirectUsage(expectedClass, pValue);
+        if (pType.startsWith("[") && pType.length() >= 2) {
+            return convertToArray(pType, value);
         }
+
+        Parser parser = PARSER_MAP.get(pType);
+        if (parser == null) {
+            throw new IllegalArgumentException(
+                    "Cannot convert string " + value + " to type " +
+                    pType + " because no converter could be found");
+        }
+        return parser.extract(value);
     }
 
     /**
@@ -157,6 +169,20 @@ public class StringToObjectConverter {
 
     // ======================================================================================================
 
+    // Extract a type version of the method above. This might be useful later
+    // on, e.g. when setting enums should be supported for certain
+    // use cases
+    private Object prepareValue(Class expectedClass, Object pValue) {
+        if (pValue == null) {
+            return null;
+        }
+        if (Enum.class.isAssignableFrom(expectedClass)) {
+            return Enum.valueOf(expectedClass,pValue.toString());
+        } else {
+            return prepareForDirectUsage(expectedClass, pValue);
+        }
+    }
+
     // Check whether an argument can be used directly or whether it needs some sort
     // of conversion. Returns null if a string conversion should happen
     private Object prepareForDirectUsage(Class expectedClass, Object pArgument) {
@@ -166,32 +192,6 @@ public class StringToObjectConverter {
         } else {
             return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
         }
-    }
-
-    /**
-     * Deserialize a string representation to an object for a given type
-     *
-     * @param pType type to convert to
-     * @param pValue the value to convert from
-     * @return the converted value
-     */
-    public Object convertFromString(String pType, String pValue) {
-        String value = convertSpecialStringTags(pValue);
-
-        if (value == null) {
-            return null;
-        }
-        if (pType.startsWith("[") && pType.length() >= 2) {
-            return convertToArray(pType, value);
-        }
-
-        Parser parser = PARSER_MAP.get(pType);
-        if (parser == null) {
-            throw new IllegalArgumentException(
-                    "Cannot convert string " + value + " to type " +
-                            pType + " because no converter could be found");
-        }
-        return parser.extract(value);
     }
 
     // Convert an array

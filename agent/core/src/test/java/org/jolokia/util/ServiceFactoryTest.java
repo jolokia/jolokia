@@ -1,5 +1,3 @@
-package org.jolokia.util;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -16,9 +14,12 @@ package org.jolokia.util;
  * limitations under the License.
  */
 
+package org.jolokia.util;
+
 import java.util.Iterator;
 import java.util.List;
 
+import org.jolokia.service.impl.LocalServiceFactory;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -32,7 +33,7 @@ public class ServiceFactoryTest {
     @Test
     public void testOrder() {
         List<TestService> services =
-                ServiceFactory.createServices("service/test-services-default", "service/test-services");
+                LocalServiceFactory.createServices("service/test-services-default", "service/test-services");
         String[] orderExpected = new String[] { "three", "two", "five", "one"};
         assertEquals(services.size(), 4);
         Iterator<TestService> it = services.iterator();
@@ -44,12 +45,12 @@ public class ServiceFactoryTest {
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*bla\\.blub\\.NotExist.*")
     public void errorHandling() {
         List<TestService> service =
-                ServiceFactory.createServices("service/error-services");
+                LocalServiceFactory.createServices("service/error-services");
     }
 
     @Test(expectedExceptions = ClassCastException.class)
     public void classCastException() {
-        List<String> services = ServiceFactory.createServices("service/test-services");
+        List<String> services = LocalServiceFactory.createServices("service/test-services");
         String bla = services.get(0);
     }
 

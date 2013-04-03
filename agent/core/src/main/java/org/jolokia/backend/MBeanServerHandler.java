@@ -13,6 +13,7 @@ import org.jolokia.config.Configuration;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
+import org.jolokia.service.impl.LocalServiceFactory;
 import org.jolokia.util.*;
 
 /*
@@ -228,7 +229,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     // Lookup all registered detectors-default + a default detector
     private List<ServerDetector> lookupDetectors() {
         List<ServerDetector> detectors =
-                ServiceFactory.createServices("META-INF/detectors-default", "META-INF/detectors");
+                LocalServiceFactory.createServices("META-INF/detectors-default", "META-INF/detectors");
         // An detector at the end of the chain in order to get a default handle
         detectors.add(new FallbackServerDetector());
         return detectors;

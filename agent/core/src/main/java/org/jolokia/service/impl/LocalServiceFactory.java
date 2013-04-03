@@ -1,5 +1,3 @@
-package org.jolokia.util;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,8 @@ package org.jolokia.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.jolokia.service.impl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,9 +40,9 @@ import java.util.*;
  * @author roland
  * @since 05.11.10
  */
-public final class ServiceFactory {
+public final class LocalServiceFactory {
 
-    private ServiceFactory() {}
+    private LocalServiceFactory() {}
 
     /**
      * Create a list of services ordered according to the ordering given in the
@@ -76,7 +76,7 @@ public final class ServiceFactory {
 
     private static <T> void readServiceDefinitions(Map<ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            Enumeration<URL> resUrls = ServiceFactory.class.getClassLoader().getResources(pDefPath);
+            Enumeration<URL> resUrls = LocalServiceFactory.class.getClassLoader().getResources(pDefPath);
             while (resUrls.hasMoreElements()) {
                 readServiceDefinitionFromUrl(pExtractorMap, resUrls.nextElement());
             }
@@ -133,7 +133,7 @@ public final class ServiceFactory {
                     pExtractorMap.remove(key);
                 }
             } else {
-                Class<T> clazz = (Class<T>) ServiceFactory.class.getClassLoader().loadClass(entry.getClassName());
+                Class<T> clazz = (Class<T>) LocalServiceFactory.class.getClassLoader().loadClass(entry.getClassName());
                 T ext = (T) clazz.newInstance();
                 pExtractorMap.put(entry,ext);
             }

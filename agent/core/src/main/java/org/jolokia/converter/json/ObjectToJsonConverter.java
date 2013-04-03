@@ -7,8 +7,8 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.service.impl.LocalServiceFactory;
 import org.jolokia.util.EscapeUtil;
-import org.jolokia.util.ServiceFactory;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -342,7 +342,7 @@ public final class ObjectToJsonConverter {
             pHandlers.addAll(Arrays.asList(pSimplifyHandlers));
         } else {
             // Add all
-            pHandlers.addAll(ServiceFactory.<Extractor>createServices(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
+            pHandlers.addAll(LocalServiceFactory.<Extractor>createServices(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
         }
     }
 }
