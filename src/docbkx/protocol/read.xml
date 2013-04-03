@@ -101,7 +101,7 @@
     <para>
       With this URL the used heap memory can be obtained:
       <informalexample>
-        <literallayout class="monospaced">http://localhost:8080/jolokia/java.lang:type=Memory/HeapMemoryUsage/used</literallayout>
+        <literallayout class="monospaced">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</literallayout>
       </informalexample>           
     </para>
   </section>  
