@@ -2,6 +2,8 @@ package org.jolokia.converter.object;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -120,6 +122,17 @@ public class StringToObjectConverterTest {
         }
     }
 
+    @Test
+    public void urlConversion(){
+     	URL url = null;
+    	try {
+    		url = new URL("http://google.com");
+    	} catch (MalformedURLException e) {}     	
+        Object object = converter.convertFromString(URL.class.getCanonicalName(),"http://google.com");
+        assertEquals("URL conversion", url, object);
+    }
+    
+    
     @Test
     public void enumConversion() {
         ConfigKey key = (ConfigKey) converter.prepareValue(ConfigKey.class.getName(), "MAX_DEPTH");

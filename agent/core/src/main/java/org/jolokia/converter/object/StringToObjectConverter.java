@@ -3,6 +3,8 @@ package org.jolokia.converter.object;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import javax.management.ObjectName;
@@ -56,6 +58,8 @@ public class StringToObjectConverter {
         PARSER_MAP.put("float",new FloatParser());
         PARSER_MAP.put(BigDecimal.class.getName(),new BigDecimalParser());
         PARSER_MAP.put(BigInteger.class.getName(),new BigIntegerParser());
+        
+        PARSER_MAP.put(URL.class.getName(),new URLParser());        
 
         PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
         PARSER_MAP.put("boolean",new BooleanParser());
@@ -306,6 +310,20 @@ public class StringToObjectConverter {
         public Object extract(String pValue) { return new BigInteger(pValue); }
     }
 
+    private static class URLParser implements Parser {
+		/** {@inheritDoc} */
+		public Object extract(String pValue) {
+			URL url = null;
+			try {
+				url = new URL(pValue);
+			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException("Cannot parse URL "
+						+ pValue + ": " + e, e);
+			}
+			return url;
+		}
+	}
+    
     private static class DateParser implements Parser {
         /** {@inheritDoc} */
         public Object extract(String pValue) {

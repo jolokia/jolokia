@@ -806,6 +806,7 @@
               <listitem>Float / float</listitem>
               <listitem>Double / double</listitem>
               <listitem>BigDecimal / BigInteger</listitem>
+              <listitem>URL / URL</listitem>
               <listitem>char</listitem>
               <listitem>Boolean / boolean</listitem>
               <listitem>Date</listitem>
