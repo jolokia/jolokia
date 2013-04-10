@@ -59,7 +59,6 @@ public class StringToObjectConverter {
         PARSER_MAP.put(BigDecimal.class.getName(),new BigDecimalParser());
         PARSER_MAP.put(BigInteger.class.getName(),new BigIntegerParser());
         
-        PARSER_MAP.put(URL.class.getName(),new URLParser());        
 
         PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
         PARSER_MAP.put("boolean",new BooleanParser());
@@ -68,6 +67,7 @@ public class StringToObjectConverter {
         PARSER_MAP.put(String.class.getName(),new StringParser());
         PARSER_MAP.put(Date.class.getName(),new DateParser());
         PARSER_MAP.put(ObjectName.class.getName(), new ObjectNameParser());
+        PARSER_MAP.put(URL.class.getName(),new URLParser());
 
         JSONParser jsonExtractor = new JSONParser();
         for (Class type : new Class[] { Map.class, List.class,
@@ -310,21 +310,8 @@ public class StringToObjectConverter {
         public Object extract(String pValue) { return new BigInteger(pValue); }
     }
 
-    private static class URLParser implements Parser {
-		/** {@inheritDoc} */
-		public Object extract(String pValue) {
-			URL url = null;
-			try {
-				url = new URL(pValue);
-			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException("Cannot parse URL "
-						+ pValue + ": " + e, e);
-			}
-			return url;
-		}
-	}
-    
     private static class DateParser implements Parser {
+
         /** {@inheritDoc} */
         public Object extract(String pValue) {
             long time;
@@ -336,8 +323,8 @@ public class StringToObjectConverter {
             }
         }
     }
-
     private static class JSONParser implements Parser {
+
         /** {@inheritDoc} */
         public Object extract(String pValue) {
             try {
@@ -347,9 +334,9 @@ public class StringToObjectConverter {
             }
         }
     }
-
     private static class ObjectNameParser implements Parser {
-    	/** {@inheritDoc} */
+
+        /** {@inheritDoc} */
     	public Object extract(String pValue) {
     		try {
     			return new javax.management.ObjectName(pValue);
@@ -359,4 +346,15 @@ public class StringToObjectConverter {
     	}
     }
 
+    private static class URLParser implements Parser {
+
+        /** {@inheritDoc} */
+        public Object extract(String pValue) {
+            try {
+                return new URL(pValue);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("Cannot parse URL " + pValue + ": " + e, e);
+            }
+        }
+    }
 }
