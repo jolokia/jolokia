@@ -23,6 +23,7 @@ import javax.management.JMException;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.NotificationBackend;
 import org.jolokia.notification.pull.PullNotificationBackend;
+import org.jolokia.service.JolokiaContext;
 
 /**
  * The notification backend managed is responsible for looking up
@@ -36,14 +37,16 @@ class NotificationBackendManager {
     // Map mode to Backend and configs
     private final Map<String, NotificationBackend> backendMap = new HashMap<String, NotificationBackend>();
     private final Map<String, Map<String, ?>> backendConfigMap = new HashMap<String, Map<String, ?>>();
+    private final JolokiaContext context;
 
     /**
      * Lookup backends and remember
      *
-     * @param pServerHandle server handle used to identify the agent
+     * @param pContext jolokia context
      */
-    NotificationBackendManager(ServerHandle pServerHandle) {
-        PullNotificationBackend backend = new PullNotificationBackend(pServerHandle.getJolokiaId());
+    NotificationBackendManager(JolokiaContext pContext) {
+        context = pContext;
+        PullNotificationBackend backend = new PullNotificationBackend(context);
         backendMap.put(backend.getType(), backend);
         backendConfigMap.put(backend.getType(),backend.getConfig());
     }

@@ -17,22 +17,21 @@ package org.jolokia.jsr160;
  */
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.converter.Converters;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 
 /**
  * Dispatcher for calling JSR-160 connectors
@@ -48,14 +47,10 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     /**
      * Constructor
      *
-     * @param pConverters object/string converters
-     * @param serverInfo server info for dealing with version information
-     * @param restrictor restrictor for restricting access to certain MBeans
+     * @param pContext the jolokia context
      */
-    public Jsr160RequestDispatcher(Converters pConverters,
-                                   ServerHandle serverInfo,
-                                   Restrictor restrictor) {
-        requestHandlerManager = new RequestHandlerManager(pConverters, serverInfo, restrictor,false);
+    public Jsr160RequestDispatcher(JolokiaContext pContext) {
+        requestHandlerManager = new RequestHandlerManager(pContext,false);
     }
 
     /**

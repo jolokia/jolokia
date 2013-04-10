@@ -32,9 +32,6 @@ public interface ConfigMBean {
     // Name under which this bean gets registered
     String OBJECT_NAME = "jolokia:type=Config";
 
-    // Legacy name for jmx4perl version < 0.80
-    String LEGACY_OBJECT_NAME = "jmx4perl:type=Config";
-    
     // Operations
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> is 0
@@ -49,7 +46,6 @@ public interface ConfigMBean {
      * @deprecated use {@see #setHistoryLimitForAttribute} instead
      */
     void setHistoryEntriesForAttribute(String pMBean,String pAttribute,String pPath,String pTarget,int pMaxEntries) throws MalformedObjectNameException;
-
 
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> and <code>pMaxDuration</code> is 
@@ -103,18 +99,6 @@ public interface ConfigMBean {
      */
     void resetHistoryEntries();
 
-    /**
-     * Get latest debug information if debugging is switched on. The returned output
-     * will not take more than {@link #getMaxDebugEntries()} lines.
-     *
-     * @return debug info in plain ascii.
-     */
-    String debugInfo();
-
-    /**
-     * Reset all debug information stored internally
-     */
-    void resetDebugInfo();
 
     // Attributes
 
@@ -141,28 +125,4 @@ public interface ConfigMBean {
      */
     void setHistoryMaxEntries(int pLimit);
 
-    /**
-     * Check, whether debugging is switched on
-     * @return state of debugging
-     */
-    boolean isDebug();
-
-    /**
-     * Set debugging to given state
-     * @param pSwitch true, if debugging should be switched on, false otherwise
-     */
-    void setDebug(boolean pSwitch);
-
-    /**
-     * Number of debug entries to remember
-     *
-     * @return number of debug entries
-     */
-    int getMaxDebugEntries();
-
-    /**
-     * Set the number of debugging info to remember
-     * @param pNumber entries to set
-     */
-    void setMaxDebugEntries(int pNumber);
 }

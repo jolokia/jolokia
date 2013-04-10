@@ -11,7 +11,7 @@ import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 
@@ -50,10 +50,10 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
     /**
      * Constructor
      *
-     * @param pRestrictor restrictor to apply
+     * @param pContext jolokia context
      */
-    public ListHandler(Restrictor pRestrictor) {
-        super(pRestrictor);
+    public ListHandler(JolokiaContext pContext) {
+        super(pContext);
     }
 
     /**

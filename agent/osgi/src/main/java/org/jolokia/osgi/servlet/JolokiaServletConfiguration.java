@@ -26,7 +26,7 @@ import org.osgi.service.http.HttpContext;
  * @author roland
  * @since 04.02.11
  */
-public interface JolokiaContext {
+public interface JolokiaServletConfiguration {
 
     /**
      * Get the HttpService context used for authentication. A client can use

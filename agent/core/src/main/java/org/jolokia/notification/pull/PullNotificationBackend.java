@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.notification.*;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.JmxUtil;
 import org.json.simple.JSONObject;
 
@@ -30,12 +31,13 @@ public class PullNotificationBackend implements NotificationBackend {
      * Create a pull notification backend which will register an MBean allowing
      * to pull received notification
      *
-     * @param pJolokiaId jolokia id to generate a unique MBean name
+     * @param pContext jolokia context
      */
-    public PullNotificationBackend(String pJolokiaId) {
+    public PullNotificationBackend(JolokiaContext pContext) {
+        String jolokiaId = pContext.getServerHandle().getJolokiaId();
         // TODO: Get configuration parameter for maxEntries
         store = new PullNotificationStore(maxEntries);
-        mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + pJolokiaId);
+        mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + jolokiaId);
         try {
             getMBeanServer().registerMBean(store, mbeanName);
         } catch (JMException e) {

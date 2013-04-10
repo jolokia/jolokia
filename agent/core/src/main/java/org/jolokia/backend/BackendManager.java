@@ -1,23 +1,17 @@
 package org.jolokia.backend;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.UUID;
 
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
-import org.jolokia.converter.Converters;
 import org.jolokia.converter.json.JsonConvertOptions;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.util.DebugStore;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.config.ConfigKey.*;
@@ -48,18 +42,11 @@ import static org.jolokia.config.ConfigKey.*;
  */
 public class BackendManager {
 
-    // Dispatches request to local MBeanServer
-    private LocalRequestDispatcher localDispatcher;
-
-    // Converter for converting various attribute object types
-    // a JSON representation
-    private Converters converters;
+    // Overall Jolokia context
+    private final JolokiaContext ctx;
 
     // Hard limits for conversion
     private JsonConvertOptions.Builder convertOptionsBuilder;
-
-    // Handling access restrictions
-    private Restrictor restrictor;
 
     // History handler
     private HistoryStore historyStore;
@@ -67,59 +54,34 @@ public class BackendManager {
     // Storage for storing debug information
     private DebugStore debugStore;
 
-    // Loghandler for dispatching logs
-    private LogHandler logHandler;
-
-    // List of RequestDispatchers to consult
-    private List<RequestDispatcher> requestDispatchers;
-
     // Initialize used for late initialization
     // ("volatile: because we use double-checked locking later on
     // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
     private volatile Initializer initializer;
 
     /**
-     * Constrcuct a new backend manager with the given configuration and which allows
-     * every operation (no restrictor)
+     * Construct a new backend manager with the given configuration.
      *
-     * @param pConfig configuration used for tuning this handler's behaviour
-     * @param pLogHandler logger
+     * @param pCtx jolokia context for accessing internal services
      */
-    public BackendManager(Configuration pConfig, LogHandler pLogHandler) {
-        this(pConfig, pLogHandler, null);
+    public BackendManager(JolokiaContext pCtx) {
+        this(pCtx,false);
     }
 
     /**
      * Construct a new backend manager with the given configuration.
      *
-     * @param pConfig configuration used for tuning this handler's behaviour
-     * @param pLogHandler logger
-     * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
-     */
-    public BackendManager(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
-        this(pConfig,pLogHandler,pRestrictor,false);
-    }
-
-    /**
-     * Construct a new backend manager with the given configuration.
-     *
-     * @param pConfig configuration map used for tuning this handler's behaviour
-     * @param pLogHandler logger
-     * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
+     * @param pCtx jolokia context for accessing internal services
      * @param pLazy whether the initialisation should be done lazy
      */
-    public BackendManager(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor, boolean pLazy) {
+    public BackendManager(JolokiaContext pCtx, boolean pLazy) {
 
-        // Access restrictor
-        restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
-
-        // Log handler for putting out debug
-        logHandler = pLogHandler;
+        ctx = pCtx;
 
         if (pLazy) {
-            initializer = new Initializer(pConfig);
+            initializer = new Initializer();
         } else {
-            init(pConfig);
+            init(pCtx);
             initializer = null;
         }
     }
@@ -180,23 +142,12 @@ public class BackendManager {
         JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
         try {
             JSONObject expObj =
-                    (JSONObject) converters.getToJsonConverter().convertToJson(pExp,null,opts);
+                    (JSONObject) ctx.getConverters().getToJsonConverter().convertToJson(pExp,null,opts);
             return expObj;
 
         } catch (AttributeNotFoundException e) {
             // Cannot happen, since we dont use a path
             return null;
-        }
-    }
-
-    /**
-     * Remove MBeans
-     */
-    public void destroy() {
-        try {
-            localDispatcher.destroy();
-        } catch (Exception e) {
-            error("Cannot unregister MBean: " + e,e);
         }
     }
 
@@ -208,7 +159,7 @@ public class BackendManager {
      * @return true if remote access is allowed
      */
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
-        return restrictor.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
+        return ctx.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
     }
 
     /**
@@ -218,7 +169,7 @@ public class BackendManager {
      * @return true if icors access is allowed
      */
     public boolean isCorsAccessAllowed(String pOrigin) {
-        return restrictor.isCorsAccessAllowed(pOrigin);
+        return ctx.isCorsAccessAllowed(pOrigin);
     }
 
     /**
@@ -227,7 +178,7 @@ public class BackendManager {
      * @param msg to log
      */
     public void info(String msg) {
-        logHandler.info(msg);
+        ctx.info(msg);
         if (debugStore != null) {
             debugStore.log(msg);
         }
@@ -239,7 +190,7 @@ public class BackendManager {
      * @param msg message to log
      */
     public void debug(String msg) {
-        logHandler.debug(msg);
+        ctx.debug(msg);
         if (debugStore != null) {
             debugStore.log(msg);
         }
@@ -253,7 +204,7 @@ public class BackendManager {
      */
     public void error(String message, Throwable t) {
         // Must not be final so that we can mock it in EasyMock for our tests
-        logHandler.error(message, t);
+        ctx.error(message, t);
         if (debugStore != null) {
             debugStore.log(message, t);
         }
@@ -268,21 +219,13 @@ public class BackendManager {
         return debugStore != null && debugStore.isDebug();
     }
 
-
     // ==========================================================================================================
 
     // Initialized used for late initialisation as it is required for the agent when used
     // as startup options
     private final class Initializer {
-
-        private Configuration config;
-
-        private Initializer(Configuration pConfig) {
-            config = pConfig;
-        }
-
         void init() {
-            BackendManager.this.init(config);
+            BackendManager.this.init(ctx);
         }
     }
 
@@ -299,32 +242,21 @@ public class BackendManager {
     }
 
     // Initialize this object;
-    private void init(Configuration pConfig) {
-        // Central objects
-        converters = new Converters();
-        initLimits(pConfig);
-
-        // Create and remember request dispatchers
-        localDispatcher = new LocalRequestDispatcher(converters,
-                                                     restrictor,
-                                                     pConfig,
-                                                     logHandler);
-        ServerHandle serverHandle = localDispatcher.getServerInfo();
-        requestDispatchers = createRequestDispatchers(pConfig.get(DISPATCHER_CLASSES),
-                                                      converters,serverHandle,restrictor);
-        requestDispatchers.add(localDispatcher);
+    private void init(JolokiaContext pCtx) {
+        // Init limits
+        initLimits(pCtx);
 
         // Backendstore for remembering agent state
-        initStores(pConfig);
+        initStores(pCtx);
     }
 
-    private void initLimits(Configuration pConfig) {
+    private void initLimits(JolokiaContext pContext) {
         // Max traversal depth
-        if (pConfig != null) {
+        if (pContext != null) {
             convertOptionsBuilder = new JsonConvertOptions.Builder(
-                    getNullSaveIntLimit(pConfig.get(MAX_DEPTH)),
-                    getNullSaveIntLimit(pConfig.get(MAX_COLLECTION_SIZE)),
-                    getNullSaveIntLimit(pConfig.get(MAX_OBJECTS))
+                    getNullSaveIntLimit(pContext.getConfig(MAX_DEPTH)),
+                    getNullSaveIntLimit(pContext.getConfig(MAX_COLLECTION_SIZE)),
+                    getNullSaveIntLimit(pContext.getConfig(MAX_OBJECTS))
             );
         } else {
             convertOptionsBuilder = new JsonConvertOptions.Builder();
@@ -335,55 +267,13 @@ public class BackendManager {
         return pValue != null ? Integer.parseInt(pValue) : 0;
     }
 
-    // Construct configured dispatchers by reflection. Returns always
-    // a list, an empty one if no request dispatcher should be created
-    private List<RequestDispatcher> createRequestDispatchers(String pClasses,
-                                                             Converters pConverters,
-                                                             ServerHandle pServerHandle,
-                                                             Restrictor pRestrictor) {
-        List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
-        if (pClasses != null && pClasses.length() > 0) {
-            String[] names = pClasses.split("\\s*,\\s*");
-            for (String name : names) {
-                ret.add(createDispatcher(name, pConverters, pServerHandle, pRestrictor));
-            }
-        }
-        return ret;
-    }
-
-    // Create a single dispatcher
-    private RequestDispatcher createDispatcher(String pDispatcherClass,
-                                               Converters pConverters,
-                                               ServerHandle pServerHandle, Restrictor pRestrictor) {
-        try {
-            Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
-            Constructor constructor = clazz.getConstructor(Converters.class,
-                                                           ServerHandle.class,
-                                                           Restrictor.class);
-            return (RequestDispatcher)
-                    constructor.newInstance(pConverters,
-                                            pServerHandle,
-                                            pRestrictor);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Couldn't load class " + pDispatcherClass + ": " + e,e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class " + pDispatcherClass + " has invalid constructor: " + e,e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Constructor of " + pDispatcherClass + " couldn't be accessed: " + e,e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(pDispatcherClass + " couldn't be instantiated: " + e,e);
-        }
-    }
-
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         Object retValue = null;
         boolean useValueWithPath = false;
         boolean found = false;
-        for (RequestDispatcher dispatcher : requestDispatchers) {
+        for (RequestDispatcher dispatcher : ctx.getRequestDispatchers()) {
             if (dispatcher.canHandle(pJmxReq)) {
                 retValue = dispatcher.dispatchRequest(pJmxReq);
                 useValueWithPath = dispatcher.useReturnValueWithPath(pJmxReq);
@@ -398,7 +288,7 @@ public class BackendManager {
         JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
-                converters.getToJsonConverter()
+                ctx.getConverters().getToJsonConverter()
                           .convertToJson(retValue, useValueWithPath ? pJmxReq.getPathParts() : null, opts);
 
         JSONObject jsonObject = new JSONObject();
@@ -417,16 +307,12 @@ public class BackendManager {
     }
 
     // init various application wide stores for handling history and debug output.
-    private void initStores(Configuration pConfig) {
-        int maxEntries = pConfig.getAsInt(HISTORY_MAX_ENTRIES);
-        int maxDebugEntries = pConfig.getAsInt(DEBUG_MAX_ENTRIES);
-
-
+    private void initStores(JolokiaContext pCtx) {
+        int maxEntries = pCtx.getConfigAsInt(HISTORY_MAX_ENTRIES);
         historyStore = new HistoryStore(maxEntries);
-        debugStore = new DebugStore(maxDebugEntries, pConfig.getAsBoolean(DEBUG));
 
         try {
-            localDispatcher.initMBeans(historyStore, debugStore);
+            initMBeans(historyStore);
         } catch (NotCompliantMBeanException e) {
             intError("Error registering config MBean: " + e, e);
         } catch (MBeanRegistrationException e) {
@@ -436,9 +322,38 @@ public class BackendManager {
         }
     }
 
+
+    private void initMBeans(HistoryStore pHistoryStore)
+            throws MalformedObjectNameException, MBeanRegistrationException, NotCompliantMBeanException {
+
+        // Register the Config MBean
+        String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
+        try {
+            Config config = new Config(pHistoryStore,oName);
+            ctx.getMBeanServerHandler().registerMBean(config,oName);
+        } catch (InstanceAlreadyExistsException exp) {
+            String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
+            try {
+                // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
+                // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
+                // a random number, but this can already be performed with a qualifier
+                ctx.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
+                         "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
+                Config config = new Config(pHistoryStore,alternativeOName);
+                ctx.getMBeanServerHandler().registerMBean(config,alternativeOName);
+            } catch (InstanceAlreadyExistsException e) {
+                ctx.error("Cannot even register fallback MBean with name " + alternativeOName + ". Should never happen. Really.",e);
+            }
+        }
+    }
+
+    private String createObjectNameWithQualifier(String pOName) {
+        String qualifier = ctx.getConfig(ConfigKey.MBEAN_QUALIFIER);
+        return pOName + (qualifier != null ? "," + qualifier : "");
+    }
     // Final private error log for use in the constructor above
     private void intError(String message,Throwable t) {
-        logHandler.error(message, t);
+        ctx.error(message, t);
         debugStore.log(message, t);
     }
 }

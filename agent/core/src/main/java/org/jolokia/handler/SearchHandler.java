@@ -8,7 +8,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxSearchRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 /*
@@ -38,10 +38,10 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
     /**
      * Create search handler
      * 
-     * @param pRestrictor access restriction to apply
+     * @param pContext jolokia context to use
      */
-    public SearchHandler(Restrictor pRestrictor) {
-        super(pRestrictor);
+    public SearchHandler(JolokiaContext pContext) {
+        super(pContext);
     }
 
     /** {@inheritDoc} */

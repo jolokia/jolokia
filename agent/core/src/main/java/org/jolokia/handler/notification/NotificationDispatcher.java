@@ -5,8 +5,8 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.notification.*;
+import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**
@@ -25,8 +25,8 @@ public class NotificationDispatcher {
     /**
      * Initialize backends and delegate
      */
-    public NotificationDispatcher(ServerHandle pServerHandle) {
-        backendManager = new NotificationBackendManager(pServerHandle);
+    public NotificationDispatcher(JolokiaContext pContext) {
+        backendManager = new NotificationBackendManager(pContext);
         listenerDelegate = new NotificationListenerDelegate(backendManager);
     }
 

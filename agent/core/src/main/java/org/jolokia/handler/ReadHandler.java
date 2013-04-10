@@ -8,7 +8,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.request.JmxReadRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 /*
@@ -64,10 +64,10 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     /**
      * Read handler constructor
      *
-     * @param pRestrictor access restriction to apply
+     * @param pContext access restriction to apply
      */
-    public ReadHandler(Restrictor pRestrictor) {
-        super(pRestrictor);
+    public ReadHandler(JolokiaContext pContext) {
+        super(pContext);
     }
 
     @Override
@@ -246,7 +246,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     private void checkRestriction(ObjectName mBeanName, String attribute) {
-        if (!getRestrictor().isAttributeReadAllowed(mBeanName,attribute)) {
+        if (!context.isAttributeReadAllowed(mBeanName,attribute)) {
             throw new SecurityException("Reading attribute " + attribute +
                     " is forbidden for MBean " + mBeanName.getCanonicalName());
         }

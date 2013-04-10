@@ -6,10 +6,9 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.notification.NotificationDispatcher;
 import org.jolokia.request.JmxNotificationRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 /**
@@ -27,12 +26,11 @@ public class NotificationHandler extends JsonRequestHandler<JmxNotificationReque
     /**
      * Create a handler with the given restrictor
      *
-     * @param pRestrictor restrictor to use
-     * @param pServerHandle
+     * @param pContext jolokia context to use
      */
-    public NotificationHandler(Restrictor pRestrictor, ServerHandle pServerHandle) {
-        super(pRestrictor);
-        dispatcher = new NotificationDispatcher(pServerHandle);
+    public NotificationHandler(JolokiaContext pContext) {
+        super(pContext);
+        dispatcher = new NotificationDispatcher(pContext);
     }
 
     @Override

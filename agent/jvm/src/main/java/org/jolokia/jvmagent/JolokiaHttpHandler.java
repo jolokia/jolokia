@@ -33,6 +33,8 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.impl.JolokiaContextImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -83,15 +85,17 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        backendManager = new BackendManager(configuration, this, createRestrictor(configuration), pLazy);
-        requestHandler = new HttpRequestHandler(configuration, backendManager, this);
+        JolokiaContext ctx = new JolokiaContextImpl(configuration,this, createRestrictor(configuration));
+        backendManager = new BackendManager(ctx, pLazy);
+        requestHandler = new HttpRequestHandler(ctx, backendManager);
     }
 
     /**
      * Stop the handler
      */
     public void stop() {
-        backendManager.destroy();
+        // TODO: CTX LC
+        // backendManager.destroy();
         backendManager = null;
         requestHandler = null;
     }

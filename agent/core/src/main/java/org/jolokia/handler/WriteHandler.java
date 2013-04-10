@@ -7,9 +7,8 @@ import java.util.List;
 import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 
-import org.jolokia.converter.Converters;
 import org.jolokia.request.JmxWriteRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 /*
@@ -37,17 +36,14 @@ import org.jolokia.util.RequestType;
  */
 public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
 
-    private Converters converters;
-
     /**
      * Constructor
      *
-     * @param pRestrictor access restriction to apply
-     * @param pConverters converters used for serialization
+     * @param pContext access restriction to apply
+     *
      */
-    public WriteHandler(Restrictor pRestrictor, Converters pConverters) {
-        super(pRestrictor);
-        converters = pConverters;
+    public WriteHandler(JolokiaContext pContext) {
+        super(pContext);
     }
 
     /** {@inheritDoc} */
@@ -59,7 +55,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
     /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JmxWriteRequest pRequest) {
-        if (!getRestrictor().isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
+        if (!context.isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
             throw new SecurityException("Writing attribute " + pRequest.getAttributeName() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
         }
@@ -161,13 +157,13 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
             // it later back via JMX
             return new Object[] {
                     pCurrentValue,
-                    converters.getToJsonConverter().setInnerValue(pCurrentValue, newValue, pathParts)
+                    context.getConverters().getToJsonConverter().setInnerValue(pCurrentValue, newValue, pathParts)
             };
 
         } else {
             // Return the objectified value
             return new Object[] {
-                    converters.getToObjectConverter().prepareValue(pType, newValue),
+                    context.getConverters().getToObjectConverter().prepareValue(pType, newValue),
                     pCurrentValue
             };
         }
@@ -183,7 +179,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
                                                pRequest.getPath() + " since OpenTypes are immutable");
         }
         return new Object[] {
-                converters.getToOpenTypeConverter().convertToObject(pOpenTypeInfo.getOpenType(), pRequest.getValue()),
+                context.getConverters().getToOpenTypeConverter().convertToObject(pOpenTypeInfo.getOpenType(), pRequest.getValue()),
                 pCurrentValue
         };
     }

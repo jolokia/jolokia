@@ -8,7 +8,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 /*
@@ -36,10 +36,10 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
 
     // Restrictor for restricting operations
 
-    private final Restrictor restrictor;
+    protected final JolokiaContext context;
 
-    protected JsonRequestHandler(Restrictor pRestrictor) {
-        restrictor = pRestrictor;
+    protected JsonRequestHandler(JolokiaContext pContext) {
+        context = pContext;
     }
 
 
@@ -101,7 +101,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * Check whether a command of the given type is allowed
      */
     protected void checkType() {
-        if (!restrictor.isTypeAllowed(getType())) {
+        if (!context.isTypeAllowed(getType())) {
             throw new SecurityException("Command type " +
                     getType() + " not allowed due to policy used");
         }
@@ -115,7 +115,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @param pRequest request to check
      */
     private void checkHttpMethod(R pRequest) {
-        if (!restrictor.isHttpMethodAllowed(pRequest.getHttpMethod())) {
+        if (!context.isHttpMethodAllowed(pRequest.getHttpMethod())) {
             throw new SecurityException("HTTP method " + pRequest.getHttpMethod().getMethod() +
                     " is not allowed according to the installed security policy");
         }
@@ -194,15 +194,6 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      */
     public void destroy() throws JMException {
 
-    }
-
-    /**
-     * Get the restrictor which is currently active
-     *
-     * @return restrictor
-     */
-    protected Restrictor getRestrictor() {
-        return restrictor;
     }
 
     /**

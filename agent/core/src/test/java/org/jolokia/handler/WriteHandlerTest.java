@@ -23,7 +23,6 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.converter.Converters;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -45,7 +44,7 @@ public class WriteHandlerTest {
 
     @BeforeTest
     public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        handler = new WriteHandler(new AllowAllRestrictor(),new Converters());
+        handler = new WriteHandler(new AllowAllRestrictor());
 
         oName = new ObjectName("jolokia:test=write");
 

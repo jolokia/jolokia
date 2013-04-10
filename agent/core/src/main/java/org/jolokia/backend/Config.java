@@ -3,7 +3,6 @@ package org.jolokia.backend;
 import javax.management.*;
 
 import org.jolokia.history.*;
-import org.jolokia.util.DebugStore;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -31,9 +30,8 @@ import org.jolokia.util.DebugStore;
  */
 public class Config implements ConfigMBean,MBeanRegistration {
 
-    // Stores for various informations
+    // Stores for various information
     private HistoryStore historyStore;
-    private DebugStore debugStore;
 
     // MBean Objectname under which this bean should be registered
     private String objectName;
@@ -42,12 +40,10 @@ public class Config implements ConfigMBean,MBeanRegistration {
      * Constructor with the configurable objects as parameters.
      *
      * @param pHistoryStore history store where to hold historical values
-     * @param pDebugStore debug store for holding debug messages
      * @param pOName object name under which to register this MBean
      */
-    public Config(HistoryStore pHistoryStore, DebugStore pDebugStore, String pOName) {
+    public Config(HistoryStore pHistoryStore, String pOName) {
         historyStore = pHistoryStore;
-        debugStore = pDebugStore;
         objectName = pOName;
     }
 
@@ -80,16 +76,6 @@ public class Config implements ConfigMBean,MBeanRegistration {
     }
 
     /** {@inheritDoc} */
-    public String debugInfo() {
-        return debugStore.debugInfo();
-    }
-
-    /** {@inheritDoc} */
-    public void resetDebugInfo() {
-        debugStore.resetDebugInfo();
-    }
-
-    /** {@inheritDoc} */
     public int getHistoryMaxEntries() {
         return historyStore.getGlobalMaxEntries();
     }
@@ -97,26 +83,6 @@ public class Config implements ConfigMBean,MBeanRegistration {
     /** {@inheritDoc} */
     public void setHistoryMaxEntries(int pLimit) {
         historyStore.setGlobalMaxEntries(pLimit);
-    }
-
-    /** {@inheritDoc} */
-    public boolean isDebug() {
-        return debugStore.isDebug();
-    }
-
-    /** {@inheritDoc} */
-    public void setDebug(boolean pSwitch) {
-        debugStore.setDebug(pSwitch);
-    }
-
-    /** {@inheritDoc} */
-    public int getMaxDebugEntries() {
-        return debugStore.getMaxDebugEntries();
-    }
-
-    /** {@inheritDoc} */
-    public void setMaxDebugEntries(int pNumber) {
-        debugStore.setMaxDebugEntries(pNumber);
     }
 
     /** {@inheritDoc} */
@@ -128,7 +94,6 @@ public class Config implements ConfigMBean,MBeanRegistration {
     private HistoryLimit limitOrNull(int pMaxEntries, long pMaxDuration) {
         return pMaxEntries != 0 || pMaxDuration != 0 ? new HistoryLimit(pMaxEntries, pMaxDuration) : null;
     }
-
 
     // ========================================================================
 

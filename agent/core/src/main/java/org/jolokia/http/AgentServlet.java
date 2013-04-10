@@ -10,6 +10,8 @@ import javax.servlet.http.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.*;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.impl.JolokiaContextImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -144,8 +146,10 @@ public class AgentServlet extends HttpServlet {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
-        backendManager = new BackendManager(config,logHandler,restrictor);
-        requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
+        // TODO: CTX init
+        JolokiaContext ctx = new JolokiaContextImpl(config,logHandler,restrictor);
+        backendManager = new BackendManager(ctx);
+        requestHandler = new HttpRequestHandler(ctx,backendManager);
     }
 
 
@@ -179,7 +183,8 @@ public class AgentServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     public void destroy() {
-        backendManager.destroy();
+        // TODO: CTX LC
+        // backendManager.destroy();
         super.destroy();
     }
 

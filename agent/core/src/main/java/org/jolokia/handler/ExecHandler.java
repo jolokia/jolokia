@@ -25,9 +25,8 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.converter.*;
-import org.jolokia.request.*;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.request.JmxExecRequest;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 
@@ -39,16 +38,12 @@ import org.jolokia.util.RequestType;
  */
 public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
 
-    private Converters converters;
-
     /**
      * Constructor
-     * @param pRestrictor restrictor for checking access restrictions
-     * @param pConverters converters for serialization
+     * @param pContext the jolokia context
      */
-    public ExecHandler(Restrictor pRestrictor, Converters pConverters) {
-        super(pRestrictor);
-        converters = pConverters;
+    public ExecHandler(JolokiaContext pContext) {
+        super(pContext);
     }
 
     /** {@inheritDoc} */
@@ -60,7 +55,7 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
     /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JmxExecRequest pRequest) {
-        if (!getRestrictor().isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {
+        if (!context.isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {
             throw new SecurityException("Operation " + pRequest.getOperation() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
         }
@@ -88,9 +83,9 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = converters.getToOpenTypeConverter().convertToObject(types.paramOpenTypes[i], args.get(i));
+        		params[i] = context.getConverters().getToOpenTypeConverter().convertToObject(types.paramOpenTypes[i], args.get(i));
         	} else { 
-        		params[i] = converters.getToObjectConverter().prepareValue(types.paramClasses[i], args.get(i));
+        		params[i] = context.getConverters().getToObjectConverter().prepareValue(types.paramClasses[i], args.get(i));
         	}
         }
 

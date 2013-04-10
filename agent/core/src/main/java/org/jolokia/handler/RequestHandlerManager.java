@@ -21,9 +21,7 @@ import java.util.Map;
 
 import javax.management.JMException;
 
-import org.jolokia.converter.Converters;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
 /**
@@ -41,20 +39,18 @@ public class RequestHandlerManager {
     /**
      * Manager and dispatcher for incoming requests
      *
-     * @param pConverters string/object converters
-     * @param pServerHandle server handle for obtaining MBeanServer
-     * @param pRestrictor handler for access restrictions
-     * @param pUseNotifications whether notifications should be used
+     * @param pCtx jolokia context
+     * @param pUseNotifications whether notifications should be enabled
      */
-    public RequestHandlerManager(Converters pConverters,ServerHandle pServerHandle, Restrictor pRestrictor, boolean pUseNotifications) {
+    public RequestHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
         JsonRequestHandler handlers[] = {
-                new ReadHandler(pRestrictor),
-                new WriteHandler(pRestrictor, pConverters),
-                new ExecHandler(pRestrictor, pConverters),
-                new ListHandler(pRestrictor),
-                new VersionHandler(pRestrictor, pServerHandle),
-                new SearchHandler(pRestrictor),
-                pUseNotifications ? new NotificationHandler(pRestrictor, pServerHandle) : null
+                new ReadHandler(pCtx),
+                new WriteHandler(pCtx),
+                new ExecHandler(pCtx),
+                new ListHandler(pCtx),
+                new VersionHandler(pCtx),
+                new SearchHandler(pCtx),
+                pUseNotifications ? new NotificationHandler(pCtx) : null
         };
         for (JsonRequestHandler handler : handlers) {
             if (handler != null) {

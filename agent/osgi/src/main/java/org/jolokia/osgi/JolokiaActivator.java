@@ -5,7 +5,7 @@ import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
-import org.jolokia.osgi.servlet.JolokiaContext;
+import org.jolokia.osgi.servlet.JolokiaServletConfiguration;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.config.ConfigKey;
@@ -40,7 +40,7 @@ import static org.jolokia.config.ConfigKey.*;
  * @author roland
  * @since Dec 27, 2009
  */
-public class JolokiaActivator implements BundleActivator, JolokiaContext {
+public class JolokiaActivator implements BundleActivator, JolokiaServletConfiguration {
 
     // Base filter to use for filtering out HttpServices
     public static final String HTTP_SERVICE_FILTER_BASE =
@@ -83,7 +83,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             httpServiceTracker.open();
 
             // Register us as JolokiaContext
-            jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(), this, null);
+            jolokiaServiceRegistration = pBundleContext.registerService(JolokiaServletConfiguration.class.getCanonicalName(), this, null);
         }
 
 

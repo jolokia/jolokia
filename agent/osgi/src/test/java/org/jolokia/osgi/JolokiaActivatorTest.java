@@ -25,7 +25,7 @@ import javax.servlet.ServletException;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.osgi.servlet.JolokiaContext;
+import org.jolokia.osgi.servlet.JolokiaServletConfiguration;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.config.ConfigKey;
 import org.osgi.framework.*;
@@ -256,7 +256,7 @@ public class JolokiaActivatorTest {
             context.addServiceListener(rememberListener(), eq(filter.toString()));
             expect(context.getServiceReferences(null, filter.toString())).andReturn(null);
             registration = createMock(ServiceRegistration.class);
-            expect(context.registerService(JolokiaContext.class.getName(), activator, null)).andReturn(registration);
+            expect(context.registerService(JolokiaServletConfiguration.class.getName(), activator, null)).andReturn(registration);
 
         }
         expect(context.getProperty("org.jolokia.useRestrictorService")).andReturn("" + doRestrictor);

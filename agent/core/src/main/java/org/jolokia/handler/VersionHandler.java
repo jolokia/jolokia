@@ -8,7 +8,7 @@ import org.jolokia.Version;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxVersionRequest;
-import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -37,17 +37,14 @@ import org.json.simple.JSONObject;
  */
 public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
 
-    private ServerHandle serverHandle;
-
     /**
      * Constructor
      *
-     * @param pRestrictor access restrions
-     * @param pServerHandle a server handle as obtained from a {@link org.jolokia.detector.ServerDetector}
+     * @param pContext access restrions
+     *
      */
-    public VersionHandler(Restrictor pRestrictor, ServerHandle pServerHandle) {
-        super(pRestrictor);
-        serverHandle = pServerHandle;
+    public VersionHandler(JolokiaContext pContext) {
+        super(pContext);
     }
 
     /** {@inheritDoc} */
@@ -76,6 +73,7 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
         JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
+        ServerHandle serverHandle = context.getServerHandle();
         if (serverHandle != null) {
             ret.put("id",serverHandle.getJolokiaId());
             ret.put("info", serverHandle.toJSONObject(serverManager));
