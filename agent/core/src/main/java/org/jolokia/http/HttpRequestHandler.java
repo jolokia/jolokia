@@ -48,18 +48,19 @@ public class HttpRequestHandler {
     private BackendManager backendManager;
 
     // Overall context
-    private JolokiaContext context;
+    private JolokiaContext jolokiaCtx;
 
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
      * request handler (with help of the backend manager)
      *
-     * @param pContext jolokia context
-     * @param pBackendManager backend manager to user
+     * @param pJolokiaCtx jolokia context
+     * @param pLazy
+     *
      */
-    public HttpRequestHandler(JolokiaContext pContext, BackendManager pBackendManager) {
-        backendManager = pBackendManager;
-        context = pContext;
+    public HttpRequestHandler(JolokiaContext pJolokiaCtx, boolean pLazy) {
+        backendManager = new BackendManager(pJolokiaCtx,pLazy);
+        jolokiaCtx = pJolokiaCtx;
     }
 
     /**
@@ -75,10 +76,10 @@ public class HttpRequestHandler {
         JmxRequest jmxReq =
                 JmxRequestFactory.createGetRequest(pathInfo,getProcessingParameter(pParameterMap));
 
-        if (backendManager.isDebug()) {
-            context.debug("URI: " + pUri);
-            context.debug("Path-Info: " + pathInfo);
-            context.debug("Request: " + jmxReq.toString());
+        if (jolokiaCtx.isDebug()) {
+            jolokiaCtx.debug("URI: " + pUri);
+            jolokiaCtx.debug("Path-Info: " + pathInfo);
+            jolokiaCtx.debug("Request: " + jmxReq.toString());
         }
         return executeRequest(jmxReq);
     }
@@ -89,11 +90,13 @@ public class HttpRequestHandler {
             for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
                 String values[] = entry.getValue();
                 if (values != null && values.length > 0) {
-                        ret.put(entry.getKey(), values[0]);
+                    // We support only scalar processing parameters, so we take the first
+                    // parameter given
+                    ret.put(entry.getKey(), values[0]);
                 }
             }
         }
-        return context.getProcessingParameters(ret);
+        return jolokiaCtx.getProcessingParameters(ret);
     }
 
     /**
@@ -111,8 +114,8 @@ public class HttpRequestHandler {
      */
     public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
             throws IOException {
-        if (backendManager.isDebug()) {
-            context.debug("URI: " + pUri);
+        if (jolokiaCtx.isDebug()) {
+            jolokiaCtx.debug("URI: " + pUri);
         }
 
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
@@ -121,8 +124,8 @@ public class HttpRequestHandler {
 
             JSONArray responseList = new JSONArray();
             for (JmxRequest jmxReq : jmxRequests) {
-                if (backendManager.isDebug()) {
-                    context.debug("Request: " + jmxReq.toString());
+                if (jolokiaCtx.isDebug()) {
+                    jolokiaCtx.debug("Request: " + jmxReq.toString());
                 }
                 // Call handler and retrieve return value
                 JSONObject resp = executeRequest(jmxReq);
@@ -256,8 +259,8 @@ public class HttpRequestHandler {
         jsonObject.put("error",getExceptionMessage(pExp));
         jsonObject.put("error_type", pExp.getClass().getName());
         addErrorInfo(jsonObject, pExp, pJmxReq);
-        if (backendManager.isDebug()) {
-            backendManager.error("Error " + pErrorCode,pExp);
+        if (jolokiaCtx.isDebug()) {
+           jolokiaCtx.error("Error " + pErrorCode,pExp);
         }
         if (pJmxReq != null) {
             jsonObject.put("request",pJmxReq.toJSON());

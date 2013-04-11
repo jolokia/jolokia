@@ -113,7 +113,7 @@ public class ServerHandleTest {
 
     @Test
     public void registerAtMBeanServer() throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        Config config = new Config(null,null,null);
+        Config config = new Config(null,null);
         ObjectName oName = new ObjectName("jolokia:type=Config");
         ObjectInstance oInstance = new ObjectInstance(oName,Config.class.getName());
         MBeanServer server = EasyMock.createMock(MBeanServer.class);
@@ -128,7 +128,7 @@ public class ServerHandleTest {
 
     @Test
     public void registerAtMBeanServer2() throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        Config config = new Config(null,null,null);
+        Config config = new Config(null,null);
         ObjectInstance oInstance = new ObjectInstance("jolokia:type=dummy",Config.class.getName());
         MBeanServer server = EasyMock.createMock(MBeanServer.class);
         expect(server.registerMBean(config,null)).andReturn(oInstance);

@@ -38,7 +38,7 @@ public interface RequestDispatcher {
      * @param pJmxReq the request to dispatch
      * @return result object
      * @throws InstanceNotFoundException when a certain MBean could not be found
-     * @throws AttributeNotFoundException in case an attributes couldnt be resolved
+     * @throws AttributeNotFoundException in case an attributes couldn't be resolved
      * @throws ReflectionException
      * @throws MBeanException
      */

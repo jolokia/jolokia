@@ -28,12 +28,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
-import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
-import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.impl.JolokiaContextImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
@@ -46,9 +44,6 @@ import org.json.simple.JSONAware;
  */
 public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
-    // Backendmanager for doing request
-    private BackendManager backendManager;
-
     // The HttpRequestHandler
     private HttpRequestHandler requestHandler;
 
@@ -59,10 +54,13 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Configuration of this handler
-    private       Configuration    configuration;
+    private Configuration    configuration;
 
     // Formatted for formatting Date response headers
     private final SimpleDateFormat rfc1123Format;
+
+    // Global context
+    private JolokiaContextImpl jolokiaContext;
 
     /**
      * Create a new HttpHandler for processing HTTP request
@@ -85,9 +83,9 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        JolokiaContext ctx = new JolokiaContextImpl(configuration,this, createRestrictor(configuration));
-        backendManager = new BackendManager(ctx, pLazy);
-        requestHandler = new HttpRequestHandler(ctx, backendManager);
+        // TODO: CTX Init
+        jolokiaContext = new JolokiaContextImpl(configuration,this, createRestrictor(configuration));
+        requestHandler = new HttpRequestHandler(jolokiaContext, pLazy);
     }
 
     /**
@@ -96,7 +94,6 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     public void stop() {
         // TODO: CTX LC
         // backendManager.destroy();
-        backendManager = null;
         requestHandler = null;
     }
 
@@ -135,8 +132,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             } else {
                 throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
             }
-            if (backendManager.isDebug()) {
-                backendManager.info("Response: " + json);
+            if (jolokiaContext.isDebug()) {
+                jolokiaContext.info("Response: " + json);
             }
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(

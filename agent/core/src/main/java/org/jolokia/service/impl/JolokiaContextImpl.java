@@ -142,6 +142,10 @@ public class JolokiaContextImpl implements JolokiaContext {
         return configuration.getProcessingParameters(pRet);
     }
 
+    public boolean isDebug() {
+        return configuration.getAsBoolean(ConfigKey.DEBUG);
+    }
+
     public void debug(String message) {
         logHandler.debug(message);
     }

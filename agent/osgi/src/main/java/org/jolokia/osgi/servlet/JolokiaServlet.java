@@ -141,7 +141,7 @@ public class JolokiaServlet extends AgentServlet {
 
     private BundleContext getBundleContext(ServletConfig pServletConfig) {
         // If no bundle context was provided, we are looking up the servlet context
-        // for the bundlect context, which will be available usually in servlet extender
+        // for the bundle context, which will be available usually in a web extender
         if (bundleContextGiven == null) {
             // try to lookup bundle context from the servlet context
             ServletContext servletContext = pServletConfig.getServletContext();

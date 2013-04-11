@@ -38,4 +38,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     ServerHandle getServerHandle();
 
     ProcessingParameters getProcessingParameters(Map<String, String> pRet);
+
+    boolean isDebug();
 }

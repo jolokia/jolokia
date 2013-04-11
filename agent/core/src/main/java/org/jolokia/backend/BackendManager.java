@@ -43,7 +43,7 @@ import static org.jolokia.config.ConfigKey.*;
 public class BackendManager {
 
     // Overall Jolokia context
-    private final JolokiaContext ctx;
+    private final JolokiaContext jolokiaCtx;
 
     // Hard limits for conversion
     private JsonConvertOptions.Builder convertOptionsBuilder;
@@ -62,26 +62,16 @@ public class BackendManager {
     /**
      * Construct a new backend manager with the given configuration.
      *
-     * @param pCtx jolokia context for accessing internal services
-     */
-    public BackendManager(JolokiaContext pCtx) {
-        this(pCtx,false);
-    }
-
-    /**
-     * Construct a new backend manager with the given configuration.
-     *
-     * @param pCtx jolokia context for accessing internal services
+     * @param pJolokiaCtx jolokia context for accessing internal services
      * @param pLazy whether the initialisation should be done lazy
      */
-    public BackendManager(JolokiaContext pCtx, boolean pLazy) {
-
-        ctx = pCtx;
+    public BackendManager(JolokiaContext pJolokiaCtx, boolean pLazy) {
+        jolokiaCtx = pJolokiaCtx;
 
         if (pLazy) {
             initializer = new Initializer();
         } else {
-            init(pCtx);
+            init(pJolokiaCtx);
             initializer = null;
         }
     }
@@ -101,7 +91,7 @@ public class BackendManager {
             ReflectionException, MBeanException, IOException {
         lazyInitIfNeeded();
 
-        boolean debug = isDebug();
+        boolean debug = jolokiaCtx.isDebug();
 
         long time = 0;
         if (debug) {
@@ -124,8 +114,8 @@ public class BackendManager {
         }
 
         if (debug) {
-            debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
-            debug("Response: " + json);
+            jolokiaCtx.debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
+            jolokiaCtx.debug("Response: " + json);
         }
 
         return json;
@@ -142,7 +132,7 @@ public class BackendManager {
         JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
         try {
             JSONObject expObj =
-                    (JSONObject) ctx.getConverters().getToJsonConverter().convertToJson(pExp,null,opts);
+                    (JSONObject) jolokiaCtx.getConverters().getToJsonConverter().convertToJson(pExp,null,opts);
             return expObj;
 
         } catch (AttributeNotFoundException e) {
@@ -159,7 +149,7 @@ public class BackendManager {
      * @return true if remote access is allowed
      */
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
-        return ctx.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
+        return jolokiaCtx.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
     }
 
     /**
@@ -169,54 +159,7 @@ public class BackendManager {
      * @return true if icors access is allowed
      */
     public boolean isCorsAccessAllowed(String pOrigin) {
-        return ctx.isCorsAccessAllowed(pOrigin);
-    }
-
-    /**
-     * Log at info level
-     *
-     * @param msg to log
-     */
-    public void info(String msg) {
-        ctx.info(msg);
-        if (debugStore != null) {
-            debugStore.log(msg);
-        }
-    }
-
-    /**
-     * Log at debug level
-     *
-     * @param msg message to log
-     */
-    public void debug(String msg) {
-        ctx.debug(msg);
-        if (debugStore != null) {
-            debugStore.log(msg);
-        }
-    }
-
-    /**
-     * Log at error level.
-     *
-     * @param message message to log
-     * @param t ecxeption occured
-     */
-    public void error(String message, Throwable t) {
-        // Must not be final so that we can mock it in EasyMock for our tests
-        ctx.error(message, t);
-        if (debugStore != null) {
-            debugStore.log(message, t);
-        }
-    }
-
-    /**
-     * Whether debug is switched on
-     *
-     * @return true if debug is switched on
-     */
-    public boolean isDebug() {
-        return debugStore != null && debugStore.isDebug();
+        return jolokiaCtx.isCorsAccessAllowed(pOrigin);
     }
 
     // ==========================================================================================================
@@ -225,7 +168,7 @@ public class BackendManager {
     // as startup options
     private final class Initializer {
         void init() {
-            BackendManager.this.init(ctx);
+            BackendManager.this.init(jolokiaCtx);
         }
     }
 
@@ -273,7 +216,7 @@ public class BackendManager {
         Object retValue = null;
         boolean useValueWithPath = false;
         boolean found = false;
-        for (RequestDispatcher dispatcher : ctx.getRequestDispatchers()) {
+        for (RequestDispatcher dispatcher : jolokiaCtx.getRequestDispatchers()) {
             if (dispatcher.canHandle(pJmxReq)) {
                 retValue = dispatcher.dispatchRequest(pJmxReq);
                 useValueWithPath = dispatcher.useReturnValueWithPath(pJmxReq);
@@ -288,7 +231,7 @@ public class BackendManager {
         JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
-                ctx.getConverters().getToJsonConverter()
+                jolokiaCtx.getConverters().getToJsonConverter()
                           .convertToJson(retValue, useValueWithPath ? pJmxReq.getPathParts() : null, opts);
 
         JSONObject jsonObject = new JSONObject();
@@ -314,11 +257,11 @@ public class BackendManager {
         try {
             initMBeans(historyStore);
         } catch (NotCompliantMBeanException e) {
-            intError("Error registering config MBean: " + e, e);
+            internalError("Error registering config MBean: " + e, e);
         } catch (MBeanRegistrationException e) {
-            intError("Cannot register MBean: " + e, e);
+            internalError("Cannot register MBean: " + e, e);
         } catch (MalformedObjectNameException e) {
-            intError("Invalid name for config MBean: " + e, e);
+            internalError("Invalid name for config MBean: " + e, e);
         }
     }
 
@@ -330,30 +273,30 @@ public class BackendManager {
         String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
         try {
             Config config = new Config(pHistoryStore,oName);
-            ctx.getMBeanServerHandler().registerMBean(config,oName);
+            jolokiaCtx.getMBeanServerHandler().registerMBean(config,oName);
         } catch (InstanceAlreadyExistsException exp) {
             String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
             try {
                 // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
                 // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
                 // a random number, but this can already be performed with a qualifier
-                ctx.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
+                jolokiaCtx.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
                          "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
                 Config config = new Config(pHistoryStore,alternativeOName);
-                ctx.getMBeanServerHandler().registerMBean(config,alternativeOName);
+                jolokiaCtx.getMBeanServerHandler().registerMBean(config,alternativeOName);
             } catch (InstanceAlreadyExistsException e) {
-                ctx.error("Cannot even register fallback MBean with name " + alternativeOName + ". Should never happen. Really.",e);
+                jolokiaCtx.error("Cannot even register fallback MBean with name " + alternativeOName + ". Should never happen. Really.", e);
             }
         }
     }
 
     private String createObjectNameWithQualifier(String pOName) {
-        String qualifier = ctx.getConfig(ConfigKey.MBEAN_QUALIFIER);
+        String qualifier = jolokiaCtx.getConfig(ConfigKey.MBEAN_QUALIFIER);
         return pOName + (qualifier != null ? "," + qualifier : "");
     }
     // Final private error log for use in the constructor above
-    private void intError(String message,Throwable t) {
-        ctx.error(message, t);
+    private void internalError(String message, Throwable t) {
+        jolokiaCtx.error(message, t);
         debugStore.log(message, t);
     }
 }

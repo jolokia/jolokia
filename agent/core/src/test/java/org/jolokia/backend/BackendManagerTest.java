@@ -108,8 +108,6 @@ public class BackendManagerTest implements LogHandler {
         assertEquals(lhandler.debug,1);
         backendManager.error("test",new Exception());
         assertEquals(lhandler.error,1);
-        backendManager.info("test");
-        assertEquals(lhandler.info,1);
         backendManager.destroy();
     }
 

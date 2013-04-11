@@ -7,7 +7,6 @@ import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.*;
 import org.jolokia.service.JolokiaContext;
@@ -51,9 +50,6 @@ public class AgentServlet extends HttpServlet {
 
     // POST- and GET- HttpRequestHandler
     private ServletRequestHandler httpGetHandler, httpPostHandler;
-
-    // Backend dispatcher
-    private BackendManager backendManager;
 
     // Used for logging
     private LogHandler logHandler;
@@ -148,8 +144,7 @@ public class AgentServlet extends HttpServlet {
         configMimeType = config.get(ConfigKey.MIME_TYPE);
         // TODO: CTX init
         JolokiaContext ctx = new JolokiaContextImpl(config,logHandler,restrictor);
-        backendManager = new BackendManager(ctx);
-        requestHandler = new HttpRequestHandler(ctx,backendManager);
+        requestHandler = new HttpRequestHandler(ctx, false);
     }
 
 

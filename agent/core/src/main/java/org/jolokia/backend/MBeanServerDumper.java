@@ -1,5 +1,3 @@
-package org.jolokia.backend;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,8 @@ package org.jolokia.backend;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.jolokia.backend;
 
 import java.lang.management.ManagementFactory;
 import java.util.Set;
