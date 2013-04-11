@@ -168,7 +168,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertNotNull(longVal);
 
             try {
-            resp.getValue("Pinola bleibt");
+                resp.getValue("Pinola bleibt");
                 fail();
             } catch (IllegalArgumentException exp) {
                 assertTrue(exp.getMessage().contains("Pinola"));
@@ -180,6 +180,57 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             } catch (IllegalArgumentException exp) {
                 assertTrue(exp.getMessage().contains("null"));
             }
+
+            try {
+                req.getAttribute();
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("than one"));
+            }
+        }
+    }
+
+    @Test
+    public void allAttributes() throws MalformedObjectNameException, J4pException {
+        for (J4pReadRequest req : readRequests(itSetup.getAttributeMBean())) {
+            J4pReadResponse resp = j4pClient.execute(req);
+            assertFalse(req.hasSingleAttribute());
+            assertTrue(req.hasAllAttributes());
+            assertEquals(0,req.getAttributes().size());
+            Map respVal = resp.getValue();
+            assertTrue(respVal.containsKey("LongSeconds"));
+            assertTrue(respVal.containsKey("SmallMinutes"));
+            assertTrue(respVal.size() > 20);
+
+            Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
+            Set<String> attrSet = new HashSet<String>(attrs);
+            assertTrue(attrSet.contains("LongSeconds"));
+            assertTrue(attrSet.contains("SmallMinutes"));
+
+            try {
+                resp.getAttributes(new ObjectName("blub:type=bla"));
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains(itSetup.getAttributeMBean()));
+            }
+
+            Set<String> allAttrs = new HashSet<String>(resp.getAttributes());
+            assertTrue(allAttrs.size() > 20);
+            assertTrue(allAttrs.contains("Name"));
+            assertTrue(allAttrs.contains("Bytes"));
+
+            Long val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
+            assertNotNull(val);
+
+            try {
+                resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"Aufsteiger");
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("Aufsteiger"));
+            }
+
+            Long bytes = resp.getValue("Bytes");
+            assertNotNull(bytes);
 
             try {
                 req.getAttribute();

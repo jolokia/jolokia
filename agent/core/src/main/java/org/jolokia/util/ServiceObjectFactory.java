@@ -1,5 +1,3 @@
-package org.jolokia.util;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,8 @@ package org.jolokia.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.jolokia.util;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
