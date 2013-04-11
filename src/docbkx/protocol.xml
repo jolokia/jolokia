@@ -809,6 +809,7 @@
               <listitem>char</listitem>
               <listitem>Boolean / boolean</listitem>
               <listitem>Date</listitem>
+              <listitem>URL</listitem>
               <listitem>Enums (whose type is accessible to the agent,
               see below)</listitem>
             </itemizedlist>

@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.1.2-SNAPSHOT" description="Release 1.1.2-SNAPSHOT">
+      <action dev="jpamador" type="add">
+        Added converters for java.net.URL
+      </action>
+    </release>
     <release version="1.1.1" description="Release 1.1.1" date="2013-03-26">
       <action dev="roland" type="fix" issue="71">
         "Expires" header contains now a valid date valu, one hour less the current time.
