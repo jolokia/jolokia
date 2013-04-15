@@ -26,7 +26,7 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.backend.Config;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
@@ -88,14 +88,14 @@ public class ServerHandleTest {
 
     @Test
     public void detectorOptions() {
-        Configuration opts = new Configuration(ConfigKey.DETECTOR_OPTIONS, "{\"dukeNukem\" : {\"doIt\" : true }}");
+        ConfigurationImpl opts = new ConfigurationImpl(ConfigKey.DETECTOR_OPTIONS, "{\"dukeNukem\" : {\"doIt\" : true }}");
         JSONObject config = serverHandle.getDetectorOptions(opts,null);
         assertTrue((Boolean) config.get("doIt"));
     }
 
     @Test
     public void detectorOptionsEmpty() {
-        JSONObject config = serverHandle.getDetectorOptions(new Configuration(),null);
+        JSONObject config = serverHandle.getDetectorOptions(new ConfigurationImpl(),null);
         assertNull(config);
     }
 
@@ -105,7 +105,7 @@ public class ServerHandleTest {
         handler.error(matches("^.*parse options.*"),isA(Exception.class));
         replay(handler);
 
-        Configuration opts = new Configuration(ConfigKey.DETECTOR_OPTIONS,"blub: bla");
+        ConfigurationImpl opts = new ConfigurationImpl(ConfigKey.DETECTOR_OPTIONS,"blub: bla");
         JSONObject config = serverHandle.getDetectorOptions(opts,handler);
         assertNull(config);
         verify(handler);

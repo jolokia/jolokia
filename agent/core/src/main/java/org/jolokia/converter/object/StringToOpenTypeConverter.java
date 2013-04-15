@@ -83,6 +83,4 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
     boolean canConvert(OpenType pType) {
         return true;
     }
-
-
 }

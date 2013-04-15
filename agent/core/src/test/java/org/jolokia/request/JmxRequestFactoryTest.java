@@ -37,7 +37,7 @@ public class JmxRequestFactoryTest {
 
     @BeforeTest
     public void setup() {
-        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
+        procParams = new ConfigurationImpl().getProcessingParameters(new HashMap<String, String>());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class JmxRequestFactoryTest {
                 "config",config);
         Map param = new HashMap();;
         param.put("maxObjects","100");
-        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,new Configuration().getProcessingParameters(param));
+        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,new ConfigurationImpl().getProcessingParameters(param));
         assertEquals(req.getAttributeName(),"HeapMemoryUsage");
         assertEquals(req.getParameter(ConfigKey.MAX_DEPTH),"10");
         assertEquals(req.getParameterAsInt(ConfigKey.MAX_OBJECTS), 100);
@@ -175,7 +175,7 @@ public class JmxRequestFactoryTest {
     public void simpleGetWithQueryPath() {
         Map<String,String> params = new HashMap<String, String>();
         params.put("p","list/java.lang/type=Memory");
-        JmxListRequest req = JmxRequestFactory.createGetRequest(null,new Configuration().getProcessingParameters(params));
+        JmxListRequest req = JmxRequestFactory.createGetRequest(null,new ConfigurationImpl().getProcessingParameters(params));
         assert req.getHttpMethod() == HttpMethod.GET : "GET by default";
         assert req.getPath().equals("java.lang/type=Memory") : "Path extracted";
     }

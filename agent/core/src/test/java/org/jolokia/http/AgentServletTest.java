@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.testng.annotations.*;
@@ -94,12 +95,12 @@ public class AgentServletTest {
         servlet.init(config);
         servlet.destroy();
 
-        org.jolokia.config.Configuration cfg = servlet.initConfig(config);
-        assertEquals(cfg.get(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
-        assertEquals(cfg.get(ConfigKey.MAX_DEPTH), "10");
-        assertEquals(cfg.get(ConfigKey.MAX_OBJECTS), "20");
-        assertNull(cfg.get(ConfigKey.CALLBACK));
-        assertNull(cfg.get(ConfigKey.DETECTOR_OPTIONS));
+        ConfigurationImpl cfg = servlet.initConfig(config);
+        assertEquals(cfg.getConfig(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
+        assertEquals(cfg.getConfig(ConfigKey.MAX_DEPTH), "10");
+        assertEquals(cfg.getConfig(ConfigKey.MAX_OBJECTS), "20");
+        assertNull(cfg.getConfig(ConfigKey.CALLBACK));
+        assertNull(cfg.getConfig(ConfigKey.DETECTOR_OPTIONS));
 
     }
 

@@ -24,7 +24,7 @@ import org.easymock.EasyMock;
 import org.jolokia.backend.MBeanServerHandler;
 import org.jolokia.backend.MBeanServerHandlerMBean;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.util.LogHandler;
 import org.testng.Assert;
 import org.testng.annotations.*;
@@ -42,7 +42,7 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
 
     @BeforeTest
     public void setup() {
-        Configuration config = new Configuration(ConfigKey.DEBUG, "true");
+        ConfigurationImpl config = new ConfigurationImpl(ConfigKey.DEBUG, "true");
         handler = new MBeanServerHandler(config, this);
     }
 

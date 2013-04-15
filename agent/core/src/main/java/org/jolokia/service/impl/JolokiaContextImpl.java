@@ -13,7 +13,6 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.JolokiaService;
 import org.jolokia.util.*;
 
 /**
@@ -36,7 +35,7 @@ public class JolokiaContextImpl implements JolokiaContext {
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
 
-    public JolokiaContextImpl(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
+    public JolokiaContextImpl(ConfigurationImpl pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
         configuration = pConfig;
         logHandler = pLogHandler;
 
@@ -53,7 +52,7 @@ public class JolokiaContextImpl implements JolokiaContext {
         // Create and remember request dispatchers
         // TODO: Not fully intialized, will switch to lookup anyway
         localDispatcher = new LocalRequestDispatcher(this);
-        requestDispatchers = createRequestDispatchers(pConfig.get(ConfigKey.DISPATCHER_CLASSES),
+        requestDispatchers = createRequestDispatchers(pConfig.getConfig(ConfigKey.DISPATCHER_CLASSES),
                                                       this);
         requestDispatchers.add(localDispatcher);
 
@@ -98,28 +97,17 @@ public class JolokiaContextImpl implements JolokiaContext {
         }
     }
 
-    public <T extends JolokiaService> List<T> getServices(Class<T> pServiceType) {
-        return null;
-    }
-
-    public <T extends JolokiaService> T getSingleService(Class<T> pServiceType) {
-        return null;
-    }
-
-    public Configuration getConfiguration() {
-        return null;
-    }
 
     public String getConfig(ConfigKey pOption) {
-        return configuration.get(pOption);
+        return configuration.getConfig(pOption);
     }
 
     public int getConfigAsInt(ConfigKey pOption) {
-        return configuration.getAsInt(pOption);
+        return configuration.getConfigAsInt(pOption);
     }
 
     public boolean getConfigAsBoolean(ConfigKey pOption) {
-        return configuration.getAsBoolean(pOption);
+        return configuration.getConfigAsBoolean(pOption);
     }
 
     public List<RequestDispatcher> getRequestDispatchers() {
@@ -143,7 +131,7 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     public boolean isDebug() {
-        return configuration.getAsBoolean(ConfigKey.DEBUG);
+        return getConfigAsBoolean(ConfigKey.DEBUG);
     }
 
     public void debug(String message) {

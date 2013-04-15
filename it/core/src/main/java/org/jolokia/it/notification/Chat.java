@@ -34,9 +34,9 @@ public class Chat extends NotificationBroadcasterSupport implements ChatMBean  {
 
     public Chat() throws MalformedObjectNameException {
         super(new MBeanNotificationInfo(
-               new String[] {NOTIF_TYPE},
-               Notification.class.getName(),
-               "Chat notification"
+                new String[] {NOTIF_TYPE},
+                Notification.class.getName(),
+                "Chat notification"
         ));
         source = new ObjectName("jolokia.it:type=Chat");
     }

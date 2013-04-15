@@ -114,10 +114,9 @@ public final class ObjectToJsonConverter {
     /**
      * Set an inner value of a complex object. A given path must point to the attribute/index to set within the outer object.
      *
-     *
      * @param pOuterObject the object to dive in
      * @param pNewValue the value to set
-     * @param pPathParts the path within the outer object. This object will be modified and be a modifiable list.
+     * @param pPathParts the path within the outer object. This object will be modified and must be a modifiable list.
      * @return the old value
      *
      * @throws AttributeNotFoundException

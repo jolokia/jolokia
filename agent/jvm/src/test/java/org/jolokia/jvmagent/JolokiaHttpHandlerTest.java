@@ -25,7 +25,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -133,7 +133,7 @@ public class JolokiaHttpHandlerTest {
     @Test
     public void customRestrictor() throws URISyntaxException, IOException, ParseException {
         for (String[] params : new String[][] {  { "classpath:/access-restrictor.xml","not allowed"},{"file:///not-existing.xml","No access"}}) {
-            Configuration config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
+            ConfigurationImpl config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
             JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
             HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
             // Simple GET method
@@ -220,7 +220,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     private static boolean debugToggle = false;
-    public Configuration getConfig(Object ... extra) {
+    public ConfigurationImpl getConfig(Object ... extra) {
         ArrayList list = new ArrayList();
         list.add(ConfigKey.AGENT_CONTEXT);
         list.add("/jolokia");
@@ -229,7 +229,7 @@ public class JolokiaHttpHandlerTest {
         for (Object e : extra) {
             list.add(e);
         }
-        Configuration config = new Configuration(list.toArray());
+        ConfigurationImpl config = new ConfigurationImpl(list.toArray());
         debugToggle = !debugToggle;
         return config;
     }

@@ -135,13 +135,13 @@ public class AgentServlet extends HttpServlet {
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
 
-        Configuration config = initConfig(pServletConfig);
+        ConfigurationImpl config = initConfig(pServletConfig);
         if (restrictor == null) {
-            restrictor = createRestrictor(config.get(ConfigKey.POLICY_LOCATION));
+            restrictor = createRestrictor(config.getConfig(ConfigKey.POLICY_LOCATION));
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
-        configMimeType = config.get(ConfigKey.MIME_TYPE);
+        configMimeType = config.getConfig(ConfigKey.MIME_TYPE);
         // TODO: CTX init
         JolokiaContext ctx = new JolokiaContextImpl(config,logHandler,restrictor);
         requestHandler = new HttpRequestHandler(ctx, false);
@@ -318,13 +318,13 @@ public class AgentServlet extends HttpServlet {
 
     // Examines servlet config and servlet context for configuration parameters.
     // Configuration from the servlet context overrides servlet parameters defined in web.xml
-    Configuration initConfig(ServletConfig pConfig) {
-        Configuration config = new Configuration();
+    ConfigurationImpl initConfig(ServletConfig pConfig) {
+        ConfigurationImpl config = new ConfigurationImpl();
         // From ServletContext ....
         config.updateGlobalConfiguration(new ServletConfigFacade(pConfig));
         // ... and ServletConfig
         config.updateGlobalConfiguration(new ServletContextFacade(getServletContext()));
-        if (config.get(ConfigKey.JOLOKIA_ID) == null) {
+        if (config.getConfig(ConfigKey.JOLOKIA_ID) == null) {
             config.updateGlobalConfiguration(
                     Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
                                              Integer.toHexString(hashCode()) + "-servlet"));

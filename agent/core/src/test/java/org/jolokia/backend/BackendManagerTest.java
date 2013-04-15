@@ -22,7 +22,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxRequest;
@@ -42,15 +42,15 @@ import static org.testng.Assert.*;
  */
 public class BackendManagerTest implements LogHandler {
 
-    Configuration config;
+    ConfigurationImpl config;
 
     @BeforeTest
     public void setup() {
-        config = new Configuration();
+        config = new ConfigurationImpl();
     }
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DEBUG,"true");
+        config = new ConfigurationImpl(ConfigKey.DEBUG,"true");
 
         BackendManager backendManager = new BackendManager(config, this);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
@@ -76,7 +76,7 @@ public class BackendManagerTest implements LogHandler {
 
     @Test
     public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
+        config = new ConfigurationImpl(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
         BackendManager backendManager = new BackendManager(config, this);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         backendManager.handleRequest(req);
@@ -86,13 +86,13 @@ public class BackendManagerTest implements LogHandler {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*invalid constructor.*")
     public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
+        config = new ConfigurationImpl(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
         BackendManager backendManager = new BackendManager(config,this);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
     public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
+        config = new ConfigurationImpl(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
         BackendManager backendManager = new BackendManager(config,this);
     }
 
@@ -106,14 +106,14 @@ public class BackendManagerTest implements LogHandler {
 
         backendManager.debug("test");
         assertEquals(lhandler.debug,1);
-        backendManager.error("test",new Exception());
+        backendManager.error("test", new Exception());
         assertEquals(lhandler.error,1);
         backendManager.destroy();
     }
 
     @Test
     public void defaultConfig() {
-        config = new Configuration(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
+        config = new ConfigurationImpl(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
         BackendManager backendManager = new BackendManager(config,this);
         backendManager.destroy();
     }

@@ -57,7 +57,7 @@ public class JmxRequestBuilder {
 
     public <R extends JmxRequest> R build() throws MalformedObjectNameException {
         RequestType type = RequestType.getTypeByName((String) request.get("type"));
-        ProcessingParameters params = new Configuration().getProcessingParameters(procConfig);
+        ProcessingParameters params = new ConfigurationImpl().getProcessingParameters(procConfig);
         switch (type) {
             case READ: return (R) new JmxReadRequest(request,params);
             case WRITE: return (R) new JmxWriteRequest(request,params);

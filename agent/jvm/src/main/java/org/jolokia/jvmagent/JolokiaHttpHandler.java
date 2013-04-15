@@ -29,11 +29,8 @@ import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
 import org.jolokia.http.HttpRequestHandler;
-import org.jolokia.restrictor.*;
-import org.jolokia.service.impl.JolokiaContextImpl;
-import org.jolokia.util.LogHandler;
+import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONAware;
 
 /**
@@ -42,36 +39,33 @@ import org.json.simple.JSONAware;
  * @author roland
  * @since Mar 3, 2010
  */
-public class JolokiaHttpHandler implements HttpHandler, LogHandler {
+public class JolokiaHttpHandler implements HttpHandler {
 
     // The HttpRequestHandler
     private HttpRequestHandler requestHandler;
 
     // Context of this request
-    private String context;
+    private String contextPath;
 
     // Content type matching
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
-
-    // Configuration of this handler
-    private Configuration    configuration;
 
     // Formatted for formatting Date response headers
     private final SimpleDateFormat rfc1123Format;
 
     // Global context
-    private JolokiaContextImpl jolokiaContext;
+    private JolokiaContext jolokiaContext;
 
     /**
      * Create a new HttpHandler for processing HTTP request
      *
-     * @param pConfig jolokia specific config tuning the processing behaviour
+     * @param pJolokiaContext jolokia context
      */
-    public JolokiaHttpHandler(Configuration pConfig) {
-        configuration = pConfig;
-        context = pConfig.get(ConfigKey.AGENT_CONTEXT);
-        if (!context.endsWith("/")) {
-            context += "/";
+    public JolokiaHttpHandler(JolokiaContext pJolokiaContext) {
+        jolokiaContext = pJolokiaContext;
+        contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
+        if (!contextPath.endsWith("/")) {
+            contextPath += "/";
         }
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
@@ -83,8 +77,6 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        // TODO: CTX Init
-        jolokiaContext = new JolokiaContextImpl(configuration,this, createRestrictor(configuration));
         requestHandler = new HttpRequestHandler(jolokiaContext, pLazy);
     }
 
@@ -113,7 +105,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
         JSONAware json = null;
         URI uri = pExchange.getRequestURI();
-        ParsedUri parsedUri = new ParsedUri(uri,context);
+        ParsedUri parsedUri = new ParsedUri(uri, contextPath);
         try {
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
@@ -140,25 +132,6 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
         } finally {
             sendResponse(pExchange,parsedUri,json);
-        }
-    }
-
-
-    private Restrictor createRestrictor(Configuration pConfig) {
-        String location = pConfig.get(ConfigKey.POLICY_LOCATION);
-        try {
-            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
-            if (ret != null) {
-                info("Using access restrictor " + location);
-                return ret;
-            } else {
-                info("No access restrictor found, access to all MBean is allowed");
-                return new AllowAllRestrictor();
-            }
-        } catch (IOException e) {
-            error("Error while accessing access restrictor at " + location +
-                          ". Denying all access to MBeans for security reasons. Exception: " + e,e);
-            return new DenyAllRestrictor();
         }
     }
 
@@ -251,26 +224,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
             if (mimeType != null) {
                 return mimeType;
             }
-            mimeType = configuration.get(ConfigKey.MIME_TYPE);
+            mimeType = jolokiaContext.getConfig(ConfigKey.MIME_TYPE);
             return mimeType != null ? mimeType : ConfigKey.MIME_TYPE.getDefaultValue();
         }
-    }
-
-    @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public final void debug(String message) {
-        System.err.println("DEBUG: " + message);
-    }
-
-    @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public final void info(String message) {
-        System.err.println("INFO: " + message);
-    }
-
-    @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public final void error(String message, Throwable t) {
-        System.err.println("ERROR: " + message);
     }
 }

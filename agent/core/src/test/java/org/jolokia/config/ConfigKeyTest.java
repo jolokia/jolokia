@@ -35,10 +35,10 @@ public class ConfigKeyTest {
         map.put(ConfigKey.MAX_OBJECTS.getKeyValue(),"4711");
         map.put(ConfigKey.CANONICAL_NAMING.getKeyValue(),"true");
         map.put("blub","bla");
-        Configuration config = new Configuration();
+        ConfigurationImpl config = new ConfigurationImpl();
         config.updateGlobalConfiguration(map);
         assertEquals(config.size(),2);
-        assertEquals(config.get(ConfigKey.MAX_OBJECTS),"4711");
-        assertEquals(config.get(ConfigKey.CANONICAL_NAMING),"true");
+        assertEquals(config.getConfig(ConfigKey.MAX_OBJECTS),"4711");
+        assertEquals(config.getConfig(ConfigKey.CANONICAL_NAMING),"true");
     }
 }

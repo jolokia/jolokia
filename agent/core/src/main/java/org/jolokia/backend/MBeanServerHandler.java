@@ -9,7 +9,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
@@ -63,9 +63,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      *
      * @param pLogHandler log handler used for logging purposes
      */
-    public MBeanServerHandler(Configuration pConfig, LogHandler pLogHandler) {
+    public MBeanServerHandler(ConfigurationImpl pConfig, LogHandler pLogHandler) {
         // A qualifier, if given, is used to add the MBean Name of this MBean
-        qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
+        qualifier = pConfig.getConfig(ConfigKey.MBEAN_QUALIFIER);
         List<ServerDetector> detectors = lookupDetectors();
         mBeanServerManager = new MBeanServerExecutorLocal(detectors);
         initServerHandle(pConfig, pLogHandler, detectors);
@@ -78,7 +78,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      * @param pLogHandler used for putting out diagnostic messags
      * @param pDetectors all detectors-default known
      */
-    private void initServerHandle(Configuration pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
+    private void initServerHandle(ConfigurationImpl pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
         serverHandle = detectServers(pDetectors, pLogHandler);
         serverHandle.postDetect(mBeanServerManager, pConfig, pLogHandler);
         serverHandle.setJolokiaId(extractJolokiaId(pConfig));
@@ -90,8 +90,8 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      * @param pConfig configuration given
      * @return the unique Jolokia ID
      */
-    private String extractJolokiaId(Configuration pConfig) {
-        String id = pConfig.get(ConfigKey.JOLOKIA_ID);
+    private String extractJolokiaId(ConfigurationImpl pConfig) {
+        String id = pConfig.getConfig(ConfigKey.JOLOKIA_ID);
         if (id != null) {
             return id;
         }

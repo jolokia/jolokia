@@ -22,7 +22,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.LogHandler;
@@ -160,7 +160,7 @@ public class ServerHandle {
      * @param pConfig agent configuration
      * @param pLoghandler logger to use for logging any error.
      */
-    public void postDetect(MBeanServerExecutor pServerManager, Configuration pConfig, LogHandler pLoghandler) {
+    public void postDetect(MBeanServerExecutor pServerManager, ConfigurationImpl pConfig, LogHandler pLoghandler) {
         // Do nothing
     }
 
@@ -236,8 +236,8 @@ public class ServerHandle {
      * @param pLogHandler a log handler for putting out error messages
      * @return the detector specific configuration
      */
-    protected JSONObject getDetectorOptions(Configuration pConfig, LogHandler pLogHandler) {
-        String optionString = pConfig.get(ConfigKey.DETECTOR_OPTIONS);
+    protected JSONObject getDetectorOptions(ConfigurationImpl pConfig, LogHandler pLogHandler) {
+        String optionString = pConfig.getConfig(ConfigKey.DETECTOR_OPTIONS);
         if (optionString != null) {
             try {
                 JSONObject opts = (JSONObject) new JSONParser().parse(optionString);

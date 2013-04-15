@@ -22,7 +22,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.util.LogHandler;
 import org.testng.annotations.Test;
 
@@ -144,7 +144,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(null).anyTimes();
         replay(mockServer);
-        Configuration config = new Configuration(ConfigKey.DETECTOR_OPTIONS,"{\"glassfish\": {\"bootAmx\" : false}}");
+        ConfigurationImpl config = new ConfigurationImpl(ConfigKey.DETECTOR_OPTIONS,"{\"glassfish\": {\"bootAmx\" : false}}");
         handle.postDetect(getMBeanServerManager(mockServer), config, null);
         verify(mockServer);
     }
@@ -157,7 +157,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         expect(mockServer.isRegistered(bootAmxName)).andStubReturn(true);
         expect(mockServer.invoke(bootAmxName,"bootAMX",null,null)).andReturn(null);
         replay(mockServer);
-        Configuration config = new Configuration(ConfigKey.DETECTOR_OPTIONS,opts);
+        ConfigurationImpl config = new ConfigurationImpl(ConfigKey.DETECTOR_OPTIONS,opts);
         MBeanServerExecutor servers = getMBeanServerManager(mockServer);
         handle.postDetect(servers, config, null);
         handle.preDispatch(servers,null);
@@ -185,7 +185,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         log.error(matches(regexp),isA(exp.getClass()));
         replay(mockServer,log);
         MBeanServerExecutor servers = getMBeanServerManager(mockServer);
-        handle.postDetect(servers,new Configuration(),log);
+        handle.postDetect(servers,new ConfigurationImpl(),log);
         handle.preDispatch(servers,null);
         verify(mockServer);
     }

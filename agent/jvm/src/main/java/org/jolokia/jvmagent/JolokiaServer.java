@@ -26,6 +26,12 @@ import java.util.concurrent.*;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.ConfigurationImpl;
+import org.jolokia.restrictor.*;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.impl.JolokiaContextImpl;
+import org.jolokia.util.LogHandler;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -147,7 +153,11 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = config.getContextPath();
-        jolokiaHttpHandler = new JolokiaHttpHandler(config.getJolokiaConfig());
+        // TODO: CTX Init
+        LogHandler log = new SimpleLogHandler();
+        JolokiaContext jolokiaContext =
+                new JolokiaContextImpl(config.getJolokiaConfig(),log, createRestrictor(config,log));
+        jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
         HttpContext context = httpServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Special customizations
@@ -294,5 +304,46 @@ public class JolokiaServer {
             }
         }
     }
+
+    private Restrictor createRestrictor(JolokiaServerConfig pConfig, LogHandler pLog) {
+        ConfigurationImpl config = pConfig.getJolokiaConfig();
+        String location = config.getConfig(ConfigKey.POLICY_LOCATION);
+        try {
+            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
+            if (ret != null) {
+                pLog.info("Using access restrictor " + location);
+                return ret;
+            } else {
+                pLog.info("No access restrictor found, access to all MBean is allowed");
+                return new AllowAllRestrictor();
+            }
+        } catch (IOException e) {
+            pLog.error("Error while accessing access restrictor at " + location +
+                       ". Denying all access to MBeans for security reasons. Exception: " + e, e);
+            return new DenyAllRestrictor();
+        }
+    }
+
+
+    private class SimpleLogHandler implements LogHandler {
+        @Override
+        @SuppressWarnings("PMD.SystemPrintln")
+        public final void debug(String message) {
+            System.err.println("DEBUG: " + message);
+        }
+
+        @Override
+        @SuppressWarnings("PMD.SystemPrintln")
+        public final void info(String message) {
+            System.err.println("INFO: " + message);
+        }
+
+        @Override
+        @SuppressWarnings("PMD.SystemPrintln")
+        public final void error(String message, Throwable t) {
+            System.err.println("ERROR: " + message);
+        }
+    }
+
 }
 

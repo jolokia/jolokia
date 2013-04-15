@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -46,7 +46,7 @@ public class Jsr160RequestDispatcherTest {
     @BeforeTest
     private void setup() {
         dispatcher = createDispatcherPointingToLocalMBeanServer();
-        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
+        procParams = new ConfigurationImpl().getProcessingParameters(new HashMap<String, String>());
     }
 
     @AfterTest

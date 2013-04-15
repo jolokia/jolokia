@@ -23,7 +23,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 
 /**
  * Configuration required for the JolokiaServer
@@ -35,7 +35,7 @@ public class JolokiaServerConfig {
 
     // Jolokia configuration is used for general jolokia config, the untyped configuration
     // is used for this agent only
-    private Configuration jolokiaConfig;
+    private ConfigurationImpl jolokiaConfig;
 
     private String      protocol;
     private int         port;
@@ -80,7 +80,7 @@ public class JolokiaServerConfig {
         prepareDetectorOptions(finalCfg);
         addJolokiaId(finalCfg);
 
-        jolokiaConfig = new Configuration();
+        jolokiaConfig = new ConfigurationImpl();
         jolokiaConfig.updateGlobalConfiguration(finalCfg);
         initConfigAndValidate(finalCfg);
     }
@@ -103,7 +103,7 @@ public class JolokiaServerConfig {
      * Get the Jolokia runtime configuration
      * @return jolokia configuration
      */
-    public Configuration getJolokiaConfig() {
+    public ConfigurationImpl getJolokiaConfig() {
         return jolokiaConfig;
     }
 
@@ -140,7 +140,7 @@ public class JolokiaServerConfig {
      * @return user
      */
     public String getUser() {
-        return jolokiaConfig.get(ConfigKey.USER);
+        return jolokiaConfig.getConfig(ConfigKey.USER);
     }
 
     /**
@@ -149,7 +149,7 @@ public class JolokiaServerConfig {
      * @return password
      */
     public String getPassword() {
-        return jolokiaConfig.get(ConfigKey.PASSWORD);
+        return jolokiaConfig.getConfig(ConfigKey.PASSWORD);
     }
 
     /**
@@ -239,7 +239,7 @@ public class JolokiaServerConfig {
     }
 
     private void initContext() {
-        context = jolokiaConfig.get(ConfigKey.AGENT_CONTEXT);
+        context = jolokiaConfig.getConfig(ConfigKey.AGENT_CONTEXT);
         if (context == null) {
             context = ConfigKey.AGENT_CONTEXT.getDefaultValue();
         }

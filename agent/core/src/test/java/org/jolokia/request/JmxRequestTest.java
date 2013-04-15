@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
@@ -42,7 +42,7 @@ public class JmxRequestTest {
 
     @BeforeTest
     public void setup() {
-        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
+        procParams = new ConfigurationImpl().getProcessingParameters(new HashMap<String, String>());
     }
     @Test
     public void testPathSplitting() throws MalformedObjectNameException {
