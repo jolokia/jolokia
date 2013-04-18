@@ -136,7 +136,7 @@ public class JolokiaSample {
       <subsection name="Roadmap">
         <p>
           In fact, serving non-java environments is one of the most
-          outstanding strength of Jolokia. The focus is on the future
+          outstanding strengths of Jolokia. The focus for the future
           evolution of Jolokia is to provide more client
           libraries. Top on the list are Groovy and Scala. If you like
           to add a client library in your favourite language, go

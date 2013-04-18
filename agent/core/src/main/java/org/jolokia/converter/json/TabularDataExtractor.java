@@ -3,7 +3,7 @@ package org.jolokia.converter.json;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import javax.management.AttributeNotFoundException;
+import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.converter.object.StringToObjectConverter;
@@ -173,19 +173,37 @@ public class TabularDataExtractor implements Extractor {
         Object keys[] = new Object[indexNames.size()];
         CompositeType rowType = type.getRowType();
         for (int i = 0; i < indexNames.size(); i++) {
-            validateRowType(rowType, indexNames.get(i));
-            keys[i] = pPathStack.pop();
+            keys[i] = getKey(rowType, indexNames.get(i), pPathStack.pop());
         }
         return pTd.get(keys);
     }
 
-    // Maybe even convert to proper types. For now it is assumed,
-    // that every key is of type string and an exception is thrown
-    // if this is not the case.
-    private void validateRowType(CompositeType rowType, String key) {
+    // The key is tried to convert to the proper type. These checks are
+    // a bit redundant, since this sort of conversion is alread offered
+    // in StringToOpenTypeConverter. Unfortunately, this converter is not
+    // easily available here. For 2.0 the modularity aspects are refactored
+    // from the ground up, so I can live with the solution here.
+    // See also #97 for details.
+    private Object getKey(CompositeType rowType, String key, String value)  {
         OpenType keyType = rowType.getType(key);
-        if (SimpleType.STRING != keyType) {
-            throw new IllegalArgumentException("All keys must be a string type for accessing TabularData via a path. " +
+        if (SimpleType.STRING == keyType) {
+            return value;
+        } else if (SimpleType.INTEGER == keyType) {
+            return Integer.parseInt(value);
+        } else if (SimpleType.LONG == keyType) {
+            return Long.parseLong(value);
+        } else if (SimpleType.SHORT == keyType) {
+            return Short.parseShort(value);
+        } else if (SimpleType.BYTE == keyType) {
+            return Byte.parseByte(value);
+        } else if (SimpleType.OBJECTNAME == keyType) {
+            try {
+                return new ObjectName(value);
+            } catch (MalformedObjectNameException e) {
+                throw new IllegalArgumentException("Can not convert " + value + " to an ObjectName",e);
+            }
+        } else {
+            throw new IllegalArgumentException("All keys must be a string, integer, long, short, byte or ObjectName type for accessing TabularData via a path. " +
                                                "This is not the case for '"
                                                + key + "' which is of type " + keyType);
         }
