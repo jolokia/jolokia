@@ -44,7 +44,7 @@
         implemented in Java, queries the MBeans via JSR-160 and prints
         out the results to standard output for a single check, opening
         a new connection for each request. For large Nagios
-        installation which monitors hundreds of server for several
+        installations which monitors hundreds of servers for several
         parameters this poses a performance problem. With Jolokia, it
         has been confirmed that it scales up very well in a Nagios
         environment with 500 servers monitoring about 10 parameters on

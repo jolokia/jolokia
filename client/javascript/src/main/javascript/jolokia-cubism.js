@@ -31,14 +31,22 @@
                 j4p = createAgent(url, opts),
                 step = 5e3;                    // 5 seconds by default
 
-            // Connecto to start and stop events
-            context.on("start",function() {
-                j4p.start();
-            });
+            try
+            {
+                // Connect to start and stop events
+                context.on("start",function() {
+                    j4p.start();
+                });
 
-            context.on("stop",function() {
-                j4p.stop();
-            });
+                context.on("stop",function() {
+                    j4p.stop();
+                });
+            }
+            catch(err)
+            {
+                // Still waiting for pull request https://github.com/square/cubism/pull/19 for supporting
+                // "start" and "stop" events
+            }
 
             /**
              * Factory method for create a metric objects which has various variants.
@@ -47,7 +55,7 @@
              * is used for sending requests periodically.
              *
              * If the first argument is a function, this function is used for calculating the numeric value
-             * to be plotted. The rest of the argumens can be one or more request objects, which are registered and their
+             * to be plotted. The rest of the arguments can be one or more request objects, which are registered and their
              * responses are put as arguments to the given callback function.
              *
              * The last argument, if an object but not a Jolokia request (i.e. there is no <code>type</code> key), is

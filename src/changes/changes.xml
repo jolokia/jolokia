@@ -24,7 +24,18 @@
   </properties>
   <body>
     <release version="1.1.2-SNAPSHOT" description="Release 1.1.2-SNAPSHOT">
-      <action dev="jpamador" type="add">
+      <action dev="roland" type="fix" issue="97" date="2013-04-18">
+        Added support for non-string keys when serializing TabularData
+        (i.e. long, int, short, byte, ObjectName).
+      </action>
+      <action dev="roland" type="fix" date="2013-04-16">
+        Catch errors for registering on "start" and "stop" events for cubism. Still waiting
+        for my pull request to be applied.
+      </action>
+      <action dev="roland" type="fix" issue="96" date="2013-04-11">
+        J4pReadRequest now fetches all attributes if no attribute is given.
+      </action>
+      <action dev="jpamador" type="add" date="2013-04-09">
         Added converters for java.net.URL
       </action>
     </release>

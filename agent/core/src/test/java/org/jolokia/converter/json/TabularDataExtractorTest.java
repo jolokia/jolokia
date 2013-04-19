@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Stack;
 
-import javax.management.AttributeNotFoundException;
+import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.converter.object.StringToObjectConverter;
@@ -124,15 +124,36 @@ public class TabularDataExtractorTest {
         assertEquals(result.get("male"),true);
     }
 
+    @Test
+    void extractGenericTabularDataWithIntegerAndObjectNamePath() throws OpenDataException, AttributeNotFoundException, MalformedObjectNameException {
+        TabularTypeAndJson taj = new TabularTypeAndJson(
+                new String[] { "bundleId", "oName" },
+                new CompositeTypeAndJson(
+                        LONG,"bundleId",null,
+                        OBJECTNAME,"oName",null,
+                        BOOLEAN,"active",null
+                ));
+        TabularData data = new TabularDataSupport(taj.getType());
+        data.put(new CompositeDataSupport(
+                taj.getType().getRowType(),
+                new String[]{"bundleId", "oName", "active"},
+                new Object[]{10L,new ObjectName("test:type=bundle"), false}
+        ));
+        JSONObject result = (JSONObject) extract(true, data, "10", "test:type=bundle");
+        assertEquals(result.size(),3);
+        assertEquals(result.get("bundleId"),10L);
+        assertEquals(result.get("active"),false);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*name.*firstname.*")
     void extractGenericTabularDataWithToShortPath() throws OpenDataException, AttributeNotFoundException {
         extract(true, getComplextTabularData(), "meyer");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Integer.*")
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Boolean.*")
     void extractTabularDataWithPathButWrongIndexType() throws OpenDataException, AttributeNotFoundException {
         TabularTypeAndJson taj = new TabularTypeAndJson(
-                new String[] { "verein", "platz" },
+                new String[] { "verein", "absteiger" },
                 new CompositeTypeAndJson(
                         STRING,"verein",null,
                         INTEGER,"platz",null,
@@ -144,7 +165,7 @@ public class TabularDataExtractorTest {
                 new String[] { "verein", "platz", "absteiger" },
                 new Object[] { "fcn", 6, false }
         ));
-        extract(true,data,"fcn","6");
+        extract(true,data,"fcn","true");
     }
 
 
