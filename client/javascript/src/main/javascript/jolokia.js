@@ -177,6 +177,13 @@
                     }
                 });
 
+                if (ajaxParams['username'] !== 'undefined' && ajaxParams['password'] !== 'undefined') {
+                    ajaxParams.beforeSend = function (xhr) { 
+                        var tok = ajaxParams['username'] + ':' + ajaxParams['password'];
+                        xhr.setRequestHeader('Authorization', "Basic " + btoa(tok));
+                    };
+                }
+
                 if (extractMethod(request, opts) === "post") {
                     $.extend(ajaxParams, POST_AJAX_PARAMS);
                     ajaxParams.data = JSON.stringify(request);
