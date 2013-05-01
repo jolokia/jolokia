@@ -1,5 +1,7 @@
 package org.jolokia.it;
 
+import java.beans.ConstructorProperties;
+
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -25,9 +27,10 @@ public class ComplexMapKey {
     private int number;
     private String string;
 
-    public ComplexMapKey(String pString, int pNumber) {
-        string = pString;
-        number = pNumber;
+    @ConstructorProperties({"string", "number"})
+    public ComplexMapKey(String string, int number) {
+        this.string = string;
+        this.number = number;
     }
 
     public ComplexMapKey() {
