@@ -1,5 +1,7 @@
 package org.jolokia.it;
 
+import java.beans.ConstructorProperties;
+
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -16,28 +18,31 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
-import java.util.Map;
-
 /**
- * Test bean for MXBean
- *
+ * Test data for MXBeans
  * @author roland
  * @since 07.08.11
  */
-public interface MxBeanSampleMXBean {
+public class ComplexMapKey {
+    private int number;
+    private String string;
 
-    int[] getNumbers();
-    void setNumbers(int[] pNumbers);
+    @ConstructorProperties({"string", "number"})
+    public ComplexMapKey(String string, int number) {
+        this.string = string;
+        this.number = number;
+    }
 
-    ComplexTestData getComplexTestData();
-    void setComplexTestData(ComplexTestData testData);
+    public ComplexMapKey() {
+        number = 1968;
+        string = "late";
+    }
 
-    Map<ComplexMapKey,String> getMapWithComplexKey();
-    void setMapWithComplexKey(Map<ComplexMapKey,String> pMap);
+    public int getNumber() {
+        return number;
+    }
 
-    Map<String,Long> getMap();
-    void setMap(Map<String,Long> pMap);
-
-    int exec(long arg);
-    int exec(ComplexTestData arg);
+    public String getString() {
+        return string;
+    }
 }
