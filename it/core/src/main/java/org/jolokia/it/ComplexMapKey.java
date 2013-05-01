@@ -16,28 +16,30 @@ package org.jolokia.it;
  *  limitations under the License.
  */
 
-import java.util.Map;
-
 /**
- * Test bean for MXBean
- *
+ * Test data for MXBeans
  * @author roland
  * @since 07.08.11
  */
-public interface MxBeanSampleMXBean {
+public class ComplexMapKey {
+    private int number;
+    private String string;
 
-    int[] getNumbers();
-    void setNumbers(int[] pNumbers);
+    public ComplexMapKey(String pString, int pNumber) {
+        string = pString;
+        number = pNumber;
+    }
 
-    ComplexTestData getComplexTestData();
-    void setComplexTestData(ComplexTestData testData);
+    public ComplexMapKey() {
+        number = 1968;
+        string = "late";
+    }
 
-    Map<ComplexMapKey,String> getMapWithComplexKey();
-    void setMapWithComplexKey(Map<ComplexMapKey,String> pMap);
+    public int getNumber() {
+        return number;
+    }
 
-    Map<String,Long> getMap();
-    void setMap(Map<String,Long> pMap);
-
-    int exec(long arg);
-    int exec(ComplexTestData arg);
+    public String getString() {
+        return string;
+    }
 }
