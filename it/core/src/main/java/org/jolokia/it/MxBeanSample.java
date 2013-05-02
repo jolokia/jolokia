@@ -18,6 +18,7 @@ package org.jolokia.it;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author roland
@@ -28,6 +29,7 @@ public class MxBeanSample implements MxBeanSampleMXBean {
     int[] numbers = new int[] { 47, 11} ;
     private ComplexTestData complex;
     private Map<String, Long> map;
+    private Map<ComplexMapKey,String> mapWithComplexKey;
 
     public MxBeanSample() {
         map = new HashMap<String, Long>();
@@ -57,6 +59,17 @@ public class MxBeanSample implements MxBeanSampleMXBean {
 
     public void setMap(Map<String, Long> pMap) {
         map = pMap;
+    }
+
+    public Map<ComplexMapKey,String> getMapWithComplexKey() {
+        Map<ComplexMapKey,String> map = new TreeMap<ComplexMapKey,String>();
+        map.put(new ComplexMapKey("foo", 1), "foo1");
+        map.put(new ComplexMapKey("bar", 2), "foo2");
+        return map;
+    }
+
+    public void setMapWithComplexKey(Map<ComplexMapKey,String> pMap) {
+        mapWithComplexKey = pMap;
     }
 
     public int exec(long arg) {
