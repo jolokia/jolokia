@@ -7,10 +7,9 @@ import javax.management.*;
 import javax.management.openmbean.CompositeData;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.converter.*;
 import org.jolokia.request.JmxExecRequest;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.jolokia.util.RequestType.EXEC;
@@ -36,13 +35,21 @@ public class OpenExecHandlerTest {
     private ExecHandler handler;
 
     private ObjectName oName;
-	
+
+    private TestJolokiaContext ctx;
+
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ExecHandler(new AllowAllRestrictor(),new Converters());
+        ctx = new TestJolokiaContext();
+        handler = new ExecHandler(ctx);
     }
 
-    @BeforeTest
+    @AfterMethod
+    public void destroy() throws JMException {
+        ctx.destroy();
+    }
+
+    @BeforeClass
     public void registerMBean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=openExec");
 
@@ -50,7 +57,7 @@ public class OpenExecHandlerTest {
         conn.createMBean(OpenExecData.class.getName(),oName);        
     }
 
-    @AfterTest
+    @AfterClass
     public void unregisterMBean() throws InstanceNotFoundException, MBeanRegistrationException, IOException {
         MBeanServerConnection conn = getMBeanServer();
         conn.unregisterMBean(oName);

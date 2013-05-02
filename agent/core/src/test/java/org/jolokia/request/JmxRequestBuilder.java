@@ -22,6 +22,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.config.*;
+import org.jolokia.http.ProcessingParameters;
+import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.request.notification.NotificationCommandType;
 import org.jolokia.util.EscapeUtil;
@@ -38,7 +40,7 @@ public class JmxRequestBuilder {
 
     private JSONObject request = new JSONObject();
 
-    private Map<String,String> procConfig = new HashMap<String,String>();
+    private Map<ConfigKey,String> procConfig = new HashMap<ConfigKey,String>();
 
     public JmxRequestBuilder(RequestType pType) throws MalformedObjectNameException {
         this(pType,(String) null);
@@ -57,7 +59,7 @@ public class JmxRequestBuilder {
 
     public <R extends JmxRequest> R build() throws MalformedObjectNameException {
         RequestType type = RequestType.getTypeByName((String) request.get("type"));
-        ProcessingParameters params = new ConfigurationImpl().getProcessingParameters(procConfig);
+        ProcessingParameters params = new TestProcessingParameters(procConfig);
         switch (type) {
             case READ: return (R) new JmxReadRequest(request,params);
             case WRITE: return (R) new JmxWriteRequest(request,params);
@@ -148,7 +150,7 @@ public class JmxRequestBuilder {
 
     public JmxRequestBuilder option(ConfigKey pKey, String pValue) {
         assert pKey.isRequestConfig();
-        procConfig.put(pKey.getKeyValue(),pValue);
+        procConfig.put(pKey,pValue);
         return this;
     }
 

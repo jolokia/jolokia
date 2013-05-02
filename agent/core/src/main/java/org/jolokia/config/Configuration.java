@@ -16,7 +16,7 @@
 
 package org.jolokia.config;
 
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for accessing Jolokia configuration.
@@ -37,28 +37,14 @@ public interface Configuration {
     String getConfig(ConfigKey pKey);
 
     /**
-     * Get an configuration value as int value
-     * @param pKey the configuration key
-     * @return the value set or, if not, the default value
+     * Get all keys stored in this configuration
      */
-    int getConfigAsInt(ConfigKey pKey);
+    Set<ConfigKey> getConfigKeys();
 
     /**
-     * Get processing parameters from a string-string map
-     *
-     * @param pParams params to extra. A parameter "p" is used as extra path info
-     * @return the processing parameters
+     * Check whether the given configuration holds a value for the given key
+     * @param pKey key to check
+     * @return true if the configuration has this key
      */
-    ProcessingParameters getProcessingParameters(Map<String, String> pParams);
-
-    /**
-     * Get an configuration value as boolean value. The value must
-     * be configured as 'true' for this method to return true
-     *
-     * @param pKey the configuration key for which a boolean config value is requested
-     * @return true if the configuration (or the default value, if the configuration is not set)
-     *         is "true" for this key, false otherwise.
-     */
-    boolean getConfigAsBoolean(ConfigKey pKey);
-
+    boolean containsKey(ConfigKey pKey);
 }

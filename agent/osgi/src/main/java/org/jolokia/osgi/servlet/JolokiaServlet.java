@@ -190,6 +190,10 @@ public class JolokiaServlet extends AgentServlet {
                 log(message,t);
             }
         }
+
+        public boolean isDebug() {
+            return true;
+        }
     }
 
 }

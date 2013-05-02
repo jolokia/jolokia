@@ -14,27 +14,13 @@
  * limitations under the License.
  */
 
-package org.jolokia.service.impl;
-
-import java.util.List;
-
-import org.jolokia.service.JolokiaService;
+package org.jolokia.service;
 
 /**
  * @author roland
- * @since 28.03.13
+ * @since 21.04.13
  */
-public class JolokiaServiceManager {
-
-    protected LocalServiceFactory localServiceFactory;
-
-    /**
-     * Get all services of a certain type currently registered
-     *
-     * @param <T> service type to fetch
-     * @return list of services detected or an empty list
-     */
-    <T extends JolokiaService> List<T> getServices(Class<T> pServiceType) {
-        return null;
-    }
+public interface JolokiaServiceFactory {
+    public void init(JolokiaServiceManager serviceManager);
+    public void destroy();
 }

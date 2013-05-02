@@ -1,5 +1,3 @@
-package org.jolokia.config;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -16,7 +14,11 @@ package org.jolokia.config;
  * limitations under the License.
  */
 
+package org.jolokia.config;
+
 import java.util.*;
+
+import org.jolokia.service.*;
 
 /**
  * Class encapsulating all Agent configuration, global config and processing parameters
@@ -24,24 +26,32 @@ import java.util.*;
  * @author roland
  * @since 07.02.13
  */
-public class ConfigurationImpl implements Configuration {
-
-    // Alternative query parameter for providing path info
-    public static final String PATH_QUERY_PARAM = "p";
+public class ConfigurationImpl extends JolokiaServiceBase implements Configuration, JolokiaService {
 
     // The global configuration given during startup
-    private Map<ConfigKey, String> globalConfig;
+    private Map<ConfigKey, String> configMap;
 
     /**
      * Convenience constructor for setting up base configuration with key values pairs. This constructor
      * is especially suited for unit tests.
      *
-     * @param keyAndValues an array with even number of elements and ConfigKey and String alternating
+     * @param keyAndValues an array with even number of elements and ConfigKey and String alternating.
+     *                     If the first element is an integer, it is used as order attribute
      */
-    public ConfigurationImpl(Object... keyAndValues) {
-        globalConfig = new HashMap<ConfigKey, String>();
-        for (int i = 0;i < keyAndValues.length; i+= 2) {
-            globalConfig.put( (ConfigKey) keyAndValues[i], (String) keyAndValues[i+1]);
+    public ConfigurationImpl(Object ... keyAndValues) {
+        super(ServiceType.CONFIGURATION);
+
+        int idx = 0;
+        if (keyAndValues.length > 0 && keyAndValues[0] instanceof Integer) {
+            order = (Integer) keyAndValues[0];
+            idx = 1;
+        } else {
+            // 1000 ... 2000 is reserved for jolokia
+            order = 1000;
+        }
+        configMap = new HashMap<ConfigKey, String>();
+        for (int i = idx;i < keyAndValues.length; i+= 2) {
+            configMap.put((ConfigKey) keyAndValues[i], (String) keyAndValues[i + 1]);
         }
     }
 
@@ -56,7 +66,7 @@ public class ConfigurationImpl implements Configuration {
             String keyS = (String) e.nextElement();
             ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
             if (key != null) {
-                globalConfig.put(key,pExtractor.getParameter(keyS));
+                configMap.put(key, pExtractor.getParameter(keyS));
             }
         }
 
@@ -72,18 +82,23 @@ public class ConfigurationImpl implements Configuration {
         for (ConfigKey c : ConfigKey.values()) {
             String value = pConfig.get(c.getKeyValue());
             if (value != null) {
-                globalConfig.put(c,value);
+                configMap.put(c, value);
             }
         }
     }
 
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
-            String value = globalConfig.get(pKey);
+            String value = configMap.get(pKey);
             if (value == null) {
                 value = pKey.getDefaultValue();
             }
             return value;
+    }
+
+    /** {@inheritDoc} */
+    public Set<ConfigKey> getConfigKeys() {
+        return configMap.keySet();
     }
 
     /** {@inheritDoc} */
@@ -103,17 +118,9 @@ public class ConfigurationImpl implements Configuration {
     }
 
     /** {@inheritDoc} */
-    public ProcessingParameters getProcessingParameters(Map<String,String> pParams) {
-        Map<ConfigKey,String> procParams = ProcessingParameters.convertToConfigMap(pParams);
-        for (Map.Entry<ConfigKey,String> entry : globalConfig.entrySet()) {
-            ConfigKey key = entry.getKey();
-            if (key.isRequestConfig() && !procParams.containsKey(key)) {
-                procParams.put(key,entry.getValue());
-            }
-        }
-        return new ProcessingParameters(procParams,pParams.get(PATH_QUERY_PARAM));
+    public boolean containsKey(ConfigKey pKey) {
+        return configMap.containsKey(pKey);
     }
-
 
     /**
      * Get the number of stored configuration values
@@ -121,6 +128,6 @@ public class ConfigurationImpl implements Configuration {
      * @return number of configuration values
      */
     public int size() {
-        return globalConfig.size();
+        return configMap.size();
     }
 }

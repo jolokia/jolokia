@@ -22,13 +22,12 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxSearchRequest;
-import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.jolokia.util.TestJolokiaContext;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -44,9 +43,17 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
     private MBeanServer server;
 
+    private TestJolokiaContext ctx;
+
     @BeforeMethod
-    public void setup() {
-        handler = new SearchHandler(new AllowAllRestrictor());
+    public void createHandler() throws MalformedObjectNameException {
+        ctx = new TestJolokiaContext();
+        handler = new SearchHandler(ctx);
+    }
+
+    @AfterMethod
+    public void destroy() throws JMException {
+        ctx.destroy();
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)

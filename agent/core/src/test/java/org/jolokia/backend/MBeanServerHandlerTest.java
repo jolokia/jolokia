@@ -32,8 +32,7 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -53,7 +52,7 @@ public class MBeanServerHandlerTest {
     public void setup() throws MalformedObjectNameException {
         TestDetector.reset();
         ConfigurationImpl config = new ConfigurationImpl(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
-        handler = new MBeanServerHandler(config,getEmptyLogHandler());
+        handler = new MBeanServerHandler(config,new StdoutLogHandler());
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 
@@ -180,20 +179,6 @@ public class MBeanServerHandlerTest {
 
 
     // ===================================================================================================
-
-
-    private LogHandler getEmptyLogHandler() {
-        return new LogHandler() {
-            public void debug(String message) {
-            }
-
-            public void info(String message) {
-            }
-
-            public void error(String message, Throwable t) {
-            }
-        };
-    }
 
 
     interface DummyMBean {

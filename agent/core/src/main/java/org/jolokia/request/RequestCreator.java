@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.config.ProcessingParameters;
+import org.jolokia.http.ProcessingParameters;
 
 /**
  * Base class for so called <em>request creators</em>, which are used for creating

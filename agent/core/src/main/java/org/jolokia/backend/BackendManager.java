@@ -251,7 +251,12 @@ public class BackendManager {
 
     // init various application wide stores for handling history and debug output.
     private void initStores(JolokiaContext pCtx) {
-        int maxEntries = pCtx.getConfigAsInt(HISTORY_MAX_ENTRIES);
+        int maxEntries;
+        try {
+            maxEntries = Integer.parseInt(pCtx.getConfig(HISTORY_MAX_ENTRIES));
+        } catch (NumberFormatException exp) {
+            maxEntries = Integer.parseInt(HISTORY_MAX_ENTRIES.getDefaultValue());
+        }
         historyStore = new HistoryStore(maxEntries);
 
         try {

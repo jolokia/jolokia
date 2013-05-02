@@ -366,7 +366,6 @@ public class AgentServletTest {
         HttpTestUtil.prepareServletConfigMock(config,pInitParams);
         HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
-
         expect(config.getServletContext()).andReturn(context).anyTimes();
         expect(config.getServletName()).andReturn("jolokia").anyTimes();
         if (pExceptionClass != null) {

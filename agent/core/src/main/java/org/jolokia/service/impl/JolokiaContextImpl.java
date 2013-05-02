@@ -7,7 +7,8 @@ import java.util.*;
 import javax.management.ObjectName;
 
 import org.jolokia.backend.*;
-import org.jolokia.config.*;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -35,7 +36,7 @@ public class JolokiaContextImpl implements JolokiaContext {
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
 
-    public JolokiaContextImpl(ConfigurationImpl pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
+    public JolokiaContextImpl(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
         configuration = pConfig;
         logHandler = pLogHandler;
 
@@ -102,12 +103,8 @@ public class JolokiaContextImpl implements JolokiaContext {
         return configuration.getConfig(pOption);
     }
 
-    public int getConfigAsInt(ConfigKey pOption) {
-        return configuration.getConfigAsInt(pOption);
-    }
-
-    public boolean getConfigAsBoolean(ConfigKey pOption) {
-        return configuration.getConfigAsBoolean(pOption);
+    public Set<ConfigKey> getConfigKeys() {
+        return configuration.getConfigKeys();
     }
 
     public List<RequestDispatcher> getRequestDispatchers() {
@@ -126,12 +123,8 @@ public class JolokiaContextImpl implements JolokiaContext {
         return mBeanServerHandler.getServerHandle();
     }
 
-    public ProcessingParameters getProcessingParameters(Map<String, String> pRet) {
-        return configuration.getProcessingParameters(pRet);
-    }
-
     public boolean isDebug() {
-        return getConfigAsBoolean(ConfigKey.DEBUG);
+        return logHandler.isDebug();
     }
 
     public void debug(String message) {
@@ -140,7 +133,6 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     public void info(String message) {
         logHandler.info(message);
-
     }
 
     public void error(String message, Throwable t) {

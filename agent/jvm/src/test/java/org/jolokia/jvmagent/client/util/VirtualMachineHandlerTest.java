@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
 
@@ -36,7 +35,7 @@ public class VirtualMachineHandlerTest {
 
     VirtualMachineHandler vmHandler;
 
-    @BeforeTest
+    @BeforeClass
     public void setup() {
         OptionsAndArgs o = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),new String[0]);
         vmHandler = new VirtualMachineHandler(o);

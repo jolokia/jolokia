@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.jolokia.restrictor.policy.*;
+import org.jolokia.service.JolokiaServiceBase;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.w3c.dom.Document;
@@ -37,7 +38,7 @@ import org.xml.sax.SAXException;
  * @author roland
  * @since Jul 28, 2009
  */
-public class PolicyRestrictor implements Restrictor {
+public class PolicyRestrictor extends JolokiaServiceBase implements Restrictor {
 
     // Checks HTTP method restrictions
     private HttpMethodChecker httpChecker;
@@ -60,6 +61,7 @@ public class PolicyRestrictor implements Restrictor {
      * @param pInput stream from where to fetch the policy data
      */
     public PolicyRestrictor(InputStream pInput) {
+        super(ServiceType.RESTRICTOR);
         Exception exp = null;
         if (pInput == null) {
             throw new SecurityException("No policy file given");

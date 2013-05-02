@@ -24,13 +24,11 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.test.util.HttpTestUtil;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -47,16 +45,18 @@ public class HttpRequestHandlerTest {
     private BackendManager backend;
     private HttpRequestHandler handler;
 
+    TestJolokiaContext ctx;
+
     @BeforeMethod
     public void setup() {
         backend = createMock(BackendManager.class);
-        expect(backend.isDebug()).andReturn(true).anyTimes();
-
-        handler = new HttpRequestHandler(new ConfigurationImpl(),backend, createDummyLogHandler());
+        ctx = new TestJolokiaContext();
+        handler = new HttpRequestHandler(ctx,false);
     }
 
     @AfterMethod
-    public void tearDown() {
+    public void tearDown() throws JMException {
+        ctx.destroy();
         verify(backend);
     }
 
@@ -198,14 +198,16 @@ public class HttpRequestHandlerTest {
                 new RuntimeMBeanException(new NullPointerException()), 500, 500
         };
 
+        LogHandler log = createMock(LogHandler.class);
+
         for (int i = 0; i < exceptions.length; i += 3) {
             Exception e = (Exception) exceptions[i];
-            reset(backend);
-            expect(backend.isDebug()).andReturn(true).anyTimes();
-            backend.error(find("" + exceptions[i + 1]), EasyMock.<Throwable>anyObject());
-            backend.error(find("" + exceptions[i + 2]), EasyMock.<Throwable>anyObject());
+            reset(log);
+            expect(log.isDebug()).andReturn(true).anyTimes();
+            log.error(find("" + exceptions[i + 1]), EasyMock.<Throwable>anyObject());
+            log.error(find("" + exceptions[i + 2]), EasyMock.<Throwable>anyObject());
             expect(backend.handleRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
-            replay(backend);
+            replay(backend,log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
             assertEquals(resp.get("status"),exceptions[i+1]);
@@ -217,16 +219,4 @@ public class HttpRequestHandlerTest {
 
     // ======================================================================================================
 
-    private LogHandler createDummyLogHandler() {
-        return new LogHandler() {
-                public void debug(String message) {
-                }
-
-                public void info(String message) {
-                }
-
-                public void error(String message, Throwable t) {
-                }
-            };
-    }
 }

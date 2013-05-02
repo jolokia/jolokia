@@ -10,7 +10,6 @@ import javax.management.*;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.ProcessingParameters;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
 import org.jolokia.service.JolokiaContext;
@@ -84,19 +83,36 @@ public class HttpRequestHandler {
         return executeRequest(jmxReq);
     }
 
+    // Alternative query parameter for providing path info
+    public static final String PATH_QUERY_PARAM = "p";
+
+    /**
+     * Get processing parameters from a string-string map
+     *
+     * @param pParameterMap params to extra. A parameter {@link ConfigKey.PATH_QUERY_PARAM} is used as extra path info
+     * @return the processing parameters
+     */
     private ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) {
-        Map<String,String> ret = new HashMap<String, String>();
+        Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         if (pParameterMap != null) {
             for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
                 String values[] = entry.getValue();
                 if (values != null && values.length > 0) {
-                    // We support only scalar processing parameters, so we take the first
-                    // parameter given
-                    ret.put(entry.getKey(), values[0]);
+                    ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
+                    if (cKey != null) {
+                        Object value = values[0];
+                        config.put(cKey, value != null ? value.toString() : null);
+                    }
+                }
+            }
+            Set<ConfigKey> globalRequestConfigKeys = jolokiaCtx.getConfigKeys();
+            for (ConfigKey key : globalRequestConfigKeys) {
+                if (key.isRequestConfig() && !config.containsKey(key)) {
+                    config.put(key,jolokiaCtx.getConfig(key));
                 }
             }
         }
-        return jolokiaCtx.getProcessingParameters(ret);
+        return new ProcessingParameters(config);
     }
 
     /**

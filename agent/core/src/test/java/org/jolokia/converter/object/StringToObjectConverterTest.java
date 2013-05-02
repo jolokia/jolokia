@@ -14,8 +14,7 @@ import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -49,7 +48,7 @@ public class StringToObjectConverterTest {
 
     StringToObjectConverter converter;
 
-    @BeforeTest
+    @BeforeClass
     public void setup() {
        converter = new StringToObjectConverter();
     }

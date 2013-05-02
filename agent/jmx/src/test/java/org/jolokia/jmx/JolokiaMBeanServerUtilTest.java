@@ -25,7 +25,7 @@ import org.jolokia.backend.MBeanServerHandler;
 import org.jolokia.backend.MBeanServerHandlerMBean;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.ConfigurationImpl;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.StdoutLogHandler;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -36,17 +36,17 @@ import static org.testng.Assert.assertTrue;
  * @author roland
  * @since 13.01.13
  */
-public class JolokiaMBeanServerUtilTest implements LogHandler {
+public class JolokiaMBeanServerUtilTest {
 
     MBeanServerHandler handler;
 
-    @BeforeTest
+    @BeforeClass
     public void setup() {
         ConfigurationImpl config = new ConfigurationImpl(ConfigKey.DEBUG, "true");
-        handler = new MBeanServerHandler(config, this);
+        handler = new MBeanServerHandler(config, new StdoutLogHandler());
     }
 
-    @AfterTest
+    @AfterClass
     public void tearDown() throws JMException {
         handler.destroy();
     }
@@ -111,16 +111,6 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
         EasyMock.replay(server);
 
         MBeanServer m = JolokiaMBeanServerUtil.registerJolokiaMBeanServerHolderMBean(server);
-    }
-
-
-    public void debug(String message) {
-    }
-
-    public void info(String message) {
-    }
-
-    public void error(String message, Throwable t) {
     }
 
     interface DummyMBean {

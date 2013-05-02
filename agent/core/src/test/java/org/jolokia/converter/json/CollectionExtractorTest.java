@@ -23,8 +23,7 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.json.simple.JSONArray;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
 
@@ -37,7 +36,7 @@ public class CollectionExtractorTest {
     CollectionExtractor extractor;
     private ObjectToJsonConverter converter;
 
-    @BeforeTest
+    @BeforeClass
     public void setup() {
         extractor = new CollectionExtractor();
         converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);

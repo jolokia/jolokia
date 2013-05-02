@@ -24,7 +24,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigurationImpl;
-import org.jolokia.config.ProcessingParameters;
+import org.jolokia.http.ProcessingParameters;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.*;
@@ -43,13 +43,13 @@ public class Jsr160RequestDispatcherTest {
     private Jsr160RequestDispatcher dispatcher;
     private ProcessingParameters procParams;
 
-    @BeforeTest
+    @BeforeClass
     private void setup() {
         dispatcher = createDispatcherPointingToLocalMBeanServer();
         procParams = new ConfigurationImpl().getProcessingParameters(new HashMap<String, String>());
     }
 
-    @AfterTest
+    @AfterClass
     public void tearDown() throws Exception {
         dispatcher.destroy();
     }

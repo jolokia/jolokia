@@ -10,7 +10,8 @@ import javax.servlet.http.*;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.*;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.impl.JolokiaContextImpl;
+import org.jolokia.service.JolokiaServiceBase;
+import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -51,9 +52,6 @@ public class AgentServlet extends HttpServlet {
     // POST- and GET- HttpRequestHandler
     private ServletRequestHandler httpGetHandler, httpPostHandler;
 
-    // Used for logging
-    private LogHandler logHandler;
-
     // Request handler for parsing request parameters and building up a response
     private HttpRequestHandler requestHandler;
 
@@ -81,42 +79,6 @@ public class AgentServlet extends HttpServlet {
         restrictor = pRestrictor;
     }
 
-    /**
-     * Get the installed log handler
-     *
-     * @return loghandler used for logging.
-     */
-    protected LogHandler getLogHandler() {
-        return logHandler;
-    }
-
-    /**
-     * Create a restrictor restrictor to use. By default, a policy file
-     * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
-     * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
-     * used by default. This method is called during the {@link #init(ServletConfig)} when initializing
-     * the subsystems and can be overridden for custom restrictor creation.
-     *
-     * @param pLocation location to lookup the restrictor
-     * @return the restrictor to use.
-     */
-    protected Restrictor createRestrictor(String pLocation) {
-        LogHandler log = getLogHandler();
-        try {
-            Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
-            if (newRestrictor != null) {
-                log.info("Using access restrictor " + pLocation);
-                return newRestrictor;
-            } else {
-                log.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
-                return new AllowAllRestrictor();
-            }
-        } catch (IOException e) {
-            log.error("Error while accessing access restrictor at " + pLocation +
-                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
-            return new DenyAllRestrictor();
-        }
-    }
 
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
@@ -128,23 +90,24 @@ public class AgentServlet extends HttpServlet {
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
-        // Create a log handler early in the lifecycle, but not too early
-        logHandler = createLogHandler(pServletConfig);
+        // Create configuration and log handler early in the lifecycle
+        ServletLogHandler logHandler = createLogHandler(pServletConfig);
+        ConfigurationImpl config = initConfig(pServletConfig);
+        JolokiaServiceManagerImpl serviceManager = new JolokiaServiceManagerImpl();
+        serviceManager.addService(config);
+        serviceManager.addService(logHandler);
+
+        // Add a restrictor factory
+        serviceManager.addServiceFactory(new RestrictorServiceFactory(restrictor));
+
+        JolokiaContext ctx = serviceManager.start();
+
+        configMimeType = ctx.getConfig(ConfigKey.MIME_TYPE);
+        requestHandler = new HttpRequestHandler(ctx, false);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
-
-        ConfigurationImpl config = initConfig(pServletConfig);
-        if (restrictor == null) {
-            restrictor = createRestrictor(config.getConfig(ConfigKey.POLICY_LOCATION));
-        } else {
-            logHandler.info("Using custom access restriction provided by " + restrictor);
-        }
-        configMimeType = config.getConfig(ConfigKey.MIME_TYPE);
-        // TODO: CTX init
-        JolokiaContext ctx = new JolokiaContextImpl(config,logHandler,restrictor);
-        requestHandler = new HttpRequestHandler(ctx, false);
     }
 
 
@@ -156,23 +119,35 @@ public class AgentServlet extends HttpServlet {
      * @return a default log handler
      * @param pServletConfig servlet config from where to get information to build up the log handler
      */
-    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
-        return new LogHandler() {
-            /** {@inheritDoc} */
-            public void debug(String message) {
-                log(message);
-            }
+    protected ServletLogHandler createLogHandler(ServletConfig pServletConfig) {
+        return new ServletLogHandler();
+    }
 
-            /** {@inheritDoc} */
-            public void info(String message) {
-                log(message);
-            }
+    // A loghandler using a servlets log facilities
+    private class ServletLogHandler extends JolokiaServiceBase implements LogHandler {
 
-            /** {@inheritDoc} */
-            public void error(String message, Throwable t) {
-                log(message,t);
-            }
-        };
+        protected ServletLogHandler() {
+            super(ServiceType.LOG_HANDLER);
+        }
+
+        /** {@inheritDoc} */
+        public void debug(String message) {
+            log(message);
+        }
+
+        /** {@inheritDoc} */
+        public void info(String message) {
+            log(message);
+        }
+
+        /** {@inheritDoc} */
+        public void error(String message, Throwable t) {
+            log(message,t);
+        }
+
+        public boolean isDebug() {
+            return true;
+        }
     }
 
     /** {@inheritDoc} */

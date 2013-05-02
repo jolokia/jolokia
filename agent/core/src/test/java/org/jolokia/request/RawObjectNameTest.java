@@ -25,11 +25,9 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.ConfigurationImpl;
-import org.jolokia.util.LogHandler;
 import org.jolokia.util.RequestType;
+import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.*;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -38,23 +36,7 @@ import static org.testng.Assert.*;
 /**
  */
 public class RawObjectNameTest {
-    private ConfigurationImpl config     = new ConfigurationImpl();
-    private LogHandler    logHandler = new LogHandler() {
-        public void debug(String message) {
-            System.out.println("[DEBUG] " + message);
-        }
-
-        public void info(String message) {
-            System.out.println("[INFO] " + message);
-        }
-
-        public void error(String message, Throwable t) {
-            System.out.println("[ERROR] " + message);
-            t.printStackTrace();
-        }
-    };
-
-    private BackendManager backendManager = new BackendManager(config, logHandler, null, true /* Lazy Init */);
+    private BackendManager backendManager = new BackendManager(new TestJolokiaContext(), true /* Lazy Init */);
 
     @Test
     public void testListRawObjectNameAccess() throws Exception {
@@ -84,12 +66,6 @@ public class RawObjectNameTest {
     @Test
     public void testSearchCanonicalNameAccess() throws Exception {
         assertPropertyNamesOrderedCorrectly(searchRequestBuilder(), true);
-    }
-
-
-    @AfterClass
-    public void destroy() throws Exception {
-        backendManager.destroy();
     }
 
     private JmxRequestBuilder listRequestBuilder() throws MalformedObjectNameException {

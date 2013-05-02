@@ -6,9 +6,11 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.notification.*;
+import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -35,11 +37,17 @@ public class NotificationDispatcherTest {
     private MBeanServerConnection       connection;
     private AbstractMBeanServerExecutor executor;
 
+    private TestJolokiaContext ctx;
+
     @BeforeMethod
     public void setup() {
         ServerHandle serverHandle = new ServerHandle(null, null, null, null, null);
         serverHandle.setJolokiaId("test");
-        dispatcher = new NotificationDispatcher(serverHandle);
+        ctx = new TestJolokiaContext.Builder()
+                .serverHandle(serverHandle)
+                .dispatchers(new ArrayList<RequestDispatcher>())
+                .build();
+        dispatcher = new NotificationDispatcher(ctx);
         connection = createMock(MBeanServerConnection.class);
         executor = new AbstractMBeanServerExecutor() {
             @Override
@@ -51,6 +59,7 @@ public class NotificationDispatcherTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
+        ctx.destroy();
         dispatcher.destroy();
     }
 

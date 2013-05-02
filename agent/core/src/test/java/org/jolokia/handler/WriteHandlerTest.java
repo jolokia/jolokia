@@ -25,7 +25,7 @@ import javax.management.*;
 
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxWriteRequest;
-import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.jolokia.util.RequestType.WRITE;
@@ -42,16 +42,24 @@ public class WriteHandlerTest {
 
     private ObjectName oName;
 
-    @BeforeTest
-    public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        handler = new WriteHandler(new AllowAllRestrictor());
+    private TestJolokiaContext ctx;
 
+    @BeforeClass
+    public void setup() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=write");
-
         MBeanServer server = getMBeanServer();
         server.createMBean(WriteData.class.getName(), oName);
     }
 
+    @BeforeMethod
+    public void createHandler() {
+        ctx = new TestJolokiaContext();
+        handler = new WriteHandler(ctx);
+    }
+    @AfterMethod
+    public void destroy() throws JMException {
+        ctx.destroy();
+    }
 
     @AfterTest
     public void unregisterMBean() throws InstanceNotFoundException, MBeanRegistrationException, IOException {

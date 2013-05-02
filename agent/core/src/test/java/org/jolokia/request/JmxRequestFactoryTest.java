@@ -19,10 +19,11 @@ package org.jolokia.request;
 import java.util.*;
 
 import org.jolokia.config.*;
+import org.jolokia.http.ProcessingParameters;
+import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.jolokia.request.JmxRequestBuilder.createMap;
 import static org.testng.Assert.assertEquals;
@@ -35,9 +36,9 @@ public class JmxRequestFactoryTest {
 
     private ProcessingParameters procParams;
 
-    @BeforeTest
+    @BeforeClass
     public void setup() {
-        procParams = new ConfigurationImpl().getProcessingParameters(new HashMap<String, String>());
+        procParams = TestProcessingParameters.create();
     }
 
     @Test
@@ -94,8 +95,8 @@ public class JmxRequestFactoryTest {
                 "attribute","HeapMemoryUsage",
                 "config",config);
         Map param = new HashMap();;
-        param.put("maxObjects","100");
-        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,new ConfigurationImpl().getProcessingParameters(param));
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap,
+                                                                 TestProcessingParameters.create(ConfigKey.MAX_OBJECTS,"100"));
         assertEquals(req.getAttributeName(),"HeapMemoryUsage");
         assertEquals(req.getParameter(ConfigKey.MAX_DEPTH),"10");
         assertEquals(req.getParameterAsInt(ConfigKey.MAX_OBJECTS), 100);
@@ -174,8 +175,8 @@ public class JmxRequestFactoryTest {
     @Test
     public void simpleGetWithQueryPath() {
         Map<String,String> params = new HashMap<String, String>();
-        params.put("p","list/java.lang/type=Memory");
-        JmxListRequest req = JmxRequestFactory.createGetRequest(null,new ConfigurationImpl().getProcessingParameters(params));
+        JmxListRequest req = JmxRequestFactory.createGetRequest(null,
+                                                                TestProcessingParameters.create(ConfigKey.PATH_QUERY_PARAM,"list/java.lang/type=Memory"));
         assert req.getHttpMethod() == HttpMethod.GET : "GET by default";
         assert req.getPath().equals("java.lang/type=Memory") : "Path extracted";
     }

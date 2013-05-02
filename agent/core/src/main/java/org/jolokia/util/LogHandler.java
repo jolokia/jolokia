@@ -19,6 +19,10 @@ package org.jolokia.util;
 
 /**
  * Simple log handler for dispatching logging to e.g. a {@link javax.servlet.http.HttpServlet}
+ *
+ * This is a dedicated abstraction in order to allow multiple implementations for a log handler
+ * independent from a certain logging API.
+ *
  * @author roland
  * @since Nov 11, 2009
  */
@@ -43,4 +47,11 @@ public interface LogHandler {
      * @param t exception causing this error
      * */
     void error(String message, Throwable t);
+
+    /**
+     * Check whether debug is switched on
+     *
+     * @return true if debugging is enabled
+     */
+    boolean isDebug();
 }

@@ -22,17 +22,17 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.ConfigurationImpl;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.LogHandler;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
+import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
 
@@ -40,128 +40,112 @@ import static org.testng.Assert.*;
  * @author roland
  * @since Jun 15, 2010
  */
-public class BackendManagerTest implements LogHandler {
+public class BackendManagerTest {
 
-    ConfigurationImpl config;
+    //ConfigurationImpl config;
 
-    @BeforeTest
-    public void setup() {
-        config = new ConfigurationImpl();
+    private TestJolokiaContext ctx;
+
+    @AfterMethod
+    public void destroy() throws JMException {
+        ctx.destroy();
     }
+
+    private TestJolokiaContext createContext(Object ... configKeysAndValues) {
+        TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder();
+        if (configKeysAndValues.length > 0) {
+                builder.config(ConfigKey.DEBUG, "true");
+        }
+        ctx = builder.build();
+        return ctx;
+    }
+
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new ConfigurationImpl(ConfigKey.DEBUG,"true");
-
-        BackendManager backendManager = new BackendManager(config, this);
+        BackendManager backendManager = new BackendManager(createContext(ConfigKey.DEBUG,"true"),false);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
-        backendManager.destroy();
     }
 
     @Test
     public void lazyInit() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(config, this, null, true /* Lazy Init */ );
+        BackendManager backendManager = new BackendManager(createContext(), true /* Lazy Init */ );
 
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
-        backendManager.destroy();
-
     }
+
+    /* TODO CTX - Request dispatcher lookup test must move elsewhere, this is not the proper place
 
     @Test
     public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new ConfigurationImpl(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
-        BackendManager backendManager = new BackendManager(config, this);
+        BackendManager backendManager = new BackendManager(
+                createContext(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName()),
+                false);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         backendManager.handleRequest(req);
         assertTrue(RequestDispatcherTest.called);
-        backendManager.destroy();
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*invalid constructor.*")
     public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new ConfigurationImpl(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(
+                createContext(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName()),
+                false);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
     public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new ConfigurationImpl(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(
+                createContext(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher"),
+                false);
     }
 
-    @Test
-    public void debugging() {
-        RecordingLogHandler lhandler = new RecordingLogHandler();
-        BackendManager backendManager = new BackendManager(config,lhandler);
-        lhandler.error = 0;
-        lhandler.debug = 0;
-        lhandler.info = 0;
-
-        backendManager.debug("test");
-        assertEquals(lhandler.debug,1);
-        backendManager.error("test", new Exception());
-        assertEquals(lhandler.error,1);
-        backendManager.destroy();
-    }
+    */
 
     @Test
     public void defaultConfig() {
-        config = new ConfigurationImpl(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
-        BackendManager backendManager = new BackendManager(config,this);
-        backendManager.destroy();
+        BackendManager backendManager = new BackendManager(
+                createContext(ConfigKey.DEBUG_MAX_ENTRIES,"blabal"),
+                false);
     }
 
     @Test
     public void doubleInit() {
-        BackendManager b1 = new BackendManager(config,this);
-        BackendManager b2 = new BackendManager(config,this);
-        b2.destroy();
-        b1.destroy();
+        JolokiaContext ctx = createContext();
+        BackendManager b1 = new BackendManager(ctx,false);
+        BackendManager b2 = new BackendManager(ctx,false);
     }
 
     @Test
     public void remoteAccessCheck() {
-        BackendManager backendManager = new BackendManager(config,this);
-        assertTrue(backendManager.isRemoteAccessAllowed("localhost","127.0.0.1"));
-        backendManager.destroy();
+        ctx = new TestJolokiaContext.Builder().restrictor(new AllowAllRestrictor()).build();
+        BackendManager backendManager = new BackendManager(ctx,false);
+        assertTrue(backendManager.isRemoteAccessAllowed("localhost", "127.0.0.1"));
     }
 
     @Test
     public void corsAccessCheck() {
-        BackendManager backendManager = new BackendManager(config,this);
+        ctx = new TestJolokiaContext.Builder().restrictor(new AllowAllRestrictor()).build();
+        BackendManager backendManager = new BackendManager(ctx,false);
         assertTrue(backendManager.isCorsAccessAllowed("http://bla.com"));
-        backendManager.destroy();
     }
 
     @Test
     public void convertError() throws MalformedObjectNameException {
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(createContext(),false);
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
         assertTrue(!jsonError.containsKey("stackTrace"));
-        assertEquals(jsonError.get("message"),"Hans");
-        assertEquals(((JSONObject) jsonError.get("cause")).get("message"),"Kalb");
-        backendManager.destroy();
-    }
-    public void debug(String message) {
-        System.out.println("D> " + message);
-    }
-
-    public void info(String message) {
-        System.out.println("I> " + message);
-    }
-
-    public void error(String message, Throwable t) {
-        System.out.println("E> " + message);
-        t.printStackTrace(System.out);
+        assertEquals(jsonError.get("message"), "Hans");
+        assertEquals(((JSONObject) jsonError.get("cause")).get("message"), "Kalb");
     }
 
     // =========================================================================================
@@ -216,24 +200,6 @@ public class BackendManagerTest implements LogHandler {
         }
 
         public void destroy() throws JMException {
-        }
-    }
-
-
-    private class RecordingLogHandler implements LogHandler {
-        int debug = 0;
-        int info = 0;
-        int error = 0;
-        public void debug(String message) {
-            debug++;
-        }
-
-        public void info(String message) {
-            info++;
-        }
-
-        public void error(String message, Throwable t) {
-            error++;
         }
     }
 }

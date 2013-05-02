@@ -24,10 +24,9 @@ import javax.management.*;
 
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.jolokia.util.TestJolokiaContext;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -40,9 +39,17 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     private ListHandler handler;
 
+    private TestJolokiaContext ctx;
+
     @BeforeMethod
-    private void createHandler() {
-        handler = new ListHandler(new AllowAllRestrictor());
+    public void createHandler() throws MalformedObjectNameException {
+        ctx = new TestJolokiaContext();
+        handler = new ListHandler(ctx);
+    }
+
+    @AfterMethod
+    public void destroy() throws JMException {
+        ctx.destroy();
     }
 
     @Test(expectedExceptions = { UnsupportedOperationException.class })

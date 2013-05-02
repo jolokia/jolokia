@@ -23,14 +23,14 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.MBeanServerExecutorLocal;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.RequestType;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -45,14 +45,18 @@ public class ListHandlerTest extends BaseHandlerTest {
     private ListHandler              handler;
     private MBeanServerExecutorLocal executor;
 
+    private TestJolokiaContext ctx;
+
     @BeforeMethod
-    private void createHandler() {
-        handler = new ListHandler(new AllowAllRestrictor());
+    public void createHandler() throws MalformedObjectNameException {
+        ctx = new TestJolokiaContext();
+        handler = new ListHandler(ctx);
         executor = new MBeanServerExecutorLocal();
     }
 
     @AfterMethod
-    private void destroy() {
+    private void destroy() throws JMException {
+        ctx.destroy();
         executor.destroy();
     }
 

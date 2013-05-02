@@ -22,6 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.notification.BackendCallback;
+import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -37,7 +38,7 @@ public class PullNotificationBackendTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        backend = new PullNotificationBackend("test");
+        backend = new PullNotificationBackend(new TestJolokiaContext());
         assertEquals(backend.getType(),"pull");
     }
 

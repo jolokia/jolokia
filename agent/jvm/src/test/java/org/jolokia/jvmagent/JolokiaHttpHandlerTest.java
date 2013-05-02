@@ -26,6 +26,7 @@ import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.ConfigurationImpl;
+import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -221,6 +222,7 @@ public class JolokiaHttpHandlerTest {
 
     private static boolean debugToggle = false;
     public ConfigurationImpl getConfig(Object ... extra) {
+        TestJolokiaContext ctx = new TestJolokiaContext();
         ArrayList list = new ArrayList();
         list.add(ConfigKey.AGENT_CONTEXT);
         list.add("/jolokia");

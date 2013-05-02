@@ -16,27 +16,18 @@
 
 package org.jolokia.service;
 
+import org.jolokia.config.Configuration;
+import org.jolokia.util.LogHandler;
+
 /**
  * @author roland
- * @since 28.03.13
+ * @since 22.04.13
  */
-public interface JolokiaService {
+public interface JolokiaServiceManager  {
 
-    public int getOrder();
+    public void addService(JolokiaService pService);
+    public void removeService(JolokiaService pService);
 
-    public ServiceType getType();
-
-    public void destroy();
-
-    public void init(JolokiaServiceManager pSerciceManager);
-
-    public enum ServiceType {
-        CONFIGURATION,
-        LOG_HANDLER,
-        RESTRICTOR,
-        REQUEST_DISPATCHER,
-        EXTRACTOR,
-        SIMPLIFIER,
-        NOTIFICATION_BACKEND
-    }
+    public Configuration getConfiguration();
+    public LogHandler getLogHandler();
 }

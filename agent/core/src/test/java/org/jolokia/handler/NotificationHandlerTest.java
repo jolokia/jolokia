@@ -16,15 +16,18 @@
 
 package org.jolokia.handler;
 
+import java.util.ArrayList;
+
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxNotificationRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.notification.NotificationCommandType;
-import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.RequestType;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.createMock;
@@ -38,22 +41,27 @@ public class NotificationHandlerTest extends BaseHandlerTest {
 
     private NotificationHandler handler;
 
+    TestJolokiaContext ctx;
+
     @BeforeMethod
     public void setUp() throws Exception {
         ServerHandle serverHandle = new ServerHandle(null,null,null,null,null);
         serverHandle.setJolokiaId("test");
-        handler = new NotificationHandler(new AllowAllRestrictor(),serverHandle);
+        ctx = new TestJolokiaContext.Builder().
+               serverHandle(serverHandle).
+               dispatchers(new ArrayList<RequestDispatcher>()).
+               build();
+        handler = new NotificationHandler(ctx);
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
         handler.destroy();
+        ctx.destroy();
     }
 
     @Test
     public void testSimple() throws Exception {
-        NotificationHandler handler = new NotificationHandler(new AllowAllRestrictor(),
-                                                              new ServerHandle(null,null,null,null,null));
         assertEquals(handler.getType(), RequestType.NOTIFICATION);
         JmxNotificationRequest request = createRequest();
         // No exception for now

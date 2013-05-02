@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.config.ProcessingParameters;
+import org.jolokia.http.ProcessingParameters;
 import org.jolokia.util.RequestType;
 
 /**

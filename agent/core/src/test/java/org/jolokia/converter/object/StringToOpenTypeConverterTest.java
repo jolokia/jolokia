@@ -9,7 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static javax.management.openmbean.SimpleType.*;
@@ -41,7 +41,7 @@ public class StringToOpenTypeConverterTest {
     private StringToOpenTypeConverter converter;
 
 
-    @BeforeTest
+    @BeforeClass
     public void setup() {
 
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();

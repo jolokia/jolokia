@@ -23,10 +23,9 @@ import javax.management.*;
 
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.jolokia.util.TestJolokiaContext;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.jolokia.util.RequestType.READ;
@@ -44,10 +43,18 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
     private ObjectName testBeanName;
 
+    private TestJolokiaContext ctx;
+
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ReadHandler(new AllowAllRestrictor());
+        ctx = new TestJolokiaContext();
+        handler = new ReadHandler(ctx);
         testBeanName = new ObjectName("jolokia:type=test");
+    }
+
+    @AfterMethod
+    public void destroy() throws JMException {
+        ctx.destroy();
     }
 
     @Test
@@ -346,8 +353,9 @@ public class ReadHandlerTest extends BaseHandlerTest {
     public void restrictAccess() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
-        handler = new ReadHandler(restrictor);
-
+        ctx.destroy();
+        ctx = new TestJolokiaContext.Builder().restrictor(restrictor).build();
+        handler = new ReadHandler(ctx);
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
                 attribute("attr").
                 build();

@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.config.ConfigurationImpl;
+import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
@@ -166,7 +166,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         @Override
         /** {@inheritDoc} */
         public void postDetect(MBeanServerExecutor pServerManager,
-                               ConfigurationImpl pConfig, LogHandler pLoghandler) {
+                               Configuration pConfig, LogHandler pLoghandler) {
             JSONObject opts = getDetectorOptions(pConfig,pLoghandler);
             amxShouldBeBooted = (opts == null || opts.get("bootAmx") == null || (Boolean) opts.get("bootAmx"))
                                 && !isAmxBooted(pServerManager);

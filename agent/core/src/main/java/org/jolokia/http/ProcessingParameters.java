@@ -1,4 +1,4 @@
-package org.jolokia.config;
+package org.jolokia.http;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -19,6 +19,8 @@ package org.jolokia.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jolokia.config.ConfigKey;
+
 /**
  * Class encapsulating parametrs used during processing
  *
@@ -30,18 +32,13 @@ public class ProcessingParameters {
     // Request specific parameters
     private Map<ConfigKey,String> params;
 
-    // An pathinfo when given with "?p="
-    private String pathInfo;
-
     /**
      * Constructor which is already filtered and splitted
      *
      * @param pConfig configuration to use
-     * @param pPathInfo optional pathinfo
      */
-    ProcessingParameters(Map<ConfigKey, String> pConfig, String pPathInfo) {
+    ProcessingParameters(Map<ConfigKey, String> pConfig) {
         params = pConfig;
-        pathInfo = pPathInfo;
     }
 
     /**
@@ -74,7 +71,7 @@ public class ProcessingParameters {
             Map<ConfigKey,String> newParams = new HashMap<ConfigKey, String>();
             newParams.putAll(params);
             newParams.putAll(convertToConfigMap(pConfig));
-            return new ProcessingParameters(newParams, pathInfo);
+            return new ProcessingParameters(newParams);
         }
     }
 
@@ -85,12 +82,12 @@ public class ProcessingParameters {
      * @return pathinfo or null if no pathinfo is set
      */
     public String getPathInfo() {
-        return pathInfo;
+        return params.get(ConfigKey.PATH_QUERY_PARAM);
     }
 
     // Convert a string-string map to one with ConfigKeys. All parameters which doesn't
     // map to a ConfigKey are filtered out
-    static Map<ConfigKey, String> convertToConfigMap(Map<String, String> pParams) {
+    private Map<ConfigKey, String> convertToConfigMap(Map<String, String> pParams) {
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         if (pParams != null) {
             for (Map.Entry<String,?> entry : pParams.entrySet()) {

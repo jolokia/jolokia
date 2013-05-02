@@ -128,6 +128,12 @@ public enum ConfigKey {
      */
     IF_MODIFIED_SINCE("ifModifiedSince",false,true),
 
+    /**
+     * Query parameter used for providing a path in order to avoid escaping
+     * issues. This can be used as an alternative for path notations
+     */
+    PATH_QUERY_PARAM("p",false,true),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 

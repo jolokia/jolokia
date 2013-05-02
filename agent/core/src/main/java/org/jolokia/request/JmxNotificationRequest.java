@@ -5,7 +5,7 @@ import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.config.ProcessingParameters;
+import org.jolokia.http.ProcessingParameters;
 import org.jolokia.request.notification.NotificationCommand;
 import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.util.RequestType;

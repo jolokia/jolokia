@@ -18,8 +18,9 @@ package org.jolokia.request;
 
 import java.util.*;
 
-import org.jolokia.config.ConfigurationImpl;
-import org.jolokia.config.ProcessingParameters;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.http.ProcessingParameters;
+import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.request.notification.*;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
@@ -85,9 +86,6 @@ public class JmxNotificationRequestTest {
     }
 
     private ProcessingParameters getParams() {
-        ConfigurationImpl config = new ConfigurationImpl();
-        Map params = new HashMap();
-        params.put("maxDepth","2");
-        return config.getProcessingParameters(params);
+        return TestProcessingParameters.create(ConfigKey.MAX_DEPTH,"2");
     }
 }
