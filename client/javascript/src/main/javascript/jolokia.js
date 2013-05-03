@@ -182,6 +182,9 @@
                         var tok = ajaxParams['username'] + ':' + ajaxParams['password'];
                         xhr.setRequestHeader('Authorization', "Basic " + btoa(tok));
                     };
+                    ajaxParams.xhrFields = {
+                        withCredentials: true
+                    };
                 }
 
                 if (extractMethod(request, opts) === "post") {
