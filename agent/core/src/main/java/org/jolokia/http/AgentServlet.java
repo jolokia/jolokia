@@ -350,9 +350,9 @@ public class AgentServlet extends HttpServlet {
         long now = System.currentTimeMillis();
         pResp.setDateHeader("Date",now);
         // 1h  in the past since it seems, that some servlet set the date header on their
-        // own so that it cannot be guaranteed that these heades are really equals.
-        // It happend on Tomcat that Date: was finally set *before* Expires: in the final
-        // answers some times which seems to be an implementation percularity from Tomcat
+        // own so that it cannot be guaranteed that these headers are really equals.
+        // It happened on Tomcat that Date: was finally set *before* Expires: in the final
+        // answers some times which seems to be an implementation peculiarity from Tomcat
         pResp.setDateHeader("Expires",now - 3600000);
     }
 
