@@ -159,6 +159,8 @@ public class HttpRequestHandler {
             if (pRequestHeaders != null) {
                 ret.put("Access-Control-Allow-Headers",pRequestHeaders);
             }
+            // Fix for CORS with authentication (#104)
+            ret.put("Access-Control-Allow-Credentials","true");
             // Allow for one year. Changes in access.xml are reflected directly in the  cors request itself
             ret.put("Access-Control-Allow-Max-Age","" + 3600 * 24 * 365);
         }

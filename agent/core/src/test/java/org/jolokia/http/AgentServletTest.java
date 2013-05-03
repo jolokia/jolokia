@@ -214,6 +214,7 @@ public class AgentServletTest {
 
         response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
         response.setHeader("Access-Control-Allow-Origin", out);
+        response.setHeader("Access-Control-Allow-Credentials", "true");
 
         replay(request, response);
 
@@ -248,6 +249,7 @@ public class AgentServletTest {
                 new Runnable() {
                     public void run() {
                         response.setHeader("Access-Control-Allow-Origin", out);
+                        response.setHeader("Access-Control-Allow-Credentials","true");
                         response.setCharacterEncoding("utf-8");
                         response.setContentType("text/plain");
                         response.setStatus(200);

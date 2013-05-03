@@ -196,6 +196,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         Headers headers = pExchange.getResponseHeaders();
         if (origin != null) {
             headers.set("Access-Control-Allow-Origin",origin);
+            headers.set("Access-Control-Allow-Credentials","true");
         }
 
         // Avoid caching at all costs

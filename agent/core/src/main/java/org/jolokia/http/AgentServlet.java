@@ -248,6 +248,7 @@ public class AgentServlet extends HttpServlet {
         String origin = requestHandler.extractCorsOrigin(pReq.getHeader("Origin"));
         if (origin != null) {
             pResp.setHeader("Access-Control-Allow-Origin",origin);
+            pResp.setHeader("Access-Control-Allow-Credentials","true");
         }
     }
 
