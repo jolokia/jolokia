@@ -23,7 +23,7 @@ import java.beans.ConstructorProperties;
  * @author roland
  * @since 07.08.11
  */
-public class ComplexMapKey {
+public class ComplexMapKey implements Comparable<ComplexMapKey> {
     private int number;
     private String string;
 
@@ -44,5 +44,29 @@ public class ComplexMapKey {
 
     public String getString() {
         return string;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ComplexMapKey that = (ComplexMapKey) o;
+
+        if (number != that.number) return false;
+        if (string != null ? !string.equals(that.string) : that.string != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = number;
+        result = 31 * result + (string != null ? string.hashCode() : 0);
+        return result;
+    }
+
+    public int compareTo(ComplexMapKey o) {
+        return this.number - o.number;
     }
 }
