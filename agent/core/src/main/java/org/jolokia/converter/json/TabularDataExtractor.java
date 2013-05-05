@@ -7,6 +7,7 @@ import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /*
@@ -40,7 +41,7 @@ public class TabularDataExtractor implements Extractor {
     /**
      * <p>
      *  Extract a {@link TabularData}. The JSON representation of a tabular data is different,
-     *  dependening on whether it represets a map for an {@link javax.management.MXBean} or is a regular data.
+     *  depending on whether it represents a map for an {@link javax.management.MXBean} or is a regular data.
      * </p>
      * <p>
      *  I.e. for an tabular data which have a row type with two column "key" and "value", then
@@ -57,7 +58,7 @@ public class TabularDataExtractor implements Extractor {
      *         ....
      *      }
      *  </pre>
-     *  For multi valued keys (i.e. {@link TabularType#getIndexNames()} is a list with more than one element), the
+     *  For multi valued keys of simple open types (i.e. {@link TabularType#getIndexNames()} is a list with more than one element), the
      *  returned JSON structure looks like (index names here are "key" and "innerkey")
      *  <pre>
      *      {
@@ -74,11 +75,24 @@ public class TabularDataExtractor implements Extractor {
      *         ....
      *      }
      *  </pre>
+     *  If keys are used, which themselves are complex objects (like composite data), this hierarchical map
+     *  structure can not be used. In this case an object with two keys is returned: "indexNames" holds the
+     *  name of the key index and "values" is an array of all rows which are represented as JSON objects:
+     *  <pre>
+     *      {
+     *        "indexNames" : [ "key", "innerkey" ],
+     *        "values" : [
+     *           { "key" : "mykey1", "innerkey" : { "name" : "a", "number" : 4711 }, "item" : "value1", .... },
+     *           { "key" : "mykey2", "innerkey" : { "name" : "b", "number" : 815 }, "item" : "value2", .... },
+     *           ...
+     *        ]
+     *      }
+     *  </pre>
      * </p>
      * <p>
-     *   Accessing {@link TabularData} with a path is only supported for string keys, i.e. each index name must point
-     *   to a string value. As many path elements must be provided as index names for the tabular type exists
-     *   (i.e. <code>pExtraArgs.size() >= pValue.getTabularType().getIndexNames().size()</code>)
+     *   Accessing {@link TabularData} with a path is only supported for simple type keys, i.e. each index name must point
+     *   to a string representation of a simple open type. As many path elements must be provided as index names for
+     *   the tabular type exists (i.e. <code>pExtraArgs.size() >= pValue.getTabularType().getIndexNames().size()</code>)
      *
      *   For TabularData representing maps, a path access with the single "key" value will
      *   return the content of the "value" value. For all other TabularData, the complete row to which the path points
@@ -124,16 +138,42 @@ public class TabularDataExtractor implements Extractor {
      */
     private boolean checkForMxBeanMap(TabularType pType) {
         CompositeType rowType = pType.getRowType();
-        return rowType.containsKey("key") && rowType.containsKey("value") && rowType.keySet().size() == 2;
+        return rowType.containsKey("key") && rowType.containsKey("value") && rowType.keySet().size() == 2
+               // Only convert to map for simple types for all others use normal conversion. See #105 for details.
+               && rowType.getType("key") instanceof  SimpleType;
     }
 
     private Object convertTabularDataToJson(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)
             throws AttributeNotFoundException {
         TabularType type = pTd.getTabularType();
+        if (hasComplexKeys(type)) {
+            return convertTabularDataDirectly(pTd, pExtraArgs, pConverter);
+        } else {
+            return convertToMaps(pTd, pExtraArgs, pConverter);
+        }
+    }
+
+    // Check, whether all keys are simple types or not
+    private boolean hasComplexKeys(TabularType pType) {
+        List<String> indexes = pType.getIndexNames();
+        CompositeType rowType = pType.getRowType();
+        for (String index : indexes) {
+            if ( ! (rowType.getType(index) instanceof SimpleType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Convert tabular data to (nested) maps. Path access is allowed here
+    private Object convertToMaps(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter) throws AttributeNotFoundException {
+        TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
         JSONObject ret = new JSONObject();
-        for (CompositeData cd : (Collection <CompositeData>) pTd.values()) {
+        for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
             JSONObject targetJSONObject = ret;
+            // TODO: Check whether all keys can be represented as simple types. If not, well
+            // we dont do any magic and return the tabular data as an array.
             for (int i = 0; i < indexNames.size() - 1; i++) {
                 Object indexValue = pConverter.extractObject(cd.get(indexNames.get(i)), null, true);
                 targetJSONObject = getNextMap(targetJSONObject,indexValue);
@@ -143,6 +183,30 @@ public class TabularDataExtractor implements Extractor {
             Object finalIndexValue = pConverter.extractObject(cd.get(finalIndex), null, true);
             targetJSONObject.put(finalIndexValue,row);
         }
+        return ret;
+    }
+
+    // Convert to a direct representation of the tabular data
+    private Object convertTabularDataDirectly(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)
+            throws AttributeNotFoundException {
+        if (!pExtraArgs.empty()) {
+            throw new IllegalArgumentException("Cannot use a path for converting tabular data with complex keys (" +
+                                               pTd.getTabularType().getRowType() + ")");
+        }
+        JSONObject ret = new JSONObject();
+        JSONArray indexNames = new JSONArray();
+        TabularType type = pTd.getTabularType();
+        for (String index : type.getIndexNames()) {
+            indexNames.add(index);
+        }
+        ret.put("indexNames",indexNames);
+
+        JSONArray values = new JSONArray();
+        for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
+            values.add(pConverter.extractObject(cd, pExtraArgs, true));
+        }
+        ret.put("values",values);
+
         return ret;
     }
 
@@ -179,7 +243,7 @@ public class TabularDataExtractor implements Extractor {
     }
 
     // The key is tried to convert to the proper type. These checks are
-    // a bit redundant, since this sort of conversion is alread offered
+    // a bit redundant, since this sort of conversion is already offered
     // in StringToOpenTypeConverter. Unfortunately, this converter is not
     // easily available here. For 2.0 the modularity aspects are refactored
     // from the ground up, so I can live with the solution here.

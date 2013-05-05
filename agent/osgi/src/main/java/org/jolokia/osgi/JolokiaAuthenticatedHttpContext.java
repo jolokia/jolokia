@@ -16,19 +16,20 @@ package org.jolokia.osgi;
  * limitations under the License.
  */
 
-import org.osgi.service.http.HttpContext;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.osgi.service.http.HttpContext;
+
 /**
- *Authentication context which uses a simple user/password credential pair
+ * Authentication context which uses a simple user/password credential pair
  *
-* @author roland
-* @since Jan 7, 2010
-*/
+ * @author roland
+ * @since Jan 7, 2010
+ */
 class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
     private final String user;
     private final String password;
