@@ -63,13 +63,13 @@ public class TabularDataExtractor implements Extractor {
      *  <pre>
      *      {
      *         "mykey1" : {
-     *                       "myinner1" => { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
-     *                       "myinner2" => { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... }
+     *                       "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
+     *                       "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... }
      *                       ....
      *                     }
      *         "mykey2" : {
-     *                       "second1" => { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... }
-     *                       "second2" => { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... }
+     *                       "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... }
+     *                       "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... }
      *                       ....
      *                    }
      *         ....

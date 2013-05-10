@@ -647,19 +647,9 @@
             </listitem>
             <listitem>
               <classname>javax.management.openmbean.TabularData</classname>
-              is serialized into one or multiple nested JSON objects
-              where the keys are derived from its
-              <methodname>TabularType.indexName()</methodname>. If
-              there is a single valued index, the index's value is the
-              key and a <classname>TabularData</classname>'s row
-              (which in turn is a
-              <classname>CompositeData</classname>) is a map. With
-              multi valued keys, the map is nested (first level: first
-              index's value, second level: second index's value and so
-              on). For the serialization of <classname>TabularData</classname> resulting
-              from a <classname><ulink
-              url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean</ulink></classname> translation for
-              maps, see <xref linkend="serialization-mxbean"/>
+              is serialized differently depending on its internal
+              structure. See below for a detailed explanation of this
+              serialization mechanism including examples.
             </listitem>
             <listitem>
               <classname>java.lang.Class</classname> is converted to
@@ -709,13 +699,94 @@
           described.
         </para>
         <para>
-          Serialization can be influenced by certain processing
-          parameters given with the request (see <xref
+         <classname>TabularData</classname> serialization depends on
+         the type of the index.  It is serialized into one or multiple
+         nested JSON objects where the keys are derived from its
+         <methodname>TabularType.indexNames()</methodname>. If there is
+         a single valued index with a simple type (i.e. an instance of
+         <classname>javax.management.openmbean.SimpleType</classname>),
+         the index's value is the key and a
+         <classname>TabularData</classname>'s row (which in turn is a
+         <classname>CompositeData</classname>) is a map. With multi
+         valued, simple typed, keys, the map is nested (first level:
+         first index's value, second level: second index's value and
+         so on). For the serialization of
+         <classname>TabularData</classname> resulting from a
+         <classname><ulink
+         url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean</ulink></classname>
+         translation for maps, see <xref
+         linkend="serialization-mxbean"/>.  If any of the declared
+         index keys of a <classname>TabularData</classname> is a
+         complex type (i.e. not a <classname>SimpleType</classname>),
+         then this simple serialization into maps of maps is not
+         possible anymore, since for JSON, map keys must be simple
+         types. In this case, a more generic serialization is used in
+         which case an JSON object with two keys is returned:
+         <constant>indexNames</constant> is an array with the
+         <classname>TabularData</classname>'s indexes as names and
+         <constant>values</constant> is the array containing the
+         values as JSON object with the corresponding rows as values
+         (including the indexes).          
+        </para>
+        <para>
+          For example if there is a single valued key
+          <constant>key</constant>, then the returned JSON looks like
+        </para>
+        <programlisting><![CDATA[
+{
+  "mykey1" : { "key" : "mkey1", "item" : "value1", .... }
+  "mykey2" : { "key" : "mkey2", "item" : "value2", .... }
+  ....
+}]]></programlisting>
+        <para>
+          For multi valued keys of simple open types
+          (i.e. <methodname>TabularType.getIndexNames()</methodname>)
+          is a list with more than one element but all of them are
+          simple types), the returned JSON structure looks like (index
+          names here are <constant>key</constant> and
+          <constant>innerkey</constant>):
+        </para>
+        <programlisting><![CDATA[
+{
+  "mykey1" : {
+    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
+    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... }
+    ....
+  },
+  "mykey2" : {
+    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... }
+    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... }
+    ....
+  }
+  ....
+}]]></programlisting>
+        <para>
+          If keys are used, which themselves are complex objects (like
+          <classname>CompositeData</classname>), this hierarchical map structure can not be
+          used. In this case an object with two keys is returned:
+          "<constant>indexNames</constant>" holds the name of the key
+          index and "<constant>values</constant>" is an array of all
+          rows which are represented as JSON objects:
+        </para>
+        <programlisting><![CDATA[
+{
+  "indexNames" : [ "key", "innerkey" ],
+  "values" : [
+    { "key" : "mykey1", "innerkey" : { "name" : "a", "number" : 4711 }, "item" : "value1", .... },
+    { "key" : "mykey2", "innerkey" : { "name" : "b", "number" : 815 }, "item" : "value2", .... },
+    ...
+  ]
+}]]></programlisting>
+        <para>
+          Beside this special behaviour for
+          <classname>TabularData</classname>, serialization can be
+          influenced by certain processing parameters given with the
+          request (see <xref
           linkend="processing-parameters"/>). I.e. the recursive
           process of JSON serialization can be stopped when the data
-          set gets too large. Self and other circular references
-          are detected, too. If this happen, special values indicate
-          the truncation of the generated JSON object.
+          set gets too large. Self and other circular references are
+          detected, too. If this happen, special values indicate the
+          truncation of the generated JSON object.
         </para>
         <variablelist>
           <varlistentry>
@@ -914,19 +985,19 @@
                 layer. E.g. the following JSON object works for 
                 a <classname>TabularType</classname> with the two
                 index names <literal>lastname</literal> and
-                <literal>firstname</literal>:
+                <literal>firstname</literal>, which are both of type <classname>SimpleType.STRING</classname>:
               </para>
         <programlisting language="perl"><![CDATA[{ 
   "Mann": {
            "Thomas": {
-                      lastname: "Mann",
-                      firstname: "Thomas",
-                      birth: 1875
+                      "lastname": "Mann",
+                      "firstname": "Thomas",
+                      "birth": 1875
                      },
            "Heinrich": {
-                        lastname: "Mann",
-                        firstname: "Heinrich",
-                        birth: 1871
+                        "lastname": "Mann",
+                        "firstname": "Heinrich",
+                        "birth": 1871
                        }
           }
 }]]></programlisting>
@@ -936,6 +1007,34 @@
                 directly from maps. More details are explained in the
                 next section <xref linkend="serialization-mxbean"/>.
               </para>
+              <para>
+                <classname>TabularType</classname>s with index values
+                which are <emphasis>not</emphasis> of type
+                <classname>SimpleType</classname> can be used, too.
+                However, in this case this simple nested map structure
+                is not enough, since keys of complex types
+                (e.g. <classname>CompositeData</classname> types) can
+                not be represented as JSON map keys. Instead, a
+                generic representation for
+                <classname>TabularTypes</classname> must be used. A
+                JSON object with two keys:
+                <constant>indexNames</constant> with an array of the
+                index names and <constant>values</constant> with an
+                array of rows containing objects which include the
+                index values plus any other values of the rows'
+                <classname>CompositeType</classname>. E.g. if in the
+                example above, the index would have been an
+                <classname>User</classname> with first- and lastname,
+                the JSON structure for setting the <classname>TabularData</classname> should
+                look like
+              </para>
+        <programlisting language="perl"><![CDATA[{ 
+  "indexNames": [ "user" ],
+  "values" : [
+     { "user" : { "lastname": "Mann", "firstname": "Thomas" }, "birth": 1875 },
+     { "user" : { "lastname": "Mann", "firstname": "Heinrich" }, "birth": 1871 }
+  ]
+}]]></programlisting>
             </listitem>
           </itemizedlist>
           
