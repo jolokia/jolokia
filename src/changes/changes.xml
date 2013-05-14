@@ -24,6 +24,17 @@
   </properties>
   <body>
     <release version="1.1.2-SNAPSHOT" description="Release 1.1.2-SNAPSHOT">
+      <action dev="roland" type="fix" issue="105" date="2013-05-05">
+        Conversion for TabularData optimized. If any index of an TabularData
+        structure is not a SimpleType, then a direct serialization of the Tabular
+        Data (i.e. an JSON Object with two entries "indexNames" and "values" is created).
+        Otherwise, if it is the representation of an MXBean Map attribute, the map is recreated,
+        otherwise, nested maps are used for simple acces. More on this in the
+        reference manual.
+      </action>
+      <action dev="roland" type="fix" issue="104" date="2013-05-03">
+        Added extra CORS header for allowing authentication during Ajax CORS access.
+      </action>
       <action dev="roland" type="fix" issue="97" date="2013-04-18">
         Added support for non-string keys when serializing TabularData
         (i.e. long, int, short, byte, ObjectName).

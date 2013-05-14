@@ -32,6 +32,9 @@ public interface MxBeanSampleMXBean {
     ComplexTestData getComplexTestData();
     void setComplexTestData(ComplexTestData testData);
 
+    Map<ComplexMapKey,String> getMapWithComplexKey();
+    void setMapWithComplexKey(Map<ComplexMapKey,String> pMap);
+
     Map<String,Long> getMap();
     void setMap(Map<String,Long> pMap);
 

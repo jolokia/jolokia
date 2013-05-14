@@ -27,9 +27,9 @@ import org.osgi.service.http.HttpContext;
 /**
  * Authentication context which uses a simple user/password credential pair
  *
-* @author roland
-* @since Jan 7, 2010
-*/
+ * @author roland
+ * @since Jan 7, 2010
+ */
 class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
     private final String user;
     private final String password;

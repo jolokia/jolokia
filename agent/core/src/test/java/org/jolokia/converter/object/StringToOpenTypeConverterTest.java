@@ -1,6 +1,9 @@
 package org.jolokia.converter.object;
 
-import javax.management.AttributeNotFoundException;
+import java.util.List;
+import java.util.Set;
+
+import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.converter.util.CompositeTypeAndJson;
@@ -192,6 +195,115 @@ public class StringToOpenTypeConverterTest {
         assertEquals(col2.get("value"),"valueTwo");
     }
 
+    @Test
+    public void tabularTypeInFullRepresentation() throws OpenDataException, MalformedObjectNameException {
+        TabularType type = getSampleTabularTypeForComplexTabularData();
+        String json = "{ \"indexNames\" : [ \"user\", \"street\" ], " +
+                      "  \"values\" : [ " +
+                      "      { \"user\" : { \"name\" : \"roland\", \"age\" : 44 }, " +
+                      "        \"street\" : \"homestreet\", " +
+                      "        \"oname\" : \"java.lang:type=Memory\" " +
+                      "      }]" +
+                      "}";
+        TabularData data = (TabularData) converter.convertToObject(type,json);
+        assertNotNull(data);
+        Set keySet = data.keySet();
+        assertEquals(keySet.size(), 1);
+        List keys = (List) keySet.iterator().next();
+        assertEquals(keys.size(),2);
+        assertTrue(keys.contains("homestreet"));
+        CompositeData cd = checkCompositeKey(keys);
+        CompositeData row = data.get(new Object[] { cd, "homestreet"});
+        assertEquals(row.get("user"),cd);
+        assertEquals(row.get("street"),"homestreet");
+        assertEquals(row.get("oname"),new ObjectName("java.lang:type=Memory"));
+    }
+
+    private CompositeData checkCompositeKey(List pKeys) {
+        for (Object o : pKeys) {
+            if (o instanceof CompositeData) {
+                CompositeData cd = (CompositeData) o;
+                assertEquals(cd.get("name"),"roland");
+                assertEquals(cd.get("age"),44);
+                return cd;
+            }
+        }
+        fail("No CD Key found");
+        return null;
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*index.*name.*")
+    public void invalidIndexNameForComplexTabularDataConversion() throws OpenDataException {
+        TabularType type = getSampleTabularTypeForComplexTabularData();
+        String json = "{ \"indexNames\" : [ \"user\", \"bla\" ], " +
+                      "  \"values\" : [ " +
+                      "      { \"user\" : { \"name\" : \"roland\", \"age\" : 44 }, " +
+                      "        \"bla\" : \"homestreet\", " +
+                      "        \"oname\" : \"java.lang:type=Memory\" " +
+                      "      }]" +
+                      "}";
+        converter.convertToObject(type,json);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*index.*name.*")
+    public void invalidIndexNameCountForComplexTabularDataConversion() throws OpenDataException {
+        TabularType type = getSampleTabularTypeForComplexTabularData();
+        String json = "{ \"indexNames\" : [ \"user\", \"street\", \"bla\" ], " +
+                      "  \"values\" : [ " +
+                      "      { \"user\" : { \"name\" : \"roland\", \"age\" : 44 }, " +
+                      "        \"street\" : \"homestreet\", " +
+                      "        \"bla\" : \"blub\", " +
+                      "        \"oname\" : \"java.lang:type=Memory\" " +
+                      "      }]" +
+                      "}";
+        converter.convertToObject(type,json);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*array.*")
+    public void invalidTypeComplexTabularDataConversion1() throws OpenDataException {
+        TabularType type = getSampleTabularTypeForComplexTabularData();
+        String json = "{ \"indexNames\" : { \"user\" : \"bla\" }, " +
+                      "  \"values\" : [ " +
+                      "      { \"user\" : { \"name\" : \"roland\", \"age\" : 44 }, " +
+                      "        \"street\" : \"homestreet\", " +
+                      "        \"bla\" : \"blub\", " +
+                      "        \"oname\" : \"java.lang:type=Memory\" " +
+                      "      }]" +
+                      "}";
+        converter.convertToObject(type,json);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*array.*")
+    public void invalidTypeComplexTabularDataConversion2() throws OpenDataException {
+        TabularType type = getSampleTabularTypeForComplexTabularData();
+        String json = "{ \"indexNames\" : [ \"user\", \"street\" ], " +
+                      "  \"values\" :  " +
+                      "      { \"user\" : { \"name\" : \"roland\", \"age\" : 44 }, " +
+                      "        \"street\" : \"homestreet\", " +
+                      "        \"bla\" : \"blub\", " +
+                      "        \"oname\" : \"java.lang:type=Memory\" " +
+                      "      }" +
+                      "}";
+        converter.convertToObject(type,json);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*object.*")
+    public void invalidTypeComplexTabularDataConversion3() throws OpenDataException {
+        TabularType type = getSampleTabularTypeForComplexTabularData();
+        String json = "{ \"indexNames\" : [ \"user\", \"street\"], " +
+                      "  \"values\" : [ " +
+                      "      [{ \"user\" : { \"name\" : \"roland\", \"age\" : 44 }, " +
+                      "        \"street\" : \"homestreet\", " +
+                      "        \"bla\" : \"blub\", " +
+                      "        \"oname\" : \"java.lang:type=Memory\" " +
+                      "      }]]" +
+                      "}";
+        converter.convertToObject(type,json);
+    }
+
+
+
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONObject.*")
     public void tabularTypeForMXBeanMapsFail() throws OpenDataException {
         TabularTypeAndJson taj = getSampleTabularTypeForMXBeanMap();
@@ -199,9 +311,8 @@ public class StringToOpenTypeConverterTest {
         converter.convertToObject(taj.getType(), "[ { \"keyOne\" : \"valueOne\" } ]");
     }
 
-
     @Test
-    public void tabularTypeForMXBeanMapsComplext() throws OpenDataException {
+    public void tabularTypeForMXBeanMapsComplex() throws OpenDataException {
         TabularTypeAndJson inner = getSampleTabularTypeForMXBeanMap();
         TabularTypeAndJson taj = new TabularTypeAndJson(
                 new String[]{"key"},
@@ -246,7 +357,6 @@ public class StringToOpenTypeConverterTest {
     }
 
 
-
     private TabularTypeAndJson getSampleTabularTypeForMXBeanMap() throws OpenDataException {
         return new TabularTypeAndJson(
                     new String[] { "key" },
@@ -255,6 +365,21 @@ public class StringToOpenTypeConverterTest {
                             STRING,"value", "dummy"
                     )
             );
+    }
+
+
+
+    private TabularType getSampleTabularTypeForComplexTabularData() throws OpenDataException {
+        CompositeType keyType = new CompositeType("key","key",
+                                                  new String[] { "name", "age"},
+                                                  new String[] { "name", "age"},
+                                                  new OpenType[] { STRING, INTEGER});
+        CompositeTypeAndJson ctj = new CompositeTypeAndJson(
+                keyType,"user",null,
+                STRING,"street",null,
+                OBJECTNAME,"oname",null
+        );
+        return new TabularType("test","test",ctj.getType(),new String[] {"user", "street"} );
     }
 
 

@@ -16,13 +16,11 @@ package org.jolokia.converter.object;
  *  limitations under the License.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 
 /**
  * Converter for {@link TabularData}
@@ -50,25 +48,116 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
     /** {@inheritDoc} */
     @Override
     Object convertToObject(TabularType pType, Object pFrom) {
-        JSONAware pValue = toJSON(pFrom);
-        CompositeType rowType = pType.getRowType();
-        if (rowType.containsKey("key") && rowType.containsKey("value") && rowType.keySet().size() == 2) {
-            return convertToTabularTypeFromMap(pType, pValue, rowType);
+
+        JSONObject value = getAsJsonObject(pFrom);
+
+        // Convert simple map representation (with rowtype "key" and "value")
+        if (checkForMapAttributeWithSimpleKey(pType)) {
+            return convertToTabularTypeFromMap(pType, value);
         }
 
-        // =====================================================================================
-        // Its a plain TabularData, which is converted from a maps of maps
+        // If it is given a a full representation (with "indexNames" and "values"), then parse this
+        // accordingly
+        if (checkForFullTabularDataRepresentation(value, pType)) {
+            return convertTabularDataFromFullRepresentation(value, pType);
+        }
 
+        // Its a plain TabularData, which is tried to convert rom a maps of maps
         TabularDataSupport tabularData = new TabularDataSupport(pType);
-        if (!(pValue instanceof JSONObject)) {
-            throw new IllegalArgumentException("Expected JSON type for a TabularData is JSONObject, not " + pValue.getClass());
+        // Recursively go down the map and collect the values
+        putRowsToTabularData(tabularData, value, pType.getIndexNames().size());
+        return tabularData;
+    }
+
+    // =========================================================================================================
+
+    private JSONObject getAsJsonObject(Object pFrom) {
+        JSONAware jsonVal = toJSON(pFrom);
+        if (!(jsonVal instanceof JSONObject)) {
+            throw new IllegalArgumentException("Expected JSON type for a TabularData is JSONObject, not " + jsonVal.getClass());
         }
-        putRowsToTabularData(tabularData, (JSONObject) pValue, pType.getIndexNames().size());
+        return (JSONObject) jsonVal;
+    }
+
+    private boolean checkForMapAttributeWithSimpleKey(TabularType pType) {
+        CompositeType rowType = pType.getRowType();
+
+        return // Single index named "key"
+                pType.getIndexNames().size() == 1 && pType.getIndexNames().contains("key") &&
+                // Two entries in the row: "key" and "value"
+                rowType.containsKey("value") && rowType.keySet().size() == 2 &&
+                // Only convert to map for simple types for all others use normal conversion. See #105 for details.
+                rowType.getType("key") instanceof SimpleType;
+    }
+
+    // Check for a full table data representation and do some sanity checks
+    private boolean checkForFullTabularDataRepresentation(JSONObject pValue, TabularType pType) {
+        if (pValue.containsKey("indexNames") && pValue.containsKey("values") && pValue.size() == 2) {
+            Object jsonVal = pValue.get("indexNames");
+            if (!(jsonVal instanceof JSONArray)) {
+                throw new IllegalArgumentException("Index names for tabular data must given as JSON array, not " + jsonVal.getClass());
+            }
+            JSONArray indexNames = (JSONArray) jsonVal;
+            List<String> tabularIndexNames = pType.getIndexNames();
+            if (indexNames.size() != tabularIndexNames.size()) {
+                throw new IllegalArgumentException("Given array with index names must have " + tabularIndexNames.size() + " entries " +
+                                                   "(given: " + indexNames + ", required: " + tabularIndexNames + ")");
+            }
+            for (Object index : indexNames) {
+                if (!tabularIndexNames.contains(index.toString())) {
+                    throw new IllegalArgumentException("No index with name '" + index + "' known " +
+                                                       "(given: " + indexNames + ", required: " + tabularIndexNames + ")");
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private TabularData convertToTabularTypeFromMap(TabularType pType, JSONObject pValue) {
+        CompositeType rowType = pType.getRowType();
+
+        // A TabularData is requested for mapping a map for the call to an MXBean
+        // as described in http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html
+        // This means, we will convert a JSONObject to the required format
+        TabularDataSupport tabularData = new TabularDataSupport(pType);
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> jsonObj = (Map<String,String>) pValue;
+        for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("key", getDispatcher().convertToObject(rowType.getType("key"), entry.getKey()));
+            map.put("value", getDispatcher().convertToObject(rowType.getType("value"), entry.getValue()));
+
+            try {
+                CompositeData compositeData = new CompositeDataSupport(rowType, map);
+                tabularData.put(compositeData);
+            } catch (OpenDataException e) {
+                throw new IllegalArgumentException(e.getMessage(),e);
+            }
+        }
 
         return tabularData;
     }
 
-    // =========================================================================================
+    // Convert complex representation containing "indexNames" and "values"
+    private TabularData convertTabularDataFromFullRepresentation(JSONObject pValue, TabularType pType) {
+        JSONAware jsonVal;
+        jsonVal = (JSONAware) pValue.get("values");
+        if (!(jsonVal instanceof JSONArray)) {
+            throw new IllegalArgumentException("Values for tabular data of type " +
+                                               pType + " must given as JSON array, not " + jsonVal.getClass());
+        }
+
+        TabularDataSupport tabularData = new TabularDataSupport(pType);
+        for (Object val : (JSONArray) jsonVal) {
+            if (!(val instanceof JSONObject)) {
+                throw new IllegalArgumentException("Tabular-Data values must be given as JSON objects, not " + val.getClass());
+            }
+            tabularData.put((CompositeData) getDispatcher().convertToObject(pType.getRowType(), val));
+        }
+        return tabularData;
+    }
 
     private void putRowsToTabularData(TabularDataSupport pTabularData, JSONObject pValue, int pLevel) {
         TabularType type = pTabularData.getTabularType();
@@ -85,34 +174,5 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
                 pTabularData.put((CompositeData) getDispatcher().convertToObject(type.getRowType(), jsonValue));
             }
         }
-    }
-
-    private TabularData convertToTabularTypeFromMap(TabularType pType, JSONAware pValue, CompositeType pRowType) {
-        // A TabularData is requested for mapping a map for the call to an MXBean
-        // as described in http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html
-        // This means, we will convert a JSONObject to the required format
-        TabularDataSupport tabularData = new TabularDataSupport(pType);
-        if (!(pValue instanceof JSONObject)) {
-            throw new IllegalArgumentException(
-                    "Cannot convert " + pValue + " to a TabularData type for an MXBean's map representation. " +
-                    "This must be a JSONObject / Map" );
-
-        }
-        @SuppressWarnings("unchecked")
-        Map<String, String> jsonObj = (Map<String,String>) pValue;
-        for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("key", getDispatcher().convertToObject(pRowType.getType("key"), entry.getKey()));
-            map.put("value", getDispatcher().convertToObject(pRowType.getType("value"), entry.getValue()));
-
-            try {
-                CompositeData compositeData = new CompositeDataSupport(pRowType, map);
-                tabularData.put(compositeData);
-            } catch (OpenDataException e) {
-                throw new IllegalArgumentException(e.getMessage(),e);
-            }
-        }
-
-        return tabularData;
     }
 }

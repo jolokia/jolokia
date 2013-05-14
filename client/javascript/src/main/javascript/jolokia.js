@@ -65,7 +65,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.1.1";
+            this.CLIENT_VERSION = "1.1.2-SNAPSHOT";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -180,6 +180,16 @@
                         ajaxParams[key] = opts[key];
                     }
                 });
+
+                if (ajaxParams['username'] !== 'undefined' && ajaxParams['password'] !== 'undefined') {
+                    ajaxParams.beforeSend = function (xhr) { 
+                        var tok = ajaxParams['username'] + ':' + ajaxParams['password'];
+                        xhr.setRequestHeader('Authorization', "Basic " + btoa(tok));
+                    };
+                    ajaxParams.xhrFields = {
+                        withCredentials: true
+                    };
+                }
 
                 if (extractMethod(request, opts) === "post") {
                     $.extend(ajaxParams, POST_AJAX_PARAMS);
