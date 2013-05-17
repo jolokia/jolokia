@@ -23,12 +23,9 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.config.ConfigurationImpl;
-import org.jolokia.http.ProcessingParameters;
-import org.jolokia.converter.Converters;
-import org.jolokia.detector.ServerHandle;
+import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.request.*;
-import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -38,44 +35,62 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 02.09.11
  */
+@Test(singleThreaded = true)
 public class Jsr160RequestDispatcherTest {
 
     private Jsr160RequestDispatcher dispatcher;
-    private ProcessingParameters procParams;
+    //private ProcessingParameters procParams;
+    private TestJolokiaContext ctx;
 
-    @BeforeClass
+    @BeforeMethod
     private void setup() {
-        dispatcher = createDispatcherPointingToLocalMBeanServer();
-        procParams = new ConfigurationImpl().getProcessingParameters(new HashMap<String, String>());
+        ctx = new TestJolokiaContext.Builder().build();
+        dispatcher = new Jsr160RequestDispatcher(ctx) {
+            @Override
+            protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
+                Map ret = super.prepareEnv(pTargetConfig);
+                if (ret == null) {
+                    ret = new HashMap();
+                }
+                ret.put("jmx.remote.protocol.provider.pkgs", "org.jolokia.jsr160");
+                return ret;
+            }
+        };
     }
 
-    @AfterClass
-    public void tearDown() throws Exception {
+    @AfterMethod
+    private void destroyCtx() throws JMException {
+        if (ctx != null) {
+            ctx.destroy();
+            ctx = null;
+        }
         dispatcher.destroy();
     }
 
     @Test
     public void canHandle() {
-        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
+        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
         JmxRequest req = preparePostReadRequest(null);
         assertTrue(dispatcher.canHandle(req));
     }
 
     @Test
     public void useReturnValue() {
-        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
+        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", procParams));
+        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()));
     }
 
     @Test(expectedExceptions = IOException.class)
     public void simpleDispatchFail() throws Exception {
         JmxRequest req = preparePostReadRequest(null);
-        tearDown();
-        getOriginalDispatcher().dispatchRequest(req);
+        destroyCtx();
+        TestJolokiaContext testCtx;
+        testCtx = new TestJolokiaContext.Builder().build();
+        new Jsr160RequestDispatcher(testCtx).dispatchRequest(req);
         setup();
     }
 
@@ -122,29 +137,7 @@ public class Jsr160RequestDispatcherTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, procParams);
-    }
-
-    private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer() {
-        Converters converters = new Converters();
-        ServerHandle handle = new ServerHandle(null,null,null,null,null);
-        return  new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor()) {
-            @Override
-            protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
-                Map ret = super.prepareEnv(pTargetConfig);
-                if (ret == null) {
-                    ret = new HashMap();
-                }
-                ret.put("jmx.remote.protocol.provider.pkgs","org.jolokia.jsr160");
-                return ret;
-            }
-        };
-    }
-
-    private Jsr160RequestDispatcher getOriginalDispatcher() {
-        return new Jsr160RequestDispatcher(new Converters(),
-                                           new ServerHandle(null,null,null,null,null),
-                                           new AllowAllRestrictor());
+        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, new TestProcessingParameters());
     }
 
 }

@@ -21,7 +21,10 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.BackendCallback;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -38,7 +41,14 @@ public class PullNotificationBackendTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        backend = new PullNotificationBackend(new TestJolokiaContext());
+        ServerHandle handle = new ServerHandle(null,null,null,null,null);
+        handle.setJolokiaId("test");
+        JolokiaContext ctx = new TestJolokiaContext.Builder()
+                .serverHandle(handle)
+                // Dispatches will add backends themselves (potentially)
+                .dispatchers(Collections.<RequestDispatcher>emptyList())
+                .build();
+        backend = new PullNotificationBackend(ctx);
         assertEquals(backend.getType(),"pull");
     }
 

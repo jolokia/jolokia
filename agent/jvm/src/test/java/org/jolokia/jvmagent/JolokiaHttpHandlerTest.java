@@ -21,12 +21,13 @@ import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import javax.management.JMException;
+
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.ConfigurationImpl;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -42,17 +43,23 @@ import static org.testng.Assert.*;
 public class JolokiaHttpHandlerTest {
 
     private JolokiaHttpHandler handler;
+    private TestJolokiaContext ctx;
 
 
     @BeforeMethod
     public void setup() {
-        handler = new JolokiaHttpHandler(getConfig());
+        ctx = getContext();
+        handler = new JolokiaHttpHandler(ctx);
         handler.start(false);
     }
 
     @AfterMethod
-    public void tearDown() {
-        handler.stop();
+    public void tearDown() throws JMException {
+        if (handler != null) {
+            handler.stop();
+            ctx.destroy();
+            handler = null;
+        }
     }
 
     @Test
@@ -63,7 +70,7 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("GET");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
 
         handler.handle(exchange);
 
@@ -83,7 +90,7 @@ public class JolokiaHttpHandlerTest {
         // Simple GET method
         prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
 
         handler.handle(exchange);
 
@@ -115,7 +122,7 @@ public class JolokiaHttpHandlerTest {
         // Simple GET method
         expect(exchange.getRequestMethod()).andReturn("PUT");
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
 
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
@@ -126,31 +133,9 @@ public class JolokiaHttpHandlerTest {
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
     public void handlerNotStarted() throws URISyntaxException, IOException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getConfig());
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getContext());
         newHandler.handle(prepareExchange("http://localhost:8080/"));
 
-    }
-
-    @Test
-    public void customRestrictor() throws URISyntaxException, IOException, ParseException {
-        for (String[] params : new String[][] {  { "classpath:/access-restrictor.xml","not allowed"},{"file:///not-existing.xml","No access"}}) {
-            ConfigurationImpl config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
-            JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
-            HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
-            // Simple GET method
-            expect(exchange.getRequestMethod()).andReturn("GET");
-            Headers header = new Headers();
-            ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-            newHandler.start(false);
-            try {
-                newHandler.handle(exchange);
-            } finally {
-                newHandler.stop();
-            }
-            JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
-            assertTrue(resp.containsKey("error"));
-            assertTrue(((String) resp.get("error")).contains(params[1]));
-        }
     }
 
     @Test
@@ -162,7 +147,7 @@ public class JolokiaHttpHandlerTest {
 
         prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
 
         handler.handle(exchange);
 
@@ -186,7 +171,7 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("OPTIONS");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
         assertEquals(header.getFirst("Access-Control-Allow-Headers"),"X-Bla, X-Blub");
@@ -197,7 +182,7 @@ public class JolokiaHttpHandlerTest {
         return prepareExchange(pUri,"Origin",null);
     }
 
-    private HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
+    static HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
         HttpExchange exchange = EasyMock.createMock(HttpExchange.class);
         URI uri = new URI(pUri);
         expect(exchange.getRequestURI()).andReturn(uri);
@@ -210,7 +195,7 @@ public class JolokiaHttpHandlerTest {
         return exchange;
     }
 
-    private ByteArrayOutputStream prepareResponse(JolokiaHttpHandler handler, HttpExchange exchange, Headers header) throws IOException {
+    static ByteArrayOutputStream prepareResponse(HttpExchange exchange, Headers header) throws IOException {
         expect(exchange.getResponseHeaders()).andReturn(header).anyTimes();
         exchange.sendResponseHeaders(anyInt(),anyLong());
 
@@ -221,8 +206,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     private static boolean debugToggle = false;
-    public ConfigurationImpl getConfig(Object ... extra) {
-        TestJolokiaContext ctx = new TestJolokiaContext();
+    public TestJolokiaContext getContext(Object... extra) {
         ArrayList list = new ArrayList();
         list.add(ConfigKey.AGENT_CONTEXT);
         list.add("/jolokia");
@@ -231,8 +215,9 @@ public class JolokiaHttpHandlerTest {
         for (Object e : extra) {
             list.add(e);
         }
-        ConfigurationImpl config = new ConfigurationImpl(list.toArray());
         debugToggle = !debugToggle;
-        return config;
+        return new TestJolokiaContext.Builder()
+                .config(list.toArray())
+                .build();
     }
 }

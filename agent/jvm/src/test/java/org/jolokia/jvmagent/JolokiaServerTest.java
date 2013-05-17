@@ -76,6 +76,7 @@ public class JolokiaServerTest {
                   false);
     }
 
+
     //@Test(expectedExceptions = SecurityException.class,expectedExceptionsMessageRegExp = ".*No password.*")
     public void invalidConfig() throws IOException, InterruptedException {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());

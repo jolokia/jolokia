@@ -32,7 +32,8 @@ import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
@@ -48,7 +49,9 @@ public class BackendManagerTest {
 
     @AfterMethod
     public void destroy() throws JMException {
-        ctx.destroy();
+        if (ctx != null) {
+            ctx.destroy();
+        }
     }
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
@@ -56,6 +59,7 @@ public class BackendManagerTest {
         if (configKeysAndValues.length > 0) {
                 builder.config(ConfigKey.DEBUG, "true");
         }
+        //builder.dispatchers(Collections.<RequestDispatcher>emptyList());
         ctx = builder.build();
         return ctx;
     }

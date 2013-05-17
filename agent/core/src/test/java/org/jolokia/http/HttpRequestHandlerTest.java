@@ -18,20 +18,23 @@ package org.jolokia.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.backend.BackendManager;
+import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.testng.annotations.*;
+import org.json.simple.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -42,62 +45,220 @@ import static org.testng.Assert.*;
  */
 public class HttpRequestHandlerTest {
 
-    private BackendManager backend;
     private HttpRequestHandler handler;
-
-    TestJolokiaContext ctx;
-
-    @BeforeMethod
-    public void setup() {
-        backend = createMock(BackendManager.class);
-        ctx = new TestJolokiaContext();
-        handler = new HttpRequestHandler(ctx,false);
-    }
+    private TestJolokiaContext ctx;
+    private RequestDispatcher dispatcher;
 
     @AfterMethod
-    public void tearDown() throws JMException {
-        ctx.destroy();
-        verify(backend);
+    public void destroy() throws JMException {
+        if (ctx != null) {
+            ctx.destroy();
+        }
     }
 
     @Test
-    public void accessAllowed() {
-        expect(backend.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
-        replay(backend);
-
-        handler.checkClientIPAccess("localhost","127.0.0.1");
+    public void accessAllowed() throws JMException {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
+        replay(restrictor);
+        init(restrictor);
+        handler.checkClientIPAccess("localhost", "127.0.0.1");
+        verify(restrictor);
     }
 
     @Test(expectedExceptions = { SecurityException.class })
-    public void accessDenied() {
-        expect(backend.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(false);
-        replay(backend);
+    public void accessDenied() throws JMException {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(false);
+        replay(restrictor);
+        init(restrictor);
 
         handler.checkClientIPAccess("localhost","127.0.0.1");
+        verify(restrictor);
     }
 
     @Test
-    public void get() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        JSONObject resp = new JSONObject();
-        expect(backend.handleRequest(isA(JmxReadRequest.class))).andReturn(resp);
-        replay(backend);
-
+    public void get() throws JMException, IOException, NotChangedException {
+        prepareDispatcher(JmxReadRequest.class);
         JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET_REQUEST, null);
-        assertTrue(response == resp);
+        verifyDispatcher(response);
     }
 
     @Test
-    public void getWithDoubleSlashes() throws MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, IOException {
-        JSONObject resp = new JSONObject();
-        expect(backend.handleRequest(eqReadRequest("read", "bla:type=s/lash/", "attribute"))).andReturn(resp);
-        replay(backend);
-
+    public void getWithDoubleSlashes() throws JMException, IOException, NotChangedException {
+        prepareDispatcher(new String[] { "bla:type=s/lash/", "attribute" });
         JSONObject response = (JSONObject) handler.handleGetRequest("/read/bla%3Atype%3Ds!/lash!//attribute",
-                                 "/read/bla:type=s!/lash!/Ok",null);
-        assertTrue(response == resp);
+                                                                    "/read/bla:type=s!/lash!/Ok", null);
+        verifyDispatcher(response);
     }
 
-    private JmxRequest eqReadRequest(String pType, final String pMBean, final String pAttribute) {
+
+    @Test
+    public void singlePost() throws IOException, JMException, NotChangedException {
+        prepareDispatcher();
+        InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
+        JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia",is,"utf-8",null);
+        verifyDispatcher(response);
+    }
+
+
+    @Test
+    public void doublePost() throws IOException, JMException, NotChangedException {
+        prepareDispatcher(2,JmxReadRequest.class);
+        InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
+        JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
+        verifyDispatcher(2, response);
+    }
+
+    @Test
+    public void preflightCheck() {
+        String origin = "http://bla.com";
+        String headers ="X-Data: Test";
+        //expect(backend.isCorsAccessAllowed(origin)).andReturn(true);
+        //replay(backend);
+
+        Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
+        assertEquals(ret.get("Access-Control-Allow-Origin"), origin);
+    }
+
+    @Test
+    public void preflightCheckNegative() throws JMException {
+        String origin = "http://bla.com";
+        String headers ="X-Data: Test";
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isCorsAccessAllowed(origin)).andReturn(false);
+        replay(restrictor);
+        init(restrictor);
+
+        Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
+        assertNull(ret.get("Access-Control-Allow-Origin"));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void invalidJson() throws IOException {
+        //replay(backend);
+        InputStream is = HttpTestUtil.createServletInputStream("{ bla;");
+        handler.handlePostRequest("/jolokia",is,"utf-8",null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void invalidJson2() throws IOException {
+        //replay(backend);
+        InputStream is = HttpTestUtil.createServletInputStream("12");
+        handler.handlePostRequest("/jolokia",is,"utf-8",null);
+    }
+
+    @Test
+    public void requestErrorHandling() throws JMException, IOException, NotChangedException {
+        Object[] exceptions = new Object[] {
+                new ReflectionException(new NullPointerException()), 404,500,
+                new InstanceNotFoundException(), 404, 500,
+                new MBeanException(new NullPointerException()), 500, 500,
+                new AttributeNotFoundException(), 404, 500,
+                new UnsupportedOperationException(), 500, 500,
+                new IOException(), 500, 500,
+                new IllegalArgumentException(), 400, 400,
+                new SecurityException(),403, 403,
+                new RuntimeMBeanException(new NullPointerException()), 500, 500
+        };
+
+
+        for (int i = 0; i < exceptions.length; i += 3) {
+            Exception e = (Exception) exceptions[i];
+            LogHandler log = createMock(LogHandler.class);
+            expect(log.isDebug()).andReturn(true).anyTimes();
+            log.error(find("" + exceptions[i + 1]), EasyMock.<Throwable>anyObject());
+            log.error(find("" + exceptions[i + 2]), EasyMock.<Throwable>anyObject());
+            log.debug((String) anyObject());
+            expectLastCall().asStub();
+            init(log);
+            expect(dispatcher.dispatchRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
+            replay(dispatcher,log);
+            JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
+                                                                    "/read/java.lang:type=Memory/HeapMemoryUsage",null);
+            assertEquals(resp.get("status"),exceptions[i+1]);
+
+            resp = handler.handleThrowable(e);
+            assertEquals(resp.get("status"),exceptions[i+2],e.getClass().getName());
+            ctx.destroy();
+            ctx = null;
+        }
+    }
+
+    // ======================================================================================================
+
+
+    private void init() throws JMException {
+        init(new AllowAllRestrictor(),new StdoutLogHandler());
+    }
+
+    private void init(LogHandler pLogHandler) throws JMException {
+        init(new AllowAllRestrictor(),pLogHandler);
+    }
+
+    private void init(Restrictor pRestrictor) throws JMException {
+        init(pRestrictor,new StdoutLogHandler());
+    }
+
+    private void init(Restrictor pRestrictor, LogHandler pLogHandler) throws JMException {
+        dispatcher = createMock(RequestDispatcher.class);
+        dispatcher.destroy();
+        expectLastCall().asStub();
+        expect(dispatcher.canHandle((JmxRequest) anyObject())).andStubReturn(true);
+        expect(dispatcher.useReturnValueWithPath((JmxRequest) anyObject())).andStubReturn(false);
+        ctx = new TestJolokiaContext.Builder()
+                .restrictor(pRestrictor)
+                .dispatchers(Arrays.asList(dispatcher))
+                .logHandler(pLogHandler)
+                .build();
+        handler = new HttpRequestHandler(ctx,false);
+    }
+
+
+
+
+    private void prepareDispatcher() throws JMException, NotChangedException, IOException {
+        prepareDispatcher(1,JmxReadRequest.class);
+    }
+
+    private void prepareDispatcher(Object pJmxRequest) throws JMException, NotChangedException, IOException {
+        prepareDispatcher(1,pJmxRequest);
+    }
+
+    private void prepareDispatcher(int i, Object pRequest) throws JMException, IOException, NotChangedException {
+        init();
+        if (pRequest instanceof JmxRequest) {
+            expect(dispatcher.dispatchRequest((JmxRequest) pRequest)).andReturn("hello").times(i);
+        }
+        else if (pRequest instanceof String[]) {
+            String a[] = (String[]) pRequest;
+            expect(dispatcher.dispatchRequest(eqReadRequest(a[0],a[1]))).andReturn("hello").times(i);
+        } else {
+            expect(dispatcher.dispatchRequest(isA((Class<JmxRequest>) pRequest))).andReturn("hello").times(i);
+        }
+        replay(dispatcher);
+    }
+
+    private void verifyDispatcher(JSONObject pResponse) {
+        verifyDispatcher(1,pResponse);
+    }
+
+    private void verifyDispatcher(int i, JSONAware response) {
+        if (i == 1) {
+            assertEquals(((JSONObject) response).get("value"),"hello");
+        } else {
+            JSONArray ret = (JSONArray) response;
+            assertEquals(ret.size(),i);
+            for (int j = 0; j < i; j++) {
+                JSONObject val = (JSONObject) ret.get(j);
+                assertEquals(val.get("value"),"hello");
+            }
+        }
+        verify(dispatcher);
+    }
+
+
+    private JmxRequest eqReadRequest(final String pMBean, final String pAttribute) {
         EasyMock.reportMatcher(new IArgumentMatcher() {
             public boolean matches(Object argument) {
                 try {
@@ -123,100 +284,5 @@ public class HttpRequestHandlerTest {
     }
 
 
-    @Test
-    public void singlePost() throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        JSONObject resp = new JSONObject();
-        expect(backend.handleRequest(isA(JmxReadRequest.class))).andReturn(resp);
-        replay(backend);
-
-        InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
-        JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia",is,"utf-8",null);
-        assertTrue(response == resp);
-    }
-
-
-    @Test
-    public void doublePost() throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        JSONObject resp = new JSONObject();
-        expect(backend.handleRequest(isA(JmxReadRequest.class))).andReturn(resp).times(2);
-        replay(backend);
-
-        InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
-        JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
-        assertEquals(response.size(),2);
-        assertTrue(response.get(0) == resp);
-        assertTrue(response.get(1) == resp);
-    }
-
-    @Test
-    public void preflightCheck() {
-        String origin = "http://bla.com";
-        String headers ="X-Data: Test";
-        expect(backend.isCorsAccessAllowed(origin)).andReturn(true);
-        replay(backend);
-
-        Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
-        assertEquals(ret.get("Access-Control-Allow-Origin"),origin);
-    }
-
-    @Test
-    public void preflightCheckNegative() {
-        String origin = "http://bla.com";
-        String headers ="X-Data: Test";
-        expect(backend.isCorsAccessAllowed(origin)).andReturn(false);
-        replay(backend);
-
-        Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
-        assertNull(ret.get("Access-Control-Allow-Origin"));
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidJson() throws IOException {
-        replay(backend);
-        InputStream is = HttpTestUtil.createServletInputStream("{ bla;");
-        handler.handlePostRequest("/jolokia",is,"utf-8",null);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidJson2() throws IOException {
-        replay(backend);
-        InputStream is = HttpTestUtil.createServletInputStream("12");
-        handler.handlePostRequest("/jolokia",is,"utf-8",null);
-    }
-
-    @Test
-    public void requestErrorHandling() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        Object[] exceptions = new Object[] {
-                new ReflectionException(new NullPointerException()), 404,500,
-                new InstanceNotFoundException(), 404, 500,
-                new MBeanException(new NullPointerException()), 500, 500,
-                new AttributeNotFoundException(), 404, 500,
-                new UnsupportedOperationException(), 500, 500,
-                new IOException(), 500, 500,
-                new IllegalArgumentException(), 400, 400,
-                new SecurityException(),403, 403,
-                new RuntimeMBeanException(new NullPointerException()), 500, 500
-        };
-
-        LogHandler log = createMock(LogHandler.class);
-
-        for (int i = 0; i < exceptions.length; i += 3) {
-            Exception e = (Exception) exceptions[i];
-            reset(log);
-            expect(log.isDebug()).andReturn(true).anyTimes();
-            log.error(find("" + exceptions[i + 1]), EasyMock.<Throwable>anyObject());
-            log.error(find("" + exceptions[i + 2]), EasyMock.<Throwable>anyObject());
-            expect(backend.handleRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
-            replay(backend,log);
-            JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
-                                                                    "/read/java.lang:type=Memory/HeapMemoryUsage",null);
-            assertEquals(resp.get("status"),exceptions[i+1]);
-
-            resp = handler.handleThrowable(e);
-            assertEquals(resp.get("status"),exceptions[i+2],e.getClass().getName());
-        }
-    }
-
-    // ======================================================================================================
 
 }

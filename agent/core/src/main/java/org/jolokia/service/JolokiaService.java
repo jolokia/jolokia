@@ -28,7 +28,7 @@ public interface JolokiaService {
 
     public void destroy();
 
-    public void init(JolokiaServiceManager pSerciceManager);
+    public void init(JolokiaServiceManager pServiceManager);
 
     public enum ServiceType {
         CONFIGURATION,

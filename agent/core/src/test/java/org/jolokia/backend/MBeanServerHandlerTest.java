@@ -58,7 +58,9 @@ public class MBeanServerHandlerTest {
 
     @AfterMethod
     public void tearDown() throws JMException {
-        handler.destroy();
+        if (handler != null) {
+            handler.destroy();
+        }
     }
 
     @Test

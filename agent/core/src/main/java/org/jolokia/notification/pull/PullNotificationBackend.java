@@ -41,6 +41,7 @@ public class PullNotificationBackend implements NotificationBackend {
         try {
             getMBeanServer().registerMBean(store, mbeanName);
         } catch (JMException e) {
+            // TODO: Re-enable when notifications have been separated. If enabled, tests will fail.
             throw new IllegalArgumentException("Cannot register MBean " + mbeanName + " as notification pull store: " + e,e);
         }
     }

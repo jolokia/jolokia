@@ -18,7 +18,9 @@ package org.jolokia.service.impl;
 
 import java.util.*;
 
-import org.jolokia.config.*;
+import javax.management.JMException;
+
+import org.jolokia.config.Configuration;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;
@@ -41,6 +43,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     // Instantiated services, categorized by type and ordered;
     private Map<ServiceType,SortedSet<JolokiaService>> services;
+
+    // Jolokia context connecting to this manager
+    private JolokiaContextImpl jolokiaContext;
 
     public JolokiaServiceManagerImpl() {
         isInitialized = false;
@@ -82,35 +87,51 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /**
-     * To be called, when the Jolokia agent goes down
-     */
-    public void destroy() {
-        // Call destroy on all service and service factories
-    }
-
-    /**
      * Start up the service manager. All pre-instantiated services sh
      *
      * @return the created jolokia context
      */
-    public JolokiaContext start() {
-        isInitialized = true;
+    public synchronized JolokiaContext start() {
+        if (!isInitialized) {
 
-        // Essential services are looked up before
-        Configuration config = getConfiguration();
-        LogHandler log = getLogHandler();
+            // Essential services are looked up before
+            Configuration config = getConfiguration();
+            LogHandler log = getLogHandler();
 
-        // Lookup all services by the given service factories
-        for (JolokiaServiceFactory factory : serviceFactories) {
-            factory.init(this);
+            // Lookup all services by the given service factories
+            for (JolokiaServiceFactory factory : serviceFactories) {
+                factory.init(this);
+            }
+            // Call init on all services
+
+            // TODO: Currently everything is used as a singleton.
+            Restrictor restrictor = (Restrictor) getMandatorySingletonService(ServiceType.RESTRICTOR);
+
+            // Create context and remember
+            jolokiaContext = new JolokiaContextImpl(config,log,restrictor);
+            isInitialized = true;
         }
-        // Call init on all services
-
-        // TODO: Currently everything is used as a singleton.
-        Restrictor restrictor = (Restrictor) getMandatorySingletonService(ServiceType.EXTRACTOR);
-        JolokiaContextImpl jolokiaContext = new JolokiaContextImpl(config,log,restrictor);
         return jolokiaContext;
     }
+
+    /**
+     * Stop all services and destroy the managed context
+     *
+     */
+     public synchronized void stop() {
+         if (isInitialized) {
+             try {
+                 jolokiaContext.destroy();
+             } catch (JMException e) {
+                 getLogHandler().error("Cannot destroy the Jolokia context: " + e,e);
+             }
+             for (JolokiaServiceFactory factory : serviceFactories) {
+                 factory.destroy();
+             }
+         }
+         isInitialized = false;
+    }
+
 
     public LogHandler getLogHandler() {
         return (LogHandler) getMandatorySingletonService(ServiceType.LOG_HANDLER);

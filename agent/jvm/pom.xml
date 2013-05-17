@@ -67,7 +67,7 @@
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
-      <classifier>test</classifier>
+      <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
 

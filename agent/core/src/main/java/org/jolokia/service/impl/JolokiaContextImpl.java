@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import javax.management.JMException;
 import javax.management.ObjectName;
 
 import org.jolokia.backend.*;
@@ -61,7 +62,12 @@ public class JolokiaContextImpl implements JolokiaContext {
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
     }
 
-
+    public void destroy() throws JMException {
+        mBeanServerHandler.destroy();
+        for (RequestDispatcher dispatcher : requestDispatchers) {
+            dispatcher.destroy();
+        }
+    }
 
     // Construct configured dispatchers by reflection. Returns always
     // a list, an empty one if no request dispatcher should be created

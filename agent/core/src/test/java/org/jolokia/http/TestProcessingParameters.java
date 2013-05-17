@@ -16,6 +16,10 @@ public class TestProcessingParameters extends ProcessingParameters {
         super(pConfig);
     }
 
+    public TestProcessingParameters() {
+        super(new HashMap<ConfigKey, String>());
+    }
+
     public static ProcessingParameters create(Object ... pParams) {
         Map<ConfigKey,String> cfg = new HashMap<ConfigKey, String>();
         for (int i = 0; i < pParams.length; i+=2) {

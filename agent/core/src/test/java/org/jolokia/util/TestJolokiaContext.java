@@ -60,9 +60,14 @@ public class TestJolokiaContext implements JolokiaContext {
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
         this.serverHandler = pServerHandler != null ? pServerHandler : new MBeanServerHandler(config,logHandler);
         try {
-            URL url = new URL("http://localhost/jolokia");
-            this.handle = pHandle != null ? pHandle : new ServerHandle("vendor","product","version",url,null);
-        } catch (MalformedURLException e) {}
+            if (pHandle != null) {
+                handle = pHandle;
+            } else {
+                URL url = new URL("http://localhost/jolokia");
+                handle = new ServerHandle("vendor","product","version",url,null);
+                handle.setJolokiaId(UUID.randomUUID().toString());
+            }
+            } catch (MalformedURLException e) {}
         this.dispatchers = pDispatchers != null ? pDispatchers : Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this));
         converters = new Converters();
     }
@@ -177,6 +182,11 @@ public class TestJolokiaContext implements JolokiaContext {
 
         public Builder dispatchers(List<RequestDispatcher> pDispatchers) {
             dispatchers = pDispatchers;
+            return this;
+        }
+
+        public Builder logHandler(LogHandler pLogHandler) {
+            logHandler = pLogHandler;
             return this;
         }
 

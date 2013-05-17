@@ -8,9 +8,9 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.jolokia.config.*;
-import org.jolokia.restrictor.*;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.JolokiaServiceBase;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.restrictor.RestrictorServiceFactory;
+import org.jolokia.service.*;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
@@ -61,6 +61,9 @@ public class AgentServlet extends HttpServlet {
     // Mime type used for returning the answer
     private String configMimeType;
 
+    // The Jolokia service manager
+    private JolokiaServiceManagerImpl serviceManager;
+
     /**
      * No argument constructor, used e.g. by an servlet
      * descriptor when creating the servlet out of web.xml
@@ -82,7 +85,7 @@ public class AgentServlet extends HttpServlet {
 
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig)}
+     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogService(ServletConfig)}
      *
      * @param pServletConfig servlet configuration
      */
@@ -91,11 +94,10 @@ public class AgentServlet extends HttpServlet {
         super.init(pServletConfig);
 
         // Create configuration and log handler early in the lifecycle
-        ServletLogHandler logHandler = createLogHandler(pServletConfig);
-        ConfigurationImpl config = initConfig(pServletConfig);
-        JolokiaServiceManagerImpl serviceManager = new JolokiaServiceManagerImpl();
-        serviceManager.addService(config);
-        serviceManager.addService(logHandler);
+
+        serviceManager = new JolokiaServiceManagerImpl();
+        serviceManager.addService(initConfig(pServletConfig));
+        serviceManager.addService(createLogService(pServletConfig));
 
         // Add a restrictor factory
         serviceManager.addServiceFactory(new RestrictorServiceFactory(restrictor));
@@ -119,7 +121,7 @@ public class AgentServlet extends HttpServlet {
      * @return a default log handler
      * @param pServletConfig servlet config from where to get information to build up the log handler
      */
-    protected ServletLogHandler createLogHandler(ServletConfig pServletConfig) {
+    protected JolokiaService createLogService(ServletConfig pServletConfig) {
         return new ServletLogHandler();
     }
 
@@ -153,8 +155,7 @@ public class AgentServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     public void destroy() {
-        // TODO: CTX LC
-        // backendManager.destroy();
+        serviceManager.stop();
         super.destroy();
     }
 
