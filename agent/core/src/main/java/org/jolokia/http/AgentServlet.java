@@ -62,7 +62,7 @@ public class AgentServlet extends HttpServlet {
     private String configMimeType;
 
     // The Jolokia service manager
-    private JolokiaServiceManagerImpl serviceManager;
+    private JolokiaServiceManager serviceManager;
 
     /**
      * No argument constructor, used e.g. by an servlet

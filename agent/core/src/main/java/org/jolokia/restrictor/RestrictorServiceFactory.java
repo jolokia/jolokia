@@ -89,7 +89,7 @@ public final class RestrictorServiceFactory extends JolokiaServiceFactoryBase im
      * @throws IOException if reading of the policy stream failed
      */
     private PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
-        InputStream is = null;
+        InputStream is;
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
             is =  Thread.currentThread().getContextClassLoader().getResourceAsStream(path);

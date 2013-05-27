@@ -28,6 +28,7 @@ import javax.net.ssl.*;
 import com.sun.net.httpserver.*;
 import org.jolokia.restrictor.RestrictorServiceFactory;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.StdoutLogHandler;
 
@@ -155,7 +156,7 @@ public class JolokiaServer {
         StdoutLogHandler log = new StdoutLogHandler();
 
         // TODO: CTX Init
-        JolokiaServiceManagerImpl serviceManager = new JolokiaServiceManagerImpl();
+        JolokiaServiceManager serviceManager = new JolokiaServiceManagerImpl();
         serviceManager.addService(config.getJolokiaConfig());
         serviceManager.addService(log);
 
