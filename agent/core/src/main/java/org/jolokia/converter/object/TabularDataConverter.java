@@ -30,6 +30,10 @@ import org.json.simple.*;
  */
 class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
+    // Fixed key names for tabular data represention maps for MXBeans.
+    private static final String TD_KEY_KEY = "key";
+    private static final String TD_KEY_VALUE = "value";
+
     /**
      * Constructor
      *
@@ -80,14 +84,25 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
     }
 
     private boolean checkForMapAttributeWithSimpleKey(TabularType pType) {
-        CompositeType rowType = pType.getRowType();
+        // The key and value must have a specific format
+        return checkForMapKey(pType) && checkForMapValue(pType);
+    }
 
-        return // Single index named "key"
-                pType.getIndexNames().size() == 1 && pType.getIndexNames().contains("key") &&
-                // Two entries in the row: "key" and "value"
-                rowType.containsKey("value") && rowType.keySet().size() == 2 &&
+    // A map is translated into a TabularData with a rowtype with two entries: "value" and "key"
+    private boolean checkForMapValue(TabularType pType) {
+        CompositeType rowType = pType.getRowType();
+        // Two entries in the row: "key" and "value"
+        return rowType.containsKey(TD_KEY_VALUE) && rowType.containsKey(TD_KEY_KEY) && rowType.keySet().size() == 2;
+    }
+
+    // The tabular data representing a map must have a single index named "key" which must be a simple type
+    private boolean checkForMapKey(TabularType pType) {
+        List<String> indexNames = pType.getIndexNames();
+        return
+                // Single index named "key"
+                indexNames.size() == 1 && indexNames.contains(TD_KEY_KEY) &&
                 // Only convert to map for simple types for all others use normal conversion. See #105 for details.
-                rowType.getType("key") instanceof SimpleType;
+                pType.getRowType().getType(TD_KEY_KEY) instanceof SimpleType;
     }
 
     // Check for a full table data representation and do some sanity checks

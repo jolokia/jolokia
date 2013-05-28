@@ -4,7 +4,7 @@ mvn clean install
 # Check Javascript tests
 cd client/javascript/test-app
 # Fix version number, test-app is not increased with the release plugin
-mvn clean install jetty:run-war
+mvn clean install jetty:run-exploded
 firefox http://localhost:8080/
 
 # =======================================================================
