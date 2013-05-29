@@ -45,6 +45,7 @@ public class JolokiaContextImpl implements JolokiaContext {
         restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
 
         // Central objects
+        // TODO: Lookup
         converters = new Converters();
 
         // Get all MBean servers we can find. This is done by a dedicated
@@ -52,7 +53,7 @@ public class JolokiaContextImpl implements JolokiaContext {
         mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
 
         // Create and remember request dispatchers
-        // TODO: Not fully intialized, will switch to lookup anyway
+        // TODO: Not fully initialized, will switch to lookup anyway
         localDispatcher = new LocalRequestDispatcher(this);
         requestDispatchers = createRequestDispatchers(pConfig.getConfig(ConfigKey.DISPATCHER_CLASSES),
                                                       this);

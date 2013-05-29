@@ -20,7 +20,10 @@ import org.jolokia.config.Configuration;
 import org.jolokia.util.LogHandler;
 
 /**
- * The service manager is responsible for building up services.
+ * The service manager is responsible for building up service and for creating a
+ * {@link JolokiaContext}.
+ *
+ * I.e.
  *
  * @author roland
  * @since 22.04.13
@@ -30,7 +33,18 @@ public interface JolokiaServiceManager  {
     public void addService(JolokiaService pService);
     public void removeService(JolokiaService pService);
 
+    /**
+     * Get the overall configuration
+     *
+     * @return configuration of this agent
+     */
     public Configuration getConfiguration();
+
+    /**
+     * Get the log handler for logging
+     *
+     * @return log handler
+     */
     public LogHandler getLogHandler();
 
     void addServiceFactory(JolokiaServiceFactory pServiceFactory);

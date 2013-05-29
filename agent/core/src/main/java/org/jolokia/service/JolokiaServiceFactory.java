@@ -21,6 +21,7 @@ package org.jolokia.service;
  * @since 21.04.13
  */
 public interface JolokiaServiceFactory {
+
     public void init(JolokiaServiceManager serviceManager);
     public void destroy();
 }
