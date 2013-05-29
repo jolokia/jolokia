@@ -28,7 +28,9 @@
           type="application/rss+xml" 
           title="Jolokia" 
           href="http://labs.consol.de/tags/jolokia/feed" />
+    <!--
     <script type="text/javascript" src="js/flattr.js"></script>
+    -->
   </head>
 
   <body>
@@ -45,12 +47,14 @@
       security policies. 
     </p>
     <subsection name="Starting points">
+      <!--
       <div style="float:right; margin-right: 5px; margin-left: 5px">
         <div style="float: right; margin-left: 5px; margin-right: 5px;">
           <a class="FlattrButton" style="display:none; float: right;"
              href="http://www.jolokia.org"></a> 
         </div>
-      </div>        
+      </div>
+      -->
       <ul>
         <li>
           Overview of <a href="features-nb.html">features</a> which

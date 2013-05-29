@@ -60,26 +60,26 @@
         </table>
         <p>
           This <code>test-app</code> is also configured for Jetty, so
-          a 
+          a
         </p>
         <pre>mvn jetty:run-exploded</pre>
         <p>
-          will startup a Jetty and deploy this test application. 
+          will startup a Jetty and deploy this test application.
         </p>
         <p>
           In order to simplify development of unit-test a shell script
           <code>makeLinks.sh</code> is included which can be used in
           unix like OSs to create symbolic links to the Javascript
           files in the source directories. A typical workflow looks
-          like:          
+          like:
         </p>
         <ul>
           <li>Initialize:
-          <pre>mvn clean install
-sh makeLinks.sh
-mvn jetty:run-exploded</pre></li>
+            <pre>mvn clean install
+              sh makeLinks.sh
+              mvn jetty:run-exploded</pre></li>
           <li>Edit and save the Javascript files (e.g. <code>jolokia.js</code>
-          or <code>jolokia-test.js</code>)</li>
+            or <code>jolokia-test.js</code>)</li>
           <li>Reload the test HTML files in the browser</li>
         </ul>
       </subsection>

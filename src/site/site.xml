@@ -71,18 +71,6 @@
       <item name="Javascript" href="client/javascript.html"/>
       <item name="Perl" href="client/perl.html"/>
     </menu>
-    <menu name="Modules" inherit="top">
-      <item name="Core" href="jolokia-agent-parent/jolokia-core/index.html"/>
-      <item name="JSR-160 Proxy" href="jolokia-agent-parent/jolokia-jsr160/index.html"/>
-      <item name="War" href="jolokia-agent-parent/jolokia-war/index.html"/>
-      <item name="Mule" href="jolokia-agent-parent/jolokia-mule/index.html"/>
-      <item name="Osgi" href="jolokia-agent-parent/jolokia-osgi/index.html"/>
-      <item name="Osgi-Bundle" href="jolokia-agent-parent/jolokia-osgi-bundle/index.html"/>
-      <item name="JVM Agent" href="jolokia-agent-parent/jolokia-jvm/index.html"/>
-      <item name="Java Client" href="jolokia-client-parent/jolokia-client-java/index.html"/>
-      <item name="Javascript Client" href="jolokia-client-parent/jolokia-client-javascript/index.html"/>
-      <item name="Integration Tests" href="jolokia-it-parent/jolokia-it-core/index.html"/>
-    </menu>
     <menu ref="reports" inherit="bottom"/>
   </body>  
 </project>
