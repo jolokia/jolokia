@@ -52,7 +52,7 @@
     </release>
     <release version="1.1.1" description="Release 1.1.1" date="2013-03-26">
       <action dev="roland" type="fix" issue="71">
-        "Expires" header contains now a valid date valu, one hour less the current time.
+        "Expires" header contains now a valid date value, one hour less the current time.
         This follows almost the recommendation of RFC-2616.
       </action>
       <action dev="roland" type="fix" issue="84" date="2013-03-17">
