@@ -75,6 +75,19 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Stopover on the road to 2.0: Jolokia 1.1.2 released">
+        <div class="news-date">2013-05-28</div>
+        <p>
+          In order to ease waiting for 2.0, Jolokia version 1.1.2 has been released. It contains some minor
+          bug fixes as explained in the <a href="changes-report.html">changelog</a>. Depending on the bug reports and
+          pull request dropping in there might be even a 1.1.3 release before 2.0 will be finished.
+        </p>
+        <p>
+          In the meantime, you can also see Jolokia live at <a href="http://www.jayday.de/">JayDay</a> where I will give a talk about
+          Jolokia's JavaScript support. The forthcoming JMX notification support will presented, too. It is also
+          a good chance to have a cold bavarian beer with me ;-)
+        </p>
+      </subsection>
       <subsection name="Some small goodies served by 1.1.1">
         <div class="news-date">2013-03-27</div>
         <p>
@@ -136,7 +149,7 @@
         <p>
           Links to the corresponding GitHub issues and the bugs fixed
           in this release can be found in the <a
-          href="changes-report.html">change report</a>. 
+          href="changes-report.html">change report</a>.
         </p>
         <p>
           This is the last feature release in the 1.x series. Work has

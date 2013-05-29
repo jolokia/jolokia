@@ -126,10 +126,8 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
             ret.add(getAttribute());
             addPath(ret,path);
             return ret;
-        } else if (hasAllAttributes()) {
-            if (path == null) {
-                return super.getRequestParts();
-            }
+        } else if (hasAllAttributes() && path == null) {
+            return super.getRequestParts();
         }
 
         // A GET request cant be used for multiple attribute fetching or for fetching
