@@ -29,6 +29,7 @@
             <webModule>
               <groupId>org.jolokia</groupId>
               <artifactId>jolokia-war</artifactId>
+              <bundleFileName>jolokia.war</bundleFileName>
               <contextRoot>/jolokia</contextRoot>
             </webModule>
           </modules>
