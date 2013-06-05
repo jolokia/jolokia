@@ -37,6 +37,7 @@
   <modules>
     <module>core</module>
     <module>war</module>
+    <module>ear</module>
     <module>jsr160</module>
     <module>mule</module>
     <module>osgi</module>
