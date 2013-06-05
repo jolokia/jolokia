@@ -71,4 +71,8 @@ public class CompositeTypeAndJson {
     public String getJsonAsString() {
         return json.toJSONString();
     }
+
+    public CompositeData getCompositeData() throws OpenDataException {
+        return new CompositeDataSupport(type,json);
+    }
 }

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
@@ -11,9 +27,9 @@
   <head>
     <script type="text/javascript" src="../js/d3.v2.min.js"></script>
     <script type="text/javascript" src="../js/jquery-1.7.2-min.js"></script>
-    <script type="text/javascript" src="../js/jolokia-min.js"></script>
+    <script type="text/javascript" src="../js/jolokia.js"></script>
     <script type="text/javascript" src="../js/cubism.v1.min.js"></script>
-    <script type="text/javascript" src="../js/jolokia-cubism-min.js"></script>
+    <script type="text/javascript" src="../js/jolokia-cubism.js"></script>
     <script type="text/javascript" src="../js/javascript-cubism.js"></script>    
     <link rel="stylesheet" type="text/css" href="../css/style.css" />
   </head>
@@ -112,14 +128,14 @@
      The following example present an advanced concept if more
      flexibility is required. When the first argument to
      <code>jolokia.metric()</code> is a function, this function is
-     feed periodically with Jolokia response object resulting from the
-     requests object given following the function argument. The final
+     feed periodically with Jolokia response objects resulting from the
+     requests object given as second argument. The final
      argument can be an options object, which in this case indicates
      the label of the chart and the type to be a delta chart,
      measuring only the increase rate for ten seconds. 
    </p>
    <p>
-     This sample also shows howto use wildcard patterns in a read
+     This sample also shows how to use wildcard patterns in a read
      request to fetch multiple values at once in a generic
      fashion. Wildcard reading is explained in detail in the <a
      href="../reference/html/protocol.html#read">reference manual</a>.

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <chapter id="protocol" xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Jolokia Protocol</title>
     <para>
@@ -6,13 +22,13 @@
       this chapter. The communication is based on a request-response
       paradigm, where each request results in a single response.
     </para>
-    <sidebar>
-      <title>GET URLs are chatty</title>
-      Keep in mind
-      that many web servers log the requested path of every request, including
-      parameters passed to a GET request, so sending messages over GET
-      often bloats server logs.
-    </sidebar>
+  <sidebar>
+    <title>GET URLs are chatty</title>
+    Keep in mind
+    that many web servers log the requested path of every request, including
+    parameters passed to a GET request, so sending messages over GET
+    often bloats server logs.
+  </sidebar>
     <para>
       Jolokia requests can be sent in two ways: Either as a HTTP GET
       request, in which case the request parameters are encoded
@@ -126,7 +142,9 @@
           for escaping. Any other characted preceded by an exclamation
           mark is taken literally. Table <xref
           linkend="escape-rules"/> illustrates the escape rules as
-          used in GET requests.
+          used in GET requests. Also, if quotes are part of an GET
+          request the need to be escaped  with
+          <constant>!"</constant>. 
         </para>
         <table id="escape-rules">
           <title>Escaping rules</title>
@@ -142,7 +160,11 @@
           </tr>
           <tr>
             <td><constant>!!</constant></td>
-          <td><constant>!</constant></td>
+            <td><constant>!</constant></td>
+          </tr>
+          <tr>
+            <td><constant>!"</constant></td>
+            <td><constant>"</constant></td>
           </tr>
           <tr>
             <td><constant>!</constant><emphasis>(anything else)</emphasis></td>
@@ -173,6 +195,9 @@
           <informalexample>
             <literallayout class="monospaced">http://localhost:8080/jolokia?p=/read/jboss.jmx:alias=jmx%2Frmi%2FRMIAdaptor/State</literallayout>
           </informalexample>
+          This format <emphasis>must</emphasis> be used for GET
+          requests containing backslashes (<literal>\</literal>) since
+          backslashes can not be sent as part of an URL at all.          
         </para>
       </section>
 
@@ -259,7 +284,11 @@
           payload contains details about the error
           occured (e.g. 404 means "not found"). (See
           <ulink url="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">this page</ulink>
-          for more information about HTTP error codes..)
+          for more information about HTTP error codes..). If the processing option
+          <constant>ifModifiedSince</constant> is given and the requested
+          value as been not changed since then, a response code of 304 is returned.
+          This option is currently only supported by the <constant>LIST</constant> request, for
+          other request types the value is always fetched.
         </para>
         <para>
           In the non-error case a JSON response looks mostly the same
@@ -364,13 +393,8 @@
         </para>
       </section>
       
-      <section id="pathes">
-        <title>Pathes</title>
-        <para>
-          Before we come to the Jolokia operation, the general concept
-          of <emphasis>inner pathes</emphasis> requires some
-          explanation. 
-        </para>
+      <section id="paths">
+        <title>Paths</title>
         <para>
           An <emphasis>inner path</emphasis> points to a certain
           substructure (plain value, array, hash) within a a complex
@@ -402,7 +426,7 @@
           traverse into this array.
         </para>    
         <para>
-          For both, GET and POST requests, pathes must be escaped as
+          For both, GET and POST requests, paths must be escaped as
           described in <xref linkend="escape-rules"/> when they
           contain slashes (<literal>/</literal>) or exclamation marks
           (<literal>!</literal>).
@@ -448,6 +472,11 @@
                  "maxObjects" : 100
                } 
   }]]></programlisting>
+      <para>
+        If a POST request carries also query parameters in the URL, these processing parameters
+        are merged with the ones given within the request. Configuration options given in the
+        request take precedence over the ones given as query parameters.
+      </para>
       <para>
         The list of known processing parameters is:
       </para>
@@ -505,6 +534,52 @@
             </para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term><literal>canonicalNaming</literal></term>
+          <listitem>
+            <para>
+              Defaults to <constant>true</constant> to return the canonical format of property lists.
+              If set to <constant>false</constant> then the default unsorted property list is returned.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>includeStackTrace</literal></term>
+          <listitem>
+            <para>
+              If set to <constant>true</constant>, then in case of an error the stack trace is included. 
+              With <constant>false</constant> no stack trace will be returned, and when this parameter
+              is set to <constant>runtime</constant> only for RuntimeExceptions a stack trace is put into 
+              the error response. Default is <constant>true</constant> if not set otherwise in the global
+              agent configuration.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>serializeException</literal></term>
+          <listitem>
+            <para>
+              If this parameter is set to <constant>true</constant> then a serialized version of the
+              exception is included in an error response. This value
+              is put under the key <constant>error_value</constant> in
+              the response value. By default this is set to
+              <constant>false</constant> except when the agent global
+              configuration option is configured otherwise.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><literal>ifModifiedSince</literal></term>
+          <listitem>
+            <para>
+              If this parameter is given, its value is interpreted as epoch time (seconds since 1.1.1970) and
+              if the requested value did not change since this time, an empty response (with no <constant>value</constant>)
+              is returned and the response status code is set to 304 ("Not modified"). This
+              option is currently only supported for <literal>LIST</literal> requests. The time value can be
+              extracted from a previous' response <constant>timestamp</constant>.
+            </para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </section>
     
@@ -552,6 +627,19 @@
               Object keys are <emphasis>always strings</emphasis>.
             </listitem>
             <listitem>
+              Enums are converted to their canonical name.<footnote id="enum-serial-jboss">
+              <para>
+                For JBoss older than version 7, there might be use cases
+                when custom enums need to be serialized. In this case,
+                the type information must be available to the agent,
+                too. For the standard PlatformMBeanServer
+                serialization should work always, regardless whether
+                the customer enum type is accessible by the agent or
+                not.
+              </para>
+            </footnote>
+            </listitem>
+            <listitem>
               <classname>javax.management.openmbean.CompositeData</classname>
               is converted in a JSON object, with the keys taken from
               the <classname>CompositeData</classname>'s key set and
@@ -559,22 +647,12 @@
             </listitem>
             <listitem>
               <classname>javax.management.openmbean.TabularData</classname>
-              is serialized into one or multiple nested JSON objects
-              where the keys are derived from its
-              <methodname>TabularType.indexName()</methodname>. If
-              there is a single valued index, the index's value is the
-              key and a <classname>TabularData</classname>'s row
-              (which in turn is a
-              <classname>CompositeData</classname>) is a map. With
-              multi valued keys, the map is nested (first level: first
-              index's value, second level: second index's value and so
-              on). For the serialization of <classname>TabularData</classname> resulting
-              from a <classname><ulink
-              url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean</ulink></classname> translation for
-              maps, see <xref linkend="serialization-mxbean"/>
+              is serialized differently depending on its internal
+              structure. See below for a detailed explanation of this
+              serialization mechanism including examples.
             </listitem>
             <listitem>
-              <classname>java.lang.Class</classname> gets converted to
+              <classname>java.lang.Class</classname> is converted to
               a JSON object with keys <literal>name</literal> (the class
               name) and <literal>interfaces</literal> (the implemented
               interfaces, if any)
@@ -621,13 +699,94 @@
           described.
         </para>
         <para>
-          Serialization can be influenced by certain processing
-          parameters given with the request (see <xref
+         <classname>TabularData</classname> serialization depends on
+         the type of the index.  It is serialized into one or multiple
+         nested JSON objects where the keys are derived from its
+         <methodname>TabularType.indexNames()</methodname>. If there is
+         a single valued index with a simple type (i.e. an instance of
+         <classname>javax.management.openmbean.SimpleType</classname>),
+         the index's value is the key and a
+         <classname>TabularData</classname>'s row (which in turn is a
+         <classname>CompositeData</classname>) is a map. With multi
+         valued, simple typed, keys, the map is nested (first level:
+         first index's value, second level: second index's value and
+         so on). For the serialization of
+         <classname>TabularData</classname> resulting from a
+         <classname><ulink
+         url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean</ulink></classname>
+         translation for maps, see <xref
+         linkend="serialization-mxbean"/>.  If any of the declared
+         index keys of a <classname>TabularData</classname> is a
+         complex type (i.e. not a <classname>SimpleType</classname>),
+         then this simple serialization into maps of maps is not
+         possible anymore, since for JSON, map keys must be simple
+         types. In this case, a more generic serialization is used in
+         which case an JSON object with two keys is returned:
+         <constant>indexNames</constant> is an array with the
+         <classname>TabularData</classname>'s indexes as names and
+         <constant>values</constant> is the array containing the
+         values as JSON object with the corresponding rows as values
+         (including the indexes).          
+        </para>
+        <para>
+          For example if there is a single valued key
+          <constant>key</constant>, then the returned JSON looks like
+        </para>
+        <programlisting><![CDATA[
+{
+  "mykey1" : { "key" : "mkey1", "item" : "value1", .... }
+  "mykey2" : { "key" : "mkey2", "item" : "value2", .... }
+  ....
+}]]></programlisting>
+        <para>
+          For multi valued keys of simple open types
+          (i.e. <methodname>TabularType.getIndexNames()</methodname>)
+          is a list with more than one element but all of them are
+          simple types), the returned JSON structure looks like (index
+          names here are <constant>key</constant> and
+          <constant>innerkey</constant>):
+        </para>
+        <programlisting><![CDATA[
+{
+  "mykey1" : {
+    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
+    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... }
+    ....
+  },
+  "mykey2" : {
+    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... }
+    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... }
+    ....
+  }
+  ....
+}]]></programlisting>
+        <para>
+          If keys are used, which themselves are complex objects (like
+          <classname>CompositeData</classname>), this hierarchical map structure can not be
+          used. In this case an object with two keys is returned:
+          "<constant>indexNames</constant>" holds the name of the key
+          index and "<constant>values</constant>" is an array of all
+          rows which are represented as JSON objects:
+        </para>
+        <programlisting><![CDATA[
+{
+  "indexNames" : [ "key", "innerkey" ],
+  "values" : [
+    { "key" : "mykey1", "innerkey" : { "name" : "a", "number" : 4711 }, "item" : "value1", .... },
+    { "key" : "mykey2", "innerkey" : { "name" : "b", "number" : 815 }, "item" : "value2", .... },
+    ...
+  ]
+}]]></programlisting>
+        <para>
+          Beside this special behaviour for
+          <classname>TabularData</classname>, serialization can be
+          influenced by certain processing parameters given with the
+          request (see <xref
           linkend="processing-parameters"/>). I.e. the recursive
           process of JSON serialization can be stopped when the data
-          set gets too large. Self and other circular references
-          are detected, too. If this happen, special values indicate
-          the truncation of the generated JSON object.
+          set gets too large. Self and other circular references are
+          detected, too. If this happen, special values indicate the
+          truncation of the generated JSON object.
         </para>
         <variablelist>
           <varlistentry>
@@ -717,9 +876,13 @@
               <listitem>Short / short</listitem>
               <listitem>Float / float</listitem>
               <listitem>Double / double</listitem>
+              <listitem>BigDecimal / BigInteger</listitem>
               <listitem>char</listitem>
               <listitem>Boolean / boolean</listitem>
               <listitem>Date</listitem>
+              <listitem>URL</listitem>
+              <listitem>Enums (whose type is accessible to the agent,
+              see below)</listitem>
             </itemizedlist>
           </para>
           <para>
@@ -771,6 +934,16 @@
             as int), an exception is raised.
           </para>
           <para>
+            Enums can be converted from their canonical name. The
+            prerequisite for this is, that the Jolokia agent has
+            access to the Enum's class. This is true for all Enums
+            shipped with the JDK (like
+            <classname>TimeUnit</classname>). Custom enums can not be
+            used for upstream serialization by default since the
+            Jolokia Agent is not able to contruct an instance of it
+            because of missing type information.
+          </para>
+          <para>
             Upstream serialization also supports <ulink
             url="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">OpenType</ulink>s.
             If the signature of JMX exec operation or the value type
@@ -812,19 +985,19 @@
                 layer. E.g. the following JSON object works for 
                 a <classname>TabularType</classname> with the two
                 index names <literal>lastname</literal> and
-                <literal>firstname</literal>:
+                <literal>firstname</literal>, which are both of type <classname>SimpleType.STRING</classname>:
               </para>
         <programlisting language="perl"><![CDATA[{ 
   "Mann": {
            "Thomas": {
-                      lastname: "Mann",
-                      firstname: "Thomas",
-                      birth: 1875
+                      "lastname": "Mann",
+                      "firstname": "Thomas",
+                      "birth": 1875
                      },
            "Heinrich": {
-                        lastname: "Mann",
-                        firstname: "Heinrich",
-                        birth: 1871
+                        "lastname": "Mann",
+                        "firstname": "Heinrich",
+                        "birth": 1871
                        }
           }
 }]]></programlisting>
@@ -834,6 +1007,34 @@
                 directly from maps. More details are explained in the
                 next section <xref linkend="serialization-mxbean"/>.
               </para>
+              <para>
+                <classname>TabularType</classname>s with index values
+                which are <emphasis>not</emphasis> of type
+                <classname>SimpleType</classname> can be used, too.
+                However, in this case this simple nested map structure
+                is not enough, since keys of complex types
+                (e.g. <classname>CompositeData</classname> types) can
+                not be represented as JSON map keys. Instead, a
+                generic representation for
+                <classname>TabularTypes</classname> must be used. A
+                JSON object with two keys:
+                <constant>indexNames</constant> with an array of the
+                index names and <constant>values</constant> with an
+                array of rows containing objects which include the
+                index values plus any other values of the rows'
+                <classname>CompositeType</classname>. E.g. if in the
+                example above, the index would have been an
+                <classname>User</classname> with first- and lastname,
+                the JSON structure for setting the <classname>TabularData</classname> should
+                look like
+              </para>
+        <programlisting language="perl"><![CDATA[{ 
+  "indexNames": [ "user" ],
+  "values" : [
+     { "user" : { "lastname": "Mann", "firstname": "Thomas" }, "birth": 1875 },
+     { "user" : { "lastname": "Mann", "firstname": "Heinrich" }, "birth": 1871 }
+  ]
+}]]></programlisting>
             </listitem>
           </itemizedlist>
           
@@ -970,9 +1171,43 @@
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">6.1</emphasis>
+        protocol version <emphasis role="bold">7.0</emphasis>
       </para>
       <variablelist>
+        <varlistentry>
+          <term><emphasis role="bold">7.0</emphasis> (since 1.1.0)</term>
+          <listitem>
+            <para>
+              The <emphasis
+              role="bold"><constant>maxDepth</constant></emphasis>
+              parameter (either as processing parameter or as
+              configuration value) is now 1 based. I.e. 0 means always
+              "no limit" (be careful with this, though), 1 implies
+              truncating the value on the first level for READ
+              request. This was already true for LIST requests and the
+              other limit values (maxCollectionSize and maxObjects) so
+              this change is used in order to harmonize the overall
+              behaviour with regard to limits.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Enums are now serialized downstream (full support)
+              and upstream (for type accessible to the agent).
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              New query parameter options
+              <constant>serializeException</constant> (for setting an
+              <constant>error_value</constant> in case of an
+              exception), <constant>canonicalNaming</constant>
+              (influences how object names are returned) and
+              <constant>includeStackTrace</constant> (for adding or
+              omitting stacktraces in error responses).
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><emphasis role="bold">6.1</emphasis> (since 1.0.2)</term>
           <listitem>
@@ -1002,7 +1237,7 @@
               the former versions of this protocol is not correct,
               since <classname>TabularData</classname> in fact is a
               hash and not a list. It is now generated as map (or
-              multiple maps), dependening on the declared
+              multiple maps), depending on the declared
               <emphasis>index</emphasis>. Also, access via path is now
               an access via key, not a list index. For the special
               case of MXBean map serialization, where the returned

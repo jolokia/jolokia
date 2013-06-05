@@ -5,24 +5,26 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 
@@ -54,18 +56,19 @@ public class SearchHandler extends JsonRequestHandler<JmxSearchRequest> {
         checkType();
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc}
+     * @param serverManager
+     * @param request*/
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(Set<MBeanServerConnection> servers, JmxSearchRequest request)
-            throws MBeanException, IOException {
-        Set<String> ret = new HashSet<String>();
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JmxSearchRequest request)
+            throws MBeanException, IOException, NotChangedException {
+        checkForModifiedSince(serverManager,request);
+        Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
+        Set<String> ret = new LinkedHashSet<String>();
 
-        for (MBeanServerConnection server : servers) {
-            Set<ObjectName> names = server.queryNames(request.getObjectName(),null);
-            for (ObjectName name : names) {
-                ret.add(name.getCanonicalName());
-            }
+        for (ObjectName name : names) {
+            ret.add(request.getOrderedObjectName(name));
         }
         return new ArrayList<String>(ret);
     }

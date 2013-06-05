@@ -1,11 +1,13 @@
+package org.jolokia.client.request;
+
 /*
- * Copyright 2009-2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,10 +16,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.client.request;
-
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
@@ -35,9 +34,12 @@ import static org.testng.AssertJUnit.*;
  */
 public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
 
+    static private final String TYPE_ESCAPED = "type=naming!/";
+    static private final String TYPE_UNESCAPED = "type=naming/";
+
     @Test
     public void simple() throws J4pException {
-        for (J4pListRequest req : new J4pListRequest[] {
+        for (J4pListRequest req : new J4pListRequest[]{
                 new J4pListRequest(),
                 new J4pListRequest(getTargetProxyConfig())
         }) {
@@ -64,8 +66,8 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void withSpace() throws MalformedObjectNameException, J4pException {
         for (J4pListRequest req : new J4pListRequest[] {
-                new J4pListRequest("jolokia.it/name=name with space,type=naming"),
-                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space,type=naming")
+                new J4pListRequest("jolokia.it/name=name with space," + TYPE_ESCAPED),
+                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space," + TYPE_ESCAPED)
         }) {
             J4pListResponse resp = j4pClient.execute(req);
             Map val = resp.getValue();
@@ -76,12 +78,12 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void withSlash() throws MalformedObjectNameException, J4pException {
         J4pListRequest reqs[] =  new J4pListRequest[] {
-                new J4pListRequest(new ObjectName("jolokia.it:type=naming,name=n!a!m!e with !/!")),
-                new J4pListRequest(getTargetProxyConfig(),new ObjectName("jolokia.it:type=naming,name=n!a!m!e with !/!")),
-                new J4pListRequest(Arrays.asList("jolokia.it","type=naming,name=n!a!m!e with !/!")),
-                new J4pListRequest(getTargetProxyConfig(),Arrays.asList("jolokia.it","type=naming,name=n!a!m!e with !/!")),
-                new J4pListRequest("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!"),
-                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!")
+                new J4pListRequest(new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new J4pListRequest(getTargetProxyConfig(),new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new J4pListRequest(Arrays.asList("jolokia.it",TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new J4pListRequest(getTargetProxyConfig(),Arrays.asList("jolokia.it", TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new J4pListRequest("jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!"),
+                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!")
         };
         for (J4pListRequest req : reqs) {
             J4pListResponse resp = j4pClient.execute(req);

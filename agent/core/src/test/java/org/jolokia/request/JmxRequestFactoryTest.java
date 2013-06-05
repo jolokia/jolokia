@@ -1,11 +1,13 @@
+package org.jolokia.request;
+
 /*
- * Copyright 2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,17 +16,16 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
-
 import java.util.*;
 
-import org.jolokia.request.*;
-import org.jolokia.request.JmxRequestFactory;
-import org.jolokia.util.*;
+import org.jolokia.config.*;
+import org.jolokia.util.HttpMethod;
+import org.jolokia.util.RequestType;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import static org.jolokia.request.JmxRequestBuilder.createMap;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -32,10 +33,16 @@ import static org.testng.Assert.*;
  */
 public class JmxRequestFactoryTest {
 
+    private ProcessingParameters procParams;
+
+    @BeforeTest
+    public void setup() {
+        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
+    }
 
     @Test
     public void simpleGet() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage", null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage", procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
         assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
@@ -49,7 +56,7 @@ public class JmxRequestFactoryTest {
                 "type","read",
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage");
-        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, null);
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
         assertEquals(req.getAttributeName(),"HeapMemoryUsage","Attribute parsed properly");
@@ -64,7 +71,7 @@ public class JmxRequestFactoryTest {
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage",
                 "path","blub!/bla/hello");
-        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, null);
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(reqMap, procParams);
         List<String> path = req.getPathParts();
         assertEquals(path.size(),2);
         assertEquals(path.get(0),"blub/bla");
@@ -74,7 +81,7 @@ public class JmxRequestFactoryTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void simplePostWithMalformedObjectName() {
-        JmxRequestFactory.createPostRequest(createMap("type", "read", "mbean", "bal::blub", "attribute", "HeapMemoryUsage"), null);
+        JmxRequestFactory.createPostRequest(createMap("type", "read", "mbean", "bal::blub", "attribute", "HeapMemoryUsage"), procParams);
     }
 
     @Test
@@ -87,11 +94,11 @@ public class JmxRequestFactoryTest {
                 "attribute","HeapMemoryUsage",
                 "config",config);
         Map param = new HashMap();;
-        param.put("maxObjects",new String[] { "100" });
-        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,param);
+        param.put("maxObjects","100");
+        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(reqMap,new Configuration().getProcessingParameters(param));
         assertEquals(req.getAttributeName(),"HeapMemoryUsage");
-        assertEquals(req.getProcessingConfig(ConfigKey.MAX_DEPTH),"10");
-        assertEquals(req.getProcessingConfigAsInt(ConfigKey.MAX_OBJECTS), new Integer(100));
+        assertEquals(req.getParameter(ConfigKey.MAX_DEPTH),"10");
+        assertEquals(req.getParameterAsInt(ConfigKey.MAX_OBJECTS), 100);
     }
 
     @Test
@@ -102,7 +109,7 @@ public class JmxRequestFactoryTest {
                 "attribute","HeapMemoryUsage");
         Map<String,Object> req2Map = createMap(
                 "type","list");
-        List<JmxRequest> req = JmxRequestFactory.createPostRequests(Arrays.asList(req1Map, req2Map),null);
+        List<JmxRequest> req = JmxRequestFactory.createPostRequests(Arrays.asList(req1Map, req2Map),procParams);
         assertEquals(req.get(0).getType(), RequestType.READ);
         assertEquals(req.get(1).getType(), RequestType.LIST);
     }
@@ -111,12 +118,12 @@ public class JmxRequestFactoryTest {
     public void multiPostRequestsWithWrongArg() {
         Map<String,Object> reqMap = createMap(
                 "type", "list");
-        JmxRequestFactory.createPostRequests(Arrays.asList(reqMap, "Wrong"),null);
+        JmxRequestFactory.createPostRequests(Arrays.asList(reqMap, "Wrong"),procParams);
     }
 
     @Test
     public void simpleGetWithPath() {
-        JmxWriteRequest req = JmxRequestFactory.createGetRequest("write/java.lang:type=Runtime/SystemProperties/7788/[com.sun.management.jmxremote.port]/value", null);
+        JmxWriteRequest req = JmxRequestFactory.createGetRequest("write/java.lang:type=Runtime/SystemProperties/7788/[com.sun.management.jmxremote.port]/value", procParams);
         assert req.getType() == RequestType.WRITE : "Type is write";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Runtime") : "Name properly parsed";
         List<String> parts = req.getPathParts();
@@ -127,43 +134,48 @@ public class JmxRequestFactoryTest {
 
     @Test
     public void simpleGetWithEscapedAttribute() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/!/Heap!/Memory!/Usage!/",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/!/Heap!/Memory!/Usage!/",procParams);
         assertEquals(req.getAttributeName(),"/Heap/Memory/Usage/","Attribute properly parsed");
     }
 
     @Test
     public void simpleGetWithEscapedPath() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used!/bla!/blub/bloe",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used!/bla!/blub/bloe",procParams);
         assertEquals(req.getPathParts().size(),2,"Size of path");
         assertEquals(req.getPath(),"used!/bla!/blub/bloe","Path properly parsed");
     }
 
     @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})
     public void illegalPath() {
-        JmxRequestFactory.createGetRequest("read", null);
+        JmxRequestFactory.createGetRequest("read", procParams);
     }
 
     @Test(expectedExceptionsMessageRegExp = ".*Invalid object name.*",expectedExceptions = {IllegalArgumentException.class})
     public void invalidObjectName() {
-        JmxRequestFactory.createGetRequest("read/bla::blub",null);
+        JmxRequestFactory.createGetRequest("read/bla::blub",procParams);
     }
 
     @Test(expectedExceptions = {UnsupportedOperationException.class})
     public void unsupportedType() {
-        JmxRequestFactory.createGetRequest("regnotif",null);
+        JmxRequestFactory.createGetRequest("regnotif",procParams);
     }
 
     @Test
     public void emptyRequest() {
-        JmxVersionRequest req = JmxRequestFactory.createGetRequest("",null);
-        req = JmxRequestFactory.createGetRequest(null,null);
+        JmxVersionRequest req = JmxRequestFactory.createGetRequest("",procParams);
+        req = JmxRequestFactory.createGetRequest(null,procParams);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void nullProcParams() {
+        JmxRequestFactory.createGetRequest("",null);
     }
 
     @Test
     public void simpleGetWithQueryPath() {
-        Map<String,String[]> params = new HashMap<String, String[]>();
-        params.put("p",new String[] { "list/java.lang/type=Memory" });
-        JmxListRequest req = JmxRequestFactory.createGetRequest(null,params);
+        Map<String,String> params = new HashMap<String, String>();
+        params.put("p","list/java.lang/type=Memory");
+        JmxListRequest req = JmxRequestFactory.createGetRequest(null,new Configuration().getProcessingParameters(params));
         assert req.getHttpMethod() == HttpMethod.GET : "GET by default";
         assert req.getPath().equals("java.lang/type=Memory") : "Path extracted";
     }
@@ -171,21 +183,21 @@ public class JmxRequestFactoryTest {
 
     @Test
     public void readWithPattern() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=*",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=*",procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=*") : "Name properly parsed";
         assert req.getObjectName().isPattern() : "Name is pattern";
         assert req.getAttributeNames() == null : "No attributes names";
         assert req.getAttributeName() == null : "No attributes names";
         assert req.getPath() == null : "Path is null";
-        req = JmxRequestFactory.createGetRequest("read/java.lang:type=*/HeapMemoryUsage",null);
+        req = JmxRequestFactory.createGetRequest("read/java.lang:type=*/HeapMemoryUsage",procParams);
         assert req.getAttributeName().equals("HeapMemoryUsage") : "No attributes names";
 
     }
 
     @Test
     public void readWithPatternAndAttribute() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=*/",null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("read/java.lang:type=*/",procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=*") : "Name properly parsed";
         assert req.getObjectName().isPattern() : "Name is pattern";
@@ -196,7 +208,7 @@ public class JmxRequestFactoryTest {
 
     @Test(expectedExceptions = { ClassCastException.class } )
     public void castException() {
-        JmxReadRequest req = JmxRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc", null);
+        JmxReadRequest req = JmxRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc", procParams);
     }
 
 }

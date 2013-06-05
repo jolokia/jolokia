@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <document>
   
   <properties>
@@ -12,6 +28,7 @@
           type="application/rss+xml" 
           title="Jolokia" 
           href="http://labs.consol.de/tags/jolokia/feed" />
+    <script type="text/javascript" src="js/flattr.js"></script>
   </head>
 
   <body>
@@ -28,6 +45,12 @@
       security policies. 
     </p>
     <subsection name="Starting points">
+      <div style="float:right; margin-right: 5px; margin-left: 5px">
+        <div style="float: right; margin-left: 5px; margin-right: 5px;">
+          <a class="FlattrButton" style="display:none; float: right;"
+             href="http://www.jolokia.org"></a> 
+        </div>
+      </div>        
       <ul>
         <li>
           Overview of <a href="features-nb.html">features</a> which
@@ -43,14 +66,195 @@
           platforms (JEE, OSGi, Mule, JVM).          
         </li>
         <li>
-          <a href="support.html">Support</a> channels are available in both <a
-          href="support.html#Your_Support_for_Jolokia">directions</a>.
-          You are also welcome to add to the <a
-          href="support.html#Source">evolution</a> of Jolokia.
+          <a href="support.html">Support</a> is available through various channels.
+        </li>
+        <li>
+          <a  href="support.html#Source">Contributions</a> are highly appreciated, too.
         </li>
       </ul>
+      <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Stopover on the road to 2.0: Jolokia 1.1.2 released">
+        <div class="news-date">2013-05-28</div>
+        <p>
+          In order to ease waiting for 2.0, Jolokia version 1.1.2 has been released. It contains some minor
+          bug fixes as explained in the <a href="changes-report.html">changelog</a>. Depending on the bug reports and
+          pull request dropping in there might be even a 1.1.3 release before 2.0 will be finished.
+        </p>
+        <p>
+          In the meantime, you can also see Jolokia live at <a href="http://www.jayday.de/">JayDay</a> where I will give a talk about
+          Jolokia's JavaScript support. The forthcoming JMX notification support will presented, too. It is also
+          a good chance to have a cold bavarian beer with me ;-)
+        </p>
+      </subsection>
+      <subsection name="Some small goodies served by 1.1.1">
+        <div class="news-date">2013-03-27</div>
+        <p>
+          This last feature release before work on 2.0.0 starts brings
+          some small goodies.  
+        </p>
+        <ul>
+          <li>
+            <code>BigDecimal</code> and <code>BigInteger</code> can
+            now be used for operation arguments and return values.
+          </li>
+          <li>
+            A new processing parameter <a href="reference/html/protocol.html#processing-parameters"><code>ifModifiedSince</code></a>
+            has been introduced. This parameter can be used with a
+            timestamp for fetching the list of available MBeans only
+            when there has been some changes in the MBean registration
+            on any observed MBeanServer since that time. If there has
+            been no changes an answer with status code "302" (Not
+            modified) is returned. This feature is also supported for
+            "search" requests. In a future version of Jolokia, there
+            will be also custom support for own "read" and "exec"
+            request so that expensive operations can be called
+            conditionally. 
+          </li>
+          <li>
+            For the JVM agent, if a port of 0 is given, then an
+            arbitrary free port will be selected and printed out on
+            standard output as part of the Jolokia agent URL. If no
+            host is given, the JVM agent will now bind to localhost
+            and if host of "0.0.0.0" or "*" is provided, the agent
+            will bind on all interfaces.
+          </li>
+          <li>
+            For the Java client an extra property
+            <code>errorValue</code> has been added which holds the
+            JSON serialized exception if the processiong parameter
+            <code>serializeException</code> is active.
+          </li>
+          <li>
+            The JavaScript client's <a
+            href="reference/html/clients.html#js-poller"><code>jolokia.register()</code></a>
+            can now take an optional <code>config</code> element for
+            specifying processing parameters for a certain scheduler
+            job. Also, the new option <code>onlyIfModified</code> can
+            be used so that the callback for list and search request
+            is only called, if the set of registered MBean has
+            changed. This is especially useful for web based client
+            which want to refresh the MBean tree only if there are
+            changes.
+          </li>
+          <li>
+            The <code>Expires:</code> header of a Jolokia response
+            has now a valid date as value (instead of '-1') which
+            points to one hour in the past. This change should help
+            clients which do not ignore according to RFC-2616 invalid
+            date syntax and treat them as 'already expired'.
+          </li>
+        </ul>
+        <p>
+          Links to the corresponding GitHub issues and the bugs fixed
+          in this release can be found in the <a
+          href="changes-report.html">change report</a>.
+        </p>
+        <p>
+          This is the last feature release in the 1.x series. Work has
+          already started on exciting new features for Jolokia
+          2.0. E.g. JMX notification support is coming, an initial
+          pull model has been already implemented (on branch <a
+          href="https://github.com/rhuss/jolokia/tree/notification">notification</a>). There
+          are even more ideas and some refactorings will happening
+          along with some modest changes in the module structure. So,
+          please stay tuned ...
+        </p>       
+      </subsection>
+      <subsection name="1.1.0 with Spring support and @JsonMBean">
+        <div class="news-date">2013-02-26</div>
+        <p>
+          It took some time, but it was worth it. Along with the usual bug fix parade,
+          several new features has been added to Jolokia.
+        </p>
+        <p>
+          A new module <code>jolokia-spring</code> has been added which makes integration of Jolokia in
+          Spring applications even easier. Simply add the following line (along with the corresponding namespace) to you
+          application context and agent will be fired up during startup:
+        </p>
+        <pre class="prettyprint lang-xml"><![CDATA[<jolokia:agent>
+   <jolokia:config
+           autoStart="true"
+           host="0.0.0.0"
+           port="8778"
+   ....
+   />
+</jolokia:agent>]]></pre>
+        <p>
+          More details can be found here in the <a href="reference/html/jmx.html#jvm-spring">reference manual</a>.
+        </p>
+        <p>
+          The new <code>jolokia-jmx</code> module provides an own
+          MBeanServer which never gets exposed via JSR-160
+          remoting. By registering your MBeans at the Jolokia
+          MBeanServer you can make them exclusively available for
+          Jolokia without worrying about JSR-160 access e.g. via
+          <code>jconsole</code>. However, if you annotate your MBeans
+          with <code>@JsonMBean</code> and register it at the Jolokia
+          MBeanServer your get automatic translation of complex data
+          types to JSON even for JSR-160 connections:
+        </p>
+        <div>
+          <img src="images/jconsole-json-mbean.png"/>
+        </div>
+        <p>
+          The details can be found <a href="reference/html/jmx.html">here</a>.
+        </p>
+        <p>
+          Several new processing options enter the scene. These can be
+          given either as global configuration parameters or as query
+          parameters:
+        </p>
+        <ul>
+          <li><strong>canonicalNaming</strong> influences the order of key properties in object names</li>
+          <li><strong>serializeExceptions</strong> adds a JSON representation of exceptions in an error case</li>
+          <li><strong>includeStackTrace</strong> can switch on/off the sending of an lengthy stack trace in an error case</li>
+        </ul>
+        <p>
+          That's it for now, all changes are summarized as always in the <a href="changes-report.html">change report</a>.
+        </p>
+        <p>Some other, more organizational stuff for now:</p>
+        <ul>
+          <li>
+            Bugtracking and feature requests switch over completely to <a href="https://github.com/rhuss/jolokia/issues">Github</a>.
+            Since I'm currently collecting features for 2.0, it's a good time for feature requests ;-). All ideas entered
+            at <a href="http://jolokia.idea.informer.com/">jolokia.idea.informer.com</a> has been transformed into Github issues.
+          </li>
+          <li>
+            If you are close to Germany it might be of interest to you, that I'm giving a training on Jolokia and Jmx4Perl,
+            with focus on Java Monitoring with Nagios. This will happen at 16./17.04.2013 in Munich, details can be
+            found on our <a href="http://www.consol.de/open-source-monitoring/schulungen/java-monitoring-mit-nagios/">web site</a>
+            (in german).
+          </li>
+        </ul>
+        <p>
+          And finally a very <strong>hot</strong> recommendation: Please have a look at <a href="http://hawt.io">hawt.io</a> a super cool
+          HTML5 console which uses Jolokia for backend communication exclusively. Most of the new ideas included in this
+          Jolokia release were inspired by discussions with James Strachan, one of the driving forces behind hawt. Thanks for that ;-)
+        </p>
+      </subsection>
+      <subsection name="1.0.6 cosmetics">
+        <div class="news-date">2012-11-23</div>
+        <p>
+          Although it has been quite calm in Jolokia land for some
+          months, there is quite some momentum around Jolokia. This
+          minor release brings some cosmetic changes, mostly for
+          tuning the ordering within MBeans names and some JavaScript
+          fixes. More on this in the <a
+          href="changes-report.html">changelog</a>.
+        </p>
+        <p>
+          Some other tidbits:
+        </p>
+        <ul>
+          <li>The new <a href="talks.html">Talks and Screencast</a> section collects some fancy multimedia introducing Jolokia</li>
+          <li>I'm going to talk about Jolokia at <a href="http://www.jayday.de/?lang=en">jayday 2012</a>, a brand new, low cost
+          conference in Munich on 3th December 2012. Hopefully there will be some brand new stuff to show, too.</li>
+          <li>Some completely irrelevant stuff: Jolokia T-Shirts can be found in the <a href="http://jolokia.spreadshirt.de/">Jolokia Shop</a>
+            The shop was too easy to setup for not doing it ;-) And they look freaking hot .... </li>
+        </ul>
+      </subsection>
       <subsection name="Cubism support in 1.0.5">
         <div class="news-date">2012-07-22</div>
         <p>
@@ -116,7 +320,7 @@
         </p>
         <pre class="prettyprint lang-javascript">var jolokia = new Jolokia("http://localhost:8080/jolokia");
 
-// Register request along with callback printing out 
+          // Register request along with callback printing out
 // the heap memory usage
 jolokia.register(function(resp) {
    console.log("Memory: " + resp.value);
@@ -200,90 +404,6 @@ jolokia.start(1000);</pre>
           Dashboard. I'm still looking for helping hands, there is
           quite a lot to do here ;-)
         </p>
-      </subsection>
-      <subsection name="1.0.2 released">
-        <div class="news-date">2012-01-06</div>
-        <p>
-          The first release of this year brings some updates and minor features:
-        </p>
-        <ul>
-          <li>The Java client library supports now using a JSR-160
-          proxy, too. The <a
-          href="reference/html/clients.html#client-java">reference
-          manual</a> tells you how to 
-          provide a proxy either as a default to a
-          <code>J4pClient</code> or per request.</li>
-
-          <li>A configuration parameter <code>mimeType</code> can be
-          either used in the global configuration or as request
-          parameter in order to explicitely set the mime type of the
-          returned JSON answer. By default this is <code>text/plain</code>,
-          but for some environments a mime type
-          <code>application/json</code> might be more
-          appropriate.</li>
-
-          <li>In case of an error on the server side, the Jolokia request
-          leading to this error is included into the response the same
-          way as it is done for successful responses.</li>
-          
-          <li>The Roo plugin has been updated for Roo 1.2 and the
-          Jolokia Javascript library has been tested with the latest
-          jQuery version 1.7.1</li>
-        </ul>
-        <p>
-          The complete changes are listed in the <a
-          href="changes-report.html">change log</a>. BTW, Jolokia is
-          available now on <a href="http://search.maven.org">Maven
-          central</a>, too. 
-        </p>
-      </subsection>
-      <subsection name="Happy new year 2012 !">
-        <div class="news-date">2011-12-29</div>
-        <p>
-          This was an exciting year for Jolokia:
-        </p>
-        <ul>
-          <li>We hit 1.0.0 in October after one year of active development</li>
-          <li>Jolokia was presented at <a
-          href="http://www.devoxx.com">Devoxx 2011</a> in the
-          "<em>Tools in action</em>" track. Despite the competition on
-          the parallel tracks was very strong and some technical issues, I
-          think the talk went rather well (although there is of course
-          quite some space for improvement ;-). I blogged about my
-          <a
-          href="http://labs.consol.de/blog/devoxx/devoxx-2011-day-1/#jolokia">experience</a>
-          and you can find the <a
-          href="http://www.parleys.com/d/2864">full talk</a> recorded
-          at Parleys. In order to see the full talk you either need to
-          wait a year or buy a 79 EU subscription from Parleys for all
-          those fantastic talks (>120) given at Devoxx this year. The slides are given below, hosted by 
-          <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx">Slideshare</a> and
-          the <a
-          href="http://labs.consol.de/blog/jolokia/devoxx-talk-jolokia-jmx-on-capsaicin-shownotes/">shownotes</a>
-          with all the links are given our blog. Devoxx was definitely
-          my personal highlight this year and I hope to get the chance
-          to present in Antwerp next year, too.</li>
-          <li>I also gave a <a
-          href="http://www.netways.de/index.php?id=3031&amp;L=1">talk</a>
-          at the <a
-          href="http://www.netways.de/en/osmc/y2011/overview/">Open
-          Source 
-          Monitoring Conference 2011</a> in Nuremberg, where I was the
-          'Java guy' this year. It was my thirds time at OSMC and it
-          was as always a big pleasure to meet the Nagios folks and
-          catering was phantastic, too ;-)</li>
-        </ul>
-        <p>
-          So what's next ? There will be a minor release 1.0.2 in the
-          first january week containing some minor feature additions
-          and library updates. And I'm going to start the work on a
-          whole new Jolokia based open source web console, called <a
-          href="http://en.wikipedia.org/wiki/Aj%C3%AD_pepper">Aji</a>. 
-        </p>
-        <p>
-          Please stay tuned and a happy new year !
-        </p>
-<div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="http://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
       </subsection>
   </section>
 </body>

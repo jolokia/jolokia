@@ -97,6 +97,9 @@ public class MBeanInfoData {
     // Initialise updaters
     private static final Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
 
+    // How to order keys in Object Names
+    private boolean useCanonicalName;
+
     static {
         for (DataUpdater updater : new DataUpdater[] {
                 new DescriptionDataUpdater(),
@@ -114,10 +117,13 @@ public class MBeanInfoData {
      * can be given, in which only a sub information is (sub-tree or leaf value) is stored
      *
      * @param pMaxDepth max depth
-     * @param pPathStack the stack for restricting the information to add
+     * @param pPathStack the stack for restricting the information to add. The given stack will be cloned
+     *                   and is left untouched.
+     * @param pUseCanonicalName whether to use canonical name in listings
      */
-    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack) {
+    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
         maxDepth = pMaxDepth;
+        useCanonicalName = pUseCanonicalName;
         pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<String>();
         infoMap = new JSONObject();
     }
@@ -143,10 +149,14 @@ public class MBeanInfoData {
         } else if (maxDepth == 2 && pathStack.size() == 0) {
             // Add domain an object name into the map, final value is a dummy value
             JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-            mBeansMap.put(pName.getCanonicalKeyPropertyListString(),1);
+            mBeansMap.put(getKeyPropertyString(pName),1);
             return true;
         }
         return false;
+    }
+
+    private String getKeyPropertyString(ObjectName pName) {
+        return useCanonicalName ? pName.getCanonicalKeyPropertyListString() : pName.getKeyPropertyListString();
     }
 
     /**
@@ -161,7 +171,7 @@ public class MBeanInfoData {
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
         JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         // Trim down stack to get rid of domain/property list
         Stack<String> stack = truncatePathStack(2);
         if (stack.empty()) {
@@ -171,7 +181,7 @@ public class MBeanInfoData {
         }
         // Trim if required
         if (mBeanMap.size() == 0) {
-            mBeansMap.remove(pName.getCanonicalKeyPropertyListString());
+            mBeansMap.remove(getKeyPropertyString(pName));
             if (mBeansMap.size() == 0) {
                 infoMap.remove(pName.getDomain());
             }
@@ -190,15 +200,37 @@ public class MBeanInfoData {
         // In case of a remote call, IOException can occur e.g. for
         // NonSerializableExceptions
         if (pathStack.size() == 0) {
-            JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-            JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, pName.getCanonicalKeyPropertyListString());
-            mBeanMap.put(DataKeys.ERROR.getKey(), pExp);
+            addException(pName, pExp);
         } else {
             // Happens for a deeper request, i.e with a path pointing directly into an MBean,
             // Hence we throw immediately an error here since there will be only this exception
             // and no extra info
-            throw pExp;
+            throw new IOException("IOException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
         }
+    }
+
+    /**
+     * Add an exception which occurred during extraction of an {@link MBeanInfo} for
+     * a certain {@link ObjectName} to this map.
+     *
+     * @param pName MBean name for which the error occurred
+     * @param pExp exception occurred
+     * @throws IllegalStateException if this method decides to rethrow the exception
+     */
+    public void handleException(ObjectName pName, IllegalStateException pExp) {
+        // This happen happens for JBoss 7.1 in some cases.
+        if (pathStack.size() == 0) {
+            addException(pName, pExp);
+        } else {
+            throw new IllegalStateException("IllegalStateException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
+        }
+    }
+
+    // Add an exception to the info map
+    private void addException(ObjectName pName, Exception pExp) {
+        JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
+        mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 
     /**

@@ -1,27 +1,27 @@
-/*
- *  Copyright 2009-2010 Roland Huss
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-
 package org.jolokia.it;
 
+/*
+ * Copyright 2009-2013 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.management.*;
+
+import org.jolokia.jmx.JolokiaMBeanServerUtil;
 
 /**
  * @author roland
@@ -29,9 +29,11 @@ import javax.management.*;
  */
 public class ItSetup {
 
-    private static final String JOLOKIA_IT_DOMAIN = "jolokia.it";
+    public static final  String JOLOKIA_IT_DOMAIN           = "jolokia.it";
+    public static final  String JOLOKIA_IT_DOMAIN_HIDDEN    = "jolokia.it.hidden";
+    private static final String JOLOKIA_IT_JSONMBEAN_DOMAIN = "jolokia.it.jsonmbean";
 
-    private String[] strangeNamesShort = {
+    private String[]     strangeNamesShort = {
             "\\/",
             "simple",
             "/slash-simple/",
@@ -44,41 +46,51 @@ public class ItSetup {
             "n!a!m!e with !/!",
 //            "äöüßÄÖÜ"
     };
-    private List<String> strangeNames = new ArrayList<String>();
+    private List<String> strangeNames      = new ArrayList<String>();
 
     private String[] fullNames = {
             "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor"
     };
 
-    private String[] escapedNamesShort = {
+    private String[]     escapedNamesShort = {
 //            "name*with?strange=\"chars"
-              "name*withstrange=chars",
-              "name?withstrange=chars",
-              "namewithstrange=\"chars\"",
-              "namewithstrange:\"chars\"",
-              ",,,",
-              ",,/,,",
-              "===",
-              "***",
-              "\"\"\"",
-              ":::",
-              "???",
-              "!!!"
+            "name*withstrange=chars",
+            "name?withstrange=chars",
+            "namewithstrange=\"chars\"",
+            "namewithstrange:\"chars\"",
+            ",,,",
+            ",,/,,",
+            "===",
+            "***",
+            "\"\"\"",
+            ":::",
+            "???",
+            "!!!"
     };
-    private List<String> escapedNames = new ArrayList<String>();
+    private List<String> escapedNames      = new ArrayList<String>();
 
 
-    private List<ObjectName> registeredMBeans = new ArrayList<ObjectName>();
+    private List<ObjectName> registeredMBeans;
+    private List<ObjectName> registeredJolokiaMBeans;
 
     public ItSetup() {
     }
 
     public void start() {
-        registerMBeans();
+        registeredMBeans = registerMBeans(ManagementFactory.getPlatformMBeanServer(), JOLOKIA_IT_DOMAIN);
+        MBeanServer jolokiaServer = getJolokiaMBeanServer();
+        if (jolokiaServer != null) {
+            registeredJolokiaMBeans = registerMBeans(jolokiaServer, JOLOKIA_IT_DOMAIN_HIDDEN);
+            registeredJolokiaMBeans.addAll(registerJsonMBeans(jolokiaServer, JOLOKIA_IT_JSONMBEAN_DOMAIN));
+        }
     }
 
     public void stop() {
-        unregisterMBeans();
+        unregisterMBeans(registeredMBeans, ManagementFactory.getPlatformMBeanServer());
+        MBeanServer jolokiaServer = getJolokiaMBeanServer();
+        if (jolokiaServer != null) {
+            unregisterMBeans(registeredJolokiaMBeans, jolokiaServer);
+        }
     }
 
     public static void premain(String agentArgs) {
@@ -87,39 +99,58 @@ public class ItSetup {
     }
     // ===================================================================================================
 
-    private void registerMBeans() {
+    private List<ObjectName> registerMBeans(MBeanServer pServer, String pDomain) {
+        List<ObjectName> ret = new ArrayList<ObjectName>();
         try {
             // Register my test mbeans
             for (String name : strangeNamesShort) {
-                String strangeName = JOLOKIA_IT_DOMAIN + ":type=naming,name=" + name;
+                String strangeName = pDomain + ":type=naming/,name=" + name;
                 strangeNames.add(strangeName);
-                registerMBean(new ObjectNameChecking(strangeName),strangeName);
+                ret.add(registerMBean(pServer, new ObjectNameChecking(strangeName), strangeName));
             }
             for (String name : escapedNamesShort) {
-                String escapedName = JOLOKIA_IT_DOMAIN + ":type=escape,name=" + ObjectName.quote(name);
+                String escapedName = pDomain + ":type=escape,name=" + ObjectName.quote(name);
                 escapedNames.add(escapedName);
-                registerMBean(new ObjectNameChecking(escapedName),escapedName);
+                ret.add(registerMBean(pServer, new ObjectNameChecking(escapedName), escapedName));
             }
 
             // Other MBeans with different names
             for (String name : fullNames) {
-                registerMBean(new ObjectNameChecking(name),name);
+                ret.add(registerMBean(pServer, new ObjectNameChecking(name), name));
             }
                         
             // Other MBeans
             boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
-            registerMBean(new OperationChecking(JOLOKIA_IT_DOMAIN),isWebsphere ? null : JOLOKIA_IT_DOMAIN + ":type=operation");
-            registerMBean(new AttributeChecking(JOLOKIA_IT_DOMAIN),isWebsphere ? null : JOLOKIA_IT_DOMAIN + ":type=attribute");
+            ret.add(registerMBean(pServer,new OperationChecking(JOLOKIA_IT_DOMAIN),isWebsphere ? null : pDomain + ":type=operation"));
+            ret.add(registerMBean(pServer, new AttributeChecking(JOLOKIA_IT_DOMAIN), isWebsphere ? null : pDomain + ":type=attribute"));
             // MXBean
             if (hasMxBeanSupport()) {
-                registerMBean(new MxBeanSample(),isWebsphere ? null : JOLOKIA_IT_DOMAIN + ":type=mxbean");
+                ret.add(registerMBean(pServer, new MxBeanSample(), isWebsphere ? null : pDomain + ":type=mxbean"));
             }
+            // Tabular Data MBean
+            ret.add(registerMBean(pServer, new TabularMBean(), pDomain + ":type=tabularData"));
         } catch (RuntimeException e) {
             throw new RuntimeException("Error",e);
         } catch (Exception exp) {
             throw new RuntimeException("Error",exp);
         }
+        return ret;
     }
+
+    private List<ObjectName> registerJsonMBeans(MBeanServer pServer, String pDomain) {
+        List<ObjectName> ret = new ArrayList<ObjectName>();
+        try {
+            ret.add(registerMBean(pServer,new JsonChecking(),pDomain + ":type=plain"));
+            ret.add(registerMXBean(pServer, new JsonChecking2(), JsonChecking2MXBean.class, pDomain + ":type=mx"));
+            return ret;
+        } catch (Exception e) {
+            throw new RuntimeException("Error",e);
+        } catch (NoSuchMethodError e) {
+            // Happens for Java 5 .. will ignore it here
+            return ret;
+        }
+    }
+
 
     private boolean hasMxBeanSupport() {
         return checkForClass("javax.management.MXBean") && ! checkForClass("org.jboss.mx.util.MBeanServerLocator");
@@ -134,11 +165,10 @@ public class ItSetup {
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private void unregisterMBeans() {
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        for (ObjectName name : registeredMBeans) {
+    private void unregisterMBeans(List<ObjectName> pMBeanNames,MBeanServer pServer) {
+        for (ObjectName name : pMBeanNames) {
             try {
-                server.unregisterMBean(name);
+                pServer.unregisterMBean(name);
             } catch (Exception e) {
                 System.out.println("Exception while unregistering " + e);
             }
@@ -146,14 +176,24 @@ public class ItSetup {
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
-    private void registerMBean(Object pObject,String pName)
+    private ObjectName registerMBean(MBeanServer pServer, Object pObject, String pName)
             throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         ObjectName registeredName = pName != null ?
-                server.registerMBean(pObject, new ObjectName(pName)).getObjectName() :
-                server.registerMBean(pObject,null).getObjectName();
+                pServer.registerMBean(pObject, new ObjectName(pName)).getObjectName() :
+                pServer.registerMBean(pObject,null).getObjectName();
         System.out.println("Registered " + registeredName);
-        registeredMBeans.add(registeredName);
+        return registeredName;
+    }
+
+    // Needed, because the JBoss MBeanServer cannot parse MXBean interfaces
+    // Hence we wrap it with a StandardMBean
+    // See https://community.jboss.org/thread/167796 for details
+    private ObjectName registerMXBean(MBeanServer pServer, Object pObject, Class pManagementInterface, String pName) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
+        ObjectName objectName = new ObjectName(pName);
+        final StandardMBean mxBean = new StandardMBean(pObject, pManagementInterface, true /* MXBean */);
+        pServer.registerMBean(mxBean, objectName);
+        System.out.println("Registered MXBean " + objectName);
+        return objectName;
     }
 
     public List<String> getStrangeNames() {
@@ -181,4 +221,18 @@ public class ItSetup {
         return Thread.currentThread().getContextClassLoader();
     }
 
+    public MBeanServer getJolokiaMBeanServer() {
+        try {
+            if (this.getClass("org.jolokia.jmx.JolokiaMBeanServerUtil") != null || Class.forName("org.jolokia.jmx.JolokiaMBeanServerUtil") != null) {
+                return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+            }
+        } catch (RuntimeException e) {
+            System.out.println("No JolokiaServer found: " + e);
+            e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException e) {
+        }
+        System.out.println("No JolokiaServer found, ignoring certain tests ...");
+        return null;
+    }
 }

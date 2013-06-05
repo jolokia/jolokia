@@ -1,33 +1,35 @@
 package org.jolokia.request;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.config.Configuration;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import static org.jolokia.request.JmxRequestBuilder.createMap;
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertTrue;
 
 
 /**
@@ -36,6 +38,12 @@ import static org.testng.Assert.assertTrue;
  */
 public class JmxRequestTest {
 
+    ProcessingParameters procParams;
+
+    @BeforeTest
+    public void setup() {
+        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
+    }
     @Test
     public void testPathSplitting() throws MalformedObjectNameException {
         List<String> paths = EscapeUtil.parsePath("hello/world");
@@ -60,11 +68,11 @@ public class JmxRequestTest {
     @Test
     public void readRequest() {
         for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used", null),
+                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used", procParams),
                 (JmxReadRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "read", "mbean", "java.lang:type=Memory",
                                   "attribute","HeapMemoryUsage",
-                                  "path","used"),null)
+                                  "path","used"),procParams)
         }) {
             assertEquals(req.getType(), RequestType.READ);
             assertEquals(req.getObjectNameAsString(),"java.lang:type=Memory");
@@ -81,10 +89,10 @@ public class JmxRequestTest {
     @Test
     public void readRequestMultiAttributes() {
         for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/Heap!/Memory!/Usage,NonHeapMemoryUsage", null),
+                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/Heap!/Memory!/Usage,NonHeapMemoryUsage", procParams),
                 (JmxReadRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "read", "mbean", "java.lang:type=Memory",
-                                  "attribute",Arrays.asList("Heap/Memory/Usage","NonHeapMemoryUsage")),null)
+                                  "attribute",Arrays.asList("Heap/Memory/Usage","NonHeapMemoryUsage")),procParams)
         }) {
             assertTrue(req.isMultiAttributeMode());
 
@@ -107,15 +115,15 @@ public class JmxRequestTest {
     public void readRequestInvalidArguments() {
         JmxRequestFactory.createPostRequest(
                 createMap("type", "read", "mbean", "java.lang:type=Memory",
-                          "attribute",createMap("bla","blub")),null);
+                          "attribute",createMap("bla","blub")),procParams);
     }
 
     @Test
     public void readRequestNullArguments() {
         for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory", null),
+                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory", procParams),
                 (JmxReadRequest) JmxRequestFactory.createPostRequest(
-                        createMap("type", "read", "mbean", "java.lang:type=Memory"),null)
+                        createMap("type", "read", "mbean", "java.lang:type=Memory"),procParams)
         }) {
             assertFalse(req.isMultiAttributeMode());
             assertFalse(req.hasAttribute());
@@ -132,7 +140,7 @@ public class JmxRequestTest {
         args.add(null);
         JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(
                 createMap("type", "read", "mbean", "java.lang:type=Memory",
-                          "attribute",args),null);
+                          "attribute",args),procParams);
         assertFalse(req.isMultiAttributeMode());
         assertNull(req.getAttributeName());
         assertNull(req.getAttributeNames());
@@ -142,12 +150,12 @@ public class JmxRequestTest {
     @Test
     public void writeRequest() {
         for (JmxWriteRequest req : new JmxWriteRequest[] {
-                (JmxWriteRequest) JmxRequestFactory.createGetRequest("write/java.lang:type=Memory/Verbose/true/bla", null),
+                (JmxWriteRequest) JmxRequestFactory.createGetRequest("write/java.lang:type=Memory/Verbose/true/bla", procParams),
                 (JmxWriteRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "write", "mbean", "java.lang:type=Memory",
                                   "attribute","Verbose",
                                   "value", "true",
-                                  "path","bla"),null)
+                                  "path","bla"),procParams)
         }) {
             assertEquals(req.getType(),RequestType.WRITE);
             assertEquals(req.getObjectNameAsString(),"java.lang:type=Memory");
@@ -166,9 +174,9 @@ public class JmxRequestTest {
     @Test
     public void listRequest() {
         for (JmxListRequest req : new JmxListRequest[] {
-                (JmxListRequest) JmxRequestFactory.createGetRequest("list/java.lang:type=Memory", null),
+                (JmxListRequest) JmxRequestFactory.createGetRequest("list/java.lang:type=Memory", procParams),
                 (JmxListRequest) JmxRequestFactory.createPostRequest(
-                        createMap("type", "list", "path", "java.lang:type=Memory"),null)
+                        createMap("type", "list", "path", "java.lang:type=Memory"),procParams)
         }) {
             assertEquals(req.getType(), RequestType.LIST);
             assertEquals(req.getPath(),"java.lang:type=Memory");
@@ -181,9 +189,9 @@ public class JmxRequestTest {
     @Test
     public void versionRequest() {
         for (JmxVersionRequest req : new JmxVersionRequest[] {
-                (JmxVersionRequest) JmxRequestFactory.createGetRequest("version/java.lang:type=Memory", null),
+                (JmxVersionRequest) JmxRequestFactory.createGetRequest("version/java.lang:type=Memory", procParams),
                 (JmxVersionRequest) JmxRequestFactory.createPostRequest(
-                        createMap("type", "version", "path", "java.lang:type=Memory"),null)
+                        createMap("type", "version", "path", "java.lang:type=Memory"),procParams)
         }) {
             assertEquals(req.getType(),RequestType.VERSION);
             verify(req,"type","version");
@@ -194,10 +202,10 @@ public class JmxRequestTest {
     public void execRequest() {
         List args = Arrays.asList(null,"","normal");
         for (JmxExecRequest req : new JmxExecRequest[] {
-                (JmxExecRequest) JmxRequestFactory.createGetRequest("exec/java.lang:type=Runtime/operation/[null]/\"\"/normal", null),
+                (JmxExecRequest) JmxRequestFactory.createGetRequest("exec/java.lang:type=Runtime/operation/[null]/\"\"/normal", procParams),
                 (JmxExecRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "exec", "mbean", "java.lang:type=Runtime",
-                                  "operation","operation","arguments", args), null)
+                                  "operation","operation","arguments", args), procParams)
         }) {
             assertEquals(req.getType(),RequestType.EXEC);
             assertEquals(req.getOperation(),"operation");
@@ -218,16 +226,16 @@ public class JmxRequestTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void invalidExecRequest() {
-        JmxRequestFactory.createGetRequest("exec/java.lang:type=Runtime",null);
+        JmxRequestFactory.createGetRequest("exec/java.lang:type=Runtime",procParams);
     }
 
     @Test
     public void searchRequest() {
 
         for (JmxSearchRequest req : new JmxSearchRequest[] {
-                (JmxSearchRequest) JmxRequestFactory.createGetRequest("search/java.lang:*", null),
+                (JmxSearchRequest) JmxRequestFactory.createGetRequest("search/java.lang:*", procParams),
                 (JmxSearchRequest) JmxRequestFactory.createPostRequest(
-                        createMap("type", "search", "mbean", "java.lang:*"),null)
+                        createMap("type", "search", "mbean", "java.lang:*"),procParams)
         }) {
             assertEquals(req.getType(),RequestType.SEARCH);
             assertEquals(req.getObjectName().getCanonicalName(),"java.lang:*");

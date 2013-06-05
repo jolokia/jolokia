@@ -4,7 +4,7 @@ mvn clean install
 # Check Javascript tests
 cd client/javascript/test-app
 # Fix version number, test-app is not increased with the release plugin
-mvn clean install jetty:run-war
+mvn clean install jetty:run-exploded
 firefox http://localhost:8080/
 
 # =======================================================================
@@ -24,21 +24,22 @@ Check in and push
 # ========================================================================
 # Build release and deploy it on labs
 git clone git@github.com:rhuss/jolokia.git
+# Move .m2/repository temporarily away
 cd jolokia
 mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:prepare
 mvn -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:perform
 
 # Copy assembly to labs:
-ssh jolokia@labs.consol.de mkdir -p www/dist/1.0.0/js
+ssh jolokia@labs.consol.de mkdir -p www/dist/1.x.0/js
 cd target/checkout/target
-scp *gz *zip jolokia@labs.consol.de:www/dist/1.0.0/
+scp *gz *zip jolokia@labs.consol.de:www/dist/1.x.0/
 cd ../client/javascript/target 
-scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/1.0.0/js/
+scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/1.x.0/js/
 cd ../../../../..
 
 # Deploy to Sonatype staging
 cd target/checkout
-mvn -Pdist deploy
+mvn -Pdist,roo deploy
 cd ../..
 
 # Release on central maven repo
@@ -88,7 +89,7 @@ mvn -Plabs site site:deploy
 # =============================================================================
 # Snapshot release
 
-# Set version number in Version.java, jolokia.js, docbkx/index.xml
+# Set version number in Version.java, jolokia.js, jolokia-cubism.js, test-app/pom.xml, docbkx/index.xml
 mvn -Pdist,labs deploy
 # Adapt URI and version number in root-repository.xml on labs.consol.de to us a httppgp URL
 

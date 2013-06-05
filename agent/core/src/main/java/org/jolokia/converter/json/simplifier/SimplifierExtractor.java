@@ -1,30 +1,29 @@
 package org.jolokia.converter.json.simplifier;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.converter.json.Extractor;
-import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.json.simple.JSONObject;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import javax.management.AttributeNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+
+import org.jolokia.converter.json.Extractor;
+import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONObject;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 
@@ -72,9 +71,8 @@ abstract class SimplifierExtractor<T> implements Extractor {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue);
             }
 
-            Object attributeValue = null;
             try {
-                attributeValue = extractor.extract((T) pValue);
+                Object attributeValue = extractor.extract((T) pValue);
                 return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
             } catch (AttributeExtractor.SkipAttributeException e) {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue,e);
@@ -83,15 +81,13 @@ abstract class SimplifierExtractor<T> implements Extractor {
             if (jsonify) {
                 JSONObject ret = new JSONObject();
                 for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
-                    Object value = null;
                     try {
-                        value = entry.getValue().extract((T) pValue);
+                        Object value = entry.getValue().extract((T) pValue);
+                        ret.put(entry.getKey(),pConverter.extractObject(value, pExtraArgs, jsonify));
                     } catch (AttributeExtractor.SkipAttributeException e) {
                         // Skip this one ...
                         continue;
                     }
-                    ret.put(entry.getKey(),
-                            pConverter.extractObject(value, pExtraArgs, jsonify));
                 }
                 return ret;
             } else {
@@ -148,6 +144,9 @@ abstract class SimplifierExtractor<T> implements Extractor {
          */
         Object extract(T value) throws AttributeExtractor.SkipAttributeException;
 
+        /**
+         * Exception to be thrown when the result of this extractor should be ommitted in the response
+         */
         class SkipAttributeException extends Exception {}
     }
 

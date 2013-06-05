@@ -1,19 +1,19 @@
 package org.jolokia.client.request;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.util.*;
@@ -53,7 +53,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
         J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
         J4pVersionRequest req2 = new J4pVersionRequest();
         Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-        params.put(J4pQueryParameter.MAX_DEPTH,"0");
+        params.put(J4pQueryParameter.MAX_DEPTH,"1");
         List resps = j4pClient.execute(Arrays.asList(req1,req2),params);
         assertEquals(resps.size(),2);
         J4pReadResponse resp = (J4pReadResponse) resps.get(0);

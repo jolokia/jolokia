@@ -1,11 +1,13 @@
+package org.jolokia.detector;
+
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,23 +16,21 @@
  * limitations under the License.
  */
 
-package org.jolokia.detector;
-
-import org.testng.annotations.Test;
-
-import javax.management.*;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import javax.management.*;
+
+import org.testng.annotations.Test;
+
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
  * @since 29.11.10
  */
-public class WebSphereDetectorTest {
+public class WebSphereDetectorTest extends BaseDetectorTest {
 
     @Test
     public void detect() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
@@ -38,12 +38,13 @@ public class WebSphereDetectorTest {
         ObjectName serverMbean = new ObjectName(SERVER_MBEAN);
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("*:j2eeType=J2EEServer,type=Server,*"),null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
+                andStubReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean)));
+        expect(mockServer.isRegistered(serverMbean)).andStubReturn(true);
         expect(mockServer.getAttribute(serverMbean,"platformName")).andReturn("IBM WebSphere Application Server");
         expect(mockServer.getAttribute(serverMbean,"serverVersion")).andReturn(SERVER_VERSION_V6);
         replay(mockServer);
 
-        ServerHandle info = detector.detect(new HashSet<MBeanServer>(Arrays.asList(mockServer)));
+        ServerHandle info = detector.detect(getMBeanServerManager(mockServer));
         assertEquals(info.getVendor(),"IBM");
         assertEquals(info.getProduct(),"websphere");
         assertNotNull(info.getExtraInfo(null));

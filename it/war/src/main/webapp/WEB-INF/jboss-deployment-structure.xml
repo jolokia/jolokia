@@ -1,0 +1,7 @@
+<jboss-deployment-structure>
+  <deployment>
+    <dependencies>
+      <module name="org.jboss.as.jmx"/>
+    </dependencies>
+  </deployment>
+</jboss-deployment-structure>

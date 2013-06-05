@@ -20,44 +20,44 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
  * @since 02.09.11
  */
-public class JBossDetectorTest {
+public class JBossDetectorTest extends BaseDetectorTest {
 
 
-    private JBossDetector detector;
-    private MBeanServer server;
-    private HashSet<MBeanServer> servers;
+    private JBossDetector       detector;
+    private MBeanServer         server;
+    private MBeanServerExecutor servers;
 
     @BeforeMethod
     public void setup() {
         detector = new JBossDetector();
 
         server = createMock(MBeanServer.class);
-        servers = new HashSet<MBeanServer>(Arrays.asList(server));
-
+        servers = getMBeanServerManager(server);
     }
 
     @Test
     public void simpleNotFound() throws MalformedObjectNameException {
 
-        for (String name : new String[] {
+        for (String name : new String[]{
                 "jboss.system:type=Server",
                 "jboss.as:management-root=server",
                 "jboss.modules:*"
         }) {
-            expect(server.queryNames(new ObjectName(name),null)).andReturn(null);
+            expect(server.queryNames(new ObjectName(name), null)).andReturn(Collections.<ObjectName>emptySet());
         }
         replay(server);
         assertNull(detector.detect(servers));
@@ -69,7 +69,8 @@ public class JBossDetectorTest {
 
 
         ObjectName oName = prepareQuery("jboss.system:type=Server");
-        expect(server.getAttribute(oName,"Version")).andReturn("5.1.0");
+        expect(server.isRegistered(oName)).andStubReturn(true);
+        expect(server.getAttribute(oName, "Version")).andReturn("5.1.0");
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"5.1.0");
@@ -80,7 +81,7 @@ public class JBossDetectorTest {
         // Verify workaround
         reset(server);
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
-        expect(server.getMBeanInfo(memoryBean)).andReturn(null);
+        expect(server.isRegistered(memoryBean)).andStubReturn(true);
         replay(server);
         handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JmxRequest>build());
         verify(server);
@@ -89,9 +90,11 @@ public class JBossDetectorTest {
     @Test
     public void version71() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.as:management-root=server");
-        expect(server.getAttribute(new ObjectName("jboss.as:management-root=server"),"releaseVersion")).andReturn("7.1.1.Final");
+        ObjectName oName = new ObjectName("jboss.as:management-root=server");
+        expect(server.isRegistered(oName)).andStubReturn(true);
+        expect(server.getAttribute(oName,"releaseVersion")).andReturn("7.1.1.Final");
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"7.1.1.Final");
@@ -114,8 +117,8 @@ public class JBossDetectorTest {
     @Test
     public void version7() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(null);
-        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(null);
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.modules:*");
         replay(server);
         ServerHandle handle = detector.detect(servers);
@@ -137,7 +140,7 @@ public class JBossDetectorTest {
     @Test
     public void addMBeanServers() {
         replay(server);
-        detector.addMBeanServers(servers);
+        detector.addMBeanServers(new HashSet<MBeanServerConnection>());
     }
 
 

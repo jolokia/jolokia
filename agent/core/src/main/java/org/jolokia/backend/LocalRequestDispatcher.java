@@ -1,35 +1,37 @@
 package org.jolokia.backend;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import java.util.Map;
 import java.util.UUID;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.history.HistoryStore;
-import org.jolokia.mbean.Config;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.*;
+import org.jolokia.util.DebugStore;
+import org.jolokia.util.LogHandler;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -58,7 +60,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @param pConfig agent configuration
      * @param pLogHandler local handler used for logging out errors and warnings
      */
-    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Map<ConfigKey, String> pConfig, LogHandler pLogHandler) {
+    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Configuration pConfig, LogHandler pLogHandler) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
         mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
@@ -84,13 +86,13 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
     /** {@inheritDoc} */
     public Object dispatchRequest(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         return mBeanServerHandler.dispatchRequest(handler, pJmxReq);
     }
 
     /**
-     * Initialise this reques dispatcher, which will register a {@link org.jolokia.mbean.ConfigMBean} for easy external
+     * Initialise this reques dispatcher, which will register a {@link ConfigMBean} for easy external
      * access to the {@link HistoryStore} and {@link DebugStore}.
      *
      * @param pHistoryStore history store to be managed from within an MBean
@@ -101,8 +103,6 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      */
     public void initMBeans(HistoryStore pHistoryStore, DebugStore pDebugStore)
             throws MalformedObjectNameException, MBeanRegistrationException, NotCompliantMBeanException {
-
-        mBeanServerHandler.initMBean();
 
         // Register the Config MBean
         String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
@@ -142,7 +142,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @throws JMException if unregistration fails
      */
     public void destroy() throws JMException {
-        mBeanServerHandler.unregisterMBeans();
+        mBeanServerHandler.destroy();
     }
 
     /**

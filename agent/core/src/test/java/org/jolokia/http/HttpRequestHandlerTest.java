@@ -23,11 +23,14 @@ import java.util.Map;
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.easymock.IArgumentMatcher;
+import org.jolokia.config.Configuration;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.RequestType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -49,7 +52,7 @@ public class HttpRequestHandlerTest {
         backend = createMock(BackendManager.class);
         expect(backend.isDebug()).andReturn(true).anyTimes();
 
-        handler = new HttpRequestHandler(backend, createDummyLogHandler());
+        handler = new HttpRequestHandler(new Configuration(),backend, createDummyLogHandler());
     }
 
     @AfterMethod
@@ -82,6 +85,43 @@ public class HttpRequestHandlerTest {
         JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET_REQUEST, null);
         assertTrue(response == resp);
     }
+
+    @Test
+    public void getWithDoubleSlashes() throws MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, IOException {
+        JSONObject resp = new JSONObject();
+        expect(backend.handleRequest(eqReadRequest("read", "bla:type=s/lash/", "attribute"))).andReturn(resp);
+        replay(backend);
+
+        JSONObject response = (JSONObject) handler.handleGetRequest("/read/bla%3Atype%3Ds!/lash!//attribute",
+                                 "/read/bla:type=s!/lash!/Ok",null);
+        assertTrue(response == resp);
+    }
+
+    private JmxRequest eqReadRequest(String pType, final String pMBean, final String pAttribute) {
+        EasyMock.reportMatcher(new IArgumentMatcher() {
+            public boolean matches(Object argument) {
+                try {
+                    JmxReadRequest req = (JmxReadRequest) argument;
+                    return req.getType() == RequestType.READ &&
+                           new ObjectName(pMBean).equals(req.getObjectName()) &&
+                           pAttribute.equals(req.getAttributeName());
+                } catch (MalformedObjectNameException e) {
+                    return false;
+                }
+            }
+
+            public void appendTo(StringBuffer buffer) {
+                buffer.append("eqReadRequest(mbean = \"");
+                buffer.append(pMBean);
+                buffer.append("\", attribute = \"");
+                buffer.append(pAttribute);
+                buffer.append("\")");
+
+            }
+        });
+        return null;
+    }
+
 
     @Test
     public void singlePost() throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {

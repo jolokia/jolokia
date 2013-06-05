@@ -1,19 +1,19 @@
 package org.jolokia.client.request;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.util.*;
@@ -113,7 +113,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nameWithSpace() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest req : readRequests("jolokia.it:type=naming,name=name with space","Ok")) {
+        for (J4pReadRequest req : readRequests("jolokia.it:type=naming/,name=name with space","Ok")) {
             J4pReadResponse resp = j4pClient.execute(req);
             assertNotNull(resp);
         }
@@ -168,7 +168,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertNotNull(longVal);
 
             try {
-            resp.getValue("Pinola bleibt");
+                resp.getValue("Pinola bleibt");
                 fail();
             } catch (IllegalArgumentException exp) {
                 assertTrue(exp.getMessage().contains("Pinola"));
@@ -180,6 +180,57 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             } catch (IllegalArgumentException exp) {
                 assertTrue(exp.getMessage().contains("null"));
             }
+
+            try {
+                req.getAttribute();
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("than one"));
+            }
+        }
+    }
+
+    @Test
+    public void allAttributes() throws MalformedObjectNameException, J4pException {
+        for (J4pReadRequest req : readRequests(itSetup.getAttributeMBean())) {
+            J4pReadResponse resp = j4pClient.execute(req);
+            assertFalse(req.hasSingleAttribute());
+            assertTrue(req.hasAllAttributes());
+            assertEquals(0,req.getAttributes().size());
+            Map respVal = resp.getValue();
+            assertTrue(respVal.containsKey("LongSeconds"));
+            assertTrue(respVal.containsKey("SmallMinutes"));
+            assertTrue(respVal.size() > 20);
+
+            Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
+            Set<String> attrSet = new HashSet<String>(attrs);
+            assertTrue(attrSet.contains("LongSeconds"));
+            assertTrue(attrSet.contains("SmallMinutes"));
+
+            try {
+                resp.getAttributes(new ObjectName("blub:type=bla"));
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains(itSetup.getAttributeMBean()));
+            }
+
+            Set<String> allAttrs = new HashSet<String>(resp.getAttributes());
+            assertTrue(allAttrs.size() > 20);
+            assertTrue(allAttrs.contains("Name"));
+            assertTrue(allAttrs.contains("Bytes"));
+
+            Long val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
+            assertNotNull(val);
+
+            try {
+                resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"Aufsteiger");
+                fail();
+            } catch (IllegalArgumentException exp) {
+                assertTrue(exp.getMessage().contains("Aufsteiger"));
+            }
+
+            Long bytes = resp.getValue("Bytes");
+            assertNotNull(bytes);
 
             try {
                 req.getAttribute();
@@ -292,7 +343,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
         for (J4pReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-            params.put(J4pQueryParameter.MAX_DEPTH,"0");
+            params.put(J4pQueryParameter.MAX_DEPTH,"1");
             params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
             for (String method : new String[] { "GET", "POST" }) {
                 if (request.getTargetConfig() != null && method.equals("GET")) {

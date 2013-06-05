@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <section id="agents-osgi">
   <title>OSGi Agents</title>
     <sidebar>There are several free implementations available of OSGi
@@ -244,6 +260,46 @@
           <literal>false</literal> the standard method of looking up a
           security policy file is used, as described in <xref
           linkend="security-policy"/>.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.canonicalNaming</td>
+        <td>true</td>
+        <td>
+          This option specifies in which order the key-value
+          properties within ObjectNames as returned by
+          <constant>list</constant> or <constant>search</constant> are
+          returned. By default this is the so called 'canonical order'
+          in which the keys are sorted alphabetically. If this option
+          is set to <constant>false</constant>, then the natural order
+          is used, i.e. the object name as it was registered. This
+          option can be overridden with a query parameter of the same
+          name.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.includeStackTrace</td>
+        <td>true</td>
+        <td>
+          Whether to include a stacktrace of an exception in case of
+          an error. By default it it set to <constant>true</constant>
+          in which case the stacktrace is always included. If set to
+          <constant>false</constant>, no stacktrace is included. If
+          the value is <constant>runtime</constant> a stacktrace is
+          only included for RuntimeExceptions. This global option can
+          be overridden with a query parameter.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.serializeException</td>
+        <td>false</td>
+        <td>
+          When this parameter is set to <constant>true</constant>,
+          then an exception thrown will be serialized as JSON and
+          included in the response under the key
+          <constant>error_value</constant>. No stactrace infornmation
+          will be included, though. This global option can be
+          overridden by a query parameter of the same name.
         </td>
       </tr>
       <tr>

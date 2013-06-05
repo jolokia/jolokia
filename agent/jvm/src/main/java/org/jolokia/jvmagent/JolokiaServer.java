@@ -1,19 +1,19 @@
 package org.jolokia.jvmagent;
 
 /*
- * Copyright 2009-2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.io.FileInputStream;
@@ -21,13 +21,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -38,9 +36,8 @@ import java.util.concurrent.ThreadFactory;
  */
 public class JolokiaServer {
 
-
     // Overall configuration
-    private ServerConfig config;
+    private JolokiaServerConfig config;
 
     // Whether the initialisation should be done lazy
     private boolean lazy;
@@ -65,14 +62,20 @@ public class JolokiaServer {
      * Create the Jolokia server, i.e. the HttpServer for serving Jolokia requests.
      *
      * @param pConfig configuration for this server
+     * @param pLazy lazy initialisation if true. This is required for agents
+     *              configured via startup options since at this early boot time
+     *              the JVM is not fully setup for the server detectors to work
      * @throws IOException if initialization fails
      */
-    public JolokiaServer(ServerConfig pConfig,boolean pLazy) throws IOException {
-        config = pConfig;
-        lazy = pLazy;
-        initServer();
+    public JolokiaServer(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+        init(pConfig, pLazy);
     }
 
+    /**
+     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig, boolean)} must be called later on
+     * for initialization
+     */
+    protected JolokiaServer() {}
 
     /**
      * Start HttpServer
@@ -107,7 +110,7 @@ public class JolokiaServer {
     }
 
     /**
-     * URL how this agent can be reached from the outsid.
+     * URL how this agent can be reached from the outside.
      *
      * @return the agent URL
      */
@@ -115,9 +118,20 @@ public class JolokiaServer {
         return url;
     }
 
+    /**
+     * Get configuration for this server
+     *
+     * @return server configuration
+     */
+    public JolokiaServerConfig getServerConfig() {
+        return config;
+    }
+
     // =========================================================================================
 
-    private void initServer() throws IOException {
+    protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+        config = pConfig;
+        lazy = pLazy;
 
         int port = config.getPort();
         InetAddress address = config.getAddress();
@@ -140,7 +154,10 @@ public class JolokiaServer {
         addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);
         initializeExecutor();
 
-        url = String.format("%s://%s:%d%s",protocol,address.getCanonicalHostName(),port,contextPath);
+        InetSocketAddress realSocketAddress = httpServer.getAddress();
+        InetAddress realAddress = realSocketAddress.getAddress() != null ? realSocketAddress.getAddress() : address;
+        url = String.format("%s://%s:%d%s",
+                            protocol,realAddress.getCanonicalHostName(),realSocketAddress.getPort(),contextPath);
     }
 
     private void addAuthenticatorIfNeeded(final String user, final String password, HttpContext pContext) {
@@ -204,6 +221,14 @@ public class JolokiaServer {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
         }
+    }
+
+    /**
+     * @return the address that the server is listening on. Thus, a program can initialize the server
+     * with 'port 0' and then retrieve the actual running port that was bound.
+     */
+    public InetSocketAddress getAddress() {
+        return httpServer.getAddress();
     }
 
     // ======================================================================================

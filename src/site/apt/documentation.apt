@@ -16,3 +16,9 @@ Documentation
  The {{{./reference/html/index.html}reference manual}} contains a comprehensive
  documentation to Jolokia, its agents and client bindings. There is also
  a {{{./reference/pdf/jolokia-reference.pdf}PDF version}}.
+
+* Talks and Screencast
+
+ In this {{{./talks.html}section}} various talks along with slides and some example screencasts
+ are collected. They give short impressions what can be done with Jolokia and
+ its clients.

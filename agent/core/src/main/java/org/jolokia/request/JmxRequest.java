@@ -1,11 +1,13 @@
+package org.jolokia.request;
+
 /*
- * Copyright 2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,11 +16,10 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
-
 import java.util.*;
 
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.*;
+import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 
@@ -39,7 +40,7 @@ public abstract class JmxRequest {
     private ProxyTargetConfig targetConfig = null;
 
     // Processing configuration for tis request object
-    private Map<ConfigKey, String> processingConfig = new HashMap<ConfigKey, String>();
+    private ProcessingParameters processingConfig;
 
     // A value fault handler for dealing with exception when extracting values
     private ValueFaultHandler valueFaultHandler;
@@ -56,11 +57,11 @@ public abstract class JmxRequest {
      *
      * @param pType request type
      * @param pPathParts an optional path, splitted up in parts. Not all requests do handle a path.
-     * @param pInitParams init parameters provided as query params for a GET request. They are used to
+     * @param pProcessingParams init parameters provided as query params for a GET request. They are used to
      *                    to influence the processing.
      */
-    protected JmxRequest(RequestType pType, List<String> pPathParts, Map<String, String> pInitParams) {
-        this(pType, HttpMethod.GET, pPathParts, pInitParams);
+    protected JmxRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams) {
+        this(pType, HttpMethod.GET, pPathParts, pProcessingParams);
     }
 
     /**
@@ -70,7 +71,7 @@ public abstract class JmxRequest {
      * @param pInitParams optional processing parameters (obtained as query parameters or from within the
      *        JSON request)
      */
-    public JmxRequest(Map<String, ?> pMap, Map<String, String> pInitParams) {
+    public JmxRequest(Map<String, ?> pMap, ProcessingParameters pInitParams) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
              EscapeUtil.parsePath((String) pMap.get("path")),
@@ -83,12 +84,12 @@ public abstract class JmxRequest {
     }
 
     // Common parts of both constructors
-    private JmxRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, Map<String, String> pInitParams) {
+    private JmxRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams) {
         method = pMethod;
         type = pType;
         pathParts = pPathParts;
 
-        initParameters(pInitParams);
+        initParameters(pProcessingParams);
     }
 
     /**
@@ -105,7 +106,7 @@ public abstract class JmxRequest {
      * @param pConfigKey configuration key to fetch
      * @return string value or <code>null</code> if not set
      */
-    public String getProcessingConfig(ConfigKey pConfigKey) {
+    public String getParameter(ConfigKey pConfigKey) {
         return processingConfig.get(pConfigKey);
     }
 
@@ -114,15 +115,26 @@ public abstract class JmxRequest {
      * if not set
      *
      * @param pConfigKey configuration to lookup
-     * @return integer value of configuration or null if not set.
+     * @return integer value of configuration or 0 if not set.
      */
-    public Integer getProcessingConfigAsInt(ConfigKey pConfigKey) {
+    public int getParameterAsInt(ConfigKey pConfigKey) {
         String intValueS = processingConfig.get(pConfigKey);
         if (intValueS != null) {
             return Integer.parseInt(intValueS);
         } else {
-            return null;
+            return 0;
         }
+    }
+
+    /**
+     * Get a processing configuration as a boolean value
+     *
+     * @param pConfigKey configuration to lookup
+     * @return boolean value of the configuration, the default value or false if the default value is null
+     */
+    public Boolean getParameterAsBool(ConfigKey pConfigKey) {
+        String booleanS = getParameter(pConfigKey);
+        return Boolean.parseBoolean(booleanS != null ? booleanS : pConfigKey.getDefaultValue());
     }
 
     /**
@@ -204,60 +216,21 @@ public abstract class JmxRequest {
             try {
                 ret.put("path",getPath());
             } catch (UnsupportedOperationException exp) {
-                // Happens when request doesnt support pathes
+                // Happens when request doesnt support paths
             }
         }
         return ret;
     }
 
     // Init parameters and value fault handler
-    private void initParameters(Map<String, String> pParams) {
-        if (pParams != null) {
-            for (Map.Entry<String,?> entry : pParams.entrySet()) {
-                ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
-                Object value = entry.getValue();
-                if (cKey != null) {
-                    processingConfig.put(cKey, value != null ? value.toString() : null);
-                }
-            }
-        }
+    private void initParameters(ProcessingParameters pParams) {
+        processingConfig = pParams;
         String ignoreErrors = processingConfig.get(ConfigKey.IGNORE_ERRORS);
         if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
-            valueFaultHandler = IGNORING_VALUE_FAULT_HANDLER;
+            valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;
         } else {
-            valueFaultHandler = THROWING_VALUE_FAULT_HANDLER;
+            valueFaultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
         }
     }
-
-    // =================================================================================================
-    // Available fault handlers
-
-    public static final ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
-        /**
-         * Ignores any exeception and records them as a string which can be used for business
-         *
-         * @param exception exception to ignore
-         * @return a descriptive string of the exception
-         */
-        public <T extends Throwable> Object handleException(T exception) throws T {
-            return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
-        }
-    };
-
-    public static final ValueFaultHandler THROWING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
-
-        /**
-         * Ret-throws the given exception
-         * @param exception exception given
-         * @return nothing
-         * @throws T always
-         */
-        public <T extends Throwable> Object handleException(T exception) throws T {
-            // Dont handle exception on our own, we rethrow it
-            throw exception;
-        }
-    };
-
-
 
 }

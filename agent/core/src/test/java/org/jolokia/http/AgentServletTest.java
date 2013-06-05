@@ -17,7 +17,6 @@ package org.jolokia.http;
  */
 
 import java.io.*;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.*;
@@ -25,9 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jolokia.backend.TestDetector;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
-import org.jolokia.util.ConfigKey;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -95,7 +94,7 @@ public class AgentServletTest {
         servlet.init(config);
         servlet.destroy();
 
-        Map<ConfigKey,String> cfg = servlet.configAsMap(config);
+        org.jolokia.config.Configuration cfg = servlet.initConfig(config);
         assertEquals(cfg.get(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
         assertEquals(cfg.get(ConfigKey.MAX_DEPTH), "10");
         assertEquals(cfg.get(ConfigKey.MAX_OBJECTS), "20");
@@ -215,6 +214,7 @@ public class AgentServletTest {
 
         response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
         response.setHeader("Access-Control-Allow-Origin", out);
+        response.setHeader("Access-Control-Allow-Credentials", "true");
 
         replay(request, response);
 
@@ -249,6 +249,7 @@ public class AgentServletTest {
                 new Runnable() {
                     public void run() {
                         response.setHeader("Access-Control-Allow-Origin", out);
+                        response.setHeader("Access-Control-Allow-Credentials","true");
                         response.setCharacterEncoding("utf-8");
                         response.setContentType("text/plain");
                         response.setStatus(200);
@@ -268,7 +269,8 @@ public class AgentServletTest {
     private void setNoCacheHeaders(HttpServletResponse pResp) {
         pResp.setHeader("Cache-Control", "no-cache");
         pResp.setHeader("Pragma","no-cache");
-        pResp.setHeader("Expires","-1");
+        pResp.setDateHeader(eq("Date"),anyLong());
+        pResp.setDateHeader(eq("Expires"),anyLong());
     }
 
     @Test

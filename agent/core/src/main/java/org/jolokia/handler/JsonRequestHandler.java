@@ -1,27 +1,30 @@
 package org.jolokia.handler;
 
-import org.jolokia.request.*;
+import java.io.IOException;
+
+import javax.management.*;
+
+import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
 
-import javax.management.*;
-import java.io.IOException;
-import java.util.Set;
-
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 
@@ -56,7 +59,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @return whether you want to have
      * {@link #doHandleRequest(MBeanServerConnection, JmxRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(java.util.Set, JmxRequest)} (<code>true</code>) called.
+     * {@link #doHandleRequest(MBeanServerExecutor, JmxRequest)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(R pRequest) {
         return false;
@@ -80,7 +83,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws java.io.IOException
      */
     public Object handleRequest(MBeanServerConnection pServer, R pRequest)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         checkForRestriction(pRequest);
         checkHttpMethod(pRequest);
         return doHandleRequest(pServer, pRequest);
@@ -93,7 +96,6 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @param pRequest request to check
      */
     protected abstract void checkForRestriction(R pRequest);
-
 
     /**
      * Check whether a command of the given type is allowed
@@ -135,14 +137,15 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws IOException
      */
     protected abstract Object doHandleRequest(MBeanServerConnection server, R request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException;
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
 
     /**
      * Override this if you want to have all servers at once for processing the request
      * (like need for merging info as for a <code>list</code> command). This method
      * is only called when {@link #handleAllServersAtOnce(JmxRequest)} returns <code>true</code>
      *
-     * @param servers all MBeans servers detected
+     *
+     * @param pServerManager server manager holding all MBeans servers detected
      * @param request request to process
      * @return the object found
      * @throws IOException
@@ -151,17 +154,18 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object handleRequest(Set<MBeanServerConnection> servers, R request)
-            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException {
+    public Object handleRequest(MBeanServerExecutor pServerManager, R request)
+            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         checkForRestriction(request);
-        return doHandleRequest(servers,request);
+        return doHandleRequest(pServerManager,request);
     }
 
     /**
      * Default implementation fo handling a request for multiple servers at once. A subclass, which returns,
      * <code>true</code> on {@link #handleAllServersAtOnce(JmxRequest)}, needs to override this method.
      *
-     * @param servers all MBean servers found in this JVM
+     *
+     * @param serverManager all MBean servers found in this JVM
      * @param request the original request
      * @return the result of the the request.
      * @throws IOException
@@ -170,8 +174,8 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object doHandleRequest(Set<MBeanServerConnection> servers, R request)
-                throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public Object doHandleRequest(MBeanServerExecutor serverManager, R request)
+                throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return null;
     }
 
@@ -193,4 +197,18 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
         return restrictor;
     }
 
+    /**
+     * Check, whether the set of MBeans for any managed MBeanServer has been change since the timestamp
+     * provided in the given request
+     * @param pServerManager manager for all MBeanServers
+     * @param pRequest the request from where to fetch the timestamp
+     * @throws NotChangedException if there has been no REGISTER/UNREGISTER notifications in the meantime
+     */
+    protected void checkForModifiedSince(MBeanServerExecutor pServerManager, JmxRequest pRequest)
+            throws NotChangedException {
+        int ifModifiedSince = pRequest.getParameterAsInt(ConfigKey.IF_MODIFIED_SINCE);
+        if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {
+            throw new NotChangedException(pRequest);
+        }
+    }
 }

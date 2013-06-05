@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <section id="write">
   <title>Writing attributes (write)</title>
   <para>
@@ -42,7 +58,7 @@
           <td><literal>&lt;path&gt;</literal></td>
           <td>   
             Inner path for accessing the parent object on which to set the value.
-            (See also <xref linkend="pathes"/>). Note, that this is
+            (See also <xref linkend="paths"/>). Note, that this is
             <emphasis>not</emphasis> the path to the attribute itself,
             but to the object carrying this attribute. With a given
             path it is possible to deeply set an value on a complex
@@ -101,7 +117,7 @@
           <td><constant>path</constant></td>
           <td>   
             An optional inner path for specifying an inner object on which to set the
-            value. See <xref linkend="pathes"/> for more on inner pathes.
+            value. See <xref linkend="paths"/> for more on inner paths.
           </td>
           <td></td>
         </tr>

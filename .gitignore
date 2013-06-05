@@ -3,5 +3,6 @@ target
 *.ipr
 *.iws
 *~
-
 /classes/
+.idea
+wiki

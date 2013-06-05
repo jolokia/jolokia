@@ -21,27 +21,28 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
  * @since 12.09.11
  */
-public class SearchHandlerTest {
+public class SearchHandlerTest extends BaseHandlerTest {
 
 
     private SearchHandler handler;
 
-    private MBeanServerConnection connection;
+    private MBeanServer server;
 
     @BeforeMethod
     public void setup() {
@@ -49,9 +50,9 @@ public class SearchHandlerTest {
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         handler.handleRequest((MBeanServerConnection) null,
-                              new JmxRequestBuilder(RequestType.SEARCH,"java.lang:*").<JmxSearchRequest>build());
+                              new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JmxSearchRequest>build());
     }
 
     @Test
@@ -60,36 +61,53 @@ public class SearchHandlerTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        List<String> res = doSearch("java.lang:*", "java.lang:type=Memory", "java.lang:type=Runtime");
-        assertEquals(res.size(),2);
+    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+        List<String> res = doSearch("java.lang:*", null, "java.lang:type=Memory", "java.lang:type=Runtime");
+        assertEquals(res.size(), 2);
         assertTrue(res.contains("java.lang:type=Memory"));
         assertTrue(res.contains("java.lang:type=Runtime"));
-        verify(connection);
+        verify(server);
     }
 
 
     @Test
-    public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         String attr = "java.lang:type=\"m:e*m\\\"?o\\\\y\\n\"";
-        List<String> res = doSearch("java.lang:*", attr);
+        List<String> res = doSearch("java.lang:*", null, attr);
         assertEquals(res.size(),1);
         assertTrue(res.contains(attr));
-        verify(connection);
+        verify(server);
     }
 
+    @Test
+    public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+        List<String> res = doSearch("java.lang:*", "true", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
+        assertEquals(res.size(),2);
+        assertTrue(res.contains("java.lang:name=bla,type=Memory"));
+        assertTrue(res.contains("java.lang:mode=run,type=Runtime"));
+        verify(server);
+    }
 
-    private List<String> doSearch(String pPattern, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    @Test
+    public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+        List<String> res = doSearch("java.lang:*", "false", "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run");
+        assertEquals(res.size(),2);
+        assertTrue(res.contains("java.lang:type=Memory,name=bla"));
+        assertTrue(res.contains("java.lang:type=Runtime,mode=run"));
+        verify(server);
+    }
+
+    private List<String> doSearch(String pPattern, String pUseCanonicalName, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         ObjectName oName = new ObjectName(pPattern);
-        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).build();
+        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.CANONICAL_NAMING,pUseCanonicalName).build();
 
-        connection = createMock(MBeanServerConnection.class);
+        server = createMock(MBeanServer.class);
         Set<ObjectName> names = new HashSet<ObjectName>();
         for (String name : pFoundNames) {
             names.add(new ObjectName(name));
         }
-        expect(connection.queryNames(oName,null)).andReturn(names);
-        replay(connection);
-        return (List<String>) handler.handleRequest(new HashSet<MBeanServerConnection>(Arrays.asList(connection)),request);
+        expect(server.queryNames(oName,null)).andReturn(names);
+        replay(server);
+        return (List<String>) handler.handleRequest(getMBeanServerManager(server),request);
     }
 }

@@ -1,19 +1,19 @@
 package org.jolokia.client.request;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.util.*;
@@ -74,7 +74,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      * from the remote j4p agent
      *
      * @param pObjectName object name as sting which gets converted to a {@link javax.management.ObjectName}}
-     * @param pAttribute one or more attributes to request.
+     * @param pAttribute zero, one or more attributes to request.
      * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
      */
     public J4pReadRequest(String pObjectName,String ... pAttribute) throws MalformedObjectNameException {
@@ -87,16 +87,16 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      *
      * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
      * @param pObjectName object name as sting which gets converted to a {@link javax.management.ObjectName}}
-     * @param pAttribute one or more attributes to request.
+     * @param pAttribute zero, one or more attributes to request.
      * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
      */
     public J4pReadRequest(J4pTargetConfig pTargetConfig,String pObjectName,String ... pAttribute) throws MalformedObjectNameException {
         this(pTargetConfig,new ObjectName(pObjectName),pAttribute);
     }
 
-
     /**
-     * Get all attributes of this request
+     * Get all attributes of this request. This list can be empty if all attributes
+     * should be fetched.
      *
      * @return attributes
      */
@@ -112,7 +112,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      *         constructed.
      */
     public String getAttribute() {
-        if (attributes == null || !hasSingleAttribute()) {
+        if (!hasSingleAttribute()) {
             throw new IllegalArgumentException("More than one attribute given for this request");
         }
         return attributes.get(0);
@@ -126,10 +126,13 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
             ret.add(getAttribute());
             addPath(ret,path);
             return ret;
-        } else {
-            // A GET request cant be used for multiple attribute fetching.
-            return null;
+        } else if (hasAllAttributes() && path == null) {
+            return super.getRequestParts();
         }
+
+        // A GET request cant be used for multiple attribute fetching or for fetching
+        // all attributes with a path
+        return null;
     }
 
     /** {@inheritDoc} */
@@ -138,7 +141,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
         JSONObject ret = super.toJson();
         if (hasSingleAttribute()) {
             ret.put("attribute",attributes.get(0));
-        } else {
+        } else if (!hasAllAttributes()) {
             JSONArray attrs = new JSONArray();
             attrs.addAll(attributes);
             ret.put("attribute",attrs);
@@ -161,7 +164,16 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      * @return true if the client request is for a single attribute
      */
     public boolean hasSingleAttribute() {
-        return attributes != null && attributes.size() == 1;
+        return attributes.size() == 1;
+    }
+
+    /**
+     * Whether all attributes should be fetched
+     *
+     * @return true if all attributes should be fetched
+     */
+    public boolean hasAllAttributes() {
+        return attributes.size() == 0;
     }
 
     /**

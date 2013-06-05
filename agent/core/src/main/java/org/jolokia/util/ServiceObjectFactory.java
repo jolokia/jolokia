@@ -1,11 +1,11 @@
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,7 +48,7 @@ public final class ServiceObjectFactory {
      * Create a list of services ordered according to the ordering given in the
      * service descriptor files. Note, that the descriptor will be looked up
      * in the whole classpath space, which can result in reading in multiple
-     * descriptors with a single path. Note, that the reading order for mutiple
+     * descriptors with a single path. Note, that the reading order for multiple
      * resources with the same name is not defined.
      *
      * @param pDescriptorPaths a list of resource paths which are handle in the given order.

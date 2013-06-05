@@ -1,11 +1,13 @@
+package org.jolokia.roo;
+
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +16,12 @@
  * limitations under the License.
  */
 
-package org.jolokia.roo;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.*;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
@@ -41,9 +42,7 @@ import org.w3c.dom.*;
 @Service
 public class JolokiaCommands implements CommandMarker {
 
-	private Logger log = Logger.getLogger(getClass().getName());
-
-    // Reference to use roo services
+	// Reference to use roo services
     @Reference private ProjectOperations projectOperations;
     @Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
@@ -216,8 +215,8 @@ public class JolokiaCommands implements CommandMarker {
                                                         "jolokia-access.xml");
         if (!fileManager.exists(destination)) {
             try {
-                FileCopyUtils.copy(FileUtils.getInputStream(getClass(), "jolokia-access.xml"),
-                                   fileManager.createFile(destination).getOutputStream());
+                IOUtils.copy(FileUtils.getInputStream(getClass(), "jolokia-access.xml"),
+                             fileManager.createFile(destination).getOutputStream());
             } catch (IOException ioe) {
                 throw new IllegalStateException(ioe);
             }

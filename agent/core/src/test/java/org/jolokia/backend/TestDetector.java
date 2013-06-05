@@ -16,11 +16,13 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
-import java.util.Set;
+import java.util.*;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
 
@@ -48,7 +50,7 @@ public class TestDetector implements ServerDetector {
         nr = instances++;
     }
 
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (nr == 2) {
             throw new RuntimeException();
         } else if (nr == 3 && !fallThrough) {
@@ -59,13 +61,25 @@ public class TestDetector implements ServerDetector {
         }
     }
 
-    public void addMBeanServers(Set<MBeanServer> pMBeanServers) {
+    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
         if (throwAddException) {
             MBeanServer server = createMock(MBeanServer.class);
             try {
                 expect(server.registerMBean(EasyMock.<Object>anyObject(), EasyMock.<ObjectName>anyObject()))
-                        .andThrow(exps[nr % exps.length]).anyTimes();
-                expect(server.isRegistered(EasyMock.<ObjectName>anyObject())).andReturn(false);
+                        .andStubThrow(exps[nr % exps.length]);
+                expect(server.queryNames(EasyMock.<ObjectName>anyObject(), (QueryExp) isNull())).andStubAnswer(
+                        new IAnswer<Set<ObjectName>>() {
+                            public Set<ObjectName> answer() throws Throwable {
+                                Object[] args = EasyMock.getCurrentArguments();
+                                return new HashSet<ObjectName>(Arrays.asList((ObjectName) args[0]));
+                            }
+                        });
+                expect(server.isRegistered(EasyMock.<ObjectName>anyObject())).andStubReturn(true);
+                server.addNotificationListener((ObjectName) anyObject(), (NotificationListener) anyObject(),
+                                               (NotificationFilter) anyObject(), anyObject());
+                expectLastCall().anyTimes();
+                server.removeNotificationListener((ObjectName) anyObject(), (NotificationListener) anyObject());
+                expectLastCall().anyTimes();
                 replay(server);
                 pMBeanServers.add(server);
             } catch (JMException e) {

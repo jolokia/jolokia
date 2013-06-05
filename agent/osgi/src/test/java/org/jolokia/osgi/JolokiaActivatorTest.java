@@ -27,7 +27,7 @@ import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;

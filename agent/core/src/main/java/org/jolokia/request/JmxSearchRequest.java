@@ -1,11 +1,13 @@
+package org.jolokia.request;
+
 /*
- * Copyright 2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +16,12 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
-
 import java.util.Map;
 import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.RequestType;
 
 /**
@@ -38,7 +39,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxSearchRequest(String pObjectName, Map<String, String> pParams) throws MalformedObjectNameException {
+    JmxSearchRequest(String pObjectName, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(RequestType.SEARCH, pObjectName, null, pParams);
     }
 
@@ -49,9 +50,10 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxSearchRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    JmxSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
     }
+
 
     @Override
     public String toString() {
@@ -74,12 +76,12 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
     static RequestCreator<JmxSearchRequest> newCreator() {
         return new RequestCreator<JmxSearchRequest>() {
             /** {@inheritDoc} */
-            public JmxSearchRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxSearchRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JmxSearchRequest(pStack.pop(),pParams);
             }
 
             /** {@inheritDoc} */
-            public JmxSearchRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxSearchRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JmxSearchRequest(requestMap,pParams);
             }

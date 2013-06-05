@@ -1,13 +1,13 @@
 package org.jolokia.jvmagent;
 
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,14 @@ package org.jolokia.jvmagent;
 
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
-import org.jolokia.util.ConfigKey;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -72,7 +73,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void testCallbackPost() throws URISyntaxException, IOException {
+    public void testCallbackPost() throws URISyntaxException, IOException, java.text.ParseException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data",
                                                 "Content-Type","text/plain; charset=UTF-8",
                                                 "Origin",null
@@ -93,7 +94,17 @@ public class JolokiaHttpHandlerTest {
 
         assertEquals(header.getFirst("Cache-Control"),"no-cache");
         assertEquals(header.getFirst("Pragma"),"no-cache");
-        assertEquals(header.getFirst("Expires"),"-1");
+        SimpleDateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        String expires = header.getFirst("Expires");
+        String date = header.getFirst("Date");
+
+        Date parsedExpires = rfc1123Format.parse(expires);
+        Date parsedDate = rfc1123Format.parse(date);
+        assertTrue(parsedExpires.before(parsedDate) || parsedExpires.equals(parsedDate));
+        Date now = new Date();
+        assertTrue(parsedExpires.before(now) || parsedExpires.equals(now));
     }
 
     @Test
@@ -122,8 +133,7 @@ public class JolokiaHttpHandlerTest {
     @Test
     public void customRestrictor() throws URISyntaxException, IOException, ParseException {
         for (String[] params : new String[][] {  { "classpath:/access-restrictor.xml","not allowed"},{"file:///not-existing.xml","No access"}}) {
-            Map<ConfigKey,String> config = getConfig();
-            config.put(ConfigKey.POLICY_LOCATION,params[0]);
+            Configuration config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
             JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
             HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
             // Simple GET method
@@ -210,11 +220,17 @@ public class JolokiaHttpHandlerTest {
     }
 
     private static boolean debugToggle = false;
-    public Map<ConfigKey,String> getConfig() {
-        Map<ConfigKey,String> map = new HashMap<ConfigKey, String>();
-        map.put(ConfigKey.AGENT_CONTEXT,"/jolokia");
-        map.put(ConfigKey.DEBUG,debugToggle ? "true" : "false");
+    public Configuration getConfig(Object ... extra) {
+        ArrayList list = new ArrayList();
+        list.add(ConfigKey.AGENT_CONTEXT);
+        list.add("/jolokia");
+        list.add(ConfigKey.DEBUG);
+        list.add(debugToggle ? "true" : "false");
+        for (Object e : extra) {
+            list.add(e);
+        }
+        Configuration config = new Configuration(list.toArray());
         debugToggle = !debugToggle;
-        return map;
+        return config;
     }
 }

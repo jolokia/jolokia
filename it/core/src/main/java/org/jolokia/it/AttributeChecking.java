@@ -8,19 +8,19 @@ import java.util.*;
 import javax.management.*;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 
@@ -31,25 +31,26 @@ import javax.management.*;
 public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistration {
 
 
-    private boolean state = false;
-    private int idx = 0;
-    private String strings[] = {
+    private boolean state     = false;
+    private int     idx       = 0;
+    private String  name      = null;
+    private String  strings[] = {
             "Started",
             "Stopped"
     };
 
     private int intValue = 0;
-    private File file;
-    private File origFile;
+    private File       file;
+    private File       origFile;
     private ObjectName objectName;
-    private List list;
-    private Map complexMap;
-    private Map map;
-    private Set set;
-    private Object bean;
-    private String domain;
+    private List       list;
+    private Map        complexMap;
+    private Map        map;
+    private Set        set;
+    private Object     bean;
+    private String     domain;
     private Date date = new Date();
-
+    private Chili chili = Chili.AJI;
 
 
     public AttributeChecking(String pDomain) {
@@ -63,19 +64,19 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
             idx = 0;
             intValue = 0;
             file = origFile;
-            origFile = File.createTempFile("bla",".txt");
+            origFile = File.createTempFile("bla", ".txt");
             file = origFile;
             objectName = new ObjectName("bla:type=blub");
-            list = Arrays.asList("jolokia","habanero",42);
+            list = Arrays.asList("jolokia", "habanero", 42);
             map = new HashMap();
-            map.put("fcn","meister");
-            map.put("bayern","mittelfeld");
-            map.put("zahl",10L);
+            map.put("fcn", "meister");
+            map.put("bayern", "mittelfeld");
+            map.put("zahl", 10L);
             complexMap = new HashMap();
             List inner = new ArrayList();
             Map anotherInner = new HashMap();
-            int innerInner[] = new int[] { 42, 23 };
-            anotherInner.put("numbers",innerInner);
+            int innerInner[] = new int[]{42, 23};
+            anotherInner.put("numbers", innerInner);
             inner.add("Bla");
             inner.add(anotherInner);
             complexMap.put("Blub",inner);
@@ -100,6 +101,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public String getString() {
         return strings[idx++ % 2];
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getNull() {
@@ -225,6 +234,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     public String getUtf8Content() {
         // UTF-8: E2 98 AF, Unicode: U+262F
         return "☯";
+    }
+
+    public Chili getChili() {
+        return chili;
+    }
+
+    public void setChili(Chili pChili) {
+        chili = pChili;
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {

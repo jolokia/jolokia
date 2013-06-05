@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <document>
   <properties>
     <title>Features</title>
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
 
-  <head>
-    <script type="text/javascript" src="js/idea.js"></script>
-    <script type="text/javascript" language="JavaScript" src="http://widget.idea.informer.com/tabn2v3.js"></script><noscript><a href="http://jolokia.useridea.com">Feature Requests feedback</a> <a href="http://useridea.com"> Powered by <img src="http://widget.useridea.com/i/reformal_ru.png" /></a></noscript>
-  </head>
   <body>
     <!-- The body of the document contains a number of sections -->
     <div class="feature grid_18 alpha">
@@ -59,7 +71,7 @@
               href="http://code.google.com/p/json-simple/">json-simple</a>
               for parsing requests and creating responses. Although
               the binary protocols (JRMP or IIOP) used by the standard
-              JSR-160 connectors are naturally much compacter than a
+              JSR-160 connectors are naturally much more compact than a
               textual representation like JSON and although they have
               some performance advantages, Jolokia balances this for
               many use cases with advanced features like bulk requests

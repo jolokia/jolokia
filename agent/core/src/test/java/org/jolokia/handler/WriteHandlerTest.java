@@ -1,11 +1,13 @@
+package org.jolokia.handler;
+
 /*
- * Copyright 2009-2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,8 +16,6 @@
  * limitations under the License.
  */
 
-package org.jolokia.handler;
-
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
@@ -23,20 +23,15 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.converter.*;
-import org.jolokia.converter.json.ObjectToJsonConverter;
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.converter.object.StringToOpenTypeConverter;
-import org.jolokia.request.*;
+import org.jolokia.converter.Converters;
+import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.testng.annotations.BeforeTest;
-
-import static org.jolokia.util.RequestType.*;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
-
 import org.testng.annotations.*;
+
+import static org.jolokia.util.RequestType.WRITE;
+import static org.testng.Assert.*;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author roland
@@ -50,12 +45,12 @@ public class WriteHandlerTest {
 
     @BeforeTest
     public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        handler = new WriteHandler(new AllowAllRestrictor(),new Converters(null));
+        handler = new WriteHandler(new AllowAllRestrictor(),new Converters());
 
         oName = new ObjectName("jolokia:test=write");
 
-        MBeanServerConnection conn = getMBeanServer();
-        conn.createMBean(WriteData.class.getName(),oName);
+        MBeanServer server = getMBeanServer();
+        server.createMBean(WriteData.class.getName(), oName);
     }
 
 
@@ -65,7 +60,7 @@ public class WriteHandlerTest {
         conn.unregisterMBean(oName);
     }
 
-    private MBeanServerConnection getMBeanServer() {
+    private MBeanServer getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();
     }
 

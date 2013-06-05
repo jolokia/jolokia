@@ -1,11 +1,13 @@
+package org.jolokia.detector;
+
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,11 +16,11 @@
  * limitations under the License.
  */
 
-package org.jolokia.detector;
-
-import javax.management.MBeanServer;
-
 import java.util.Set;
+
+import javax.management.MBeanServerConnection;
+
+import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting
@@ -35,15 +37,17 @@ public interface ServerDetector {
      * in case of a successful detection, <code>null</code> otherwise.
      *
      *
-     * @param pMbeanServers a set of MBeanServers which can be used for detecting server informations
+     *
+     *
+     * @param pMBeanServerExecutor a set of MBeanServers which can be used for detecting server informations
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
-    ServerHandle detect(Set<MBeanServer> pMbeanServers);
+    ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor);
 
     /**
      * Add server specific MBeanServers
      *
      * @param pMBeanServers set to add detected MBeanServers to
      */
-    void addMBeanServers(Set<MBeanServer> pMBeanServers);
+    void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
 }

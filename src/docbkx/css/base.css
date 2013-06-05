@@ -1,11 +1,11 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,6 +64,9 @@ h1, h2, h3, h4, h5 {
 
 code, pre {
     font-family: 'Lucida Console', 'DejaVu Sans Mono', Courier, monospace;
+    border: 1px #eee solid;
+    padding: 2px;
+    background: #f7f7f7;
 }
 
 /*
@@ -165,6 +168,7 @@ pre {
     font-size: 100%;
     min-width: 50%;
     border: solid #d0d0d0 1px;
+    line-height: 150%;
 }
 
 .table table td {

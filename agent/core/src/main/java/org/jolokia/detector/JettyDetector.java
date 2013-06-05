@@ -1,11 +1,13 @@
+package org.jolokia.detector;
+
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +16,9 @@
  * limitations under the License.
  */
 
-package org.jolokia.detector;
-
-import javax.management.MBeanServer;
-
 import java.lang.reflect.*;
-import java.util.Set;
 
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 
 /**
@@ -32,8 +30,9 @@ import org.jolokia.util.ClassUtil;
 public class JettyDetector extends AbstractServerDetector {
 
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
+    /** {@inheritDoc}
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
         if (serverClass != null) {
             return new ServerHandle("Mortbay", "jetty", getVersion(serverClass), null, null);

@@ -1,19 +1,19 @@
 package org.jolokia.history;
 
 /*
- *  Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.util.*;
@@ -92,6 +92,17 @@ public class HistoryStoreTest {
         assertEquals("4 history entries after reset",4,updateNTimesAsList(req,5).size());
         store.configure(new HistoryKey(req), null);
         assertEquals("History disabled",null,updateNTimesAsList(req,12));
+    }
+
+    @Test
+    public void reconfigure() throws MalformedObjectNameException {
+        JmxExecRequest req =
+                new JmxRequestBuilder(EXEC,"test:type=exec")
+                        .operation("op")
+                        .build();
+
+        store.configure(new HistoryKey(req), new HistoryLimit(2, 100L));
+        store.configure(new HistoryKey(req), new HistoryLimit(2, 100L));
     }
     
     @Test
@@ -283,8 +294,18 @@ public class HistoryStoreTest {
 
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxEntries.*maxDuration.*")
-    public void invalidHistoryLimit() {
+     public void invalidHistoryLimit() {
         new HistoryLimit(0,0L);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxEntries.*")
+    public void invalidMaxEntriesHistoryLimit() {
+        new HistoryLimit(-1,0L);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*maxDuration.*")
+    public void invalidMaxDurationHistoryLimit() {
+        new HistoryLimit(0,-1L);
     }
 
     @Test

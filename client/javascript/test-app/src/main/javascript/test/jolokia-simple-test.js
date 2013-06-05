@@ -1,11 +1,11 @@
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -103,8 +103,10 @@ $(document).ready(function() {
         equals(value, 1);
         value = j4p.execute("jolokia.it:type=operation", "overloadedMethod(java.lang.String,int)", "bla", 1);
         equals(value, 2);
-        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "bla,blub", "x");
-        equals(value, "bla");
+        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "Max\nMorlock,blub", "x", { method: "POST" });
+        equals(value, "Max\nMorlock");
+        value = j4p.execute("jolokia.it:type=operation", "arrayArguments", [ "Max\nMorlock", "blub"], "x", { method: "POST"});
+        equals(value, "Max\nMorlock");
         value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null);
         equals(value, true);
         j4p.execute("jolokia.it:type=operation", "reset");
@@ -189,9 +191,9 @@ $(document).ready(function() {
         value = j4p.list(["java.lang","type=Memory","op"]);
         ok(value["gc"], "Garbage collection (with array path)");
         equals(value.gc.args, 0);
-        value = j4p.list("jolokia.it/type=naming,name=n!!a!!m!!e with !!!/!!/attr");
+        value = j4p.list("jolokia.it/name=n!!a!!m!!e with !!!/!!,type=naming!//attr");
         ok(value["Ok"], "Path with /");
-        value = j4p.list(["jolokia.it","type=naming,name=n!a!m!e with !/!","attr"]);
+        value = j4p.list(["jolokia.it","type=naming/,name=n!a!m!e with !/!","attr"]);
         ok(value["Ok"], "Path with / (path elements)");
         raises(function() {
             j4p.list("java.lang/type=Bla");

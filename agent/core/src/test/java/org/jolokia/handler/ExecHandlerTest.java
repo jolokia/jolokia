@@ -1,11 +1,13 @@
+package org.jolokia.handler;
+
 /*
- * Copyright 2009-2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,14 +16,13 @@
  * limitations under the License.
  */
 
-package org.jolokia.handler;
-
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -42,7 +43,7 @@ public class ExecHandlerTest {
 
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ExecHandler(new AllowAllRestrictor(),new Converters(null));
+        handler = new ExecHandler(new AllowAllRestrictor(),new Converters());
     }
 
     @BeforeTest
@@ -61,7 +62,7 @@ public class ExecHandlerTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException {
+    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("simple").
                 build();
@@ -71,7 +72,7 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void simpleWithWrongArguments() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
+    public void simpleWithWrongArguments() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("simple").
                 arguments("blub","bla").
@@ -80,13 +81,13 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).build();
         handler.handleRequest(getMBeanServer(),request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).operation("koan titel").build();
         handler.handleRequest(getMBeanServer(),request);
     }
@@ -109,7 +110,7 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("overloaded").
                 build();
@@ -117,7 +118,7 @@ public class ExecHandlerTest {
     }
 
     @Test
-    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("overloaded(int)").
                 arguments(10).
@@ -141,7 +142,7 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void overloadedWrongSignature() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void overloadedWrongSignature() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("overloaded(java.lang.Integer)").
                 arguments(1).

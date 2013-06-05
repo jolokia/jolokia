@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <section id="client-javascript">
   <title>Javascript Client Library</title>
   <para>
@@ -148,8 +164,10 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
         Each request can be influenced by a set of optional options
         provided either as default during construction of the
         <classname>Jolokia</classname> object or as optional last
-        parameter for the request object. The known options are
-        summarized in <xref linkend="js-request-options-table"/>
+        parameter for the request object. Also a request can carry a
+        <constant>config</constant> attribute, which can be used for all
+        processing parameters (<xref linkend="processing-parameters"/>).
+        The known options are summarized in <xref linkend="js-request-options-table"/>
       </para>      
       <table id="js-request-options-table">
         <title>Request options</title>
@@ -242,6 +260,10 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
           <td>Maximum traversal depth for serialization of complex return values</td>
         </tr>
         <tr>
+          <td><constant>canonicalProperties</constant></td>
+          <td>Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</td>
+        </tr>
+        <tr>
           <td><constant>maxCollectionSize</constant></td>
           <td>
             Maximum size of collections returned during serialization.
@@ -262,6 +284,38 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
             deserialization fails, the whole request returns with an
             error. This works only for certain operations like pattern
             reads.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>serializeException</constant></td>
+          <td>
+            If true then in case of an error, the exception itself is returned in 
+            it JSON representation under the key <constant>error_value</constant> 
+            in the response object.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>includeStackTrace</constant></td>
+          <td>
+            By default, a stacktrace is returned with every error (key: <constant>stacktrace</constant>)
+            This can be ommitted by setting the value of this option to false.
+          </td>
+        </tr>
+        <tr>
+          <td><constant>ifModifiedSince</constant></td>
+          <td>
+            The <constant>LIST</constant> operations provides an
+            optimization in that it remembers, when the set of
+            registered MBeans has been changes last. If a timestamp
+            (in epoch seconds) is provided with this parameter, then
+            the LIST operation returns an empty response
+            (i.e. <constant>value</constant> is null) and a
+            <constant>status</constant> code of 304 (Not Modified) if
+            the MBeans haven't changed. If you use the request
+            scheduler (<xref linkend="js-request-options-table"/>)
+            then this feature can be used to get the callbacks called
+            only if a value is returned. For the normal request, the
+            error callback is called which must check the status itself.
           </td>
         </tr>
       </table>
@@ -582,19 +636,55 @@ j4p.start(10000);
         <listitem>
           <para>
             This method registers one or more request for being
-            periodically fetched. <code>callback</code> is either a
-            function which will be called with all responses as
-            arguments (in the same order as the requests). Or it is an
-            object with two attributes <code>success</code> and
-            <code>error</code> which have a functions as value. In the
-            later case these functions are called for successful and
-            failed requests, respectively. If multiple requests have
-            been registered, the success- and/or error-function is called
-            multiple times, once for each request.             
+            periodically fetched. <code>callback</code> can be either a
+            function or an object.
           </para>
           <para>
-            This method returns a handle which can be used later for
-            unregistering these requests. 
+            If a function is given or an object with an attribute
+            <code>callback</code> holding a function, then this
+            function is called with all responses received as
+            argument, regardless whether the individual response
+            indicates a success or error state.
+          </para>
+          <para>
+            If the first argument is an object with two callback
+            attributes <code>success</code> and <code>error</code>,
+            these functions are called for <emphasis>each</emphasis> response
+            separately, depending whether the response indicates
+            success or an error state. If multiple requests have been
+            registered along with this callback object, the callback
+            is called multiple times, one for each request in the same
+            order as the request are given.  As second argument, the
+            handle which is returned by this method is given and as
+            third argument the index within the list of requests.
+          </para>
+          <para>
+            If the first argument is an object, an additional
+            <constant>config</constant> attribute with processing
+            parameters can be given which is used as default for the
+            registered requests. Requests with a
+            <constant>config</constant> section take precedence.
+          </para>            
+          <para>
+            Furthermore, if a <constant>onlyIfModified:
+            true</constant> exists in the callback object, then the
+            <constant>sucess</constant> and <constant>error</constant>
+            callbacks are called only if the result changed on the
+            server side. Currently, this is supported for the
+            <constant>list</constant> operation only in which case the
+            callback is only called when MBean has been registered or
+            deregistered since the last call of the scheduler. If a
+            single <constant>callback</constant> function is used
+            which gets all responses for a job at once, then this
+            function is called only with the responses, which carry a
+            value. If none of the registered requests produced a
+            response with value (i.e. the server decided that there
+            was no update for any request), then a call to the callback function is
+            skipped competely.
+          </para>
+          <para>
+            <code>register()</code> returns a handle which can be used
+            later for unregistering these requests.
           </para>
           <para>
             In the following example two requests are registered along
@@ -624,10 +714,15 @@ j4p.register(
     },
     error: function(resp) {
        console.log("Error: " + resp.error_text);
-    }
+    },
+    config: {
+       serializeException: true
+    },
+    onlyIfModified: true
   },
-  { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
-  { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
+  { type: "LIST", config: { maxDepth: 2}},
+  { type: "READ", mbean: "java.lang:type=Threading", 
+    attribute: "ThreadCount", config: { ignoreErrors: true }},
   { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
 ]]>
           </programlisting>
@@ -639,7 +734,16 @@ j4p.register(
           <para>
             Unregister one or more requests registered with
             <code>handle</code> so that they are no longer polled
-            with the scheduler. 
+            with the scheduler.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>j4p.jobs()</term>
+        <listitem>
+          <para>
+            Return an array of handles for all registered jobs. This array can be freely manipulated, its a copy of
+            the handle list.
           </para>
         </listitem>
       </varlistentry>

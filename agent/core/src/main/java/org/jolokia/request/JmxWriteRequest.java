@@ -1,11 +1,13 @@
+package org.jolokia.request;
+
 /*
- * Copyright 2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,12 +16,11 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
-
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
@@ -49,7 +50,7 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
      * @throws MalformedObjectNameException if the object name is not well formed.
      */
     JmxWriteRequest(String pObjectName,String pAttribute,Object pValue,List<String> pPathParts,
-                    Map<String, String> pInitParams) throws MalformedObjectNameException {
+                    ProcessingParameters pInitParams) throws MalformedObjectNameException {
         super(RequestType.WRITE, pObjectName, pPathParts, pInitParams);
         attributeName = pAttribute;
         value = pValue;
@@ -62,7 +63,7 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxWriteRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    JmxWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         value = pRequestMap.get("value");
         attributeName = (String) pRequestMap.get("attribute");
@@ -122,7 +123,7 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
     static RequestCreator<JmxWriteRequest> newCreator() {
         return new RequestCreator<JmxWriteRequest>() {
             /** {@inheritDoc} */
-            public JmxWriteRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxWriteRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JmxWriteRequest(
                         pStack.pop(), // object name
                         pStack.pop(), // attribute name
@@ -132,7 +133,7 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JmxWriteRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxWriteRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JmxWriteRequest(requestMap,pParams);
             }

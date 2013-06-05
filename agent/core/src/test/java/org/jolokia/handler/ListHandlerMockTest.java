@@ -1,11 +1,13 @@
+package org.jolokia.handler;
+
 /*
- * Copyright 2009-2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.jolokia.handler;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -30,15 +30,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.test.util.EnvTestUtil.asSet;
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
  * @since 14.04.11
  */
-public class ListHandlerMockTest {
+public class ListHandlerMockTest extends BaseHandlerTest {
 
     private ListHandler handler;
 
@@ -74,9 +72,10 @@ public class ListHandlerMockTest {
             expect(connection.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
 
         }
-        expect(connection.queryNames(null, null)).andReturn(nameSet);
+        expect(connection.queryNames(null,null)).andReturn(nameSet);
         replay(connection);
-        Map res = (Map) handler.handleRequest(asSet(connection),request);
+
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request);
         assertTrue(res.containsKey("java.lang"));
         Map inner = (Map) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
@@ -90,12 +89,16 @@ public class ListHandlerMockTest {
         verify(connection);
     }
 
+
+
     @Test
     public void iOException() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
 
-        MBeanServerConnection connection = prepareForIOException();
-        Map res = (Map) handler.handleRequest(asSet(connection),request);
+        MBeanServerConnection connection = prepareForIOException(false);
+
+
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request);
         verify(connection);
         assertEquals(res.size(),1);
         Map jl = (Map) res.get("java.lang");
@@ -109,22 +112,25 @@ public class ListHandlerMockTest {
     public void iOExceptionWithPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Runtime","attr").build();
 
-        MBeanServerConnection connection = prepareForIOException();
-        Map res = (Map) handler.handleRequest(asSet(connection),request);
+        MBeanServerConnection server = prepareForIOException(true);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
     }
 
-    private MBeanServerConnection prepareForIOException() throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
-        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
+    private MBeanServerConnection prepareForIOException(boolean registerCheck) throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+        MBeanServerConnection server = createMock(MBeanServerConnection.class);
         Set<ObjectName> nameSet = new HashSet<ObjectName>();
         ObjectName oName = new ObjectName("java.lang:type=Memory");
         nameSet.add(oName);
-        expect(connection.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
+        expect(server.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
         oName = new ObjectName("java.lang:type=Runtime");
+        if (registerCheck) {
+            expect(server.isRegistered(oName)).andReturn(true);
+        }
         nameSet.add(oName);
-        expect(connection.getMBeanInfo(oName)).andThrow(new IOException());
-        expect(connection.queryNames(null, null)).andReturn(nameSet);
-        replay(connection);
-        return connection;
+        expect(server.getMBeanInfo(oName)).andThrow(new IOException());
+        expect(server.queryNames(null, null)).andReturn(nameSet);
+        replay(server);
+        return server;
     }
 
     private MBeanInfo getRealMBeanInfo(ObjectName oName) throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {

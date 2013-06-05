@@ -1,11 +1,13 @@
+package org.jolokia.detector;
+
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,11 +16,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.detector;
-
-import java.util.Set;
-
-import javax.management.MBeanServer;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
  * Detector for the Geronimo JEE Server
@@ -28,9 +26,10 @@ import javax.management.MBeanServer;
  */
 public class GeronimoDetector extends AbstractServerDetector {
 
-    /** {@inheritDoc} */
-    public ServerHandle detect(Set<MBeanServer> pMbeanServers) {
-        String version = getSingleStringAttribute(pMbeanServers,"geronimo:j2eeType=J2EEServer,*","serverVersion");
+    /** {@inheritDoc}
+     * @param pMBeanServerExecutor*/
+    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        String version = getSingleStringAttribute(pMBeanServerExecutor,"geronimo:j2eeType=J2EEServer,*","serverVersion");
         if (version != null) {
             return new ServerHandle("Apache","geronimo",version,null,null);
         } else {

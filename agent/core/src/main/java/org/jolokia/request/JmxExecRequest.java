@@ -1,11 +1,13 @@
+package org.jolokia.request;
+
 /*
- * Copyright 2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,12 +16,11 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
-
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
@@ -50,7 +51,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
     JmxExecRequest(String pObjectName,String pOperation,List pArguments,
-                   Map<String, String> pParams) throws MalformedObjectNameException {
+                   ProcessingParameters pParams) throws MalformedObjectNameException {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams);
         operation = pOperation;
         arguments = pArguments;
@@ -63,7 +64,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JmxExecRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    JmxExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         arguments = (List) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
@@ -110,7 +111,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
     static RequestCreator<JmxExecRequest> newCreator() {
         return new RequestCreator<JmxExecRequest>() {
             /** {@inheritDoc} */
-            public JmxExecRequest create(Stack<String> pStack, Map<String, String> pParams) throws MalformedObjectNameException {
+            public JmxExecRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JmxExecRequest(
                         pStack.pop(), // Object name
                         pStack.pop(), // Operation name
@@ -119,7 +120,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JmxExecRequest create(Map<String, ?> requestMap, Map<String, String> pParams)
+            public JmxExecRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JmxExecRequest(requestMap,pParams);
             }

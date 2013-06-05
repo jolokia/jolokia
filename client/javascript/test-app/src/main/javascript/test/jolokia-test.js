@@ -1,11 +1,11 @@
 /*
- * Copyright 2009-2010 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,6 +42,9 @@ $(document).ready(function() {
     // Advanced READ tests
     advancedReadTests();
 
+    // Testing the list functionality
+    listTest();
+
     // ==========================================================================================
 
     // Single Request Tests
@@ -56,6 +59,10 @@ $(document).ready(function() {
                              equals(response.request.type, "read", "Type must be read");
                              ok(response.value != null, "Value must be set: " + JSON.stringify(response.value));
                              ok(response.value.used != null, "Composite data returned: ");
+                             start();
+                         },
+                         error: function(resp) {
+                            fail("error");
                              start();
                          }
                      })
@@ -112,10 +119,12 @@ $(document).ready(function() {
                          error: function(response) {
                              equals(response.status, 404, "Instance not (404 status code)");
                              equals(response.error_type, "javax.management.InstanceNotFoundException", "javax.management.InstanceNotFoundException");
+                             ok(response.error_value != null,"Serialized exception should be contained");
                              ok(response.error != null, "Error description");
                              ok(response.stacktrace != null, "Stacktrace");
                              start();
-                         }
+                         },
+                         serializeException: true
                      }));
         });
         asyncTest("Invalid URL", function() {
@@ -238,6 +247,22 @@ $(document).ready(function() {
                 { jsonp: true });
             }, "Must throw an ERROR");
         });
+
+        test("GET Write test with newlines", function() {
+            var value = "Max\nMorlock";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "Name", value: value},{method: "GET"});
+            equals(resp.status,200);
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "Name"});
+            equals(resp.value,value);
+        });
+
+        test("GET Exec test with newlines", function() {
+            var args = [ [ "Max\nMorlock", "dummy"] ,"extra"];
+            var resp = j4p.request({ type: "EXEC", mbean: "jolokia.it:type=operation", operation: "arrayArguments", arguments: args},{method: "GET"});
+            equals(resp.status,200);
+            equals(resp.value,"Max\nMorlock");
+        });
+
     }
 
     // ==========================================================================================
@@ -291,17 +316,17 @@ $(document).ready(function() {
         module("Advanced READ");
         asyncTest("Multiple Attribute Read Request", function() {
             j4p.request(
-            { type: "READ", mbean: "java.lang:type=Memory", attribute: ["HeapMemoryUsage","NonHeapMemoryUsage"]},
-            {
-                success: function(response) {
-                    equals(response.request.type, "read", "Type must be read");
-                    ok(response.value != null, "Value must be set: " + JSON.stringify(response.value));
-                    ok(response.value.HeapMemoryUsage, "HeapMemoryUsage set");
-                    ok(response.value.HeapMemoryUsage.used, "HeapMemoryUsage.used set");
-                    ok(response.value.NonHeapMemoryUsage, "NonHeapMemoryUsage set");
-                    start();
-                }
-            });
+                { type: "READ", mbean: "java.lang:type=Memory", attribute: ["HeapMemoryUsage","NonHeapMemoryUsage"]},
+                {
+                    success: function(response) {
+                        equals(response.request.type, "read", "Type must be read");
+                        ok(response.value != null, "Value must be set: " + JSON.stringify(response.value));
+                        ok(response.value.HeapMemoryUsage, "HeapMemoryUsage set");
+                        ok(response.value.HeapMemoryUsage.used, "HeapMemoryUsage.used set");
+                        ok(response.value.NonHeapMemoryUsage, "NonHeapMemoryUsage set");
+                        start();
+                    }
+                });
         });
         asyncTest("All Attribute Read Request", function() {
             j4p.request(
@@ -333,6 +358,48 @@ $(document).ready(function() {
             });
         });
     }
+
+    // =================================================================================
+
+    function listTest() {
+        module("LIST");
+        asyncTest("List with maxDepth 1", function() {
+            j4p.request(
+                { type: "LIST" },
+                {
+                    maxDepth: 1,
+                    success: function(response) {
+                        equals(response.request.type, "list", "Type must be 'list'");
+                        ok(response.value != null, "Value must be set");
+                        for (var key in response.value) {
+                            equals(response.value[key],1,"List must be truncated");
+                        }
+                        start();
+                    }
+                });
+        });
+
+        asyncTest("List with maxDepth 2", function() {
+            j4p.request(
+                { type: "LIST" },
+                {
+                    maxDepth: 2,
+                    success: function(response) {
+                        equals(response.request.type, "list", "Type must be 'list'");
+                        ok(response.value != null, "Value must be set");
+                        for (var key1 in response.value) {
+                            for (var key2 in response.value[key1]) {
+                                equals(response.value[key1][key2],1);
+                            }
+                        }
+                        //log(response);
+                        start();
+                    }
+                });
+        });
+
+    }
+
 
     function log(response) {
         console.log(JSON.stringify(response));

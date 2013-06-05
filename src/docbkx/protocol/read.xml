@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <section id="read">
   <title>Reading attributes (read)</title>
   <para>
@@ -18,7 +34,7 @@
     MBeans with bulk requests. A single read request will always
     result in a single read response, even when multiple attribute
     values are fetched. Only the single response's structure of the
-    <literal>value</literal> will differ dependening on what kind of
+    <literal>value</literal> will differ depending on what kind of
     read request was performed.
   </note>
   <para>
@@ -32,7 +48,7 @@
     in which case the attributes are read on all matching MBeans. If a
     MBean pattern and multiple attributes are requestes, then only the
     value of attributes which matches both are returned, the others
-    are ignored. Pathes cannot be used with multi value reads, though.
+    are ignored. Paths cannot be used with multi value reads, though.
   </para>
   <section id="get-read">
     <title>GET read request</title>
@@ -76,7 +92,7 @@
         <td><literal>&lt;inner path&gt;</literal></td>
         <td>
           This optional part describes an <emphasis>inner
-          path</emphasis> as described in <xref linkend="pathes"/>
+          path</emphasis> as described in <xref linkend="paths"/>
         </td>
         <td><literal>used</literal></td>
       </tr>
@@ -85,7 +101,7 @@
     <para>
       With this URL the used heap memory can be obtained:
       <informalexample>
-        <literallayout class="monospaced">http://localhost:8080/jolokia/java.lang:type=Memory/HeapMemoryUsage/used</literallayout>
+        <literallayout class="monospaced">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</literallayout>
       </informalexample>           
     </para>
   </section>  
@@ -125,7 +141,7 @@
       <tr>
         <td><constant>path</constant></td>
         <td>Inner path for accessing the value of a complex value
-        (<xref linkend="pathes"/>)</td>
+        (<xref linkend="paths"/>)</td>
         <td><constant>used</constant></td>
       </tr>
     </table>
@@ -182,7 +198,7 @@
       linkend="serialization"/> for detail on object serialization.
     </para>
     <para>
-      For read request to a single MBean with multiple attributes, the
+      For a read request to a single MBean with multiple attributes, the
       returned value is a JSON object with the attribute names as keys
       and their values as values. For example a request to
       <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory</literal>

@@ -18,10 +18,6 @@ package org.jolokia.test.util;
 
 import java.io.*;
 import java.net.*;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.management.MBeanServerConnection;
 
 /**
  * Utility methods useful for unit tests when interacting with the
@@ -92,19 +88,4 @@ public class EnvTestUtil {
         }
         return new String(os.toByteArray());
     }
-
-    /**
-     * Return a var arg list of connections as set
-     *
-     * @param pConnections list of connections to return
-     * @return set of MBeanServerConnections
-     */
-    public static Set<MBeanServerConnection> asSet(MBeanServerConnection... pConnections) {
-        Set<MBeanServerConnection> ret = new HashSet<MBeanServerConnection>();
-        for (MBeanServerConnection conn : pConnections) {
-            ret.add(conn);
-        }
-        return ret;
-    }
-
 }

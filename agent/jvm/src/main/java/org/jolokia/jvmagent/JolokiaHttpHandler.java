@@ -1,9 +1,26 @@
 package org.jolokia.jvmagent;
 
+/*
+ * Copyright 2009-2013 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,28 +29,12 @@ import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
-import org.jolokia.util.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
-
-/*
- *  Copyright 2009-2010 Roland Huss
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 
 /**
  * HttpHandler for handling a jolokia request
@@ -56,21 +57,25 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Configuration of this handler
-    private Map<ConfigKey, String> configuration;
+    private       Configuration    configuration;
 
+    // Formatted for formatting Date response headers
+    private final SimpleDateFormat rfc1123Format;
 
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pConfig jolokia specific config tuning the processing behaviour
      */
-    public JolokiaHttpHandler(Map<ConfigKey,String> pConfig) {
+    public JolokiaHttpHandler(Configuration pConfig) {
         configuration = pConfig;
         context = pConfig.get(ConfigKey.AGENT_CONTEXT);
         if (!context.endsWith("/")) {
             context += "/";
         }
 
+        rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     /**
@@ -78,8 +83,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        backendManager = new BackendManager(configuration,this, createRestrictor(configuration),pLazy);
-        requestHandler = new HttpRequestHandler(backendManager,this);
+        backendManager = new BackendManager(configuration, this, createRestrictor(configuration), pLazy);
+        requestHandler = new HttpRequestHandler(configuration, backendManager, this);
     }
 
     /**
@@ -99,7 +104,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @throws IllegalStateException if the handler has not yet been started
      */
     @Override
-    @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
+    @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
     public void handle(HttpExchange pExchange) throws IOException {
         if (requestHandler == null) {
             throw new IllegalStateException("Handler not yet started");
@@ -138,8 +143,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     }
 
 
-    private Restrictor createRestrictor(Map<ConfigKey, String> pConfig) {
-        String location = ConfigKey.POLICY_LOCATION.getValue(pConfig);
+    private Restrictor createRestrictor(Configuration pConfig) {
+        String location = pConfig.get(ConfigKey.POLICY_LOCATION);
         try {
             Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
             if (ret != null) {
@@ -191,12 +196,24 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         Headers headers = pExchange.getResponseHeaders();
         if (origin != null) {
             headers.set("Access-Control-Allow-Origin",origin);
+            headers.set("Access-Control-Allow-Credentials","true");
         }
 
         // Avoid caching at all costs
         headers.set("Cache-Control", "no-cache");
         headers.set("Pragma","no-cache");
-        headers.set("Expires","-1");
+
+        // Check for a date header and set it accordingly to the recommendations of
+        // RFC-2616. See also {@link AgentServlet#setNoCacheHeaders()}
+        // Issue: #71
+        Calendar cal = Calendar.getInstance();
+        headers.set("Date",rfc1123Format.format(cal.getTime()));
+        // 1h  in the past since it seems, that some servlet set the date header on their
+        // own so that it cannot be guaranteed that these heades are really equals.
+        // It happend on Tomcat that Date: was finally set *before* Expires: in the final
+        // answers some times which seems to be an implementation percularity from Tomcat
+        cal.add(Calendar.HOUR, -1);
+        headers.set("Expires",rfc1123Format.format(cal.getTime()));
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {

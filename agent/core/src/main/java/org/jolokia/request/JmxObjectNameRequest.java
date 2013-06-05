@@ -1,11 +1,13 @@
+package org.jolokia.request;
+
 /*
- * Copyright 2011 Roland Huss
+ * Copyright 2009-2013 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,14 +16,14 @@
  * limitations under the License.
  */
 
-package org.jolokia.request;
-
 import java.util.List;
 import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -42,12 +44,12 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pType request type
      * @param pObjectName object name, which must not be null.
      * @param pPathParts parts of an path
-     * @param pInitParams optional init params
+     * @param pProcessingParams optional init params
      * @throws MalformedObjectNameException if the given MBean name is not a valid object name
      */
-    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, Map<String, String> pInitParams)
+    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, ProcessingParameters pProcessingParams)
             throws MalformedObjectNameException {
-        super(pType,pPathParts,pInitParams);
+        super(pType,pPathParts,pProcessingParams);
         initObjectName(pObjectName);
     }
 
@@ -58,7 +60,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the given MBean name (key: "mbean") is not a valid object name.
      */
-    public JmxObjectNameRequest(Map<String, ?> pRequestMap, Map<String, String> pParams) throws MalformedObjectNameException {
+    public JmxObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         initObjectName((String) pRequestMap.get("mbean"));
     }
@@ -68,7 +70,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
-        ret.put("mbean",objectName.getCanonicalName());
+        ret.put("mbean",getOrderedObjectName(objectName));
         return ret;
     }
 
@@ -92,7 +94,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
     }
 
     /**
-     * String representation of the object name
+     * String representation of the object name for this request.
      *
      * @return the object name a string representation
      */
@@ -100,6 +102,26 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
         return objectName.getCanonicalName();
     }
 
+    /**
+     * Name prepared according to requested formatting note. The key ordering can be influenced by the
+     * proccesing parameter {@link ConfigKey#CANONICAL_NAMING}. If not given or set to "true",
+     * then the canonical order is used, if set to "initial" the name is given to construction time
+     * is used.
+     *
+     * @param pName name to format
+     * @return formatted string
+     */
+    public String getOrderedObjectName(ObjectName pName) {
+        // For patterns we always return the canonical name
+        if (pName.isPattern()) {
+            return pName.getCanonicalName();
+        }
+        if (getParameterAsBool(ConfigKey.CANONICAL_NAMING)) {
+            return pName.getCanonicalName();
+        } else {
+            return pName.getDomain() + ":" + pName.getKeyPropertyListString();
+        }
+    }
 
     private void initObjectName(String pObjectName) throws MalformedObjectNameException {
         if (pObjectName == null) {

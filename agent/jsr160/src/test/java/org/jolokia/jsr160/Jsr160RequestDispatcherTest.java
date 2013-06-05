@@ -22,6 +22,9 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.Configuration;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.*;
@@ -39,50 +42,52 @@ import static org.testng.Assert.*;
 public class Jsr160RequestDispatcherTest {
 
     private Jsr160RequestDispatcher dispatcher;
+    private ProcessingParameters procParams;
 
     @BeforeTest
     private void setup() {
         dispatcher = createDispatcherPointingToLocalMBeanServer();
+        procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
     }
 
     @Test
     public void canHandle() {
-        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", null)));
+        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
         JmxRequest req = preparePostReadRequest(null);
         assertTrue(dispatcher.canHandle(req));
     }
 
     @Test
     public void useReturnValue() {
-        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", null)));
+        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", null));
+    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", procParams));
     }
 
     @Test(expectedExceptions = IOException.class)
-    public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxRequest req = preparePostReadRequest(null);
         getOriginalDispatcher().dispatchRequest(req);
     }
 
     @Test
-    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxReadRequest req = (JmxReadRequest) preparePostReadRequest(null);
         Map result = (Map) dispatcher.dispatchRequest(req);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
     @Test
-    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
         assertNotNull(dispatcher.dispatchRequest(req));
     }
 
     @Test
-    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JmxRequest req = preparePostReadRequest("roland");
@@ -111,11 +116,11 @@ public class Jsr160RequestDispatcherTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, null);
+        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, procParams);
     }
 
     private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer() {
-        Converters converters = new Converters(null);
+        Converters converters = new Converters();
         ServerHandle handle = new ServerHandle(null,null,null,null,null);
         return  new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor()) {
             @Override
@@ -131,7 +136,7 @@ public class Jsr160RequestDispatcherTest {
     }
 
     private Jsr160RequestDispatcher getOriginalDispatcher() {
-        return new Jsr160RequestDispatcher(new Converters(null),
+        return new Jsr160RequestDispatcher(new Converters(),
                                            new ServerHandle(null,null,null,null,null),
                                            new AllowAllRestrictor());
     }
