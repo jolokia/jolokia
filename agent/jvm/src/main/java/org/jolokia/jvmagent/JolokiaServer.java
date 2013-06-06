@@ -49,6 +49,8 @@ public class JolokiaServer {
     // Http/Https server to use
     private HttpServer httpServer;
 
+    private HttpContext httpContext;
+    
     // Agent URL
     private String url;
 
@@ -148,10 +150,10 @@ public class JolokiaServer {
         // Create proper context along with handler
         final String contextPath = config.getContextPath();
         jolokiaHttpHandler = new JolokiaHttpHandler(config.getJolokiaConfig());
-        HttpContext context = httpServer.createContext(contextPath, jolokiaHttpHandler);
+        httpContext = httpServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Special customizations
-        addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);
+        addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),httpContext);
         initializeExecutor();
 
         InetSocketAddress realSocketAddress = httpServer.getAddress();
@@ -231,6 +233,14 @@ public class JolokiaServer {
         return httpServer.getAddress();
     }
 
+    /**
+     * Sets a custom authenticator to authenticate user requests
+     * @param customAuthenticator
+     */
+    public void setAuthenticator(Authenticator customAuthenticator) {
+        httpContext.setAuthenticator(customAuthenticator);
+    }
+    
     // ======================================================================================
 
     // Thread factory for creating daemon threads only
