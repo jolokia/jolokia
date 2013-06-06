@@ -33,7 +33,7 @@
         <a href="http://www.nagios.org">Nagios</a>. <a href="http://www.jmx4perl.org">Jmx4perl</a>
         was its former name, which in addition the agents contains
         powerfule Perl modules for accessing Jolokia instrumented
-        servers. This modules are the fundaments for tools like
+        servers. These modules are the foundation for tools like
         <strong>check_jmx4perl</strong>, a Nagios plugin with a rich feature set,
         <strong>jmx4perl</strong>, a command line utility for accessing the agents and
         <strong>j4psh</strong>, a readline based remote JMX shell.
