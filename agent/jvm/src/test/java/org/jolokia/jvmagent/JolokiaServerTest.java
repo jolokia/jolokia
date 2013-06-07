@@ -17,15 +17,18 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sun.net.httpserver.HttpServer;
 import org.jolokia.Version;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -81,6 +84,18 @@ public class JolokiaServerTest {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
         Thread.sleep(1000);
         new JolokiaServer(cfg,false);
+    }
+
+    @Test
+    public void customHttpServer() throws IOException, NoSuchFieldException, IllegalAccessException {
+        HttpServer httpServer = HttpServer.create();
+        JvmAgentConfig cfg = new JvmAgentConfig("");
+        JolokiaServer server = new JolokiaServer(httpServer,cfg,false);
+        Field field = JolokiaServer.class.getDeclaredField("httpServer");
+        field.setAccessible(true);
+        assertNull(field.get(server));
+        server.start();
+        server.stop();
     }
 
     // ==================================================================

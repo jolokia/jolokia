@@ -49,6 +49,9 @@ public class JolokiaServer {
     // Http/Https server to use
     private HttpServer httpServer;
 
+    // HttpServer address
+    private InetSocketAddress serverAddress;
+
     // Agent URL
     private String url;
 
@@ -59,7 +62,7 @@ public class JolokiaServer {
     private ThreadFactory daemonThreadFactory = new DaemonThreadFactory();
 
     /**
-     * Create the Jolokia server, i.e. the HttpServer for serving Jolokia requests.
+     * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests.
      *
      * @param pConfig configuration for this server
      * @param pLazy lazy initialisation if true. This is required for agents
@@ -72,30 +75,48 @@ public class JolokiaServer {
     }
 
     /**
+     * Create the Jolokia server by using an existing HttpServer to which a request handler
+     * gets added.
+     *
+     * @param pServer HttpServer to use
+     * @param pConfig configuration for this server
+     * @param pLazy lazy initialisation if true. This is required for agents
+     *              configured via startup options since at this early boot time
+     *              the JVM is not fully setup for the server detectors to work
+     */
+    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, boolean pLazy) {
+        init(pServer,pConfig,pLazy);
+    }
+
+    /**
      * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig, boolean)} must be called later on
      * for initialization
      */
     protected JolokiaServer() {}
 
     /**
-     * Start HttpServer
+     * Start this server. If we manage an own HttpServer, then the HttpServer will
+     * be started as well.
      */
     public void start() {
         jolokiaHttpHandler.start(lazy);
 
-        ThreadGroup threadGroup = new ThreadGroup("jolokia");
-        threadGroup.setDaemon(false);
-        // Starting server in an own thread group with a fixed name
-        // so that the cleanup thread can recognize it.
-        Thread starterThread = new Thread(threadGroup,new Runnable() {
+        if (httpServer != null) {
+            // Starting our own server in an own thread group with a fixed name
+            // so that the cleanup thread can recognize it.
+            ThreadGroup threadGroup = new ThreadGroup("jolokia");
+            threadGroup.setDaemon(false);
+
+            Thread starterThread = new Thread(threadGroup,new Runnable() {
             @Override
             public void run() {
                 httpServer.start();
             }
         });
-        starterThread.start();
-        cleaner = new CleanupThread(httpServer,threadGroup);
-        cleaner.start();
+            starterThread.start();
+            cleaner = new CleanupThread(httpServer,threadGroup);
+            cleaner.start();
+        }
     }
 
     /**
@@ -129,75 +150,106 @@ public class JolokiaServer {
 
     // =========================================================================================
 
+    /**
+     * Initialize this JolokiaServer and use an own created HttpServer
+     *
+     * @param pConfig configuartion to use
+     * @param pLazy whether to do the inialization lazy or not
+     * @throws IOException if the creation of the HttpServer fails
+     */
     protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+        // We manage it on our own
+        httpServer = createHttpServer(pConfig);
+        init(httpServer,pConfig,pLazy);
+    }
+
+    /**
+     * Initialize this JolokiaServer with the given HttpServer. The calle is responsible for managing (starting/stopping)
+     * the HttpServer.
+     *
+     * @param pServer server to use
+     * @param pConfig configuration
+     * @param pLazy whether the initialization should be done lazy or not
+     */
+    protected final void init(HttpServer pServer, JolokiaServerConfig pConfig, boolean pLazy)  {
         config = pConfig;
         lazy = pLazy;
 
-        int port = config.getPort();
-        InetAddress address = config.getAddress();
-        String protocol = config.getProtocol();
+        // Create proper context along with handler
+        final String contextPath = pConfig.getContextPath();
+        jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig());
+        HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
+
+        // Add authentication if configured
+        final Authenticator authenticator = pConfig.getAuthenticator();
+        if (authenticator != null) {
+            context.setAuthenticator(authenticator);
+        }
+
+        // Get own URL for later reference
+        serverAddress= pServer.getAddress();
+        InetAddress realAddress;
+        int port;
+        if (serverAddress != null) {
+            realAddress = serverAddress.getAddress();
+            port = serverAddress.getPort();
+        } else {
+            realAddress = pConfig.getAddress();
+            port = pConfig.getPort();
+        }
+        url = String.format("%s://%s:%d%s",
+                            pConfig.getProtocol(),realAddress.getCanonicalHostName(),port,contextPath);
+    }
+
+    /**
+     * Create the HttpServer to use. Can be overridden if a custom or already existing HttpServer should be
+     * used
+     *
+     * @return HttpServer to use
+     * @throws IOException if something fails during the initialisation
+     */
+    private HttpServer createHttpServer(JolokiaServerConfig pConfig) throws IOException {
+        int port = pConfig.getPort();
+        InetAddress address = pConfig.getAddress();
+        String protocol = pConfig.getProtocol();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
-        if (protocol.equalsIgnoreCase("https")) {
-            httpServer = createHttpsServer(socketAddress);
-        } else {
-            httpServer = HttpServer.create(socketAddress,config.getBacklog());
-        }
+        HttpServer server =
+                protocol.equalsIgnoreCase("https") ?
+                        createHttpsServer(socketAddress, pConfig) :
+                        HttpServer.create(socketAddress, pConfig.getBacklog());
 
-
-        // Create proper context along with handler
-        final String contextPath = config.getContextPath();
-        jolokiaHttpHandler = new JolokiaHttpHandler(config.getJolokiaConfig());
-        HttpContext context = httpServer.createContext(contextPath, jolokiaHttpHandler);
-
-        // Special customizations
-        addAuthenticatorIfNeeded(config.getUser(),config.getPassword(),context);
-        initializeExecutor();
-
-        InetSocketAddress realSocketAddress = httpServer.getAddress();
-        InetAddress realAddress = realSocketAddress.getAddress() != null ? realSocketAddress.getAddress() : address;
-        url = String.format("%s://%s:%d%s",
-                            protocol,realAddress.getCanonicalHostName(),realSocketAddress.getPort(),contextPath);
-    }
-
-    private void addAuthenticatorIfNeeded(final String user, final String password, HttpContext pContext) {
-        if (user != null) {
-            if (password == null) {
-                throw new SecurityException("No password given for user " + user);
-            }
-            pContext.setAuthenticator(new JolokiaAuthenticator(user,password));
-        }
-    }
-
-    private void initializeExecutor() {
+        // Prepare executor pool
         Executor executor;
-        String mode = config.getExecutor();
+        String mode = pConfig.getExecutor();
         if ("fixed".equalsIgnoreCase(mode)) {
-            executor = Executors.newFixedThreadPool(config.getThreadNr(), daemonThreadFactory);
+            executor = Executors.newFixedThreadPool(pConfig.getThreadNr(), daemonThreadFactory);
         } else if ("cached".equalsIgnoreCase(mode)) {
             executor = Executors.newCachedThreadPool(daemonThreadFactory);
         } else {
             executor = Executors.newSingleThreadExecutor(daemonThreadFactory);
         }
-        httpServer.setExecutor(executor);
+        server.setExecutor(executor);
+
+        return server;
     }
 
 
     // =========================================================================================================
     // HTTPS handling
 
-    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress) {
+    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress,JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
         try {
-            HttpsServer server = HttpsServer.create(pSocketAddress, config.getBacklog());
+            HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
             SSLContext sslContext = SSLContext.getInstance("TLS");
 
             // initialise the keystore
-            char[] password = config.getKeystorePassword();
+            char[] password = pConfig.getKeystorePassword();
             KeyStore ks = KeyStore.getInstance("JKS");
             FileInputStream fis = null;
             try {
-                fis = new FileInputStream(config.getKeystore());
+                fis = new FileInputStream(pConfig.getKeystore());
                 ks.load(fis, password);
             } finally {
                 if (fis != null) {
@@ -214,7 +266,7 @@ public class JolokiaServer {
 
             // setup the HTTPS context and parameters
             sslContext.init(kmf.getKeyManagers(),tmf.getTrustManagers(), null);
-            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext,config.useClientAuthentication()));
+            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig.useSslClientAuthentication()));
             return server;
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
@@ -228,7 +280,7 @@ public class JolokiaServer {
      * with 'port 0' and then retrieve the actual running port that was bound.
      */
     public InetSocketAddress getAddress() {
-        return httpServer.getAddress();
+        return serverAddress;
     }
 
     // ======================================================================================
@@ -242,29 +294,6 @@ public class JolokiaServer {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
-        }
-    }
-
-    // Simple authenticator
-    private static class JolokiaAuthenticator extends BasicAuthenticator {
-        private String user;
-        private String password;
-
-        /**
-         * Authenticator which checks agains a given user and password
-         *
-         * @param pUser user to check again
-         * @param pPassword her password
-         */
-        JolokiaAuthenticator(String pUser, String pPassword) {
-            super("jolokia");
-            user = pUser;
-            password = pPassword;
-        }
-
-        /** {@inheritDoc} */
-        public boolean checkCredentials(String pUserGiven, String pPasswordGiven) {
-            return user.equals(pUserGiven) && password.equals(pPasswordGiven);
         }
     }
 

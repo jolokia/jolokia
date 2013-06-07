@@ -22,6 +22,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 
@@ -37,16 +38,17 @@ public class JolokiaServerConfig {
     // is used for this agent only
     private Configuration jolokiaConfig;
 
-    private String      protocol;
-    private int         port;
-    private int         backlog;
-    private InetAddress address;
-    private String      executor;
-    private int         threadNr;
-    private String      keystore;
-    private String      context;
-    private boolean     useClientAuthentication;
-    private char[]      keystorePassword;
+    private String        protocol;
+    private int           port;
+    private int           backlog;
+    private InetAddress   address;
+    private String        executor;
+    private int           threadNr;
+    private String        keystore;
+    private String        context;
+    private boolean       useSslClientAuthentication;
+    private char[]        keystorePassword;
+    private Authenticator authenticator;
 
     /**
      * Constructor which prepares the server configuration from a map
@@ -126,21 +128,15 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * User name or <code>null</code> if no authentication should be used
-     * @return user
+     * Return a basic authenticator if user or password is given in the configuration. You can override
+     * this method if you want to provide an own authenticator.
+     *
+     * @return an authenticator if authentication is switched on, or null if no authentication should be used.
      */
-    public String getUser() {
-        return jolokiaConfig.get(ConfigKey.USER);
+    public Authenticator getAuthenticator() {
+        return authenticator;
     }
 
-    /**
-     * Password to be used when authentication is switched on. If <code>user</code> is set, then
-     * <code>password</code> must be set, too.
-     * @return password
-     */
-    public String getPassword() {
-        return jolokiaConfig.get(ConfigKey.PASSWORD);
-    }
 
     /**
      * Backlog of the HTTP server, which is the number of requests to keep before throwing them away
@@ -182,8 +178,8 @@ public class JolokiaServerConfig {
      *
      * @return true when ssl client authentication should be used
      */
-    public boolean useClientAuthentication() {
-        return useClientAuthentication;
+    public boolean useSslClientAuthentication() {
+        return useSslClientAuthentication;
     }
 
     /**
@@ -206,6 +202,7 @@ public class JolokiaServerConfig {
     // Initialise and validate early in order to fail fast in case of an configuration error
     protected void initConfigAndValidate(Map<String,String> agentConfig) {
         initContext();
+        initAuthenticator();
         initProtocol(agentConfig);
         initAddress(agentConfig);
         port = Integer.parseInt(agentConfig.get("port"));
@@ -215,10 +212,19 @@ public class JolokiaServerConfig {
         initKeystore(agentConfig);
 
         String auth = agentConfig.get("useSslClientAuthentication");
-        useClientAuthentication = auth != null && Boolean.getBoolean(auth);
+        useSslClientAuthentication = auth != null && Boolean.getBoolean(auth);
 
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
+    }
+
+    private void initAuthenticator() {
+        String user = jolokiaConfig.get(ConfigKey.USER);
+        String password = jolokiaConfig.get(ConfigKey.PASSWORD);
+
+        authenticator = (user != null && password != null) ?
+                new UserPasswordAuthenticator(user,password) :
+                null;
     }
 
     private void initProtocol(Map<String, String> agentConfig) {
@@ -263,6 +269,7 @@ public class JolokiaServerConfig {
         }
     }
 
+
     private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
         try {
@@ -277,7 +284,6 @@ public class JolokiaServerConfig {
             throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "loopback interface") + ": " + e,e);
         }
     }
-
 
     protected Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
         Map ret = new HashMap<String, String>();

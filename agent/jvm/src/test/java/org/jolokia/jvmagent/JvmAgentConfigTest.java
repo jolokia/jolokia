@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.testng.annotations.Test;
@@ -55,13 +56,12 @@ public class JvmAgentConfigTest {
         assertFalse(config.isModeStop());
         assertEquals(config.getProtocol(), "http");
         assertEquals(config.getPort(), 8778);
-        assertNull(config.getUser());
-        assertNull(config.getPassword());
+        assertNull(config.getAuthenticator());
         assertEquals(config.getBacklog(),10);
         assertEquals(config.getContextPath(),"/jolokia/");
         assertEquals(config.getExecutor(),"single");
         assertEquals(config.getThreadNr(),5);
-        assertFalse(config.useClientAuthentication());
+        assertFalse(config.useSslClientAuthentication());
         assertNull(config.getKeystore());
         assertEquals(config.getKeystorePassword().length, 0);
     }
@@ -90,8 +90,10 @@ public class JvmAgentConfigTest {
         String path = copyResourceToTemp("/agent-test.properties");
         JvmAgentConfig config = new JvmAgentConfig("config=" + path);
         assertEquals(config.getProtocol(), "https");
-        assertEquals(config.getUser(),"roland");
-        assertEquals(config.getPassword(),"s!cr!t");
+        Authenticator authenticator = config.getAuthenticator();
+        assertNotNull(authenticator);
+        assertTrue(authenticator instanceof UserPasswordAuthenticator);
+        assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla\\.txt.*")
