@@ -75,7 +75,7 @@ public class VirtualMachineHandlerTest {
         List<ProcessDescription> procs = filterOwnProcess(vmHandler.listProcesses());
         for (ProcessDescription desc : procs) {
             if (desc.getDisplay() != null && desc.getDisplay().length() > 0) {
-                Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(procs.get(0).getDisplay()) + "$");
+                Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(desc.getDisplay()) + "$");
                 assertTrue(tryAttach(singleHitPattern.pattern()));
                 break;
             }
