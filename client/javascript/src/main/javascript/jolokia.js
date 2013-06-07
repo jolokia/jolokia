@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- j * You may obtain a copy of the License at
+ * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -65,7 +65,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.1.2";
+            this.CLIENT_VERSION = "1.1.3-SNAPSHOT";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -177,12 +177,25 @@
                     }
                 });
 
-                if (ajaxParams['username'] !== 'undefined' && ajaxParams['password'] !== 'undefined') {
-                    ajaxParams.beforeSend = function (xhr) { 
-                        var tok = ajaxParams['username'] + ':' + ajaxParams['password'];
-                        xhr.setRequestHeader('Authorization', "Basic " + btoa(tok));
-                    };
+                if (ajaxParams['username'] && ajaxParams['password']) {
+                    // If we have btoa() then we set the authentication preemptively,
+
+                    // Otherwise (e.g. for IE < 10) an extra roundtrip might be necessary
+                    // when using 'username' and 'password' in xhr.open(..)
+                    // See http://stackoverflow.com/questions/5507234/how-to-use-basic-auth-and-jquery-and-ajax
+                    // for details
+                    if (window.btoa) {
+                        ajaxParams.beforeSend = function (xhr) {
+                            var tok = ajaxParams['username'] + ':' + ajaxParams['password'];
+                            xhr.setRequestHeader('Authorization', "Basic " + window.btoa(tok));
+                        };
+                    }
+
+                    // Add appropriate field for CORS access
                     ajaxParams.xhrFields = {
+                        // Please note that for CORS access with credentials, the request
+                        // must be asynchronous (see https://dvcs.w3.org/hg/xhr/raw-file/tip/Overview.html#the-withcredentials-attribute)
+                        // It works synchronously in Chrome nevertheless, but fails in Firefox.
                         withCredentials: true
                     };
                 }
