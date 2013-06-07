@@ -53,8 +53,10 @@ public final class JvmAgent {
 
     private static JolokiaServer server;
 
+    // System property used for communicating the agent's state
     public static final String JOLOKIA_AGENT_URL = "jolokia.agent";
 
+    // This Java agent classes is supposed to be used by the Java attach API only
     private JvmAgent() {}
 
     /**
@@ -68,8 +70,8 @@ public final class JvmAgent {
     }
 
     /**
-     * Entry point for the agent, using dynamic attach
-     * (this is post VM initialisation attachment, via com.sun.attach)
+     * Entry point for the agent, using dynamic attach.
+     * (this is a post VM initialisation attachment, via com.sun.attach)
      *
      * @param agentArgs arguments as given on the command line
      */
