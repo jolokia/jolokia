@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.*;
 
+import org.jolokia.backend.dispatcher.DispatchResult;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.json.JsonConvertOptions;
@@ -213,18 +214,8 @@ public class BackendManager {
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        Object retValue = null;
-        boolean useValueWithPath = false;
-        boolean found = false;
-        for (RequestDispatcher dispatcher : jolokiaCtx.getRequestDispatchers()) {
-            if (dispatcher.canHandle(pJmxReq)) {
-                retValue = dispatcher.dispatchRequest(pJmxReq);
-                useValueWithPath = dispatcher.useReturnValueWithPath(pJmxReq);
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
+        DispatchResult result = jolokiaCtx.dispatch(pJmxReq);
+        if (result == null) {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }
 
@@ -232,7 +223,7 @@ public class BackendManager {
 
         Object jsonResult =
                 jolokiaCtx.getConverters().getToJsonConverter()
-                          .convertToJson(retValue, useValueWithPath ? pJmxReq.getPathParts() : null, opts);
+                          .convertToJson(result.getValue(), result.getPathParts(), opts);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);

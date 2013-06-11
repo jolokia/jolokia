@@ -18,6 +18,7 @@ package org.jolokia.backend;
 
 import javax.management.*;
 
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;

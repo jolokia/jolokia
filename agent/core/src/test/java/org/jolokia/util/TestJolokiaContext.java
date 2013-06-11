@@ -16,17 +16,21 @@
 
 package org.jolokia.util;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-import javax.management.JMException;
-import javax.management.ObjectName;
+import javax.management.*;
 
-import org.jolokia.backend.*;
+import org.jolokia.backend.LocalRequestDispatcher;
+import org.jolokia.backend.MBeanServerHandler;
+import org.jolokia.backend.dispatcher.*;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
@@ -37,11 +41,11 @@ import org.jolokia.service.JolokiaContext;
  */
 public class TestJolokiaContext implements JolokiaContext {
 
+    RequestDispatchManager requestDispatchManager;
     LogHandler logHandler;
     Restrictor restrictor;
     Configuration config;
     Converters converters;
-    List<RequestDispatcher> dispatchers;
     MBeanServerHandler serverHandler;
     ServerHandle handle;
 
@@ -68,20 +72,19 @@ public class TestJolokiaContext implements JolokiaContext {
                 handle.setJolokiaId(UUID.randomUUID().toString());
             }
             } catch (MalformedURLException e) {}
-        this.dispatchers = pDispatchers != null ? pDispatchers : Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this));
+        this.requestDispatchManager = new RequestDispatchManager(
+                pDispatchers != null ? pDispatchers :
+                        Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this)));
         converters = new Converters();
     }
 
     public void destroy() throws JMException {
         serverHandler.destroy();
-        for (RequestDispatcher dispatcher : dispatchers) {
-            dispatcher.destroy();
-        }
-
+        requestDispatchManager.destroy();
     }
 
-    public List<RequestDispatcher> getRequestDispatchers() {
-        return dispatchers;
+    public DispatchResult dispatch(JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+        return requestDispatchManager.dispatch(request);
     }
 
     public MBeanServerHandler getMBeanServerHandler() {
@@ -191,6 +194,7 @@ public class TestJolokiaContext implements JolokiaContext {
         }
 
         public TestJolokiaContext build() {
+
             return new TestJolokiaContext(
                     config,
                     restrictor,

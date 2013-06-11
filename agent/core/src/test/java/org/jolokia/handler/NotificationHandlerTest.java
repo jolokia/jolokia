@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxNotificationRequest;
 import org.jolokia.request.JmxRequestBuilder;

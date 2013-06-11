@@ -1,43 +1,54 @@
 package org.jolokia.service.impl;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import javax.management.JMException;
-import javax.management.ObjectName;
+import javax.management.*;
 
 import org.jolokia.backend.*;
+import org.jolokia.backend.dispatcher.*;
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.*;
 
 /**
+ * Central implementation of the {@link JolokiaContext}
+ *
  * @author roland
  * @since 09.04.13
  */
 public class JolokiaContextImpl implements JolokiaContext {
+
+    // manager for dispatching requests
+    private final RequestDispatchManager requestDispatchManager;
+
+    // Overall configuration for which this context is a delegate
     private Configuration configuration;
+
+    // Logger to use
     private LogHandler logHandler;
+
+    // The restrictor to delegate to
     private Restrictor restrictor;
 
+    // Converts for object serialization
     private Converters converters;
-
-    // Dispatches request to local MBeanServer
-    private LocalRequestDispatcher localDispatcher;
 
     // Handler for finding and merging the various MBeanHandler
     private MBeanServerHandler mBeanServerHandler;
 
-    // List of RequestDispatchers to consult
-    private List<RequestDispatcher> requestDispatchers;
-
-    public JolokiaContextImpl(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
+    public JolokiaContextImpl(Configuration pConfig,
+                              LogHandler pLogHandler,
+                              Restrictor pRestrictor) {
         configuration = pConfig;
         logHandler = pLogHandler;
 
@@ -54,10 +65,11 @@ public class JolokiaContextImpl implements JolokiaContext {
 
         // Create and remember request dispatchers
         // TODO: Not fully initialized, will switch to lookup anyway
-        localDispatcher = new LocalRequestDispatcher(this);
-        requestDispatchers = createRequestDispatchers(pConfig.getConfig(ConfigKey.DISPATCHER_CLASSES),
-                                                      this);
+        LocalRequestDispatcher localDispatcher = new LocalRequestDispatcher(this);
+        List<RequestDispatcher> requestDispatchers = createRequestDispatchers(pConfig.getConfig(ConfigKey.DISPATCHER_CLASSES),
+                                                                              this);
         requestDispatchers.add(localDispatcher);
+        requestDispatchManager = new RequestDispatchManager(requestDispatchers);
 
         //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
@@ -65,9 +77,7 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     public void destroy() throws JMException {
         mBeanServerHandler.destroy();
-        for (RequestDispatcher dispatcher : requestDispatchers) {
-            dispatcher.destroy();
-        }
+        requestDispatchManager.destroy();
     }
 
     // Construct configured dispatchers by reflection. Returns always
@@ -114,8 +124,8 @@ public class JolokiaContextImpl implements JolokiaContext {
         return configuration.getConfigKeys();
     }
 
-    public List<RequestDispatcher> getRequestDispatchers() {
-        return requestDispatchers;
+    public DispatchResult dispatch(JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+        return requestDispatchManager.dispatch(request);
     }
 
     public MBeanServerHandler getMBeanServerHandler() {

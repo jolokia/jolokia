@@ -24,7 +24,7 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;

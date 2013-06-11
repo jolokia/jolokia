@@ -24,7 +24,7 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.JsonRequestHandler;

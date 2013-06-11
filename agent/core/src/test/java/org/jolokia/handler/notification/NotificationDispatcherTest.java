@@ -6,7 +6,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.notification.*;

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
