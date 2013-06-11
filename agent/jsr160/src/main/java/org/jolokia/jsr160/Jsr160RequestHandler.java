@@ -28,7 +28,7 @@ import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.CommandHandler;
-import org.jolokia.handler.OperationHandlerManager;
+import org.jolokia.handler.CommandHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
 import org.jolokia.service.JolokiaContext;
@@ -42,7 +42,7 @@ import org.jolokia.service.JolokiaContext;
 public class Jsr160RequestHandler implements RequestHandler {
 
     // request handler for specific request types
-    private OperationHandlerManager operationHandlerManager;
+    private CommandHandlerManager commandHandlerManager;
 
     /**
      * Constructor
@@ -50,7 +50,7 @@ public class Jsr160RequestHandler implements RequestHandler {
      * @param pContext the jolokia context
      */
     public Jsr160RequestHandler(JolokiaContext pContext) {
-        operationHandlerManager = new OperationHandlerManager(pContext,false);
+        commandHandlerManager = new CommandHandlerManager(pContext,false);
     }
 
     /**
@@ -68,7 +68,7 @@ public class Jsr160RequestHandler implements RequestHandler {
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
-        CommandHandler handler = operationHandlerManager.getCommandHandler(pJmxReq.getType());
+        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);
         try {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -134,12 +134,12 @@ public class Jsr160RequestHandler implements RequestHandler {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        CommandHandler handler = operationHandlerManager.getCommandHandler(pJmxRequest.getType());
+        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
     /** {@inheritDoc} */
     public void destroy() throws JMException {
-        operationHandlerManager.destroy();
+        commandHandlerManager.destroy();
     }
 }

@@ -31,7 +31,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Nov 13, 2009
  */
-public class OperationHandlerManager {
+public class CommandHandlerManager {
 
     // Map with all json request handlers
     private final Map<RequestType, CommandHandler> requestHandlerMap = new HashMap<RequestType, CommandHandler>();
@@ -42,7 +42,7 @@ public class OperationHandlerManager {
      * @param pCtx jolokia context
      * @param pUseNotifications whether notifications should be enabled
      */
-    public OperationHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
+    public CommandHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
         CommandHandler handlers[] = {
                 new ReadHandler(pCtx),
                 new WriteHandler(pCtx),
