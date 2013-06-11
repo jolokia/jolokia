@@ -25,6 +25,7 @@ import javax.management.JMException;
 import javax.management.ObjectName;
 
 import org.jolokia.backend.MBeanServerHandler;
+import org.jolokia.backend.MBeanServerHandlerImpl;
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -57,7 +58,7 @@ public class TestJolokiaContext implements JolokiaContext {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
-        this.serverHandler = pServerHandler != null ? pServerHandler : new MBeanServerHandler(config,logHandler);
+        this.serverHandler = pServerHandler != null ? pServerHandler : new MBeanServerHandlerImpl(config,logHandler);
         try {
             if (pHandle != null) {
                 handle = pHandle;

@@ -227,9 +227,7 @@ public final class LocalServiceFactory {
 
             ServiceEntry that = (ServiceEntry) o;
 
-            if (!className.equals(that.className)) { return false; }
-
-            return true;
+            return className.equals(that.className);
         }
 
         @Override

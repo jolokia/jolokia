@@ -21,8 +21,7 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.backend.MBeanServerHandlerMBean;
+import org.jolokia.backend.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.StaticConfiguration;
 import org.jolokia.util.StdoutLogHandler;
@@ -43,7 +42,7 @@ public class JolokiaMBeanServerUtilTest {
     @BeforeClass
     public void setup() {
         StaticConfiguration config = new StaticConfiguration(ConfigKey.DEBUG, "true");
-        handler = new MBeanServerHandler(config, new StdoutLogHandler());
+        handler = new MBeanServerHandlerImpl(config, new StdoutLogHandler());
     }
 
     @AfterClass
@@ -54,7 +53,7 @@ public class JolokiaMBeanServerUtilTest {
     @Test
     public void handlerBeanOnPlatformServer() throws MalformedObjectNameException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        assertTrue(server.isRegistered(new ObjectName(MBeanServerHandlerMBean.OBJECT_NAME)));
+        assertTrue(server.isRegistered(new ObjectName(MBeanServerHandlerImplMBean.OBJECT_NAME)));
     }
 
     @Test

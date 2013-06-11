@@ -27,7 +27,7 @@ import javax.naming.Context;
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.handler.OperationHandler;
+import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.OperationHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
@@ -68,7 +68,7 @@ public class Jsr160RequestHandler implements RequestHandler {
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
-        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxReq.getType());
+        CommandHandler handler = operationHandlerManager.getCommandHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);
         try {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -134,7 +134,7 @@ public class Jsr160RequestHandler implements RequestHandler {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxRequest.getType());
+        CommandHandler handler = operationHandlerManager.getCommandHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 

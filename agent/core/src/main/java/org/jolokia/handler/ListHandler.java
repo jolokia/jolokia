@@ -39,7 +39,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ListHandler extends OperationHandler<JmxListRequest> {
+public class ListHandler extends CommandHandler<JmxListRequest> {
 
 
     /** {@inheritDoc} */

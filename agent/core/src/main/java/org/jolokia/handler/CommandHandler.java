@@ -29,16 +29,23 @@ import org.jolokia.util.RequestType;
 
 
 /**
+ * A handler for dealing with a certain Jolokia command
+ *
  * @author roland
  * @since Jun 12, 2009
  */
-public abstract class OperationHandler<R extends JmxRequest> {
+public abstract class CommandHandler<R extends JmxRequest> {
 
     // Restrictor for restricting operations
 
     protected final JolokiaContext context;
 
-    protected OperationHandler(JolokiaContext pContext) {
+    /**
+     * Construct a command for the given Jolokia context
+     *
+     * @param pContext context within this command works
+     */
+    protected CommandHandler(JolokiaContext pContext) {
         context = pContext;
     }
 

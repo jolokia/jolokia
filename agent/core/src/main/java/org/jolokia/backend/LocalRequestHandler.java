@@ -20,7 +20,7 @@ import javax.management.*;
 
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.handler.OperationHandler;
+import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.OperationHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
@@ -36,7 +36,7 @@ public class LocalRequestHandler implements RequestHandler {
     // Jolokia context
     private final JolokiaContext ctx;
 
-    private OperationHandlerManager operationHandlerManager;
+    private OperationHandlerManager commandHandlerManager;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
@@ -48,7 +48,7 @@ public class LocalRequestHandler implements RequestHandler {
         ctx = pCtx;
 
         // Request handling manager 
-        operationHandlerManager =  new OperationHandlerManager(pCtx,true);
+        commandHandlerManager =  new OperationHandlerManager(pCtx,true);
     }
 
     // Can handle any request
@@ -59,15 +59,15 @@ public class LocalRequestHandler implements RequestHandler {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxRequest.getType());
+        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
     /** {@inheritDoc} */
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
-        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxReq.getType());
-        return ctx.getMBeanServerHandler().dispatchRequest(handler, pJmxReq);
+        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
+        return ctx.getMBeanServerHandler().dispatch(handler, pJmxReq);
     }
 
     /**
@@ -77,6 +77,6 @@ public class LocalRequestHandler implements RequestHandler {
      */
     public void destroy() throws JMException {
         //mBeanServerHandler.destroy();
-        operationHandlerManager.destroy();
+        commandHandlerManager.destroy();
     }
 }

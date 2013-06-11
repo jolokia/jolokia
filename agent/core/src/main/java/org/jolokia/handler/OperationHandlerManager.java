@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
 public class OperationHandlerManager {
 
     // Map with all json request handlers
-    private final Map<RequestType, OperationHandler> requestHandlerMap = new HashMap<RequestType, OperationHandler>();
+    private final Map<RequestType, CommandHandler> requestHandlerMap = new HashMap<RequestType, CommandHandler>();
 
     /**
      * Manager and dispatcher for incoming requests
@@ -43,7 +43,7 @@ public class OperationHandlerManager {
      * @param pUseNotifications whether notifications should be enabled
      */
     public OperationHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
-        OperationHandler handlers[] = {
+        CommandHandler handlers[] = {
                 new ReadHandler(pCtx),
                 new WriteHandler(pCtx),
                 new ExecHandler(pCtx),
@@ -52,7 +52,7 @@ public class OperationHandlerManager {
                 new SearchHandler(pCtx),
                 pUseNotifications ? new NotificationHandler(pCtx) : null
         };
-        for (OperationHandler handler : handlers) {
+        for (CommandHandler handler : handlers) {
             if (handler != null) {
                 requestHandlerMap.put(handler.getType(),handler);
             }
@@ -65,8 +65,8 @@ public class OperationHandlerManager {
      * @param pType type of request
      * @return handler which can handle requests of the given type
      */
-    public OperationHandler getRequestHandler(RequestType pType) {
-        OperationHandler handler = requestHandlerMap.get(pType);
+    public CommandHandler getCommandHandler(RequestType pType) {
+        CommandHandler handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");
         }
@@ -77,7 +77,7 @@ public class OperationHandlerManager {
      * Lifecycle method called when agent goes down
      */
     public void destroy() throws JMException {
-        for (OperationHandler handler : requestHandlerMap.values()) {
+        for (CommandHandler handler : requestHandlerMap.values()) {
             handler.destroy();
         }
     }

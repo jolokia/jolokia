@@ -50,5 +50,6 @@ public interface JolokiaServiceManager  {
     void addServiceFactory(JolokiaServiceFactory pServiceFactory);
 
     JolokiaContext start();
+
     void stop();
 }

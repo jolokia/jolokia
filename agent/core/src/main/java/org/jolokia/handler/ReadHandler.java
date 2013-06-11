@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ReadHandler extends OperationHandler<JmxReadRequest> {
+public class ReadHandler extends CommandHandler<JmxReadRequest> {
 
     // MBean Handler used for extracting MBean Meta data
     private static final MBeanServerExecutor.MBeanAction<MBeanInfo> MBEAN_INFO_HANDLER =

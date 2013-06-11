@@ -29,7 +29,7 @@ import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.*;
 import org.jolokia.config.StaticConfiguration;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.handler.OperationHandler;
+import org.jolokia.handler.CommandHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.*;
@@ -46,13 +46,13 @@ public class MBeanServerHandlerTest {
 
     private JmxRequest request;
 
-    private MBeanServerHandler handler;
+    private MBeanServerHandlerImpl handler;
 
     @BeforeMethod
     public void setup() throws MalformedObjectNameException {
         TestDetector.reset();
         StaticConfiguration config = new StaticConfiguration(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
-        handler = new MBeanServerHandler(config,new StdoutLogHandler());
+        handler = new MBeanServerHandlerImpl(config,new StdoutLogHandler());
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 
@@ -65,14 +65,14 @@ public class MBeanServerHandlerTest {
 
     @Test
     public void dispatchRequest() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException {
-        OperationHandler reqHandler = createMock(OperationHandler.class);
+        CommandHandler reqHandler = createMock(CommandHandler.class);
 
         Object result = new Object();
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
         replay(reqHandler);
-        assertEquals(handler.dispatchRequest(reqHandler, request),result);
+        assertEquals(handler.dispatch(reqHandler, request),result);
     }
 
 
@@ -93,34 +93,34 @@ public class MBeanServerHandlerTest {
     }
 
     private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        OperationHandler reqHandler = createMock(OperationHandler.class);
+        CommandHandler reqHandler = createMock(CommandHandler.class);
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(reqHandler);
-        handler.dispatchRequest(reqHandler, request);
+        handler.dispatch(reqHandler, request);
     }
 
     @Test
     public void dispatchAtOnce() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        OperationHandler reqHandler = createMock(OperationHandler.class);
+        CommandHandler reqHandler = createMock(CommandHandler.class);
 
         Object result = new Object();
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(reqHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andReturn(result);
         replay(reqHandler);
-        assertEquals(handler.dispatchRequest(reqHandler, request),result);
+        assertEquals(handler.dispatch(reqHandler, request),result);
     }
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        OperationHandler reqHandler = createMock(OperationHandler.class);
+        CommandHandler reqHandler = createMock(CommandHandler.class);
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(reqHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andThrow(new IOException());
         replay(reqHandler);
-        handler.dispatchRequest(reqHandler, request);
+        handler.dispatch(reqHandler, request);
     }
 
 

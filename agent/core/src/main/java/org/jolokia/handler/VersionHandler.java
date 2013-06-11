@@ -35,7 +35,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jun 12, 2009
  */
-public class VersionHandler extends OperationHandler<JmxVersionRequest> {
+public class VersionHandler extends CommandHandler<JmxVersionRequest> {
 
     /**
      * Constructor

@@ -114,7 +114,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                     (Restrictor) getMandatorySingletonService(ServiceType.RESTRICTOR);
 
             // Create context and remember
-            jolokiaContext = new JolokiaContextImpl(configuration, logHandler,restrictor);
+            jolokiaContext = new JolokiaContextImpl(configuration, logHandler, restrictor);
             isInitialized = true;
         }
         return jolokiaContext;

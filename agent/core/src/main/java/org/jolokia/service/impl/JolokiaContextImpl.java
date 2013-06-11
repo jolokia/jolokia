@@ -6,6 +6,7 @@ import javax.management.JMException;
 import javax.management.ObjectName;
 
 import org.jolokia.backend.MBeanServerHandler;
+import org.jolokia.backend.MBeanServerHandlerImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
@@ -53,7 +54,7 @@ public class JolokiaContextImpl implements JolokiaContext {
 
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
-        mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
+        mBeanServerHandler = new MBeanServerHandlerImpl(pConfig,pLogHandler);
 
         //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));

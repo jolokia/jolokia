@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class WriteHandler extends OperationHandler<JmxWriteRequest> {
+public class WriteHandler extends CommandHandler<JmxWriteRequest> {
 
     /**
      * Constructor

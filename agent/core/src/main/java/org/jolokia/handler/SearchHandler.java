@@ -33,7 +33,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 18, 2009
  */
-public class SearchHandler extends OperationHandler<JmxSearchRequest> {
+public class SearchHandler extends CommandHandler<JmxSearchRequest> {
 
     /**
      * Create search handler

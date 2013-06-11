@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
  */
 public class MBeanServerHandlerTestNegative {
 
-    private MBeanServerHandler handler;
+    private MBeanServerHandlerImpl handler;
 
     @Test
     public void mbeanRegistrationWithFailingTestDetector() throws JMException, IOException {
@@ -79,7 +79,7 @@ public class MBeanServerHandlerTestNegative {
     private void init() throws MalformedObjectNameException {
         TestDetector.reset();
         StaticConfiguration config = new StaticConfiguration(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
-        handler = new MBeanServerHandler(config, new StdoutLogHandler());
+        handler = new MBeanServerHandlerImpl(config, new StdoutLogHandler());
     }
 
 }

@@ -17,12 +17,12 @@ package org.jolokia.backend;
  */
 
 /**
- * MBean interface for accessing the {@link MBeanServerHandler}
+ * MBean interface for accessing the {@link MBeanServerHandlerImpl}
  *
  * @author roland
  * @since Jul 2, 2010
  */
-public interface MBeanServerHandlerMBean {
+public interface MBeanServerHandlerImplMBean {
 
     /**
      * Name of MBean used for registration
