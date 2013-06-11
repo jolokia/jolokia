@@ -53,7 +53,7 @@ abstract public class AbstractJ4pIntegrationTest {
             jettyServer = new Server(JETTY_DEFAULT_PORT);
             Context jettyContext = new Context(jettyServer, "/");
             ServletHolder holder = new ServletHolder(new AgentServlet());
-            holder.setInitParameter("dispatcherClasses","org.jolokia.jsr160.Jsr160RequestDispatcher");
+            holder.setInitParameter("dispatcherClasses","org.jolokia.jsr160.Jsr160RequestHandler");
             jettyContext.addServlet(holder, J4P_CONTEXT + "/*");
             jettyServer.start();
             j4pUrl = J4P_DEFAULT_URL;

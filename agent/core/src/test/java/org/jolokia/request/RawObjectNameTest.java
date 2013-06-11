@@ -25,8 +25,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.util.*;
 import org.json.simple.*;
 import org.testng.annotations.Test;
 
@@ -36,7 +35,8 @@ import static org.testng.Assert.*;
 /**
  */
 public class RawObjectNameTest {
-    private BackendManager backendManager = new BackendManager(new TestJolokiaContext(), true /* Lazy Init */);
+    private BackendManager backendManager =
+            new BackendManager(new TestJolokiaContext(), new TestRequestDispatcher(), true /* Lazy Init */);
 
     @Test
     public void testListRawObjectNameAccess() throws Exception {

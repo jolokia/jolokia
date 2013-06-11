@@ -36,16 +36,16 @@ import static org.testng.Assert.*;
  * @since 02.09.11
  */
 @Test(singleThreaded = true)
-public class Jsr160RequestDispatcherTest {
+public class Jsr160RequestHandlerTest {
 
-    private Jsr160RequestDispatcher dispatcher;
+    private Jsr160RequestHandler dispatcher;
     //private ProcessingParameters procParams;
     private TestJolokiaContext ctx;
 
     @BeforeMethod
     private void setup() {
         ctx = new TestJolokiaContext.Builder().build();
-        dispatcher = new Jsr160RequestDispatcher(ctx) {
+        dispatcher = new Jsr160RequestHandler(ctx) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
                 Map ret = super.prepareEnv(pTargetConfig);
@@ -90,7 +90,7 @@ public class Jsr160RequestDispatcherTest {
         destroyCtx();
         TestJolokiaContext testCtx;
         testCtx = new TestJolokiaContext.Builder().build();
-        new Jsr160RequestDispatcher(testCtx).dispatchRequest(req);
+        new Jsr160RequestHandler(testCtx).dispatchRequest(req);
         setup();
     }
 

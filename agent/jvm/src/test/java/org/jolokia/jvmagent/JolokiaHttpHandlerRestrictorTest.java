@@ -10,6 +10,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.jolokia.restrictor.DenyAllRestrictor;
 import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.util.TestRequestDispatcher;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,7 +33,7 @@ public class JolokiaHttpHandlerRestrictorTest {
     }
 
     private void checkRestrictor(String pParam, TestJolokiaContext pTestContext) throws URISyntaxException, IOException, ParseException, JMException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(pTestContext);
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(pTestContext, new TestRequestDispatcher(pTestContext));
         HttpExchange exchange = JolokiaHttpHandlerTest.prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
         // Simple GET method
         expect(exchange.getRequestMethod()).andReturn("GET");

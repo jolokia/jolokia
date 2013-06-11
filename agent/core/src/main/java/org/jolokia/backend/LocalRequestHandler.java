@@ -18,10 +18,10 @@ package org.jolokia.backend;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.handler.RequestHandlerManager;
+import org.jolokia.handler.OperationHandler;
+import org.jolokia.handler.OperationHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
 
@@ -31,24 +31,24 @@ import org.jolokia.service.JolokiaContext;
  * @author roland
  * @since Nov 11, 2009
  */
-public class LocalRequestDispatcher implements RequestDispatcher {
+public class LocalRequestHandler implements RequestHandler {
 
     // Jolokia context
     private final JolokiaContext ctx;
 
-    private RequestHandlerManager requestHandlerManager;
+    private OperationHandlerManager operationHandlerManager;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
      *
      * @param pCtx context to use for this dispatcher
      */
-    public LocalRequestDispatcher(JolokiaContext pCtx) {
+    public LocalRequestHandler(JolokiaContext pCtx) {
 
         ctx = pCtx;
 
         // Request handling manager 
-        requestHandlerManager =  new RequestHandlerManager(pCtx,true);
+        operationHandlerManager =  new OperationHandlerManager(pCtx,true);
     }
 
     // Can handle any request
@@ -59,14 +59,14 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
+        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
     /** {@inheritDoc} */
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
+        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxReq.getType());
         return ctx.getMBeanServerHandler().dispatchRequest(handler, pJmxReq);
     }
 
@@ -77,6 +77,6 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      */
     public void destroy() throws JMException {
         //mBeanServerHandler.destroy();
-        requestHandlerManager.destroy();
+        operationHandlerManager.destroy();
     }
 }

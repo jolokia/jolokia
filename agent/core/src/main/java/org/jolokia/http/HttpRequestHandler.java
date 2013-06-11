@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.BackendManager;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
@@ -54,11 +55,12 @@ public class HttpRequestHandler {
      * request handler (with help of the backend manager)
      *
      * @param pJolokiaCtx jolokia context
-     * @param pLazy
+     * @param pRequestDispatcher request dispatcher for calling the backend
+     * @param pLazy whether the initialization should be done lazy
      *
      */
-    public HttpRequestHandler(JolokiaContext pJolokiaCtx, boolean pLazy) {
-        backendManager = new BackendManager(pJolokiaCtx,pLazy);
+    public HttpRequestHandler(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher, boolean pLazy) {
+        backendManager = new BackendManager(pJolokiaCtx,pRequestDispatcher,pLazy);
         jolokiaCtx = pJolokiaCtx;
     }
 

@@ -32,13 +32,13 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public abstract class JsonRequestHandler<R extends JmxRequest> {
+public abstract class OperationHandler<R extends JmxRequest> {
 
     // Restrictor for restricting operations
 
     protected final JolokiaContext context;
 
-    protected JsonRequestHandler(JolokiaContext pContext) {
+    protected OperationHandler(JolokiaContext pContext) {
         context = pContext;
     }
 

@@ -16,21 +16,18 @@
 
 package org.jolokia.util;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Set;
+import java.util.UUID;
 
-import javax.management.*;
+import javax.management.JMException;
+import javax.management.ObjectName;
 
-import org.jolokia.backend.LocalRequestDispatcher;
 import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.backend.dispatcher.*;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
@@ -41,7 +38,6 @@ import org.jolokia.service.JolokiaContext;
  */
 public class TestJolokiaContext implements JolokiaContext {
 
-    RequestDispatchManager requestDispatchManager;
     LogHandler logHandler;
     Restrictor restrictor;
     Configuration config;
@@ -50,15 +46,14 @@ public class TestJolokiaContext implements JolokiaContext {
     ServerHandle handle;
 
     public TestJolokiaContext() {
-        this(null,null,null,null,null,null);
+        this(null,null,null,null,null);
     }
 
     private TestJolokiaContext(Configuration pConfig,
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
                                ServerHandle pHandle,
-                               MBeanServerHandler pServerHandler,
-                               List<RequestDispatcher> pDispatchers) {
+                               MBeanServerHandler pServerHandler) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
@@ -72,19 +67,14 @@ public class TestJolokiaContext implements JolokiaContext {
                 handle.setJolokiaId(UUID.randomUUID().toString());
             }
             } catch (MalformedURLException e) {}
-        this.requestDispatchManager = new RequestDispatchManager(
-                pDispatchers != null ? pDispatchers :
-                        Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this)));
+//        this.requestDispatchManager = new RequestDispatchManager(
+//                pDispatchers != null ? pDispatchers :
+//                        Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this)));
         converters = new Converters();
     }
 
     public void destroy() throws JMException {
         serverHandler.destroy();
-        requestDispatchManager.destroy();
-    }
-
-    public DispatchResult dispatch(JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        return requestDispatchManager.dispatch(request);
     }
 
     public MBeanServerHandler getMBeanServerHandler() {
@@ -159,7 +149,6 @@ public class TestJolokiaContext implements JolokiaContext {
         Restrictor restrictor;
         Configuration config;
         Converters converters;
-        List<RequestDispatcher> dispatchers;
         MBeanServerHandler serverHandler;
         ServerHandle handle;
 
@@ -183,11 +172,6 @@ public class TestJolokiaContext implements JolokiaContext {
             return this;
         }
 
-        public Builder dispatchers(List<RequestDispatcher> pDispatchers) {
-            dispatchers = pDispatchers;
-            return this;
-        }
-
         public Builder logHandler(LogHandler pLogHandler) {
             logHandler = pLogHandler;
             return this;
@@ -200,8 +184,7 @@ public class TestJolokiaContext implements JolokiaContext {
                     restrictor,
                     logHandler,
                     handle,
-                    serverHandler,
-                    dispatchers
+                    serverHandler
             );
         }
 

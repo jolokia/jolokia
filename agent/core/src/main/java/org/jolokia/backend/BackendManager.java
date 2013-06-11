@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.DispatchResult;
+import org.jolokia.backend.dispatcher.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.json.JsonConvertOptions;
@@ -46,6 +46,9 @@ public class BackendManager {
     // Overall Jolokia context
     private final JolokiaContext jolokiaCtx;
 
+    // Dispatcher for doing the requests
+    private final RequestDispatcher requestDispatcher;
+
     // Hard limits for conversion
     private JsonConvertOptions.Builder convertOptionsBuilder;
 
@@ -64,10 +67,12 @@ public class BackendManager {
      * Construct a new backend manager with the given configuration.
      *
      * @param pJolokiaCtx jolokia context for accessing internal services
+     * @param pRequestDispatcher
      * @param pLazy whether the initialisation should be done lazy
      */
-    public BackendManager(JolokiaContext pJolokiaCtx, boolean pLazy) {
+    public BackendManager(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher, boolean pLazy) {
         jolokiaCtx = pJolokiaCtx;
+        requestDispatcher = pRequestDispatcher;
 
         if (pLazy) {
             initializer = new Initializer();
@@ -214,7 +219,7 @@ public class BackendManager {
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        DispatchResult result = jolokiaCtx.dispatch(pJmxReq);
+        DispatchResult result = requestDispatcher.dispatch(pJmxReq);
         if (result == null) {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }

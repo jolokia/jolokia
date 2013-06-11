@@ -16,12 +16,9 @@
 
 package org.jolokia.handler;
 
-import java.util.ArrayList;
-
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxNotificationRequest;
 import org.jolokia.request.JmxRequestBuilder;
@@ -49,8 +46,8 @@ public class NotificationHandlerTest extends BaseHandlerTest {
         serverHandle.setJolokiaId("test");
         ctx = new TestJolokiaContext.Builder().
                serverHandle(serverHandle).
-               dispatchers(new ArrayList<RequestDispatcher>()).
                build();
+
         handler = new NotificationHandler(ctx);
     }
 

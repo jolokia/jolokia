@@ -1,20 +1,15 @@
 package org.jolokia.service.impl;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Set;
 
-import javax.management.*;
+import javax.management.JMException;
+import javax.management.ObjectName;
 
-import org.jolokia.backend.*;
-import org.jolokia.backend.dispatcher.*;
-import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.backend.MBeanServerHandler;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
@@ -27,9 +22,6 @@ import org.jolokia.util.*;
  * @since 09.04.13
  */
 public class JolokiaContextImpl implements JolokiaContext {
-
-    // manager for dispatching requests
-    private final RequestDispatchManager requestDispatchManager;
 
     // Overall configuration for which this context is a delegate
     private Configuration configuration;
@@ -63,56 +55,12 @@ public class JolokiaContextImpl implements JolokiaContext {
         // handler object
         mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
 
-        // Create and remember request dispatchers
-        // TODO: Not fully initialized, will switch to lookup anyway
-        LocalRequestDispatcher localDispatcher = new LocalRequestDispatcher(this);
-        List<RequestDispatcher> requestDispatchers = createRequestDispatchers(pConfig.getConfig(ConfigKey.DISPATCHER_CLASSES),
-                                                                              this);
-        requestDispatchers.add(localDispatcher);
-        requestDispatchManager = new RequestDispatchManager(requestDispatchers);
-
         //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
     }
 
     public void destroy() throws JMException {
         mBeanServerHandler.destroy();
-        requestDispatchManager.destroy();
-    }
-
-    // Construct configured dispatchers by reflection. Returns always
-    // a list, an empty one if no request dispatcher should be created
-    private List<RequestDispatcher> createRequestDispatchers(String pClasses,
-                                                             JolokiaContext pContext) {
-        List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
-        if (pClasses != null && pClasses.length() > 0) {
-            String[] names = pClasses.split("\\s*,\\s*");
-            for (String name : names) {
-                ret.add(createDispatcher(name, pContext));
-            }
-        }
-        return ret;
-    }
-
-    // Create a single dispatcher
-    private RequestDispatcher createDispatcher(String pDispatcherClass,
-                                               JolokiaContext pContext) {
-        try {
-            Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
-            Constructor constructor = clazz.getConstructor(JolokiaContext.class);
-            return (RequestDispatcher)
-                    constructor.newInstance(pContext);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Couldn't load class " + pDispatcherClass + ": " + e,e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class " + pDispatcherClass + " has invalid constructor: " + e,e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Constructor of " + pDispatcherClass + " couldn't be accessed: " + e,e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(pDispatcherClass + " couldn't be instantiated: " + e,e);
-        }
     }
 
 
@@ -122,10 +70,6 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     public Set<ConfigKey> getConfigKeys() {
         return configuration.getConfigKeys();
-    }
-
-    public DispatchResult dispatch(JmxRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        return requestDispatchManager.dispatch(request);
     }
 
     public MBeanServerHandler getMBeanServerHandler() {

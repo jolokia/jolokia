@@ -36,7 +36,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
+public class ExecHandler extends OperationHandler<JmxExecRequest> {
 
     /**
      * Constructor

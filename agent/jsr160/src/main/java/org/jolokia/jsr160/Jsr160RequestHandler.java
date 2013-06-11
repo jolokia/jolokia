@@ -24,11 +24,11 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.handler.JsonRequestHandler;
-import org.jolokia.handler.RequestHandlerManager;
+import org.jolokia.handler.OperationHandler;
+import org.jolokia.handler.OperationHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
 import org.jolokia.service.JolokiaContext;
@@ -39,18 +39,18 @@ import org.jolokia.service.JolokiaContext;
  * @author roland
  * @since Nov 11, 2009
  */
-public class Jsr160RequestDispatcher implements RequestDispatcher {
+public class Jsr160RequestHandler implements RequestHandler {
 
     // request handler for specific request types
-    private RequestHandlerManager requestHandlerManager;
+    private OperationHandlerManager operationHandlerManager;
 
     /**
      * Constructor
      *
      * @param pContext the jolokia context
      */
-    public Jsr160RequestDispatcher(JolokiaContext pContext) {
-        requestHandlerManager = new RequestHandlerManager(pContext,false);
+    public Jsr160RequestHandler(JolokiaContext pContext) {
+        operationHandlerManager = new OperationHandlerManager(pContext,false);
     }
 
     /**
@@ -68,7 +68,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
+        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);
         try {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
@@ -134,12 +134,12 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
+        OperationHandler handler = operationHandlerManager.getRequestHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
     /** {@inheritDoc} */
     public void destroy() throws JMException {
-        requestHandlerManager.destroy();
+        operationHandlerManager.destroy();
     }
 }

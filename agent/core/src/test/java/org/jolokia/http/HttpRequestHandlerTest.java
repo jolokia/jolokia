@@ -18,13 +18,14 @@ package org.jolokia.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
@@ -47,7 +48,7 @@ public class HttpRequestHandlerTest {
 
     private HttpRequestHandler handler;
     private TestJolokiaContext ctx;
-    private RequestDispatcher dispatcher;
+    private RequestHandler requestHandler;
 
     @AfterMethod
     public void destroy() throws JMException {
@@ -172,8 +173,8 @@ public class HttpRequestHandlerTest {
             log.debug((String) anyObject());
             expectLastCall().asStub();
             init(log);
-            expect(dispatcher.dispatchRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
-            replay(dispatcher,log);
+            expect(requestHandler.dispatchRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
+            replay(requestHandler,log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
             assertEquals(resp.get("status"),exceptions[i+1]);
@@ -201,17 +202,17 @@ public class HttpRequestHandlerTest {
     }
 
     private void init(Restrictor pRestrictor, LogHandler pLogHandler) throws JMException {
-        dispatcher = createMock(RequestDispatcher.class);
-        dispatcher.destroy();
+        requestHandler = createMock(RequestHandler.class);
+        requestHandler.destroy();
         expectLastCall().asStub();
-        expect(dispatcher.canHandle((JmxRequest) anyObject())).andStubReturn(true);
-        expect(dispatcher.useReturnValueWithPath((JmxRequest) anyObject())).andStubReturn(false);
+        expect(requestHandler.canHandle((JmxRequest) anyObject())).andStubReturn(true);
+        expect(requestHandler.useReturnValueWithPath((JmxRequest) anyObject())).andStubReturn(false);
         ctx = new TestJolokiaContext.Builder()
                 .restrictor(pRestrictor)
-                .dispatchers(Arrays.asList(dispatcher))
                 .logHandler(pLogHandler)
                 .build();
-        handler = new HttpRequestHandler(ctx,false);
+        RequestDispatcher dispatcher = new RequestDispatcherImpl(Arrays.asList(requestHandler));
+        handler = new HttpRequestHandler(ctx, dispatcher, false);
     }
 
 
@@ -228,15 +229,15 @@ public class HttpRequestHandlerTest {
     private void prepareDispatcher(int i, Object pRequest) throws JMException, IOException, NotChangedException {
         init();
         if (pRequest instanceof JmxRequest) {
-            expect(dispatcher.dispatchRequest((JmxRequest) pRequest)).andReturn("hello").times(i);
+            expect(requestHandler.dispatchRequest((JmxRequest) pRequest)).andReturn("hello").times(i);
         }
         else if (pRequest instanceof String[]) {
             String a[] = (String[]) pRequest;
-            expect(dispatcher.dispatchRequest(eqReadRequest(a[0],a[1]))).andReturn("hello").times(i);
+            expect(requestHandler.dispatchRequest(eqReadRequest(a[0],a[1]))).andReturn("hello").times(i);
         } else {
-            expect(dispatcher.dispatchRequest(isA((Class<JmxRequest>) pRequest))).andReturn("hello").times(i);
+            expect(requestHandler.dispatchRequest(isA((Class<JmxRequest>) pRequest))).andReturn("hello").times(i);
         }
-        replay(dispatcher);
+        replay(requestHandler);
     }
 
     private void verifyDispatcher(JSONObject pResponse) {
@@ -254,7 +255,7 @@ public class HttpRequestHandlerTest {
                 assertEquals(val.get("value"),"hello");
             }
         }
-        verify(dispatcher);
+        verify(requestHandler);
     }
 
 

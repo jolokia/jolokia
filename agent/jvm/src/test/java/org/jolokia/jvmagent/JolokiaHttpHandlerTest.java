@@ -28,6 +28,7 @@ import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.util.TestRequestDispatcher;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -44,12 +45,14 @@ public class JolokiaHttpHandlerTest {
 
     private JolokiaHttpHandler handler;
     private TestJolokiaContext ctx;
+    private TestRequestDispatcher requestDispatcher;
 
 
     @BeforeMethod
     public void setup() {
         ctx = getContext();
-        handler = new JolokiaHttpHandler(ctx);
+        requestDispatcher = new TestRequestDispatcher(ctx);
+        handler = new JolokiaHttpHandler(ctx, requestDispatcher);
         handler.start(false);
     }
 
@@ -57,6 +60,7 @@ public class JolokiaHttpHandlerTest {
     public void tearDown() throws JMException {
         if (handler != null) {
             handler.stop();
+            requestDispatcher.destroy();
             ctx.destroy();
             handler = null;
         }
@@ -133,7 +137,7 @@ public class JolokiaHttpHandlerTest {
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
     public void handlerNotStarted() throws URISyntaxException, IOException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getContext());
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getContext(), requestDispatcher);
         newHandler.handle(prepareExchange("http://localhost:8080/"));
 
     }

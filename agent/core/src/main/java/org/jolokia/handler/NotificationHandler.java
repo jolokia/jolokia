@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since 19.03.13
  */
-public class NotificationHandler extends JsonRequestHandler<JmxNotificationRequest> {
+public class NotificationHandler extends OperationHandler<JmxNotificationRequest> {
 
     // Dispatcher for notification registration requests
     private NotificationDispatcher dispatcher;

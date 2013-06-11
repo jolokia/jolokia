@@ -78,7 +78,7 @@ roo> osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolokia
       <td>
         Adapts the agent servlet's <constant>init-param</constant>
         to add an additional
-        <classname>org.jolokia.jsr160.Jsr160RequestDispatcher</classname>
+        <classname>org.jolokia.jsr160.Jsr160RequestHandler</classname>
         request dispatcher which allows the installed servlet to act
         as an JSR-160 proxy. See <xref linkend="proxy"/> for details
         about the JSR-160 proxy

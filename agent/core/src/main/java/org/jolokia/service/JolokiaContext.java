@@ -1,17 +1,11 @@
 package org.jolokia.service;
 
-import java.io.IOException;
 import java.util.Set;
 
-import javax.management.*;
-
 import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.backend.dispatcher.DispatchResult;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 
@@ -25,15 +19,6 @@ import org.jolokia.util.LogHandler;
  * @since 09.04.13
  */
 public interface JolokiaContext extends LogHandler, Restrictor {
-
-    /**
-     * Dispatch a JMX request to a single dispatcher
-     * for handling the request
-     *
-     * @return the result of the dispatch
-     */
-    DispatchResult dispatch(JmxRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
 
     /**
      * Access to the {@link MBeanServerHandler} for dealing with the

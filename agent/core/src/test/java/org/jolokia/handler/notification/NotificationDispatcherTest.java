@@ -6,7 +6,6 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.notification.*;
@@ -45,7 +44,6 @@ public class NotificationDispatcherTest {
         serverHandle.setJolokiaId("test");
         ctx = new TestJolokiaContext.Builder()
                 .serverHandle(serverHandle)
-                .dispatchers(new ArrayList<RequestDispatcher>())
                 .build();
         dispatcher = new NotificationDispatcher(ctx);
         connection = createMock(MBeanServerConnection.class);

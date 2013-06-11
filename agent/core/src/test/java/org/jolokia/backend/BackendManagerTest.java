@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -30,8 +31,7 @@ import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -60,14 +60,13 @@ public class BackendManagerTest {
         if (configKeysAndValues.length > 0) {
                 builder.config(ConfigKey.DEBUG, "true");
         }
-        //builder.dispatchers(Collections.<RequestDispatcher>emptyList());
         ctx = builder.build();
         return ctx;
     }
 
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(createContext(ConfigKey.DEBUG,"true"),false);
+        BackendManager backendManager = createBackendManager(new Object[] { ConfigKey.DEBUG,"true"}, false);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -75,9 +74,15 @@ public class BackendManagerTest {
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
     }
 
+    private BackendManager createBackendManager(Object[] pContextParams,boolean pLazy) {
+        JolokiaContext ctx = createContext(pContextParams);
+        return new BackendManager(ctx, new TestRequestDispatcher(ctx), pLazy);
+    }
+
+
     @Test
     public void lazyInit() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(createContext(), true /* Lazy Init */ );
+        BackendManager backendManager = createBackendManager(new Object[0],true);
 
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
@@ -116,35 +121,34 @@ public class BackendManagerTest {
 
     @Test
     public void defaultConfig() {
-        BackendManager backendManager = new BackendManager(
-                createContext(ConfigKey.DEBUG_MAX_ENTRIES,"blabal"),
-                false);
+        BackendManager backendManager = createBackendManager(new Object[] {  ConfigKey.DEBUG_MAX_ENTRIES,"blabal" },false);
     }
 
     @Test
     public void doubleInit() {
         JolokiaContext ctx = createContext();
-        BackendManager b1 = new BackendManager(ctx,false);
-        BackendManager b2 = new BackendManager(ctx,false);
+        RequestDispatcher dispatcher = new TestRequestDispatcher(ctx);
+        BackendManager b1 = new BackendManager(ctx, dispatcher, false);
+        BackendManager b2 = new BackendManager(ctx, dispatcher, false);
     }
 
     @Test
     public void remoteAccessCheck() {
         ctx = new TestJolokiaContext.Builder().restrictor(new AllowAllRestrictor()).build();
-        BackendManager backendManager = new BackendManager(ctx,false);
+        BackendManager backendManager = new BackendManager(ctx, new TestRequestDispatcher(ctx), false);
         assertTrue(backendManager.isRemoteAccessAllowed("localhost", "127.0.0.1"));
     }
 
     @Test
     public void corsAccessCheck() {
         ctx = new TestJolokiaContext.Builder().restrictor(new AllowAllRestrictor()).build();
-        BackendManager backendManager = new BackendManager(ctx,false);
+        BackendManager backendManager = new BackendManager(ctx, new TestRequestDispatcher(ctx), false);
         assertTrue(backendManager.isCorsAccessAllowed("http://bla.com"));
     }
 
     @Test
     public void convertError() throws MalformedObjectNameException {
-        BackendManager backendManager = new BackendManager(createContext(),false);
+        BackendManager backendManager = createBackendManager(new Object[0], false);
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
@@ -155,11 +159,11 @@ public class BackendManagerTest {
 
     // =========================================================================================
 
-    static class RequestDispatcherTest implements RequestDispatcher {
+    static class RequestHandlerTest implements RequestHandler {
 
         static boolean called = false;
 
-        public RequestDispatcherTest(Converters pConverters,ServerHandle pServerHandle,Restrictor pRestrictor) {
+        public RequestHandlerTest(Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
             assertNotNull(pConverters);
             assertNotNull(pRestrictor);
         }
@@ -188,7 +192,7 @@ public class BackendManagerTest {
 
     // ========================================================
 
-    static class RequestDispatcherWrong implements RequestDispatcher {
+    static class RequestHandlerWrong implements RequestHandler {
 
         // No special constructor --> fail
 

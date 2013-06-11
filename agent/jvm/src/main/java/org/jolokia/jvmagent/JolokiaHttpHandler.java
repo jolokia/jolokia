@@ -28,6 +28,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.service.JolokiaContext;
@@ -56,13 +57,19 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Global context
     private JolokiaContext jolokiaContext;
 
+    // Dispatcher for all requests
+    private RequestDispatcher requestDispatcher;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pJolokiaContext jolokia context
+     * @param pRequestDispatcher
      */
-    public JolokiaHttpHandler(JolokiaContext pJolokiaContext) {
+    public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher) {
         jolokiaContext = pJolokiaContext;
+        requestDispatcher = pRequestDispatcher;
+
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
         if (!contextPath.endsWith("/")) {
             contextPath += "/";
@@ -77,7 +84,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        requestHandler = new HttpRequestHandler(jolokiaContext, pLazy);
+        requestHandler = new HttpRequestHandler(jolokiaContext, requestDispatcher, pLazy);
     }
 
     /**

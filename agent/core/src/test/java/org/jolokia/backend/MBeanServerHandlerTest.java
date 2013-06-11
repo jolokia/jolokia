@@ -29,7 +29,7 @@ import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.*;
 import org.jolokia.config.StaticConfiguration;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.handler.OperationHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.*;
@@ -65,7 +65,7 @@ public class MBeanServerHandlerTest {
 
     @Test
     public void dispatchRequest() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException {
-        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+        OperationHandler reqHandler = createMock(OperationHandler.class);
 
         Object result = new Object();
 
@@ -93,7 +93,7 @@ public class MBeanServerHandlerTest {
     }
 
     private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+        OperationHandler reqHandler = createMock(OperationHandler.class);
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(reqHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
@@ -103,7 +103,7 @@ public class MBeanServerHandlerTest {
 
     @Test
     public void dispatchAtOnce() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+        OperationHandler reqHandler = createMock(OperationHandler.class);
 
         Object result = new Object();
 
@@ -115,7 +115,7 @@ public class MBeanServerHandlerTest {
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JsonRequestHandler reqHandler = createMock(JsonRequestHandler.class);
+        OperationHandler reqHandler = createMock(OperationHandler.class);
 
         expect(reqHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(reqHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andThrow(new IOException());

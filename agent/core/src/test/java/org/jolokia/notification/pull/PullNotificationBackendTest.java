@@ -17,11 +17,11 @@
 package org.jolokia.notification.pull;
 
 import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.BackendCallback;
 import org.jolokia.service.JolokiaContext;
@@ -45,8 +45,6 @@ public class PullNotificationBackendTest {
         handle.setJolokiaId("test");
         JolokiaContext ctx = new TestJolokiaContext.Builder()
                 .serverHandle(handle)
-                // Dispatches will add backends themselves (potentially)
-                .dispatchers(Collections.<RequestDispatcher>emptyList())
                 .build();
         backend = new PullNotificationBackend(ctx);
         assertEquals(backend.getType(),"pull");

@@ -87,7 +87,7 @@
           'route') a request to a different destination.
         </td>
         <td>
-          <literal>org.jolokia.jsr160.Jsr160RequestDispatcher</literal>
+          <literal>org.jolokia.jsr160.Jsr160RequestHandler</literal>
           (this is the dispatcher for the JSR-160 proxy)
         </td>
       </tr>

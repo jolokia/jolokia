@@ -1,16 +1,22 @@
 package org.jolokia.http;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import org.jolokia.backend.LocalRequestHandler;
+import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
+import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorServiceFactory;
-import org.jolokia.service.*;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
@@ -103,15 +109,19 @@ public class AgentServlet extends HttpServlet {
         serviceManager.addServiceFactory(new RestrictorServiceFactory(restrictor));
 
         JolokiaContext ctx = serviceManager.start();
+        // ==========================================================================
+        // Create and remember request dispatchers
+        RequestDispatcherImpl requestDispatcherImpl = new RequestDispatcherImpl(ctx);
+        // ==========================================================================
+
+        requestHandler = new HttpRequestHandler(ctx, requestDispatcherImpl, false);
 
         configMimeType = ctx.getConfig(ConfigKey.MIME_TYPE);
-        requestHandler = new HttpRequestHandler(ctx, false);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
     }
-
 
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden

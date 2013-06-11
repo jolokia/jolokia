@@ -31,10 +31,10 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Nov 13, 2009
  */
-public class RequestHandlerManager {
+public class OperationHandlerManager {
 
     // Map with all json request handlers
-    private final Map<RequestType, JsonRequestHandler> requestHandlerMap = new HashMap<RequestType, JsonRequestHandler>();
+    private final Map<RequestType, OperationHandler> requestHandlerMap = new HashMap<RequestType, OperationHandler>();
 
     /**
      * Manager and dispatcher for incoming requests
@@ -42,8 +42,8 @@ public class RequestHandlerManager {
      * @param pCtx jolokia context
      * @param pUseNotifications whether notifications should be enabled
      */
-    public RequestHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
-        JsonRequestHandler handlers[] = {
+    public OperationHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
+        OperationHandler handlers[] = {
                 new ReadHandler(pCtx),
                 new WriteHandler(pCtx),
                 new ExecHandler(pCtx),
@@ -52,7 +52,7 @@ public class RequestHandlerManager {
                 new SearchHandler(pCtx),
                 pUseNotifications ? new NotificationHandler(pCtx) : null
         };
-        for (JsonRequestHandler handler : handlers) {
+        for (OperationHandler handler : handlers) {
             if (handler != null) {
                 requestHandlerMap.put(handler.getType(),handler);
             }
@@ -65,8 +65,8 @@ public class RequestHandlerManager {
      * @param pType type of request
      * @return handler which can handle requests of the given type
      */
-    public JsonRequestHandler getRequestHandler(RequestType pType) {
-        JsonRequestHandler handler = requestHandlerMap.get(pType);
+    public OperationHandler getRequestHandler(RequestType pType) {
+        OperationHandler handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");
         }
@@ -77,7 +77,7 @@ public class RequestHandlerManager {
      * Lifecycle method called when agent goes down
      */
     public void destroy() throws JMException {
-        for (JsonRequestHandler handler : requestHandlerMap.values()) {
+        for (OperationHandler handler : requestHandlerMap.values()) {
             handler.destroy();
         }
     }
