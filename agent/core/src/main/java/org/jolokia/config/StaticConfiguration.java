@@ -18,15 +18,13 @@ package org.jolokia.config;
 
 import java.util.*;
 
-import org.jolokia.service.*;
-
 /**
  * Class encapsulating all Agent configuration, global config and processing parameters
  *
  * @author roland
  * @since 07.02.13
  */
-public class ConfigurationImpl extends JolokiaServiceBase implements Configuration, JolokiaService {
+public class StaticConfiguration implements Configuration {
 
     // The global configuration given during startup
     private Map<ConfigKey, String> configMap;
@@ -36,19 +34,9 @@ public class ConfigurationImpl extends JolokiaServiceBase implements Configurati
      * is especially suited for unit tests.
      *
      * @param keyAndValues an array with even number of elements and ConfigKey and String alternating.
-     *                     If the first element is an integer, it is used as order attribute
      */
-    public ConfigurationImpl(Object ... keyAndValues) {
-        super(ServiceType.CONFIGURATION);
-
+    public StaticConfiguration(Object... keyAndValues) {
         int idx = 0;
-        if (keyAndValues.length > 0 && keyAndValues[0] instanceof Integer) {
-            order = (Integer) keyAndValues[0];
-            idx = 1;
-        } else {
-            // 1000 ... 2000 is reserved for jolokia
-            order = 1000;
-        }
         configMap = new HashMap<ConfigKey, String>();
         for (int i = idx;i < keyAndValues.length; i+= 2) {
             configMap.put((ConfigKey) keyAndValues[i], (String) keyAndValues[i + 1]);
@@ -56,29 +44,13 @@ public class ConfigurationImpl extends JolokiaServiceBase implements Configurati
     }
 
     /**
-     * Update the configuration hold by this object
-     *
-     * @param pExtractor an extractor for retrieving the configuration from some external object
-     */
-    public void updateGlobalConfiguration(ConfigExtractor pExtractor) {
-        Enumeration e = pExtractor.getNames();
-        while (e.hasMoreElements()) {
-            String keyS = (String) e.nextElement();
-            ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
-            if (key != null) {
-                configMap.put(key, pExtractor.getParameter(keyS));
-            }
-        }
-
-    }
-
-    /**
-     * Update this global configuration from a string-string. Only the known keys are taken
-     * from this map
+     * Initialise this configuration from a string-string map. Only the known keys are taken
+     * from the given map
      *
      * @param pConfig config map from where to take the configuration
      */
-    public void updateGlobalConfiguration(Map<String, String> pConfig) {
+    public StaticConfiguration(Map<String,String> pConfig) {
+        configMap = new HashMap<ConfigKey, String>();
         for (ConfigKey c : ConfigKey.values()) {
             String value = pConfig.get(c.getKeyValue());
             if (value != null) {
@@ -87,13 +59,29 @@ public class ConfigurationImpl extends JolokiaServiceBase implements Configurati
         }
     }
 
+    /**
+     * Update the configuration hold by this object
+     *
+     * @param pExtractor an extractor for retrieving the configuration from some external object
+     */
+    public void update(ConfigExtractor pExtractor) {
+        Enumeration e = pExtractor.getNames();
+        while (e.hasMoreElements()) {
+            String keyS = (String) e.nextElement();
+            ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
+            if (key != null) {
+                configMap.put(key, pExtractor.getParameter(keyS));
+            }
+        }
+    }
+
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
-            String value = configMap.get(pKey);
-            if (value == null) {
-                value = pKey.getDefaultValue();
-            }
-            return value;
+        String value = configMap.get(pKey);
+        if (value == null) {
+            value = pKey.getDefaultValue();
+        }
+        return value;
     }
 
     /** {@inheritDoc} */
@@ -102,32 +90,7 @@ public class ConfigurationImpl extends JolokiaServiceBase implements Configurati
     }
 
     /** {@inheritDoc} */
-    public int getConfigAsInt(ConfigKey pKey) {
-        int ret;
-        try {
-            ret = Integer.parseInt(getConfig(pKey));
-        } catch (NumberFormatException exp) {
-            ret = Integer.parseInt(pKey.getDefaultValue());
-        }
-        return ret;
-    }
-
-    /** {@inheritDoc} */
-    public boolean getConfigAsBoolean(ConfigKey pKey) {
-        return Boolean.valueOf(getConfig(pKey));
-    }
-
-    /** {@inheritDoc} */
     public boolean containsKey(ConfigKey pKey) {
         return configMap.containsKey(pKey);
-    }
-
-    /**
-     * Get the number of stored configuration values
-     *
-     * @return number of configuration values
-     */
-    public int size() {
-        return configMap.size();
     }
 }

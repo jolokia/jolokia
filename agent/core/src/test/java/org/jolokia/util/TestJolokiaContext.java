@@ -55,7 +55,7 @@ public class TestJolokiaContext implements JolokiaContext {
                                ServerHandle pHandle,
                                MBeanServerHandler pServerHandler,
                                List<RequestDispatcher> pDispatchers) {
-        this.config = pConfig != null ? pConfig : new ConfigurationImpl();
+        this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
         this.serverHandler = pServerHandler != null ? pServerHandler : new MBeanServerHandler(config,logHandler);
@@ -166,7 +166,7 @@ public class TestJolokiaContext implements JolokiaContext {
         }
 
         public Builder config(Object... keyAndValues) {
-            this.config = new ConfigurationImpl(keyAndValues);
+            this.config = new StaticConfiguration(keyAndValues);
             return this;
         }
 

@@ -27,7 +27,7 @@ import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.*;
-import org.jolokia.config.ConfigurationImpl;
+import org.jolokia.config.StaticConfiguration;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
@@ -51,7 +51,7 @@ public class MBeanServerHandlerTest {
     @BeforeMethod
     public void setup() throws MalformedObjectNameException {
         TestDetector.reset();
-        ConfigurationImpl config = new ConfigurationImpl(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
+        StaticConfiguration config = new StaticConfiguration(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
         handler = new MBeanServerHandler(config,new StdoutLogHandler());
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }

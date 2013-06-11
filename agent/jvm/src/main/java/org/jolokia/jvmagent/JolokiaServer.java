@@ -183,17 +183,16 @@ public class JolokiaServer {
         // Create proper context along with handler
         final String contextPath = pConfig.getContextPath();
 
-        StdoutLogHandler log = new StdoutLogHandler();
-
         // TODO: CTX Init
-        JolokiaServiceManager serviceManager = new JolokiaServiceManagerImpl();
-        serviceManager.addService(config.getJolokiaConfig());
-        serviceManager.addService(log);
+        JolokiaServiceManager serviceManager = new JolokiaServiceManagerImpl(
+                config.getJolokiaConfig(),
+                new StdoutLogHandler()
+        );
 
         // Add a restrictor factory
         serviceManager.addServiceFactory(new RestrictorServiceFactory(null));
-
         JolokiaContext jolokiaContext = serviceManager.start();
+
         jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
 

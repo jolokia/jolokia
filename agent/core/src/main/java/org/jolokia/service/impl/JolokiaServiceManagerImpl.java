@@ -33,6 +33,12 @@ import static org.jolokia.service.JolokiaService.ServiceType;
  */
 public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
+    // Overall configuration
+    private Configuration configuration;
+
+    // Logger to use
+    private LogHandler logHandler;
+
     protected LocalServiceFactory localServiceFactory;
 
     // Whether this service manager is already initialized
@@ -47,7 +53,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // Jolokia context connecting to this manager
     private JolokiaContextImpl jolokiaContext;
 
-    public JolokiaServiceManagerImpl() {
+    public JolokiaServiceManagerImpl(Configuration pConfig,LogHandler pLogHandler) {
+        configuration = pConfig;
+        logHandler = pLogHandler;
         isInitialized = false;
         serviceFactories = new HashSet<JolokiaServiceFactory>();
         services = new HashMap<ServiceType,SortedSet<JolokiaService>>();
@@ -94,21 +102,19 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
 
-            // Essential services are looked up before
-            Configuration config = getConfiguration();
-            LogHandler log = getLogHandler();
-
             // Lookup all services by the given service factories
+            // The factories add the services on their own.
             for (JolokiaServiceFactory factory : serviceFactories) {
                 factory.init(this);
             }
             // Call init on all services
 
-            // TODO: Currently everything is used as a singleton.
-            Restrictor restrictor = (Restrictor) getMandatorySingletonService(ServiceType.RESTRICTOR);
+            // Only one restrictor is allowed and must be present.
+            Restrictor restrictor =
+                    (Restrictor) getMandatorySingletonService(ServiceType.RESTRICTOR);
 
             // Create context and remember
-            jolokiaContext = new JolokiaContextImpl(config,log,restrictor);
+            jolokiaContext = new JolokiaContextImpl(configuration, logHandler,restrictor);
             isInitialized = true;
         }
         return jolokiaContext;
@@ -134,11 +140,11 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
 
     public LogHandler getLogHandler() {
-        return (LogHandler) getMandatorySingletonService(ServiceType.LOG_HANDLER);
+        return logHandler;
     }
 
     public Configuration getConfiguration() {
-        return (Configuration) getMandatorySingletonService(ServiceType.CONFIGURATION);
+        return configuration;
     }
 
     private JolokiaService getMandatorySingletonService(ServiceType pType) {

@@ -16,20 +16,17 @@
 
 package org.jolokia.util;
 
-import org.jolokia.service.JolokiaServiceBase;
-
 /**
  * Very simple log handler printing out logging to standard out
  *
  * @author roland
  * @since 19.04.13
  */
-public class StdoutLogHandler extends JolokiaServiceBase implements LogHandler {
+public class StdoutLogHandler implements LogHandler {
 
     private boolean debug = true;
 
     public StdoutLogHandler(boolean pDebug) {
-        super(ServiceType.LOG_HANDLER);
         debug = pDebug;
     }
 

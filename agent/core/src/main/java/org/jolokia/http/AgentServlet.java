@@ -95,9 +95,9 @@ public class AgentServlet extends HttpServlet {
 
         // Create configuration and log handler early in the lifecycle
 
-        serviceManager = new JolokiaServiceManagerImpl();
-        serviceManager.addService(initConfig(pServletConfig));
-        serviceManager.addService(createLogService(pServletConfig));
+        Configuration config = initConfig(pServletConfig);
+        LogHandler logHandler = createLogService(pServletConfig);
+        serviceManager = new JolokiaServiceManagerImpl(config,logHandler);
 
         // Add a restrictor factory
         serviceManager.addServiceFactory(new RestrictorServiceFactory(restrictor));
@@ -121,16 +121,12 @@ public class AgentServlet extends HttpServlet {
      * @return a default log handler
      * @param pServletConfig servlet config from where to get information to build up the log handler
      */
-    protected JolokiaService createLogService(ServletConfig pServletConfig) {
+    protected LogHandler createLogService(ServletConfig pServletConfig) {
         return new ServletLogHandler();
     }
 
     // A loghandler using a servlets log facilities
-    private class ServletLogHandler extends JolokiaServiceBase implements LogHandler {
-
-        protected ServletLogHandler() {
-            super(ServiceType.LOG_HANDLER);
-        }
+    private class ServletLogHandler implements LogHandler {
 
         /** {@inheritDoc} */
         public void debug(String message) {
@@ -295,17 +291,14 @@ public class AgentServlet extends HttpServlet {
 
     // Examines servlet config and servlet context for configuration parameters.
     // Configuration from the servlet context overrides servlet parameters defined in web.xml
-    ConfigurationImpl initConfig(ServletConfig pConfig) {
-        ConfigurationImpl config = new ConfigurationImpl();
+    Configuration initConfig(ServletConfig pConfig) {
+        StaticConfiguration config = new StaticConfiguration(
+                Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
+                                         Integer.toHexString(hashCode()) + "-servlet"));
         // From ServletContext ....
-        config.updateGlobalConfiguration(new ServletConfigFacade(pConfig));
+        config.update(new ServletConfigFacade(pConfig));
         // ... and ServletConfig
-        config.updateGlobalConfiguration(new ServletContextFacade(getServletContext()));
-        if (config.getConfig(ConfigKey.JOLOKIA_ID) == null) {
-            config.updateGlobalConfiguration(
-                    Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
-                                             Integer.toHexString(hashCode()) + "-servlet"));
-        }
+        config.update(new ServletContextFacade(getServletContext()));
         return config;
     }
 

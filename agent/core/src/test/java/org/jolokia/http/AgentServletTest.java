@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.TestDetector;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.ConfigurationImpl;
+import org.jolokia.config.*;
+import org.jolokia.config.Configuration;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.testng.annotations.*;
@@ -96,7 +96,7 @@ public class AgentServletTest {
         servlet.init(config);
         servlet.destroy();
 
-        ConfigurationImpl cfg = servlet.initConfig(config);
+        Configuration cfg = servlet.initConfig(config);
         assertEquals(cfg.getConfig(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
         assertEquals(cfg.getConfig(ConfigKey.MAX_DEPTH), "10");
         assertEquals(cfg.getConfig(ConfigKey.MAX_OBJECTS), "20");

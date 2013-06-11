@@ -20,8 +20,6 @@ import javax.servlet.*;
 
 import org.jolokia.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.JolokiaService;
-import org.jolokia.service.JolokiaServiceBase;
 import org.jolokia.util.LogHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -103,7 +101,7 @@ public class JolokiaServlet extends AgentServlet {
      * @param pServletConfig  servlet configuration
      */
     @Override
-    protected JolokiaService createLogService(ServletConfig pServletConfig) {
+    protected LogHandler createLogService(ServletConfig pServletConfig) {
         // If there is a bundle context available, set up a tracker for tracking the logging
         // service and optionally a restrictor service
         BundleContext ctx = getBundleContext(pServletConfig);
@@ -156,12 +154,11 @@ public class JolokiaServlet extends AgentServlet {
 
     // LogHandler which logs to a LogService if available, otherwise
     // it uses simply the servlets log facility
-    private final class ActivatorLogHandler extends JolokiaServiceBase implements LogHandler {
+    private final class ActivatorLogHandler implements LogHandler {
 
         private ServiceTracker logTracker;
 
         private ActivatorLogHandler(ServiceTracker pLogTracker) {
-            super(ServiceType.LOG_HANDLER);
             logTracker = pLogTracker;
         }
 

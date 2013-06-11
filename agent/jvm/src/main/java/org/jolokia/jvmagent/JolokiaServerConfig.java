@@ -24,7 +24,7 @@ import java.util.*;
 
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.ConfigurationImpl;
+import org.jolokia.config.StaticConfiguration;
 
 /**
  * Configuration required for the JolokiaServer
@@ -36,7 +36,7 @@ public class JolokiaServerConfig {
 
     // Jolokia configuration is used for general jolokia config, the untyped configuration
     // is used for this agent only
-    private ConfigurationImpl jolokiaConfig;
+    private StaticConfiguration jolokiaConfig;
 
     private String        protocol;
     private int           port;
@@ -82,8 +82,7 @@ public class JolokiaServerConfig {
         prepareDetectorOptions(finalCfg);
         addJolokiaId(finalCfg);
 
-        jolokiaConfig = new ConfigurationImpl();
-        jolokiaConfig.updateGlobalConfiguration(finalCfg);
+        jolokiaConfig = new StaticConfiguration(finalCfg);
         initConfigAndValidate(finalCfg);
     }
 
@@ -105,7 +104,7 @@ public class JolokiaServerConfig {
      * Get the Jolokia runtime configuration
      * @return jolokia configuration
      */
-    public ConfigurationImpl getJolokiaConfig() {
+    public StaticConfiguration getJolokiaConfig() {
         return jolokiaConfig;
     }
 

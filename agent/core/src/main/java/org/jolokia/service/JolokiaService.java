@@ -31,8 +31,6 @@ public interface JolokiaService {
     public void init(JolokiaServiceManager pServiceManager);
 
     public enum ServiceType {
-        CONFIGURATION,
-        LOG_HANDLER,
         RESTRICTOR,
         REQUEST_DISPATCHER,
         EXTRACTOR,
