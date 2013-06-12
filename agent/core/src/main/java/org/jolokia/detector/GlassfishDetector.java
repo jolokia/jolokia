@@ -26,9 +26,8 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.util.LogHandler;
+import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**
@@ -85,7 +84,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         return mBeanExists(pServerManager,"amx:type=domain-root,*");
     }
 
-    private synchronized boolean bootAmx(MBeanServerExecutor pServers, final LogHandler pLoghandler) {
+    private synchronized boolean bootAmx(MBeanServerExecutor pServers, JolokiaContext pCtx) {
         ObjectName bootMBean = null;
         try {
             bootMBean = new ObjectName("amx-support:type=boot-amx");
@@ -103,16 +102,16 @@ public class GlassfishDetector extends AbstractServerDetector {
             });
             return true;
         } catch (InstanceNotFoundException e) {
-            pLoghandler.error("No bootAmx MBean found: " + e,e);
+            pCtx.error("No bootAmx MBean found: " + e, e);
             // Can happen, when a call to bootAmx comes to early before the bean
             // is registered
             return false;
         } catch (IllegalArgumentException e) {
-            pLoghandler.error("Exception while booting AMX: " + e,e);
+            pCtx.error("Exception while booting AMX: " + e, e);
             // We dont try it again
             return true;
         } catch (Exception e) {
-            pLoghandler.error("Exception while executing bootAmx: " + e, e);
+            pCtx.error("Exception while executing bootAmx: " + e, e);
             // dito
             return true;
         }
@@ -132,7 +131,7 @@ public class GlassfishDetector extends AbstractServerDetector {
 
     private class GlassfishServerHandle extends ServerHandle {
         private boolean amxShouldBeBooted = false;
-        private LogHandler logHandler;
+        private JolokiaContext jolokiaContext;
 
         /**
          * Server handle for a glassfish server
@@ -159,18 +158,18 @@ public class GlassfishDetector extends AbstractServerDetector {
         /** {@inheritDoc} */
         public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
             if (amxShouldBeBooted) {
-                amxShouldBeBooted = bootAmx(pMBeanServerExecutor,logHandler);
+                amxShouldBeBooted = bootAmx(pMBeanServerExecutor,jolokiaContext);
             }
         }
 
         @Override
         /** {@inheritDoc} */
         public void postDetect(MBeanServerExecutor pServerManager,
-                               Configuration pConfig, LogHandler pLoghandler) {
-            JSONObject opts = getDetectorOptions(pConfig,pLoghandler);
+                               JolokiaContext pCtx) {
+            JSONObject opts = getDetectorOptions(pCtx);
             amxShouldBeBooted = (opts == null || opts.get("bootAmx") == null || (Boolean) opts.get("bootAmx"))
                                 && !isAmxBooted(pServerManager);
-            logHandler = pLoghandler;
+            jolokiaContext = pCtx;
         }
     }
 

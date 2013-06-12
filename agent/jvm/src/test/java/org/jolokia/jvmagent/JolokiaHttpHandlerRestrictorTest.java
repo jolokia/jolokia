@@ -49,7 +49,6 @@ public class JolokiaHttpHandlerRestrictorTest {
         assertTrue(resp.containsKey("error"));
         assertTrue(((String) resp.get("error")).contains(pParam));
 
-        pTestContext.destroy();
     }
 
 

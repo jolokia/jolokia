@@ -54,7 +54,6 @@ public class NotificationHandlerTest extends BaseHandlerTest {
     @AfterMethod
     public void tearDown() throws Exception {
         handler.destroy();
-        ctx.destroy();
     }
 
     @Test

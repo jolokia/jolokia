@@ -59,11 +59,7 @@ public class Jsr160RequestHandlerTest {
     }
 
     @AfterMethod
-    private void destroyCtx() throws JMException {
-        if (ctx != null) {
-            ctx.destroy();
-            ctx = null;
-        }
+    private void destroy() throws JMException {
         dispatcher.destroy();
     }
 
@@ -87,7 +83,7 @@ public class Jsr160RequestHandlerTest {
     @Test(expectedExceptions = IOException.class)
     public void simpleDispatchFail() throws Exception {
         JmxRequest req = preparePostReadRequest(null);
-        destroyCtx();
+        destroy();
         TestJolokiaContext testCtx;
         testCtx = new TestJolokiaContext.Builder().build();
         new Jsr160RequestHandler(testCtx).dispatchRequest(req);

@@ -52,11 +52,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
         testBeanName = new ObjectName("jolokia:type=test");
     }
 
-    @AfterMethod
-    public void destroy() throws JMException {
-        ctx.destroy();
-    }
-
     @Test
     public void singleBeanSingleAttribute() throws Exception {
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
@@ -353,7 +348,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
     public void restrictAccess() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
-        ctx.destroy();
         ctx = new TestJolokiaContext.Builder().restrictor(restrictor).build();
         handler = new ReadHandler(ctx);
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).

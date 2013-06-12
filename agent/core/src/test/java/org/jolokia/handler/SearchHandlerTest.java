@@ -51,10 +51,6 @@ public class SearchHandlerTest extends BaseHandlerTest {
         handler = new SearchHandler(ctx);
     }
 
-    @AfterMethod
-    public void destroy() throws JMException {
-        ctx.destroy();
-    }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {

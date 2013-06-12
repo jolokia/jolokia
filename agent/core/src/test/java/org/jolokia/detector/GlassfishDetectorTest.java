@@ -22,8 +22,9 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.StaticConfiguration;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -144,8 +145,8 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(null).anyTimes();
         replay(mockServer);
-        StaticConfiguration config = new StaticConfiguration(ConfigKey.DETECTOR_OPTIONS,"{\"glassfish\": {\"bootAmx\" : false}}");
-        handle.postDetect(getMBeanServerManager(mockServer), config, null);
+        JolokiaContext ctx = new TestJolokiaContext.Builder().config(ConfigKey.DETECTOR_OPTIONS,"{\"glassfish\": {\"bootAmx\" : false}}").build();
+        handle.postDetect(getMBeanServerManager(mockServer), ctx);
         verify(mockServer);
     }
 
@@ -157,9 +158,9 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         expect(mockServer.isRegistered(bootAmxName)).andStubReturn(true);
         expect(mockServer.invoke(bootAmxName,"bootAMX",null,null)).andReturn(null);
         replay(mockServer);
-        StaticConfiguration config = new StaticConfiguration(ConfigKey.DETECTOR_OPTIONS,opts);
+        JolokiaContext context = new TestJolokiaContext.Builder().config(ConfigKey.DETECTOR_OPTIONS,opts).build();
         MBeanServerExecutor servers = getMBeanServerManager(mockServer);
-        handle.postDetect(servers, config, null);
+        handle.postDetect(servers, context);
         handle.preDispatch(servers,null);
         verify(mockServer);
     }
@@ -185,7 +186,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         log.error(matches(regexp),isA(exp.getClass()));
         replay(mockServer,log);
         MBeanServerExecutor servers = getMBeanServerManager(mockServer);
-        handle.postDetect(servers,new StaticConfiguration(),log);
+        handle.postDetect(servers,new TestJolokiaContext());
         handle.preDispatch(servers,null);
         verify(mockServer);
     }

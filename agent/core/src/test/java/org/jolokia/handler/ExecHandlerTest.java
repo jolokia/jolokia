@@ -49,12 +49,6 @@ public class ExecHandlerTest {
         handler = new ExecHandler(ctx);
     }
 
-    @AfterMethod
-    public void destroy() throws JMException {
-        ctx.destroy();
-    }
-
-
     @BeforeClass
     public void registerMBean() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=exec");

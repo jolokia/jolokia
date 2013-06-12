@@ -2,11 +2,8 @@ package org.jolokia.service.impl;
 
 import java.util.Set;
 
-import javax.management.JMException;
 import javax.management.ObjectName;
 
-import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.backend.MBeanServerHandlerImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
@@ -36,8 +33,8 @@ public class JolokiaContextImpl implements JolokiaContext {
     // Converts for object serialization
     private Converters converters;
 
-    // Handler for finding and merging the various MBeanHandler
-    private MBeanServerHandler mBeanServerHandler;
+    // Server handle
+    private ServerHandle serverHandle;
 
     public JolokiaContextImpl(Configuration pConfig,
                               LogHandler pLogHandler,
@@ -52,16 +49,17 @@ public class JolokiaContextImpl implements JolokiaContext {
         // TODO: Lookup
         converters = new Converters();
 
-        // Get all MBean servers we can find. This is done by a dedicated
-        // handler object
-        mBeanServerHandler = new MBeanServerHandlerImpl(pConfig,pLogHandler);
-
-        //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
-        //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
+        // Initially the server handle is a fallback server handle
+        serverHandle = ServerHandle.NULL_SERVER_HANDLE;
     }
 
-    public void destroy() throws JMException {
-        mBeanServerHandler.destroy();
+    public ServerHandle getServerHandle() {
+        return serverHandle;
+    }
+
+    // Used for setting the server handle in retrospective
+    public void setServerHandle(ServerHandle pServerHandle) {
+        serverHandle = pServerHandle;
     }
 
 
@@ -73,16 +71,8 @@ public class JolokiaContextImpl implements JolokiaContext {
         return configuration.getConfigKeys();
     }
 
-    public MBeanServerHandler getMBeanServerHandler() {
-        return mBeanServerHandler;
-    }
-
     public Converters getConverters() {
         return converters;
-    }
-
-    public ServerHandle getServerHandle() {
-        return mBeanServerHandler.getServerHandle();
     }
 
     public boolean isDebug() {
@@ -128,4 +118,5 @@ public class JolokiaContextImpl implements JolokiaContext {
     public boolean isCorsAccessAllowed(String pOrigin) {
         return restrictor.isCorsAccessAllowed(pOrigin);
     }
+
 }

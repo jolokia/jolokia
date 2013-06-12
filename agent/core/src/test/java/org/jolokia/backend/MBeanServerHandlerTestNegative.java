@@ -17,19 +17,18 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.StaticConfiguration;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.util.StdoutLogHandler;
+import org.jolokia.detector.ServerDetector;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -37,16 +36,16 @@ import static org.testng.Assert.*;
  */
 public class MBeanServerHandlerTestNegative {
 
-    private MBeanServerHandlerImpl handler;
+    private MBeanRegistry handler;
 
-    @Test
+    @Test(enabled = false)
     public void mbeanRegistrationWithFailingTestDetector() throws JMException, IOException {
         TestDetector.setThrowAddException(true);
         // New setup because detection happens at construction time
         init();
         try {
-            ObjectName oName = new ObjectName(handler.getObjectName());
-            MBeanServerExecutor servers = handler.getMBeanServerManager();
+            ObjectName oName = new ObjectName("Bla:type=blub");
+            MBeanServerExecutor servers = new MBeanServerExecutorLocal(Arrays.<ServerDetector>asList(new TestDetector()));
             final List<Boolean> results = new ArrayList<Boolean>();
             servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
                 public void callback(MBeanServerConnection pConn, ObjectName pName)
@@ -61,25 +60,13 @@ public class MBeanServerHandlerTestNegative {
         }
     }
 
-    @Test
-    public void fallThrough() throws JMException {
-        TestDetector.setFallThrough(true);
-        init();
-        try {
-            ServerHandle handle = handler.getServerHandle();
-            assertNull(handle.getProduct());
-        } finally {
-            TestDetector.setFallThrough(false);
-            handler.destroy();
-        }
-    }
 
     // ===================================================================================================
 
     private void init() throws MalformedObjectNameException {
         TestDetector.reset();
-        StaticConfiguration config = new StaticConfiguration(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
-        handler = new MBeanServerHandlerImpl(config, new StdoutLogHandler());
+        JolokiaContext ctx = new TestJolokiaContext.Builder().config(ConfigKey.MBEAN_QUALIFIER, "qualifier=test").build();
+        handler = new MBeanRegistry(ctx);
     }
 
 }

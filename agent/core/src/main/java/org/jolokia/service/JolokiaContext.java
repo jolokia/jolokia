@@ -2,8 +2,6 @@ package org.jolokia.service;
 
 import java.util.Set;
 
-import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.backend.MBeanServerHandlerImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -20,14 +18,6 @@ import org.jolokia.util.LogHandler;
  * @since 09.04.13
  */
 public interface JolokiaContext extends LogHandler, Restrictor {
-
-    /**
-     * Access to the {@link MBeanServerHandlerImpl} for dealing with the
-     * local MBeanServers
-     *
-     * @return the mbean server handler
-     */
-    MBeanServerHandler getMBeanServerHandler();
 
     /**
      * Get the various converters used for converting object to and from

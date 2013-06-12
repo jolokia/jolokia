@@ -56,7 +56,6 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @AfterMethod
     private void destroy() throws JMException {
-        ctx.destroy();
         executor.destroy();
     }
 

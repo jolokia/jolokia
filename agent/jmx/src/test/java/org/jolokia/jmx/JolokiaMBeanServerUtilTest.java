@@ -21,10 +21,9 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.*;
+import org.jolokia.backend.MBeanRegistry;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.StaticConfiguration;
-import org.jolokia.util.StdoutLogHandler;
+import org.jolokia.util.TestJolokiaContext;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -37,23 +36,17 @@ import static org.testng.Assert.assertTrue;
  */
 public class JolokiaMBeanServerUtilTest {
 
-    MBeanServerHandler handler;
+    MBeanRegistry handler;
 
     @BeforeClass
     public void setup() {
-        StaticConfiguration config = new StaticConfiguration(ConfigKey.DEBUG, "true");
-        handler = new MBeanServerHandlerImpl(config, new StdoutLogHandler());
+        handler = new MBeanRegistry(
+                new TestJolokiaContext.Builder().config(ConfigKey.DEBUG, "true").build());
     }
 
     @AfterClass
     public void tearDown() throws JMException {
         handler.destroy();
-    }
-
-    @Test
-    public void handlerBeanOnPlatformServer() throws MalformedObjectNameException {
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        assertTrue(server.isRegistered(new ObjectName(MBeanServerHandlerImplMBean.OBJECT_NAME)));
     }
 
     @Test

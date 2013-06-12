@@ -57,7 +57,6 @@ public class NotificationDispatcherTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        ctx.destroy();
         dispatcher.destroy();
     }
 

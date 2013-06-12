@@ -84,7 +84,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        requestHandler = new HttpRequestHandler(jolokiaContext, requestDispatcher, pLazy);
+        requestHandler = new HttpRequestHandler(jolokiaContext, requestDispatcher);
     }
 
     /**

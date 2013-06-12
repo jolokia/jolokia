@@ -56,11 +56,9 @@ public class HttpRequestHandler {
      *
      * @param pJolokiaCtx jolokia context
      * @param pRequestDispatcher request dispatcher for calling the backend
-     * @param pLazy whether the initialization should be done lazy
-     *
      */
-    public HttpRequestHandler(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher, boolean pLazy) {
-        backendManager = new BackendManager(pJolokiaCtx,pRequestDispatcher,pLazy);
+    public HttpRequestHandler(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
+        backendManager = new BackendManager(pJolokiaCtx,pRequestDispatcher);
         jolokiaCtx = pJolokiaCtx;
     }
 
@@ -91,7 +89,7 @@ public class HttpRequestHandler {
     /**
      * Get processing parameters from a string-string map
      *
-     * @param pParameterMap params to extra. A parameter {@link ConfigKey.PATH_QUERY_PARAM} is used as extra path info
+     * @param pParameterMap params to extra. A parameter {@link ConfigKey#PATH_QUERY_PARAM} is used as extra path info
      * @return the processing parameters
      */
     private ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) {
@@ -171,7 +169,7 @@ public class HttpRequestHandler {
      */
     public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
         Map<String,String> ret = new HashMap<String, String>();
-        if (pOrigin != null && backendManager.isCorsAccessAllowed(pOrigin)) {
+        if (pOrigin != null && jolokiaCtx.isCorsAccessAllowed(pOrigin)) {
             // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
             ret.put("Access-Control-Allow-Origin","null".equals(pOrigin) ? "*" : pOrigin);
             if (pRequestHeaders != null) {
@@ -314,7 +312,7 @@ public class HttpRequestHandler {
         if (pOrigin != null) {
             // Prevent HTTP response splitting attacks
             String origin  = pOrigin.replaceAll("[\\n\\r]*","");
-            if (backendManager.isCorsAccessAllowed(origin)) {
+            if (jolokiaCtx.isCorsAccessAllowed(origin)) {
                 return "null".equals(origin) ? "*" : origin;
             } else {
                 return null;

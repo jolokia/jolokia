@@ -18,9 +18,15 @@ package org.jolokia.service.impl;
 
 import java.util.*;
 
-import javax.management.JMException;
+import javax.management.*;
 
+import org.jolokia.backend.MBeanRegistry;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.history.History;
+import org.jolokia.history.HistoryStore;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;
@@ -52,6 +58,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     // Jolokia context connecting to this manager
     private JolokiaContextImpl jolokiaContext;
+
+    // Server handler for registering MBeans
+    private MBeanRegistry mBeanServerHandler;
+
+    // Request dispatcher for executing operations
+    private RequestDispatcher requestDispatcher;
 
     public JolokiaServiceManagerImpl(Configuration pConfig,LogHandler pLogHandler) {
         configuration = pConfig;
@@ -115,6 +127,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
             // Create context and remember
             jolokiaContext = new JolokiaContextImpl(configuration, logHandler, restrictor);
+
+            initMBeans(jolokiaContext);
+
+            // Initialize the request dispatcher
+            requestDispatcher = new RequestDispatcherImpl(jolokiaContext);
+
             isInitialized = true;
         }
         return jolokiaContext;
@@ -124,18 +142,69 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      * Stop all services and destroy the managed context
      *
      */
-     public synchronized void stop() {
-         if (isInitialized) {
-             try {
-                 jolokiaContext.destroy();
-             } catch (JMException e) {
-                 getLogHandler().error("Cannot destroy the Jolokia context: " + e,e);
-             }
-             for (JolokiaServiceFactory factory : serviceFactories) {
-                 factory.destroy();
-             }
-         }
-         isInitialized = false;
+    public synchronized void stop() {
+        if (isInitialized) {
+            try {
+                mBeanServerHandler.destroy();
+            } catch (JMException e) {
+                getLogHandler().error("Cannot unregister own MBeans: " + e,e);
+            }
+            for (JolokiaServiceFactory factory : serviceFactories) {
+                factory.destroy();
+            }
+            try {
+                requestDispatcher.destroy();
+            } catch (JMException e) {
+                getLogHandler().error("Cannot stop the request dispatcher: " + e,e);
+            }
+        }
+        isInitialized = false;
+    }
+
+    private void initMBeans(JolokiaContextImpl pCtx) {
+        mBeanServerHandler = new MBeanRegistry(pCtx);
+        initHistoryStore(pCtx);
+
+        // TODO: MBeanServer Infos MBean which exports org.jolokia.backend.MBeanServerExecutorLocal.getServersInfo()
+        // Under "jolokia:type=ServerHandler"
+    }
+
+    private void initHistoryStore(JolokiaContextImpl pCtx) {
+        // Get all MBean servers we can find. This is done by a dedicated
+        // handler object
+        /// TODO: Initialisation of Detectors must be done lazily for the JVM agent here ...
+
+        int maxEntries;
+        try {
+            maxEntries = Integer.parseInt(pCtx.getConfig(ConfigKey.HISTORY_MAX_ENTRIES));
+        } catch (NumberFormatException exp) {
+            maxEntries = Integer.parseInt(ConfigKey.HISTORY_MAX_ENTRIES.getDefaultValue());
+        }
+        HistoryStore historyStore = new HistoryStore(maxEntries);
+        try {
+
+            // Register the Config MBean
+            String qualifier = pCtx.getConfig(ConfigKey.MBEAN_QUALIFIER);
+            String oName = History.OBJECT_NAME + (qualifier != null ? "," + qualifier : "");
+
+            History history = new History(historyStore,oName);
+            mBeanServerHandler.registerMBean(history, oName);
+        } catch (InstanceAlreadyExistsException exp) {
+            // That's ok, we are reusing it.
+        } catch (NotCompliantMBeanException e) {
+            pCtx.error("Error registering config MBean: " + e, e);
+        } catch (MalformedObjectNameException e) {
+            pCtx.error("Invalid name for config MBean: " + e, e);
+        }
+        //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
+        //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
+    }
+
+    public RequestDispatcher getRequestDispatcher() {
+        if (requestDispatcher == null) {
+            throw new IllegalStateException("Service Manager not yet started, please call start() before");
+        }
+        return requestDispatcher;
     }
 
 

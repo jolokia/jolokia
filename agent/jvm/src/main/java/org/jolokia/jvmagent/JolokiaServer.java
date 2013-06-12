@@ -27,7 +27,6 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.restrictor.RestrictorServiceFactory;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
@@ -194,7 +193,7 @@ public class JolokiaServer {
         // Add a restrictor factory
         serviceManager.addServiceFactory(new RestrictorServiceFactory(null));
         JolokiaContext jolokiaContext = serviceManager.start();
-        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(jolokiaContext);
+        RequestDispatcher requestDispatcher = serviceManager.getRequestDispatcher();
 
         jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);

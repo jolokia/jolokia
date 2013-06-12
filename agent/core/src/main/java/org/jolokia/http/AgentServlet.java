@@ -1,17 +1,12 @@
 package org.jolokia.http;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.jolokia.backend.LocalRequestHandler;
-import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
-import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorServiceFactory;
@@ -82,7 +77,8 @@ public class AgentServlet extends HttpServlet {
      * Constructor taking a restrictor to use
      *
      * @param pRestrictor restrictor to use or <code>null</code> if the restrictor
-     *        should be created in the default way ({@link #createRestrictor(String)})
+     *        should be created in the default way by doing a lookup and use the standard
+     *        restrictors.
      */
     public AgentServlet(Restrictor pRestrictor) {
         restrictor = pRestrictor;
@@ -90,8 +86,10 @@ public class AgentServlet extends HttpServlet {
 
 
     /**
-     * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogService(ServletConfig)}
+     * Initialize the backend systems by creating a {@link JolokiaServiceManagerImpl}
+     *
+     * A subclass can tune this step by overriding
+     * {@link #createLogService(ServletConfig)} and {@link #createRestrictor()}
      *
      * @param pServletConfig servlet configuration
      */
@@ -106,15 +104,11 @@ public class AgentServlet extends HttpServlet {
         serviceManager = new JolokiaServiceManagerImpl(config,logHandler);
 
         // Add a restrictor factory
-        serviceManager.addServiceFactory(new RestrictorServiceFactory(restrictor));
+        serviceManager.addServiceFactory(new RestrictorServiceFactory(createRestrictor()));
 
         JolokiaContext ctx = serviceManager.start();
-        // ==========================================================================
-        // Create and remember request dispatchers
-        RequestDispatcherImpl requestDispatcherImpl = new RequestDispatcherImpl(ctx);
-        // ==========================================================================
 
-        requestHandler = new HttpRequestHandler(ctx, requestDispatcherImpl, false);
+        requestHandler = new HttpRequestHandler(ctx, serviceManager.getRequestDispatcher());
 
         configMimeType = ctx.getConfig(ConfigKey.MIME_TYPE);
 
@@ -124,9 +118,18 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
+     * Create a restrictor to use. By default this methods returns the restrictor given in the
+     * constructor, but it can be overridden in order to fine tune the creation.
+     *
+     * @return the restrictor to use
+     */
+    protected Restrictor createRestrictor() {
+        return restrictor;
+    }
+
+    /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
-     * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
-     * can already be used when building up the restrictor.
+     * to provide a custom log handler.
      *
      * @return a default log handler
      * @param pServletConfig servlet config from where to get information to build up the log handler

@@ -22,9 +22,9 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.config.*;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.util.LogHandler;
+import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -35,6 +35,9 @@ import org.json.simple.parser.JSONParser;
  * @since 05.11.10
  */
 public class ServerHandle {
+
+    // Empty server handle
+    public static final ServerHandle NULL_SERVER_HANDLE = new ServerHandle(null, null, null, null, null);
 
     // an unique id of the agent for identifying a
     // Jolokia agent in a JVM (there can be multiple)
@@ -156,10 +159,9 @@ public class ServerHandle {
      * The default is a no-op.
      *
      * @param pServerManager
-     * @param pConfig agent configuration
-     * @param pLoghandler logger to use for logging any error.
+     * @param pContext the Jolokia Context
      */
-    public void postDetect(MBeanServerExecutor pServerManager, Configuration pConfig, LogHandler pLoghandler) {
+    public void postDetect(MBeanServerExecutor pServerManager, JolokiaContext pContext) {
         // Do nothing
     }
 
@@ -231,18 +233,17 @@ public class ServerHandle {
      * </pre>
      *
      *
-     * @param pConfig the agent configuration
-     * @param pLogHandler a log handler for putting out error messages
+     * @param pCtx the jolokia context
      * @return the detector specific configuration
      */
-    protected JSONObject getDetectorOptions(Configuration pConfig, LogHandler pLogHandler) {
-        String optionString = pConfig.getConfig(ConfigKey.DETECTOR_OPTIONS);
+    protected JSONObject getDetectorOptions(JolokiaContext pCtx) {
+        String optionString = pCtx.getConfig(ConfigKey.DETECTOR_OPTIONS);
         if (optionString != null) {
             try {
                 JSONObject opts = (JSONObject) new JSONParser().parse(optionString);
                 return (JSONObject) opts.get(getProduct());
             } catch (Exception e) {
-                pLogHandler.error("Could not parse options '" + optionString + "' as JSON object: " + e,e);
+                pCtx.error("Could not parse options '" + optionString + "' as JSON object: " + e, e);
             }
         }
         return null;

@@ -61,7 +61,6 @@ public class JolokiaHttpHandlerTest {
         if (handler != null) {
             handler.stop();
             requestDispatcher.destroy();
-            ctx.destroy();
             handler = null;
         }
     }

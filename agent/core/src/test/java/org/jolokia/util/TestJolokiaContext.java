@@ -21,11 +21,8 @@ import java.net.URL;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.management.JMException;
 import javax.management.ObjectName;
 
-import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.backend.MBeanServerHandlerImpl;
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -43,22 +40,19 @@ public class TestJolokiaContext implements JolokiaContext {
     Restrictor restrictor;
     Configuration config;
     Converters converters;
-    MBeanServerHandler serverHandler;
     ServerHandle handle;
 
     public TestJolokiaContext() {
-        this(null,null,null,null,null);
+        this(null,null,null,null);
     }
 
     private TestJolokiaContext(Configuration pConfig,
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
-                               ServerHandle pHandle,
-                               MBeanServerHandler pServerHandler) {
+                               ServerHandle pHandle) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
-        this.serverHandler = pServerHandler != null ? pServerHandler : new MBeanServerHandlerImpl(config,logHandler);
         try {
             if (pHandle != null) {
                 handle = pHandle;
@@ -67,19 +61,11 @@ public class TestJolokiaContext implements JolokiaContext {
                 handle = new ServerHandle("vendor","product","version",url,null);
                 handle.setJolokiaId(UUID.randomUUID().toString());
             }
-            } catch (MalformedURLException e) {}
+        } catch (MalformedURLException e) {}
 //        this.requestDispatchManager = new RequestDispatchManager(
 //                pDispatchers != null ? pDispatchers :
 //                        Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this)));
         converters = new Converters();
-    }
-
-    public void destroy() throws JMException {
-        serverHandler.destroy();
-    }
-
-    public MBeanServerHandler getMBeanServerHandler() {
-        return serverHandler;
     }
 
     public Converters getConverters() {
@@ -150,7 +136,6 @@ public class TestJolokiaContext implements JolokiaContext {
         Restrictor restrictor;
         Configuration config;
         Converters converters;
-        MBeanServerHandler serverHandler;
         ServerHandle handle;
 
         public Builder config(Configuration config) {
@@ -184,8 +169,7 @@ public class TestJolokiaContext implements JolokiaContext {
                     config,
                     restrictor,
                     logHandler,
-                    handle,
-                    serverHandler
+                    handle
             );
         }
 

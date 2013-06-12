@@ -1,38 +1,35 @@
-package org.jolokia.backend;
+package org.jolokia.history;
 
 import java.io.IOException;
 
 import javax.management.MalformedObjectNameException;
 
-/*
- * Copyright 2009-2013 Roland Huss
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import org.jolokia.request.JmxRequest;
+import org.json.simple.JSONObject;
 
 /**
- * MBean for handling configuration issues from outside.
+ * JMX interface for the history store
  *
  * @author roland
- * @since Jun 12, 2009
+ * @since 11.06.13
  */
-public interface ConfigMBean {
+public interface HistoryMBean {
 
     // Name under which this bean gets registered
     String OBJECT_NAME = "jolokia:type=Config";
 
     // Operations
+
+    /**
+     * Update the history store with the value of an an read, write or execute operation. Also, the timestamp
+     * of the insertion is recorded. Also, the recorded history values are added to the given json value.
+     * This operation must be called only internally.
+     *
+     * @param pJmxReq request for which an entry should be added in this history store
+     * @param pJson the JSONObject to which to add the history.
+     */
+    public void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson);
+
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> is 0
      * history tracking is switched off.
@@ -48,7 +45,7 @@ public interface ConfigMBean {
     void setHistoryEntriesForAttribute(String pMBean,String pAttribute,String pPath,String pTarget,int pMaxEntries) throws MalformedObjectNameException;
 
     /**
-     * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> and <code>pMaxDuration</code> is 
+     * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> and <code>pMaxDuration</code> is
      * 0 then history tracking is switched off.
      *
      * If either <code>pMaxEntries</code> or <code>pMaxDuration</code> 0, then the given limit applies. If both are != 0,
@@ -62,7 +59,7 @@ public interface ConfigMBean {
      * @param pMaxDuration maximum duration the maximum duration for how long to keep a value (in seconds)
      * @throws MalformedObjectNameException if the given name is not proper object name
      */
-    void setHistoryLimitForAttribute(String pMBean,String pAttribute,String pPath,String pTarget,int pMaxEntries,long pMaxDuration) 
+    void setHistoryLimitForAttribute(String pMBean,String pAttribute,String pPath,String pTarget,int pMaxEntries,long pMaxDuration)
             throws MalformedObjectNameException;
 
 
@@ -124,5 +121,4 @@ public interface ConfigMBean {
      * @param pLimit limit to set
      */
     void setHistoryMaxEntries(int pLimit);
-
 }

@@ -1,8 +1,9 @@
-package org.jolokia.backend;
+package org.jolokia.history;
 
 import javax.management.*;
 
-import org.jolokia.history.*;
+import org.jolokia.request.JmxRequest;
+import org.json.simple.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -28,10 +29,10 @@ import org.jolokia.history.*;
  * @author roland
  * @since Jun 12, 2009
  */
-public class Config implements ConfigMBean,MBeanRegistration {
+public class History implements HistoryMBean,MBeanRegistration {
 
     // Stores for various information
-    private HistoryStore historyStore;
+    private HistoryStore store;
 
     // MBean Objectname under which this bean should be registered
     private String objectName;
@@ -39,12 +40,17 @@ public class Config implements ConfigMBean,MBeanRegistration {
     /**
      * Constructor with the configurable objects as parameters.
      *
-     * @param pHistoryStore history store where to hold historical values
+     * @param pStore history store where to hold historical values
      * @param pOName object name under which to register this MBean
      */
-    public Config(HistoryStore pHistoryStore, String pOName) {
-        historyStore = pHistoryStore;
+    public History(HistoryStore pStore, String pOName) {
+        store = pStore;
         objectName = pOName;
+    }
+
+    /** {@inheritDoc} */
+    public void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson) {
+        store.updateAndAdd(pJmxReq,pJson);
     }
 
     /** {@inheritDoc} */
@@ -56,7 +62,7 @@ public class Config implements ConfigMBean,MBeanRegistration {
     /** {@inheritDoc} */
     public void setHistoryLimitForAttribute(String pMBean, String pAttribute, String pPath, String pTarget, int pMaxEntries, long pMaxDuration) throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey(pMBean,pAttribute,pPath,pTarget);
-        historyStore.configure(key,limitOrNull(pMaxEntries, pMaxDuration));
+        store.configure(key,limitOrNull(pMaxEntries, pMaxDuration));
     }
 
     /** {@inheritDoc} */
@@ -67,27 +73,27 @@ public class Config implements ConfigMBean,MBeanRegistration {
     /** {@inheritDoc} */
     public void setHistoryLimitForOperation(String pMBean, String pOperation, String pTarget, int pMaxEntries, long pMaxDuration) throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey(pMBean,pOperation,pTarget);
-        historyStore.configure(key, limitOrNull(pMaxEntries,pMaxDuration));
+        store.configure(key, limitOrNull(pMaxEntries,pMaxDuration));
     }
 
     /** {@inheritDoc} */
     public void resetHistoryEntries() {
-        historyStore.reset();
+        store.reset();
     }
 
     /** {@inheritDoc} */
     public int getHistoryMaxEntries() {
-        return historyStore.getGlobalMaxEntries();
+        return store.getGlobalMaxEntries();
     }
 
     /** {@inheritDoc} */
     public void setHistoryMaxEntries(int pLimit) {
-        historyStore.setGlobalMaxEntries(pLimit);
+        store.setGlobalMaxEntries(pLimit);
     }
 
     /** {@inheritDoc} */
     public int getHistorySize() {
-        return historyStore.getSize();
+        return store.getSize();
     }
 
     // The limit or null if the entry should be disabled in the history store

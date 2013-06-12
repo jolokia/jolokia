@@ -47,11 +47,6 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         handler = new ListHandler(ctx);
     }
 
-    @AfterMethod
-    public void destroy() throws JMException {
-        ctx.destroy();
-    }
-
     @Test(expectedExceptions = { UnsupportedOperationException.class })
     public void wrongMethod() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).build();

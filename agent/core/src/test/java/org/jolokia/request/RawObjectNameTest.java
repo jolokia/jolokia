@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  */
 public class RawObjectNameTest {
     private BackendManager backendManager =
-            new BackendManager(new TestJolokiaContext(), new TestRequestDispatcher(), true /* Lazy Init */);
+            new BackendManager(new TestJolokiaContext(), new TestRequestDispatcher());
 
     @Test
     public void testListRawObjectNameAccess() throws Exception {

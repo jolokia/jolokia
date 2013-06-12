@@ -1,18 +1,19 @@
 package org.jolokia.backend;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.lang.management.ManagementFactory;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.*;
+import org.jolokia.backend.dispatcher.DispatchResult;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.json.JsonConvertOptions;
-import org.jolokia.history.HistoryStore;
+import org.jolokia.history.History;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.DebugStore;
+import org.jolokia.util.JmxUtil;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.config.ConfigKey.*;
@@ -43,6 +44,9 @@ import static org.jolokia.config.ConfigKey.*;
  */
 public class BackendManager {
 
+    // Objectname for updating the history
+    private static final ObjectName HISTORY_OBJECTNAME = JmxUtil.newObjectName(History.OBJECT_NAME);
+
     // Overall Jolokia context
     private final JolokiaContext jolokiaCtx;
 
@@ -51,12 +55,6 @@ public class BackendManager {
 
     // Hard limits for conversion
     private JsonConvertOptions.Builder convertOptionsBuilder;
-
-    // History handler
-    private HistoryStore historyStore;
-
-    // Storage for storing debug information
-    private DebugStore debugStore;
 
     // Initialize used for late initialization
     // ("volatile: because we use double-checked locking later on
@@ -68,13 +66,14 @@ public class BackendManager {
      *
      * @param pJolokiaCtx jolokia context for accessing internal services
      * @param pRequestDispatcher
-     * @param pLazy whether the initialisation should be done lazy
      */
-    public BackendManager(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher, boolean pLazy) {
+    public BackendManager(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
         jolokiaCtx = pJolokiaCtx;
         requestDispatcher = pRequestDispatcher;
 
-        if (pLazy) {
+        // TODO: Left here for reference. Mechanism must be moved to the place
+        // where Detectors have to be initialized.
+        if (false) {
             initializer = new Initializer();
         } else {
             init(pJolokiaCtx);
@@ -108,7 +107,7 @@ public class BackendManager {
             json = callRequestDispatcher(pJmxReq);
 
             // Update global history store, add timestamp and possibly history information to the request
-            historyStore.updateAndAdd(pJmxReq,json);
+            updateHistory(pJmxReq, json);
             json.put("status",200 /* success */);
         } catch (NotChangedException exp) {
             // A handled indicates that its value hasn't changed. We return an status with
@@ -125,6 +124,29 @@ public class BackendManager {
         }
 
         return json;
+    }
+
+    // TODO: Maybe move to an interceptor ?
+
+    /**
+     * Update history
+     * @param pJmxReq request obtained
+     * @param pJson result as included in the response
+     */
+    private void updateHistory(JmxRequest pJmxReq, JSONObject pJson) {
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        try {
+            mBeanServer.invoke(HISTORY_OBJECTNAME,
+                               "updateAndAdd",
+                               new Object[] { pJmxReq, pJson},
+                               new String[] { JmxRequest.class.getName(), JSONObject.class.getName() });
+        } catch (InstanceNotFoundException e) {
+            // Ignore, no history MBean is enabled, so no update
+        } catch (MBeanException e) {
+            throw new IllegalStateException("Internal: Cannot update History store",e);
+        } catch (ReflectionException e) {
+            throw new IllegalStateException("Internal: Cannot call History MBean via reflection",e);
+        }
     }
 
     /**
@@ -158,16 +180,6 @@ public class BackendManager {
         return jolokiaCtx.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
     }
 
-    /**
-     * Check whether CORS access is allowed for the given origin.
-     *
-     * @param pOrigin origin URL which needs to be checked
-     * @return true if icors access is allowed
-     */
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return jolokiaCtx.isCorsAccessAllowed(pOrigin);
-    }
-
     // ==========================================================================================================
 
     // Initialized used for late initialisation as it is required for the agent when used
@@ -193,19 +205,13 @@ public class BackendManager {
     // Initialize this object;
     private void init(JolokiaContext pCtx) {
         // Init limits
-        initLimits(pCtx);
 
-        // Backendstore for remembering agent state
-        initStores(pCtx);
-    }
-
-    private void initLimits(JolokiaContext pContext) {
         // Max traversal depth
-        if (pContext != null) {
+        if (pCtx != null) {
             convertOptionsBuilder = new JsonConvertOptions.Builder(
-                    getNullSaveIntLimit(pContext.getConfig(MAX_DEPTH)),
-                    getNullSaveIntLimit(pContext.getConfig(MAX_COLLECTION_SIZE)),
-                    getNullSaveIntLimit(pContext.getConfig(MAX_OBJECTS))
+                    getNullSaveIntLimit(pCtx.getConfig(MAX_DEPTH)),
+                    getNullSaveIntLimit(pCtx.getConfig(MAX_COLLECTION_SIZE)),
+                    getNullSaveIntLimit(pCtx.getConfig(MAX_OBJECTS))
             );
         } else {
             convertOptionsBuilder = new JsonConvertOptions.Builder();
@@ -243,61 +249,5 @@ public class BackendManager {
                     maxObjects(pJmxReq.getParameterAsInt(ConfigKey.MAX_OBJECTS)).
                     faultHandler(pJmxReq.getValueFaultHandler()).
                     build();
-    }
-
-    // init various application wide stores for handling history and debug output.
-    private void initStores(JolokiaContext pCtx) {
-        int maxEntries;
-        try {
-            maxEntries = Integer.parseInt(pCtx.getConfig(HISTORY_MAX_ENTRIES));
-        } catch (NumberFormatException exp) {
-            maxEntries = Integer.parseInt(HISTORY_MAX_ENTRIES.getDefaultValue());
-        }
-        historyStore = new HistoryStore(maxEntries);
-
-        try {
-            initMBeans(historyStore);
-        } catch (NotCompliantMBeanException e) {
-            internalError("Error registering config MBean: " + e, e);
-        } catch (MBeanRegistrationException e) {
-            internalError("Cannot register MBean: " + e, e);
-        } catch (MalformedObjectNameException e) {
-            internalError("Invalid name for config MBean: " + e, e);
-        }
-    }
-
-
-    private void initMBeans(HistoryStore pHistoryStore)
-            throws MalformedObjectNameException, MBeanRegistrationException, NotCompliantMBeanException {
-
-        // Register the Config MBean
-        String oName = createObjectNameWithQualifier(Config.OBJECT_NAME);
-        try {
-            Config config = new Config(pHistoryStore,oName);
-            jolokiaCtx.getMBeanServerHandler().registerMBean(config,oName);
-        } catch (InstanceAlreadyExistsException exp) {
-            String alternativeOName = oName + ",uuid=" + UUID.randomUUID();
-            try {
-                // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
-                // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
-                // a random number, but this can already be performed with a qualifier
-                jolokiaCtx.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
-                         "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
-                Config config = new Config(pHistoryStore,alternativeOName);
-                jolokiaCtx.getMBeanServerHandler().registerMBean(config,alternativeOName);
-            } catch (InstanceAlreadyExistsException e) {
-                jolokiaCtx.error("Cannot even register fallback MBean with name " + alternativeOName + ". Should never happen. Really.", e);
-            }
-        }
-    }
-
-    private String createObjectNameWithQualifier(String pOName) {
-        String qualifier = jolokiaCtx.getConfig(ConfigKey.MBEAN_QUALIFIER);
-        return pOName + (qualifier != null ? "," + qualifier : "");
-    }
-    // Final private error log for use in the constructor above
-    private void internalError(String message, Throwable t) {
-        jolokiaCtx.error(message, t);
-        debugStore.log(message, t);
     }
 }

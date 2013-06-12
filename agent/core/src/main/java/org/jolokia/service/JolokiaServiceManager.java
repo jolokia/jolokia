@@ -16,6 +16,7 @@
 
 package org.jolokia.service;
 
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.Configuration;
 import org.jolokia.util.LogHandler;
 
@@ -52,4 +53,6 @@ public interface JolokiaServiceManager  {
     JolokiaContext start();
 
     void stop();
+
+    RequestDispatcher getRequestDispatcher();
 }

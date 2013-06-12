@@ -34,7 +34,6 @@ import org.jolokia.restrictor.Restrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.*;
 import org.json.simple.*;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -49,13 +48,6 @@ public class HttpRequestHandlerTest {
     private HttpRequestHandler handler;
     private TestJolokiaContext ctx;
     private RequestHandler requestHandler;
-
-    @AfterMethod
-    public void destroy() throws JMException {
-        if (ctx != null) {
-            ctx.destroy();
-        }
-    }
 
     @Test
     public void accessAllowed() throws JMException {
@@ -181,7 +173,6 @@ public class HttpRequestHandlerTest {
 
             resp = handler.handleThrowable(e);
             assertEquals(resp.get("status"),exceptions[i+2],e.getClass().getName());
-            ctx.destroy();
             ctx = null;
         }
     }
@@ -212,7 +203,7 @@ public class HttpRequestHandlerTest {
                 .logHandler(pLogHandler)
                 .build();
         RequestDispatcher dispatcher = new RequestDispatcherImpl(Arrays.asList(requestHandler));
-        handler = new HttpRequestHandler(ctx, dispatcher, false);
+        handler = new HttpRequestHandler(ctx, dispatcher);
     }
 
 

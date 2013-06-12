@@ -56,10 +56,6 @@ public class WriteHandlerTest {
         ctx = new TestJolokiaContext();
         handler = new WriteHandler(ctx);
     }
-    @AfterMethod
-    public void destroy() throws JMException {
-        ctx.destroy();
-    }
 
     @AfterTest
     public void unregisterMBean() throws InstanceNotFoundException, MBeanRegistrationException, IOException {
