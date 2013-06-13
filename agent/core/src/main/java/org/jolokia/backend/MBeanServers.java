@@ -5,11 +5,10 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.detector.ServerDetector;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.util.JmxUtil;
 
-import static javax.management.MBeanServerNotification.REGISTRATION_NOTIFICATION;
-import static javax.management.MBeanServerNotification.UNREGISTRATION_NOTIFICATION;
+import static javax.management.MBeanServerNotification.*;
 
 /**
  * Class managing the set of available MBeanServers
@@ -34,22 +33,19 @@ class MBeanServers implements NotificationListener {
     /**
      * Constructor building up the list of available MBeanServers
      *
-     * @param pDetectors detectors-default to be used for looking up MBeanServers
+     * @param pServerHandle detectors-default to be used for looking up MBeanServers
      * @param pListener listener to register to the Jolokia MBeanServer when this server
-     *                  comes in late
      */
-    MBeanServers(List<ServerDetector> pDetectors, NotificationListener pListener) {
+    MBeanServers(ServerHandle pServerHandle, NotificationListener pListener) {
         detectedMBeanServers = new LinkedHashSet<MBeanServerConnection>();
         jolokiaMBeanServerListener = pListener;
         // Create and add our own JolokiaMBeanServer first and
-        // add us for registration/deregestration of the MBeanServer
+        // add us for registration/deregistration of the MBeanServer
         jolokiaMBeanServer = lookupJolokiaMBeanServer();
         addJolokiaMBeanServerRegistrationListener();
 
         // Let every detector add its own MBeanServer
-        for (ServerDetector detector : pDetectors) {
-            detector.addMBeanServers(detectedMBeanServers);
-        }
+        pServerHandle.addMBeanServers(detectedMBeanServers);
 
         // All MBean Server known by the MBeanServerFactory
         List<MBeanServer> beanServers = MBeanServerFactory.findMBeanServer(null);

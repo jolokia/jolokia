@@ -153,12 +153,4 @@ public abstract class AbstractServerDetector implements ServerDetector {
         return null;
     }
 
-    /**
-     * Do nothing by default, leaving the implementation
-     * optional for each specific detector
-     *
-     * @param pServers servers to add
-     */
-    public void addMBeanServers(Set<MBeanServerConnection> pServers) {
-    }
 }

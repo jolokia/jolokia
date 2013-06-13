@@ -17,13 +17,13 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.detector.ServerDetector;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.Test;
@@ -38,14 +38,14 @@ public class MBeanServerHandlerTestNegative {
 
     private MBeanRegistry handler;
 
-    @Test(enabled = false)
+    @Test
     public void mbeanRegistrationWithFailingTestDetector() throws JMException, IOException {
         TestDetector.setThrowAddException(true);
         // New setup because detection happens at construction time
         init();
         try {
             ObjectName oName = new ObjectName("Bla:type=blub");
-            MBeanServerExecutor servers = new MBeanServerExecutorLocal(Arrays.<ServerDetector>asList(new TestDetector()));
+            MBeanServerExecutor servers = new MBeanServerExecutorLocal();
             final List<Boolean> results = new ArrayList<Boolean>();
             servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
                 public void callback(MBeanServerConnection pConn, ObjectName pName)
@@ -59,7 +59,6 @@ public class MBeanServerHandlerTestNegative {
             handler.destroy();
         }
     }
-
 
     // ===================================================================================================
 

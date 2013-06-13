@@ -71,33 +71,6 @@ public class WebsphereDetector extends AbstractServerDetector {
         return null;
     }
 
-    /** {@inheritDoc}
-     * @param servers*/
-    @Override
-    public void addMBeanServers(Set<MBeanServerConnection> servers) {
-        try {
-            /*
-			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
-			 */
-            Class adminServiceClass = getClass().getClassLoader().loadClass("com.ibm.websphere.management.AdminServiceFactory");
-            Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
-            Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
-            Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
-            servers.add((MBeanServer) getMBeanServerMethod.invoke(mbeanFactory));
-        }
-        catch (ClassNotFoundException ex) {
-            // Expected if not running under WAS
-        }
-        catch (InvocationTargetException ex) {
-            // CNFE should be earlier
-            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
-        } catch (IllegalAccessException ex) {
-            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
-        } catch (NoSuchMethodException ex) {
-            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
-        }
-    }
-
     // ==================================================================================
 
     /**
@@ -122,6 +95,31 @@ public class WebsphereDetector extends AbstractServerDetector {
                 return pServer.registerMBean(pMBean,null).getObjectName();
             } else {
                 return super.registerMBeanAtServer(pServer, pMBean, pName);
+            }
+        }
+
+        @Override
+        public void addMBeanServers(Set<MBeanServerConnection> servers) {
+            try {
+                /*
+			     * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
+			     */
+                Class adminServiceClass = getClass().getClassLoader().loadClass("com.ibm.websphere.management.AdminServiceFactory");
+                Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
+                Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
+                Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
+                servers.add((MBeanServer) getMBeanServerMethod.invoke(mbeanFactory));
+            }
+            catch (ClassNotFoundException ex) {
+                // Expected if not running under WAS
+            }
+            catch (InvocationTargetException ex) {
+                // CNFE should be earlier
+                throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
+            } catch (IllegalAccessException ex) {
+                throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
+            } catch (NoSuchMethodException ex) {
+                throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
             }
         }
     }

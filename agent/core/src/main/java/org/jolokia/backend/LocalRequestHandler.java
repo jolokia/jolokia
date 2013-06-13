@@ -44,6 +44,7 @@ public class LocalRequestHandler implements RequestHandler {
     private final MBeanServerExecutorLocal mBeanServerManager;
     private CommandHandlerManager commandHandlerManager;
     private ServerHandle serverHandle;
+
     /**
      * Create a new local dispatcher which accesses local MBeans.
      *
@@ -52,9 +53,9 @@ public class LocalRequestHandler implements RequestHandler {
     public LocalRequestHandler(JolokiaContext pCtx) {
         // Request handling manager
         List<ServerDetector> detectors = lookupDetectors();
-        mBeanServerManager = new MBeanServerExecutorLocal(detectors);
-        initServerHandle(pCtx, detectors);
-
+        serverHandle = detectServerHandle(pCtx, detectors);
+        mBeanServerManager = new MBeanServerExecutorLocal();
+        mBeanServerManager.init(serverHandle);
         commandHandlerManager =  new CommandHandlerManager(pCtx,true);
     }
 
@@ -74,9 +75,7 @@ public class LocalRequestHandler implements RequestHandler {
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
-        if (serverHandle != null) {
-            serverHandle.preDispatch(mBeanServerManager, pJmxReq);
-        }
+        serverHandle.preDispatch(mBeanServerManager, pJmxReq);
         if (handler.handleAllServersAtOnce(pJmxReq)) {
             try {
                 return handler.handleRequest(mBeanServerManager, pJmxReq);
@@ -94,22 +93,23 @@ public class LocalRequestHandler implements RequestHandler {
      * @throws JMException if unregistration fails
      */
     public void destroy() throws JMException {
-        //mBeanServerHandler.destroy();
         commandHandlerManager.destroy();
     }
 
     /**
-     * Initialize the server handle.
+     * Initialize the server handle and update the context.
+     *
      * @param pCtx the jolokia context used for initializing the server handle
      * @param pDetectors all detectors-default known
      */
-    private void initServerHandle(JolokiaContext pCtx, List<ServerDetector> pDetectors) {
-        serverHandle = detectServers(pDetectors, pCtx);
-        serverHandle.postDetect(mBeanServerManager, pCtx);
-        serverHandle.setJolokiaId(extractJolokiaId(pCtx));
+    private ServerHandle detectServerHandle(JolokiaContext pCtx, List<ServerDetector> pDetectors) {
+        ServerHandle handle = detectServers(pDetectors, pCtx);
+        handle.postDetect(mBeanServerManager, pCtx);
+        handle.setJolokiaId(extractJolokiaId(pCtx));
         if (pCtx instanceof JolokiaContextImpl) {
-            ((JolokiaContextImpl) pCtx).setServerHandle(serverHandle);
+            ((JolokiaContextImpl) pCtx).setServerHandle(handle);
         }
+        return handle;
     }
 
     /**

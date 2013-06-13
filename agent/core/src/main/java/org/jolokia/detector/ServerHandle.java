@@ -18,6 +18,7 @@ package org.jolokia.detector;
 
 import java.net.URL;
 import java.util.Map;
+import java.util.Set;
 
 import javax.management.*;
 
@@ -164,6 +165,14 @@ public class ServerHandle {
     public void postDetect(MBeanServerExecutor pServerManager, JolokiaContext pContext) {
         // Do nothing
     }
+
+    /**
+     * Add MBeanServers dedicated specifically on the identified platform. This method must be overridden
+     * by any platform wanting to add MBeanServers. By default this method does nothing.
+     *
+     * @param pMBeanServers set of MBeanServers to add to.
+     */
+    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) { }
 
     /**
      * Register a MBean at the dedicated server. This method can be overridden if

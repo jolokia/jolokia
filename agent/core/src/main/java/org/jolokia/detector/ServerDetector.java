@@ -16,10 +16,6 @@ package org.jolokia.detector;
  * limitations under the License.
  */
 
-import java.util.Set;
-
-import javax.management.MBeanServerConnection;
-
 import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
@@ -31,7 +27,6 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
  * @since 05.11.10
  */
 public interface ServerDetector {
-
     /**
      * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.
@@ -40,11 +35,4 @@ public interface ServerDetector {
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
     ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor);
-
-    /**
-     * Add server specific MBeanServers
-     *
-     * @param pMBeanServers set to add detected MBeanServers to
-     */
-    void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
 }

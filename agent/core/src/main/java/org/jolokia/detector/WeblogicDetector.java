@@ -39,27 +39,34 @@ public class WeblogicDetector extends AbstractServerDetector {
         String domainConfigMBean = getSingleStringAttribute(pMBeanServerExecutor,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
             String version = getSingleStringAttribute(pMBeanServerExecutor,domainConfigMBean,"ConfigurationVersion");
-            return new ServerHandle("Oracle","weblogic",version,null,null);
+            return new WeblogicServerHandle(version);
         }
         return null;
     }
 
-    /**
-     * Adde Weblogic specific runtime MBeanServer
-     * @param servers set to add own MBean servers
-     */
-    @Override
-    public void addMBeanServers(Set<MBeanServerConnection> servers) {
-        // Weblogic stores the MBeanServer in a JNDI context
-        InitialContext ctx;
-        try {
-            ctx = new InitialContext();
-            MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
-            if (server != null) {
-                servers.add(server);
+    static class WeblogicServerHandle extends ServerHandle {
+        /**
+         * Constructor
+         *
+         * @param version  version used
+         */
+        public WeblogicServerHandle(String version) {
+            super("Oracle", "weblogic", version, null, null);
+        }
+
+        @Override
+        public void addMBeanServers(Set<MBeanServerConnection> servers) {
+            // Weblogic stores the MBeanServer in a JNDI context
+            InitialContext ctx;
+            try {
+                ctx = new InitialContext();
+                MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
+                if (server != null) {
+                    servers.add(server);
+                }
+            } catch (NamingException e) {
+                // expected and can happen on non-Weblogic platforms
             }
-        } catch (NamingException e) {
-            // expected and can happen on non-Weblogic platforms
         }
     }
 }

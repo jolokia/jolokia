@@ -137,11 +137,4 @@ public class JBossDetectorTest extends BaseDetectorTest {
         return oName;
     }
 
-    @Test
-    public void addMBeanServers() {
-        replay(server);
-        detector.addMBeanServers(new HashSet<MBeanServerConnection>());
-    }
-
-
 }
