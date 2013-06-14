@@ -16,6 +16,10 @@ package org.jolokia.detector;
  * limitations under the License.
  */
 
+import java.util.Set;
+
+import javax.management.MBeanServerConnection;
+
 import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
@@ -35,4 +39,13 @@ public interface ServerDetector {
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
     ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor);
+
+    /**
+     * Add MBeanServers dedicated specifically on the identified platform. This method must be overridden
+     * by any platform wanting to add MBeanServers. By default this method does nothing.
+     *
+     * @param pMBeanServers set of MBeanServers to add to.
+     */
+    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
+
 }

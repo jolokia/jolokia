@@ -16,9 +16,9 @@
 
 package org.jolokia.service.impl;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 
@@ -37,6 +37,12 @@ import java.util.*;
  * If a line starts with <code>!</code> it is removed if it has been added previously.
  * The optional second numeric value is the order in which the services are returned.
  *
+ * The services to create can have either a no-op constructor or one with an integer
+ * argument. If a constructor with an integer value exists than it is fed with
+ * the determined order. This feature is typically used in combination with
+ * {@link Comparable} to obtain a {@link SortedSet} which can merged with other sets
+ * and keeping the order intact. To get the services as set, use {@link #createServicesAsSet(String...)}
+ *
  * @author roland
  * @since 05.11.10
  */
@@ -49,7 +55,7 @@ public final class LocalServiceFactory {
      * service descriptor files. Note, that the descriptor will be looked up
      * in the whole classpath space, which can result in reading in multiple
      * descriptors with a single path. Note, that the reading order for multiple
-     * resources with the same name is not defined.
+     * resources with the same  name is not defined.
      *
      * @param pDescriptorPaths a list of resource paths which are handle in the given order.
      *        Normally, default service should be given as first parameter so that custom
@@ -64,7 +70,7 @@ public final class LocalServiceFactory {
             for (String descriptor : pDescriptorPaths) {
                 readServiceDefinitions(extractorMap, descriptor);
             }
-            ArrayList<T> ret = new ArrayList<T>();
+            List<T> ret = new ArrayList<T>();
             for (T service : extractorMap.values()) {
                 ret.add(service);
             }
@@ -74,7 +80,24 @@ public final class LocalServiceFactory {
         }
     }
 
-    private static <T> void readServiceDefinitions(Map<ServiceEntry, T> pExtractorMap, String pDefPath) {
+
+    /**
+     * Create services as a set. This set is sorted and hence the created services should
+     * implement {@link Comparable}.
+     *
+     * @param pDescriptorPaths a list of resource paths which are handle in the given order.
+     *        Normally, default service should be given as first parameter so that custom
+     *        descriptors have a chance to remove a default service.
+     * @param <T> type of the service objects to create
+     * @return a sorted list of created services.
+     */
+    public static <T> SortedSet<T> createServicesAsSet(String... pDescriptorPaths) {
+        return new TreeSet<T>((List<T>) createServices(pDescriptorPaths));
+    }
+
+    // ==================================================================================
+
+    private static <T> void readServiceDefinitions(Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
             Enumeration<URL> resUrls = LocalServiceFactory.class.getClassLoader().getResources(pDefPath);
             while (resUrls.hasMoreElements()) {
@@ -126,16 +149,28 @@ public final class LocalServiceFactory {
                 Set<ServiceEntry> toRemove = new HashSet<ServiceEntry>();
                 for (ServiceEntry key : pExtractorMap.keySet()) {
                     if (key.getClassName().equals(entry.getClassName())) {
-                       toRemove.add(key);
+                        toRemove.add(key);
                     }
                 }
                 for (ServiceEntry key : toRemove) {
                     pExtractorMap.remove(key);
                 }
             } else {
+                // Create a new object. If an constructor with a single int
+                // argument is given, this constructor is used and feed with
+                // the order. This is typically used in combination with implementing
+                // and {@link Comparable} interface to get a sorted set
                 Class<T> clazz = (Class<T>) LocalServiceFactory.class.getClassLoader().loadClass(entry.getClassName());
-                T ext = (T) clazz.newInstance();
-                pExtractorMap.put(entry,ext);
+                T ext;
+                try {
+                    Constructor ctr = clazz.getConstructor(int.class);
+                    pExtractorMap.put(entry, (T) ctr.newInstance(entry.getOrder()));
+                } catch (NoSuchMethodException e) {
+                    ext = clazz.newInstance();
+                    pExtractorMap.put(entry,ext);
+                } catch (InvocationTargetException e) {
+                    throw new IllegalArgumentException("Can not instantiate " + entry.getClassName() + ": " + e,e);
+                }
             }
         }
     }
@@ -198,7 +233,11 @@ public final class LocalServiceFactory {
             }
         }
 
-        private Integer nextDefaultOrder() {
+         int getOrder() {
+             return order;
+         }
+
+         private Integer nextDefaultOrder() {
             Integer defaultOrder = defaultOrderHolder.get();
             defaultOrderHolder.set(defaultOrder + 1);
             return defaultOrder;
@@ -215,6 +254,7 @@ public final class LocalServiceFactory {
         private String getClassName() {
             return className;
         }
+
 
         private boolean isRemove() {
             return remove;

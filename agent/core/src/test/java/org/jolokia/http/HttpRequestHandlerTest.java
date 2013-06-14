@@ -18,19 +18,18 @@ package org.jolokia.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.backend.dispatcher.*;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.*;
 import org.json.simple.*;
@@ -50,7 +49,7 @@ public class HttpRequestHandlerTest {
     private RequestHandler requestHandler;
 
     @Test
-    public void accessAllowed() throws JMException {
+    public void accessAllowed() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
         replay(restrictor);
@@ -60,7 +59,7 @@ public class HttpRequestHandlerTest {
     }
 
     @Test(expectedExceptions = { SecurityException.class })
-    public void accessDenied() throws JMException {
+    public void accessDenied() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(false);
         replay(restrictor);
@@ -71,14 +70,14 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void get() throws JMException, IOException, NotChangedException {
+    public void get() throws Exception {
         prepareDispatcher(JmxReadRequest.class);
         JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET_REQUEST, null);
         verifyDispatcher(response);
     }
 
     @Test
-    public void getWithDoubleSlashes() throws JMException, IOException, NotChangedException {
+    public void getWithDoubleSlashes() throws Exception {
         prepareDispatcher(new String[] { "bla:type=s/lash/", "attribute" });
         JSONObject response = (JSONObject) handler.handleGetRequest("/read/bla%3Atype%3Ds!/lash!//attribute",
                                                                     "/read/bla:type=s!/lash!/Ok", null);
@@ -87,7 +86,7 @@ public class HttpRequestHandlerTest {
 
 
     @Test
-    public void singlePost() throws IOException, JMException, NotChangedException {
+    public void singlePost() throws Exception {
         prepareDispatcher();
         InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
         JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia",is,"utf-8",null);
@@ -96,7 +95,7 @@ public class HttpRequestHandlerTest {
 
 
     @Test
-    public void doublePost() throws IOException, JMException, NotChangedException {
+    public void doublePost() throws Exception {
         prepareDispatcher(2,JmxReadRequest.class);
         InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
         JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
@@ -115,7 +114,7 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void preflightCheckNegative() throws JMException {
+    public void preflightCheckNegative() throws Exception {
         String origin = "http://bla.com";
         String headers ="X-Data: Test";
         Restrictor restrictor = createMock(Restrictor.class);
@@ -142,7 +141,7 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void requestErrorHandling() throws JMException, IOException, NotChangedException {
+    public void requestErrorHandling() throws Exception {
         Object[] exceptions = new Object[] {
                 new ReflectionException(new NullPointerException()), 404,500,
                 new InstanceNotFoundException(), 404, 500,
@@ -180,19 +179,19 @@ public class HttpRequestHandlerTest {
     // ======================================================================================================
 
 
-    private void init() throws JMException {
+    private void init() throws Exception {
         init(new AllowAllRestrictor(),new StdoutLogHandler());
     }
 
-    private void init(LogHandler pLogHandler) throws JMException {
+    private void init(LogHandler pLogHandler) throws Exception {
         init(new AllowAllRestrictor(),pLogHandler);
     }
 
-    private void init(Restrictor pRestrictor) throws JMException {
+    private void init(Restrictor pRestrictor) throws Exception {
         init(pRestrictor,new StdoutLogHandler());
     }
 
-    private void init(Restrictor pRestrictor, LogHandler pLogHandler) throws JMException {
+    private void init(Restrictor pRestrictor, LogHandler pLogHandler) throws Exception {
         requestHandler = createMock(RequestHandler.class);
         requestHandler.destroy();
         expectLastCall().asStub();
@@ -202,22 +201,25 @@ public class HttpRequestHandlerTest {
                 .restrictor(pRestrictor)
                 .logHandler(pLogHandler)
                 .build();
-        RequestDispatcher dispatcher = new RequestDispatcherImpl(Arrays.asList(requestHandler));
+        JolokiaServiceManager sm = createMock(JolokiaServiceManager.class);
+        expect(sm.getServices(RequestHandler.class)).andStubReturn(Collections.singleton(requestHandler));
+        replay(sm);
+        RequestDispatcher dispatcher = new RequestDispatcherImpl(sm);
         handler = new HttpRequestHandler(ctx, dispatcher);
     }
 
 
 
 
-    private void prepareDispatcher() throws JMException, NotChangedException, IOException {
+    private void prepareDispatcher() throws Exception {
         prepareDispatcher(1,JmxReadRequest.class);
     }
 
-    private void prepareDispatcher(Object pJmxRequest) throws JMException, NotChangedException, IOException {
+    private void prepareDispatcher(Object pJmxRequest) throws Exception {
         prepareDispatcher(1,pJmxRequest);
     }
 
-    private void prepareDispatcher(int i, Object pRequest) throws JMException, IOException, NotChangedException {
+    private void prepareDispatcher(int i, Object pRequest) throws Exception {
         init();
         if (pRequest instanceof JmxRequest) {
             expect(requestHandler.dispatchRequest((JmxRequest) pRequest)).andReturn("hello").times(i);

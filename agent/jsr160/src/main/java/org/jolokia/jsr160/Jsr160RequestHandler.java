@@ -31,7 +31,7 @@ import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.*;
 
 /**
  * Dispatcher for calling JSR-160 connectors
@@ -39,17 +39,22 @@ import org.jolokia.service.JolokiaContext;
  * @author roland
  * @since Nov 11, 2009
  */
-public class Jsr160RequestHandler implements RequestHandler {
+public class Jsr160RequestHandler extends JolokiaServiceBase implements RequestHandler {
 
     // request handler for specific request types
     private CommandHandlerManager commandHandlerManager;
 
+
+    public Jsr160RequestHandler(int pOrder) {
+        super(RequestHandler.class, pOrder);
+    }
+
     /**
-     * Constructor
+     * Initialization
      *
      * @param pContext the jolokia context
      */
-    public Jsr160RequestHandler(JolokiaContext pContext) {
+    public void init(JolokiaContext pContext) {
         commandHandlerManager = new CommandHandlerManager(pContext,false);
     }
 

@@ -30,6 +30,7 @@ import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.JolokiaServiceBase;
 import org.jolokia.service.impl.JolokiaContextImpl;
 import org.jolokia.service.impl.LocalServiceFactory;
 
@@ -39,24 +40,32 @@ import org.jolokia.service.impl.LocalServiceFactory;
  * @author roland
  * @since Nov 11, 2009
  */
-public class LocalRequestHandler implements RequestHandler {
-
-    private final MBeanServerExecutorLocal mBeanServerManager;
+public class LocalRequestHandler extends JolokiaServiceBase implements RequestHandler {
+    private MBeanServerExecutorLocal mBeanServerManager;
     private CommandHandlerManager commandHandlerManager;
     private ServerHandle serverHandle;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
-     *
-     * @param pCtx context to use for this dispatcher
      */
-    public LocalRequestHandler(JolokiaContext pCtx) {
-        // Request handling manager
-        List<ServerDetector> detectors = lookupDetectors();
-        serverHandle = detectServerHandle(pCtx, detectors);
-        mBeanServerManager = new MBeanServerExecutorLocal();
-        mBeanServerManager.init(serverHandle);
+    public LocalRequestHandler(int pOrder) {
+        super(RequestHandler.class,pOrder);
+    }
+
+
+    public void init(JolokiaContext pCtx) {
         commandHandlerManager =  new CommandHandlerManager(pCtx,true);
+        mBeanServerManager = new MBeanServerExecutorLocal();
+
+        // Request handling manager
+        // TODO: Introduce lazy detection for the Agent based, startup option
+        List<ServerDetector> detectors = lookupDetectors();
+        // Lookup all MBeanServers. Needs to be done before the server handle detection
+        // so that all available MBeanServer have been already collected
+        mBeanServerManager.init(detectors);
+
+        serverHandle = detectServerHandle(pCtx, detectors);
+
     }
 
     // Can handle any request

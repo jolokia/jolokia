@@ -28,27 +28,28 @@ public abstract class JolokiaServiceBase implements JolokiaService {
     private static final int DEFAULT_ORDER = 1000;
 
     // service type of this Jolokia Service
-    private ServiceType type;
+    private Class<? extends JolokiaService> type;
 
     // order number for this service
     protected int order;
+
 
     /**
      * Create this base for the given service type
      *
      * @param pType type of this service
      */
-    protected JolokiaServiceBase(ServiceType pType) {
+    protected JolokiaServiceBase(Class<? extends JolokiaService> pType) {
         this(pType,DEFAULT_ORDER);
     }
 
     /**
-     * Consructio of a base service for a given type and order
+     * Consruction of a base service for a given type and order
      *
      * @param pType service type
      * @param pOrder order
      */
-    protected JolokiaServiceBase(ServiceType pType, int pOrder) {
+    protected JolokiaServiceBase(Class<? extends JolokiaService> pType, int pOrder) {
         type = pType;
         order = pOrder;
     }
@@ -59,22 +60,28 @@ public abstract class JolokiaServiceBase implements JolokiaService {
     }
 
     /** {@inheritDoc} */
-    public ServiceType getType() {
+    public Class<? extends JolokiaService> getType() {
         return type;
     }
 
     /**
      * Override for hooking into the lifecycle
      */
-    public void destroy() {
+    public void destroy() throws Exception {
     }
 
     /**
      * Override if access to the JolokiaContext is
      * required.
      *
-     * @param pServiceManager service manager for accessing other services
+     * @param pJolokiaContext JolokiaContext used
      */
-    public void init(JolokiaServiceManager pServiceManager) {
+    public void init(JolokiaContext pJolokiaContext) {
+    }
+
+    /** {@inheritDoc} */
+    public int compareTo(Object o) {
+        JolokiaService service1 = (JolokiaService) o;
+        return service1.getOrder() - getOrder();
     }
 }

@@ -17,6 +17,7 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import javax.management.*;
@@ -24,7 +25,6 @@ import javax.management.*;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.detector.ServerDetector;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.request.JmxRequest;
 
@@ -61,12 +61,12 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * </ul>
      *
      * @throws IllegalStateException if no MBeanServer could be found.
-     * @param pHandle Serer handle for addiding custom MBeanServer
+     * @param pDetectors Serer handle for addiding custom MBeanServer
      */
-    public synchronized void init(ServerHandle pHandle) {
+    public synchronized void init(List<ServerDetector> pDetectors) {
 
         // Create the MBeanServerList
-        mbeanServers = new MBeanServers(pHandle,this);
+        mbeanServers = new MBeanServers(pDetectors,this);
 
         // Register for registers/deregister of MBean changes in order to update lastUpdateTime
         registerForMBeanNotifications();

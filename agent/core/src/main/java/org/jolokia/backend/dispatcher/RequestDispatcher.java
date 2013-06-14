@@ -13,6 +13,4 @@ import org.jolokia.request.JmxRequest;
  */
 public interface RequestDispatcher {
     DispatchResult dispatch(JmxRequest pJmxRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException;
-
-    void destroy() throws JMException;
 }

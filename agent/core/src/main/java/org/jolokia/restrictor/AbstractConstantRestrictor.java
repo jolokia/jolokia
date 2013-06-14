@@ -18,7 +18,6 @@ package org.jolokia.restrictor;
 
 import javax.management.ObjectName;
 
-import org.jolokia.service.JolokiaServiceBase;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 
@@ -29,7 +28,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since 06.10.11
  */
-public abstract class AbstractConstantRestrictor extends JolokiaServiceBase implements Restrictor {
+public abstract class AbstractConstantRestrictor implements Restrictor {
 
     private boolean isAllowed;
 
@@ -40,7 +39,6 @@ public abstract class AbstractConstantRestrictor extends JolokiaServiceBase impl
      * @param pAllowed whether access is allowed or denied
      */
     protected AbstractConstantRestrictor(boolean pAllowed) {
-        super(ServiceType.RESTRICTOR);
         isAllowed = pAllowed;
     }
 

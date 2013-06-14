@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;
 
 /*
@@ -31,28 +30,9 @@ import org.jolokia.util.LogHandler;
  * @author roland
  * @since Jul 28, 2009
  */
-public final class RestrictorServiceFactory extends JolokiaServiceFactoryBase implements JolokiaServiceFactory {
+public final class PolicyRestrictorFactory {
 
-    private Restrictor restrictor;
-
-    public RestrictorServiceFactory(Restrictor pRestrictor) {
-        restrictor = pRestrictor;
-    }
-
-    /** {@inheritDoc} */
-    protected void doInit() {
-        if (restrictor == null) {
-            addService(createRestrictor(getLogHandler(), getConfig(ConfigKey.POLICY_LOCATION)));
-        } else {
-            if (restrictor instanceof JolokiaService) {
-                info("Using custom access restriction provided by " + restrictor);
-                addService((JolokiaService) restrictor);
-            } else {
-                throw new IllegalArgumentException("Restrictor " + restrictor + " is not a JolokiaService");
-            }
-        }
-    }
-
+    private PolicyRestrictorFactory() {  }
 
     /**
      * Create a restrictor restrictor to use. By default, a policy file
@@ -60,25 +40,27 @@ public final class RestrictorServiceFactory extends JolokiaServiceFactoryBase im
      * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
      * used by default.
      *
-     * @param pLocation location to lookup the restrictor
+     * @param location location from where to lookup the policy restrictor
+     * @param log handle for doing the logs
      * @return the restrictor to use.
      */
-    protected JolokiaService createRestrictor(LogHandler log, String pLocation) {
+    public static Restrictor createRestrictor(String location,LogHandler log) {
         try {
-            PolicyRestrictor newRestrictor = lookupPolicyRestrictor(pLocation);
+            PolicyRestrictor newRestrictor = lookupPolicyRestrictor(location);
             if (newRestrictor != null) {
-                log.info("Using access restrictor " + pLocation);
+                log.info("Using access restrictor " + location);
                 return newRestrictor;
             } else {
-                log.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
+                log.info("No access restrictor found at " + location + ", access to all MBeans is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            log.error("Error while accessing access restrictor at " + pLocation +
+            log.error("Error while accessing access restrictor at " + location +
                       ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
     }
+
 
     /**
      * Lookup a restrictor based on an URL
@@ -88,13 +70,13 @@ public final class RestrictorServiceFactory extends JolokiaServiceFactoryBase im
      * @return the restrictor created or <code>null</code> if none could be found.
      * @throws IOException if reading of the policy stream failed
      */
-    private PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
+    private static PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
         InputStream is;
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
             is =  Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
             if (is == null) {
-                is = RestrictorServiceFactory.class.getResourceAsStream(path);
+                is = PolicyRestrictorFactory.class.getResourceAsStream(path);
             }
         } else {
             URL url = new URL(pLocation);

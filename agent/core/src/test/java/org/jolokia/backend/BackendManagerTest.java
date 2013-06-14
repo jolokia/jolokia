@@ -30,7 +30,7 @@ import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.*;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -144,11 +144,12 @@ public class BackendManagerTest {
 
     // =========================================================================================
 
-    static class RequestHandlerTest implements RequestHandler {
+    static class RequestHandlerTest extends JolokiaServiceBase implements RequestHandler {
 
         static boolean called = false;
 
         public RequestHandlerTest(Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
+            super(RequestHandler.class);
             assertNotNull(pConverters);
             assertNotNull(pRestrictor);
         }
@@ -177,7 +178,11 @@ public class BackendManagerTest {
 
     // ========================================================
 
-    static class RequestHandlerWrong implements RequestHandler {
+    static class RequestHandlerWrong extends JolokiaServiceBase implements RequestHandler {
+
+        protected RequestHandlerWrong() {
+            super(RequestHandler.class);
+        }
 
         // No special constructor --> fail
 

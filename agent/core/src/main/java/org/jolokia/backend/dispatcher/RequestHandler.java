@@ -6,6 +6,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequest;
+import org.jolokia.service.JolokiaService;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -30,7 +31,7 @@ import org.jolokia.request.JmxRequest;
  * @author roland
  * @since Nov 11, 2009
  */
-public interface RequestHandler {
+public interface RequestHandler extends JolokiaService {
     /**
      * Dispatch a {@link JmxRequest} to a certain backend
      * and return the result of the JMX action.
@@ -63,9 +64,4 @@ public interface RequestHandler {
      *         if the value should be directly returned
      */
     boolean useReturnValueWithPath(JmxRequest pJmxRequest);
-
-    /**
-     * Lifecycle method called when agent goes down.
-     */
-    void destroy() throws JMException;
 }

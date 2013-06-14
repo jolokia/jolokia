@@ -27,10 +27,14 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.restrictor.RestrictorServiceFactory;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
+import org.jolokia.service.impl.ClasspathRequestHandlerCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
+import org.jolokia.util.LogHandler;
 import org.jolokia.util.StdoutLogHandler;
 
 /**
@@ -66,6 +70,15 @@ public class JolokiaServer {
 
     // Thread factory which creates only daemon threads
     private ThreadFactory daemonThreadFactory = new DaemonThreadFactory();
+
+    // Service Manager in use
+    private JolokiaServiceManager serviceManager;
+
+    // Whether we are using our own HTTP Server
+    private boolean useOwnServer = false;
+
+    // HttpContext created when we start it up
+    private HttpContext httpContext;
 
     /**
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests.
@@ -105,9 +118,19 @@ public class JolokiaServer {
      * be started as well.
      */
     public void start() {
+        JolokiaContext jolokiaContext = serviceManager.start();
+        RequestDispatcher requestDispatcher = serviceManager.getRequestDispatcher();
+        jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
+
+        httpContext = httpServer.createContext(config.getContextPath(), jolokiaHttpHandler);
+        // Add authentication if configured
+        final Authenticator authenticator = config.getAuthenticator();
+        if (authenticator != null) {
+            httpContext.setAuthenticator(authenticator);
+        }
         jolokiaHttpHandler.start(lazy);
 
-        if (httpServer != null) {
+        if (useOwnServer) {
             // Starting our own server in an own thread group with a fixed name
             // so that the cleanup thread can recognize it.
             ThreadGroup threadGroup = new ThreadGroup("jolokia");
@@ -130,6 +153,8 @@ public class JolokiaServer {
      */
     public void stop() {
         jolokiaHttpHandler.stop();
+        httpServer.removeContext(httpContext);
+        serviceManager.stop();
 
         if (cleaner != null) {
             cleaner.stopServer();
@@ -165,8 +190,8 @@ public class JolokiaServer {
      */
     protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
         // We manage it on our own
-        httpServer = createHttpServer(pConfig);
-        init(httpServer,pConfig,pLazy);
+        init(createHttpServer(pConfig),pConfig,pLazy);
+        useOwnServer = true;
     }
 
     /**
@@ -180,33 +205,24 @@ public class JolokiaServer {
     protected final void init(HttpServer pServer, JolokiaServerConfig pConfig, boolean pLazy)  {
         config = pConfig;
         lazy = pLazy;
+        httpServer = pServer;
 
         // Create proper context along with handler
-        final String contextPath = pConfig.getContextPath();
 
-        // TODO: CTX Init
-        JolokiaServiceManager serviceManager = new JolokiaServiceManagerImpl(
-                config.getJolokiaConfig(),
-                new StdoutLogHandler()
+        Configuration jolokiaCfg = config.getJolokiaConfig();
+        LogHandler log = new StdoutLogHandler();
+        serviceManager = new JolokiaServiceManagerImpl(
+                jolokiaCfg,log,
+                PolicyRestrictorFactory.createRestrictor(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION), log)
         );
-
-        // Add a restrictor factory
-        serviceManager.addServiceFactory(new RestrictorServiceFactory(null));
-        JolokiaContext jolokiaContext = serviceManager.start();
-        RequestDispatcher requestDispatcher = serviceManager.getRequestDispatcher();
-
-        jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
-        HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
-
-
-        // Add authentication if configured
-        final Authenticator authenticator = pConfig.getAuthenticator();
-        if (authenticator != null) {
-            context.setAuthenticator(authenticator);
-        }
+        serviceManager.addServices(new ClasspathRequestHandlerCreator());
 
         // Get own URL for later reference
-        serverAddress= pServer.getAddress();
+        serverAddress = pServer.getAddress();
+        url = extractUrl(pConfig);
+    }
+
+    private String extractUrl(JolokiaServerConfig pConfig) {
         InetAddress realAddress;
         int port;
         if (serverAddress != null) {
@@ -216,8 +232,8 @@ public class JolokiaServer {
             realAddress = pConfig.getAddress();
             port = pConfig.getPort();
         }
-        url = String.format("%s://%s:%d%s",
-                            pConfig.getProtocol(),realAddress.getCanonicalHostName(),port,contextPath);
+        return String.format("%s://%s:%d%s",
+                            pConfig.getProtocol(),realAddress.getCanonicalHostName(),port, pConfig.getContextPath());
     }
 
     /**

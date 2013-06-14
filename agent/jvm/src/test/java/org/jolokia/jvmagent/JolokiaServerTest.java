@@ -28,8 +28,7 @@ import org.jolokia.Version;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -92,9 +91,9 @@ public class JolokiaServerTest {
         HttpServer httpServer = HttpServer.create();
         JvmAgentConfig cfg = new JvmAgentConfig("");
         JolokiaServer server = new JolokiaServer(httpServer,cfg,false);
-        Field field = JolokiaServer.class.getDeclaredField("httpServer");
+        Field field = JolokiaServer.class.getDeclaredField("useOwnServer");
         field.setAccessible(true);
-        assertNull(field.get(server));
+        assertFalse((Boolean) field.get(server));
         server.start();
         server.stop();
     }

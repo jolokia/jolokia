@@ -53,6 +53,19 @@ public class JBossDetector extends AbstractServerDetector {
         return null;
     }
 
+
+    @Override
+    public void addMBeanServers(Set<MBeanServerConnection> servers) {
+        try {
+            Class locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
+            Method method = locatorClass.getMethod("locateJBoss");
+            servers.add((MBeanServer) method.invoke(null));
+        } catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException e) {
+        }
+    }
+
     // Special handling for JBoss
 
 
@@ -67,18 +80,6 @@ public class JBossDetector extends AbstractServerDetector {
           */
         JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
             super("RedHat", "jboss", version, agentUrl, extraInfo);
-        }
-
-        @Override
-        public void addMBeanServers(Set<MBeanServerConnection> servers) {
-            try {
-                Class locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
-                Method method = locatorClass.getMethod("locateJBoss");
-                servers.add((MBeanServer) method.invoke(null));
-            } catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ } catch (NoSuchMethodException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InvocationTargetException e) {
-            }
         }
     }
 }

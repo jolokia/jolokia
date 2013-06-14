@@ -44,6 +44,22 @@ public class WeblogicDetector extends AbstractServerDetector {
         return null;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void addMBeanServers(Set<MBeanServerConnection> servers) {
+        // Weblogic stores the MBeanServer in a JNDI context
+        InitialContext ctx;
+        try {
+            ctx = new InitialContext();
+            MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
+            if (server != null) {
+                servers.add(server);
+            }
+        } catch (NamingException e) {
+            // expected and can happen on non-Weblogic platforms
+        }
+    }
+
     static class WeblogicServerHandle extends ServerHandle {
         /**
          * Constructor
@@ -52,21 +68,6 @@ public class WeblogicDetector extends AbstractServerDetector {
          */
         public WeblogicServerHandle(String version) {
             super("Oracle", "weblogic", version, null, null);
-        }
-
-        @Override
-        public void addMBeanServers(Set<MBeanServerConnection> servers) {
-            // Weblogic stores the MBeanServer in a JNDI context
-            InitialContext ctx;
-            try {
-                ctx = new InitialContext();
-                MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
-                if (server != null) {
-                    servers.add(server);
-                }
-            } catch (NamingException e) {
-                // expected and can happen on non-Weblogic platforms
-            }
         }
     }
 }

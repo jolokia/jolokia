@@ -8,10 +8,11 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.jolokia.config.*;
+import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.restrictor.RestrictorServiceFactory;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
+import org.jolokia.service.impl.ClasspathRequestHandlerCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
@@ -89,7 +90,7 @@ public class AgentServlet extends HttpServlet {
      * Initialize the backend systems by creating a {@link JolokiaServiceManagerImpl}
      *
      * A subclass can tune this step by overriding
-     * {@link #createLogService(ServletConfig)} and {@link #createRestrictor()}
+     * {@link #createLogHandler(ServletConfig)} and {@link #createRestrictor()}
      *
      * @param pServletConfig servlet configuration
      */
@@ -98,16 +99,19 @@ public class AgentServlet extends HttpServlet {
         super.init(pServletConfig);
 
         // Create configuration and log handler early in the lifecycle
-
         Configuration config = initConfig(pServletConfig);
-        LogHandler logHandler = createLogService(pServletConfig);
-        serviceManager = new JolokiaServiceManagerImpl(config,logHandler);
+        LogHandler logHandler = createLogHandler(pServletConfig);
 
-        // Add a restrictor factory
-        serviceManager.addServiceFactory(new RestrictorServiceFactory(createRestrictor()));
+        if (restrictor == null) {
+            restrictor = PolicyRestrictorFactory.createRestrictor(config.getConfig(ConfigKey.POLICY_LOCATION),logHandler);
+        }
 
+        // Create the service manager
+        serviceManager = new JolokiaServiceManagerImpl(config,logHandler,restrictor);
+        serviceManager.addServices(new ClasspathRequestHandlerCreator());
+
+        // Start it up ....
         JolokiaContext ctx = serviceManager.start();
-
         requestHandler = new HttpRequestHandler(ctx, serviceManager.getRequestDispatcher());
 
         configMimeType = ctx.getConfig(ConfigKey.MIME_TYPE);
@@ -134,7 +138,7 @@ public class AgentServlet extends HttpServlet {
      * @return a default log handler
      * @param pServletConfig servlet config from where to get information to build up the log handler
      */
-    protected LogHandler createLogService(ServletConfig pServletConfig) {
+    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
         return new ServletLogHandler();
     }
 

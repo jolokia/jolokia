@@ -16,20 +16,13 @@
 
 package org.jolokia.service;
 
+import java.util.Set;
+
 /**
  * @author roland
- * @since 28.03.13
+ * @since 14.06.13
  */
-public interface JolokiaService extends Comparable {
+public interface JolokiaServiceCreator<T extends JolokiaService> {
 
-    public int getOrder();
-
-    public <T extends JolokiaService> Class<? extends JolokiaService> getType();
-
-    /**
-     * Lifecycle method called when agent goes down.
-     */
-    public void destroy() throws Exception;
-
-    public void init(JolokiaContext pJolokiaContext);
+    Set<T> getServices();
 }

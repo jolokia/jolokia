@@ -98,7 +98,7 @@ public class JolokiaServletTest {
         servlet.init(config);
         assertNull(JolokiaServlet.getCurrentBundleContext());
 
-        LogHandler handler = (LogHandler) servlet.createLogService(config);
+        LogHandler handler = (LogHandler) servlet.createLogHandler(config);
         handler.debug("Debug");
         handler.info("Info");
         handler.error("Error",new Exception());
@@ -140,6 +140,9 @@ public class JolokiaServletTest {
 
         public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
             return ServerHandle.NULL_SERVER_HANDLE;
+        }
+
+        public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
         }
     }
 

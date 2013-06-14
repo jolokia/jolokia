@@ -34,7 +34,8 @@ public class LocalRequestHandlerTest {
     public void setup() throws JMException, NoSuchFieldException, IllegalAccessException {
         TestDetector.reset();
         JolokiaContext ctx = new TestJolokiaContext.Builder().config(ConfigKey.MBEAN_QUALIFIER,"qualifier=test").build();
-        requestHandler = new LocalRequestHandler(ctx);
+        requestHandler = new LocalRequestHandler(10);
+        requestHandler.init(ctx);
         commandHandler = injectCommandHandler(requestHandler);
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }

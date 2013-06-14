@@ -16,12 +16,20 @@
 
 package org.jolokia.service;
 
+import java.util.Set;
+
 /**
  * @author roland
  * @since 21.04.13
  */
-public interface JolokiaServiceFactory {
+public interface JolokiaServiceFactory<T extends JolokiaService>  {
 
-    public void init(JolokiaServiceManager serviceManager);
+    Set<T> getServices();
+
+    Class<T> getType();
+
+    // Lifecycle
+    void init(JolokiaContext pJolokiaContext);
     public void destroy();
+
 }

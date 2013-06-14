@@ -45,7 +45,7 @@ public class Jsr160RequestHandlerTest {
     @BeforeMethod
     private void setup() {
         ctx = new TestJolokiaContext.Builder().build();
-        dispatcher = new Jsr160RequestHandler(ctx) {
+        dispatcher = new Jsr160RequestHandler(0) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
                 Map ret = super.prepareEnv(pTargetConfig);
@@ -56,6 +56,7 @@ public class Jsr160RequestHandlerTest {
                 return ret;
             }
         };
+        dispatcher.init(ctx);
     }
 
     @AfterMethod
@@ -86,7 +87,9 @@ public class Jsr160RequestHandlerTest {
         destroy();
         TestJolokiaContext testCtx;
         testCtx = new TestJolokiaContext.Builder().build();
-        new Jsr160RequestHandler(testCtx).dispatchRequest(req);
+        Jsr160RequestHandler handler = new Jsr160RequestHandler(0);
+        handler.init(testCtx);
+        handler.dispatchRequest(req);
         setup();
     }
 

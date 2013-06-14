@@ -24,7 +24,8 @@ public class TestRequestDispatcher implements RequestDispatcher {
     }
 
     public TestRequestDispatcher(JolokiaContext pCtx) {
-        handler = new LocalRequestHandler(pCtx);
+        handler = new LocalRequestHandler(0);
+        handler.init(pCtx);
     }
 
     public DispatchResult dispatch(JmxRequest pJmxRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {

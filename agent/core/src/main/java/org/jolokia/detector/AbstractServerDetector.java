@@ -32,6 +32,9 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
  */
 public abstract class AbstractServerDetector implements ServerDetector {
 
+    /** {@inheritDoc} */
+    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) { }
+
     /**
      * Check for the existence of a certain MBean. All known MBeanServers are queried
      *
@@ -152,5 +155,6 @@ public abstract class AbstractServerDetector implements ServerDetector {
         }
         return null;
     }
+
 
 }

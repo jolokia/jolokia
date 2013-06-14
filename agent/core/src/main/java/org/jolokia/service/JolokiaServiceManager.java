@@ -16,9 +16,9 @@
 
 package org.jolokia.service;
 
+import java.util.Set;
+
 import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.config.Configuration;
-import org.jolokia.util.LogHandler;
 
 /**
  * The service manager is responsible for building up service and for creating a
@@ -31,28 +31,18 @@ import org.jolokia.util.LogHandler;
  */
 public interface JolokiaServiceManager  {
 
-    public void addService(JolokiaService pService);
-    public void removeService(JolokiaService pService);
+    public <T extends JolokiaService> void addService(T pService);
+    public <T extends JolokiaService> void removeService(T pService);
 
-    /**
-     * Get the overall configuration
-     *
-     * @return configuration of this agent
-     */
-    public Configuration getConfiguration();
-
-    /**
-     * Get the log handler for logging
-     *
-     * @return log handler
-     */
-    public LogHandler getLogHandler();
-
-    void addServiceFactory(JolokiaServiceFactory pServiceFactory);
+    <T extends JolokiaService> void addServiceFactory(JolokiaServiceFactory<T> pFactory);
 
     JolokiaContext start();
 
     void stop();
 
     RequestDispatcher getRequestDispatcher();
+
+    <T extends JolokiaService> Set<T> getServices(Class<T> pType);
+
+    <T extends JolokiaService> void addServices(JolokiaServiceCreator<T> pServiceCreator);
 }
