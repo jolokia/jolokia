@@ -1,6 +1,7 @@
 package org.jolokia.service.impl;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.management.ObjectName;
 
@@ -8,9 +9,8 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.*;
 import org.jolokia.util.*;
 
 /**
@@ -21,29 +21,17 @@ import org.jolokia.util.*;
  */
 public class JolokiaContextImpl implements JolokiaContext {
 
-    // Overall configuration for which this context is a delegate
-    private Configuration configuration;
-
-    // Logger to use
-    private LogHandler logHandler;
-
-    // The restrictor to delegate to
-    private Restrictor restrictor;
-
     // Converts for object serialization
     private Converters converters;
 
     // Server handle
     private ServerHandle serverHandle;
 
-    public JolokiaContextImpl(Configuration pConfig,
-                              LogHandler pLogHandler,
-                              Restrictor pRestrictor) {
-        configuration = pConfig;
-        logHandler = pLogHandler;
+    // Service manager associated with the context
+    private JolokiaServiceManager serviceManager;
 
-        // Access restrictor
-        restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
+    JolokiaContextImpl(JolokiaServiceManager pServiceManager) {
+        serviceManager = pServiceManager;
 
         // Central objects
         // TODO: Lookup
@@ -64,59 +52,74 @@ public class JolokiaContextImpl implements JolokiaContext {
 
 
     public String getConfig(ConfigKey pOption) {
-        return configuration.getConfig(pOption);
+        return getConfiguration().getConfig(pOption);
     }
 
     public Set<ConfigKey> getConfigKeys() {
-        return configuration.getConfigKeys();
+        return getConfiguration().getConfigKeys();
     }
 
     public Converters getConverters() {
         return converters;
     }
 
+    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+        return serviceManager.getServices(pType);
+    }
+
     public boolean isDebug() {
-        return logHandler.isDebug();
+        return getLog().isDebug();
     }
 
     public void debug(String message) {
-        logHandler.debug(message);
+        getLog().debug(message);
     }
 
     public void info(String message) {
-        logHandler.info(message);
+        getLog().info(message);
     }
 
     public void error(String message, Throwable t) {
-        logHandler.error(message,t);
+        getLog().error(message, t);
     }
 
     public boolean isHttpMethodAllowed(HttpMethod pMethod) {
-        return restrictor.isHttpMethodAllowed(pMethod);
+        return getRestrictor().isHttpMethodAllowed(pMethod);
     }
 
     public boolean isTypeAllowed(RequestType pType) {
-        return restrictor.isTypeAllowed(pType);
+        return getRestrictor().isTypeAllowed(pType);
     }
 
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return restrictor.isAttributeReadAllowed(pName,pAttribute);
+        return getRestrictor().isAttributeReadAllowed(pName, pAttribute);
     }
 
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
-        return restrictor.isAttributeWriteAllowed(pName,pAttribute);
+        return getRestrictor().isAttributeWriteAllowed(pName, pAttribute);
     }
 
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
-        return restrictor.isOperationAllowed(pName,pOperation);
+        return getRestrictor().isOperationAllowed(pName, pOperation);
     }
 
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return restrictor.isRemoteAccessAllowed(pHostOrAddress);
+        return getRestrictor().isRemoteAccessAllowed(pHostOrAddress);
     }
 
     public boolean isCorsAccessAllowed(String pOrigin) {
-        return restrictor.isCorsAccessAllowed(pOrigin);
+        return getRestrictor().isCorsAccessAllowed(pOrigin);
     }
 
+    private Configuration getConfiguration() {
+        return serviceManager.getConfiguration();
+    }
+
+    private Restrictor getRestrictor() {
+        return serviceManager.getRestrictor();
+    }
+
+    private LogHandler getLog() {
+        return serviceManager.getLogHandler();
+    }
 }

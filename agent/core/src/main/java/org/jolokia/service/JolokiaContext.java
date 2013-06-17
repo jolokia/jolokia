@@ -1,6 +1,7 @@
 package org.jolokia.service;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
@@ -26,6 +27,11 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return converter holder object
      */
     Converters getConverters();
+
+    /**
+     * Get Jolokia services of a certain kind.
+     */
+    <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
 
     /**
      * Access to the server handle holding the server side information

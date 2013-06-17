@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.management.JMException;
 
+import org.jolokia.service.JolokiaService;
+
 /**
  * A notification backend which is responsible for the final delivery. This final
  * delivery is done by a callback which a backend needs to create out of a given
@@ -13,14 +15,14 @@ import javax.management.JMException;
  * @author roland
  * @since 18.03.13
  */
-public interface NotificationBackend {
+public interface NotificationBackend extends JolokiaService {
 
     /**
      * Type of this backend
      *
      * @return type
      */
-    String getType();
+    String getNotifType();
 
     /**
      * Create a specific callback for the given configuration. This

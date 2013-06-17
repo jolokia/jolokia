@@ -67,12 +67,6 @@ public class NotificationDispatcher {
         throw new UnsupportedOperationException("Unsupported notification command " + pCommand.getType());
     }
 
-    /**
-     * Lifecycle method when agent goes down
-     */
-    public void destroy() throws JMException {
-        backendManager.destroy();
-    }
 
     // =======================================================================================
 

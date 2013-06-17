@@ -80,8 +80,4 @@ public class NotificationHandler extends CommandHandler<JmxNotificationRequest> 
         return dispatcher.dispatch(serverManager,request.getCommand());
     }
 
-    /** {@inheritDoc} */
-    public void destroy() throws JMException {
-        dispatcher.destroy();
-    }
 }

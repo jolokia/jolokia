@@ -16,9 +16,12 @@
 
 package org.jolokia.service;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.config.Configuration;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.LogHandler;
 
 /**
  * The service manager is responsible for building up service and for creating a
@@ -42,7 +45,13 @@ public interface JolokiaServiceManager  {
 
     RequestDispatcher getRequestDispatcher();
 
-    <T extends JolokiaService> Set<T> getServices(Class<T> pType);
+    <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
 
     <T extends JolokiaService> void addServices(JolokiaServiceCreator<T> pServiceCreator);
+
+    Configuration getConfiguration();
+
+    LogHandler getLogHandler();
+
+    Restrictor getRestrictor();
 }

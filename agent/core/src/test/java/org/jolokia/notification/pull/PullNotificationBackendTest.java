@@ -46,8 +46,9 @@ public class PullNotificationBackendTest {
         JolokiaContext ctx = new TestJolokiaContext.Builder()
                 .serverHandle(handle)
                 .build();
-        backend = new PullNotificationBackend(ctx);
-        assertEquals(backend.getType(),"pull");
+        backend = new PullNotificationBackend(0);
+        backend.init(ctx);
+        assertEquals(backend.getNotifType(),"pull");
     }
 
     @AfterMethod

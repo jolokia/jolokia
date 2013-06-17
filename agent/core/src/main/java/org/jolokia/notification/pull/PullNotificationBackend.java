@@ -7,6 +7,7 @@ import javax.management.*;
 
 import org.jolokia.notification.*;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.JolokiaServiceBase;
 import org.jolokia.util.JmxUtil;
 import org.json.simple.JSONObject;
 
@@ -16,7 +17,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 20.03.13
  */
-public class PullNotificationBackend implements NotificationBackend {
+public class PullNotificationBackend extends JolokiaServiceBase implements NotificationBackend {
 
     // Store for holding the notification
     private PullNotificationStore store;
@@ -31,9 +32,14 @@ public class PullNotificationBackend implements NotificationBackend {
      * Create a pull notification backend which will register an MBean allowing
      * to pull received notification
      *
-     * @param pContext jolokia context
+     * @param order of this notification backend
      */
-    public PullNotificationBackend(JolokiaContext pContext) {
+    public PullNotificationBackend(int order) {
+        super(NotificationBackend.class,order);
+    }
+
+    /** {@inheritDoc} */
+    public void init(JolokiaContext pContext) {
         String jolokiaId = pContext.getServerHandle().getJolokiaId();
         // TODO: Get configuration parameter for maxEntries
         store = new PullNotificationStore(maxEntries);
@@ -47,7 +53,7 @@ public class PullNotificationBackend implements NotificationBackend {
     }
 
     /** {@inheritDoc} */
-    public String getType() {
+    public String getNotifType() {
         return "pull";
     }
 

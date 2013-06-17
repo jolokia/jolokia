@@ -14,9 +14,20 @@ import org.jolokia.service.JolokiaServiceCreator;
  */
 public class ClasspathRequestHandlerCreator implements JolokiaServiceCreator<RequestHandler> {
 
+    private String base;
+
+    /**
+     * Create a creator with the given base name
+     *
+     * @param pBase base name to use
+     */
+    public ClasspathRequestHandlerCreator(String pBase) {
+        base = pBase;
+    }
+
     /** {@inheritDoc} */
     public Set<RequestHandler> getServices() {
-        return LocalServiceFactory.createServicesAsSet("META-INF/request-handler-default",
-                                                       "META-INF/request-handler");
+        return LocalServiceFactory.createServicesAsSet("META-INF/" + base + "-default",
+                                                       "META-INF/" + base);
     }
 }

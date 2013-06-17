@@ -18,8 +18,7 @@ package org.jolokia.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import javax.management.ObjectName;
 
@@ -29,6 +28,7 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.JolokiaService;
 
 /**
  * @author roland
@@ -36,6 +36,7 @@ import org.jolokia.service.JolokiaContext;
  */
 public class TestJolokiaContext implements JolokiaContext {
 
+    SortedSet<? extends JolokiaService> services;
     LogHandler logHandler;
     Restrictor restrictor;
     Configuration config;
@@ -43,16 +44,18 @@ public class TestJolokiaContext implements JolokiaContext {
     ServerHandle handle;
 
     public TestJolokiaContext() {
-        this(null,null,null,null);
+        this(null,null,null,null,null);
     }
 
     private TestJolokiaContext(Configuration pConfig,
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
-                               ServerHandle pHandle) {
+                               ServerHandle pHandle,
+                               SortedSet<JolokiaService> pServices) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
+        this.services = pServices != null ? pServices : new TreeSet<JolokiaService>();
         try {
             if (pHandle != null) {
                 handle = pHandle;
@@ -68,8 +71,14 @@ public class TestJolokiaContext implements JolokiaContext {
         converters = new Converters();
     }
 
+
+
     public Converters getConverters() {
         return converters;
+    }
+
+    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+        return (SortedSet<T>) services;
     }
 
     public ServerHandle getServerHandle() {
@@ -137,6 +146,7 @@ public class TestJolokiaContext implements JolokiaContext {
         Configuration config;
         Converters converters;
         ServerHandle handle;
+        SortedSet<JolokiaService> services;
 
         public Builder config(Configuration config) {
             this.config = config;
@@ -163,13 +173,18 @@ public class TestJolokiaContext implements JolokiaContext {
             return this;
         }
 
+        public <T extends JolokiaService> Builder services(T ... pServices) {
+            services = new TreeSet(Arrays.asList(pServices));
+            return this;
+        }
         public TestJolokiaContext build() {
 
             return new TestJolokiaContext(
                     config,
                     restrictor,
                     logHandler,
-                    handle
+                    handle,
+                    services
             );
         }
 

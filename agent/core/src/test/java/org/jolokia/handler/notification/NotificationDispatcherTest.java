@@ -8,6 +8,8 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.notification.NotificationBackend;
+import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.request.notification.*;
 import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
@@ -37,14 +39,18 @@ public class NotificationDispatcherTest {
     private AbstractMBeanServerExecutor executor;
 
     private TestJolokiaContext ctx;
+    private NotificationBackend pullBackend;
 
     @BeforeMethod
     public void setup() {
         ServerHandle serverHandle = new ServerHandle(null, null, null, null, null);
         serverHandle.setJolokiaId("test");
+        pullBackend = new PullNotificationBackend(10);
         ctx = new TestJolokiaContext.Builder()
                 .serverHandle(serverHandle)
+                .services(pullBackend)
                 .build();
+        pullBackend.init(ctx);
         dispatcher = new NotificationDispatcher(ctx);
         connection = createMock(MBeanServerConnection.class);
         executor = new AbstractMBeanServerExecutor() {
@@ -56,8 +62,8 @@ public class NotificationDispatcherTest {
     }
 
     @AfterMethod
-    public void tearDown() throws Exception {
-        dispatcher.destroy();
+    public void tearDown() throws JMException {
+        pullBackend.destroy();
     }
 
     @Test

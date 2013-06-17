@@ -51,7 +51,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     // All service factories used
     private Map<Class<? extends JolokiaService>,
-            Set<JolokiaServiceFactory<? extends JolokiaService>>> dynamicServiceFactories;
+            SortedSet<JolokiaServiceFactory<? extends JolokiaService>>> dynamicServiceFactories;
 
     // Instantiated services, categorized by type and ordered;
     private Map<Class<? extends JolokiaService>,SortedSet<? extends JolokiaService>> staticServices;
@@ -70,8 +70,23 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         logHandler = pLogHandler;
         restrictor = pRestrictor;
         isInitialized = false;
-        dynamicServiceFactories = new HashMap<Class<? extends JolokiaService>, Set<JolokiaServiceFactory<? extends JolokiaService>>>();
+        dynamicServiceFactories = new HashMap<
+                Class<? extends JolokiaService>,
+                SortedSet<JolokiaServiceFactory<? extends JolokiaService>>>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
+    }
+
+
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    public LogHandler getLogHandler() {
+        return logHandler;
+    }
+
+    public Restrictor getRestrictor() {
+        return restrictor;
     }
 
     /**
@@ -105,7 +120,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      */
     public <T extends JolokiaService> void addServiceFactory(JolokiaServiceFactory<T> pFactory) {
         Class<T> type = pFactory.getType();
-        Set<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(type);
+        SortedSet<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(type);
         if (factories == null) {
             factories = new TreeSet<JolokiaServiceFactory<? extends JolokiaService>>();
             dynamicServiceFactories.put(type, factories);
@@ -128,7 +143,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         if (!isInitialized) {
 
             // Create context and remember
-            jolokiaContext = new JolokiaContextImpl(configuration, logHandler, restrictor);
+            jolokiaContext = new JolokiaContextImpl(this);
 
             // Initialize all services
             for (Set<? extends JolokiaService> services : staticServices.values()) {
@@ -248,9 +263,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      * @param pType service type to fetch
      * @return list of services detected or an empty list
      */
-    public <T extends JolokiaService> Set<T> getServices(Class<T> pType) {
-        Set<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(pType);
-        Set<T> services = (Set<T>) staticServices.get(pType);
+    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+        SortedSet<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(pType);
+        SortedSet<T> services = (SortedSet<T>) staticServices.get(pType);
         if (services == null) {
             services = new TreeSet<T>();
         }
@@ -260,7 +275,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             SortedSet<T> ret = new TreeSet<T>();
             ret.addAll(services);
             for (JolokiaServiceFactory<? extends JolokiaService> factory : factories) {
-                ret.addAll((Set<? extends T>) factory.getServices());
+                ret.addAll((SortedSet<? extends T>) factory.getServices());
             }
             return ret;
         }

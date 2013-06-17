@@ -22,8 +22,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.easymock.EasyMock;
-import org.easymock.IArgumentMatcher;
+import org.easymock.*;
 import org.jolokia.backend.dispatcher.*;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
@@ -202,8 +201,15 @@ public class HttpRequestHandlerTest {
                 .logHandler(pLogHandler)
                 .build();
         JolokiaServiceManager sm = createMock(JolokiaServiceManager.class);
-        expect(sm.getServices(RequestHandler.class)).andStubReturn(Collections.singleton(requestHandler));
-        replay(sm);
+        SortedSet<RequestHandler> services = createMock(SortedSet.class);
+        expect(services.add(requestHandler)).andStubReturn(true);
+        expect(services.iterator()).andStubAnswer(new IAnswer<Iterator<RequestHandler>>() {
+            public Iterator<RequestHandler> answer() throws Throwable {
+                return new SingletonIterator<RequestHandler> (requestHandler);
+            }
+        });
+        expect(sm.getServices(RequestHandler.class)).andStubReturn(services);
+        replay(sm,services);
         RequestDispatcher dispatcher = new RequestDispatcherImpl(sm);
         handler = new HttpRequestHandler(ctx, dispatcher);
     }
@@ -228,7 +234,7 @@ public class HttpRequestHandlerTest {
             String a[] = (String[]) pRequest;
             expect(requestHandler.dispatchRequest(eqReadRequest(a[0],a[1]))).andReturn("hello").times(i);
         } else {
-            expect(requestHandler.dispatchRequest(isA((Class<JmxRequest>) pRequest))).andReturn("hello").times(i);
+            expect(requestHandler.dispatchRequest(isA(JmxRequest.class))).andReturn("hello").times(i);
         }
         replay(requestHandler);
     }
@@ -277,6 +283,22 @@ public class HttpRequestHandlerTest {
         return null;
     }
 
+    private class SingletonIterator<T> implements Iterator<T> {
+        boolean first = true;
+        T object;
 
+       private SingletonIterator(T pObject) {
+            object = pObject;
+        }
 
+        public boolean hasNext() {
+            if (first) {
+                first = false;
+                return true;
+            }
+            return false;
+        }
+        public T next() { return object;  }
+        public void remove() { }
+    }
 }

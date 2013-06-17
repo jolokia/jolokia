@@ -16,13 +16,10 @@
 
 package org.jolokia.handler.notification;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.management.JMException;
-
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.NotificationBackend;
-import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.service.JolokiaContext;
 
 /**
@@ -35,8 +32,6 @@ import org.jolokia.service.JolokiaContext;
 class NotificationBackendManager {
 
     // Map mode to Backend and configs
-    private final Map<String, NotificationBackend> backendMap = new HashMap<String, NotificationBackend>();
-    private final Map<String, Map<String, ?>> backendConfigMap = new HashMap<String, Map<String, ?>>();
     private final JolokiaContext context;
 
     /**
@@ -46,20 +41,6 @@ class NotificationBackendManager {
      */
     NotificationBackendManager(JolokiaContext pContext) {
         context = pContext;
-        PullNotificationBackend backend = new PullNotificationBackend(context);
-        backendMap.put(backend.getType(), backend);
-        backendConfigMap.put(backend.getType(),backend.getConfig());
-    }
-
-    /**
-     * Lifecycle method for notifying the backends that the agent goes down
-     *
-     * @throws JMException
-     */
-    void destroy() throws JMException {
-        for (NotificationBackend backend : backendMap.values()) {
-            backend.destroy();
-        }
     }
 
     /**
@@ -70,7 +51,12 @@ class NotificationBackendManager {
      *         is probably also a map)
      */
     Map<String, ?> getBackendConfig() {
-        return Collections.unmodifiableMap(backendConfigMap);
+        Map<String, Map<String, ?>> configMap = new HashMap<String, Map<String, ?>>();
+
+        for (NotificationBackend backend : context.getServices(NotificationBackend.class)) {
+            configMap.put(backend.getNotifType(),backend.getConfig());
+        }
+        return configMap;
     }
 
     /**
@@ -79,11 +65,12 @@ class NotificationBackendManager {
      * @param pType backend type to lookup
      */
     NotificationBackend getBackend(String pType) {
-        NotificationBackend backend = backendMap.get(pType);
-        if (backend == null) {
-            throw new IllegalArgumentException("No backend of type '" + pType + "' registered");
+        for (NotificationBackend backend : context.getServices(NotificationBackend.class)) {
+            if (backend.getNotifType().equalsIgnoreCase(pType)) {
+                return backend;
+            }
         }
-        return backend;
+        throw new IllegalArgumentException("No backend of type '" + pType + "' registered");
     }
 
     /**

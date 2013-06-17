@@ -108,8 +108,8 @@ public class AgentServlet extends HttpServlet {
 
         // Create the service manager
         serviceManager = new JolokiaServiceManagerImpl(config,logHandler,restrictor);
-        serviceManager.addServices(new ClasspathRequestHandlerCreator());
-
+        serviceManager.addServices(new ClasspathRequestHandlerCreator("request-handler"));
+        serviceManager.addServices(new ClasspathRequestHandlerCreator("notification-backend"));
         // Start it up ....
         JolokiaContext ctx = serviceManager.start();
         requestHandler = new HttpRequestHandler(ctx, serviceManager.getRequestDispatcher());
