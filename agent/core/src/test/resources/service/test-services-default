@@ -1,5 +1,10 @@
-org.jolokia.util.ServiceFactoryTest$Test1,1000
-org.jolokia.util.ServiceFactoryTest$Test2
-org.jolokia.util.ServiceFactoryTest$Test5,200
-org.jolokia.util.ServiceFactoryTest$Test4
-org.jolokia.util.ServiceFactoryTest$Test3,5
+
+# ================================================
+# Default Implementations
+# ================================================
+
+org.jolokia.service.impl.LocalServiceFactoryTest$Test1,1000
+org.jolokia.service.impl.LocalServiceFactoryTest$Test2
+org.jolokia.service.impl.LocalServiceFactoryTest$Test5,200
+org.jolokia.service.impl.LocalServiceFactoryTest$Test4
+org.jolokia.service.impl.LocalServiceFactoryTest$Test3,5

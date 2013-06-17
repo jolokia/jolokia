@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jolokia.util;
+package org.jolokia.service.impl;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.jolokia.service.impl.LocalServiceFactory;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -28,7 +27,7 @@ import static org.testng.Assert.assertEquals;
  * @author roland
  * @since 02.12.10
  */
-public class ServiceFactoryTest {
+public class LocalServiceFactoryTest {
 
     @Test
     public void testOrder() {

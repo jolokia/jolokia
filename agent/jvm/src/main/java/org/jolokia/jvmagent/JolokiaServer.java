@@ -217,7 +217,7 @@ public class JolokiaServer {
         );
         serviceManager.addServices(new ClasspathRequestHandlerCreator("request-handler"));
         serviceManager.addServices(new ClasspathRequestHandlerCreator("notification-backend"));
-        
+
         // Get own URL for later reference
         serverAddress = pServer.getAddress();
         url = extractUrl(pConfig);

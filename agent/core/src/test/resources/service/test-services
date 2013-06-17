@@ -1,2 +1,2 @@
-!org.jolokia.util.ServiceFactoryTest$Test4
-org.jolokia.util.ServiceFactoryTest$Test5,200
+!org.jolokia.service.impl.LocalServiceFactoryTest$Test4
+org.jolokia.service.impl.LocalServiceFactoryTest$Test5,200
