@@ -52,8 +52,8 @@ public final class ObjectToJsonConverter {
     private StringToObjectConverter stringToObjectConverter;
 
     // Definition of simplifiers
-    private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/simplifiers-default";
-    private static final String SIMPLIFIERS_DEF         = "META-INF/simplifiers";
+    private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
+    private static final String SIMPLIFIERS_DEF         = "META-INF/jolokia/simplifiers";
 
     /**
      * New object-to-json converter

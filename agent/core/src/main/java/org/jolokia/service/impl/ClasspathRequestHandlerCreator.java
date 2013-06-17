@@ -27,7 +27,7 @@ public class ClasspathRequestHandlerCreator implements JolokiaServiceCreator<Req
 
     /** {@inheritDoc} */
     public Set<RequestHandler> getServices() {
-        return LocalServiceFactory.createServicesAsSet("META-INF/" + base + "-default",
-                                                       "META-INF/" + base);
+        return LocalServiceFactory.createServicesAsSet("META-INF/jolokia/" + base + "-default",
+                                                       "META-INF/jolokia/" + base);
     }
 }

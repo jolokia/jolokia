@@ -138,7 +138,7 @@ public class LocalRequestHandler extends JolokiaServiceBase implements RequestHa
     // Lookup all registered detectors-default + a default detector
     private List<ServerDetector> lookupDetectors() {
         List<ServerDetector> detectors =
-                LocalServiceFactory.createServices("META-INF/detectors-default", "META-INF/detectors");
+                LocalServiceFactory.createServices("META-INF/jolokia/detectors-default", "META-INF/jolokia/detectors");
         // An detector at the end of the chain in order to get a default handle
         detectors.add(new FallbackServerDetector());
         return detectors;
