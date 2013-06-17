@@ -1,0 +1,8 @@
+
+# ============================================
+# Request Handlers
+org.jolokia.backend.LocalRequestHandler,1000
+
+# ============================================
+# Notification backend
+org.jolokia.notification.pull.PullNotificationBackend
