@@ -30,6 +30,15 @@ import org.jolokia.detector.ServerHandle;
  */
 public class VirgoDetector extends AbstractOsgiServerDetector {
 
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public VirgoDetector(int pOrder) {
+        super(pOrder);
+    }
+
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {

@@ -21,6 +21,7 @@ import java.util.Set;
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.service.JolokiaService;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting
@@ -30,7 +31,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
  * @author roland
  * @since 05.11.10
  */
-public interface ServerDetector {
+public interface ServerDetector extends JolokiaService {
     /**
      * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.

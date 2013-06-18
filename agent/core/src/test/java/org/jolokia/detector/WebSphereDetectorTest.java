@@ -34,7 +34,7 @@ public class WebSphereDetectorTest extends BaseDetectorTest {
 
     @Test
     public void detect() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        ServerDetector detector = new WebsphereDetector();
+        ServerDetector detector = new WebsphereDetector(1);
         ObjectName serverMbean = new ObjectName(SERVER_MBEAN);
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("*:j2eeType=J2EEServer,type=Server,*"),null)).

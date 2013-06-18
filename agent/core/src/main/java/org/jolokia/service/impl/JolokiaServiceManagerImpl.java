@@ -21,10 +21,10 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.MBeanRegistry;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
+import org.jolokia.backend.dispatcher.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.detector.ServerDetector;
 import org.jolokia.history.History;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.restrictor.Restrictor;
@@ -48,6 +48,10 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     // Whether this service manager is already initialized
     private boolean isInitialized;
+
+    // Order in which services get initialized
+    private final static Class[] SERVICE_TYPE_ORDER =
+            new Class[] { ServerDetector.class, RequestHandler.class};
 
     // All service factories used
     private Map<Class<? extends JolokiaService>,
@@ -145,18 +149,25 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             // Create context and remember
             jolokiaContext = new JolokiaContextImpl(this);
 
-            // Initialize all services
-            for (Set<? extends JolokiaService> services : staticServices.values()) {
-                for (JolokiaService service : services) {
-                    service.init(jolokiaContext);
-                }
-            }
+            // Initialize all services in the proper order
+            List<Class<? extends JolokiaService>> serviceTypes = getServiceTypes();
+            for (Class<? extends JolokiaService> serviceType : serviceTypes) {
 
-            // All dynamic service factories are initialized as well. The factory itmself is responsible
-            // for initializing any new services coming in with the JolokiaContext.
-            for (Set<JolokiaServiceFactory<? extends JolokiaService>> dFactories : dynamicServiceFactories.values()) {
-                for (JolokiaServiceFactory factory : dFactories) {
-                    factory.init(jolokiaContext);
+                // Initialize services
+                Set<? extends JolokiaService> services = staticServices.get(serviceType);
+                if (services != null) {
+                    for (JolokiaService service : services) {
+                        service.init(jolokiaContext);
+                    }
+                }
+
+                // All dynamic service factories are initialized as well. The factory itmself is responsible
+                // for initializing any new services coming in with the JolokiaContext.
+                Set<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(serviceType);
+                if (factories != null) {
+                    for (JolokiaServiceFactory factory : factories) {
+                        factory.init(jolokiaContext);
+                    }
                 }
             }
 
@@ -167,6 +178,22 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             isInitialized = true;
         }
         return jolokiaContext;
+    }
+
+    // Extract the order in which services should be initialized
+    private List<Class<? extends JolokiaService>> getServiceTypes() {
+        List<Class<? extends JolokiaService>> ret = new ArrayList<Class<? extends JolokiaService>>();
+        for (Class type : SERVICE_TYPE_ORDER) {
+            ret.add(type);
+        }
+        for (Set staticTypeSet : new Set[] { staticServices.keySet(), dynamicServiceFactories.keySet() }) {
+            for (Object staticType : staticTypeSet) {
+                if (!ret.contains(staticType)) {
+                    ret.add((Class<? extends JolokiaService>) staticType);
+                }
+            }
+        }
+        return ret;
     }
 
     /**
@@ -180,18 +207,23 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             } catch (JMException e) {
                 logHandler.error("Cannot unregister own MBeans: " + e, e);
             }
-            for (Set<JolokiaServiceFactory<? extends JolokiaService>> dFactories : dynamicServiceFactories.values()) {
-                for (JolokiaServiceFactory factory : dFactories) {
-                    factory.destroy();
-                }
-            }
-            for (Set<? extends JolokiaService> services : staticServices.values()) {
-                for (JolokiaService service : services) {
-                    try {
-                        service.destroy();
-                    } catch (Exception e) {
-                        logHandler.error("Error while stopping service " + service + " of type " + service.getType() + ": " + e,e);
+            for (Class<? extends JolokiaService> serviceType : getServiceTypes()) {
+                Set<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(serviceType);
+                if (factories != null) {
+                    for (JolokiaServiceFactory factory : factories) {
+                        factory.destroy();
                     }
+                }
+                Set<? extends JolokiaService> services = staticServices.get(serviceType);
+                if (services != null) {
+                    for (JolokiaService service : services) {
+                        try {
+                            service.destroy();
+                        } catch (Exception e) {
+                            logHandler.error("Error while stopping service " + service + " of type " + service.getType() + ": " + e,e);
+                        }
+                    }
+
                 }
             }
         }

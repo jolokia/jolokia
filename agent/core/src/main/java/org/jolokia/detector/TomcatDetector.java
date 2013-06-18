@@ -31,6 +31,15 @@ public class TomcatDetector extends AbstractServerDetector {
 
     private static final Pattern SERVER_INFO_PATTERN = Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+)");
 
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public TomcatDetector(int pOrder) {
+        super(pOrder);
+    }
+
 
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/

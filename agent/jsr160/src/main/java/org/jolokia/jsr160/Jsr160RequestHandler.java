@@ -39,7 +39,7 @@ import org.jolokia.service.*;
  * @author roland
  * @since Nov 11, 2009
  */
-public class Jsr160RequestHandler extends JolokiaServiceBase implements RequestHandler {
+public class Jsr160RequestHandler extends AbstractJolokiaService implements RequestHandler {
 
     // request handler for specific request types
     private CommandHandlerManager commandHandlerManager;
@@ -70,7 +70,7 @@ public class Jsr160RequestHandler extends JolokiaServiceBase implements RequestH
      * @throws MBeanException
      * @throws IOException
      */
-    public Object dispatchRequest(JmxRequest pJmxReq)
+    public Object handleRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
         CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());

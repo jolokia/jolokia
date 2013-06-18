@@ -42,9 +42,11 @@ public interface RequestHandler extends JolokiaService {
      * @throws AttributeNotFoundException in case an attributes couldn't be resolved
      * @throws ReflectionException
      * @throws MBeanException
+     * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
+     *         has been set).
      */
-    Object dispatchRequest(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
+    Object handleRequest(JmxRequest pJmxReq)
+            throws JMException, IOException, NotChangedException;
 
     /**
      * Check whether current dispatcher can handle the given request

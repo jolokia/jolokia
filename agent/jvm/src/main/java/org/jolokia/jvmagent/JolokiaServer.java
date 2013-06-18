@@ -216,7 +216,7 @@ public class JolokiaServer {
                 PolicyRestrictorFactory.createRestrictor(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION), log)
         );
         serviceManager.addServices(new ClasspathRequestHandlerCreator("services"));
-        
+
         // Get own URL for later reference
         serverAddress = pServer.getAddress();
         url = extractUrl(pConfig);

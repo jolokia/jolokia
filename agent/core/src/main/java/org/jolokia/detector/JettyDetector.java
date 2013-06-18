@@ -30,6 +30,15 @@ import org.jolokia.util.ClassUtil;
 public class JettyDetector extends AbstractServerDetector {
 
 
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public JettyDetector(int pOrder) {
+        super(pOrder);
+    }
+
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {

@@ -23,14 +23,24 @@ import java.util.Set;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.service.AbstractJolokiaService;
 
 /**
- * Base class for server detectors-default
+ * Base class for server detectors.
  * 
  * @author roland
  * @since 05.11.10
  */
-public abstract class AbstractServerDetector implements ServerDetector {
+public abstract class AbstractServerDetector extends AbstractJolokiaService implements ServerDetector {
+
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public AbstractServerDetector(int pOrder) {
+        super(ServerDetector.class,pOrder);
+    }
 
     /** {@inheritDoc} */
     public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) { }

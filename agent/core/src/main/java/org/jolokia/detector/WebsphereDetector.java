@@ -48,6 +48,15 @@ public class WebsphereDetector extends AbstractServerDetector {
     private boolean isWebsphere7 = ClassUtil.checkForClass("com.ibm.websphere.management.AdminContext");
     private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public WebsphereDetector(int pOrder) {
+        super(pOrder);
+    }
+
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {

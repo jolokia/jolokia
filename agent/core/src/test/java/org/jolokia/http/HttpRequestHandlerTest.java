@@ -150,7 +150,8 @@ public class HttpRequestHandlerTest {
                 new IOException(), 500, 500,
                 new IllegalArgumentException(), 400, 400,
                 new SecurityException(),403, 403,
-                new RuntimeMBeanException(new NullPointerException()), 500, 500
+                new RuntimeMBeanException(new NullPointerException()), 500, 500,
+                new JMException(), 500, 500
         };
 
 
@@ -163,7 +164,7 @@ public class HttpRequestHandlerTest {
             log.debug((String) anyObject());
             expectLastCall().asStub();
             init(log);
-            expect(requestHandler.dispatchRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
+            expect(requestHandler.handleRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
             replay(requestHandler,log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
@@ -228,13 +229,13 @@ public class HttpRequestHandlerTest {
     private void prepareDispatcher(int i, Object pRequest) throws Exception {
         init();
         if (pRequest instanceof JmxRequest) {
-            expect(requestHandler.dispatchRequest((JmxRequest) pRequest)).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest((JmxRequest) pRequest)).andReturn("hello").times(i);
         }
         else if (pRequest instanceof String[]) {
             String a[] = (String[]) pRequest;
-            expect(requestHandler.dispatchRequest(eqReadRequest(a[0],a[1]))).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest(eqReadRequest(a[0], a[1]))).andReturn("hello").times(i);
         } else {
-            expect(requestHandler.dispatchRequest(isA(JmxRequest.class))).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest(isA(JmxRequest.class))).andReturn("hello").times(i);
         }
         replay(requestHandler);
     }

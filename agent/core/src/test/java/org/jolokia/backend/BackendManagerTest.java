@@ -57,7 +57,7 @@ public class BackendManagerTest {
     }
 
     @Test
-    public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simpleRead() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[] { ConfigKey.DEBUG,"true"});
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
@@ -73,7 +73,7 @@ public class BackendManagerTest {
 
 
     @Test
-    public void lazyInit() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void lazyInit() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[0]);
 
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
@@ -144,17 +144,17 @@ public class BackendManagerTest {
 
     // =========================================================================================
 
-    static class RequestHandlerTest extends JolokiaServiceBase implements RequestHandler {
+    static class RequestHandlerTest extends AbstractJolokiaService implements RequestHandler {
 
         static boolean called = false;
 
         public RequestHandlerTest(Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
-            super(RequestHandler.class);
+            super(RequestHandler.class,1);
             assertNotNull(pConverters);
             assertNotNull(pRestrictor);
         }
 
-        public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             called = true;
             if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();
@@ -178,15 +178,15 @@ public class BackendManagerTest {
 
     // ========================================================
 
-    static class RequestHandlerWrong extends JolokiaServiceBase implements RequestHandler {
+    static class RequestHandlerWrong extends AbstractJolokiaService implements RequestHandler {
 
         protected RequestHandlerWrong() {
-            super(RequestHandler.class);
+            super(RequestHandler.class,1);
         }
 
         // No special constructor --> fail
 
-        public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             return null;
         }
 

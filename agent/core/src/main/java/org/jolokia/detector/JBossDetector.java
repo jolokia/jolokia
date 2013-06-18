@@ -20,6 +20,15 @@ import org.jolokia.util.ClassUtil;
  */
 public class JBossDetector extends AbstractServerDetector {
 
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public JBossDetector(int pOrder) {
+        super(pOrder);
+    }
+
     /** {@inheritDoc} */
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {

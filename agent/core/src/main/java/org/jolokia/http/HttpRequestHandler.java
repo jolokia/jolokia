@@ -221,6 +221,8 @@ public class HttpRequestHandler {
             return getErrorJSON(404,e, pJmxReq);
         } catch (UnsupportedOperationException e) {
             return getErrorJSON(500,e, pJmxReq);
+        } catch (JMException e) {
+            return getErrorJSON(500,e, pJmxReq);
         } catch (IOException e) {
             return getErrorJSON(500,e, pJmxReq);
         } catch (IllegalArgumentException e) {

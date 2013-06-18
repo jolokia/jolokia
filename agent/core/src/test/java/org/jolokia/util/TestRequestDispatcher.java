@@ -29,7 +29,7 @@ public class TestRequestDispatcher implements RequestDispatcher {
     }
 
     public DispatchResult dispatch(JmxRequest pJmxRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
-        return new DispatchResult(handler.dispatchRequest(pJmxRequest),
+        return new DispatchResult(handler.handleRequest(pJmxRequest),
                                   handler.useReturnValueWithPath(pJmxRequest) ? pJmxRequest.getPathParts() : null);
     }
 

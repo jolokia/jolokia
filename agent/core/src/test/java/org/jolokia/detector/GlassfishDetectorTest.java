@@ -37,7 +37,7 @@ import static org.testng.AssertJUnit.assertEquals;
  */
 public class GlassfishDetectorTest extends BaseDetectorTest {
 
-    ServerDetector detector = new GlassfishDetector();
+    ServerDetector detector = new GlassfishDetector(1);
 
     @Test
     public void noDetect() throws MalformedObjectNameException {

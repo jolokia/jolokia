@@ -1,7 +1,6 @@
 package org.jolokia.backend.dispatcher;
 
 import java.io.IOException;
-import java.util.Set;
 
 import javax.management.*;
 
@@ -31,11 +30,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     }
 
     /** {@inheritDoc} */
-    public DispatchResult dispatch(JmxRequest pJmxRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
+    public DispatchResult dispatch(JmxRequest pJmxRequest) throws JMException, IOException, NotChangedException {
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
         for (RequestHandler requestHandler : serviceManager.getServices(RequestHandler.class)) {
             if (requestHandler.canHandle(pJmxRequest)) {
-                Object retValue = requestHandler.dispatchRequest(pJmxRequest);
+                Object retValue = requestHandler.handleRequest(pJmxRequest);
                 boolean useValueWithPath = requestHandler.useReturnValueWithPath(pJmxRequest);
                 return new DispatchResult(retValue,useValueWithPath ? pJmxRequest.getPathParts() : null);
             }

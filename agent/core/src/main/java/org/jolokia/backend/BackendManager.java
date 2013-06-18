@@ -87,13 +87,10 @@ public class BackendManager {
      *
      * @param pJmxReq request to perform
      * @return the already converted answer.
-     * @throws InstanceNotFoundException
-     * @throws AttributeNotFoundException
-     * @throws ReflectionException
-     * @throws MBeanException
+     * @throws JMException
+     * @throws IOException
      */
-    public JSONObject handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException,
-            ReflectionException, MBeanException, IOException {
+    public JSONObject handleRequest(JmxRequest pJmxReq) throws JMException, IOException {
         lazyInitIfNeeded();
 
         boolean debug = jolokiaCtx.isDebug();
@@ -224,7 +221,7 @@ public class BackendManager {
 
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+            throws JMException, IOException, NotChangedException {
         DispatchResult result = requestDispatcher.dispatch(pJmxReq);
         if (result == null) {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);

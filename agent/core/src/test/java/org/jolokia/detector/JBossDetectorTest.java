@@ -43,7 +43,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
     @BeforeMethod
     public void setup() {
-        detector = new JBossDetector();
+        detector = new JBossDetector(1);
 
         server = createMock(MBeanServer.class);
         servers = getMBeanServerManager(server);

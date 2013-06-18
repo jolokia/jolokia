@@ -26,6 +26,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
 import org.osgi.framework.*;
@@ -136,7 +137,11 @@ public class JolokiaServletTest {
     // ===========================================================================
     // Detector to avoid checkup with every detector
 
-    public static class CatchAllDetector implements ServerDetector {
+    public static class CatchAllDetector extends AbstractJolokiaService implements ServerDetector {
+
+        public CatchAllDetector(int pOrderId) {
+            super(ServerDetector.class, pOrderId);
+        }
 
         public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
             return ServerHandle.NULL_SERVER_HANDLE;

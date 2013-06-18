@@ -69,7 +69,7 @@ public class LocalRequestHandlerTest {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(commandHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
         replay(commandHandler);
-        assertEquals(requestHandler.dispatchRequest(request),result);
+        assertEquals(requestHandler.handleRequest(request),result);
     }
 
 
@@ -93,7 +93,7 @@ public class LocalRequestHandlerTest {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(commandHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(commandHandler);
-        requestHandler.dispatchRequest(request);
+        requestHandler.handleRequest(request);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class LocalRequestHandlerTest {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andReturn(result);
         replay(commandHandler);
-        assertEquals(requestHandler.dispatchRequest(request),result);
+        assertEquals(requestHandler.handleRequest(request),result);
     }
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
@@ -111,7 +111,7 @@ public class LocalRequestHandlerTest {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andThrow(new IOException());
         replay(commandHandler);
-        requestHandler.dispatchRequest(request);
+        requestHandler.handleRequest(request);
     }
 
 }

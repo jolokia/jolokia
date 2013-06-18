@@ -22,10 +22,7 @@ package org.jolokia.service;
  * @author roland
  * @since 22.04.13
  */
-public abstract class JolokiaServiceBase implements JolokiaService {
-
-    // default order value for a jolokia service
-    private static final int DEFAULT_ORDER = 1000;
+public abstract class AbstractJolokiaService implements JolokiaService {
 
     // service type of this Jolokia Service
     private Class<? extends JolokiaService> type;
@@ -33,25 +30,17 @@ public abstract class JolokiaServiceBase implements JolokiaService {
     // order number for this service
     protected int order;
 
-
-    /**
-     * Create this base for the given service type
-     *
-     * @param pType type of this service
-     */
-    protected JolokiaServiceBase(Class<? extends JolokiaService> pType) {
-        this(pType,DEFAULT_ORDER);
-    }
-
     /**
      * Consruction of a base service for a given type and order
      *
      * @param pType service type
-     * @param pOrder order
+     * @param pOrderId order id. A user of JolokiaService <em>must ensure</em> that the given
+     *                 order id is unique for the given type. It used for ordering the services but is also
+     *                 used as an id when storing it in  aset.
      */
-    protected JolokiaServiceBase(Class<? extends JolokiaService> pType, int pOrder) {
+    protected AbstractJolokiaService(Class<? extends JolokiaService> pType, int pOrderId) {
         type = pType;
-        order = pOrder;
+        order = pOrderId;
     }
 
     /** {@inheritDoc} */
@@ -82,6 +71,6 @@ public abstract class JolokiaServiceBase implements JolokiaService {
     /** {@inheritDoc} */
     public int compareTo(Object o) {
         JolokiaService service1 = (JolokiaService) o;
-        return service1.getOrder() - getOrder();
+        return getOrder() - service1.getOrder();
     }
 }

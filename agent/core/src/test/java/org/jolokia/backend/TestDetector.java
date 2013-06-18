@@ -25,6 +25,7 @@ import org.easymock.IAnswer;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.service.AbstractJolokiaService;
 
 import static org.easymock.EasyMock.*;
 
@@ -32,7 +33,7 @@ import static org.easymock.EasyMock.*;
  * @author roland
  * @since 02.09.11
  */
-public class TestDetector implements ServerDetector {
+public class TestDetector extends AbstractJolokiaService implements ServerDetector {
 
     private static boolean throwAddException = false;
 
@@ -46,7 +47,8 @@ public class TestDetector implements ServerDetector {
     static int instances = 0;
     int nr;
 
-    public TestDetector() {
+    public TestDetector(int order) {
+        super(ServerDetector.class,order);
         nr = instances++;
     }
 

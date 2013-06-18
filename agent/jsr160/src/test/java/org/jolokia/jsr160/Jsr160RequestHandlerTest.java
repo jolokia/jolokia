@@ -78,7 +78,7 @@ public class Jsr160RequestHandlerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()));
+        dispatcher.handleRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()));
     }
 
     @Test(expectedExceptions = IOException.class)
@@ -89,21 +89,21 @@ public class Jsr160RequestHandlerTest {
         testCtx = new TestJolokiaContext.Builder().build();
         Jsr160RequestHandler handler = new Jsr160RequestHandler(0);
         handler.init(testCtx);
-        handler.dispatchRequest(req);
+        handler.handleRequest(req);
         setup();
     }
 
     @Test
     public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxReadRequest req =  preparePostReadRequest(null);
-        Map result = (Map) dispatcher.dispatchRequest(req);
+        Map result = (Map) dispatcher.handleRequest(req);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
     @Test
     public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
-        assertNotNull(dispatcher.dispatchRequest(req));
+        assertNotNull(dispatcher.handleRequest(req));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class Jsr160RequestHandlerTest {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JmxRequest req = preparePostReadRequest("roland");
-            Map result = (Map) dispatcher.dispatchRequest(req);
+            Map result = (Map) dispatcher.handleRequest(req);
             assertTrue(result.containsKey("HeapMemoryUsage"));
         } finally {
             System.clearProperty("TEST_WITH_USER");

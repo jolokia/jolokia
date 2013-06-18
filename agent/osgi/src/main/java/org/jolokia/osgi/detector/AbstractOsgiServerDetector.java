@@ -28,6 +28,16 @@ import org.osgi.framework.BundleContext;
  * @since 04.12.10
  */
 public abstract class AbstractOsgiServerDetector extends AbstractServerDetector {
+
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public AbstractOsgiServerDetector(int pOrder) {
+        super(pOrder);
+    }
+
     protected String getSystemBundleVersion() {
         Dictionary headers = getSystemBundleHeaders();
         return (String) headers.get("Bundle-Version");

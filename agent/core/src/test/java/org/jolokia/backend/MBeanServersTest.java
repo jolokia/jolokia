@@ -110,7 +110,7 @@ public class MBeanServersTest implements NotificationListener {
     }
 
     private ServerDetector getTestDetector() {
-        return new AbstractServerDetector() {
+        return new AbstractServerDetector(1) {
             public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
                 return null;
             }

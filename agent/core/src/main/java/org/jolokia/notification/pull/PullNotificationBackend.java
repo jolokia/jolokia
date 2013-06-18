@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.notification.*;
+import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.JolokiaServiceBase;
 import org.jolokia.util.JmxUtil;
 import org.json.simple.JSONObject;
 
@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 20.03.13
  */
-public class PullNotificationBackend extends JolokiaServiceBase implements NotificationBackend {
+public class PullNotificationBackend extends AbstractJolokiaService implements NotificationBackend {
 
     // Store for holding the notification
     private PullNotificationStore store;

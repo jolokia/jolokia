@@ -26,6 +26,15 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
  */
 public class GeronimoDetector extends AbstractServerDetector {
 
+    /**
+     * Create a server detector
+     *
+     * @param pOrder of the detector (within the list of detectors)
+     */
+    public GeronimoDetector(int pOrder) {
+        super(pOrder);
+    }
+
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
