@@ -1,23 +1,9 @@
 package org.jolokia.it;
 
 import java.util.Iterator;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.DynamicMBean;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.ReflectionException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenMBeanAttributeInfoSupport;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularDataSupport;
-import javax.management.openmbean.TabularType;
+
+import javax.management.*;
+import javax.management.openmbean.*;
 
 /**
  * @author Dave Messink
@@ -35,27 +21,50 @@ public class TabularMBean implements DynamicMBean
   private final TabularType _table1Type;
   private final TabularType _table2Type;
 
+  private final TabularType _updateType;
+
   public TabularMBean() throws
       OpenDataException
   {
-    MBeanAttributeInfo[] attributes = new MBeanAttributeInfo[2];
+      MBeanAttributeInfo[] attributes = new MBeanAttributeInfo[2];
 
-    String[] columnDescriptions = {"column one", "column two", "column three"};
-    OpenType[] columnTypes = {SimpleType.STRING, SimpleType.STRING, SimpleType.STRING};
-    CompositeType compositeType = new CompositeType("SensorMetric", "Sensor metric data",
-                                                    COLUMN_NAMES, columnDescriptions, columnTypes);
+      String[] columnDescriptions = {"column one", "column two", "column three"};
+      OpenType[] columnTypes = {SimpleType.STRING, SimpleType.STRING, SimpleType.STRING};
+      CompositeType compositeType = new CompositeType("SensorMetric", "Sensor metric data",
+                                                      COLUMN_NAMES, columnDescriptions, columnTypes);
 
-    _table1Type = new TabularType("Table1Type", "table one type", compositeType, new String[]{"Column1"});
-    attributes[0] = new OpenMBeanAttributeInfoSupport("Table1", "table one", _table1Type, true, false, false);
+      _table1Type = new TabularType("Table1Type", "table one type", compositeType, new String[]{"Column1"});
+      attributes[0] = new OpenMBeanAttributeInfoSupport("Table1", "table one", _table1Type, true, false, false);
 
-    _table2Type = new TabularType("Table2Type", "table two type", compositeType, new String[]{"Column1", "Column2"});
-    attributes[1] = new OpenMBeanAttributeInfoSupport("Table2", "table two", _table2Type, true, false, false);
+      _table2Type = new TabularType("Table2Type", "table two type", compositeType, new String[]{"Column1", "Column2"});
+      attributes[1] = new OpenMBeanAttributeInfoSupport("Table2", "table two", _table2Type, true, false, false);
 
-    _mbeanInfo = new MBeanInfo(getClass().getName(),
+
+
+      // "update" method works here, because we use open data. This is contrast to OperationCheckingMBean which is
+      // standard MBean and were TabularData doesnt work without Meta-Data.
+      _updateType = new TabularType("UpdateType","Update data",
+                                    new CompositeType("updateRow","Row desc",
+                                                      new String[] { "Key", "Value", "Type"},
+                                                      new String[] { "Key", "Value", "Type"},
+                                                      new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.STRING}),
+                                    new String[] { "Key" });
+      MBeanOperationInfo[] operations = new MBeanOperationInfo[1];
+      operations[0] = new OpenMBeanOperationInfoSupport(
+              "update",
+              "Test method for TabularData",
+              new OpenMBeanParameterInfo[] {
+                      new OpenMBeanParameterInfoSupport("name","1. param",SimpleType.STRING),
+                      new OpenMBeanParameterInfoSupport("data","2. param",_updateType)
+              },
+              _updateType,
+              MBeanOperationInfo.INFO
+      );
+      _mbeanInfo = new MBeanInfo(getClass().getName(),
                                "tabular mbean",
                                attributes,
                                null,
-                               null,
+                               operations,
                                null);
   }
 
@@ -149,8 +158,12 @@ public class TabularMBean implements DynamicMBean
   public Object invoke(String actionName, Object[] params, String[] signature) throws MBeanException,
       ReflectionException
   {
-    throw new MBeanException(
-        new UnsupportedOperationException("MBean operation " + actionName + " is not supported for " + getClass().getName()));
+      if (actionName.equals("update")) {
+          return params[1];
+      } else {
+          throw new MBeanException(
+                  new UnsupportedOperationException("MBean operation " + actionName + " is not supported for " + getClass().getName()));
+      }
   }
 
   public MBeanInfo getMBeanInfo()

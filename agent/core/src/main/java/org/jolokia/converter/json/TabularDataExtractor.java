@@ -108,7 +108,7 @@ public class TabularDataExtractor implements Extractor {
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pExtraArgs,boolean pJsonify) throws AttributeNotFoundException {
+                                Stack<String> pExtraArgs,boolean pJsonify) throws AttributeNotFoundException {
         TabularData td = (TabularData) pValue;
         if (!pExtraArgs.isEmpty()) {
             CompositeData cd = extractCompositeDataFromPath(td, pExtraArgs);

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.*;
+import javax.management.openmbean.TabularData;
 
 /**
  * @author roland
@@ -110,6 +111,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
 
     public BigDecimal addBigDecimal(int first,BigDecimal second) {
         return second.add(BigDecimal.valueOf(first));
+    }
+
+    public TabularData update(String name, TabularData data) {
+        return data;
     }
 
     public int overloadedMethod() {
