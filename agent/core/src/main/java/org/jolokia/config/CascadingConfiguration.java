@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.jolokia.service.impl;
+package org.jolokia.config;
 
 import java.util.*;
 
-import org.jolokia.config.*;
 import org.jolokia.http.ProcessingParameters;
 
 /**

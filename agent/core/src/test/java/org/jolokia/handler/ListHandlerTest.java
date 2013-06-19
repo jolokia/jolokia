@@ -27,7 +27,6 @@ import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.detector.ServerDetector;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
@@ -53,7 +52,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         ctx = new TestJolokiaContext();
         handler = new ListHandler(ctx);
         executor = new MBeanServerExecutorLocal();
-        executor.init(Collections.<ServerDetector>emptyList());
+        executor.init(Collections.<MBeanServerConnection>emptySet());
     }
 
     @AfterMethod

@@ -2,7 +2,7 @@ package org.jolokia.backend.dispatcher;
 
 import java.io.IOException;
 
-import javax.management.*;
+import javax.management.JMException;
 
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequest;
@@ -27,10 +27,12 @@ public class RequestDispatcherImpl implements RequestDispatcher {
      */
     public RequestDispatcherImpl(JolokiaServiceManager pServiceManager) {
         serviceManager = pServiceManager;
+
     }
 
     /** {@inheritDoc} */
     public DispatchResult dispatch(JmxRequest pJmxRequest) throws JMException, IOException, NotChangedException {
+
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
         for (RequestHandler requestHandler : serviceManager.getServices(RequestHandler.class)) {
             if (requestHandler.canHandle(pJmxRequest)) {

@@ -93,6 +93,10 @@ public class TestJolokiaContext implements JolokiaContext {
         return config.getConfigKeys();
     }
 
+    public void setServerHandle(ServerHandle pHandle) {
+        handle = pHandle;
+    }
+
     public void debug(String message) {
         logHandler.debug(message);
     }

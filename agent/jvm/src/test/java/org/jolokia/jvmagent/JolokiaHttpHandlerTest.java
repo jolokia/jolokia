@@ -53,13 +53,11 @@ public class JolokiaHttpHandlerTest {
         ctx = getContext();
         requestDispatcher = new TestRequestDispatcher(ctx);
         handler = new JolokiaHttpHandler(ctx, requestDispatcher);
-        handler.start(false);
     }
 
     @AfterMethod
     public void tearDown() throws JMException {
         if (handler != null) {
-            handler.stop();
             requestDispatcher.destroy();
             handler = null;
         }
@@ -132,13 +130,6 @@ public class JolokiaHttpHandlerTest {
         assertTrue(resp.containsKey("error"));
         assertEquals(resp.get("error_type"),IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("PUT"));
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
-    public void handlerNotStarted() throws URISyntaxException, IOException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getContext(), requestDispatcher);
-        newHandler.handle(prepareExchange("http://localhost:8080/"));
-
     }
 
     @Test

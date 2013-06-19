@@ -23,8 +23,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import com.sun.net.httpserver.Authenticator;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.StaticConfiguration;
+import org.jolokia.config.*;
 
 /**
  * Configuration required for the JolokiaServer
@@ -97,14 +96,24 @@ public class JolokiaServerConfig {
 
     protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
         InputStream is = getClass().getResourceAsStream("/default-jolokia-agent.properties");
-        return readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
+        Map<String,String> props = readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
+        Map<String,String> extra = getExtraOptions();
+        if (extra != null) {
+            props.putAll(extra);
+        }
+        return props;
+    }
+
+    // Hook for adding extra options
+    protected Map<String,String> getExtraOptions() {
+        return null;
     }
 
     /**
      * Get the Jolokia runtime configuration
      * @return jolokia configuration
      */
-    public StaticConfiguration getJolokiaConfig() {
+    public Configuration getJolokiaConfig() {
         return jolokiaConfig;
     }
 

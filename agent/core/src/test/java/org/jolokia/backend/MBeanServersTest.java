@@ -1,8 +1,7 @@
 package org.jolokia.backend;
 
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.*;
 
@@ -32,7 +31,7 @@ public class MBeanServersTest implements NotificationListener {
 
     @Test
     public void simple() throws ListenerNotFoundException, InstanceNotFoundException {
-        MBeanServers servers = new MBeanServers(Arrays.asList(getTestDetector()), this);
+        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
         checkForServers(servers.getMBeanServers(), ManagementFactory.getPlatformMBeanServer(), ownServer);
         assertFalse(notificationCalled);
 
@@ -49,7 +48,7 @@ public class MBeanServersTest implements NotificationListener {
     @Test
     public void withJolokiaMBeanServerFromStart() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
         registerJolokiaMBeanServer();
-        MBeanServers servers = new MBeanServers(Arrays.asList(getTestDetector()),this);
+        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
         checkForServers(servers.getMBeanServers(),ManagementFactory.getPlatformMBeanServer(), ownServer,lookup.getJolokiaMBeanServer());
         assertFalse(notificationCalled);
         assertEquals(lookup.getJolokiaMBeanServer(), servers.getJolokiaMBeanServer());
@@ -60,7 +59,7 @@ public class MBeanServersTest implements NotificationListener {
 
     @Test
     public void withJolokiaMBeanServerFromKickingInLater() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
-        MBeanServers servers = new MBeanServers(Arrays.asList(getTestDetector()),this);
+        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
         registerJolokiaMBeanServer();
 
         MBeanServer jolokiaMBeanServer = lookup.getJolokiaMBeanServer();
@@ -77,7 +76,7 @@ public class MBeanServersTest implements NotificationListener {
 
     @Test
     public void dump() {
-        MBeanServers servers = new MBeanServers(Arrays.asList(getTestDetector()),this);
+        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
         String dump = servers.dump();
         assertTrue(dump.contains("java.lang"));
         assertTrue(dump.contains("type=Memory"));

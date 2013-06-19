@@ -195,6 +195,15 @@ public enum ConfigKey {
     DETECTOR_OPTIONS("detectorOptions",true, false),
 
     /**
+     * Set to true if a lazy detection is required, i.e. the detection will happen during the first request.
+     * This can be set in order to avoid a missed detection because of the start-up order of the
+     * Jolokia agent and the instrumented server. I.e. the JVM Agent when configured for attaching during startup
+     * uses this flag to delay the detection. This options is mostly of internal use and should not necessarily
+     * used otherwise.
+     */
+    LAZY_SERVER_DETECTION("lazyServerDetection", true, false, "false"),
+
+    /**
      * The ID to uniquely identify this agent within a JVM. There
      * can be multiple agents registered a JVM. This id is e.g. used to
      * uniquely create MBean names.

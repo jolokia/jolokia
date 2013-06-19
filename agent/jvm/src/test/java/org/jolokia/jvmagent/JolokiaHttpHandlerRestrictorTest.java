@@ -39,12 +39,7 @@ public class JolokiaHttpHandlerRestrictorTest {
         expect(exchange.getRequestMethod()).andReturn("GET");
         Headers header = new Headers();
         ByteArrayOutputStream out = JolokiaHttpHandlerTest.prepareResponse(exchange, header);
-        newHandler.start(false);
-        try {
-            newHandler.handle(exchange);
-        } finally {
-            newHandler.stop();
-        }
+        newHandler.handle(exchange);
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
         assertTrue(resp.containsKey("error"));
         assertTrue(((String) resp.get("error")).contains(pParam));

@@ -84,14 +84,14 @@ public class JolokiaServerTest {
     public void invalidConfig() throws IOException, InterruptedException {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
         Thread.sleep(1000);
-        new JolokiaServer(cfg,false);
+        new JolokiaServer(cfg);
     }
 
     @Test
     public void customHttpServer() throws IOException, NoSuchFieldException, IllegalAccessException {
         HttpServer httpServer = HttpServer.create();
         JvmAgentConfig cfg = new JvmAgentConfig("");
-        JolokiaServer server = new JolokiaServer(httpServer,cfg,false);
+        JolokiaServer server = new JolokiaServer(httpServer,cfg);
         Field field = JolokiaServer.class.getDeclaredField("useOwnServer");
         field.setAccessible(true);
         assertFalse((Boolean) field.get(server));
@@ -131,7 +131,7 @@ public class JolokiaServerTest {
     }
 
     private void checkServer(JvmAgentConfig pConfig, boolean pDoRequest) throws IOException {
-        JolokiaServer server = new JolokiaServer(pConfig,false);
+        JolokiaServer server = new JolokiaServer(pConfig);
         server.start();
         //Thread.sleep(2000);
         try {

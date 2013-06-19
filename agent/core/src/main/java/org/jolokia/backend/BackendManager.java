@@ -56,11 +56,6 @@ public class BackendManager {
     // Hard limits for conversion
     private JsonConvertOptions.Builder convertOptionsBuilder;
 
-    // Initialize used for late initialization
-    // ("volatile: because we use double-checked locking later on
-    // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
-    private volatile Initializer initializer;
-
     /**
      * Construct a new backend manager with the given configuration.
      *
@@ -70,15 +65,7 @@ public class BackendManager {
     public BackendManager(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
         jolokiaCtx = pJolokiaCtx;
         requestDispatcher = pRequestDispatcher;
-
-        // TODO: Left here for reference. Mechanism must be moved to the place
-        // where Detectors have to be initialized.
-        if (false) {
-            initializer = new Initializer();
-        } else {
-            init(pJolokiaCtx);
-            initializer = null;
-        }
+        init(pJolokiaCtx);
     }
 
     /**
@@ -91,8 +78,6 @@ public class BackendManager {
      * @throws IOException
      */
     public JSONObject handleRequest(JmxRequest pJmxReq) throws JMException, IOException {
-        lazyInitIfNeeded();
-
         boolean debug = jolokiaCtx.isDebug();
 
         long time = 0;
@@ -179,31 +164,9 @@ public class BackendManager {
 
     // ==========================================================================================================
 
-    // Initialized used for late initialisation as it is required for the agent when used
-    // as startup options
-    private final class Initializer {
-        void init() {
-            BackendManager.this.init(jolokiaCtx);
-        }
-    }
 
-    // Run initialized if not already done
-    private void lazyInitIfNeeded() {
-        if (initializer != null) {
-            synchronized (this) {
-                if (initializer != null) {
-                    initializer.init();
-                    initializer = null;
-                }
-            }
-        }
-    }
-
-    // Initialize this object;
     private void init(JolokiaContext pCtx) {
         // Init limits
-
-        // Max traversal depth
         if (pCtx != null) {
             convertOptionsBuilder = new JsonConvertOptions.Builder(
                     getNullSaveIntLimit(pCtx.getConfig(MAX_DEPTH)),

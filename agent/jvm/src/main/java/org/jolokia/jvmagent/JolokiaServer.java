@@ -85,13 +85,10 @@ public class JolokiaServer {
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests.
      *
      * @param pConfig configuration for this server
-     * @param pLazy lazy initialisation if true. This is required for agents
-     *              configured via startup options since at this early boot time
-     *              the JVM is not fully setup for the server detectors-default to work
      * @throws IOException if initialization fails
      */
-    public JolokiaServer(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
-        init(pConfig, pLazy);
+    public JolokiaServer(JolokiaServerConfig pConfig) throws IOException {
+        init(pConfig);
     }
 
     /**
@@ -100,16 +97,13 @@ public class JolokiaServer {
      *
      * @param pServer HttpServer to use
      * @param pConfig configuration for this server
-     * @param pLazy lazy initialisation if true. This is required for agents
-     *              configured via startup options since at this early boot time
-     *              the JVM is not fully setup for the server detectors to work
      */
-    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, boolean pLazy) {
-        init(pServer, pConfig, pLazy);
+    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig) {
+        init(pServer, pConfig);
     }
 
     /**
-     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig, boolean)} must be called later on
+     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig)} must be called later on
      * for initialization
      */
     protected JolokiaServer() {}
@@ -129,7 +123,6 @@ public class JolokiaServer {
         if (authenticator != null) {
             httpContext.setAuthenticator(authenticator);
         }
-        jolokiaHttpHandler.start(lazy);
 
         if (useOwnServer) {
             // Starting our own server in an own thread group with a fixed name
@@ -153,7 +146,6 @@ public class JolokiaServer {
      * Stop the HTTP server
      */
     public void stop() {
-        jolokiaHttpHandler.stop();
         httpServer.removeContext(httpContext);
         serviceManager.stop();
 
@@ -186,12 +178,11 @@ public class JolokiaServer {
      * Initialize this JolokiaServer and use an own created HttpServer
      *
      * @param pConfig configuartion to use
-     * @param pLazy whether to do the inialization lazy or not
      * @throws IOException if the creation of the HttpServer fails
      */
-    protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
+    protected final void init(JolokiaServerConfig pConfig) throws IOException {
         // We manage it on our own
-        init(createHttpServer(pConfig),pConfig,pLazy);
+        init(createHttpServer(pConfig),pConfig);
         useOwnServer = true;
     }
 
@@ -201,11 +192,9 @@ public class JolokiaServer {
      *
      * @param pServer server to use
      * @param pConfig configuration
-     * @param pLazy whether the initialization should be done lazy or not
      */
-    protected final void init(HttpServer pServer, JolokiaServerConfig pConfig, boolean pLazy)  {
+    private void init(HttpServer pServer, JolokiaServerConfig pConfig)  {
         config = pConfig;
-        lazy = pLazy;
         httpServer = pServer;
 
         // Create proper context along with handler

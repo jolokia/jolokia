@@ -17,22 +17,19 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.management.*;
 
 import org.jolokia.backend.dispatcher.RequestHandler;
-import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.backend.dispatcher.ServerHandleFinder;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.detector.*;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.impl.JolokiaContextImpl;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -41,9 +38,15 @@ import org.jolokia.service.impl.JolokiaContextImpl;
  * @since Nov 11, 2009
  */
 public class LocalRequestHandler extends AbstractJolokiaService implements RequestHandler {
+
     private MBeanServerExecutorLocal mBeanServerManager;
     private CommandHandlerManager commandHandlerManager;
-    private ServerHandle serverHandle;
+    private JolokiaContext jolokiaContext;
+
+    // Initialize used for late initialization
+    // ("volatile: because we use double-checked locking later on
+    // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
+    private volatile Initializer initializer;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
@@ -52,22 +55,21 @@ public class LocalRequestHandler extends AbstractJolokiaService implements Reque
         super(RequestHandler.class,pOrder);
     }
 
-
     /** {@inheritDoc} */
     // This service must be initialized after the detectors, since detectors will be
     // looked up in this init
     public void init(JolokiaContext pCtx) {
         commandHandlerManager =  new CommandHandlerManager(pCtx,true);
         mBeanServerManager = new MBeanServerExecutorLocal();
+        jolokiaContext = pCtx;
 
-        // Request handling manager
-        // TODO: Introduce lazy detection for the Agent based, startup option
-        List<ServerDetector> detectors = lookupDetectors(pCtx);
-        // Lookup all MBeanServers. Needs to be done before the server handle detection
-        // so that all available MBeanServer have been already collected
-        mBeanServerManager.init(detectors);
-
-        serverHandle = detectServerHandle(pCtx, detectors);
+        // where Detectors have to be initialized.
+        if (Boolean.parseBoolean(pCtx.getConfig(ConfigKey.LAZY_SERVER_DETECTION))) {
+            initializer = new Initializer();
+        } else {
+            new Initializer().init();
+            initializer = null;
+        }
     }
 
     // Can handle any request
@@ -85,8 +87,10 @@ public class LocalRequestHandler extends AbstractJolokiaService implements Reque
     /** {@inheritDoc} */
     public Object handleRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
+        lazyInitIfNeeded();
+
         CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
-        serverHandle.preDispatch(mBeanServerManager, pJmxReq);
+        jolokiaContext.getServerHandle().preDispatch(mBeanServerManager, pJmxReq);
         if (handler.handleAllServersAtOnce(pJmxReq)) {
             try {
                 return handler.handleRequest(mBeanServerManager, pJmxReq);
@@ -107,77 +111,29 @@ public class LocalRequestHandler extends AbstractJolokiaService implements Reque
         commandHandlerManager.destroy();
     }
 
-    /**
-     * Initialize the server handle and update the context.
-     *
-     * @param pCtx the jolokia context used for initializing the server handle
-     * @param pDetectors all detectors-default known
-     */
-    private ServerHandle detectServerHandle(JolokiaContext pCtx, List<ServerDetector> pDetectors) {
-        ServerHandle handle = detectServers(pDetectors, pCtx);
-        handle.postDetect(mBeanServerManager, pCtx);
-        handle.setJolokiaId(extractJolokiaId(pCtx));
-        if (pCtx instanceof JolokiaContextImpl) {
-            ((JolokiaContextImpl) pCtx).setServerHandle(handle);
-        }
-        return handle;
-    }
+    // =====================================================================================================
 
-    /**
-     * Extract a unique Id for this agent
-     *
-     * @param pContext the jolokia context
-     * @return the unique Jolokia ID
-     */
-    private String extractJolokiaId(JolokiaContext pContext) {
-        String id = pContext.getConfig(ConfigKey.JOLOKIA_ID);
-        if (id != null) {
-            return id;
-        }
-        return Integer.toHexString(hashCode()) + "-unknown";
-    }
-
-    // Lookup all registered detectors-default + a default detector
-    private List<ServerDetector> lookupDetectors(JolokiaContext pCtx) {
-        List<ServerDetector> detectors = new ArrayList<ServerDetector>();
-        detectors.addAll(pCtx.getServices(ServerDetector.class));
-        // An detector at the end of the chain in order to get a default handle
-        detectors.add(new FallbackServerDetector());
-        return detectors;
-    }
-
-    // Detect the server by delegating it to a set of predefined detectors-default. These will be created
-    // by a lookup mechanism, queried and thrown away after this method
-    private ServerHandle detectServers(List<ServerDetector> pDetectors, JolokiaContext pCtx) {
-        // Now detect the server
-        for (ServerDetector detector : pDetectors) {
-            try {
-                ServerHandle info = detector.detect(mBeanServerManager);
-                if (info != null) {
-                    return info;
+    // Run initialized if not already done
+    private void lazyInitIfNeeded() {
+        if (initializer != null) {
+            synchronized (this) {
+                if (initializer != null) {
+                    initializer.init();
+                    initializer = null;
                 }
-            } catch (Exception exp) {
-                // We are defensive here and wont stop the servlet because
-                // there is a problem with the server detection. A error will be logged
-                // nevertheless, though.
-                pCtx.error("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp,exp);
             }
         }
-        return ServerHandle.NULL_SERVER_HANDLE;
     }
 
-    // ==================================================================================
-    // Fallback server detector which matches always
-
-    private static class FallbackServerDetector extends AbstractServerDetector {
-        public FallbackServerDetector() {
-            super(10000);
-        }
-
-        /** {@inheritDoc}
-         * @param pMBeanServerExecutor*/
-        public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
-            return ServerHandle.NULL_SERVER_HANDLE;
+    // Initialized used for late initialisation as it is required for the agent when used
+    // as startup options
+    private final class Initializer {
+        void init() {
+            ServerHandleFinder finder = new ServerHandleFinder(jolokiaContext);
+            mBeanServerManager.init(finder.getExtraMBeanServers());
+            ServerHandle handle = finder.detectServerHandle(mBeanServerManager);
+            jolokiaContext.setServerHandle(handle);
         }
     }
+
 }

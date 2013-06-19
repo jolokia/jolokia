@@ -5,7 +5,6 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.detector.ServerDetector;
 import org.jolokia.util.JmxUtil;
 
 import static javax.management.MBeanServerNotification.*;
@@ -33,21 +32,19 @@ class MBeanServers implements NotificationListener {
     /**
      * Constructor building up the list of available MBeanServers
      *
-     * @param pDetectors detectors-default to be used for looking up MBeanServers
+     * @param pExtraServers list of extra MBeanServers, possibly detected elsewhere
      * @param pListener listener to register to the Jolokia MBeanServer when this server
      */
-    MBeanServers(List<ServerDetector> pDetectors, NotificationListener pListener) {
+    MBeanServers(Set<MBeanServerConnection> pExtraServers, NotificationListener pListener) {
         detectedMBeanServers = new LinkedHashSet<MBeanServerConnection>();
         jolokiaMBeanServerListener = pListener;
+
         // Create and add our own JolokiaMBeanServer first and
         // add us for registration/deregistration of the MBeanServer
         jolokiaMBeanServer = lookupJolokiaMBeanServer();
         addJolokiaMBeanServerRegistrationListener();
 
-        // Let every detector add its own MBeanServer
-        for (ServerDetector detector : pDetectors) {
-            detector.addMBeanServers(detectedMBeanServers);
-        }
+        detectedMBeanServers.addAll(pExtraServers);
 
         // All MBean Server known by the MBeanServerFactory
         List<MBeanServer> beanServers = MBeanServerFactory.findMBeanServer(null);

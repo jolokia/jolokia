@@ -17,6 +17,10 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import org.jolokia.config.ConfigKey;
 
 
 /**
@@ -66,7 +70,17 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        startAgent(new JvmAgentConfig(agentArgs),true /* register and detect lazy */);
+        startAgent(new JvmAgentConfig(agentArgs) {
+
+            @Override
+            /* register and detect lazy because when used as a startup option we do not have access
+             * to the app server specific MBean right now, only later. So the detection is shift to
+             * the first request (which can still be to early, but at least we tried)
+             */
+            protected Map<String, String> getExtraOptions() {
+                return Collections.singletonMap(ConfigKey.LAZY_SERVER_DETECTION.getKeyValue(),"true");
+            }
+        });
     }
 
     /**
@@ -78,15 +92,15 @@ public final class JvmAgent {
     public static void agentmain(String agentArgs) {
         JvmAgentConfig config = new JvmAgentConfig(agentArgs);
         if (!config.isModeStop()) {
-            startAgent(config,false);
+            startAgent(config);
         } else {
             stopAgent();
         }
     }
 
-    private static void startAgent(JvmAgentConfig pConfig,boolean pLazy)  {
+    private static void startAgent(JvmAgentConfig pConfig)  {
         try {
-            server = new JolokiaServer(pConfig,pLazy);
+            server = new JolokiaServer(pConfig);
 
             server.start();
             setStateMarker();

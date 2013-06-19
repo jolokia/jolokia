@@ -21,8 +21,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import com.sun.net.httpserver.Authenticator;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.StaticConfiguration;
+import org.jolokia.config.*;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -44,7 +43,7 @@ public class JvmAgentConfigTest {
     @Test
     public void detectorArgs() {
         JvmAgentConfig config = new JvmAgentConfig("bootAmx=true");
-        StaticConfiguration jConfig = config.getJolokiaConfig();
+        Configuration jConfig = config.getJolokiaConfig();
         String detectorOpts = jConfig.getConfig(ConfigKey.DETECTOR_OPTIONS);
         assertEquals(detectorOpts.replaceAll("\\s*",""),"{\"glassfish\":{\"bootAmx\":true}}");
     }
@@ -76,7 +75,7 @@ public class JvmAgentConfigTest {
     public void jolokiaConfig() {
         JvmAgentConfig config = new JvmAgentConfig("maxDepth=42");
 
-        StaticConfiguration jolokiaConfig = config.getJolokiaConfig();
+        Configuration jolokiaConfig = config.getJolokiaConfig();
         assertEquals(jolokiaConfig.getConfig(ConfigKey.MAX_DEPTH),"42");
     }
 

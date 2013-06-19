@@ -88,14 +88,14 @@ public class HttpRequestHandlerTest {
     public void singlePost() throws Exception {
         prepareDispatcher();
         InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
-        JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia",is,"utf-8",null);
+        JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         verifyDispatcher(response);
     }
 
 
     @Test
     public void doublePost() throws Exception {
-        prepareDispatcher(2,JmxReadRequest.class);
+        prepareDispatcher(2, JmxReadRequest.class);
         InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
         JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         verifyDispatcher(2, response);
@@ -129,14 +129,14 @@ public class HttpRequestHandlerTest {
     public void invalidJson() throws IOException {
         //replay(backend);
         InputStream is = HttpTestUtil.createServletInputStream("{ bla;");
-        handler.handlePostRequest("/jolokia",is,"utf-8",null);
+        handler.handlePostRequest("/jolokia", is, "utf-8", null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidJson2() throws IOException {
         //replay(backend);
         InputStream is = HttpTestUtil.createServletInputStream("12");
-        handler.handlePostRequest("/jolokia",is,"utf-8",null);
+        handler.handlePostRequest("/jolokia", is, "utf-8", null);
     }
 
     @Test

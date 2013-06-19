@@ -55,4 +55,14 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * Get all keys stored in this configuration
      */
     Set<ConfigKey> getConfigKeys();
+
+    /**
+     * Method to set the server handle. This can be called only once after which this
+     * method is sealed. The setter is given so that a lazy initialization is easily possible
+     * It MUST not be used by any custom code. So, I'm still looking for a cleaner solution here (probably
+     * letting the handle return from the request handler service).
+     *
+     * @param pHandle handle to use.
+     */
+    void setServerHandle(ServerHandle pHandle);
 }

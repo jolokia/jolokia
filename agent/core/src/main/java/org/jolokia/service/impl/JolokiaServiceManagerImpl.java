@@ -65,14 +65,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // Server handler for registering MBeans
     private MBeanRegistry mBeanServerHandler;
 
-    // Request dispatcher for executing operations
-    private RequestDispatcher requestDispatcher;
-
     /**
+     * Create the implementation of a service manager
      *
-     * @param pConfig
-     * @param pLogHandler
-     * @param pRestrictor
+     * @param pConfig configuration to use
+     * @param pLogHandler the logger
+     * @param pRestrictor restrictor to apply
      */
     public JolokiaServiceManagerImpl(Configuration pConfig,LogHandler pLogHandler, Restrictor pRestrictor) {
         configuration = pConfig;
@@ -178,8 +176,8 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
                 }
             }
+            isInitialized = false;
         }
-        isInitialized = false;
     }
 
     /** {@inheritDoc} */

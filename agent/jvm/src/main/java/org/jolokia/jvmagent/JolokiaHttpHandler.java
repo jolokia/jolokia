@@ -77,27 +77,12 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
 
-    /**
-     * Start the handler
-     * @param pLazy whether initialisation should be done lazy.
-     */
-    public void start(boolean pLazy) {
         requestHandler = new HttpRequestHandler(jolokiaContext, requestDispatcher);
     }
 
     /**
-     * Stop the handler
-     */
-    public void stop() {
-        // TODO: CTX LC
-        // backendManager.destroy();
-        requestHandler = null;
-    }
-
-    /**
-     * Handler a request. If the handler is not yet started, an exception is thrown
+     * Handle a request.
      *
      * @param pExchange the request/response object
      * @throws IOException if something fails during handling
@@ -106,10 +91,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     @Override
     @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
     public void handle(HttpExchange pExchange) throws IOException {
-        if (requestHandler == null) {
-            throw new IllegalStateException("Handler not yet started");
-        }
-
         JSONAware json = null;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
@@ -141,7 +122,6 @@ public class JolokiaHttpHandler implements HttpHandler {
             sendResponse(pExchange,parsedUri,json);
         }
     }
-
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());

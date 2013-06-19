@@ -75,7 +75,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
-        init(new JolokiaServerConfig(finalConfig),false);
+        init(new JolokiaServerConfig(finalConfig));
         if (autoStart) {
             start();
         }
