@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.management.openmbean.TabularData;
+
 /**
  * @author roland
  * @since Jun 30, 2009
@@ -68,4 +70,6 @@ public interface OperationCheckingMBean {
     TimeUnit findTimeUnit(TimeUnit unit);
 
     BigDecimal addBigDecimal(int first, BigDecimal second);
+
+    TabularData update(String name,TabularData data);
 }
