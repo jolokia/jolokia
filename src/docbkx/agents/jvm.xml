@@ -76,10 +76,11 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>agentContext</constant></td>
           <td>
             Context under which the agent is deployed. The full URL
-            will be <literal>protocol://host:port/agentContext</literal>
+            will be <literal>protocol://host:port/agentContext</literal>. The default context is
+            <constant>/jolokia</constant>.
           </td>        
           <td>
-            <constant>/jolokia</constant>
+            <constant>/j4p</constant>
           </td>
         </tr>
         <tr>
@@ -265,12 +266,12 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <literal>--help</literal> to get a short usage information:
     </para>
     <programlisting><![CDATA[
-$ java -jar jolokia-jvm-1.0.1-agent.jar --help
+$ java -jar jolokia-jvm-1.1.2-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.1.0-SNAPSHOT-agent.jar [options] <command> <pid/regexp>
+Usage: java -jar jolokia-jvm-1.1.2-agent.jar [options] <command> <pid/regexp>
 
 where <command> is one of
     start     -- Start a Jolokia agent for the process specified
