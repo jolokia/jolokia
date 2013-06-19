@@ -96,7 +96,7 @@ public class AgentServletTest {
         servlet.init(config);
         servlet.destroy();
 
-        Configuration cfg = servlet.initConfig(config);
+        Configuration cfg = servlet.createConfig(config);
         assertEquals(cfg.getConfig(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
         assertEquals(cfg.getConfig(ConfigKey.MAX_DEPTH), "10");
         assertEquals(cfg.getConfig(ConfigKey.MAX_OBJECTS), "20");

@@ -297,7 +297,7 @@ public class HttpRequestHandler {
      * @param pAddress address to check
      */
     public void checkClientIPAccess(String pHost, String pAddress) {
-        if (!backendManager.isRemoteAccessAllowed(pHost,pAddress)) {
+        if (!jolokiaCtx.isRemoteAccessAllowed(pHost,pAddress)) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
     }

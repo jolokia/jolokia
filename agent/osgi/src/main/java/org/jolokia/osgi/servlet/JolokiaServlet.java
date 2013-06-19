@@ -20,6 +20,7 @@ import javax.servlet.*;
 
 import org.jolokia.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.util.LogHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -113,6 +114,15 @@ public class JolokiaServlet extends AgentServlet {
         } else {
             // Use default log handler
             return super.createLogHandler(pServletConfig);
+        }
+    }
+
+    @Override
+    protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
+        super.initServices(pServletConfig, pServiceManager);
+        BundleContext ctx = getBundleContext(pServletConfig);
+        if (ctx != null) {
+            pServiceManager.addServiceLookup(new OsgiJolokiaServiceFactory(ctx));
         }
     }
 

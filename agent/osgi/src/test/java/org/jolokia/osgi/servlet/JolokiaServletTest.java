@@ -89,7 +89,7 @@ public class JolokiaServletTest {
     }
 
     private void initWithLogService() throws InvalidSyntaxException, ServletException {
-        prepareLogServiceLookup();
+        prepareServiceLookup();
         HttpTestUtil.prepareServletConfigMock(config);
         HttpTestUtil.prepareServletContextMock(servletContext);
         preparePlainLogging();
@@ -99,7 +99,7 @@ public class JolokiaServletTest {
         servlet.init(config);
         assertNull(JolokiaServlet.getCurrentBundleContext());
 
-        LogHandler handler = (LogHandler) servlet.createLogHandler(config);
+        LogHandler handler = servlet.createLogHandler(config);
         handler.debug("Debug");
         handler.info("Info");
         handler.error("Error",new Exception());
@@ -118,12 +118,18 @@ public class JolokiaServletTest {
 
     // ===========================================================================
 
-    private void prepareLogServiceLookup() throws InvalidSyntaxException {
-        expect(servletContext.getAttribute("osgi-bundlecontext")).andReturn(bundleContext).times(3);
-        expect(bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)")).andReturn(createMock(Filter.class)).times(2);
-        bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=org.osgi.service.log.LogService)"));
-        expectLastCall().times(2);
-        expect(bundleContext.getServiceReferences(LogService.class.getName(),null)).andReturn(null).times(2);
+    private void prepareServiceLookup() throws InvalidSyntaxException {
+        expect(servletContext.getAttribute("osgi-bundlecontext")).andStubReturn(bundleContext);
+        addServiceLookup(LogService.class);
+        addServiceLookup(ServerDetector.class);
+    }
+
+    private void addServiceLookup(Class pLogServiceClass) throws InvalidSyntaxException {
+        expect(bundleContext.createFilter("(objectClass=" + pLogServiceClass.getName()+ ")"))
+                .andStubReturn(createMock(Filter.class));
+        bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=" + pLogServiceClass.getName() + ")"));
+        expectLastCall().asStub();
+        expect(bundleContext.getServiceReferences(pLogServiceClass.getName(),null)).andStubReturn(null);
     }
 
     private void preparePlainLogging() {

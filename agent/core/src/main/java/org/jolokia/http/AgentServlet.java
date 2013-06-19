@@ -7,6 +7,8 @@ import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.restrictor.Restrictor;
@@ -58,11 +60,8 @@ public class AgentServlet extends HttpServlet {
     private HttpRequestHandler requestHandler;
 
     // Restrictor to use as given in the constructor
-    private Restrictor restrictor;
+    private Restrictor initRestrictor;
     
-    // Mime type used for returning the answer
-    private String configMimeType;
-
     // The Jolokia service manager
     private JolokiaServiceManager serviceManager;
 
@@ -82,7 +81,7 @@ public class AgentServlet extends HttpServlet {
      *        restrictors.
      */
     public AgentServlet(Restrictor pRestrictor) {
-        restrictor = pRestrictor;
+        initRestrictor = pRestrictor;
     }
 
 
@@ -90,7 +89,7 @@ public class AgentServlet extends HttpServlet {
      * Initialize the backend systems by creating a {@link JolokiaServiceManagerImpl}
      *
      * A subclass can tune this step by overriding
-     * {@link #createLogHandler(ServletConfig)} and {@link #createRestrictor()}
+     * {@link #createLogHandler}, {@link #createRestrictor} and {@link #createConfig}
      *
      * @param pServletConfig servlet configuration
      */
@@ -98,22 +97,20 @@ public class AgentServlet extends HttpServlet {
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
-        // Create configuration and log handler early in the lifecycle
-        Configuration config = initConfig(pServletConfig);
+        // Create configuration, log handler and restrictor early in the lifecycle
+        // and explicitly
+        Configuration config = createConfig(pServletConfig);
         LogHandler logHandler = createLogHandler(pServletConfig);
+        Restrictor restrictor = createRestrictor(config, logHandler);
 
-        if (restrictor == null) {
-            restrictor = PolicyRestrictorFactory.createRestrictor(config.getConfig(ConfigKey.POLICY_LOCATION),logHandler);
-        }
-
-        // Create the service manager
+        // Create the service manager and initialize
         serviceManager = new JolokiaServiceManagerImpl(config,logHandler,restrictor);
-        serviceManager.addServices(new ClasspathRequestHandlerCreator("services"));
+        initServices(pServletConfig, serviceManager);
+
         // Start it up ....
         JolokiaContext ctx = serviceManager.start();
-        requestHandler = new HttpRequestHandler(ctx, serviceManager.getRequestDispatcher());
-
-        configMimeType = ctx.getConfig(ConfigKey.MIME_TYPE);
+        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(serviceManager);
+        requestHandler = new HttpRequestHandler(ctx, requestDispatcher);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -121,24 +118,57 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
-     * Create a restrictor to use. By default this methods returns the restrictor given in the
-     * constructor, but it can be overridden in order to fine tune the creation.
-     *
-     * @return the restrictor to use
+     * Initialize services and register service factoris
+     * @param pServletConfig
+     * @param pServiceManager service manager to which to add services
      */
-    protected Restrictor createRestrictor() {
-        return restrictor;
+    protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
+        pServiceManager.addServices(new ClasspathRequestHandlerCreator("services"));
+    }
+
+    /**
+     * Examines servlet config and servlet context for configuration parameters.
+     * Configuration from the servlet context overrides servlet parameters defined in web.xml.
+     * This method can be subclassed in order to provide an own mechanism for
+     * providing a configuration.
+     *
+     * @param pServletConfig servlet configuration
+     * @return generated configuration
+     */
+    protected Configuration createConfig(ServletConfig pServletConfig) {
+        StaticConfiguration config = new StaticConfiguration(
+                Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
+                                         Integer.toHexString(hashCode()) + "-servlet"));
+        // From ServletContext ....
+        config.update(new ServletConfigFacade(pServletConfig));
+        // ... and ServletConfig
+        config.update(new ServletContextFacade(getServletContext()));
+        return config;
     }
 
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
      * to provide a custom log handler.
      *
+     * @param pConfig configuration used for building up the the log handler
      * @return a default log handler
-     * @param pServletConfig servlet config from where to get information to build up the log handler
      */
-    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
+    protected LogHandler createLogHandler(ServletConfig pConfig) {
         return new ServletLogHandler();
+    }
+
+
+    /**
+     * Create a restrictor to use. By default this methods returns the restrictor given in the
+     * constructor or does a lookup for a policy fule,
+     * but thie can be overridden in order to fine tune the creation.
+     *
+     * @return the restrictor to use
+     */
+    protected Restrictor createRestrictor(Configuration pConfig, LogHandler pLogHandler) {
+        return initRestrictor != null ?
+                initRestrictor :
+                PolicyRestrictorFactory.createRestrictor(pConfig.getConfig(ConfigKey.POLICY_LOCATION), pLogHandler);
     }
 
     // A loghandler using a servlets log facilities
@@ -158,10 +188,10 @@ public class AgentServlet extends HttpServlet {
         public void error(String message, Throwable t) {
             log(message,t);
         }
-
         public boolean isDebug() {
             return true;
         }
+
     }
 
     /** {@inheritDoc} */
@@ -246,7 +276,7 @@ public class AgentServlet extends HttpServlet {
         if (requestMimeType != null) {
             return requestMimeType;
         }
-        return configMimeType;
+        return serviceManager.getConfiguration().getConfig(ConfigKey.MIME_TYPE);
     }
 
     private interface ServletRequestHandler {
@@ -259,6 +289,7 @@ public class AgentServlet extends HttpServlet {
          */
         JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                 throws IOException;
+
     }
 
     // factory method for POST request handler
@@ -273,7 +304,7 @@ public class AgentServlet extends HttpServlet {
              }
         };
     }
-    
+
     // factory method for GET request handler
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
@@ -303,19 +334,6 @@ public class AgentServlet extends HttpServlet {
             }
             return ret;
         }
-    }
-
-    // Examines servlet config and servlet context for configuration parameters.
-    // Configuration from the servlet context overrides servlet parameters defined in web.xml
-    Configuration initConfig(ServletConfig pConfig) {
-        StaticConfiguration config = new StaticConfiguration(
-                Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
-                                         Integer.toHexString(hashCode()) + "-servlet"));
-        // From ServletContext ....
-        config.update(new ServletConfigFacade(pConfig));
-        // ... and ServletConfig
-        config.update(new ServletContextFacade(getServletContext()));
-        return config;
     }
 
     private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {

@@ -27,6 +27,7 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
@@ -104,7 +105,7 @@ public class JolokiaServer {
      *              the JVM is not fully setup for the server detectors to work
      */
     public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, boolean pLazy) {
-        init(pServer,pConfig,pLazy);
+        init(pServer, pConfig, pLazy);
     }
 
     /**
@@ -119,7 +120,7 @@ public class JolokiaServer {
      */
     public void start() {
         JolokiaContext jolokiaContext = serviceManager.start();
-        RequestDispatcher requestDispatcher = serviceManager.getRequestDispatcher();
+        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(serviceManager);
         jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
 
         httpContext = httpServer.createContext(config.getContextPath(), jolokiaHttpHandler);

@@ -19,17 +19,33 @@ package org.jolokia.service;
 import java.util.Set;
 
 /**
+ * Interface for a service factory which is consulted every time services
+ * are required. This factory can be used for dynamic services which
+ * can come and go.
+ *
  * @author roland
  * @since 21.04.13
  */
-public interface JolokiaServiceFactory<T extends JolokiaService>  {
+public interface JolokiaServiceLookup {
 
-    Set<T> getServices();
+    /**
+     * Get the current list of available services for a certain type.
+     *
+     * @param pType type for which to get the services
+     * @return list of services for the required type or an empty set
+     */
+    <T extends JolokiaService> Set<T> getServices(Class<T> pType);
 
-    Class<T> getType();
-
-    // Lifecycle
+    /**
+     * Lifecycle method called when the service managed starts up
+     *
+     * @param pJolokiaContext created context
+     */
     void init(JolokiaContext pJolokiaContext);
+
+    /**
+     * Lifecycle method when the service manager stops
+     */
     public void destroy();
 
 }

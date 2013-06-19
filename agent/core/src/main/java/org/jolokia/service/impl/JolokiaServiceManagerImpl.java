@@ -54,8 +54,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             new Class[] { ServerDetector.class, RequestHandler.class};
 
     // All service factories used
-    private Map<Class<? extends JolokiaService>,
-            SortedSet<JolokiaServiceFactory<? extends JolokiaService>>> dynamicServiceFactories;
+    private List<JolokiaServiceLookup> serviceLookups;
 
     // Instantiated services, categorized by type and ordered;
     private Map<Class<? extends JolokiaService>,SortedSet<? extends JolokiaService>> staticServices;
@@ -69,80 +68,60 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // Request dispatcher for executing operations
     private RequestDispatcher requestDispatcher;
 
+    /**
+     *
+     * @param pConfig
+     * @param pLogHandler
+     * @param pRestrictor
+     */
     public JolokiaServiceManagerImpl(Configuration pConfig,LogHandler pLogHandler, Restrictor pRestrictor) {
         configuration = pConfig;
         logHandler = pLogHandler;
         restrictor = pRestrictor;
         isInitialized = false;
-        dynamicServiceFactories = new HashMap<
-                Class<? extends JolokiaService>,
-                SortedSet<JolokiaServiceFactory<? extends JolokiaService>>>();
+        serviceLookups = new ArrayList<JolokiaServiceLookup>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
     }
 
 
+    /** {@inheritDoc} */
     public Configuration getConfiguration() {
         return configuration;
     }
 
+    /** {@inheritDoc} */
     public LogHandler getLogHandler() {
         return logHandler;
     }
 
+    /** {@inheritDoc} */
     public Restrictor getRestrictor() {
         return restrictor;
     }
 
-    /**
-     * Register a service which was instantiated by external means.
-     * The lifecycle management goes over to this manager.
-     *
-     * @param pService service to register
-     */
-    public <T extends JolokiaService> void addService(T pService) {
-        SortedSet<T> servicesOfType = (SortedSet<T>) staticServices.get(pService.getType());
+    /** {@inheritDoc} */
+    public void addService(JolokiaService pService) {
+        SortedSet<JolokiaService> servicesOfType = (SortedSet<JolokiaService>) staticServices.get(pService.getType());
         if (servicesOfType == null) {
-            servicesOfType = new TreeSet<T>();
+            servicesOfType = new TreeSet<JolokiaService>();
             staticServices.put(pService.getType(), servicesOfType);
         }
         servicesOfType.add(pService);
     }
 
-    /**
-     * Remove a service when it goes out of scope
-     *
-     * @param pService service to remove
-     */
-    public void removeService(JolokiaService pService) {
+    /** {@inheritDoc} */
+    public void addServiceLookup(JolokiaServiceLookup pLookup) {
+        serviceLookups.add(pLookup);
     }
 
-    /**
-     * Add a service factory for initially looking up services e.g.
-     * by class path scanning
-     *
-     * @param pFactory
-     */
-    public <T extends JolokiaService> void addServiceFactory(JolokiaServiceFactory<T> pFactory) {
-        Class<T> type = pFactory.getType();
-        SortedSet<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(type);
-        if (factories == null) {
-            factories = new TreeSet<JolokiaServiceFactory<? extends JolokiaService>>();
-            dynamicServiceFactories.put(type, factories);
-        }
-        factories.add(pFactory);
-    }
-
-    public <T extends JolokiaService> void addServices(JolokiaServiceCreator<T> pServiceCreator) {
-        for (T service : pServiceCreator.getServices()) {
+    /** {@inheritDoc} */
+    public void addServices(JolokiaServiceCreator<? extends JolokiaService> pServiceCreator) {
+        for (JolokiaService service : pServiceCreator.getServices()) {
             addService(service);
         }
     }
 
-    /**
-     * Start up the service manager. All pre-instantiated services sh
-     *
-     * @return the created jolokia context
-     */
+    /** {@inheritDoc} */
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
 
@@ -152,7 +131,6 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             // Initialize all services in the proper order
             List<Class<? extends JolokiaService>> serviceTypes = getServiceTypes();
             for (Class<? extends JolokiaService> serviceType : serviceTypes) {
-
                 // Initialize services
                 Set<? extends JolokiaService> services = staticServices.get(serviceType);
                 if (services != null) {
@@ -160,46 +138,23 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                         service.init(jolokiaContext);
                     }
                 }
+            }
 
-                // All dynamic service factories are initialized as well. The factory itmself is responsible
-                // for initializing any new services coming in with the JolokiaContext.
-                Set<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(serviceType);
-                if (factories != null) {
-                    for (JolokiaServiceFactory factory : factories) {
-                        factory.init(jolokiaContext);
-                    }
-                }
+            // All dynamic service factories are initialized as well. The factory itmself is responsible
+            // for initializing any new services coming in with the JolokiaContext.
+            for (JolokiaServiceLookup lookup : serviceLookups) {
+                lookup.init(jolokiaContext);
             }
 
             // Main initialization ....
             initMBeans(jolokiaContext);
-            requestDispatcher = new RequestDispatcherImpl(this);
 
             isInitialized = true;
         }
         return jolokiaContext;
     }
 
-    // Extract the order in which services should be initialized
-    private List<Class<? extends JolokiaService>> getServiceTypes() {
-        List<Class<? extends JolokiaService>> ret = new ArrayList<Class<? extends JolokiaService>>();
-        for (Class type : SERVICE_TYPE_ORDER) {
-            ret.add(type);
-        }
-        for (Set staticTypeSet : new Set[] { staticServices.keySet(), dynamicServiceFactories.keySet() }) {
-            for (Object staticType : staticTypeSet) {
-                if (!ret.contains(staticType)) {
-                    ret.add((Class<? extends JolokiaService>) staticType);
-                }
-            }
-        }
-        return ret;
-    }
-
-    /**
-     * Stop all services and destroy the managed context
-     *
-     */
+    /** {@inheritDoc} */
     public synchronized void stop() {
         if (isInitialized) {
             try {
@@ -207,13 +162,10 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             } catch (JMException e) {
                 logHandler.error("Cannot unregister own MBeans: " + e, e);
             }
+            for (JolokiaServiceLookup factory : serviceLookups) {
+                factory.destroy();
+            }
             for (Class<? extends JolokiaService> serviceType : getServiceTypes()) {
-                Set<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(serviceType);
-                if (factories != null) {
-                    for (JolokiaServiceFactory factory : factories) {
-                        factory.destroy();
-                    }
-                }
                 Set<? extends JolokiaService> services = staticServices.get(serviceType);
                 if (services != null) {
                     for (JolokiaService service : services) {
@@ -230,6 +182,33 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         isInitialized = false;
     }
 
+    /** {@inheritDoc} */
+    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+        SortedSet<T> services = (SortedSet<T>) staticServices.get(pType);
+        SortedSet<T> ret = services != null ? new TreeSet<T>(services) : new TreeSet<T>();
+        for (JolokiaServiceLookup factory : serviceLookups) {
+            ret.addAll(factory.getServices(pType));
+        }
+        return ret;
+    }
+
+
+    // =======================================================================================================
+
+    // Extract the order in which services should be initialized
+    private List<Class<? extends JolokiaService>> getServiceTypes() {
+        List<Class<? extends JolokiaService>> ret = new ArrayList<Class<? extends JolokiaService>>();
+        for (Class type : SERVICE_TYPE_ORDER) {
+            ret.add(type);
+        }
+        for (Class<? extends JolokiaService> staticType : staticServices.keySet()) {
+            if (!ret.contains(staticType)) {
+                ret.add(staticType);
+            }
+        }
+        return ret;
+    }
+
     private void initMBeans(JolokiaContextImpl pCtx) {
         mBeanServerHandler = new MBeanRegistry(pCtx);
         initHistoryStore(pCtx);
@@ -237,6 +216,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         // TODO: MBeanServer Infos MBean which exports org.jolokia.backend.MBeanServerExecutorLocal.getServersInfo()
         // Under "jolokia:type=ServerHandler"
     }
+
 
     private void initHistoryStore(JolokiaContextImpl pCtx) {
         // Get all MBean servers we can find. This is done by a dedicated
@@ -269,14 +249,6 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
     }
 
-    public RequestDispatcher getRequestDispatcher() {
-        if (requestDispatcher == null) {
-            throw new IllegalStateException("Service Manager not yet started, please call start() before");
-        }
-        return requestDispatcher;
-    }
-
-
     private <T extends JolokiaService> T getMandatorySingletonService(Class<T> pType) {
         Set<T> services = getServices(pType);
         if (services == null || services.size() == 0) {
@@ -285,31 +257,5 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             throw new IllegalStateException("More than one service of type " + pType + " registered");
         }
         return services.iterator().next();
-    }
-
-    /**
-     * Get all services of a certain type currently registered. Static services
-     * are returned directly, for dynamic services a lookup to the service factory is
-     * performed.
-     *
-     * @param pType service type to fetch
-     * @return list of services detected or an empty list
-     */
-    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
-        SortedSet<JolokiaServiceFactory<? extends JolokiaService>> factories = dynamicServiceFactories.get(pType);
-        SortedSet<T> services = (SortedSet<T>) staticServices.get(pType);
-        if (services == null) {
-            services = new TreeSet<T>();
-        }
-        if (factories == null) {
-            return services;
-        } else {
-            SortedSet<T> ret = new TreeSet<T>();
-            ret.addAll(services);
-            for (JolokiaServiceFactory<? extends JolokiaService> factory : factories) {
-                ret.addAll((SortedSet<? extends T>) factory.getServices());
-            }
-            return ret;
-        }
     }
 }

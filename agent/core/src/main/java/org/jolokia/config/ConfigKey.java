@@ -171,7 +171,7 @@ public enum ConfigKey {
      * Set this to control which of the implementations of HttpService are bound to.
      * <p>The syntax is that of the standard OSGi Filter.</p>
      * <pre><code>
-     *     (VirtualServer=__asadmin)  - Glassfish 3+ administration server
+     *     (VirtualServer=__asadmin)  --> Glassfish 3+ administration server only
      * </code></pre>
      * <p>Note this will be combined with the objectClass filter for HttpService with
      * the and (&amp;) operator.</p>
