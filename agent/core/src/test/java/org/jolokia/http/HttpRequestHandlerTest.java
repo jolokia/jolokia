@@ -28,7 +28,6 @@ import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.*;
 import org.json.simple.*;
@@ -197,11 +196,6 @@ public class HttpRequestHandlerTest {
         expectLastCall().asStub();
         expect(requestHandler.canHandle((JmxRequest) anyObject())).andStubReturn(true);
         expect(requestHandler.useReturnValueWithPath((JmxRequest) anyObject())).andStubReturn(false);
-        ctx = new TestJolokiaContext.Builder()
-                .restrictor(pRestrictor)
-                .logHandler(pLogHandler)
-                .build();
-        JolokiaServiceManager sm = createMock(JolokiaServiceManager.class);
         SortedSet<RequestHandler> services = createMock(SortedSet.class);
         expect(services.add(requestHandler)).andStubReturn(true);
         expect(services.iterator()).andStubAnswer(new IAnswer<Iterator<RequestHandler>>() {
@@ -209,9 +203,13 @@ public class HttpRequestHandlerTest {
                 return new SingletonIterator<RequestHandler> (requestHandler);
             }
         });
-        expect(sm.getServices(RequestHandler.class)).andStubReturn(services);
-        replay(sm,services);
-        RequestDispatcher dispatcher = new RequestDispatcherImpl(sm);
+        replay(services);
+        ctx = new TestJolokiaContext.Builder()
+                .restrictor(pRestrictor)
+                .logHandler(pLogHandler)
+                .services(services)
+                .build();
+        RequestDispatcher dispatcher = new RequestDispatcherImpl(ctx);
         handler = new HttpRequestHandler(ctx, dispatcher);
     }
 

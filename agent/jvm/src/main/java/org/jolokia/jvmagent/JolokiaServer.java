@@ -108,7 +108,7 @@ public class JolokiaServer {
      */
     public void start() {
         JolokiaContext jolokiaContext = serviceManager.start();
-        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(serviceManager);
+        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(jolokiaContext);
         JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
 
         httpContext = httpServer.createContext(config.getContextPath(), jolokiaHttpHandler);

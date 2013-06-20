@@ -7,7 +7,6 @@ import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
@@ -63,7 +62,7 @@ public class AgentServlet extends HttpServlet {
     private Restrictor initRestrictor;
     
     // The Jolokia service manager
-    private JolokiaServiceManager serviceManager;
+    private transient JolokiaServiceManager serviceManager;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -83,7 +82,6 @@ public class AgentServlet extends HttpServlet {
     public AgentServlet(Restrictor pRestrictor) {
         initRestrictor = pRestrictor;
     }
-
 
     /**
      * Initialize the backend systems by creating a {@link JolokiaServiceManagerImpl}
@@ -109,8 +107,7 @@ public class AgentServlet extends HttpServlet {
 
         // Start it up ....
         JolokiaContext ctx = serviceManager.start();
-        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(serviceManager);
-        requestHandler = new HttpRequestHandler(ctx, requestDispatcher);
+        requestHandler = new HttpRequestHandler(ctx, new RequestDispatcherImpl(ctx));
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -119,7 +116,7 @@ public class AgentServlet extends HttpServlet {
 
     /**
      * Initialize services and register service factoris
-     * @param pServletConfig
+     * @param pServletConfig servlet configuration
      * @param pServiceManager service manager to which to add services
      */
     protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {

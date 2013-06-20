@@ -61,7 +61,6 @@ public class JolokiaHttpHandler implements HttpHandler {
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pJolokiaContext jolokia context
-     * @param pRequestDispatcher
      */
     public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher) {
         jolokiaContext = pJolokiaContext;

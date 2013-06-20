@@ -181,6 +181,12 @@ public class TestJolokiaContext implements JolokiaContext {
             services = new TreeSet(Arrays.asList(pServices));
             return this;
         }
+
+        public <T extends JolokiaService> Builder services(SortedSet<T> pServices) {
+            services = (SortedSet<JolokiaService>) pServices;
+            return this;
+        }
+
         public TestJolokiaContext build() {
 
             return new TestJolokiaContext(

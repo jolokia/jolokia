@@ -23,7 +23,6 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.detector.ServerDetector;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.request.JmxRequest;
 
@@ -31,7 +30,7 @@ import org.jolokia.request.JmxRequest;
  * Singleton responsible for doing the merging of all MBeanServer detected.
  * It provides a single entry point for all supported JMX operations and has the
  * facility to detect MBeanServers by delegating the lookup to various
- * {@link ServerDetector}s, to {@link MBeanServerFactory#findMBeanServer(String)}
+ * {@link org.jolokia.detector.ServerDetector}s, to {@link MBeanServerFactory#findMBeanServer(String)}
  * and finally to the PlatformMBeanServer
  *
  *

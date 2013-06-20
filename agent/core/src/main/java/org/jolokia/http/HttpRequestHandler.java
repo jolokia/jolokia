@@ -54,7 +54,6 @@ public class HttpRequestHandler {
      * request handler (with help of the backend manager)
      *
      * @param pJolokiaCtx jolokia context
-     * @param pRequestDispatcher request dispatcher for calling the backend
      */
     public HttpRequestHandler(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
         backendManager = new BackendManager(pJolokiaCtx,pRequestDispatcher);

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.LogHandler;
 
 /*
@@ -36,7 +35,7 @@ public final class PolicyRestrictorFactory {
 
     /**
      * Create a restrictor restrictor to use. By default, a policy file
-     * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
+     * is looked up (with the URL given by the init parameter {@link org.jolokia.config.ConfigKey#POLICY_LOCATION}
      * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
      * used by default.
      *

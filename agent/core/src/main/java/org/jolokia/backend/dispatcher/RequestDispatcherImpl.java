@@ -6,7 +6,7 @@ import javax.management.JMException;
 
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.service.JolokiaServiceManager;
+import org.jolokia.service.JolokiaContext;
 
 /**
  * Manager object responsible for finding a {@link RequestHandler} and
@@ -18,15 +18,15 @@ import org.jolokia.service.JolokiaServiceManager;
 public class RequestDispatcherImpl implements RequestDispatcher {
 
     // Service manager for looking up services
-    private final JolokiaServiceManager serviceManager;
+    private final JolokiaContext jolokiaContext;
 
     /**
      * Create a dispatcher which is used to select the backend for processing the request
      *
-     * @param pServiceManager service manager for looking up all services
+     * @param pPJolokiaContext service manager for looking up all services
      */
-    public RequestDispatcherImpl(JolokiaServiceManager pServiceManager) {
-        serviceManager = pServiceManager;
+    public RequestDispatcherImpl(JolokiaContext pPJolokiaContext) {
+        jolokiaContext = pPJolokiaContext;
 
     }
 
@@ -34,7 +34,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     public DispatchResult dispatch(JmxRequest pJmxRequest) throws JMException, IOException, NotChangedException {
 
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
-        for (RequestHandler requestHandler : serviceManager.getServices(RequestHandler.class)) {
+        for (RequestHandler requestHandler : jolokiaContext.getServices(RequestHandler.class)) {
             if (requestHandler.canHandle(pJmxRequest)) {
                 Object retValue = requestHandler.handleRequest(pJmxRequest);
                 boolean useValueWithPath = requestHandler.useReturnValueWithPath(pJmxRequest);
