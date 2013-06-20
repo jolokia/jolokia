@@ -26,15 +26,24 @@ public class StdoutLogHandler implements LogHandler {
 
     private boolean debug = true;
 
+    /**
+     * Loghandler for printing out to standard out/err streams
+     *
+     * @param pDebug whether to enable debug or not
+     */
     public StdoutLogHandler(boolean pDebug) {
         debug = pDebug;
     }
 
+    /**
+     * Loghandler with debugging switched on
+     */
     public StdoutLogHandler() {
         this(true);
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
+    /** {@inheritDoc} */
     public void debug(String message) {
         if (isDebug()) {
             System.out.println("[DEBUG] " + message);
@@ -42,16 +51,19 @@ public class StdoutLogHandler implements LogHandler {
     }
 
     @SuppressWarnings("PMD.SystemPrintln")
+    /** {@inheritDoc} */
     public void info(String message) {
         System.out.println("[INFO] " + message);
     }
 
     @SuppressWarnings({"PMD.SystemPrintln","PMD.AvoidPrintStackTrace"})
+    /** {@inheritDoc} */
     public void error(String message, Throwable t) {
         System.out.println("[ERROR] " + message);
         t.printStackTrace();
     }
 
+    /** {@inheritDoc} */
     public boolean isDebug() {
         return debug;
     }

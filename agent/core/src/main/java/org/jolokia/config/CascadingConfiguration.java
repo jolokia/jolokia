@@ -29,6 +29,11 @@ public class CascadingConfiguration implements Configuration {
 
     private SortedSet<Configuration> configurations;
 
+    /**
+     * Constructor
+     *
+     * @param pConfigurations configurations to merge
+     */
     public CascadingConfiguration(SortedSet<Configuration> pConfigurations) {
         configurations = pConfigurations;
     }
@@ -52,6 +57,7 @@ public class CascadingConfiguration implements Configuration {
         return ret;
     }
 
+    /** {@inheritDoc} */
     public boolean containsKey(ConfigKey pKey) {
         for (Configuration config : getConfigurations()) {
             if (config.containsKey(pKey)) {
@@ -61,6 +67,11 @@ public class CascadingConfiguration implements Configuration {
         return false;
     }
 
+    /**
+     * Get the managed configurations
+     *
+     * @return configurations used
+     */
     SortedSet<Configuration> getConfigurations() {
         return configurations;
     }

@@ -24,7 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Service Factory for tracking OSGi Jolokia Services
- *
+ * TODO: Initialize services when they come in
  * @author roland
  * @since 19.06.13
  */
@@ -36,6 +36,11 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
     // Map holding all service trackers for the various services
     private Map<Class<? extends JolokiaService>,ServiceTracker> serviceTrackerMap;
 
+    /**
+     * A new factory associated with the given context
+     *
+     * @param pCtx the OSGi context
+     */
     public OsgiJolokiaServiceFactory(BundleContext pCtx) {
         context = pCtx;
         serviceTrackerMap = new HashMap<Class<? extends JolokiaService>, ServiceTracker>();
@@ -61,8 +66,12 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
         }
     }
 
+    /** {@inheritDoc} */
     public void init(JolokiaContext pJolokiaContext) { }
 
+    /**
+     * Close down the factory by closing all existing service trackers
+     */
     public void destroy() {
         for (ServiceTracker tracker : serviceTrackerMap.values()) {
             tracker.close();

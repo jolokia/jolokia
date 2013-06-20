@@ -18,6 +18,8 @@ package org.jolokia.osgi.servlet;
 
 import javax.servlet.*;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaServiceManager;
@@ -100,9 +102,10 @@ public class JolokiaServlet extends AgentServlet {
      * for logging, in the other time uses the servlet's default logging facility
      *
      * @param pServletConfig  servlet configuration
+     * @param pConfiguration
      */
     @Override
-    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
+    protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfiguration) {
         // If there is a bundle context available, set up a tracker for tracking the logging
         // service and optionally a restrictor service
         BundleContext ctx = getBundleContext(pServletConfig);
@@ -110,16 +113,22 @@ public class JolokiaServlet extends AgentServlet {
             // Track logging service
             logTracker = new ServiceTracker(ctx, LogService.class.getName(), null);
             logTracker.open();
-            return new ActivatorLogHandler(logTracker);
+            return new ActivatorLogHandler(logTracker,Boolean.parseBoolean(pConfiguration.getConfig(ConfigKey.DEBUG)));
         } else {
             // Use default log handler
-            return super.createLogHandler(pServletConfig);
+            return super.createLogHandler(pServletConfig, pConfiguration);
         }
     }
 
+    /**
+     * Initialize the service manager and add an OSGi based lookup mechanism
+     *
+     * @param pServletConfig servlet configuration
+     * @param pServiceManager service manager to which to add services
+     */
     @Override
-    protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
-        super.initServices(pServletConfig, pServiceManager);
+    protected void initServiceManager(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
+        super.initServiceManager(pServletConfig, pServiceManager);
         BundleContext ctx = getBundleContext(pServletConfig);
         if (ctx != null) {
             pServiceManager.addServiceLookup(new OsgiJolokiaServiceFactory(ctx));
@@ -167,9 +176,11 @@ public class JolokiaServlet extends AgentServlet {
     private final class ActivatorLogHandler implements LogHandler {
 
         private ServiceTracker logTracker;
+        private boolean debug;
 
-        private ActivatorLogHandler(ServiceTracker pLogTracker) {
+        private ActivatorLogHandler(ServiceTracker pLogTracker, boolean pDebug) {
             logTracker = pLogTracker;
+            debug = pDebug;
         }
 
         /** {@inheritDoc} */
@@ -201,8 +212,9 @@ public class JolokiaServlet extends AgentServlet {
             }
         }
 
+        /** {@inheritDoc} */
         public boolean isDebug() {
-            return true;
+            return debug;
         }
     }
 

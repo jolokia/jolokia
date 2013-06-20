@@ -98,12 +98,12 @@ public class AgentServlet extends HttpServlet {
         // Create configuration, log handler and restrictor early in the lifecycle
         // and explicitly
         Configuration config = createConfig(pServletConfig);
-        LogHandler logHandler = createLogHandler(pServletConfig);
+        LogHandler logHandler = createLogHandler(pServletConfig, config);
         Restrictor restrictor = createRestrictor(config, logHandler);
 
         // Create the service manager and initialize
         serviceManager = new JolokiaServiceManagerImpl(config,logHandler,restrictor);
-        initServices(pServletConfig, serviceManager);
+        initServiceManager(pServletConfig, serviceManager);
 
         // Start it up ....
         JolokiaContext ctx = serviceManager.start();
@@ -119,7 +119,7 @@ public class AgentServlet extends HttpServlet {
      * @param pServletConfig servlet configuration
      * @param pServiceManager service manager to which to add services
      */
-    protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
+    protected void initServiceManager(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
         pServiceManager.addServices(new ClasspathRequestHandlerCreator("services"));
     }
 
@@ -147,11 +147,13 @@ public class AgentServlet extends HttpServlet {
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
      * to provide a custom log handler.
      *
-     * @param pConfig configuration used for building up the the log handler
+     *
+     * @param pServletConfig servlet config
+     * @param pConfig jolokia config
      * @return a default log handler
      */
-    protected LogHandler createLogHandler(ServletConfig pConfig) {
-        return new ServletLogHandler();
+    protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfig) {
+        return new ServletLogHandler(Boolean.parseBoolean(pConfig.getConfig(ConfigKey.DEBUG)));
     }
 
 
@@ -171,6 +173,12 @@ public class AgentServlet extends HttpServlet {
     // A loghandler using a servlets log facilities
     private class ServletLogHandler implements LogHandler {
 
+        private final boolean debug;
+
+        private ServletLogHandler(boolean pDebug) {
+            debug = pDebug;
+        }
+
         /** {@inheritDoc} */
         public void debug(String message) {
             log(message);
@@ -185,8 +193,10 @@ public class AgentServlet extends HttpServlet {
         public void error(String message, Throwable t) {
             log(message,t);
         }
+
+        /** {@inheritDoc} */
         public boolean isDebug() {
-            return true;
+            return debug;
         }
 
     }

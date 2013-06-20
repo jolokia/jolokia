@@ -23,6 +23,8 @@ import javax.servlet.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.StaticConfiguration;
 import org.jolokia.detector.ServerDetector;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -99,7 +101,7 @@ public class JolokiaServletTest {
         servlet.init(config);
         assertNull(JolokiaServlet.getCurrentBundleContext());
 
-        LogHandler handler = servlet.createLogHandler(config);
+        LogHandler handler = servlet.createLogHandler(config, new StaticConfiguration(ConfigKey.DEBUG,"true"));
         handler.debug("Debug");
         handler.info("Info");
         handler.error("Error",new Exception());

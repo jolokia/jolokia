@@ -302,7 +302,7 @@ public class AgentServletTest {
     @Test
     public void withException() throws ServletException, IOException {
         servlet = new AgentServlet(new AllowAllRestrictor());
-        initConfigMocks(null, null,"500", IllegalStateException.class);
+        initConfigMocks(new String[] { ConfigKey.DEBUG.getKeyValue(), "true" }, null,"500", IllegalStateException.class);
         replay(config, context);
         servlet.init(config);
 
