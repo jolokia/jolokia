@@ -55,7 +55,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         checkSystemPropertyMode(null,"/jol/",null,"/jolokia/");
     }
 
-    private void checkSystemPropertyMode(String mode,String propContext,String configContext,String expectContext) throws IOException {
+    private void checkSystemPropertyMode(String mode,String propContext,String configContext,String expectContext) throws Exception {
         if (propContext != null) {
             System.setProperty("jolokia.agentContext", propContext);
         }
@@ -65,7 +65,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         server.afterPropertiesSet();
         assertEquals(server.getServerConfig().getContextPath(), expectContext);
         System.getProperties().remove("jolokia.agentContext");
-        server.stop();
+        checkServerAndStop(server);
     }
 
     @Test

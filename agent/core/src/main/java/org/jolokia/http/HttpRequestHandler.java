@@ -94,22 +94,8 @@ public class HttpRequestHandler {
     private ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) {
         Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
         if (pParameterMap != null) {
-            for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
-                String values[] = entry.getValue();
-                if (values != null && values.length > 0) {
-                    ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
-                    if (cKey != null) {
-                        Object value = values[0];
-                        config.put(cKey, value != null ? value.toString() : null);
-                    }
-                }
-            }
-            Set<ConfigKey> globalRequestConfigKeys = jolokiaCtx.getConfigKeys();
-            for (ConfigKey key : globalRequestConfigKeys) {
-                if (key.isRequestConfig() && !config.containsKey(key)) {
-                    config.put(key,jolokiaCtx.getConfig(key));
-                }
-            }
+            extractRequestParameters(config, pParameterMap);
+            extractDefaultRequestParameters(config);
         }
         return new ProcessingParameters(config);
     }
@@ -321,6 +307,32 @@ public class HttpRequestHandler {
         }
         return null;
     }
+
+    // Extract configuration parameters from the given HTTP request parameters
+    private void extractRequestParameters(Map<ConfigKey, String> pConfig, Map<String, String[]> pParameterMap) {
+        for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
+            String values[] = entry.getValue();
+            if (values != null && values.length > 0) {
+                ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
+                if (cKey != null) {
+                    Object value = values[0];
+                    pConfig.put(cKey, value != null ? value.toString() : null);
+                }
+            }
+        }
+    }
+
+    // Add from the global configuration all request relevant parameters which have not
+    // already been set in the given map
+    private void extractDefaultRequestParameters(Map<ConfigKey, String> pConfig) {
+        Set<ConfigKey> globalRequestConfigKeys = jolokiaCtx.getConfigKeys();
+        for (ConfigKey key : globalRequestConfigKeys) {
+            if (key.isRequestConfig() && !pConfig.containsKey(key)) {
+                pConfig.put(key,jolokiaCtx.getConfig(key));
+            }
+        }
+    }
+
 
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JmxRequest pJmxReq) {
         String includeStackTrace = pJmxReq != null ?
