@@ -18,15 +18,20 @@ package org.jolokia.config;
 
 import java.util.*;
 
-import org.jolokia.http.ProcessingParameters;
-
 /**
+ * A configuration coming from various sources.
+ * Still a dummy for now
+ *
  * @author roland
  * @since 22.04.13
  */
 public class CascadingConfiguration implements Configuration {
 
     private SortedSet<Configuration> configurations;
+
+    public CascadingConfiguration(SortedSet<Configuration> pConfigurations) {
+        configurations = pConfigurations;
+    }
 
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
@@ -45,10 +50,6 @@ public class CascadingConfiguration implements Configuration {
             ret.addAll(config.getConfigKeys());
         }
         return ret;
-    }
-
-    public ProcessingParameters getProcessingParameters(Map<String, String> pParams) {
-        return null;
     }
 
     public boolean containsKey(ConfigKey pKey) {

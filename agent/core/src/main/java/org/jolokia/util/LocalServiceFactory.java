@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.service.impl;
+package org.jolokia.util;
 
 import java.io.*;
 import java.lang.reflect.Constructor;

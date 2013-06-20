@@ -22,8 +22,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.config.*;
-import org.jolokia.http.ProcessingParameters;
-import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.request.notification.NotificationCommandType;
 import org.jolokia.util.EscapeUtil;

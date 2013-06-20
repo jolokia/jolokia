@@ -7,7 +7,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.service.impl.LocalServiceFactory;
+import org.jolokia.util.LocalServiceFactory;
 import org.jolokia.util.EscapeUtil;
 
 /*

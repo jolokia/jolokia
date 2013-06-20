@@ -20,7 +20,6 @@ import java.util.*;
 
 import org.jolokia.config.*;
 import org.jolokia.converter.json.ValueFaultHandler;
-import org.jolokia.http.ProcessingParameters;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 

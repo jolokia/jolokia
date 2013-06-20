@@ -19,8 +19,6 @@ package org.jolokia.request;
 import java.util.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.http.ProcessingParameters;
-import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.request.notification.*;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;

@@ -50,9 +50,6 @@ public class JolokiaServer {
     // Overall configuration
     private JolokiaServerConfig config;
 
-    // Whether the initialisation should be done lazy
-    private boolean lazy;
-
     // Thread for proper cleaning up our server thread
     // on exit
     private CleanupThread cleaner = null;

@@ -4,7 +4,6 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.http.ProcessingParameters;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 

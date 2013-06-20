@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.service.impl;
+package org.jolokia.util;
 
 import java.util.Iterator;
 import java.util.List;

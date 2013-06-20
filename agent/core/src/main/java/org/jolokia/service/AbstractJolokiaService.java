@@ -28,7 +28,7 @@ public abstract class AbstractJolokiaService implements JolokiaService {
     private Class<? extends JolokiaService> type;
 
     // order number for this service
-    protected int order;
+    private int order;
 
     /**
      * Consruction of a base service for a given type and order

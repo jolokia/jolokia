@@ -34,16 +34,19 @@ public class StdoutLogHandler implements LogHandler {
         this(true);
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     public void debug(String message) {
         if (isDebug()) {
             System.out.println("[DEBUG] " + message);
         }
     }
 
+    @SuppressWarnings("PMD.SystemPrintln")
     public void info(String message) {
         System.out.println("[INFO] " + message);
     }
 
+    @SuppressWarnings({"PMD.SystemPrintln","PMD.AvoidPrintStackTrace"})
     public void error(String message, Throwable t) {
         System.out.println("[ERROR] " + message);
         t.printStackTrace();

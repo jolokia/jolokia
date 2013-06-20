@@ -23,7 +23,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.http.ProcessingParameters;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 

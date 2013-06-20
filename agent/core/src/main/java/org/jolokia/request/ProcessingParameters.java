@@ -1,4 +1,4 @@
-package org.jolokia.http;
+package org.jolokia.request;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -22,7 +22,7 @@ import java.util.Map;
 import org.jolokia.config.ConfigKey;
 
 /**
- * Class encapsulating parametrs used during processing
+ * Class encapsulating parameters used during processing
  *
  * @author roland
  * @since 07.02.13
@@ -37,7 +37,7 @@ public class ProcessingParameters {
      *
      * @param pConfig configuration to use
      */
-    ProcessingParameters(Map<ConfigKey, String> pConfig) {
+    public ProcessingParameters(Map<ConfigKey, String> pConfig) {
         params = pConfig;
     }
 

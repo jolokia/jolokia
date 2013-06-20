@@ -20,8 +20,6 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.http.ProcessingParameters;
-
 /**
  * Base class for so called <em>request creators</em>, which are used for creating
  * {@link JmxRequest}s of a specific type. These creators are used by the {@link JmxRequestFactory} for

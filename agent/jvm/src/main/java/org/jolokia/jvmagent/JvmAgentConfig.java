@@ -47,7 +47,7 @@ public class JvmAgentConfig extends JolokiaServerConfig {
     }
 
     /**
-     * Constructor with a preparsed configuration
+     * Constrructor with a preparsed configuration
      *
      * @param pConfig config map with key value pairs
      */

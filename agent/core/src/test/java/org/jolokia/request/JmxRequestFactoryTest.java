@@ -19,8 +19,6 @@ package org.jolokia.request;
 import java.util.*;
 
 import org.jolokia.config.*;
-import org.jolokia.http.ProcessingParameters;
-import org.jolokia.http.TestProcessingParameters;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;

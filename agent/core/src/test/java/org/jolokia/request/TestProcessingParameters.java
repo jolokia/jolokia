@@ -1,4 +1,4 @@
-package org.jolokia.http;
+package org.jolokia.request;
 
 import java.util.HashMap;
 import java.util.Map;

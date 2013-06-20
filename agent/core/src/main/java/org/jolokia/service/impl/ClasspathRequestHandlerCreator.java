@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.service.JolokiaServiceCreator;
+import org.jolokia.util.LocalServiceFactory;
 
 /**
  * A request handler factory which looks up the request handler via
