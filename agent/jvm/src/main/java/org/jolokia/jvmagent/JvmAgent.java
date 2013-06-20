@@ -17,10 +17,6 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-
-import org.jolokia.config.ConfigKey;
 
 
 /**

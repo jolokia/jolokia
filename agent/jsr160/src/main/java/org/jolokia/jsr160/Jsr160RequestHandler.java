@@ -45,6 +45,11 @@ public class Jsr160RequestHandler extends AbstractJolokiaService implements Requ
     private CommandHandlerManager commandHandlerManager;
 
 
+    /**
+     * Create this request handler as service
+     *
+     * @param pOrder service order as given during construction.
+     */
     public Jsr160RequestHandler(int pOrder) {
         super(RequestHandler.class, pOrder);
     }

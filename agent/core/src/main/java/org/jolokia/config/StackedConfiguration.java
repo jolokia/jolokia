@@ -16,6 +16,11 @@ public class StackedConfiguration implements Configuration {
     // List of delegated configuration objects
     private List<Configuration> delegateConfigs;
 
+    /**
+     * Generated this configuration stack from the given configurations
+     *
+     * @param configs configs to stack
+     */
     public StackedConfiguration(Configuration ... configs) {
         delegateConfigs = Arrays.asList(configs);
     }

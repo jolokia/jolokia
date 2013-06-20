@@ -171,7 +171,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     // A loghandler using a servlets log facilities
-    private class ServletLogHandler implements LogHandler {
+    private final class ServletLogHandler implements LogHandler {
 
         private final boolean debug;
 

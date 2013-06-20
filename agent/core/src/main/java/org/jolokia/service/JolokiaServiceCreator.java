@@ -18,11 +18,21 @@ package org.jolokia.service;
 
 import java.util.Set;
 
+
 /**
+ * Object for creating static services
+ *
+ * @param <T> service to use
+ *
  * @author roland
  * @since 14.06.13
  */
 public interface JolokiaServiceCreator<T extends JolokiaService> {
 
+    /**
+     * Get the services created by this creator
+     *
+     * @return created services
+     */
     Set<T> getServices();
 }
