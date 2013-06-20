@@ -66,15 +66,6 @@ public class JolokiaServerConfig {
      * @param pConfig the configuration options to use.
      */
     public JolokiaServerConfig(Map<String, String> pConfig) {
-        init(pConfig);
-    }
-
-    /**
-     * Initialize the configuration with the given map
-     *
-     * @param pConfig map holding the configuration in string representation. A reference to the map will be kept
-     */
-    protected void init(Map<String, String> pConfig) {
         Map<String, String> finalCfg = getDefaultConfig(pConfig);
         finalCfg.putAll(pConfig);
 

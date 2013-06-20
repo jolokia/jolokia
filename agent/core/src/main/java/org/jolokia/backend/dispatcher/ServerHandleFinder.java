@@ -36,6 +36,10 @@ public class ServerHandleFinder {
     // The context used for detection
     private JolokiaContext jolokiaContext;
 
+    /**
+     * Construct this finder
+     * @param pJolokiaContext context for reaching the detectors
+     */
     public ServerHandleFinder(JolokiaContext pJolokiaContext) {
         jolokiaContext = pJolokiaContext;
     }
@@ -102,6 +106,9 @@ public class ServerHandleFinder {
     // ==================================================================================
     // Fallback server detector which matches always and comes last
     private static class FallbackServerDetector extends AbstractServerDetector {
+        /**
+         * Default constructor with an order of 1000
+         */
         public FallbackServerDetector() {
             super(10000);
         }

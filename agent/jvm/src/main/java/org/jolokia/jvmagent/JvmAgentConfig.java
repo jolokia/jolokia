@@ -53,12 +53,7 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      */
     public JvmAgentConfig(Map<String,String> pConfig) {
         super(pConfig);
-    }
 
-    @Override
-    /** {@inheritDoc} */
-    protected void init(Map<String, String> pConfig) {
-        super.init(pConfig);
         // Special mode used by the client in order to indicate whether to stop/start the server.
         initMode(pConfig);
     }
