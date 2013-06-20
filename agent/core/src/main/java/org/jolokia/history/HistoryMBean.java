@@ -28,7 +28,7 @@ public interface HistoryMBean {
      * @param pJmxReq request for which an entry should be added in this history store
      * @param pJson the JSONObject to which to add the history.
      */
-    public void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson);
+    void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson);
 
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> is 0

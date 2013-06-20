@@ -37,7 +37,6 @@ import org.jolokia.util.RequestType;
 public abstract class CommandHandler<R extends JmxRequest> {
 
     // Restrictor for restricting operations
-
     protected final JolokiaContext context;
 
     /**

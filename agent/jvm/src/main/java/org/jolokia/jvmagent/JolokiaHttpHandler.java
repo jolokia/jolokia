@@ -57,9 +57,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Global context
     private JolokiaContext jolokiaContext;
 
-    // Dispatcher for all requests
-    private RequestDispatcher requestDispatcher;
-
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -68,7 +65,6 @@ public class JolokiaHttpHandler implements HttpHandler {
      */
     public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher) {
         jolokiaContext = pJolokiaContext;
-        requestDispatcher = pRequestDispatcher;
 
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
         if (!contextPath.endsWith("/")) {
@@ -78,7 +74,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        requestHandler = new HttpRequestHandler(jolokiaContext, requestDispatcher);
+        requestHandler = new HttpRequestHandler(jolokiaContext, pRequestDispatcher);
     }
 
     /**

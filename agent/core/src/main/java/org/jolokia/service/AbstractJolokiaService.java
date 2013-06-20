@@ -56,8 +56,8 @@ public abstract class AbstractJolokiaService implements JolokiaService {
     /**
      * Override for hooking into the lifecycle
      */
-    public void destroy() throws Exception {
-    }
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public void destroy() throws Exception { }
 
     /**
      * Override if access to the JolokiaContext is
@@ -65,8 +65,7 @@ public abstract class AbstractJolokiaService implements JolokiaService {
      *
      * @param pJolokiaContext JolokiaContext used
      */
-    public void init(JolokiaContext pJolokiaContext) {
-    }
+    public void init(JolokiaContext pJolokiaContext) { }
 
     /** {@inheritDoc} */
     public int compareTo(Object o) {

@@ -63,9 +63,6 @@ public class JolokiaServer {
     // Agent URL
     private String url;
 
-    // Handler for jolokia requests
-    private JolokiaHttpHandler jolokiaHttpHandler;
-
     // Thread factory which creates only daemon threads
     private ThreadFactory daemonThreadFactory = new DaemonThreadFactory();
 
@@ -112,7 +109,7 @@ public class JolokiaServer {
     public void start() {
         JolokiaContext jolokiaContext = serviceManager.start();
         RequestDispatcher requestDispatcher = new RequestDispatcherImpl(serviceManager);
-        jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
+        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
 
         httpContext = httpServer.createContext(config.getContextPath(), jolokiaHttpHandler);
         // Add authentication if configured

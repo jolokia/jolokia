@@ -37,7 +37,7 @@ public enum ConfigKey {
     /**
      * Whether debug is switched on or not
      */
-    DEBUG("debug",true, false, "false"),
+    DEBUG("debug",true, false, Constants.FALSE),
 
     /**
      * Maximum number of debug entries to hold
@@ -83,21 +83,21 @@ public enum ConfigKey {
      * should be included or "runtime" if only {@link RuntimeException}s should
      * be included. Default is "true"
      */
-    INCLUDE_STACKTRACE("includeStackTrace", true, true, "true"),
+    INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.TRUE),
 
     /**
      * Whether to include a JSON serialized version of the exception. If set
      * to "true", the exception is added under the key "error_value" in
      * the response. Default is false.
      */
-    SERIALIZE_EXCEPTION("serializeException", true, true, "false"),
+    SERIALIZE_EXCEPTION("serializeException", true, true, Constants.FALSE),
     /**
      * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
      * are created.
      * The allowed values are either "true" in which case the canonical key order (== alphabetical
      * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
-    CANONICAL_NAMING("canonicalNaming", true, true, "true"),
+    CANONICAL_NAMING("canonicalNaming", true, true, Constants.TRUE),
 
     /**
      * Optional domain name for registering own MBeans
@@ -105,7 +105,7 @@ public enum ConfigKey {
     MBEAN_QUALIFIER("mbeanQualifier", true, false),
 
     /**
-     * Option which can be given to a request to speficy a JSONP callback.
+     * Option which can be given to a request to specify a JSONP callback.
      * The generated answer will be of type text/javascript and it will
      * contain a Javascript function to be called.
      */
@@ -157,14 +157,14 @@ public enum ConfigKey {
      * For OSGi, if set to true, the agent uses a restrictor service when it kicks in,
      * but denies access otherwise.
      */
-    USE_RESTRICTOR_SERVICE("useRestrictorService", true, false, "false"),
+    USE_RESTRICTOR_SERVICE("useRestrictorService", true, false, Constants.FALSE),
 
     /**
      * By default, the OSGi Agent listens for an OSGi HttpService to which it will register
      * an agent servlet. Set this to false if you want to instantiate the
      * servlet on your own (either declaratively within another war or programmatically)
      */
-    LISTEN_FOR_HTTP_SERVICE("listenForHttpService", true, false, "true"),
+    LISTEN_FOR_HTTP_SERVICE("listenForHttpService", true, false, Constants.TRUE),
 
     /**
      * By default, the OSGi Agent will bind to all HttpService implementations.
@@ -201,7 +201,7 @@ public enum ConfigKey {
      * uses this flag to delay the detection. This options is mostly of internal use and should not necessarily
      * used otherwise.
      */
-    LAZY_SERVER_DETECTION("lazyServerDetection", true, false, "false"),
+    LAZY_SERVER_DETECTION("lazyServerDetection", true, false, Constants.FALSE),
 
     /**
      * The ID to uniquely identify this agent within a JVM. There
@@ -306,5 +306,11 @@ public enum ConfigKey {
      */
     public boolean isRequestConfig() {
         return requestConfig;
+    }
+
+    // Constants used for boolean values
+    private static class Constants {
+        public static final String FALSE = "false";
+        public static final String TRUE = "true";
     }
 }

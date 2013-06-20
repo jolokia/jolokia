@@ -47,6 +47,6 @@ public interface ServerDetector extends JolokiaService {
      *
      * @param pMBeanServers set of MBeanServers to add to.
      */
-    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
+    void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
 
 }

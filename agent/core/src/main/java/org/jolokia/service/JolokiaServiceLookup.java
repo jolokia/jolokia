@@ -46,6 +46,6 @@ public interface JolokiaServiceLookup {
     /**
      * Lifecycle method when the service manager stops
      */
-    public void destroy();
+     void destroy();
 
 }

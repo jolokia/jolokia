@@ -26,24 +26,27 @@ import org.jolokia.detector.*;
 import org.jolokia.service.JolokiaContext;
 
 /**
+ * Helper class for detecting a server handle
+ *
  * @author roland
  * @since 19.06.13
  */
 public class ServerHandleFinder {
 
+    // The context used for detection
     private JolokiaContext jolokiaContext;
-
-    SortedSet<ServerDetector> detectors;
 
     public ServerHandleFinder(JolokiaContext pJolokiaContext) {
         jolokiaContext = pJolokiaContext;
-        detectors = pJolokiaContext.getServices(ServerDetector.class);
-        detectors.add(new FallbackServerDetector());
     }
 
+    /**
+     * Get all extra MBeanServerConnections detected by the ServerDetectors
+     * @return
+     */
     public Set<MBeanServerConnection> getExtraMBeanServers() {
         Set<MBeanServerConnection> ret = new HashSet<MBeanServerConnection>();
-        for (ServerDetector detector : detectors) {
+        for (ServerDetector detector : getDetectors()) {
             detector.addMBeanServers(ret);
         }
         return ret;
@@ -55,18 +58,21 @@ public class ServerHandleFinder {
     public ServerHandle detectServerHandle(MBeanServerExecutor pMBeanServerExecutor) {
         ServerHandle handle = detectServers(pMBeanServerExecutor);
         handle.postDetect(pMBeanServerExecutor, jolokiaContext);
-        handle.setJolokiaId(extractJolokiaId(jolokiaContext));
+        handle.setJolokiaId(extractJolokiaId());
         return handle;
     }
 
-    /**
-     * Extract a unique Id for this agent
-     *
-     * @param pContext the jolokia context
-     * @return the unique Jolokia ID
-     */
-    private String extractJolokiaId(JolokiaContext pContext) {
-        String id = pContext.getConfig(ConfigKey.JOLOKIA_ID);
+    // =====================================================================================
+    // Look up detectors as services and add a fallback detector
+    private SortedSet<ServerDetector> getDetectors() {
+        SortedSet<ServerDetector> detectors = jolokiaContext.getServices(ServerDetector.class);
+        detectors.add(new FallbackServerDetector());
+        return detectors;
+    }
+
+    // Extract a unique Id for this agent
+    private String extractJolokiaId() {
+        String id = jolokiaContext.getConfig(ConfigKey.JOLOKIA_ID);
         if (id != null) {
             return id;
         }
@@ -77,7 +83,7 @@ public class ServerHandleFinder {
     // by a lookup mechanism, queried and thrown away after this method
     private ServerHandle detectServers(MBeanServerExecutor pMBeanServerExecutor) {
         // Now detect the server
-        for (ServerDetector detector : detectors) {
+        for (ServerDetector detector : getDetectors()) {
             try {
                 ServerHandle info = detector.detect(pMBeanServerExecutor);
                 if (info != null) {
@@ -94,15 +100,13 @@ public class ServerHandleFinder {
     }
 
     // ==================================================================================
-    // Fallback server detector which matches always
-
+    // Fallback server detector which matches always and comes last
     private static class FallbackServerDetector extends AbstractServerDetector {
         public FallbackServerDetector() {
             super(10000);
         }
 
-        /** {@inheritDoc}
-         * @param pMBeanServerExecutor*/
+        /** {@inheritDoc} */
         public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
             return ServerHandle.NULL_SERVER_HANDLE;
         }

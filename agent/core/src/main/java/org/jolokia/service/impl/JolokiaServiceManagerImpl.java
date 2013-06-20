@@ -50,7 +50,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private boolean isInitialized;
 
     // Order in which services get initialized
-    private final static Class[] SERVICE_TYPE_ORDER =
+    private static final Class[] SERVICE_TYPE_ORDER =
             new Class[] { ServerDetector.class, RequestHandler.class};
 
     // All service factories used
@@ -145,6 +145,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             }
 
             // Main initialization ....
+            // TODO: MBeans should be initialized also lazily if required
             initMBeans(jolokiaContext);
 
             isInitialized = true;
@@ -217,10 +218,6 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
 
     private void initHistoryStore(JolokiaContextImpl pCtx) {
-        // Get all MBean servers we can find. This is done by a dedicated
-        // handler object
-        /// TODO: Initialisation of Detectors must be done lazily for the JVM agent here ...
-
         int maxEntries;
         try {
             maxEntries = Integer.parseInt(pCtx.getConfig(ConfigKey.HISTORY_MAX_ENTRIES));
@@ -245,15 +242,5 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         }
         //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
-    }
-
-    private <T extends JolokiaService> T getMandatorySingletonService(Class<T> pType) {
-        Set<T> services = getServices(pType);
-        if (services == null || services.size() == 0) {
-            throw new IllegalStateException("No service of type " + pType + " registered");
-        } else if (services.size() > 1) {
-            throw new IllegalStateException("More than one service of type " + pType + " registered");
-        }
-        return services.iterator().next();
     }
 }

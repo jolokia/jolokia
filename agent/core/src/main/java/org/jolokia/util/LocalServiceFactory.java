@@ -114,23 +114,13 @@ public final class LocalServiceFactory {
         LineNumberReader reader = null;
         try {
             reader = new LineNumberReader(new InputStreamReader(pUrl.openStream()));
-            line = reader.readLine();
-            while (line != null) {
+            while ( (line = reader.readLine()) != null) {
                 // Skip empty lines and comments
                 if (line.trim().length() > 0 && !line.matches("^\\s*#.*$")) {
                     createOrRemoveService(pExtractorMap, line);
                 }
-                line = reader.readLine();
             }
-        } catch (ClassNotFoundException e) {
-            error = e;
-        } catch (InstantiationException e) {
-            error = e;
-        } catch (IllegalAccessException e) {
-            error = e;
-        } catch (ClassCastException e) {
-            error = e;
-        } catch (IOException e) {
+        } catch (Exception e) {
             error = e;
         } finally {
             closeReader(reader);

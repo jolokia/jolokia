@@ -17,19 +17,43 @@
 package org.jolokia.service;
 
 /**
+ * Interface describing a Jolokia Service. Jolokia Services are used within Jolokia
+ * for various tasks. Each service has a specific type describing its API. Also, it has an
+ * order which is used when multiple services exist. Services can be created in many ways, either
+ * statically (and then registered at the {@link JolokiaServiceManager}) or dynamically via a {@link JolokiaServiceLookup}
+ * (which is especially suited for looking up OSGi services).
+ *
  * @author roland
  * @since 28.03.13
  */
 public interface JolokiaService extends Comparable {
 
-    public int getOrder();
+    /**
+     * Order of the service. The higher the number, the later in the list of services this service appears.
+     * Default order is 100 by convention.
+     *
+     * @return the order of this service
+     */
+    int getOrder();
 
-    public <T extends JolokiaService> Class<? extends JolokiaService> getType();
+    /**
+     * The service type which is used to distinguish the various services. The service type is an extension
+     * of this base interface and add service specific methods to it
+     *
+     * @return service type
+     */
+    Class<? extends JolokiaService> getType();
 
     /**
      * Lifecycle method called when agent goes down.
      */
-    public void destroy() throws Exception;
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    void destroy() throws Exception;
 
-    public void init(JolokiaContext pJolokiaContext);
+    /**
+     * Lifecycle method caleld when the services are initialized
+     *
+     * @param pJolokiaContext the jolokia context used
+     */
+    void init(JolokiaContext pJolokiaContext);
 }
