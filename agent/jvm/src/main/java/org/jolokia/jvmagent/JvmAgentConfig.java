@@ -17,9 +17,9 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.EscapeUtil;
 
 /**
@@ -43,20 +43,51 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      *        for an agent parameter
      */
     public JvmAgentConfig(String pArgs) {
-        this(split(pArgs));
+        this(pArgs,false);
     }
 
     /**
-     * Constrructor with a preparsed configuration
+     * Constructor which also specifies whether initialization should be done lazy or not
+     *
+     * @param pArgs arguments as given on the command line
+     * @param pLazy whether to initialize lazily or not
+     */
+    public JvmAgentConfig(String pArgs, boolean pLazy) {
+        this(split(pArgs), pLazy);
+    }
+
+    /**
+     * Constructor with a preparsed configuration
      *
      * @param pConfig config map with key value pairs
      */
     public JvmAgentConfig(Map<String,String> pConfig) {
-        super(pConfig);
+        this(pConfig, false);
+    }
+
+    /**
+     * Constructor with a preparsed configuration
+     *
+     * @param pConfig config map with key value pairs
+     * @param pLazy whether to initialize lazily or not
+     */
+    public JvmAgentConfig(Map<String,String> pConfig, boolean pLazy) {
+        Map<String,String> defaultConfig = getDefaultConfig();
+
+        // If the key 'config' in the configuration file point to another properties file, read this in, too.
+        if (pConfig.containsKey("config")) {
+            defaultConfig.putAll(readConfig(pConfig.get("config")));
+        }
+        if (pLazy) {
+            // Marker used later when doing the initialization.
+            defaultConfig.put(ConfigKey.LAZY_SERVER_DETECTION.getKeyValue(), "true");
+        }
+        init(pConfig,defaultConfig);
 
         // Special mode used by the client in order to indicate whether to stop/start the server.
         initMode(pConfig);
     }
+
 
     /**
      * The mode is 'stop' indicates that the server should be stopped when used in dynamic mode
@@ -74,24 +105,6 @@ public class JvmAgentConfig extends JolokiaServerConfig {
             throw new IllegalArgumentException("Invalid running mode '" + mode + "'. Must be either 'start' or 'stop'");
         }
         isStopMode = "stop".equals(mode);
-    }
-
-
-    /**
-     * Beside reading the default configuration from an internal property file,
-     * also add extra configuration given in an external properties where the path
-     * to this property file is given under the key "config"
-     *
-     * @param pConfig the configuration provided during construction
-     * @return the default configuration used as fallback
-     */
-    @Override
-    protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
-        Map<String,String> config = super.getDefaultConfig(pConfig);
-        if (pConfig.containsKey("config")) {
-            config.putAll(readConfig(pConfig.get("config")));
-        }
-        return config;
     }
 
     // ======================================================================================

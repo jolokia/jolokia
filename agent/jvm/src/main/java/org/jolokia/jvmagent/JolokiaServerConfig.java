@@ -53,7 +53,7 @@ public class JolokiaServerConfig {
      * Constructor which prepares the server configuration from a map
      * of given config options (key: option name, value: option value).
      * Also, default values are used for any
-     * parameter not provided ({@link #getDefaultConfig(Map)}).
+     * parameter not provided ({@link #getDefaultConfig}).
      *
      * The given configuration consist of two parts: Any global options
      * as defined in {@link ConfigKey} are used for setting up the agent.
@@ -66,7 +66,23 @@ public class JolokiaServerConfig {
      * @param pConfig the configuration options to use.
      */
     public JolokiaServerConfig(Map<String, String> pConfig) {
-        Map<String, String> finalCfg = getDefaultConfig(pConfig);
+        init(pConfig,getDefaultConfig());
+    }
+
+    /**
+     * Empty constructor useful for subclasses which want to do their own initialization. Note that
+     * the subclass must call {@link #init} on its own.
+     */
+    protected JolokiaServerConfig() { }
+
+    /**
+     * Initialization
+     *
+     * @param pConfig original config
+     * @param pDefaultConfig default config used as background
+     */
+    protected final void init(Map<String, String> pConfig,Map<String,String> pDefaultConfig) {
+        Map<String, String> finalCfg = new HashMap<String, String>(pDefaultConfig);
         finalCfg.putAll(pConfig);
 
         prepareDetectorOptions(finalCfg);
@@ -85,19 +101,13 @@ public class JolokiaServerConfig {
         }
     }
 
-    protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
+    /**
+     * Read in the default configuration from a properties resource
+     * @return
+     */
+    protected final Map<String, String> getDefaultConfig() {
         InputStream is = getClass().getResourceAsStream("/default-jolokia-agent.properties");
-        Map<String,String> props = readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
-        Map<String,String> extra = getExtraOptions();
-        if (extra != null) {
-            props.putAll(extra);
-        }
-        return props;
-    }
-
-    // Hook for adding extra options
-    protected Map<String,String> getExtraOptions() {
-        return null;
+        return readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
     }
 
     /**
@@ -208,7 +218,7 @@ public class JolokiaServerConfig {
     }
 
     // Initialise and validate early in order to fail fast in case of an configuration error
-    protected void initConfigAndValidate(Map<String,String> agentConfig) {
+    private void initConfigAndValidate(Map<String,String> agentConfig) {
         initContext();
         initAuthenticator();
         initProtocol(agentConfig);
@@ -293,7 +303,7 @@ public class JolokiaServerConfig {
         }
     }
 
-    protected Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
+    protected final Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
         Map ret = new HashMap<String, String>();
         if (pIs == null) {
             return ret;
@@ -309,7 +319,7 @@ public class JolokiaServerConfig {
     }
 
     // Add detector specific options if given on the command line
-    protected void prepareDetectorOptions(Map<String, String> pConfig) {
+    private void prepareDetectorOptions(Map<String, String> pConfig) {
         StringBuffer detectorOpts = new StringBuffer("{");
         if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
             detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");

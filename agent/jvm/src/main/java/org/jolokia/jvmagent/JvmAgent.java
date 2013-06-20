@@ -70,17 +70,7 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        startAgent(new JvmAgentConfig(agentArgs) {
-
-            @Override
-            /* register and detect lazy because when used as a startup option we do not have access
-             * to the app server specific MBean right now, only later. So the detection is shift to
-             * the first request (which can still be to early, but at least we tried)
-             */
-            protected Map<String, String> getExtraOptions() {
-                return Collections.singletonMap(ConfigKey.LAZY_SERVER_DETECTION.getKeyValue(),"true");
-            }
-        });
+        startAgent(new JvmAgentConfig(agentArgs,true));
     }
 
     /**
