@@ -144,7 +144,7 @@ public class BackendManagerTest {
 
     // =========================================================================================
 
-    static class RequestHandlerTest extends AbstractJolokiaService implements RequestHandler {
+    static class RequestHandlerTest extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
 
         static boolean called = false;
 
@@ -178,7 +178,7 @@ public class BackendManagerTest {
 
     // ========================================================
 
-    static class RequestHandlerWrong extends AbstractJolokiaService implements RequestHandler {
+    static class RequestHandlerWrong extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
 
         protected RequestHandlerWrong() {
             super(RequestHandler.class,1);

@@ -31,7 +31,7 @@ import org.jolokia.service.JolokiaService;
  * @author roland
  * @since Nov 11, 2009
  */
-public interface RequestHandler extends JolokiaService {
+public interface RequestHandler extends JolokiaService<RequestHandler> {
     /**
      * Dispatch a {@link JmxRequest} to a certain backend
      * and return the result of the JMX action.

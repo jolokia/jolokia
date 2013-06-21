@@ -15,7 +15,7 @@ import org.jolokia.service.JolokiaService;
  * @author roland
  * @since 18.03.13
  */
-public interface NotificationBackend extends JolokiaService {
+public interface NotificationBackend extends JolokiaService<NotificationBackend> {
 
     /**
      * Type of this backend

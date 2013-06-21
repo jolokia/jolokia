@@ -68,7 +68,7 @@ public interface JolokiaServiceManager  {
      *
      * @param pServiceCreator creator for creating the service
      */
-    void addServices(JolokiaServiceCreator<? extends JolokiaService> pServiceCreator);
+    void addServices(JolokiaServiceCreator pServiceCreator);
 
     /**
      * Start up the service manager. All pre-instantiated services sh

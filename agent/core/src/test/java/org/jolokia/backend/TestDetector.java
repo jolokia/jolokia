@@ -33,7 +33,7 @@ import static org.easymock.EasyMock.*;
  * @author roland
  * @since 02.09.11
  */
-public class TestDetector extends AbstractJolokiaService implements ServerDetector {
+public class TestDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
 
     private static boolean throwAddException = false;
 

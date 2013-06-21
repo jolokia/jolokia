@@ -13,7 +13,7 @@ import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
-import org.jolokia.service.impl.ClasspathRequestHandlerCreator;
+import org.jolokia.service.impl.ClasspathServiceCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
@@ -120,7 +120,7 @@ public class AgentServlet extends HttpServlet {
      * @param pServiceManager service manager to which to add services
      */
     protected void initServiceManager(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
-        pServiceManager.addServices(new ClasspathRequestHandlerCreator("services"));
+        pServiceManager.addServices(new ClasspathServiceCreator("services"));
     }
 
     /**

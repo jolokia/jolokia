@@ -113,7 +113,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /** {@inheritDoc} */
-    public void addServices(JolokiaServiceCreator<? extends JolokiaService> pServiceCreator) {
+    public void addServices(JolokiaServiceCreator pServiceCreator) {
         for (JolokiaService service : pServiceCreator.getServices()) {
             addService(service);
         }

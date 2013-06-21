@@ -22,17 +22,16 @@ import java.util.Set;
 /**
  * Object for creating static services
  *
- * @param <T> service to use
- *
  * @author roland
  * @since 14.06.13
  */
-public interface JolokiaServiceCreator<T extends JolokiaService> {
+public interface JolokiaServiceCreator {
 
     /**
-     * Get the services created by this creator
+     * Get the services created by this creator. The service created can
+     * be of various types
      *
      * @return created services
      */
-    Set<T> getServices();
+    Set<JolokiaService> getServices();
 }

@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 20.03.13
  */
-public class PullNotificationBackend extends AbstractJolokiaService implements NotificationBackend {
+public class PullNotificationBackend extends AbstractJolokiaService<NotificationBackend> implements NotificationBackend {
 
     // Store for holding the notification
     private PullNotificationStore store;

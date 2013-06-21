@@ -31,7 +31,7 @@ import org.jolokia.service.JolokiaService;
  * @author roland
  * @since 05.11.10
  */
-public interface ServerDetector extends JolokiaService {
+public interface ServerDetector extends JolokiaService<ServerDetector> {
     /**
      * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.
@@ -48,5 +48,4 @@ public interface ServerDetector extends JolokiaService {
      * @param pMBeanServers set of MBeanServers to add to.
      */
     void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
-
 }

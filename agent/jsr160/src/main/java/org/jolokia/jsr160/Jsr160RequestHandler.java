@@ -39,11 +39,10 @@ import org.jolokia.service.*;
  * @author roland
  * @since Nov 11, 2009
  */
-public class Jsr160RequestHandler extends AbstractJolokiaService implements RequestHandler {
+public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
 
     // request handler for specific request types
     private CommandHandlerManager commandHandlerManager;
-
 
     /**
      * Create this request handler as service

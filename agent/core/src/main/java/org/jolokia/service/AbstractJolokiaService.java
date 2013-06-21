@@ -22,10 +22,10 @@ package org.jolokia.service;
  * @author roland
  * @since 22.04.13
  */
-public abstract class AbstractJolokiaService implements JolokiaService {
+public abstract class AbstractJolokiaService<T extends JolokiaService> implements JolokiaService<T> {
 
     // service type of this Jolokia Service
-    private Class<? extends JolokiaService> type;
+    private Class<T> type;
 
     // order number for this service
     private int order;
@@ -38,7 +38,7 @@ public abstract class AbstractJolokiaService implements JolokiaService {
      *                 order id is unique for the given type. It used for ordering the services but is also
      *                 used as an id when storing it in  aset.
      */
-    protected AbstractJolokiaService(Class<? extends JolokiaService> pType, int pOrderId) {
+    protected AbstractJolokiaService(Class<T> pType, int pOrderId) {
         type = pType;
         order = pOrderId;
     }
@@ -49,7 +49,7 @@ public abstract class AbstractJolokiaService implements JolokiaService {
     }
 
     /** {@inheritDoc} */
-    public Class<? extends JolokiaService> getType() {
+    public Class<T> getType() {
         return type;
     }
 
@@ -68,8 +68,7 @@ public abstract class AbstractJolokiaService implements JolokiaService {
     public void init(JolokiaContext pJolokiaContext) { }
 
     /** {@inheritDoc} */
-    public int compareTo(Object o) {
-        JolokiaService service1 = (JolokiaService) o;
-        return getOrder() - service1.getOrder();
+    public int compareTo(T o) {
+        return getOrder() - o.getOrder();
     }
 }

@@ -145,7 +145,7 @@ public class JolokiaServletTest {
     // ===========================================================================
     // Detector to avoid checkup with every detector
 
-    public static class CatchAllDetector extends AbstractJolokiaService implements ServerDetector {
+    public static class CatchAllDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
 
         public CatchAllDetector(int pOrderId) {
             super(ServerDetector.class, pOrderId);

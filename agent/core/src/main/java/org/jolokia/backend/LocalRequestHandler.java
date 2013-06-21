@@ -37,7 +37,7 @@ import org.jolokia.service.JolokiaContext;
  * @author roland
  * @since Nov 11, 2009
  */
-public class LocalRequestHandler extends AbstractJolokiaService implements RequestHandler {
+public class LocalRequestHandler extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
 
     private MBeanServerExecutorLocal mBeanServerManager;
     private CommandHandlerManager commandHandlerManager;

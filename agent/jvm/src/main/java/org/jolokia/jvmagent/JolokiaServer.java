@@ -33,7 +33,7 @@ import org.jolokia.config.Configuration;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
-import org.jolokia.service.impl.ClasspathRequestHandlerCreator;
+import org.jolokia.service.impl.ClasspathServiceCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.StdoutLogHandler;
@@ -199,7 +199,7 @@ public class JolokiaServer {
                 jolokiaCfg,log,
                 PolicyRestrictorFactory.createRestrictor(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION), log)
         );
-        serviceManager.addServices(new ClasspathRequestHandlerCreator("services"));
+        serviceManager.addServices(new ClasspathServiceCreator("services"));
 
         // Get own URL for later reference
         serverAddress = pServer.getAddress();

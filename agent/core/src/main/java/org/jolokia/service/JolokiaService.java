@@ -26,7 +26,7 @@ package org.jolokia.service;
  * @author roland
  * @since 28.03.13
  */
-public interface JolokiaService extends Comparable {
+public interface JolokiaService<T extends JolokiaService> extends Comparable<T> {
 
     /**
      * Order of the service. The higher the number, the later in the list of services this service appears.
@@ -42,7 +42,7 @@ public interface JolokiaService extends Comparable {
      *
      * @return service type
      */
-    Class<? extends JolokiaService> getType();
+    Class<T> getType();
 
     /**
      * Lifecycle method called when agent goes down.

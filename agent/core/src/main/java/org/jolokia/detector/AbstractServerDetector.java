@@ -31,7 +31,7 @@ import org.jolokia.service.AbstractJolokiaService;
  * @author roland
  * @since 05.11.10
  */
-public abstract class AbstractServerDetector extends AbstractJolokiaService implements ServerDetector {
+public abstract class AbstractServerDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
 
     /**
      * Create a server detector
@@ -94,8 +94,6 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService impl
 
     /**
      * Get the string representation of an attribute
-     *
-     *
      *
      * @param pMBeanServerExecutor set of MBeanServers to query. The first one wins.
      * @param pMBean name of MBean to lookup
