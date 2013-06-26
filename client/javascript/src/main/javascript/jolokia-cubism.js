@@ -156,11 +156,11 @@
                 j4p.start(newStep);
             };
 
-            // Stop fetching of values in the backgorund
-            source.stop = j4p.stop;
+            // Stop fetching of values in the background
+            source.stop = function() { j4p.stop() };
 
             // Check whether the scheduler is running
-            source.isRunning = j4p.isRunning;
+            source.isRunning = function() { return j4p.isRunning() };
 
             // Startup poller which will call the agent periodically
             return source;
