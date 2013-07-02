@@ -194,7 +194,9 @@ public class JolokiaServer {
         // Create proper context along with handler
 
         Configuration jolokiaCfg = config.getJolokiaConfig();
-        LogHandler log = new StdoutLogHandler();
+        // TODO: StdouLogHandler should reference the configuration directly to determine, whether debug is switched
+        // on or not.
+        LogHandler log = new StdoutLogHandler(Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
         serviceManager = new JolokiaServiceManagerImpl(
                 jolokiaCfg,log,
                 PolicyRestrictorFactory.createRestrictor(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION), log)
