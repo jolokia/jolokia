@@ -89,7 +89,8 @@ public class BackendManager {
             json = callRequestDispatcher(pJmxReq);
 
             // Update global history store, add timestamp and possibly history information to the request
-            updateHistory(pJmxReq, json);
+            // TODO: Switch on ...
+            // updateHistory(pJmxReq, json);
             json.put("status",200 /* success */);
         } catch (NotChangedException exp) {
             // A handled indicates that its value hasn't changed. We return an status with
