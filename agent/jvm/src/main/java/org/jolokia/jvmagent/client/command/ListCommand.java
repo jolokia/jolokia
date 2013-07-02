@@ -43,7 +43,10 @@ public class ListCommand extends AbstractBaseCommand {
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> vmDescriptors = pHandler.listProcesses();
         for (ProcessDescription descriptor : vmDescriptors) {
-            System.out.println(new Formatter().format("%7.7s   %-100.100s",stripNewline(descriptor.getId()),stripNewline(descriptor.getDisplay())));
+            Formatter formatter = new Formatter().format("%7.7s   %-100.100s",
+                                                         stripNewline(descriptor.getId()),
+                                                         stripNewline(descriptor.getDisplay()));
+            System.out.println(formatter.toString().trim());
         }
         return 0;
     }
