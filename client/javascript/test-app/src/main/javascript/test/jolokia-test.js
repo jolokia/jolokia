@@ -328,6 +328,7 @@ $(document).ready(function() {
                     }
                 });
         });
+
         asyncTest("All Attribute Read Request", function() {
             j4p.request(
             { type: "READ", mbean: "java.lang:type=Memory"},
@@ -357,6 +358,23 @@ $(document).ready(function() {
                 }
             });
         });
+
+        asyncTest("Complex name with GET", function() {
+            j4p.request(
+                { type: "READ", mbean: "jolokia.it:type=naming/,name=\"jdbc/testDB\"", attribute: "Ok"},
+                {
+                    success: function(response) {
+                        equals(response.request.type, "read", "Type must be read");
+                        equals(response.value,"OK");
+                        start();
+                    },
+                    error: function(resp) {
+                        throw new Error("Cannot read attribute " + JSON.stringify(resp));
+                    },
+                    method: "get"
+                });
+        });
+
     }
 
     // =================================================================================
