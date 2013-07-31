@@ -386,7 +386,7 @@
                             handle: job.pull.handle
                         });
                     }
-                    jobs[handle] = undefined;
+                    delete jobs[handle];
                 }
             };
 
@@ -491,11 +491,11 @@
                     i, j,
                     len = jobs.length;
                 var requests = [];
-                for (i = 0; i < len; i++) {
+                for (i in jobs) {
+                    if (!jobs.hasOwnProperty(i)) {
+                        continue;
+                    }
                     var job = jobs[i];
-                    // Can happen when job has been deleted
-                    // TODO: Can be probably optimized so that only the existing keys of jobs can be visited
-                    if (!job) { continue;  }
                     var reqsLen = job.requests.length;
                     if (job.success) {
                         // Success/error pair of callbacks. For multiple request,
