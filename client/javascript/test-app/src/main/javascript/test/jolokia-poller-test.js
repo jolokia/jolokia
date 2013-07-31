@@ -31,7 +31,7 @@ $(document).ready(function() {
             counter2++;
         },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "max"});
 
-        equals(j4p.jobs().length,2,"Two jobs registered");
+        equal(j4p.jobs().length,2,"Two jobs registered");
 
         ok(!j4p.isRunning(),"Poller should not be running");
         j4p.start(100);
@@ -39,8 +39,8 @@ $(document).ready(function() {
         setTimeout(function() {
             j4p.stop();
             ok(!j4p.isRunning(),"Poller should be stopped");
-            equals(counter1,3,"Request1 should have been called 3 times");
-            equals(counter2,3,"Request2 should have been called 3 times");
+            equal(counter1,3,"Request1 should have been called 3 times");
+            equal(counter2,3,"Request2 should have been called 3 times");
             start();
         },280);
     });
@@ -57,7 +57,7 @@ $(document).ready(function() {
         setTimeout(function() {
             j4p.stop();
             setTimeout(function() {
-                equals(counter,4,"Request should have been called 4 times")
+                equal(counter,4,"Request should have been called 4 times")
                 ok(!j4p.isRunning(),"Poller should be stopped");
                 start();
             },300);
@@ -76,24 +76,24 @@ $(document).ready(function() {
             counter2++;
         },{ type: "EXEC", mbean: "java.lang:type=Memory", operation: "gc"});
         j4p.start(300);
-        equals(j4p.jobs().length,2,"2 jobs registered");
+        equal(j4p.jobs().length,2,"2 jobs registered");
         setTimeout(function() {
-            equals(counter1,3,"Req1 should be called 2 times");
-            equals(counter2,3,"Req2 should be called 2 times");
+            equal(counter1,3,"Req1 should be called 2 times");
+            equal(counter2,3,"Req2 should be called 2 times");
             j4p.unregister(id1);
-            equals(j4p.jobs().length,1,"1 job remaining");
+            equal(j4p.jobs().length,1,"1 job remaining");
             setTimeout(function() {
-                equals(counter1,3,"Req1 stays at 2 times since it was unregistered");
-                equals(counter2,5,"Req2 should continue to be requested, now for 4 times");
+                equal(counter1,3,"Req1 stays at 2 times since it was unregistered");
+                equal(counter2,5,"Req2 should continue to be requested, now for 4 times");
                 j4p.unregister(id2);
-                equals(j4p.jobs().length,0,"No job remaining");
+                equal(j4p.jobs().length,0,"No job remaining");
                 // Handles should stay stable, so the previous unregister of id1 should not change
                 // the meaining of id2 (see http://jolokia.963608.n3.nabble.com/Possible-bug-in-the-scheduler-tp4023893.html
                 // for details)
                 setTimeout(function() {
                     j4p.stop();
-                    equals(counter1,3,"Req1 stays at 3 times since it was unregistered");
-                    equals(counter2,5,"Req2 stays at 4 times since it was unregistered");
+                    equal(counter1,3,"Req1 stays at 3 times since it was unregistered");
+                    equal(counter2,5,"Req2 stays at 4 times since it was unregistered");
                     start();
                 },300);
             },650);
@@ -104,13 +104,13 @@ $(document).ready(function() {
         var j4p = new Jolokia("/jolokia");
         var counter = 1;
         j4p.register(function(resp1,resp2,resp3,resp4) {
-                equals(resp1.status,200);
-                equals(resp2.status,200);
+                equal(resp1.status,200);
+                equal(resp2.status,200);
                 ok(resp1.value > 0);
                 ok(resp2.value > 0);
-                equals(resp1.request.attribute,"HeapMemoryUsage");
-                equals(resp2.request.attribute,"ThreadCount");
-                equals(resp3.status,404);
+                equal(resp1.request.attribute,"HeapMemoryUsage");
+                equal(resp2.request.attribute,"ThreadCount");
+                equal(resp3.status,404);
                 ok(!resp4);
                 counter++
             },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
@@ -119,7 +119,7 @@ $(document).ready(function() {
         j4p.start(200);
         setTimeout(function() {
             j4p.stop();
-            equals(counter,3,"Req should be called 3 times");
+            equal(counter,3,"Req should be called 3 times");
             start();
         },500);
     })
@@ -166,8 +166,8 @@ $(document).ready(function() {
         j4p.start(200);
         setTimeout(function() {
             j4p.stop();
-            equals(counter[3],1);
-            equals(counter[1],1);
+            equal(counter[3],1);
+            equal(counter[1],1);
             start();
         },500);
     });
@@ -190,7 +190,7 @@ $(document).ready(function() {
         setTimeout(function() {
             j4p.stop();
             // Should have been called only once
-            equals(counter,1);
+            equal(counter,1);
             start();
         },600);
     });
@@ -205,7 +205,7 @@ $(document).ready(function() {
                 },
                 error: function(resp) {
                     counterE++;
-                    equals(resp.status,404);
+                    equal(resp.status,404);
                 }
             },
             { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
@@ -214,8 +214,8 @@ $(document).ready(function() {
         j4p.start(200);
         setTimeout(function() {
             j4p.stop();
-            equals(counterS,5,"Req should be called 4 times successfully");
-            equals(counterE,3,"One error request, twice");
+            equal(counterS,5,"Req should be called 4 times successfully");
+            equal(counterE,3,"One error request, twice");
             start();
         },500);
     });

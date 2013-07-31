@@ -38,12 +38,12 @@ $(document).ready(function() {
     });
 
     test("getAttribute with strange name (sync)", function() {
-        equals(j4p.getAttribute("jolokia.it:name=\",,/,,\",type=escape","Ok"),"OK");
+        equal(j4p.getAttribute("jolokia.it:name=\",,/,,\",type=escape","Ok"),"OK");
     });
 
     asyncTest("getAttribute (sync with error)", function() {
         var value = j4p.getAttribute("bla:blub=x", { error: function(resp) {
-            equals(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
+            equal(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
             start();
         }});
         ok(value == null, "Error call");
@@ -62,18 +62,18 @@ $(document).ready(function() {
     test("setAttribute (sync)", function() {
         var oldValue = j4p.getAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled");
         var value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", oldValue ? false : true);
-        equals(oldValue, value, "Old-Value should be returned");
+        equal(oldValue, value, "Old-Value should be returned");
         value = j4p.setAttribute("java.lang:type=Threading", "ThreadCpuTimeEnabled", value ? false : true);
         ok(oldValue != value, "Alternate state");
         value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0");
-        equals(value, 42);
-        equals(j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0"), 23);
+        equal(value, 42);
+        equal(j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0"), 23);
         j4p.execute("jolokia.it:type=attribute", "reset");
     });
 
     asyncTest("setAttribute (sync with error)", function() {
         var value = j4p.setAttribute("bla:blub=x", "x", 10, { error: function(resp) {
-            equals(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
+            equal(resp.error_type, "javax.management.InstanceNotFoundException", "Exception type");
             start();
         }});
         ok(value == null, "Error call");
@@ -83,47 +83,47 @@ $(document).ready(function() {
         var value = j4p.setAttribute("jolokia.it:type=attribute", "ComplexNestedValue", 23, "Blub/1/numbers/0",
                 {
                     success: function(val) {
-                        equals(val, 42, "Old value returned");
+                        equal(val, 42, "Old value returned");
                         j4p.getAttribute("jolokia.it:type=attribute", "ComplexNestedValue", "Blub/1/numbers/0", {
                             success: function(nval) {
-                                equals(nval, 23, "New value set");
+                                equal(nval, 23, "New value set");
                                 j4p.execute("jolokia.it:type=attribute", "reset");
                                 start();
                             }
                         })
                     }
                 });
-        equals(value, null, "No return value for async operations");
+        equal(value, null, "No return value for async operations");
     });
 
     test("execute (sync)", function() {
         var value = j4p.execute("jolokia.it:type=operation", "fetchNumber", "inc");
-        equals(value, 0);
+        equal(value, 0);
         value = j4p.execute("jolokia.it:type=operation", "fetchNumber", "inc");
-        equals(value, 1);
+        equal(value, 1);
         value = j4p.execute("jolokia.it:type=operation", "overloadedMethod(java.lang.String,int)", "bla", 1);
-        equals(value, 2);
+        equal(value, 2);
         value = j4p.execute("jolokia.it:type=operation", "arrayArguments", "Max\nMorlock,blub", "x", { method: "POST" });
-        equals(value, "Max\nMorlock");
+        equal(value, "Max\nMorlock");
         value = j4p.execute("jolokia.it:type=operation", "arrayArguments", [ "Max\nMorlock", "blub"], "x", { method: "POST"});
-        equals(value, "Max\nMorlock");
+        equal(value, "Max\nMorlock");
         value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null);
-        equals(value, true);
+        equal(value, true);
         j4p.execute("jolokia.it:type=operation", "reset");
     });
 
     test("execute (sync) with escape", function() {
-        equals(j4p.execute("jolokia.it:type=operation","echo","blub!"),"blub!");
-        equals(j4p.execute("jolokia.it:type=operation","echo","blub!!"),"blub!!");
-        equals(j4p.execute("jolokia.it:type=operation","echo","blub!/!"),"blub!/!");
-        equals(j4p.execute("jolokia.it:type=operation","echo","blub!//!"),"blub!//!");
+        equal(j4p.execute("jolokia.it:type=operation","echo","blub!"),"blub!");
+        equal(j4p.execute("jolokia.it:type=operation","echo","blub!!"),"blub!!");
+        equal(j4p.execute("jolokia.it:type=operation","echo","blub!/!"),"blub!/!");
+        equal(j4p.execute("jolokia.it:type=operation","echo","blub!//!"),"blub!//!");
     });
 
 
     asyncTest("execute (sync with error)", function() {
         var value = j4p.execute("jolokia.it:type=operation", "throwCheckedException", {
             error: function(resp) {
-                equals(resp.error_type, "java.lang.Exception");
+                equal(resp.error_type, "java.lang.Exception");
                 start();
             }
         });
@@ -132,11 +132,11 @@ $(document).ready(function() {
     asyncTest("execute (async)", function() {
             var value = j4p.execute("jolokia.it:type=operation", "nullArgumentCheck", null, null, {
                 success: function(value) {
-                    equals(value, true);
+                    equal(value, true);
                     start()
                 }
             });
-        equals(value, null);
+        equal(value, null);
     });
 
     test("search (sync)", function() {
@@ -152,7 +152,7 @@ $(document).ready(function() {
     test("search (no result, sync)", function() {
         var value = j4p.search("bla:notype=*");
         ok($.isArray(value),"Return value from search must be an array");
-        equals(value.length,0,"List must be empty");
+        equal(value.length,0,"List must be empty");
     });
 
     asyncTest("search (sync with error)", function() {
@@ -160,7 +160,7 @@ $(document).ready(function() {
             ok(resp.error != null, "Error occured");
             start();
         },success:log});
-        equals(value, null);
+        equal(value, null);
     });
 
     asyncTest("search (async)", function() {
@@ -182,7 +182,7 @@ $(document).ready(function() {
             ok(val.agent == j4p.CLIENT_VERSION, "Agent version " + j4p.CLIENT_VERSION);
             start();
         }});
-        equals(value, null);
+        equal(value, null);
     });
 
     test("list (sync)", function() {
@@ -190,7 +190,7 @@ $(document).ready(function() {
         ok(value["gc"], "Garbage collection");
         value = j4p.list(["java.lang","type=Memory","op"]);
         ok(value["gc"], "Garbage collection (with array path)");
-        equals(value.gc.args, 0);
+        equal(value.gc.args, 0);
         value = j4p.list("jolokia.it/name=n!!a!!m!!e with !!!/!!,type=naming!//attr");
         ok(value["Ok"], "Path with /");
         value = j4p.list(["jolokia.it","type=naming/,name=n!a!m!e with !/!","attr"]);
@@ -205,10 +205,10 @@ $(document).ready(function() {
 
     asyncTest("list (sync with error)", function() {
         var value = j4p.list("java.lang/type=Bla", {error:function(resp) {
-            equals(resp.error_type, "java.lang.IllegalArgumentException", "java.lang.IllegalArgumentException");
+            equal(resp.error_type, "java.lang.IllegalArgumentException", "java.lang.IllegalArgumentException");
                 start();
         }});
-        equals(value, null);
+        equal(value, null);
     });
 
     asyncTest("list (async)", function() {
@@ -219,7 +219,7 @@ $(document).ready(function() {
                 start();
             }
         });
-        equals(value, null);
+        equal(value, null);
     });
 
     function log(response) {
