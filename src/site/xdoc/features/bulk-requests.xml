@@ -58,12 +58,13 @@
       <subsection name="Example">
         <p>
           Let's have a look at an example.  Jolokias client libraries
-          (currently available for <a
-          href="../client/java.html">Java</a> and <a
+          (currently available for <a href="../client/javascript.html">JavaScript</a>,
+         <a href="../client/java.html">Java</a> and <a
           href="../client/perl.html">Perl</a>) make the usage of bulk
           request easy by providing an extra layer of abstraction:
         </p>
         <pre class="prettyprint"><![CDATA[
+  J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia/");
   J4pRequest req1 = new J4pExecRequest("java.lang:type=Memory","gc");
   J4pRequest req2 = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
   List<J4pResponse<J4pRequest>> responses = j4pClient.execute(req1,req2);

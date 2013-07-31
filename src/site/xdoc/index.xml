@@ -79,6 +79,19 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Small fixes with 1.1.3">
+        <div class="news-date">2013-07-30</div>
+        <p>
+          No big news in Jolokia land, but some bug fixes come with <a href="changes-report.html">1.1.3</a>. Especially some issues
+          with the JavaScript client's
+          basic authentication and cross origin requests has been fixed. Otherwise I'm busy with 2.0 (and tons
+          of other stuff ...). You can have a sneak preview of Jolokia 2.0 on this <a href="https://github.com/rhuss/jolokia/tree/2.0">branch</a>
+          including basic notification support and quite some refactoring with respect to the service architecture.
+        </p>
+        <p>
+          So please stay tuned ....
+        </p>
+      </subsection>
       <subsection name="Stopover on the road to 2.0: Jolokia 1.1.2 released">
         <div class="news-date">2013-05-28</div>
         <p>
