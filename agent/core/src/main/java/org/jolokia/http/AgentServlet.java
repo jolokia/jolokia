@@ -10,6 +10,7 @@ import javax.servlet.http.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
 import org.jolokia.restrictor.*;
+import org.jolokia.util.ClassUtil;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -130,14 +131,18 @@ public class AgentServlet extends HttpServlet {
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
+        Configuration config = initConfig(pServletConfig);
+
         // Create a log handler early in the lifecycle, but not too early
-        logHandler = createLogHandler(pServletConfig);
+        String logHandlerClass =  config.get(ConfigKey.LOGHANDLER_CLASS);
+        logHandler = logHandlerClass != null ?
+                (LogHandler) ClassUtil.newInstance(logHandlerClass) :
+                createLogHandler(pServletConfig);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
 
-        Configuration config = initConfig(pServletConfig);
         if (restrictor == null) {
             restrictor = createRestrictor(config.get(ConfigKey.POLICY_LOCATION));
         } else {
@@ -147,7 +152,6 @@ public class AgentServlet extends HttpServlet {
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
     }
-
 
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden

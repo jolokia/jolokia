@@ -33,6 +33,7 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
+import org.jolokia.util.ClassUtil;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -42,7 +43,7 @@ import org.json.simple.JSONAware;
  * @author roland
  * @since Mar 3, 2010
  */
-public class JolokiaHttpHandler implements HttpHandler, LogHandler {
+public class JolokiaHttpHandler implements HttpHandler {
 
     // Backendmanager for doing request
     private BackendManager backendManager;
@@ -62,12 +63,25 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     // Formatted for formatting Date response headers
     private final SimpleDateFormat rfc1123Format;
 
+    // Loghandler to use
+    private final LogHandler logHandler;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pConfig jolokia specific config tuning the processing behaviour
      */
     public JolokiaHttpHandler(Configuration pConfig) {
+        this(pConfig,null);
+    }
+
+    /**
+     * Create a new HttpHandler for processing HTTP request
+     *
+     * @param pConfig jolokia specific config tuning the processing behaviour
+     * @param pLogHandler log-handler the log handler to use for jolokia
+     */
+    public JolokiaHttpHandler(Configuration pConfig, LogHandler pLogHandler) {
         configuration = pConfig;
         context = pConfig.get(ConfigKey.AGENT_CONTEXT);
         if (!context.endsWith("/")) {
@@ -76,6 +90,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS));
     }
 
     /**
@@ -83,8 +98,8 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        backendManager = new BackendManager(configuration, this, createRestrictor(configuration), pLazy);
-        requestHandler = new HttpRequestHandler(configuration, backendManager, this);
+        backendManager = new BackendManager(configuration, logHandler, createRestrictor(configuration), pLazy);
+        requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
     }
 
     /**
@@ -142,21 +157,20 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         }
     }
 
-
     private Restrictor createRestrictor(Configuration pConfig) {
         String location = pConfig.get(ConfigKey.POLICY_LOCATION);
         try {
             Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
             if (ret != null) {
-                info("Using access restrictor " + location);
+                logHandler.info("Using access restrictor " + location);
                 return ret;
             } else {
-                info("No access restrictor found, access to all MBean is allowed");
+                logHandler.info("No access restrictor found, access to all MBean is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            error("Error while accessing access restrictor at " + location +
-                          ". Denying all access to MBeans for security reasons. Exception: " + e,e);
+            logHandler.error("Error while accessing access restrictor at " + location +
+                             ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
     }
@@ -165,6 +179,7 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
     private JSONAware executeGetRequest(ParsedUri parsedUri) {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
+
 
     private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {
         String encoding = null;
@@ -256,21 +271,31 @@ public class JolokiaHttpHandler implements HttpHandler, LogHandler {
         }
     }
 
-    @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public final void debug(String message) {
-        System.err.println("DEBUG: " + message);
-    }
+    // Creat a log handler from either the given class or by creating a default log handler printing
+    // out to stderr
+    private LogHandler createLogHandler(String pLogHandlerClass) {
+        if (pLogHandlerClass != null) {
+            return ClassUtil.newInstance(pLogHandlerClass);
+        } else {
+            return new LogHandler() {
+                @Override
+                @SuppressWarnings("PMD.SystemPrintln")
+                public final void debug(String message) {
+                    System.err.println("DEBUG: " + message);
+                }
 
-    @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public final void info(String message) {
-        System.err.println("INFO: " + message);
-    }
+                @Override
+                @SuppressWarnings("PMD.SystemPrintln")
+                public final void info(String message) {
+                    System.err.println("INFO: " + message);
+                }
 
-    @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public final void error(String message, Throwable t) {
-        System.err.println("ERROR: " + message);
+                @Override
+                @SuppressWarnings("PMD.SystemPrintln")
+                public final void error(String message, Throwable t) {
+                    System.err.println("ERROR: " + message);
+                }
+            };
+        }
     }
 }

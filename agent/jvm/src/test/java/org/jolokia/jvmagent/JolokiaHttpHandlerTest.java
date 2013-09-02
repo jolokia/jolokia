@@ -26,6 +26,7 @@ import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -119,7 +120,7 @@ public class JolokiaHttpHandlerTest {
 
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
         assertTrue(resp.containsKey("error"));
-        assertEquals(resp.get("error_type"),IllegalArgumentException.class.getName());
+        assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("PUT"));
     }
 
@@ -150,6 +151,28 @@ public class JolokiaHttpHandlerTest {
             assertTrue(resp.containsKey("error"));
             assertTrue(((String) resp.get("error")).contains(params[1]));
         }
+    }
+
+    @Test
+    public void customLogHandler1() throws Exception {
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(),new CustomLogHandler());
+        handler.start(false);
+        handler.stop();
+        assertTrue(CustomLogHandler.infoCount  > 0);
+    }
+
+    @Test
+    public void customLogHandler2() throws Exception {
+        CustomLogHandler.infoCount = 0;
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.LOGHANDLER_CLASS,CustomLogHandler.class.getName()));
+        handler.start(false);
+        handler.stop();
+        assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void invalidCustomLogHandler() throws Exception {
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.LOGHANDLER_CLASS,InvalidLogHandler.class.getName()));
     }
 
     @Test
@@ -232,5 +255,46 @@ public class JolokiaHttpHandlerTest {
         Configuration config = new Configuration(list.toArray());
         debugToggle = !debugToggle;
         return config;
+    }
+
+    public static class CustomLogHandler implements LogHandler {
+
+        private static int debugCount, infoCount, errorCount;
+
+        public CustomLogHandler() {
+            debugCount = 0;
+            infoCount = 0;
+            errorCount = 0;
+        }
+
+        @Override
+        public void debug(String message) {
+            debugCount++;
+        }
+
+        @Override
+        public void info(String message) {
+            infoCount++;
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+            errorCount++;
+        }
+    }
+
+    private class InvalidLogHandler implements LogHandler {
+
+        @Override
+        public void debug(String message) {
+        }
+
+        @Override
+        public void info(String message) {
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+        }
     }
 }
