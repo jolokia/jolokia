@@ -26,6 +26,7 @@ import java.util.Map;
 import com.sun.net.httpserver.HttpServer;
 import org.jolokia.Version;
 import org.jolokia.test.util.EnvTestUtil;
+import org.jolokia.util.LogHandler;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -91,13 +92,39 @@ public class JolokiaServerTest {
     public void customHttpServer() throws IOException, NoSuchFieldException, IllegalAccessException {
         HttpServer httpServer = HttpServer.create();
         JvmAgentConfig cfg = new JvmAgentConfig("");
-        JolokiaServer server = new JolokiaServer(httpServer,cfg);
+        JolokiaServer server = new JolokiaServer(httpServer,cfg,null);
         Field field = JolokiaServer.class.getDeclaredField("useOwnServer");
         field.setAccessible(true);
         assertFalse((Boolean) field.get(server));
         server.start();
         server.stop();
     }
+
+    @Test
+    public void customLogHandler1() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("");
+        JolokiaServer server = new JolokiaServer(cfg,new CustomLogHandler());
+        server.start();
+        server.stop();
+        assertTrue(CustomLogHandler.infoCount  > 0);
+    }
+
+    @Test
+    public void customLogHandler2() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + CustomLogHandler.class.getName());
+        CustomLogHandler.infoCount = 0;
+        JolokiaServer handler = new JolokiaServer(cfg);
+        handler.start();
+        handler.stop();
+        assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void invalidCustomLogHandler() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + InvalidLogHandler.class.getName());
+        new JolokiaServer(cfg);
+    }
+
 
     // ==================================================================
 
@@ -150,5 +177,54 @@ public class JolokiaServerTest {
         }
     }
 
+    public static class CustomLogHandler implements LogHandler {
 
+        private static int debugCount, infoCount, errorCount;
+
+        public CustomLogHandler() {
+            debugCount = 0;
+            infoCount = 0;
+            errorCount = 0;
+        }
+
+        @Override
+        public void debug(String message) {
+            debugCount++;
+        }
+
+        @Override
+        public void info(String message) {
+            infoCount++;
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+            errorCount++;
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
+
+    private class InvalidLogHandler implements LogHandler {
+
+        @Override
+        public void debug(String message) {
+        }
+
+        @Override
+        public void info(String message) {
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
 }

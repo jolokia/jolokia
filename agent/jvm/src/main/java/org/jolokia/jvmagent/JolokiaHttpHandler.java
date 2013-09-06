@@ -32,8 +32,6 @@ import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
 /**
@@ -59,19 +57,12 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Global context
     private JolokiaContext jolokiaContext;
 
-    // Loghandler to use
-    private final LogHandler logHandler;
-
-    public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher) {
-        this(pJolokiaContext, pRequestDispatcher, null);
-    }
-
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pJolokiaContext jolokia context
      */
-    public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher, LogHandler pLogHandler) {
+    public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher) {
         jolokiaContext = pJolokiaContext;
 
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
@@ -83,8 +74,6 @@ public class JolokiaHttpHandler implements HttpHandler {
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         requestHandler = new HttpRequestHandler(jolokiaContext, pRequestDispatcher);
-        logHandler = pLogHandler != null ? pLogHandler : createLogHandler(jolokiaContext.getConfig(ConfigKey.LOGHANDLER_CLASS),
-                                                                          Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.DEBUG)));
     }
 
     /**
@@ -224,36 +213,4 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
     }
 
-    // Creat a log handler from either the given class or by creating a default log handler printing
-    // out to stderr
-    private LogHandler createLogHandler(String pLogHandlerClass, final boolean pIsDebug) {
-        if (pLogHandlerClass != null) {
-            return ClassUtil.newInstance(pLogHandlerClass);
-        } else {
-            return new LogHandler() {
-                @Override
-                @SuppressWarnings("PMD.SystemPrintln")
-                public final void debug(String message) {
-                    System.err.println("DEBUG: " + message);
-                }
-
-                @Override
-                @SuppressWarnings("PMD.SystemPrintln")
-                public final void info(String message) {
-                    System.err.println("INFO: " + message);
-                }
-
-                @Override
-                @SuppressWarnings("PMD.SystemPrintln")
-                public final void error(String message, Throwable t) {
-                    System.err.println("ERROR: " + message);
-                }
-
-                @Override
-                public boolean isDebug() {
-                    return pIsDebug;
-                }
-            };
-        }
-    }
 }

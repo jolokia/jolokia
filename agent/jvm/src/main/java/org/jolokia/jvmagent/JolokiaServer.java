@@ -35,8 +35,7 @@ import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.service.impl.ClasspathServiceCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.StdoutLogHandler;
+import org.jolokia.util.*;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -76,13 +75,26 @@ public class JolokiaServer {
     private HttpContext httpContext;
 
     /**
-     * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests.
+     * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests. This
+     * uses a loghandler which prints out to stdout.
      *
      * @param pConfig configuration for this server
      * @throws IOException if initialization fails
      */
     public JolokiaServer(JolokiaServerConfig pConfig) throws IOException {
-        init(pConfig);
+        init(pConfig, null);
+    }
+
+
+    /**
+     * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests.
+     *
+     * @param pConfig configuration for this server
+     * @param pLogHandler log handler to use or <code>null</code> if logging should go to stdout
+     * @throws IOException if initialization fails
+     */
+    public JolokiaServer(JolokiaServerConfig pConfig, LogHandler pLogHandler) throws IOException {
+        init(pConfig, pLogHandler);
     }
 
     /**
@@ -91,13 +103,14 @@ public class JolokiaServer {
      *
      * @param pServer HttpServer to use
      * @param pConfig configuration for this server
+     * @param pLogHandler log handler to use
      */
-    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig) {
-        init(pServer, pConfig);
+    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, LogHandler pLogHandler) {
+        init(pServer, pConfig, pLogHandler);
     }
 
     /**
-     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig)} must be called later on
+     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig,LogHandler)} must be called later on
      * for initialization
      */
     protected JolokiaServer() {}
@@ -172,11 +185,12 @@ public class JolokiaServer {
      * Initialize this JolokiaServer and use an own created HttpServer
      *
      * @param pConfig configuartion to use
+     * @param pLogHandler log handler to use
      * @throws IOException if the creation of the HttpServer fails
      */
-    protected final void init(JolokiaServerConfig pConfig) throws IOException {
+    protected final void init(JolokiaServerConfig pConfig,LogHandler pLogHandler) throws IOException {
         // We manage it on our own
-        init(createHttpServer(pConfig),pConfig);
+        init(createHttpServer(pConfig),pConfig,pLogHandler);
         useOwnServer = true;
     }
 
@@ -186,17 +200,18 @@ public class JolokiaServer {
      *
      * @param pServer server to use
      * @param pConfig configuration
+     * @param pLogHandler log handler to use.
      */
-    private void init(HttpServer pServer, JolokiaServerConfig pConfig)  {
+    private void init(HttpServer pServer, JolokiaServerConfig pConfig, LogHandler pLogHandler)  {
         config = pConfig;
         httpServer = pServer;
 
         // Create proper context along with handler
 
         Configuration jolokiaCfg = config.getJolokiaConfig();
-        // TODO: StdouLogHandler should reference the configuration directly to determine, whether debug is switched
-        // on or not.
-        LogHandler log = new StdoutLogHandler(Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
+        LogHandler log = pLogHandler != null ? pLogHandler : createLogHandler(jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_CLASS),
+                                                                              Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
+
         serviceManager = new JolokiaServiceManagerImpl(
                 jolokiaCfg,log,
                 PolicyRestrictorFactory.createRestrictor(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION), log)
@@ -206,6 +221,16 @@ public class JolokiaServer {
         // Get own URL for later reference
         serverAddress = pServer.getAddress();
         url = extractUrl(pConfig);
+    }
+
+    // Creat a log handler from either the given class or by creating a default log handler printing
+    // out to stderr
+    private LogHandler createLogHandler(String pLogHandlerClass, final boolean pIsDebug) {
+        if (pLogHandlerClass != null) {
+            return ClassUtil.newInstance(pLogHandlerClass);
+        } else {
+            return new StdoutLogHandler(pIsDebug);
+        }
     }
 
     private String extractUrl(JolokiaServerConfig pConfig) {

@@ -148,6 +148,10 @@ public class AgentServletTest {
 
         public void error(String message, Throwable t) {
         }
+
+        public boolean isDebug() {
+            return false;
+        }
     }
 
     @Test
