@@ -50,20 +50,25 @@ public enum ConfigKey {
     DISPATCHER_CLASSES("dispatcherClasses", true, false),
 
     /**
+     * Log handler class to use, which must have an empty constructor.
+     * If not set, then a default logging mechanism is used.
+     */
+    LOGHANDLER_CLASS("logHandlerClass", true, false),
+    /**
      * Maximum traversal depth for serialization of complex objects.
      */
-    MAX_DEPTH("maxDepth",true, true, null),
+    MAX_DEPTH("maxDepth",true, true),
 
     /**
      * Maximum size of collections returned during serialization.
      * If larger, the collection is truncated
      */
-    MAX_COLLECTION_SIZE("maxCollectionSize",true, true, null),
+    MAX_COLLECTION_SIZE("maxCollectionSize",true, true),
 
     /**
      * Maximum number of objects returned by serialization
      */
-    MAX_OBJECTS("maxObjects",true, true, null),
+    MAX_OBJECTS("maxObjects",true, true),
 
     /**
      * Init parameter for the location of the policy file

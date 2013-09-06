@@ -79,4 +79,30 @@ public final class ClassUtil {
     public static boolean checkForClass(String pClassName) {
         return ClassUtil.classForName(pClassName,false) != null;
     }
+
+    /**
+     * Instantiate an instance of the given class with its default constructor
+     *
+     * @param pClass name of class to instantiate
+     * @param <T> type object type
+     * @return instantiated class
+     * @throws IllegalArgumentException if the class could not be found or instantiated
+     */
+    public static <T> T newInstance(String pClass) {
+        try {
+            Class<T> clazz = classForName(pClass);
+            if (clazz != null) {
+                return clazz.newInstance();
+            } else {
+                throw new IllegalArgumentException("Cannot find " + pClass);
+            }
+            } catch (InstantiationException e) {
+                throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+            }
+    }
+
+
+
 }

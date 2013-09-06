@@ -107,7 +107,7 @@ public class JolokiaServlet extends AgentServlet {
     @Override
     protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfiguration) {
         // If there is a bundle context available, set up a tracker for tracking the logging
-        // service and optionally a restrictor service
+        // service
         BundleContext ctx = getBundleContext(pServletConfig);
         if (ctx != null) {
             // Track logging service

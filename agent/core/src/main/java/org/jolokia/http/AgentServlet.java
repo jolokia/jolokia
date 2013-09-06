@@ -15,6 +15,7 @@ import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.service.impl.ClasspathServiceCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
+import org.jolokia.util.ClassUtil;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -153,7 +154,10 @@ public class AgentServlet extends HttpServlet {
      * @return a default log handler
      */
     protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfig) {
-        return new ServletLogHandler(Boolean.parseBoolean(pConfig.getConfig(ConfigKey.DEBUG)));
+        String logHandlerClass = pConfig.getConfig(ConfigKey.LOGHANDLER_CLASS);
+        return logHandlerClass != null ?
+                (LogHandler) ClassUtil.newInstance(logHandlerClass) :
+                new ServletLogHandler(Boolean.parseBoolean(pConfig.getConfig(ConfigKey.DEBUG)));
     }
 
 

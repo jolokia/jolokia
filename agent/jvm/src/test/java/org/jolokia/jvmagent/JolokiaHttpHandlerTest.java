@@ -29,6 +29,8 @@ import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.TestJolokiaContext;
 import org.jolokia.util.TestRequestDispatcher;
+import org.jolokia.config.Configuration;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -128,7 +130,7 @@ public class JolokiaHttpHandlerTest {
 
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
         assertTrue(resp.containsKey("error"));
-        assertEquals(resp.get("error_type"),IllegalArgumentException.class.getName());
+        assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("PUT"));
     }
 

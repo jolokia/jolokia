@@ -29,6 +29,7 @@ import org.jolokia.config.*;
 import org.jolokia.config.Configuration;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
+import org.jolokia.util.LogHandler;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -109,6 +110,44 @@ public class AgentServletTest {
     public void initWithcustomAccessRestrictor() throws ServletException {
         prepareStandardInitialisation();
         servlet.destroy();
+    }
+
+    @Test
+    public void initWithCustomLogHandler() throws Exception {
+        servlet = new AgentServlet();
+        config = createMock(ServletConfig.class);
+        context = createMock(ServletContext.class);
+
+        HttpTestUtil.prepareServletConfigMock(config,new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
+        HttpTestUtil.prepareServletContextMock(context,null);
+
+        expect(config.getServletContext()).andReturn(context).anyTimes();
+        expect(config.getServletName()).andReturn("jolokia").anyTimes();
+        replay(config, context);
+
+        servlet.init(config);
+        servlet.destroy();
+
+        assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    public static class CustomLogHandler implements LogHandler {
+
+        private static int infoCount = 0;
+
+        public CustomLogHandler() {
+            infoCount = 0;
+        }
+
+        public void debug(String message) {
+        }
+
+        public void info(String message) {
+            infoCount++;
+        }
+
+        public void error(String message, Throwable t) {
+        }
     }
 
     @Test
