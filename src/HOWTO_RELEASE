@@ -45,7 +45,7 @@ cd ../..
 # Release on central maven repo
 # See: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
 # Staging Nexus: https://oss.sonatype.org/
-# Steps todo:
+# Steps:
 # 1. Login into https://oss.sonatype.org/
 # 2. "Staging Repositories"
 # 3. Select staging repository

@@ -75,7 +75,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
-        // TODO: The spring agent needs also away for adding a log handler
+        // TODO: The spring agent needs also a way for adding a log handler
         init(new JolokiaServerConfig(finalConfig), null);
         if (autoStart) {
             start();

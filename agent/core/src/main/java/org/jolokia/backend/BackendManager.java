@@ -82,7 +82,7 @@ public class BackendManager {
 
         long time = 0;
         if (debug) {
-            time = System.currentTimeMillis();
+             time = System.currentTimeMillis();
         }
         JSONObject json = null;
         try {
