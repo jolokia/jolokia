@@ -106,6 +106,7 @@ public class JvmAgentConfigTest {
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
         assertTrue(authenticator instanceof Dummy);
+        assertSame(((Dummy)authenticator).getConfig(), config.getJolokiaConfig());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla\\.txt.*")

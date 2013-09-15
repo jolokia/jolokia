@@ -22,6 +22,8 @@ import org.jolokia.config.Configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -239,7 +241,25 @@ public class JolokiaServerConfig {
                 }
 
                 try {
-                    authenticator = (Authenticator) authClass.newInstance();
+                    // prefer constructor that takes configuration
+                    try {
+                        Constructor constructorThatTakesConfiguration = authClass.getConstructor(Configuration.class);
+                        authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
+                    } catch (NoSuchMethodException ignore) {
+
+                        // fallback to default constructor
+                        try {
+                            Constructor defaultConstructor = authClass.getConstructor();
+                            authenticator = (Authenticator) defaultConstructor.newInstance();
+                        } catch (NoSuchMethodException e) {
+                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
+                        } catch (InvocationTargetException e) {
+                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
+                        }
+
+                    } catch (InvocationTargetException e) {
+                        throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
+                    }
                 } catch (InstantiationException e) {
                     throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
                 } catch (IllegalAccessException e) {
