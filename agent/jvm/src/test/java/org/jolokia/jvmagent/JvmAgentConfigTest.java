@@ -98,6 +98,16 @@ public class JvmAgentConfigTest {
         assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
     }
 
+    @Test
+    public void readConfigWithCustomAuthenticator() throws IOException {
+        String path = copyResourceToTemp("/agent-custom-authenticator-test.properties");
+        JvmAgentConfig config = new JvmAgentConfig("config=" + path);
+        assertEquals(config.getProtocol(), "http");
+        Authenticator authenticator = config.getAuthenticator();
+        assertNotNull(authenticator);
+        assertTrue(authenticator instanceof Dummy);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla\\.txt.*")
     public void configNotFound() {
         new JvmAgentConfig("config=/bla.txt");

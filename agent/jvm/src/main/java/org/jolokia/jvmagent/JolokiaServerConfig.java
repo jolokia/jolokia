@@ -16,15 +16,17 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
+import com.sun.net.httpserver.Authenticator;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
-
-import com.sun.net.httpserver.Authenticator;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Configuration required for the JolokiaServer
@@ -219,6 +221,37 @@ public class JolokiaServerConfig {
     }
 
     private void initAuthenticator() {
+        initCustomAuthenticator();
+        if (authenticator == null) {
+            initDefaultAuthenticator();
+        }
+    }
+
+    private void initCustomAuthenticator() {
+        String authenticatorClass = jolokiaConfig.get(ConfigKey.AUTHENTICATOR_CLASS);
+
+        if (authenticatorClass != null) {
+            try {
+                Class authClass = Class.forName(authenticatorClass);
+                if (!Authenticator.class.isAssignableFrom(authClass)) {
+                    throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
+                            "] is not a subclass of Authenticator");
+                }
+
+                try {
+                    authenticator = (Authenticator) authClass.newInstance();
+                } catch (InstantiationException e) {
+                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+                }
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Cannot find authenticator class", e);
+            }
+        }
+    }
+
+    private void initDefaultAuthenticator() {
         String user = jolokiaConfig.get(ConfigKey.USER);
         String password = jolokiaConfig.get(ConfigKey.PASSWORD);
 
