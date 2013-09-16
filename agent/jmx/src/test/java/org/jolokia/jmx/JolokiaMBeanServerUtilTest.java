@@ -22,8 +22,6 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.MBeanRegistry;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.TestJolokiaContext;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -40,8 +38,7 @@ public class JolokiaMBeanServerUtilTest {
 
     @BeforeClass
     public void setup() {
-        handler = new MBeanRegistry(
-                new TestJolokiaContext.Builder().config(ConfigKey.DEBUG, "true").build());
+        handler = new MBeanRegistry();
     }
 
     @AfterClass

@@ -45,7 +45,11 @@ public class History implements HistoryMBean,MBeanRegistration {
      */
     public History(HistoryStore pStore, String pOName) {
         store = pStore;
+        if (pOName == null) {
+            throw new IllegalArgumentException("ObjectName for history must not be null");
+        }
         objectName = pOName;
+
     }
 
     /** {@inheritDoc} */

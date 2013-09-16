@@ -50,7 +50,7 @@ public class BackendManagerTest {
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
         TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder();
         if (configKeysAndValues.length > 0) {
-                builder.config(ConfigKey.DEBUG, "true");
+            builder.config(ConfigKey.DEBUG, "true");
         }
         ctx = builder.build();
         return ctx;

@@ -3,14 +3,15 @@ package org.jolokia.service.impl;
 import java.util.Set;
 import java.util.SortedSet;
 
-import javax.management.ObjectName;
+import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.*;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.JolokiaService;
 import org.jolokia.util.*;
 
 /**
@@ -28,14 +29,14 @@ public class JolokiaContextImpl implements JolokiaContext {
     private ServerHandle serverHandle;
 
     // Service manager associated with the context
-    private JolokiaServiceManager serviceManager;
+    private JolokiaServiceManagerImpl serviceManager;
 
     /**
      * New context associated with the given service manager
      *
      * @param pServiceManager service manager, used later for looking up services
      */
-    JolokiaContextImpl(JolokiaServiceManager pServiceManager) {
+    JolokiaContextImpl(JolokiaServiceManagerImpl pServiceManager) {
         serviceManager = pServiceManager;
 
         // Central objects
@@ -49,6 +50,12 @@ public class JolokiaContextImpl implements JolokiaContext {
     /** {@inheritDoc} */
     public ServerHandle getServerHandle() {
         return serverHandle;
+    }
+
+    /** {@inheritDoc} */
+    public ObjectName registerMBean(Object pMBean, String... pOptionalName)
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
+        return serviceManager.registerMBean(pMBean,pOptionalName);
     }
 
     /** {@inheritDoc} */

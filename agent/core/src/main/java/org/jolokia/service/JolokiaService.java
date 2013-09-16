@@ -51,7 +51,7 @@ public interface JolokiaService<T extends JolokiaService> extends Comparable<T> 
     void destroy() throws Exception;
 
     /**
-     * Lifecycle method caleld when the services are initialized
+     * Lifecycle method called when the services are initialized
      *
      * @param pJolokiaContext the jolokia context used
      */

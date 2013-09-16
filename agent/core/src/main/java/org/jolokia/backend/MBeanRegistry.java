@@ -6,9 +6,6 @@ import java.util.List;
 
 import javax.management.*;
 
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.service.JolokiaContext;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -35,22 +32,8 @@ import org.jolokia.service.JolokiaContext;
  */
 public class MBeanRegistry {
 
-    // Jolokia context to use
-    private final JolokiaContext jolokiaContext;
-
     // Handles remembered for unregistering
     private final List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
-
-    /**
-     * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
-     * An optional qualifier used for registering this object as an MBean is taken from the given configuration as well
-     *
-     * @partam pCtx context from where to get configuration information
-     */
-    public MBeanRegistry(JolokiaContext pCtx) {
-        // A qualifier, if given, is used to add the MBean Name of this MBean
-        jolokiaContext = pCtx;
-    }
 
     /**
      * Register a MBean under a certain name to the platform MBeanServer
@@ -68,8 +51,7 @@ public class MBeanRegistry {
             MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             try {
                 String name = pOptionalName != null && pOptionalName.length > 0 ? pOptionalName[0] : null;
-                ServerHandle serverHandle = jolokiaContext.getServerHandle();
-                ObjectName registeredName = serverHandle.registerMBeanAtServer(server, pMBean, name);
+                ObjectName registeredName = registerMBeanAtServer(server, pMBean, name);
                 mBeanHandles.add(new MBeanHandle(server,registeredName));
                 return registeredName;
             } catch (RuntimeException exp) {
@@ -79,6 +61,32 @@ public class MBeanRegistry {
             }
         }
     }
+
+    /**
+     * Register a MBean at the dedicated server. This method can be overridden if
+     * something special registration procedure is required, like for using the
+     * specific name for the registration or deligating the namin to MBean to register.
+     *
+     * @param pServer server an MBean should be registered
+     * @param pMBean the MBean to register
+     * @param pName an optional name under which the MBean should be registered. Can be null
+     * @return the object name of the registered MBean
+     * @throws MBeanRegistrationException when registration failed
+     * @throws InstanceAlreadyExistsException when there is already MBean with this name
+     * @throws NotCompliantMBeanException
+     * @throws MalformedObjectNameException if the name is not valid
+     */
+    private ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName)
+            throws MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException, MalformedObjectNameException {
+        if (pName != null) {
+            ObjectName oName = new ObjectName(pName);
+            return pServer.registerMBean(pMBean,oName).getObjectName();
+        } else {
+            // Needs to implement MBeanRegistration interface
+            return pServer.registerMBean(pMBean,null).getObjectName();
+        }
+    }
+
 
     /**
      * Unregister all previously registered MBean. This is tried for all previously

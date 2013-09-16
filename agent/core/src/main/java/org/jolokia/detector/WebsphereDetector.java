@@ -118,7 +118,14 @@ public class WebsphereDetector extends AbstractServerDetector {
             super("IBM","websphere", pVersion, pAgenturl, pExtrainfo);
         }
 
-        /** {@inheritDoc} */
+        /*
+        In Jolokia 1.x it was possible to set a workaround for WebSphere 6 where websphere add a
+        random extra part to an MBean name when registering via MBeanRegistration. Since Websphere 6
+        is the only server exhibiting such a strange behaviour, and the workaround is quite evolved,
+        it is removed for 2.0
+
+        The code and the original comment is left here for reference, but will be removed soon.
+
         @Override
         public ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName)
                 throws MBeanRegistrationException, InstanceAlreadyExistsException,
@@ -132,5 +139,6 @@ public class WebsphereDetector extends AbstractServerDetector {
                 return super.registerMBeanAtServer(pServer, pMBean, pName);
             }
         }
+        */
     }
 }

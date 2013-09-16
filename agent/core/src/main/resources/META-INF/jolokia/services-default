@@ -6,6 +6,10 @@ org.jolokia.backend.LocalRequestHandler,1000
 # Notification backend
 org.jolokia.notification.pull.PullNotificationBackend
 
+# ============================================
+# History MBean interceptor
+org.jolokia.history.HistoryMBeanRequestInterceptor
+
 # ===========================================
 # Server Detectors
 org.jolokia.detector.GeronimoDetector

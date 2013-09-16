@@ -3,6 +3,8 @@ package org.jolokia.service;
 import java.util.Set;
 import java.util.SortedSet;
 
+import javax.management.*;
+
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -29,7 +31,9 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     Converters getConverters();
 
     /**
-     * Get Jolokia services of a certain kind.
+     * Get Jolokia services of a certain kind. The returned list might be empty,
+     * but never null. The set is sorted according to the service order
+     * (see {@link JolokiaService#getOrder()}).
      */
     <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
 
@@ -40,6 +44,12 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return the server handle
      */
     ServerHandle getServerHandle();
+
+    /**
+     * Register an MBean which gets automatically unregistered during shutdown
+     */
+    public ObjectName registerMBean(Object pMBean, String... pOptionalName)
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException;
 
     /**
      * Get a configuration value if set as configuration or the default

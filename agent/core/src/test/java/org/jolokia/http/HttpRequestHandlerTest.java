@@ -196,6 +196,7 @@ public class HttpRequestHandlerTest {
         expectLastCall().asStub();
         expect(requestHandler.canHandle((JmxRequest) anyObject())).andStubReturn(true);
         expect(requestHandler.useReturnValueWithPath((JmxRequest) anyObject())).andStubReturn(false);
+        expect(requestHandler.compareTo((RequestHandler) anyObject())).andStubReturn(1);
         SortedSet<RequestHandler> services = createMock(SortedSet.class);
         expect(services.add(requestHandler)).andStubReturn(true);
         expect(services.iterator()).andStubAnswer(new IAnswer<Iterator<RequestHandler>>() {
@@ -203,11 +204,13 @@ public class HttpRequestHandlerTest {
                 return new SingletonIterator<RequestHandler> (requestHandler);
             }
         });
+        expect(services.comparator()).andStubReturn(null);
+        expect(services.size()).andStubReturn(1);
         replay(services);
         ctx = new TestJolokiaContext.Builder()
                 .restrictor(pRestrictor)
                 .logHandler(pLogHandler)
-                .services(services)
+                .services(RequestHandler.class,services)
                 .build();
         RequestDispatcher dispatcher = new RequestDispatcherImpl(ctx);
         handler = new HttpRequestHandler(ctx, dispatcher);

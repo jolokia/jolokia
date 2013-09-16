@@ -23,9 +23,6 @@ import java.util.List;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;
@@ -64,8 +61,7 @@ public class MBeanServerHandlerTestNegative {
 
     private void init() throws MalformedObjectNameException {
         TestDetector.reset();
-        JolokiaContext ctx = new TestJolokiaContext.Builder().config(ConfigKey.MBEAN_QUALIFIER, "qualifier=test").build();
-        handler = new MBeanRegistry(ctx);
+        handler = new MBeanRegistry();
     }
 
 }

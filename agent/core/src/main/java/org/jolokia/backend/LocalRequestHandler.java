@@ -131,7 +131,7 @@ public class LocalRequestHandler extends AbstractJolokiaService<RequestHandler> 
         void init() {
             ServerHandleFinder finder = new ServerHandleFinder(jolokiaContext);
             mBeanServerManager.init(finder.getExtraMBeanServers());
-            ServerHandle handle = finder.detectServerHandle(mBeanServerManager);
+              ServerHandle handle = finder.detectServerHandle(mBeanServerManager);
             jolokiaContext.setServerHandle(handle);
         }
     }

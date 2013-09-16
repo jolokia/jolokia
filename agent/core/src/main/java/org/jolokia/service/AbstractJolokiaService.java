@@ -31,7 +31,7 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
     private int order;
 
     /**
-     * Consruction of a base service for a given type and order
+     * Construction of a base service for a given type and order
      *
      * @param pType service type
      * @param pOrderId order id. A user of JolokiaService <em>must ensure</em> that the given

@@ -19,8 +19,6 @@ package org.jolokia.detector;
 import java.net.URL;
 import java.util.Map;
 
-import javax.management.*;
-
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequest;
@@ -163,31 +161,6 @@ public class ServerHandle {
      */
     public void postDetect(MBeanServerExecutor pServerManager, JolokiaContext pContext) {
         // Do nothing
-    }
-
-    /**
-     * Register a MBean at the dedicated server. This method can be overridden if
-     * something special registration procedure is required, like for using the
-     * specific name for the registration or deligating the namin to MBean to register.
-     *
-     * @param pServer server an MBean should be registered
-     * @param pMBean the MBean to register
-     * @param pName an optional name under which the MBean should be registered. Can be null
-     * @return the object name of the registered MBean
-     * @throws MBeanRegistrationException when registration failed
-     * @throws InstanceAlreadyExistsException when there is already MBean with this name
-     * @throws NotCompliantMBeanException
-     * @throws MalformedObjectNameException if the name is not valid
-     */
-    public ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName)
-            throws MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException, MalformedObjectNameException {
-        if (pName != null) {
-            ObjectName oName = new ObjectName(pName);
-            return pServer.registerMBean(pMBean,oName).getObjectName();
-        } else {
-            // Needs to implement MBeanRegistration interface
-            return pServer.registerMBean(pMBean,null).getObjectName();
-        }
     }
 
     /**

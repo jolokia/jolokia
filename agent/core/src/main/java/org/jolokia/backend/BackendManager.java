@@ -1,19 +1,17 @@
 package org.jolokia.backend;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
+import java.util.Set;
 
-import javax.management.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.JMException;
 
-import org.jolokia.backend.dispatcher.DispatchResult;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.json.JsonConvertOptions;
-import org.jolokia.history.History;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.JmxUtil;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.config.ConfigKey.*;
@@ -43,9 +41,6 @@ import static org.jolokia.config.ConfigKey.*;
  * @since Nov 11, 2009
  */
 public class BackendManager {
-
-    // Objectname for updating the history
-    private static final ObjectName HISTORY_OBJECTNAME = JmxUtil.newObjectName(History.OBJECT_NAME);
 
     // Overall Jolokia context
     private final JolokiaContext jolokiaCtx;
@@ -84,13 +79,9 @@ public class BackendManager {
         if (debug) {
              time = System.currentTimeMillis();
         }
-        JSONObject json = null;
+        JSONObject json;
         try {
             json = callRequestDispatcher(pJmxReq);
-
-            // Update global history store, add timestamp and possibly history information to the request
-            // TODO: Switch on ...
-            // updateHistory(pJmxReq, json);
             json.put("status",200 /* success */);
         } catch (NotChangedException exp) {
             // A handled indicates that its value hasn't changed. We return an status with
@@ -101,6 +92,9 @@ public class BackendManager {
             json.put("timestamp",System.currentTimeMillis() / 1000);
         }
 
+        // Call request logger
+        logResult(pJmxReq,json);
+
         if (debug) {
             jolokiaCtx.debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
             jolokiaCtx.debug("Response: " + json);
@@ -109,26 +103,15 @@ public class BackendManager {
         return json;
     }
 
-    // TODO: Maybe move to an interceptor ?
-
-    /**
-     * Update history
-     * @param pJmxReq request obtained
-     * @param pJson result as included in the response
-     */
-    private void updateHistory(JmxRequest pJmxReq, JSONObject pJson) {
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-        try {
-            mBeanServer.invoke(HISTORY_OBJECTNAME,
-                               "updateAndAdd",
-                               new Object[] { pJmxReq, pJson},
-                               new String[] { JmxRequest.class.getName(), JSONObject.class.getName() });
-        } catch (InstanceNotFoundException e) {
-            // Ignore, no history MBean is enabled, so no update
-        } catch (MBeanException e) {
-            throw new IllegalStateException("Internal: Cannot update History store",e);
-        } catch (ReflectionException e) {
-            throw new IllegalStateException("Internal: Cannot call History MBean via reflection",e);
+    // Log the result for any logger found
+    private void logResult(JmxRequest pJmxReq, JSONObject pRetValue) {
+        Set<RequestInterceptor> interceptors = jolokiaCtx.getServices(RequestInterceptor.class);
+        for (RequestInterceptor interceptor : interceptors) {
+            try {
+                interceptor.intercept(pJmxReq, pRetValue);
+            } catch (RuntimeException exp) {
+                jolokiaCtx.error("Cannot call request logger " + interceptor + ": " + exp,exp);
+            }
         }
     }
 

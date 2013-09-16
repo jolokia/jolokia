@@ -48,7 +48,7 @@ public class NotificationDispatcherTest {
         pullBackend = new PullNotificationBackend(10);
         ctx = new TestJolokiaContext.Builder()
                 .serverHandle(serverHandle)
-                .services(pullBackend)
+                .services(NotificationBackend.class,pullBackend)
                 .build();
         pullBackend.init(ctx);
         dispatcher = new NotificationDispatcher(ctx);

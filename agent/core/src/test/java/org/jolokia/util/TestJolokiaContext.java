@@ -20,7 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-import javax.management.ObjectName;
+import javax.management.*;
 
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
@@ -36,7 +36,7 @@ import org.jolokia.service.JolokiaService;
  */
 public class TestJolokiaContext implements JolokiaContext {
 
-    SortedSet<? extends JolokiaService> services;
+    Map<Class,SortedSet> services;
     LogHandler logHandler;
     Restrictor restrictor;
     Configuration config;
@@ -51,11 +51,11 @@ public class TestJolokiaContext implements JolokiaContext {
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
                                ServerHandle pHandle,
-                               SortedSet<JolokiaService> pServices) {
+                               Map<Class, SortedSet> pServices) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
-        this.services = pServices != null ? pServices : new TreeSet<JolokiaService>();
+        this.services = pServices != null ? pServices : new HashMap();
         try {
             if (pHandle != null) {
                 handle = pHandle;
@@ -78,11 +78,17 @@ public class TestJolokiaContext implements JolokiaContext {
     }
 
     public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
-        return (SortedSet<T>) services;
+        SortedSet<T> ret = services.get(pType);
+        return ret != null ? new TreeSet<T>(ret) : new TreeSet<T>();
     }
 
     public ServerHandle getServerHandle() {
         return handle;
+    }
+
+    public ObjectName registerMBean(Object pMBean, String... pOptionalName)
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
+        return null;
     }
 
     public String getConfig(ConfigKey pKey) {
@@ -150,7 +156,7 @@ public class TestJolokiaContext implements JolokiaContext {
         Configuration config;
         Converters converters;
         ServerHandle handle;
-        SortedSet<JolokiaService> services;
+        Map<Class,SortedSet> services = new HashMap<Class, SortedSet>();
 
         public Builder config(Configuration config) {
             this.config = config;
@@ -177,13 +183,14 @@ public class TestJolokiaContext implements JolokiaContext {
             return this;
         }
 
-        public <T extends JolokiaService> Builder services(T ... pServices) {
-            services = new TreeSet(Arrays.asList(pServices));
+        public <T extends JolokiaService> Builder services(Class<T> pType, T ... pServices) {
+            SortedSet<T> serviceSet = new TreeSet(Arrays.asList(pServices));
+            services.put(pType, serviceSet);
             return this;
         }
 
-        public <T extends JolokiaService> Builder services(SortedSet<T> pServices) {
-            services = (SortedSet<JolokiaService>) pServices;
+        public <T extends JolokiaService> Builder services(Class<T> pType, SortedSet<T> pServices) {
+            services.put(pType, pServices);
             return this;
         }
 

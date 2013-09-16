@@ -21,11 +21,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.*;
-
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.history.History;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.TestJolokiaContext;
@@ -113,34 +110,5 @@ public class ServerHandleTest {
         JSONObject config = serverHandle.getDetectorOptions(opts);
         assertNull(config);
         verify(handler);
-    }
-
-    @Test
-    public void registerAtMBeanServer() throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        History history = new History(null,null);
-        ObjectName oName = new ObjectName("jolokia:type=Config");
-        ObjectInstance oInstance = new ObjectInstance(oName,History.class.getName());
-        MBeanServer server = EasyMock.createMock(MBeanServer.class);
-        expect(server.registerMBean(eq(history),eq(oName))).andReturn(oInstance);
-        replay(server);
-
-        ObjectName resName = serverHandle.registerMBeanAtServer(server, history,"jolokia:type=Config");
-        assertEquals(resName,oName);
-
-        verify(server);
-    }
-
-    @Test
-    public void registerAtMBeanServer2() throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        History history = new History(null,null);
-        ObjectInstance oInstance = new ObjectInstance("jolokia:type=dummy",History.class.getName());
-        MBeanServer server = EasyMock.createMock(MBeanServer.class);
-        expect(server.registerMBean(history,null)).andReturn(oInstance);
-        replay(server);
-
-        ObjectName resName = serverHandle.registerMBeanAtServer(server, history,null);
-        assertEquals(resName,new ObjectName("jolokia:type=dummy"));
-
-        verify(server);
     }
 }
