@@ -51,6 +51,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
         ServiceTracker tracker = serviceTrackerMap.get(pType);
         if (tracker == null) {
             tracker = new ServiceTracker(context,pType.getName(),null);
+            serviceTrackerMap.put(pType,tracker);
             tracker.open();
         }
 
