@@ -43,8 +43,6 @@ import static org.testng.Assert.*;
  */
 public class BackendManagerTest {
 
-    //ConfigurationImpl config;
-
     private TestJolokiaContext ctx;
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
@@ -82,34 +80,6 @@ public class BackendManagerTest {
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
     }
-
-    /* TODO CTX - Request dispatcher lookup test must move elsewhere, this is not the proper place
-
-    @Test
-    public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(
-                createContext(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName()),
-                false);
-        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
-        backendManager.handleRequest(req);
-        assertTrue(RequestDispatcherTest.called);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*invalid constructor.*")
-    public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(
-                createContext(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName()),
-                false);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
-    public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(
-                createContext(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher"),
-                false);
-    }
-
-    */
 
     @Test
     public void defaultConfig() {
