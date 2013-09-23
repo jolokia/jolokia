@@ -75,7 +75,12 @@ public class VirtualMachineHandlerTest {
         for (ProcessDescription desc : procs) {
             if (desc.getDisplay() != null && desc.getDisplay().length() > 0) {
                 Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(desc.getDisplay()) + "$");
-                assertTrue(tryAttach(singleHitPattern.pattern()));
+                System.out.println("Trying to attach to " + desc.getDisplay() + " (" + desc.getId() + ")");
+                try {
+                    assertTrue(tryAttach(singleHitPattern.pattern()));
+                } catch (Exception exp) {
+                    throw new RuntimeException("Cannot attach to " + desc.getDisplay() + " (" + desc.getId() + "): " + exp.getMessage(),exp);
+                }
                 break;
             }
         }
