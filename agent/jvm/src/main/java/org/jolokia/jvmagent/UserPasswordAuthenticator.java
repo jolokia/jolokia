@@ -13,7 +13,7 @@ class UserPasswordAuthenticator extends BasicAuthenticator {
     private String password;
 
     /**
-     * Authenticator which checks agains a given user and password
+     * Authenticator which checks against a given user and password
      *
      * @param pUser user to check again
      * @param pPassword her password

@@ -16,15 +16,19 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.*;
-
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Configuration required for the JolokiaServer
@@ -219,6 +223,55 @@ public class JolokiaServerConfig {
     }
 
     private void initAuthenticator() {
+        initCustomAuthenticator();
+        if (authenticator == null) {
+            initDefaultAuthenticator();
+        }
+    }
+
+    private void initCustomAuthenticator() {
+        String authenticatorClass = jolokiaConfig.get(ConfigKey.AUTHENTICATOR_CLASS);
+
+        if (authenticatorClass != null) {
+            try {
+                Class authClass = Class.forName(authenticatorClass);
+                if (!Authenticator.class.isAssignableFrom(authClass)) {
+                    throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
+                            "] is not a subclass of Authenticator");
+                }
+
+                try {
+                    // prefer constructor that takes configuration
+                    try {
+                        Constructor constructorThatTakesConfiguration = authClass.getConstructor(Configuration.class);
+                        authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
+                    } catch (NoSuchMethodException ignore) {
+
+                        // fallback to default constructor
+                        try {
+                            Constructor defaultConstructor = authClass.getConstructor();
+                            authenticator = (Authenticator) defaultConstructor.newInstance();
+                        } catch (NoSuchMethodException e) {
+                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
+                        } catch (InvocationTargetException e) {
+                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
+                        }
+
+                    } catch (InvocationTargetException e) {
+                        throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
+                    }
+                } catch (InstantiationException e) {
+                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+                }
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Cannot find authenticator class", e);
+            }
+        }
+    }
+
+    private void initDefaultAuthenticator() {
         String user = jolokiaConfig.get(ConfigKey.USER);
         String password = jolokiaConfig.get(ConfigKey.PASSWORD);
 
