@@ -128,18 +128,24 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
         Map<String,Object> ret = new HashMap<String, Object>();
         List<String> attributeNames = pRequest.getAttributeNames();
         for (ObjectName name : names) {
-            if (!pRequest.hasAttribute()) {
-                Map values = (Map) fetchAttributes(pServerManager,name, null, faultHandler);
-                if (values != null && values.size() > 0) {
-                    ret.put(pRequest.getOrderedObjectName(name),values);
+            try {
+                if (!pRequest.hasAttribute()) {
+                    Map values = (Map) fetchAttributes(pServerManager,name, null, faultHandler);
+                    if (values != null && values.size() > 0) {
+                        ret.put(pRequest.getOrderedObjectName(name),values);
+                    }
+                } else {
+                    List<String> filteredAttributeNames = filterAttributeNames(pServerManager,name,attributeNames);
+                    if (filteredAttributeNames.size() == 0) {
+                        continue;
+                    }
+                    ret.put(pRequest.getOrderedObjectName(name),
+                            fetchAttributes(pServerManager,name,filteredAttributeNames, faultHandler));
                 }
-            } else {
-                List<String> filteredAttributeNames = filterAttributeNames(pServerManager,name,attributeNames);
-                if (filteredAttributeNames.size() == 0) {
-                    continue;
-                }
-                ret.put(pRequest.getOrderedObjectName(name),
-                        fetchAttributes(pServerManager,name,filteredAttributeNames, faultHandler));
+            } catch (InstanceNotFoundException exp) {
+                // Since MBean can be registered/deregistered dynamically, it can happen here, that
+                // an MBean has been already unregistered in the meantim. We simply ignore an InstanceNotFoundException
+                // here and go on ....
             }
         }
         if (ret.size() == 0) {
