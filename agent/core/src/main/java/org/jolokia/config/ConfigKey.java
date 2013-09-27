@@ -147,6 +147,11 @@ public enum ConfigKey {
     PASSWORD("password", false, true),
 
     /**
+     * Custom authenticator to be used instead of default user/password one
+     */
+    AUTHENTICATOR_CLASS("authenticatorClass", true, false),
+
+    /**
      * Context used for agent, used e.g. in the OSGi activator
      * (but not for the servlet, this is done in web.xml)
      */

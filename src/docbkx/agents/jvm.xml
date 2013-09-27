@@ -120,6 +120,19 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>authenticatorClass</constant></td>
+          <td>
+            Fully qualified name of an authenticator class. Class must be on classpath and must extend
+            <constant>com.sun.net.httpserver.Authenticator</constant>. Class can declare a constructor
+            that takes one argument of a type <constant>org.jolokia.config.Configuration</constant> in which case
+            Jolokia runtime configuration will be passed (useful in cases where authenticator requires additional
+            configuration). If no such constructor is found, default (no-arg) constructor will be use to create an
+            instance.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
           <td><constant>protocol</constant></td>
           <td>
             HTTP protocol to use. Should be either <literal>http</literal>

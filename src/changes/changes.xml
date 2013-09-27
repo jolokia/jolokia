@@ -24,6 +24,12 @@
   </properties>
   <body>
     <release version="1.1.4-SNAPSHOT" description="Release 1.1.4-SNAPSHOT">
+      <action dev="georgy" type="add" date="2013-09-25">
+        Introduced new configuration parameter "authenticatorClass" which can be used to provide custom authenticator
+        for JVM agent.
+      </action>
+    </release>
+    <release version="1.1.4-SNAPSHOT" description="Release 1.1.4-SNAPSHOT">
       <action dev="roland" type="add" date="2013-09-02">
         Introduced new configuration parameter "logHandlerClass" which can be used to specify an alternate
         LogHandler for the WAR and JVM agent. Also, if the JVM agent is used programmatically, a LogHandler

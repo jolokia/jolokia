@@ -360,6 +360,13 @@
       </roles>
     </developer>
   </developers>
+
+  <contributors>
+      <contributor>
+          <name>Georgy Bolyuba</name>
+          <email>georgy@bolyuba.com</email>
+      </contributor>
+  </contributors>
    
   <!-- Overall version management -->
   <dependencyManagement>
