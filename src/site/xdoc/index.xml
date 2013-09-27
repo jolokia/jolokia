@@ -79,6 +79,28 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Step by step ... 1.1.4">
+        <div class="news-date">2013-07-30</div>
+        <p>
+          Some bug fixes, and two small new features. Not much <a href="changes-report.html">more</a>.
+        </p>
+        <p>
+          A new configuration parameter "<code>authenticatorClass</code>" can be used for the JVM to specify an
+          alternate authentication handler beside the default one, which simply checks for user and password as
+          defined in the configuration.
+        </p>
+        <p>
+          With the configuration "<code>logHandlerClass</code>" and alternative log handler can be specified. This can
+          be used for the WAR and JVM agent in order to tweak Jolokia's logging behaviour. For the OsgiAgent you already
+          could use a <code>LogService</code>.
+        </p>
+        <p>
+          Ok, that's it and I hope you enjoy this release. I know, I'm late with 2.0, but as things happens, I have too
+          much to do in 'real life' (e.g. feeding my family ;-). But I still hope to get it out this year, and yes, the
+          2.0 branch is growing (slowly).
+        </p>
+      </subsection>
+
       <subsection name="Small fixes with 1.1.3">
         <div class="news-date">2013-07-30</div>
         <p>
