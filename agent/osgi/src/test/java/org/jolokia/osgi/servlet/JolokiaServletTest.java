@@ -114,6 +114,7 @@ public class JolokiaServletTest {
     private void destroyServlet() {
         reset(bundleContext);
         bundleContext.removeServiceListener(EasyMock.<ServiceListener>anyObject());
+        expectLastCall().asStub();
         replay(bundleContext);
         servlet.destroy();
     }
