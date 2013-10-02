@@ -94,9 +94,15 @@
           could use a <code>LogService</code> for customizing logging.
         </p>
         <p>
-          Ok, that's it and I hope you enjoy this release. I know, I'm late with 2.0, but as things happens, I have too
+          That's it and I hope you enjoy this release. I know, I'm late with 2.0, but as things happens, I have too
           much to do in 'real life' (i.e. feeding my family ;-). But I still hope to get it out this year, and yes, the
           2.0 branch is growing (slowly).
+        </p>
+        <p>
+          BTW, the slides to my talk for the small but very fine <a href="">JayDay 2013</a> are <a href="">online</a>, too.
+          These are "implemented" in JavaScript including live demos, where the JavaScript can be directly inserted
+          in the browser (tested with Chrome &amp; Firefox). For the sample code, simply push the blue buttons at the
+          bottom of a <a href="">demo slide</a>.
         </p>
       </subsection>
 
