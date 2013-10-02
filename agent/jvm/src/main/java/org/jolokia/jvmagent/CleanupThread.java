@@ -99,7 +99,9 @@ class CleanupThread extends Thread {
         for (int i=0;i< pThreads.length;i++) {
             final Thread t = pThreads[i];
             if (t.isDaemon() ||
+                    t.getThreadGroup() == null || // has died on us
                     t.getThreadGroup().equals(threadGroup) ||
+                    t.getName().startsWith("WrapperListener_stop_runner") || // Tanuki Java Service Wrapper (#116)
                     t.getName().startsWith("DestroyJavaVM")) {
                 // These are threads which should not prevent the server from stopping.
                 continue;

@@ -356,7 +356,7 @@
         <dependency>
           <groupId>org.jolokia</groupId>
           <artifactId>jolokia-core</artifactId>
-          <version>0.90</version>
+          <version>${jolokia.version}</version>
         </dependency>
       </dependencies>
 

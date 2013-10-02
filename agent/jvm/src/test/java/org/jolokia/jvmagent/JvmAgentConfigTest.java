@@ -19,9 +19,12 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.regex.Matcher;
 
 import com.sun.net.httpserver.Authenticator;
-import org.jolokia.config.*;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+import org.jolokia.util.EscapeUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -95,6 +98,17 @@ public class JvmAgentConfigTest {
         assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
     }
 
+    @Test
+    public void readConfigWithCustomAuthenticator() throws IOException {
+        String path = copyResourceToTemp("/agent-custom-authenticator-test.properties");
+        JvmAgentConfig config = new JvmAgentConfig("config=" + path);
+        assertEquals(config.getProtocol(), "http");
+        Authenticator authenticator = config.getAuthenticator();
+        assertNotNull(authenticator);
+        assertTrue(authenticator instanceof Dummy);
+        assertSame(((Dummy)authenticator).getConfig(), config.getJolokiaConfig());
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla\\.txt.*")
     public void configNotFound() {
         new JvmAgentConfig("config=/bla.txt");
@@ -132,7 +146,17 @@ public class JvmAgentConfigTest {
         assertNotNull(is,"Cannot find " + pResource);
         File out = File.createTempFile("prop",".properties");
         copy(is,new FileOutputStream(out));
-        return out.getAbsolutePath();
+        String path = out.getAbsolutePath();
+
+        if (EscapeUtil.CSV_ESCAPE.equals("\\\\") && (File.separator.equals("\\"))) {
+           /* Path can be similar to C:\...\...\...\...\Temp\prop424242424242424242.properties on Win,
+              so we need to escape \ otherwise tests will fail. We need to escape it twice, once for
+              list of parameter split unescaping and once more for parameter=value split unecapsulation
+           */
+            //First "\\\\" is regex
+            path = path.replaceAll("\\\\", Matcher.quoteReplacement("\\\\\\\\"));
+        }
+        return path;
     }
 
     private void copy(InputStream in, OutputStream out) throws IOException   {

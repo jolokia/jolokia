@@ -25,6 +25,17 @@
   </properties>
 
   <body>
+    <section name="JayDay 2013">
+      <p>
+        The slides to my talk for the small but very fine <a href="">JayDay 2013</a> are <a href="">online</a>, too.
+        These are "implemented" in JavaScript including live demos, where the JavaScript can be directly inserted
+        in the browser (tested with Chrome &amp; Firefox). For the sample code, simply push the blue buttons at the
+        bottom of a <a href="">demo slide</a>.
+      </p>
+       <div style="width:500px; margin-left: auto; margin-right: auto;">
+         <img src="images/jayday2013_title.png"/>
+      </div>
+    </section>
     <section name="Devoxx 2011">
       <p>
         Here's my talk from Devoxx 2011 which is now freely
