@@ -1,8 +1,16 @@
 package org.jolokia.converter;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import javax.management.AttributeNotFoundException;
+import javax.management.openmbean.OpenType;
+
 import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.json.SerializeOptions;
+import org.jolokia.converter.object.OpenTypeDeserializer;
 import org.jolokia.converter.object.StringToObjectConverter;
-import org.jolokia.converter.object.StringToOpenTypeConverter;
+import org.jolokia.service.AbstractJolokiaService;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -26,50 +34,39 @@ import org.jolokia.converter.object.StringToOpenTypeConverter;
  * @author roland
  * @since 02.08.11
  */
-public class Converters {
+public class Converters extends AbstractJolokiaService<JolokiaSerializer> implements JolokiaSerializer {
 
     // From object to json:
     private ObjectToJsonConverter toJsonConverter;
 
     // From string/json to object:
     private StringToObjectConverter toObjectConverter;
-    private StringToOpenTypeConverter toOpenTypeConverter;
+    private OpenTypeDeserializer toOpenTypeConverter;
 
     /**
      * Create converters (string-to-object, string-to-openType and object-to-json)
      *
      */
-    public Converters() {
+    public Converters(int pOrder) {
+        super(JolokiaSerializer.class,pOrder);
         toObjectConverter = new StringToObjectConverter();
-        toOpenTypeConverter = new StringToOpenTypeConverter(toObjectConverter);
+        toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter);
         toJsonConverter = new ObjectToJsonConverter(toObjectConverter);
     }
 
-    /**
-     * Get the converter which is repsonsible for converting objects to JSON
-     *
-     * @return converter
-     */
-    public ObjectToJsonConverter getToJsonConverter() {
-        return toJsonConverter;
+    public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException {
+        return toJsonConverter.serialize(pValue,pPathParts,pOptions);
     }
 
-    /**
-     * Get the converter which translates a given string value to a certain object (depending
-     * on type)
-     *
-     * @return converter
-     */
-    public StringToObjectConverter getToObjectConverter() {
-        return toObjectConverter;
+    public Object deserialize(String pExpectedClassName, Object pValue) {
+        return toObjectConverter.deserialize(pExpectedClassName,pValue);
     }
 
-    /**
-     * Get the converter for strings to {@link javax.management.openmbean.OpenType}
-     *
-     * @return converter
-     */
-    public StringToOpenTypeConverter getToOpenTypeConverter() {
-        return toOpenTypeConverter;
+    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+        return toJsonConverter.setInnerValue(pOuterObject,pNewValue,pPathParts);
+    }
+
+    public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
+        return toOpenTypeConverter.deserialize(pOpenType,pValue);
     }
 }

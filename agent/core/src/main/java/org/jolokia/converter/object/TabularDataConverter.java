@@ -39,7 +39,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
      *
      * @param pDispatcher parent converter used for recursive conversion
      */
-    public TabularDataConverter(OpenTypeConverter pDispatcher) {
+    public TabularDataConverter(OpenTypeDeserializer pDispatcher) {
         super(pDispatcher);
     }
 
@@ -141,8 +141,8 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
         Map<String, String> jsonObj = (Map<String,String>) pValue;
         for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("key", getDispatcher().convertToObject(rowType.getType("key"), entry.getKey()));
-            map.put("value", getDispatcher().convertToObject(rowType.getType("value"), entry.getValue()));
+            map.put("key", getDispatcher().deserialize(rowType.getType("key"), entry.getKey()));
+            map.put("value", getDispatcher().deserialize(rowType.getType("value"), entry.getValue()));
 
             try {
                 CompositeData compositeData = new CompositeDataSupport(rowType, map);
@@ -169,7 +169,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
             if (!(val instanceof JSONObject)) {
                 throw new IllegalArgumentException("Tabular-Data values must be given as JSON objects, not " + val.getClass());
             }
-            tabularData.put((CompositeData) getDispatcher().convertToObject(pType.getRowType(), val));
+            tabularData.put((CompositeData) getDispatcher().deserialize(pType.getRowType(), val));
         }
         return tabularData;
     }
@@ -186,7 +186,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
             if (pLevel > 1) {
                 putRowsToTabularData(pTabularData, jsonValue, pLevel - 1);
             } else {
-                pTabularData.put((CompositeData) getDispatcher().convertToObject(type.getRowType(), jsonValue));
+                pTabularData.put((CompositeData) getDispatcher().deserialize(type.getRowType(), jsonValue));
             }
         }
     }

@@ -35,7 +35,7 @@ class SimpleTypeConverter extends OpenTypeConverter<SimpleType> {
      * @param pDispatcher parent converter (not used here)
      * @param pStringToObjectConverter string to object converter for transforming simple types
      */
-    SimpleTypeConverter(OpenTypeConverter pDispatcher, StringToObjectConverter pStringToObjectConverter) {
+    SimpleTypeConverter(OpenTypeDeserializer pDispatcher, StringToObjectConverter pStringToObjectConverter) {
         super(pDispatcher);
         stringToObjectConverter = pStringToObjectConverter;
     }
@@ -49,6 +49,6 @@ class SimpleTypeConverter extends OpenTypeConverter<SimpleType> {
     /** {@inheritDoc} */
     @Override
     Object convertToObject(SimpleType pType, Object pFrom) {
-        return stringToObjectConverter.prepareValue(pType.getClassName(), pFrom);
+        return stringToObjectConverter.deserialize(pType.getClassName(), pFrom);
     }
 }

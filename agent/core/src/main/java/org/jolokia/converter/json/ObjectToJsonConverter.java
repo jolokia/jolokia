@@ -105,7 +105,7 @@ public final class ObjectToJsonConverter {
      * @return the converter object. This either a subclass of {@link org.json.simple.JSONAware} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within an path an attribute could not be found
      */
-    public Object convertToJson(Object pValue, List<String> pPathParts, JsonConvertOptions pOptions)
+    public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions)
             throws AttributeNotFoundException {
         Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<String>();
         return extractObjectWithContext(pValue, extraStack, pOptions, true);
@@ -131,14 +131,13 @@ public final class ObjectToJsonConverter {
         // Get the object pointed to do with path-1
         // We are using no limits here, since a path must have been given (see above), and hence we should
         // be save anyway.
-        Object inner = extractObjectWithContext(pOuterObject, extraStack, JsonConvertOptions.DEFAULT, false);
+        Object inner = extractObjectWithContext(pOuterObject, extraStack, SerializeOptions.DEFAULT, false);
 
         // Set the attribute pointed to by the path elements
         // (depending of the parent object's type)
         return setObjectValue(inner, lastPathElement, pNewValue);
     }
 
-    // =================================================================================================
 
     /**
      * Related to {@link #extractObjectWithContext} except that
@@ -146,7 +145,7 @@ public final class ObjectToJsonConverter {
      * various extractors to recursively continue the extraction, hence it is public.
      *
      * This method must not be used as entry point for serialization.
-     * Use {@link #convertToJson(Object, List, JsonConvertOptions)} or
+     * Use {@link #serialize(Object, List, SerializeOptions)} or
      * {@link #setInnerValue(Object, Object, List)} instead.
      *
      * @param pValue value to extract from
@@ -180,6 +179,8 @@ public final class ObjectToJsonConverter {
         }
     }
 
+    // =================================================================================================
+
     /**
      * Handle a value which means to dive into the internal of a complex object
      * (if <code>pExtraArgs</code> is not null) and/or to convert
@@ -195,7 +196,7 @@ public final class ObjectToJsonConverter {
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
-    private Object extractObjectWithContext(Object pValue, Stack<String> pExtraArgs, JsonConvertOptions pOpts, boolean pJsonify)
+    private Object extractObjectWithContext(Object pValue, Stack<String> pExtraArgs, SerializeOptions pOpts, boolean pJsonify)
             throws AttributeNotFoundException {
         Object jsonResult;
         setupContext(pOpts);
@@ -272,7 +273,7 @@ public final class ObjectToJsonConverter {
      * Setup the context with hard limits
      */
     void setupContext() {
-        setupContext(new JsonConvertOptions.Builder().build());
+        setupContext(new SerializeOptions.Builder().build());
     }
 
     /**
@@ -281,7 +282,7 @@ public final class ObjectToJsonConverter {
      *
      * @param pOpts options used for parsing.
      */
-    void setupContext(JsonConvertOptions pOpts) {
+    void setupContext(SerializeOptions pOpts) {
         ObjectSerializationContext stackContext = new ObjectSerializationContext(pOpts);
         stackContextLocal.set(stackContext);
     }

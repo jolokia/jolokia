@@ -41,7 +41,7 @@ public class JolokiaContextImpl implements JolokiaContext {
 
         // Central objects
         // TODO: Lookup
-        converters = new Converters();
+        converters = new Converters(0);
 
         // Initially the server handle is a fallback server handle
         serverHandle = ServerHandle.NULL_SERVER_HANDLE;

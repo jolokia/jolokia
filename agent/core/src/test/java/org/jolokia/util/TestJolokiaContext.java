@@ -68,7 +68,7 @@ public class TestJolokiaContext implements JolokiaContext {
 //        this.requestDispatchManager = new RequestDispatchManager(
 //                pDispatchers != null ? pDispatchers :
 //                        Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this)));
-        converters = new Converters();
+        converters = new Converters(0);
     }
 
 

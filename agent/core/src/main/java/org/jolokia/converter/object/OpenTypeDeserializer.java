@@ -30,7 +30,7 @@ import javax.management.openmbean.OpenType;
  * @author Assaf Berg, roland
  * @since 02.08.11
  */
-public class StringToOpenTypeConverter extends OpenTypeConverter {
+public class OpenTypeDeserializer {
 
     // List of converters used
     private List<OpenTypeConverter<? extends OpenType>> converters;
@@ -40,8 +40,7 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
      *
      * @param pStringToObjectConverter converter for the 'leaf' values.
      */
-    public StringToOpenTypeConverter(StringToObjectConverter pStringToObjectConverter) {
-        super(null);
+    public OpenTypeDeserializer(StringToObjectConverter pStringToObjectConverter) {
         converters = Arrays.asList(
                 new SimpleTypeConverter(this,pStringToObjectConverter),
                 new ArrayTypeConverter(this),
@@ -58,8 +57,7 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
      * @return the converted value
      */
     @SuppressWarnings("unchecked")
-    @Override
-	public Object convertToObject(OpenType openType, Object pValue) {
+    public Object deserialize(OpenType openType, Object pValue) {
         if (pValue == null) {
             return null;
         } else {
@@ -72,15 +70,4 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
                     "Cannot convert " + pValue + " to " + openType + ": " + "No converter could be found");
         }
 	}
-
-    /**
-     * This converter is the parent converter can hence can convert
-     * all open types
-     * @param pType type (ignored)
-     * @return always true
-     */
-    @Override
-    boolean canConvert(OpenType pType) {
-        return true;
-    }
 }

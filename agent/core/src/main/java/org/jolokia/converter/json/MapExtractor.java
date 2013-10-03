@@ -118,7 +118,7 @@ public class MapExtractor implements Extractor {
         }
         Object value =
                 oldValue != null ?
-                        pConverter.prepareValue(oldValue.getClass().getName(), pValue) :
+                        pConverter.deserialize(oldValue.getClass().getName(), pValue) :
                         pValue;
         map.put(oldKey,value);
         return oldValue;

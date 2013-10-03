@@ -35,7 +35,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
      * Constructor
      * @param pDispatcher parent converter used for recursively converting
      */
-    ArrayTypeConverter(OpenTypeConverter pDispatcher) {
+    ArrayTypeConverter(OpenTypeDeserializer pDispatcher) {
         super(pDispatcher);
     }
 
@@ -63,7 +63,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
 
         int i = 0;
         for (Object element : jsonArray) {
-            valueArray[i++] = getDispatcher().convertToObject(elementOpenType, element);
+            valueArray[i++] = getDispatcher().deserialize(elementOpenType, element);
         }
 
         return valueArray;

@@ -83,9 +83,9 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
         verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = context.getConverters().getToOpenTypeConverter().convertToObject(types.paramOpenTypes[i], args.get(i));
+        		params[i] = context.getConverters().deserializeOpenType(types.paramOpenTypes[i], args.get(i));
         	} else { 
-        		params[i] = context.getConverters().getToObjectConverter().prepareValue(types.paramClasses[i], args.get(i));
+        		params[i] = context.getConverters().deserialize(types.paramClasses[i], args.get(i));
         	}
         }
 
