@@ -43,7 +43,7 @@ public class OsgiJolokiaServiceFactoryTest {
                 serviceRef
         });
         RequestHandler requestHandler = createMock(RequestHandler.class);
-        expect(requestHandler.compareTo(requestHandler)).andReturn(0);
+        expect(requestHandler.compareTo(requestHandler)).andStubReturn(0);
         expect(ctx.getService(serviceRef)).andReturn(requestHandler);
 
         expect(ctx.ungetService(serviceRef)).andReturn(true);
