@@ -318,6 +318,10 @@ a:active, a:hover {
   background: #E9E9E9;
 }
 
+a:active.no-hover, a:hover.no-hover {
+    background: none;
+}
+
 #legend li.externalLink {
   background: url(../images/external.png) left top no-repeat;
   padding-left: 18px;

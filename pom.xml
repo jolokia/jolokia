@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia</artifactId>
-  <version>1.1.4-SNAPSHOT</version>
+  <version>1.1.5-SNAPSHOT</version>
   <name>jolokia-parent</name>
   <description>jolokia parent pom</description>
 
@@ -432,8 +432,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>1.1.3</currentStableVersion>
-    <currentSnapshotVersion>1.1.4-SNAPSHOT</currentSnapshotVersion>
+    <currentStableVersion>1.1.4</currentStableVersion>
+    <currentSnapshotVersion>1.1.5-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
   </properties>

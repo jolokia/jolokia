@@ -99,10 +99,10 @@
           2.0 branch is growing (slowly).
         </p>
         <p>
-          BTW, the slides to my talk for the small but very fine <a href="">JayDay 2013</a> are <a href="">online</a>, too.
+          BTW, the slides to my talk for the small but very fine <a href="http://www.jayday.de">JayDay 2013</a> are <a href="http://www.jolokia.org/jayday-2013">online</a>, too.
           These are "implemented" in JavaScript including live demos, where the JavaScript can be directly inserted
           in the browser (tested with Chrome &amp; Firefox). For the sample code, simply push the blue buttons at the
-          bottom of a <a href="">demo slide</a>.
+          bottom of a <a href="http://www.jolokia.org/jayday-2013/#/step-20">demo slide</a>.
         </p>
       </subsection>
 
