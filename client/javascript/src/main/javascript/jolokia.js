@@ -19,7 +19,8 @@
  * =================================
  *
  * Requires jquery.js and json2.js
- * (if no native JSON.stringify() support is available)
+ * (if no native JSON.stringify() support is available,
+ * look here where this is the case: http://caniuse.com/json)
  */
 
 (function() {

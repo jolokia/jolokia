@@ -33,8 +33,8 @@
         in the browser (tested with Chrome &amp; Firefox). For the sample code, simply push the blue buttons at the
         bottom of a <a href="http://www.jolokia.org/jayday-2013/#/step-20">demo slide</a>.
       </p>
-       <div style="width:500px; margin-left: auto; margin-right: auto;">
-         <img src="images/jayday2013_title.png"/>
+       <div style="width:500px; margin-left: auto; margin-right: auto">
+         <a class="no-hover" href="/jayday-2013"><img src="images/jayday2013_title.png"/></a>
       </div>
     </section>
     <section name="Devoxx 2011">
