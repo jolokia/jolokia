@@ -31,7 +31,7 @@ import org.json.simple.parser.ParseException;
 abstract class OpenTypeConverter<T extends OpenType> {
 
     // parent converter
-    private OpenTypeConverter dispatcher;
+    private OpenTypeDeserializer dispatcher;
 
     /**
      * Constructor which need the parent converter. This parent converter
@@ -39,7 +39,7 @@ abstract class OpenTypeConverter<T extends OpenType> {
      * to convert collection types (like {@link CompositeType} or {@link ArrayType})
      * @param pDispatcher
      */
-    OpenTypeConverter(OpenTypeConverter pDispatcher) {
+    OpenTypeConverter(OpenTypeDeserializer pDispatcher) {
         dispatcher = pDispatcher;
     }
 
@@ -88,7 +88,7 @@ abstract class OpenTypeConverter<T extends OpenType> {
      * Get the dispatcher converter
      * @return dispatcher
      */
-    protected OpenTypeConverter getDispatcher() {
+    protected OpenTypeDeserializer getDispatcher() {
         return dispatcher;
     }
 }

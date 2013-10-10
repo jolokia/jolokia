@@ -134,7 +134,7 @@ public class StringToObjectConverterTest {
     
     @Test
     public void enumConversion() {
-        ConfigKey key = (ConfigKey) converter.prepareValue(ConfigKey.class.getName(), "MAX_DEPTH");
+        ConfigKey key = (ConfigKey) converter.deserialize(ConfigKey.class.getName(), "MAX_DEPTH");
         assertEquals(key, ConfigKey.MAX_DEPTH);
     }
 
@@ -151,7 +151,7 @@ public class StringToObjectConverterTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class})
     public void dateConversionFailed() {
-        converter.prepareValue(Date.class.getName(),"illegal-date-format");
+        converter.deserialize(Date.class.getName(), "illegal-date-format");
     }
 
     @Test
@@ -224,24 +224,24 @@ public class StringToObjectConverterTest {
 
     @Test
     public void prepareValue() {
-        assertNull(converter.prepareValue("java.lang.String", null));
-        assertEquals(converter.prepareValue("java.lang.Long", 10L), 10L);
-        assertEquals(converter.prepareValue("java.lang.Long", "10"), 10L);
+        assertNull(converter.deserialize("java.lang.String", null));
+        assertEquals(converter.deserialize("java.lang.Long", 10L), 10L);
+        assertEquals(converter.deserialize("java.lang.Long", "10"), 10L);
         Map<String,String> map = new HashMap<String, String>();
         map.put("euro","fcn");
-        assertTrue(converter.prepareValue("java.util.Map", map) == map);
+        assertTrue(converter.deserialize("java.util.Map", map) == map);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void prepareValueInvalidClass() {
-        converter.prepareValue("blubber.bla.hello",10L);
+        converter.deserialize("blubber.bla.hello", 10L);
     }
     @Test
     public void prepareValueListConversion1() {
         List<Boolean> list = new ArrayList<Boolean>();
         list.add(true);
         list.add(false);
-        boolean[] res = (boolean[]) converter.prepareValue("[Z",list);
+        boolean[] res = (boolean[]) converter.deserialize("[Z", list);
         assertTrue(res[0]);
         assertFalse(res[1]);
         Assert.assertEquals(res.length,2);
@@ -253,7 +253,7 @@ public class StringToObjectConverterTest {
         list.add(true);
         list.add(false);
         list.add(null);
-        Boolean[] res = (Boolean[]) converter.prepareValue("[Ljava.lang.Boolean;",list);
+        Boolean[] res = (Boolean[]) converter.deserialize("[Ljava.lang.Boolean;", list);
         assertTrue(res[0]);
         assertFalse(res[1]);
         assertNull(res[2]);
@@ -265,6 +265,6 @@ public class StringToObjectConverterTest {
         List<Integer> list = new ArrayList<Integer>();
         list.add(10);
         list.add(null);
-        converter.prepareValue("[I",list);
+        converter.deserialize("[I", list);
     }
 }

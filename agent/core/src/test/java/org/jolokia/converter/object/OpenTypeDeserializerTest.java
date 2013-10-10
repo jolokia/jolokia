@@ -39,39 +39,38 @@ import static org.testng.Assert.*;
  * @since 03.08.11
  */
 @Test
-public class StringToOpenTypeConverterTest {
+public class OpenTypeDeserializerTest {
 
-    private StringToOpenTypeConverter converter;
+    private OpenTypeDeserializer converter;
 
 
     @BeforeClass
     public void setup() {
 
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
-        converter = new StringToOpenTypeConverter(stringToObjectConverter);
+        converter = new OpenTypeDeserializer(stringToObjectConverter);
     }
 
     @Test
     public void nullValue() throws OpenDataException {
-        assertNull(converter.convertToObject(SimpleType.STRING,null));
+        assertNull(converter.deserialize(SimpleType.STRING, null));
     }
 
 
     @Test
     public void simpleType() {
-        assertTrue(converter.canConvert(SimpleType.STRING));
-        assertEquals(converter.convertToObject(SimpleType.STRING,"bla"),"bla");
-        assertEquals(converter.convertToObject(SimpleType.BOOLEAN,"true"),true);
-        assertEquals(converter.convertToObject(SimpleType.BOOLEAN,false),false);
-        assertEquals(converter.convertToObject(SimpleType.DOUBLE,4.52),4.52);
-        assertEquals(converter.convertToObject(SimpleType.DOUBLE,"4.52"),4.52);
-        assertEquals(converter.convertToObject(SimpleType.INTEGER,"9876"),9876);
+        assertEquals(converter.deserialize(SimpleType.STRING, "bla"),"bla");
+        assertEquals(converter.deserialize(SimpleType.BOOLEAN, "true"),true);
+        assertEquals(converter.deserialize(SimpleType.BOOLEAN, false),false);
+        assertEquals(converter.deserialize(SimpleType.DOUBLE, 4.52),4.52);
+        assertEquals(converter.deserialize(SimpleType.DOUBLE, "4.52"),4.52);
+        assertEquals(converter.deserialize(SimpleType.INTEGER, "9876"),9876);
     }
 
 
     @Test(expectedExceptions = { NumberFormatException.class })
     public void simpleTypeFailed() {
-        converter.convertToObject(SimpleType.INTEGER,"4.52");
+        converter.deserialize(SimpleType.INTEGER, "4.52");
     }
 
 
@@ -80,7 +79,7 @@ public class StringToOpenTypeConverterTest {
         ArrayType type = new ArrayType(2,STRING);
         String json = "[ \"hello\", \"world\" ]";
         for (Object element : new Object[] { json, new JSONParser().parse(json) }) {
-            Object[] data = (Object[]) converter.convertToObject(type,element);
+            Object[] data = (Object[]) converter.deserialize(type, element);
             assertEquals(data.length,2);
             assertEquals(data[0],"hello");
             assertEquals(data[1],"world");
@@ -89,7 +88,7 @@ public class StringToOpenTypeConverterTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
     public void arrayTypeWithWrongJson() throws OpenDataException {
-        converter.convertToObject(new ArrayType(2,STRING),"{ \"hello\": \"world\"}");
+        converter.deserialize(new ArrayType(2, STRING), "{ \"hello\": \"world\"}");
     }
 
     @Test
@@ -99,7 +98,7 @@ public class StringToOpenTypeConverterTest {
 
         );
         CompositeData[] result =
-                (CompositeData[]) converter.convertToObject(new ArrayType(2,taj.getType()),"[" + taj.getJsonAsString() + "]");
+                (CompositeData[]) converter.deserialize(new ArrayType(2, taj.getType()), "[" + taj.getJsonAsString() + "]");
         assertEquals(result[0].get("verein"), "FCN");
         assertEquals(result.length,1);
     }
@@ -115,7 +114,7 @@ public class StringToOpenTypeConverterTest {
         );
         JSONArray array = new JSONArray();
         array.add(taj.getJson());
-        converter.convertToObject(new ArrayType(2, taj.getType()),array);
+        converter.deserialize(new ArrayType(2, taj.getType()), array);
     }
 
     @Test
@@ -127,7 +126,7 @@ public class StringToOpenTypeConverterTest {
                 BOOLEAN,"absteiger",false
         );
         for (Object input : new Object[] { taj.getJson(), taj.getJsonAsString() }) {
-            CompositeData result = (CompositeData) converter.convertToObject(taj.getType(),input);
+            CompositeData result = (CompositeData) converter.deserialize(taj.getType(), input);
             assertEquals(result.get("verein"),"FCN");
             assertEquals(result.get("trainer"),null);
             assertEquals(result.get("platz"),6);
@@ -142,7 +141,7 @@ public class StringToOpenTypeConverterTest {
                 STRING,"verein","FCN"
 
         );
-        converter.convertToObject(taj.getType(),"[ 12, 15, 16]");
+        converter.deserialize(taj.getType(), "[ 12, 15, 16]");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*praesident.*")
@@ -151,7 +150,7 @@ public class StringToOpenTypeConverterTest {
                 STRING,"verein","FCN"
 
         );
-        converter.convertToObject(taj.getType(),"{ \"praesident\": \"hoeness\"}");
+        converter.deserialize(taj.getType(), "{ \"praesident\": \"hoeness\"}");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*parse.*")
@@ -160,7 +159,7 @@ public class StringToOpenTypeConverterTest {
                 STRING,"verein","FCN"
 
         );
-        converter.convertToObject(taj.getType(),"{ \"praesident\":");
+        converter.deserialize(taj.getType(), "{ \"praesident\":");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONAware.*")
@@ -169,14 +168,14 @@ public class StringToOpenTypeConverterTest {
                 STRING,"verein","FCN"
 
         );
-        converter.convertToObject(taj.getType(),"2");
+        converter.deserialize(taj.getType(), "2");
     }
 
 
     @Test
     public void tabularType() throws OpenDataException {
         TabularTypeAndJson taj = getSampleTabularType();
-        TabularData data = (TabularData) converter.convertToObject(taj.getType(),taj.getJsonAsString());
+        TabularData data = (TabularData) converter.deserialize(taj.getType(), taj.getJsonAsString());
         assertEquals(data.get(new String[] { "fcn" }).get("absteiger"),false);
         assertEquals(data.get(new String[] { "fcb" }).get("absteiger"),true);
     }
@@ -186,7 +185,7 @@ public class StringToOpenTypeConverterTest {
         TabularTypeAndJson taj = getSampleTabularTypeForMXBeanMap();
 
         String json = "{ \"keyOne\" : \"valueOne\", \"keyTwo\" : \"valueTwo\"}";
-        TabularData data = (TabularData) converter.convertToObject(taj.getType(),json);
+        TabularData data = (TabularData) converter.deserialize(taj.getType(), json);
         CompositeData col1 = data.get(new String[] { "keyOne" });
         assertEquals(col1.get("key"),"keyOne");
         assertEquals(col1.get("value"),"valueOne");
@@ -205,7 +204,7 @@ public class StringToOpenTypeConverterTest {
                       "        \"oname\" : \"java.lang:type=Memory\" " +
                       "      }]" +
                       "}";
-        TabularData data = (TabularData) converter.convertToObject(type,json);
+        TabularData data = (TabularData) converter.deserialize(type, json);
         assertNotNull(data);
         Set keySet = data.keySet();
         assertEquals(keySet.size(), 1);
@@ -242,7 +241,7 @@ public class StringToOpenTypeConverterTest {
                       "        \"oname\" : \"java.lang:type=Memory\" " +
                       "      }]" +
                       "}";
-        converter.convertToObject(type,json);
+        converter.deserialize(type, json);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*index.*name.*")
@@ -256,7 +255,7 @@ public class StringToOpenTypeConverterTest {
                       "        \"oname\" : \"java.lang:type=Memory\" " +
                       "      }]" +
                       "}";
-        converter.convertToObject(type,json);
+        converter.deserialize(type, json);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*array.*")
@@ -270,7 +269,7 @@ public class StringToOpenTypeConverterTest {
                       "        \"oname\" : \"java.lang:type=Memory\" " +
                       "      }]" +
                       "}";
-        converter.convertToObject(type,json);
+        converter.deserialize(type, json);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*array.*")
@@ -284,7 +283,7 @@ public class StringToOpenTypeConverterTest {
                       "        \"oname\" : \"java.lang:type=Memory\" " +
                       "      }" +
                       "}";
-        converter.convertToObject(type,json);
+        converter.deserialize(type, json);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*object.*")
@@ -298,7 +297,7 @@ public class StringToOpenTypeConverterTest {
                       "        \"oname\" : \"java.lang:type=Memory\" " +
                       "      }]]" +
                       "}";
-        converter.convertToObject(type,json);
+        converter.deserialize(type, json);
     }
 
 
@@ -308,7 +307,7 @@ public class StringToOpenTypeConverterTest {
     public void tabularTypeForMXBeanMapsFail() throws OpenDataException {
         TabularTypeAndJson taj = getSampleTabularTypeForMXBeanMap();
 
-        converter.convertToObject(taj.getType(), "[ { \"keyOne\" : \"valueOne\" } ]");
+        converter.deserialize(taj.getType(), "[ { \"keyOne\" : \"valueOne\" } ]");
     }
 
     @Test
@@ -323,7 +322,7 @@ public class StringToOpenTypeConverterTest {
         );
 
         String json = "{ \"keyOne\" : { \"innerKeyOne\" : \"valueOne\" }, \"keyTwo\" : { \"innerKeyTwo\" : \"valueTwo\"}}";
-        TabularData data = (TabularData) converter.convertToObject(taj.getType(),json);
+        TabularData data = (TabularData) converter.deserialize(taj.getType(), json);
         CompositeData col1 = data.get(new String[] { "keyOne" });
         assertEquals(col1.get("key"),"keyOne");
         TabularData innerCol1 = (TabularData) col1.get("value");
@@ -350,7 +349,7 @@ public class StringToOpenTypeConverterTest {
                                                              new String[] { "verein","region","absteiger"},
                                                              new OpenType[] { STRING, STRING, BOOLEAN}),
                                            new String[] { "verein", "region" });
-        TabularData data = (TabularData) converter.convertToObject(type,map);
+        TabularData data = (TabularData) converter.deserialize(type, map);
         CompositeData row = data.get(new Object[] { "fcn", "franconia" });
         assertNotNull(row);
         assertFalse((Boolean) row.get("absteiger"));
@@ -399,18 +398,18 @@ public class StringToOpenTypeConverterTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*praesident.*")
     public void compositeTypeWithWrongType() throws OpenDataException {
-        converter.convertToObject(getSampleTabularType().getType(),"{ \"praesident\": \"hoeness\"}");
+        converter.deserialize(getSampleTabularType().getType(), "{ \"praesident\": \"hoeness\"}");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
     public void compositeTypeWithWrongInnerType() throws OpenDataException {
-        converter.convertToObject(getSampleTabularType().getType(),"[[{ \"praesident\": \"hoeness\"}]]");
+        converter.deserialize(getSampleTabularType().getType(), "[[{ \"praesident\": \"hoeness\"}]]");
     }
 
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*No converter.*")
     public void unknownOpenType() throws OpenDataException {
-        converter.convertToObject(new OpenType("java.util.Date","guenther","guenther") {
+        converter.deserialize(new OpenType("java.util.Date", "guenther", "guenther") {
             @Override
             public boolean isValue(Object obj) {
                 return false;
@@ -430,6 +429,6 @@ public class StringToOpenTypeConverterTest {
             public String toString() {
                 return null;
             }
-        },"bla");
+        }, "bla");
     }
 }

@@ -36,7 +36,7 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
      * Constructor
      * @param pDispatcher parent dispatcher for converting recursively
      */
-    CompositeTypeConverter(OpenTypeConverter pDispatcher) {
+    CompositeTypeConverter(OpenTypeDeserializer pDispatcher) {
         super(pDispatcher);
     }
 
@@ -82,7 +82,7 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
                         "Conversion to CompositeType failed because " + key + " is not known as composite attribute key.");
             }
             if (value != null) {
-                Object convertedValue = getDispatcher().convertToObject(pType.getType(key),value);
+                Object convertedValue = getDispatcher().deserialize(pType.getType(key), value);
                 pCompositeValues.put(key, convertedValue);
             }
         }

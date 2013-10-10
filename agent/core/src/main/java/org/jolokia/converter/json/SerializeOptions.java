@@ -16,8 +16,6 @@ package org.jolokia.converter.json;
  * limitations under the License.
  */
 
-import org.jolokia.converter.json.ValueFaultHandler;
-
 /**
  * Options object influencing the serializing of JSON objects.
  * E.g. the max serialization depth when serializing a complex object.
@@ -33,12 +31,12 @@ import org.jolokia.converter.json.ValueFaultHandler;
  * @author roland
  * @since 15.01.13
  */
-public final class JsonConvertOptions {
+public final class SerializeOptions {
 
     /**
      * Default JsonConvertOptions filled with the default values as defined in ConfigKey
      */
-    public static final JsonConvertOptions DEFAULT = new Builder().build();
+    public static final SerializeOptions DEFAULT = new Builder().build();
 
     // Maximum depth used for serialization
     private int maxDepth;
@@ -54,8 +52,8 @@ public final class JsonConvertOptions {
     private ValueFaultHandler faultHandler;
 
     // Use a builder to construct this object
-    private JsonConvertOptions(int pMaxDepth, int pMaxCollectionSize, int pMaxObjects,
-                               ValueFaultHandler pFaultHandler) {
+    private SerializeOptions(int pMaxDepth, int pMaxCollectionSize, int pMaxObjects,
+                             ValueFaultHandler pFaultHandler) {
         maxDepth = pMaxDepth;
         maxCollectionSize = pMaxCollectionSize;
         maxObjects = pMaxObjects;
@@ -199,8 +197,8 @@ public final class JsonConvertOptions {
          *
          * @return the options created.
          */
-        public JsonConvertOptions build() {
-            JsonConvertOptions opts = new JsonConvertOptions(maxDepth,maxCollectionSize,maxObjects,faultHandler);
+        public SerializeOptions build() {
+            SerializeOptions opts = new SerializeOptions(maxDepth,maxCollectionSize,maxObjects,faultHandler);
             maxDepth = 0;
             maxCollectionSize = 0;
             maxObjects = 0;

@@ -27,10 +27,10 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.converter.Converters;
+import org.jolokia.converter.JmxSerializer;
 import org.jolokia.util.TestJolokiaContext;
 import org.jolokia.util.TestRequestDispatcher;
-import org.jolokia.config.Configuration;
-import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -214,6 +214,7 @@ public class JolokiaHttpHandlerTest {
         debugToggle = !debugToggle;
         return new TestJolokiaContext.Builder()
                 .config(list.toArray())
+                .services(JmxSerializer.class,new Converters())
                 .build();
     }
 }

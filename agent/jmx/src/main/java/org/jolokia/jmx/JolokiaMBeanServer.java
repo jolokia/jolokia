@@ -26,7 +26,7 @@ import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.Converters;
-import org.jolokia.converter.json.JsonConvertOptions;
+import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.converter.json.ValueFaultHandler;
 
 /**
@@ -50,7 +50,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
         MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
         delegatedMBeans = new HashSet<ObjectName>();
         delegateServer = ManagementFactory.getPlatformMBeanServer();
-        converters = new Converters();
+        converters = new Converters(0);
         init(mBeanServer);
     }
 
@@ -146,9 +146,9 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      * @param pConvertOptions options used for conversion
      * @return serialized object
      */
-    String toJson(Object object, JsonConvertOptions pConvertOptions) {
+    String toJson(Object object, SerializeOptions pConvertOptions) {
         try {
-            Object ret = converters.getToJsonConverter().convertToJson(object,null,pConvertOptions);
+            Object ret = converters.serialize(object, null, pConvertOptions);
             return ret.toString();
         } catch (AttributeNotFoundException exp) {
             // Cannot happen, since we dont use a path
@@ -165,7 +165,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      * @return the deserialized object
      */
     Object fromJson(String type, String json) {
-        return converters.getToObjectConverter().convertFromString(type,json);
+        return converters.deserialize(type, json);
     }
 
     /**
@@ -176,20 +176,20 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      * @return the converted object
      */
     Object fromJson(OpenType type, String json) {
-        return converters.getToOpenTypeConverter().convertToObject(type,json);
+        return converters.deserializeOpenType(type, json);
     }
 
     // Extract convert options from annotation
-    private JsonConvertOptions getJsonConverterOptions(JsonMBean pAnno) {
+    private SerializeOptions getJsonConverterOptions(JsonMBean pAnno) {
         // Extract conversion options from the annotation
         if (pAnno == null) {
-            return JsonConvertOptions.DEFAULT;
+            return SerializeOptions.DEFAULT;
         } else {
             ValueFaultHandler faultHandler =
                     pAnno.faultHandling() == JsonMBean.FaultHandler.IGNORE_ERRORS ?
                             ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER :
                             ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
-            return new JsonConvertOptions.Builder()
+            return new SerializeOptions.Builder()
                     .maxCollectionSize(pAnno.maxCollectionSize())
                     .maxDepth(pAnno.maxDepth())
                     .maxObjects(pAnno.maxObjects())

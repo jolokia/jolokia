@@ -94,8 +94,8 @@ public class ObjectToJsonConverterTest {
         ObjectSerializationContext ctx = converter.getStackContextLocal().get();
         Field field = ObjectSerializationContext.class.getDeclaredField("options");
         field.setAccessible(true);
-        JsonConvertOptions opts = (JsonConvertOptions) field.get(ctx);
-        field = JsonConvertOptions.class.getDeclaredField(pLimit);
+        SerializeOptions opts = (SerializeOptions) field.get(ctx);
+        field = SerializeOptions.class.getDeclaredField(pLimit);
         field.setAccessible(true);
         field.set(opts,pVal);
     }
@@ -127,9 +127,9 @@ public class ObjectToJsonConverterTest {
     public void convertToJsonTest() throws MalformedObjectNameException, AttributeNotFoundException {
         File file = new File("myFile");
 
-        Map ret = (Map) converter.convertToJson(file, null, JsonConvertOptions.DEFAULT);
+        Map ret = (Map) converter.serialize(file, null, SerializeOptions.DEFAULT);
         assertEquals(ret.get("name"),"myFile");
-        String name = (String) converter.convertToJson(file, Arrays.asList("name"), JsonConvertOptions.DEFAULT);
+        String name = (String) converter.serialize(file, Arrays.asList("name"), SerializeOptions.DEFAULT);
         assertEquals(name,"myFile");
     }
 

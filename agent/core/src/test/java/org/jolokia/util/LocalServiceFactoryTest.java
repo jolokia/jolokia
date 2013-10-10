@@ -27,6 +27,8 @@ import static org.testng.Assert.assertEquals;
  * @author roland
  * @since 02.12.10
  */
+
+// TODO: Add Test for nested service lookups with regard to the default order
 public class LocalServiceFactoryTest {
 
     @Test

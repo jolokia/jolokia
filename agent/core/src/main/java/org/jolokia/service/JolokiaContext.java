@@ -6,7 +6,6 @@ import java.util.SortedSet;
 import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
@@ -23,19 +22,25 @@ import org.jolokia.util.LogHandler;
 public interface JolokiaContext extends LogHandler, Restrictor {
 
     /**
-     * Get the various converters used for converting object to and from
-     * strings and/or JSON.
-     *
-     * @return converter holder object
-     */
-    Converters getConverters();
-
-    /**
      * Get Jolokia services of a certain kind. The returned list might be empty,
      * but never null. The set is sorted according to the service order
      * (see {@link JolokiaService#getOrder()}).
+     *
+     * @param pType requested service type
+     * @return sorted set of services or an empty set
      */
     <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
+
+
+    /**
+     * Get a single service. If more than one service of the given type has been
+     * registered, return the one with the highest order. If no one has been registered
+     * return <code>null</code>
+     *
+     * @param pType requested service type
+     * @return the requested service or null if none has been registered
+     */
+    <T extends JolokiaService> T getService(Class<T> pType);
 
     /**
      * Access to the server handle holding the server side information

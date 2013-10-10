@@ -7,7 +7,6 @@ import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
@@ -22,9 +21,6 @@ import org.jolokia.util.*;
  */
 public class JolokiaContextImpl implements JolokiaContext {
 
-    // Converts for object serialization
-    private Converters converters;
-
     // Server handle
     private ServerHandle serverHandle;
 
@@ -38,10 +34,6 @@ public class JolokiaContextImpl implements JolokiaContext {
      */
     JolokiaContextImpl(JolokiaServiceManagerImpl pServiceManager) {
         serviceManager = pServiceManager;
-
-        // Central objects
-        // TODO: Lookup
-        converters = new Converters();
 
         // Initially the server handle is a fallback server handle
         serverHandle = ServerHandle.NULL_SERVER_HANDLE;
@@ -74,13 +66,13 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
-    public Converters getConverters() {
-        return converters;
+    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+        return serviceManager.getServices(pType);
     }
 
     /** {@inheritDoc} */
-    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
-        return serviceManager.getServices(pType);
+    public <T extends JolokiaService> T getService(Class<T> pType) {
+        return serviceManager.getService(pType);
     }
 
     /** {@inheritDoc} */

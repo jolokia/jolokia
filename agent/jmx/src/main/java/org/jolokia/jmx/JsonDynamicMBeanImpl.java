@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.*;
 import javax.management.openmbean.*;
 
-import org.jolokia.converter.json.JsonConvertOptions;
+import org.jolokia.converter.json.SerializeOptions;
 
 /**
  * A {@link DynamicMBean} used to wrap an MBean registered at the Jolokia MBeanServer and translated
@@ -52,7 +52,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     private Map<String, List<OperationMapInfo>> operationInfoMap;
 
     // Options used for converting return values
-    private final JsonConvertOptions jsonConvertOptions;
+    private final SerializeOptions serializeOptions;
 
     /**
      * Construct a DynamicMBean wrapping an original MBean object. For attributes
@@ -64,10 +64,10 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
      * @param pInfo               the original MBeanInfo
      * @param pConvertOptions     options used for converting return values to JSON
      */
-    public JsonDynamicMBeanImpl(JolokiaMBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo, JsonConvertOptions pConvertOptions) {
+    public JsonDynamicMBeanImpl(JolokiaMBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo, SerializeOptions pConvertOptions) {
         jolokiaMBeanServer = pJolokiaMBeanServer;
         objectName = pObjectName;
-        jsonConvertOptions = pConvertOptions != null ? pConvertOptions : JsonConvertOptions.DEFAULT;
+        serializeOptions = pConvertOptions != null ? pConvertOptions : SerializeOptions.DEFAULT;
         attributeInfoMap = new HashMap<String, MBeanAttributeInfo>();
         operationInfoMap = new HashMap<String, List<OperationMapInfo>>();
         wrappedMBeanInfo = getWrappedInfo(pInfo);
@@ -172,7 +172,7 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     // Delegate serialization/deserialization the Jolokia MBeanServer
     private Object toJson(Object pValue) {
-        return jolokiaMBeanServer.toJson(pValue, jsonConvertOptions);
+        return jolokiaMBeanServer.toJson(pValue, serializeOptions);
     }
 
     private Object fromJson(String pType, String pValue) {

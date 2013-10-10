@@ -25,6 +25,7 @@ import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
+import org.jolokia.converter.JmxSerializer;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
@@ -46,7 +47,9 @@ public class BackendManagerTest {
     private TestJolokiaContext ctx;
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
-        TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder();
+        TestJolokiaContext.Builder builder =
+                new TestJolokiaContext.Builder()
+                .services(JmxSerializer.class,new Converters());
         if (configKeysAndValues.length > 0) {
             builder.config(ConfigKey.DEBUG, "true");
         }

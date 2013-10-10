@@ -9,7 +9,8 @@ import javax.management.JMException;
 import org.jolokia.backend.dispatcher.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.converter.json.JsonConvertOptions;
+import org.jolokia.converter.JmxSerializer;
+import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
@@ -49,7 +50,7 @@ public class BackendManager {
     private final RequestDispatcher requestDispatcher;
 
     // Hard limits for conversion
-    private JsonConvertOptions.Builder convertOptionsBuilder;
+    private SerializeOptions.Builder convertOptionsBuilder;
 
     /**
      * Construct a new backend manager with the given configuration.
@@ -93,7 +94,7 @@ public class BackendManager {
         }
 
         // Call request logger
-        logResult(pJmxReq,json);
+        intercept(pJmxReq, json);
 
         if (debug) {
             jolokiaCtx.debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
@@ -103,8 +104,8 @@ public class BackendManager {
         return json;
     }
 
-    // Log the result for any logger found
-    private void logResult(JmxRequest pJmxReq, JSONObject pRetValue) {
+    // Provide interceptors a change for wrapping around the request
+    private void intercept(JmxRequest pJmxReq, JSONObject pRetValue) {
         Set<RequestInterceptor> interceptors = jolokiaCtx.getServices(RequestInterceptor.class);
         for (RequestInterceptor interceptor : interceptors) {
             try {
@@ -123,10 +124,10 @@ public class BackendManager {
      * @return the exception.
      */
     public Object convertExceptionToJson(Throwable pExp, JmxRequest pJmxReq)  {
-        JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
+        SerializeOptions opts = getJsonConvertOptions(pJmxReq);
         try {
             JSONObject expObj =
-                    (JSONObject) jolokiaCtx.getConverters().getToJsonConverter().convertToJson(pExp,null,opts);
+                    (JSONObject) jolokiaCtx.getService(JmxSerializer.class).serialize(pExp, null, opts);
             return expObj;
 
         } catch (AttributeNotFoundException e) {
@@ -152,13 +153,13 @@ public class BackendManager {
     private void init(JolokiaContext pCtx) {
         // Init limits
         if (pCtx != null) {
-            convertOptionsBuilder = new JsonConvertOptions.Builder(
+            convertOptionsBuilder = new SerializeOptions.Builder(
                     getNullSaveIntLimit(pCtx.getConfig(MAX_DEPTH)),
                     getNullSaveIntLimit(pCtx.getConfig(MAX_COLLECTION_SIZE)),
                     getNullSaveIntLimit(pCtx.getConfig(MAX_OBJECTS))
             );
         } else {
-            convertOptionsBuilder = new JsonConvertOptions.Builder();
+            convertOptionsBuilder = new SerializeOptions.Builder();
         }
     }
 
@@ -174,11 +175,10 @@ public class BackendManager {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }
 
-        JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
+        SerializeOptions opts = getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
-                jolokiaCtx.getConverters().getToJsonConverter()
-                          .convertToJson(result.getValue(), result.getPathParts(), opts);
+                jolokiaCtx.getService(JmxSerializer.class).serialize(result.getValue(), result.getPathParts(), opts);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);
@@ -186,7 +186,7 @@ public class BackendManager {
         return jsonObject;
     }
 
-    private JsonConvertOptions getJsonConvertOptions(JmxRequest pJmxReq) {
+    private SerializeOptions getJsonConvertOptions(JmxRequest pJmxReq) {
         return convertOptionsBuilder.
                     maxDepth(pJmxReq.getParameterAsInt(ConfigKey.MAX_DEPTH)).
                     maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).

@@ -86,14 +86,14 @@ public class StringToObjectConverter {
     }
 
     /**
-     * Prepare a value from a either a given object or its string representation.
+     * Convert value from a either a given object or its string representation.
      * If the value is already assignable to the given class name it is returned directly.
      *
      * @param pExpectedClassName type name of the expected type
      * @param pValue value to either take directly or to convert from its string representation.
-     * @return the prepared / converted object
+     * @return the converted object which is of type <code>pExpectedClassName</code>
      */
-    public Object prepareValue(String pExpectedClassName, Object pValue) {
+    public Object deserialize(String pExpectedClassName, Object pValue) {
         if (pValue == null) {
             return null;
         } else {

@@ -103,7 +103,7 @@ public class ArrayExtractor implements Extractor {
                     ". (index = " + pIndex + ", value to set = " +  pValue + ")",exp);
         }
         Class type = clazz.getComponentType();
-        Object value = pConverter.prepareValue(type.getName(), pValue);
+        Object value = pConverter.deserialize(type.getName(), pValue);
         Object oldValue = Array.get(pInner, idx);
         Array.set(pInner, idx, value);
         return oldValue;

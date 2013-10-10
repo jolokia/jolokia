@@ -2,8 +2,6 @@ package org.jolokia.converter.json;
 
 import java.util.*;
 
-import org.jolokia.converter.json.ValueFaultHandler;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -41,7 +39,7 @@ class ObjectSerializationContext {
 
     private Set   objectsInCallStack = new HashSet();
     private Stack callStack          = new Stack();
-    private final JsonConvertOptions options;
+    private final SerializeOptions options;
 
     private int objectCount = 0;
 
@@ -50,7 +48,7 @@ class ObjectSerializationContext {
      *
      * @param pOpts options used for parsing
      */
-    ObjectSerializationContext(JsonConvertOptions pOpts) {
+    ObjectSerializationContext(SerializeOptions pOpts) {
         options = pOpts;
     }
 

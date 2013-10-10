@@ -106,7 +106,7 @@ public class ListExtractor implements Extractor {
         Object oldValue = list.get(idx);
         Object value =
                 oldValue != null ?
-                        pConverter.prepareValue(oldValue.getClass().getName(), pValue) :
+                        pConverter.deserialize(oldValue.getClass().getName(), pValue) :
                         pValue;
         list.set(idx,value);
         return oldValue;
