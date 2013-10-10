@@ -24,6 +24,7 @@ import javax.management.*;
 
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
+import org.jolokia.converter.JmxSerializer;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
@@ -45,6 +46,7 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public TestJolokiaContext() {
         this(null,null,null,null,null);
+        services.put(JmxSerializer.class,new TreeSet<JmxSerializer>(Arrays.asList(new Converters())));
     }
 
     private TestJolokiaContext(Configuration pConfig,
@@ -71,15 +73,14 @@ public class TestJolokiaContext implements JolokiaContext {
         converters = new Converters(0);
     }
 
-
-
-    public Converters getConverters() {
-        return converters;
-    }
-
     public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
         SortedSet<T> ret = services.get(pType);
         return ret != null ? new TreeSet<T>(ret) : new TreeSet<T>();
+    }
+
+    public <T extends JolokiaService> T getService(Class<T> pType) {
+        SortedSet<T> services = getServices(pType);
+        return services.size() > 0 ? services.first() : null;
     }
 
     public ServerHandle getServerHandle() {
@@ -154,7 +155,6 @@ public class TestJolokiaContext implements JolokiaContext {
         LogHandler logHandler;
         Restrictor restrictor;
         Configuration config;
-        Converters converters;
         ServerHandle handle;
         Map<Class,SortedSet> services = new HashMap<Class, SortedSet>();
 

@@ -56,6 +56,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // Instantiated services, categorized by type and ordered;
     private Map<Class<? extends JolokiaService>,SortedSet<? extends JolokiaService>> staticServices;
 
+    // The lowest order service registered
+    private Map<Class<? extends JolokiaService>, JolokiaService> staticLowServices;
+
     // Jolokia context connecting to this manager
     private JolokiaContextImpl jolokiaContext;
 
@@ -76,6 +79,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         isInitialized = false;
         serviceLookups = new ArrayList<JolokiaServiceLookup>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
+        staticLowServices = new HashMap<Class<? extends JolokiaService>, JolokiaService>();
     }
 
 
@@ -95,13 +99,18 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /** {@inheritDoc} */
-    public void addService(JolokiaService pService) {
-        SortedSet<JolokiaService> servicesOfType = (SortedSet<JolokiaService>) staticServices.get(pService.getType());
+    public synchronized void addService(JolokiaService pService) {
+        Class<? extends JolokiaService> type = pService.getType();
+        SortedSet<JolokiaService> servicesOfType = (SortedSet<JolokiaService>) staticServices.get(type);
         if (servicesOfType == null) {
             servicesOfType = new TreeSet<JolokiaService>();
-            staticServices.put(pService.getType(), servicesOfType);
+            staticServices.put(type, servicesOfType);
         }
         servicesOfType.add(pService);
+        JolokiaService pLowService = staticLowServices.get(type);
+        if (pLowService == null || pLowService.getOrder() > pService.getOrder()) {
+            staticLowServices.put(type,pService);
+        }
     }
 
     /** {@inheritDoc} */
@@ -187,6 +196,21 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         return ret;
     }
 
+    /** {@inheritDoc} */
+    public <T extends JolokiaService> T getService(Class<T> pType) {
+        T ret = (T) staticLowServices.get(pType);
+        int order = ret != null ? ret.getOrder() : Integer.MAX_VALUE;
+        for (JolokiaServiceLookup factory : serviceLookups) {
+            for (T service : (SortedSet<T>) factory.getServices(pType)) {
+                if (service.getOrder() < order) {
+                    ret = service;
+                    order = ret.getOrder();
+                }
+            }
+        }
+        return ret;
+    }
+
 
     // =======================================================================================================
 
@@ -202,11 +226,6 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             }
         }
         return ret;
-    }
-
-    private void initMBeans(JolokiaContextImpl pCtx) {
-        // TODO: MBeanServer Infos MBean which exports org.jolokia.backend.MBeanServerExecutorLocal.getServersInfo()
-        // Under "jolokia:type=ServerHandler"
     }
 
     public final ObjectName registerMBean(Object pMBean, String... pOptionalName)

@@ -9,6 +9,7 @@ import javax.management.JMException;
 import org.jolokia.backend.dispatcher.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.converter.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.service.JolokiaContext;
@@ -93,7 +94,7 @@ public class BackendManager {
         }
 
         // Call request logger
-        logResult(pJmxReq,json);
+        intercept(pJmxReq, json);
 
         if (debug) {
             jolokiaCtx.debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
@@ -103,8 +104,8 @@ public class BackendManager {
         return json;
     }
 
-    // Log the result for any logger found
-    private void logResult(JmxRequest pJmxReq, JSONObject pRetValue) {
+    // Provide interceptors a change for wrapping around the request
+    private void intercept(JmxRequest pJmxReq, JSONObject pRetValue) {
         Set<RequestInterceptor> interceptors = jolokiaCtx.getServices(RequestInterceptor.class);
         for (RequestInterceptor interceptor : interceptors) {
             try {
@@ -126,7 +127,7 @@ public class BackendManager {
         SerializeOptions opts = getJsonConvertOptions(pJmxReq);
         try {
             JSONObject expObj =
-                    (JSONObject) jolokiaCtx.getConverters().serialize(pExp, null, opts);
+                    (JSONObject) jolokiaCtx.getService(JmxSerializer.class).serialize(pExp, null, opts);
             return expObj;
 
         } catch (AttributeNotFoundException e) {
@@ -177,7 +178,7 @@ public class BackendManager {
         SerializeOptions opts = getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
-                jolokiaCtx.getConverters().serialize(result.getValue(), result.getPathParts(), opts);
+                jolokiaCtx.getService(JmxSerializer.class).serialize(result.getValue(), result.getPathParts(), opts);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);

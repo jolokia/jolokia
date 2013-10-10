@@ -93,6 +93,16 @@ public interface JolokiaServiceManager  {
     <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
 
     /**
+     * Get a single service. If more than one service of the given type has been
+     * registered, return the one with the highest order. If no one has been registered
+     * return <code>null</code>
+     *
+     * @param pType requested service type
+     * @return the requested service or null if none has been registered
+     */
+    <T extends JolokiaService> T getService(Class<T> pType);
+
+    /**
      * Get the overall configuration
      *
      * @return configuration
@@ -112,4 +122,5 @@ public interface JolokiaServiceManager  {
      * @return restrictor
      */
     Restrictor getRestrictor();
+
 }

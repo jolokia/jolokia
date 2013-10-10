@@ -13,7 +13,7 @@ import org.jolokia.service.JolokiaService;
  * @author roland
  * @since 02.10.13
  */
-public interface JolokiaSerializer extends JolokiaService<JolokiaSerializer> {
+public interface JmxSerializer extends JolokiaService<JmxSerializer> {
 
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException;
 

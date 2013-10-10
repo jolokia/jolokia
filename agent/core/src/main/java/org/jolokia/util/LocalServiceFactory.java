@@ -180,23 +180,17 @@ public final class LocalServiceFactory {
 
     // =============================================================================
 
-     static class ServiceEntry implements Comparable<ServiceEntry> {
+    static class ServiceEntry implements Comparable<ServiceEntry> {
         private String className;
         private boolean remove;
-        private Integer order;
+        private int order;
 
-        private static ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<Integer>() {
+        // Thread holding the current default orders
+        private static ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<Integer>();
 
-            /**
-             * Initialise with start value for entries without an explicite order. 100 in this case.
-             *
-             * @return 100
-             */
-            @Override
-            protected Integer initialValue() {
-                return Integer.valueOf(100);
-            }
-        };
+        // Thread local holding an old order which gets restored on remove(). This is required
+        // for nested service lookups
+        private static ThreadLocal<Stack<Integer>> defaultOrders = new ThreadLocal<Stack<Integer>>();
 
         /**
          * Parse an entry in the service definition. This should be the full qualified classname
@@ -237,11 +231,29 @@ public final class LocalServiceFactory {
         }
 
         private static void initDefaultOrder() {
+            Integer old = defaultOrderHolder.get();
+            Stack<Integer> orderStack = defaultOrders.get();
+            if (orderStack == null) {
+                orderStack = new Stack<Integer>();
+                defaultOrders.set(orderStack);
+            }
+            if (old != null) {
+                orderStack.push(old);
+            }
             defaultOrderHolder.set(100);
         }
 
         private static void removeDefaultOrder() {
-            defaultOrderHolder.remove();
+            Stack<Integer> orderStack = defaultOrders.get();
+            if (orderStack == null) {
+                throw new IllegalStateException("No initDefaultOrder() called before");
+            }
+            if (orderStack.size() > 0) {
+                defaultOrderHolder.set(orderStack.pop());
+            } else {
+                defaultOrderHolder.remove();
+                defaultOrders.remove();
+            }
         }
 
         private String getClassName() {
@@ -270,7 +282,8 @@ public final class LocalServiceFactory {
 
         /** {@inheritDoc} */
         public int compareTo(ServiceEntry o) {
-            return order - o.order;
+            int ret = order - o.order;
+            return ret != 0 ? ret : className.compareTo(o.className);
         }
     }
 }

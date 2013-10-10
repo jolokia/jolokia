@@ -24,6 +24,8 @@ import javax.management.*;
 
 import org.easymock.*;
 import org.jolokia.backend.dispatcher.*;
+import org.jolokia.converter.Converters;
+import org.jolokia.converter.JmxSerializer;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -211,6 +213,7 @@ public class HttpRequestHandlerTest {
                 .restrictor(pRestrictor)
                 .logHandler(pLogHandler)
                 .services(RequestHandler.class,services)
+                .services(JmxSerializer.class,new Converters())
                 .build();
         RequestDispatcher dispatcher = new RequestDispatcherImpl(ctx);
         handler = new HttpRequestHandler(ctx, dispatcher);

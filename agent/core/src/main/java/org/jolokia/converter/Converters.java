@@ -34,7 +34,7 @@ import org.jolokia.service.AbstractJolokiaService;
  * @author roland
  * @since 02.08.11
  */
-public class Converters extends AbstractJolokiaService<JolokiaSerializer> implements JolokiaSerializer {
+public class Converters extends AbstractJolokiaService<JmxSerializer> implements JmxSerializer {
 
     // From object to json:
     private ObjectToJsonConverter toJsonConverter;
@@ -43,12 +43,17 @@ public class Converters extends AbstractJolokiaService<JolokiaSerializer> implem
     private StringToObjectConverter toObjectConverter;
     private OpenTypeDeserializer toOpenTypeConverter;
 
+
+    public Converters() {
+        this(100);
+    }
+
     /**
      * Create converters (string-to-object, string-to-openType and object-to-json)
      *
      */
     public Converters(int pOrder) {
-        super(JolokiaSerializer.class,pOrder);
+        super(JmxSerializer.class,pOrder);
         toObjectConverter = new StringToObjectConverter();
         toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter);
         toJsonConverter = new ObjectToJsonConverter(toObjectConverter);
