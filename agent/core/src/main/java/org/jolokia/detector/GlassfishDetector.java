@@ -159,7 +159,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         /** {@inheritDoc} */
         public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
             if (amxShouldBeBooted) {
-                amxShouldBeBooted = bootAmx(pMBeanServerExecutor,logHandler);
+                amxShouldBeBooted = !bootAmx(pMBeanServerExecutor,logHandler);
             }
         }
 
