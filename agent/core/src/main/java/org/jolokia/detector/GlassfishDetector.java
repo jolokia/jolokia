@@ -85,6 +85,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         return mBeanExists(pServerManager,"amx:type=domain-root,*");
     }
 
+    // Return true if AMX could be booted, false otherwise
     private synchronized boolean bootAmx(MBeanServerExecutor pServers, final LogHandler pLoghandler) {
         ObjectName bootMBean = null;
         try {
@@ -159,6 +160,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         /** {@inheritDoc} */
         public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
             if (amxShouldBeBooted) {
+                // Clear flag only of bootAMX succeed or fails with an unrecoverable error
                 amxShouldBeBooted = !bootAmx(pMBeanServerExecutor,logHandler);
             }
         }
