@@ -148,7 +148,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             }
 
             // All dynamic service factories are initialized as well. The factory itself is responsible
-            // for initializing any new services coming in with the JolokiaContext.
+            // for initializing any new services coming in with the JolokiaContext
             for (JolokiaServiceLookup lookup : serviceLookups) {
                 lookup.init(jolokiaContext);
             }

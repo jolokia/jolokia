@@ -71,14 +71,21 @@ public interface JolokiaServiceManager  {
     void addServices(JolokiaServiceCreator pServiceCreator);
 
     /**
-     * Start up the service manager. All pre-instantiated services sh
+     * Start up the service manager. All static services are initialized via its lifecycle method
+     * {@link JolokiaService#init(JolokiaContext)}.
+     * For dynamic services, the lookup service obtains a handle to the
+     * created {@link JolokiaContext} via {@link JolokiaServiceLookup#init(JolokiaContext)}.
+     * This method is ominpotent as it can be called multiple in sequence returning always the same
+     * {@link JolokiaContext}.
      *
-     * @return the created jolokia context
+     * @return the created jolokia context which can be used directly
      */
     JolokiaContext start();
 
     /**
-     * Stop the service manager an
+     * Stop the service manager and all services by calling their lifecycle methods
+     * {@link JolokiaService#destroy()} and {@link JolokiaServiceLookup#destroy()}
+     * on all static and dynamic services.
      */
     void stop();
 
@@ -122,5 +129,4 @@ public interface JolokiaServiceManager  {
      * @return restrictor
      */
     Restrictor getRestrictor();
-
 }

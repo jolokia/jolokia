@@ -19,8 +19,8 @@ package org.jolokia.osgi.servlet;
 import org.osgi.service.http.HttpContext;
 
 /**
- * Context exported as OSGi Service so that other bundles
- * can get access to configuration information of the
+ * Jolokia Servlet OSGi Service for other bundles
+ * to obtain access to configuration information of the
  * Jolokia agent.
  *
  * @author roland

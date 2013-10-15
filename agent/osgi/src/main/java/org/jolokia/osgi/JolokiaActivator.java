@@ -85,8 +85,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaServletConfigur
             // Register us as JolokiaContext
             jolokiaServiceRegistration = pBundleContext.registerService(JolokiaServletConfiguration.class.getCanonicalName(), this, null);
         }
-
-
     }
 
     /** {@inheritDoc} */
@@ -129,7 +127,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaServletConfigur
     }
 
     /**
-     * Get the servlet alias under which the agen servlet is registered
+     * Get the servlet alias under which the agent servlet is registered
      * @return get the servlet alias
      */
     public String getServletAlias() {

@@ -53,16 +53,17 @@ class DelegatingRestrictor implements Restrictor {
         try {
             ServiceReference[] serviceRefs = bundleContext.getServiceReferences(Restrictor.class.getName(),null);
             if (serviceRefs != null) {
-                boolean ret = true;
                 boolean found = false;
                 for (ServiceReference serviceRef : serviceRefs) {
                     Restrictor restrictor = (Restrictor) bundleContext.getService(serviceRef);
                     if (restrictor != null) {
-                        ret = ret && pCheck.check(restrictor,args);
+                        if (!pCheck.check(restrictor,args)) {
+                            return false;
+                        }
                         found = true;
                     }
                 }
-                return found && ret;
+                return found;
             } else {
                 return false;
             }

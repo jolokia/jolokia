@@ -102,7 +102,8 @@ public class JolokiaServlet extends AgentServlet {
      * for logging, in the other time uses the servlet's default logging facility
      *
      * @param pServletConfig  servlet configuration
-     * @param pConfiguration
+     * @param pConfiguration configuration which contains information like a log class handler or whether to to do
+     *                       debugging
      */
     @Override
     protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfiguration) {

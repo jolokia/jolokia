@@ -5,12 +5,14 @@ import java.util.Set;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.service.JolokiaContext;
 import org.osgi.framework.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * @author roland
@@ -37,30 +39,83 @@ public class OsgiJolokiaServiceFactoryTest {
     }
 
     @Test
-    public void simpleService() throws InvalidSyntaxException {
-        ServiceReference serviceRef = createMock(ServiceReference.class);
-        expect(ctx.getServiceReferences(RequestHandler.class.getName(),null)).andReturn(new ServiceReference[] {
-                serviceRef
-        });
-        RequestHandler requestHandler = createMock(RequestHandler.class);
-        expect(requestHandler.compareTo(requestHandler)).andStubReturn(0);
-        expect(ctx.getService(serviceRef)).andReturn(requestHandler);
+    public void simpleService() throws Exception {
+        ServiceReference serviceRef = createServiceReference();
+        JolokiaContext jolokiaContext = createMock(JolokiaContext.class);
 
+        RequestHandler requestHandler = createRequestHandler(serviceRef);
+
+        requestHandler.init(jolokiaContext);
+        requestHandler.destroy();
         expect(ctx.ungetService(serviceRef)).andReturn(true);
-
         ctx.removeServiceListener(getServiceListener());
-        replay(ctx, filter);
 
-        replay(serviceRef, requestHandler);
+        replay(ctx, jolokiaContext, filter, serviceRef, requestHandler);
 
+        factory.init(jolokiaContext);
         Set<RequestHandler> handler = factory.getServices(RequestHandler.class);
         assertEquals(handler.size(),1);
         assertEquals(handler.iterator().next(),requestHandler);
 
         factory.destroy();
 
-        verify(ctx, filter, serviceRef, requestHandler);
+        verify(ctx, filter, serviceRef, requestHandler, jolokiaContext);
     }
+
+    @Test(expectedExceptions = ServiceException.class, expectedExceptionsMessageRegExp = "^.*not yet initialized.*$")
+    public void notInitialized() throws Exception {
+        JolokiaContext jolokiaContext = createMock(JolokiaContext.class);
+
+        ServiceReference serviceRef = createServiceReference();
+        RequestHandler requestHandler = createRequestHandler(serviceRef);
+
+        replay(ctx, serviceRef, requestHandler);
+        Set<RequestHandler> handler = factory.getServices(RequestHandler.class);
+    }
+
+    @Test()
+    public void exceptionOnDestroy() throws Exception {
+        ServiceReference serviceRef = createServiceReference();
+        JolokiaContext jolokiaContext = createMock(JolokiaContext.class);
+
+        RequestHandler requestHandler = createRequestHandler(serviceRef);
+
+        requestHandler.init(jolokiaContext);
+        expect(ctx.ungetService(serviceRef)).andReturn(true);
+        requestHandler.destroy();
+        expectLastCall().andThrow(new IllegalStateException("Forced error"));
+        ctx.removeServiceListener(getServiceListener());
+
+        replay(ctx, jolokiaContext, filter, serviceRef, requestHandler);
+
+        factory.init(jolokiaContext);
+        factory.getServices(RequestHandler.class);
+
+        try {
+            factory.destroy();
+            fail("Expected exception");
+        } catch (ServiceException exp) {
+            // Expected exception
+        }
+
+        verify(ctx, filter, serviceRef, requestHandler, jolokiaContext);
+    }
+
+    private RequestHandler createRequestHandler(ServiceReference pServiceRef) {
+        RequestHandler requestHandler = createMock(RequestHandler.class);
+        expect(requestHandler.compareTo(requestHandler)).andStubReturn(0);
+        expect(ctx.getService(pServiceRef)).andReturn(requestHandler);
+        return requestHandler;
+    }
+
+    private ServiceReference createServiceReference() throws InvalidSyntaxException {
+        ServiceReference serviceRef = createMock(ServiceReference.class);
+        expect(ctx.getServiceReferences(RequestHandler.class.getName(),null)).andReturn(new ServiceReference[] {
+                serviceRef
+        });
+        return serviceRef;
+    }
+
 
     @Test
     public void noService() throws InvalidSyntaxException {
