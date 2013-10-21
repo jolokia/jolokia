@@ -19,25 +19,24 @@ package org.jolokia.jvmagent.spring;
 /**
  * Enumeration for how to handle system properties when configuring a {@link SpringJolokiaAgent}.
  *
- *
  * @author roland
  * @since 01.01.13
  */
 public enum SystemPropertyMode {
     /** Never check system properties. */
-    MODE_NEVER("never"),
+    NEVER("never"),
 
     /**
      * Check system properties if not resolvable in the specified properties.
      * This is the default.
      */
-    MODE_FALLBACK("fallback"),
+    FALLBACK("fallback"),
 
     /**
      * Check system properties first, before trying the specified properties.
      * This allows system properties to override any other property source.
      */
-    MODE_OVERRIDE("override");
+    OVERRIDE("override");
 
     // Mode as it can be provided in the configuration
     private final String mode;

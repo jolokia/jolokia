@@ -41,5 +41,6 @@
             port="${jolokia.port}"
             host="127.0.0.1"
             />
+    <jolokia:log type="jul"/>
   </jolokia:agent>
 </beans>

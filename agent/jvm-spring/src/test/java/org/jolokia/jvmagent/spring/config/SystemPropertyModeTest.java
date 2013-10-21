@@ -30,8 +30,8 @@ public class SystemPropertyModeTest {
 
     @Test
     public void basic() {
-        assertEquals(SystemPropertyMode.fromMode("fallback"),SystemPropertyMode.MODE_FALLBACK);
-        assertEquals(SystemPropertyMode.fromMode("NeVeR"),SystemPropertyMode.MODE_NEVER);
+        assertEquals(SystemPropertyMode.fromMode("fallback"),SystemPropertyMode.FALLBACK);
+        assertEquals(SystemPropertyMode.fromMode("NeVeR"),SystemPropertyMode.NEVER);
         assertNull(SystemPropertyMode.fromMode("Blub"));
         assertNull(SystemPropertyMode.fromMode(null));
     }

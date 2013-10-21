@@ -21,10 +21,10 @@ import java.util.Map;
 
 import javax.xml.parsers.*;
 
-import org.jolokia.jvmagent.spring.SpringJolokiaAgent;
-import org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder;
+import org.jolokia.jvmagent.spring.*;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -73,6 +73,29 @@ public class SpringConfigTest {
         assertEquals(cProps.getPropertyValue("order").getValue(), 1000);
     }
 
+    @Test
+    public void logHandlerRef() throws IOException, SAXException, ParserConfigurationException {
+        Element element = getElement("/simple-log-ref.xml");
+        LogBeanDefinitionParser parser = new LogBeanDefinitionParser();
+        BeanDefinition bd = parser.parseInternal(element,null);
+        assertEquals(bd.getBeanClassName(), SpringJolokiaLogHandlerHolder.class.getName());
+        MutablePropertyValues props = bd.getPropertyValues();
+        assertEquals(props.size(),1);
+        assertTrue(props.getPropertyValue("logHandler").getValue() instanceof BeanReference);
+        assertEquals(((BeanReference) props.getPropertyValue("logHandler").getValue()).getBeanName(),"logHandler");
+    }
+
+    @Test
+    public void logHandlerType() throws IOException, SAXException, ParserConfigurationException {
+        Element element = getElement("/simple-log-type.xml");
+        LogBeanDefinitionParser parser = new LogBeanDefinitionParser();
+        BeanDefinition bd = parser.parseInternal(element,null);
+        assertEquals(bd.getBeanClassName(), SpringJolokiaLogHandlerHolder.class.getName());
+        MutablePropertyValues props = bd.getPropertyValues();
+        assertEquals(props.size(),2);
+        assertEquals(props.getPropertyValue("type").getValue(),"commons");
+        assertEquals(props.getPropertyValue("category").getValue(),"bla");
+    }
 
     private Element getElement(String pXmlPath) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();

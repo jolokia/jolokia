@@ -47,12 +47,15 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
     // Remember the context for dynamic lookup of multiple configs
     private ApplicationContext context;
 
+    // Log handler to use. If not given it is class looked up from the configuration
+    private SpringJolokiaLogHandlerHolder logHandlerHolder;
+
     /**
      * Callback used for initializing and optionally starting up the server
      */
     public void afterPropertiesSet() throws IOException {
         Map<String, String> finalConfig = new HashMap<String, String>();
-        if (systemPropertyMode == SystemPropertyMode.MODE_FALLBACK) {
+        if (systemPropertyMode == SystemPropertyMode.FALLBACK) {
             finalConfig.putAll(lookupSystemProperties());
         }
         finalConfig.putAll(config.getConfig());
@@ -67,7 +70,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
                 }
             }
         }
-        if (systemPropertyMode == SystemPropertyMode.MODE_OVERRIDE) {
+        if (systemPropertyMode == SystemPropertyMode.OVERRIDE) {
             finalConfig.putAll(lookupSystemProperties());
         }
         String autoStartS = finalConfig.remove("autoStart");
@@ -75,8 +78,8 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         if (autoStartS != null) {
             autoStart = Boolean.parseBoolean(autoStartS);
         }
-        // TODO: The spring agent needs also a way for adding a log handler
-        init(new JolokiaServerConfig(finalConfig), null);
+
+        init(new JolokiaServerConfig(finalConfig), logHandlerHolder != null ? logHandlerHolder.getLogHandler() : null);
         if (autoStart) {
             start();
         }
@@ -113,6 +116,15 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
     }
 
     /**
+     * Set the log handler to use which is contained in the given holder
+     *
+     * @param pLogHandlerHolder holder of a log handler
+     */
+    public void setLogHandler(SpringJolokiaLogHandlerHolder pLogHandlerHolder) {
+        logHandlerHolder = pLogHandlerHolder;
+    }
+
+    /**
      * Whether to lookup dynamically configs in the application context after creation
      * of this bean. This especially useful if the server is automatically started in a different
      * module and needs some extra customization. Used e.g for the spring plugin.
@@ -136,13 +148,13 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
     }
 
     /**
-     * Set the system propert mode for how to deal with configuration coming from system properties
+     * Set the system property mode for how to deal with configuration coming from system properties
      *
      */
     public void setSystemPropertiesMode(String pMode) {
         systemPropertyMode = SystemPropertyMode.fromMode(pMode);
         if (systemPropertyMode == null) {
-            systemPropertyMode = SystemPropertyMode.MODE_NEVER;
+            systemPropertyMode = SystemPropertyMode.NEVER;
         }
     }
 
@@ -153,7 +165,4 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      */
     public void setId(String pId) {
     }
-
-    // ===================================================================
-
 }

@@ -39,6 +39,11 @@ public class AgentBeanDefinitionParser extends AbstractBeanDefinitionParser {
             ConfigBeanDefinitionParser configParser = new ConfigBeanDefinitionParser();
             builder.addPropertyValue("config", configParser.parseInternal(config, parserContext));
         }
+        Element log = DomUtils.getChildElementByTagName(element,"log");
+        if (log != null) {
+            LogBeanDefinitionParser logParser = new LogBeanDefinitionParser();
+            builder.addPropertyValue("logHandler", logParser.parseInternal(log,parserContext));
+        }
         String lookupConfig = element.getAttribute("lookupConfig");
         if (StringUtils.hasLength(lookupConfig)) {
             builder.addPropertyValue("lookupConfig", Boolean.parseBoolean(lookupConfig));
