@@ -31,8 +31,7 @@ import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.JolokiaServiceManager;
+import org.jolokia.service.*;
 import org.jolokia.service.impl.ClasspathServiceCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.util.*;
@@ -221,6 +220,16 @@ public class JolokiaServer {
         // Get own URL for later reference
         serverAddress = pServer.getAddress();
         url = extractUrl(pConfig);
+    }
+
+    /**
+     * Allow to add service from within a sub class. This method should be called before
+     * the service manager is started
+     *
+     * @param pService service to add
+     */
+    protected void addService(JolokiaService pService) {
+        serviceManager.addService(pService);
     }
 
     // Creat a log handler from either the given class or by creating a default log handler printing

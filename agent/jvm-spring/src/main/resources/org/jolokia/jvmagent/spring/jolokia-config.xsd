@@ -52,6 +52,15 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="lookupServices" type="xs:boolean" use="optional">
+        <xs:annotation>
+          <xs:documentation>
+            If set to true, externally defined Jolokia-services are looked up
+            and added to the set of services to use. Please refer to the documentation
+            of org.jolokia.service.JolokiaService for details.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="systemPropertiesMode">
         <xs:annotation>
           <xs:documentation><![CDATA[

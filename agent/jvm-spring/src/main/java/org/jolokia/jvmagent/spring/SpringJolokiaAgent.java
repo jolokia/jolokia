@@ -21,6 +21,8 @@ import java.util.*;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
+import org.jolokia.service.JolokiaService;
+import org.jolokia.util.LogHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -36,10 +38,13 @@ import org.springframework.core.OrderComparator;
 public class SpringJolokiaAgent extends JolokiaServer implements ApplicationContextAware, InitializingBean, DisposableBean {
 
     // Default configuration to use
-    private SpringJolokiaConfigHolder config;
+    private SpringJolokiaConfigHolder configHolder;
 
     // Whether to lookup up other configurations in the context
     private boolean lookupConfig = false;
+
+    // Whether to lookup Jolokia services from the spring context
+    private boolean lookupServices = false;
 
     // How to deal with system properties
     private SystemPropertyMode systemPropertyMode;
@@ -54,35 +59,54 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      * Callback used for initializing and optionally starting up the server
      */
     public void afterPropertiesSet() throws IOException {
-        Map<String, String> finalConfig = new HashMap<String, String>();
+        Map<String, String> config = new HashMap<String, String>();
         if (systemPropertyMode == SystemPropertyMode.FALLBACK) {
-            finalConfig.putAll(lookupSystemProperties());
+            config.putAll(lookupSystemProperties());
         }
-        finalConfig.putAll(config.getConfig());
+        config.putAll(configHolder.getConfig());
+
         if (lookupConfig) {
-            // Merge all configs in the context in the reverse order
-            Map<String, SpringJolokiaConfigHolder> configsMap = context.getBeansOfType(SpringJolokiaConfigHolder.class);
-            List<SpringJolokiaConfigHolder> configs = new ArrayList<SpringJolokiaConfigHolder>(configsMap.values());
-            Collections.sort(configs, new OrderComparator());
-            for (SpringJolokiaConfigHolder c : configs) {
-                if (c != config) {
-                    finalConfig.putAll(c.getConfig());
-                }
-            }
-        }
-        if (systemPropertyMode == SystemPropertyMode.OVERRIDE) {
-            finalConfig.putAll(lookupSystemProperties());
-        }
-        String autoStartS = finalConfig.remove("autoStart");
-        boolean autoStart = true;
-        if (autoStartS != null) {
-            autoStart = Boolean.parseBoolean(autoStartS);
+            config.putAll(lookupConfigurationFromContext());
         }
 
-        init(new JolokiaServerConfig(finalConfig), logHandlerHolder != null ? logHandlerHolder.getLogHandler() : null);
+        if (systemPropertyMode == SystemPropertyMode.OVERRIDE) {
+            config.putAll(lookupSystemProperties());
+        }
+
+        // Spring specific config 'autoStart' gets removed here
+        boolean autoStart = Boolean.parseBoolean(config.remove("autoStart"));
+
+        LogHandler logHandler = logHandlerHolder != null ? logHandlerHolder.getLogHandler() : null;
+        init(new JolokiaServerConfig(config), logHandler);
+
+        if (lookupServices) {
+            lookupServices();
+        }
+
         if (autoStart) {
             start();
         }
+    }
+
+    private void lookupServices() {
+        Map<String,JolokiaService> services = context.getBeansOfType(JolokiaService.class);
+        for (JolokiaService service : services.values()) {
+            addService(service);
+        }
+    }
+
+    private Map<String,String> lookupConfigurationFromContext() {
+        // Merge all configs in the context in the reverse order
+        Map<String,String> config = new HashMap<String, String>();
+        Map<String, SpringJolokiaConfigHolder> configsMap = context.getBeansOfType(SpringJolokiaConfigHolder.class);
+        List<SpringJolokiaConfigHolder> configs = new ArrayList<SpringJolokiaConfigHolder>(configsMap.values());
+        Collections.sort(configs, new OrderComparator());
+        for (SpringJolokiaConfigHolder c : configs) {
+            if (c != this.configHolder) {
+                config.putAll(c.getConfig());
+            }
+        }
+        return config;
     }
 
     // Lookup system properties for all configurations possible
@@ -112,7 +136,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      * @param pConfig configuration to use
      */
     public void setConfig(SpringJolokiaConfigHolder pConfig) {
-        config = pConfig;
+        configHolder = pConfig;
     }
 
     /**
@@ -133,6 +157,16 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      */
     public void setLookupConfig(boolean pLookupConfig) {
         lookupConfig = pLookupConfig;
+    }
+
+    /**
+     * Whether to lookup {@link JolokiaService}s from the application context. These are
+     * added according to their order to the set of the services present.
+     *
+     * @param pLookupServices whether to lookup jolokia services.
+     */
+    public void setLookupServices(boolean pLookupServices) {
+        lookupServices = pLookupServices;
     }
 
     /**

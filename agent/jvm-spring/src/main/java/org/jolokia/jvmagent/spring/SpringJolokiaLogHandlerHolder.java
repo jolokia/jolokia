@@ -62,6 +62,7 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
     enum LogHandlerType {
         JUL("jul","org.jolokia.jvmagent.spring.log.JulLogHandler"),
         LOG4J("log4j","org.jolokia.jvmagent.spring.log.Log4jLogHandler"),
+        LOG4J2("log4j2","org.jolokia.jvmagent.spring.log.Log4j2LogHandler"),
         SL4J("sl4j","org.jolokia.jvmagent.spring.log.Sl4jLogHandler"),
         COMMONS("commons","org.jolokia.jvmagent.spring.log.CommonsLogHandler");
 

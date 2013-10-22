@@ -35,7 +35,7 @@
 
   <jolokia:config agentContext="/j4p/" order="10"/>
 
-  <jolokia:agent id="jolokia" lookupConfig="true">
+  <jolokia:agent id="jolokia" lookupConfig="true" lookupServices="true">
     <jolokia:config
             autoStart="true"
             port="${jolokia.port}"
@@ -43,4 +43,6 @@
             />
     <jolokia:log type="jul"/>
   </jolokia:agent>
+
+  <bean class="org.jolokia.jvmagent.spring.DummyRequestHandler"/>
 </beans>

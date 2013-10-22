@@ -44,11 +44,11 @@ public class AgentBeanDefinitionParser extends AbstractBeanDefinitionParser {
             LogBeanDefinitionParser logParser = new LogBeanDefinitionParser();
             builder.addPropertyValue("logHandler", logParser.parseInternal(log,parserContext));
         }
-        String lookupConfig = element.getAttribute("lookupConfig");
-        if (StringUtils.hasLength(lookupConfig)) {
-            builder.addPropertyValue("lookupConfig", Boolean.parseBoolean(lookupConfig));
-        } else {
-            builder.addPropertyValue("lookupConfig",false);
+        for (String lookupKey : new String[] { "lookupConfig", "lookupServices" } ) {
+            String lookup = element.getAttribute(lookupKey);
+            builder.addPropertyValue(lookupKey,
+                                     StringUtils.hasLength(lookup) &&
+                                     Boolean.parseBoolean(lookup));
         }
         String systemPropertiesMode = element.getAttribute("systemPropertiesMode");
         if (StringUtils.hasLength(systemPropertiesMode)) {

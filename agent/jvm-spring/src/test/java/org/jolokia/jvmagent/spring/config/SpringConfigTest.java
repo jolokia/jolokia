@@ -52,8 +52,9 @@ public class SpringConfigTest {
         BeanDefinition bd = parser.parseInternal(element, null);
         assertEquals(bd.getBeanClassName(), SpringJolokiaAgent.class.getName());
         MutablePropertyValues props = bd.getPropertyValues();
-        assertEquals(props.size(),2);
+        assertEquals(props.size(),3);
         assertEquals(props.getPropertyValue("lookupConfig").getValue(), false);
+        assertEquals(props.getPropertyValue("lookupServices").getValue(), false);
         BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();;
         assertEquals(cBd.getBeanClassName(),SpringJolokiaConfigHolder.class.getName());
         MutablePropertyValues cProps = cBd.getPropertyValues();
