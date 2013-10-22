@@ -36,7 +36,7 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
      * @param pType service type
      * @param pOrderId order id. A user of JolokiaService <em>must ensure</em> that the given
      *                 order id is unique for the given type. It used for ordering the services but is also
-     *                 used as an id when storing it in  aset.
+     *                 used as an id when storing it in a set.
      */
     protected AbstractJolokiaService(Class<T> pType, int pOrderId) {
         type = pType;
