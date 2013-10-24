@@ -24,7 +24,7 @@
   </properties>
   <body>
     <release version="1.1.5-SNAPSHOT" description="Release 1.1.5-SNAPSHOT" date="">
-      <action dev="jhermann" type="fix" date="2013-10-14" issue="63">
+      <action dev="roland" type="fix" date="2013-10-14" issue="63">
         Fixed Glassfish detector's lazy initialization of the AMX boot system.
       </action>
     </release>
@@ -32,7 +32,7 @@
       <action dev="jhermann" type="fix" date="2013-09-27" issue="116">
         Ignore Daemon Thread from Tanunki JSW when deciding whether the agent should shut down or not
       </action>
-      <action dev="" type="fix" date="2013-09-27" issue="117">
+      <action dev="roland" type="fix" date="2013-09-27" issue="117">
         Fixed InstanceNotFoundExceptions in case of a multiple attribute read, for the case that an MBean
         get deregistered between being included in the search result set and the actual query.
       </action>
