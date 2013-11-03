@@ -18,7 +18,7 @@ package org.jolokia.request;
 
 import java.util.*;
 
-import org.jolokia.config.*;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
@@ -27,7 +27,6 @@ import org.json.simple.JSONObject;
  * Abstract base class for a JMX request. This is the server side
  * representation of a Jolokia request.
  *
- *
  * @author roland
  * @since 15.03.11
  */
@@ -35,9 +34,6 @@ public abstract class JmxRequest {
 
     // Type of request
     private RequestType type;
-
-    // An optional target configuration
-    private ProxyTargetConfig targetConfig = null;
 
     // Processing configuration for tis request object
     private ProcessingParameters processingConfig;
@@ -51,6 +47,9 @@ public abstract class JmxRequest {
 
     // Path parts, which are used for selecting parts of the return value
     private List<String> pathParts;
+
+    // Free-form options
+    private Map<String,?> options = null;
 
     /**
      * Constructor used for representing {@link HttpMethod#GET} requests.
@@ -77,9 +76,18 @@ public abstract class JmxRequest {
              EscapeUtil.parsePath((String) pMap.get("path")),
              pProcessingParams);
 
-        Map target = (Map) pMap.get("target");
-        if (target != null) {
-            targetConfig = new ProxyTargetConfig(target);
+        JSONObject reqOptions = (JSONObject) pMap.get("options");
+        if (reqOptions != null) {
+            options = reqOptions;
+        }
+
+        // For backwards compatibility, examine "target" as well
+        Object targetOptions = pMap.get("target");
+        if (targetOptions != null) {
+            if (options == null) {
+                options = new HashMap();
+            }
+            options.put("target",pMap.get("target"));
         }
     }
 
@@ -158,7 +166,7 @@ public abstract class JmxRequest {
     }
 
     /**
-     * Get tha value fault handler, which can be passwed around.
+     * Get tha value fault handler, which can be passed around.
      * @return the value fault handler
      */
     public ValueFaultHandler getValueFaultHandler() {
@@ -172,7 +180,7 @@ public abstract class JmxRequest {
      * @return description of this base request
      */
     protected String getInfo() {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         if (pathParts != null) {
             ret.append(", path=").append(pathParts);
         }
