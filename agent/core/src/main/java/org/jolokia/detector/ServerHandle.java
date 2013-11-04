@@ -110,10 +110,8 @@ public class ServerHandle {
 
     /**
      * Get extra information specific to a server. A subclass can overwrite this in order
-     * to provide dynamice information on the server which gets calculated afresh
-     * on each invokation.
-     *
-     *
+     * to provide dynamic information on the server which gets calculated afresh
+     * on each invocation.
      *
      * @param pServerManager MBeanServers to query
      * @return a map of extra info or <code>null</code> if no extra information is given.
@@ -156,7 +154,7 @@ public class ServerHandle {
      *
      * The default is a no-op.
      *
-     * @param pServerManager
+     * @param pServerManager server manager
      * @param pContext the Jolokia Context
      */
     public void postDetect(MBeanServerExecutor pServerManager, JolokiaContext pContext) {

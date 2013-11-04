@@ -2,7 +2,6 @@ package org.jolokia.service.impl;
 
 import java.util.Set;
 
-import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.service.JolokiaService;
 import org.jolokia.service.JolokiaServiceCreator;
 import org.jolokia.util.LocalServiceFactory;

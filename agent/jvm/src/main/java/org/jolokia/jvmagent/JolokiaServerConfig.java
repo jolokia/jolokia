@@ -234,6 +234,7 @@ public class JolokiaServerConfig {
         String auth = agentConfig.get("useSslClientAuthentication");
         useSslClientAuthentication = auth != null && Boolean.getBoolean(auth);
 
+
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
     }
@@ -249,41 +250,60 @@ public class JolokiaServerConfig {
         String authenticatorClass = jolokiaConfig.getConfig(ConfigKey.AUTHENTICATOR_CLASS);
 
         if (authenticatorClass != null) {
+            Class authClass = getAuthenticatorClass(authenticatorClass);
+
             try {
-                Class authClass = Class.forName(authenticatorClass);
-                if (!Authenticator.class.isAssignableFrom(authClass)) {
-                    throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
-                            "] is not a subclass of Authenticator");
-                }
-
-                try {
-                    // prefer constructor that takes configuration
-                    try {
-                        Constructor constructorThatTakesConfiguration = authClass.getConstructor(Configuration.class);
-                        authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
-                    } catch (NoSuchMethodException ignore) {
-
-                        // fallback to default constructor
-                        try {
-                            Constructor defaultConstructor = authClass.getConstructor();
-                            authenticator = (Authenticator) defaultConstructor.newInstance();
-                        } catch (NoSuchMethodException e) {
-                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
-                        } catch (InvocationTargetException e) {
-                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
-                        }
-
-                    } catch (InvocationTargetException e) {
-                        throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
-                    }
-                } catch (InstantiationException e) {
-                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
-                }
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Cannot find authenticator class", e);
+                // prefer constructor that takes configuration
+                authenticator = createFromConstructorWithConfigArg(authClass);
+            } catch (NoSuchMethodException ignore) {
+                // fallback to default constructor
+                authenticator = createFromDefaultConstructor(authClass);
             }
+        }
+    }
+
+    private Authenticator createFromConstructorWithConfigArg(Class pAuthClass) throws NoSuchMethodException {
+        try {
+            Constructor constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+            return (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
+        }
+        catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Cannot invoke 1-arg constructor for custom authenticator " + pAuthClass, e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class " + pAuthClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot access 1-arg constructor for custom authenticator class" + pAuthClass +
+                                               " (is the constructor 'private' ?)", e);
+        }
+    }
+
+    private Authenticator createFromDefaultConstructor(Class pAuthClass) {
+        try {
+            Constructor defaultConstructor = pAuthClass.getConstructor();
+            return (Authenticator) defaultConstructor.newInstance();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, " +
+                                               "no default constructor available for " + pAuthClass, e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Cannot invoke default constructor for custom authenticator " + pAuthClass, e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class " + pAuthClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot access default constructor for custom authenticator class" + pAuthClass +
+                                               " (is the constructor 'private' ?)", e);
+        }
+    }
+
+    private Class getAuthenticatorClass(String pAuthenticatorClass) {
+        try {
+            Class authClass = Class.forName(pAuthenticatorClass);
+            if (!Authenticator.class.isAssignableFrom(authClass)) {
+                throw new IllegalArgumentException("Provided authenticator class [" + pAuthenticatorClass +
+                                                   "] is not a subclass of Authenticator");
+            }
+            return authClass;
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Cannot find authenticator class " + pAuthenticatorClass, e);
         }
     }
 

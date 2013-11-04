@@ -111,7 +111,7 @@ public class WebsphereDetector extends AbstractServerDetector {
     /**
      * Server handle for Websphere platforms
      */
-    class WebsphereServerHandle extends ServerHandle {
+    static class WebsphereServerHandle extends ServerHandle {
 
         /** {@inheritDoc} */
         public WebsphereServerHandle(String pVersion, URL pAgenturl, Map<String, String> pExtrainfo) {

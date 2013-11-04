@@ -52,22 +52,22 @@ public class OpenTypeDeserializer {
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either
      * an {@link org.json.simple.JSONAware} object or its string representation.
      *
-     * @param openType target type
+     * @param pOpenType target type
      * @param pValue value to convert from
      * @return the converted value
      */
     @SuppressWarnings("unchecked")
-    public Object deserialize(OpenType openType, Object pValue) {
+    public Object deserialize(OpenType pOpenType, Object pValue) {
         if (pValue == null) {
             return null;
         } else {
             for (OpenTypeConverter converter : converters) {
-                if (converter.canConvert(openType)) {
-                    return converter.convertToObject(openType,pValue);
+                if (converter.canConvert(pOpenType)) {
+                    return converter.convertToObject(pOpenType,pValue);
                 }
             }
             throw new IllegalArgumentException(
-                    "Cannot convert " + pValue + " to " + openType + ": " + "No converter could be found");
+                    "Cannot convert " + pValue + " to " + pOpenType + ": " + "No converter could be found");
         }
 	}
 }

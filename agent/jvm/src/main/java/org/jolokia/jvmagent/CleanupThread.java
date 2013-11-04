@@ -98,12 +98,7 @@ class CleanupThread extends Thread {
     private boolean joinThreads(Thread pThreads[]) {
         for (int i=0;i< pThreads.length;i++) {
             final Thread t = pThreads[i];
-            if (t.isDaemon() ||
-                    t.getThreadGroup() == null || // has died on us
-                    t.getThreadGroup().equals(threadGroup) ||
-                    t.getName().startsWith("WrapperListener_stop_runner") || // Tanuki Java Service Wrapper (#116)
-                    t.getName().startsWith("DestroyJavaVM")) {
-                // These are threads which should not prevent the server from stopping.
+            if (isDaemonLikeThread(t)) {
                 continue;
             }
             try {
@@ -119,5 +114,28 @@ class CleanupThread extends Thread {
         return false;
     }
 
+
+    private static String[] DAEMON_THREAD_NAMES = new String[] {
+            // Tanuki Java Service Wrapper (#116)
+            "WrapperListener_stop_runner",
+            // Shutdown thread
+            "DestroyJavaVM"
+    };
+
+    // Check for threads which should not prevent the server from stopping.
+    private boolean isDaemonLikeThread(Thread pThread) {
+        // Daemon or part of our thread group
+        if (pThread.isDaemon() ||
+            pThread.getThreadGroup() == null || // has died on us
+            pThread.getThreadGroup().equals(threadGroup)) {
+            return true;
+        }
+        for (String name : DAEMON_THREAD_NAMES) {
+           if (pThread.getName().startsWith(name)) {
+               return true;
+           }
+        }
+        return false;
+    }
 }
 

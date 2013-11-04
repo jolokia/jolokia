@@ -97,8 +97,6 @@ public final class ObjectToJsonConverter {
     /**
      * Convert the return value to a JSON object.
      *
-     *
-     *
      * @param pValue the value to convert
      * @param pPathParts path parts to use for extraction
      * @param pOptions options used for parsing

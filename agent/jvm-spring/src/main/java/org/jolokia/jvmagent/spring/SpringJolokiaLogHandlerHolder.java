@@ -25,7 +25,7 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
     private String category;
 
     /** {@inheritDoc} */
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         if (logHandler == null) {
             if (StringUtils.hasLength(type)) {
                 LogHandlerType lht = LogHandlerType.byType(type);
@@ -68,7 +68,7 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
 
 
         private final String className;
-        private final String type;
+        private final String type; // NOPMD
 
         LogHandlerType(String pType, String pClassName) {
             this.className = pClassName;

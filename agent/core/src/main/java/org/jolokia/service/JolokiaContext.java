@@ -31,7 +31,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      */
     <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
 
-
     /**
      * Get a single service. If more than one service of the given type has been
      * registered, return the one with the highest order. If no one has been registered
@@ -51,9 +50,16 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     ServerHandle getServerHandle();
 
     /**
-     * Register an MBean which gets automatically unregistered during shutdown
+     * Register an MBean which gets automatically unregistered during shutdown.
+     *
+     * @param pMBean MBean to register
+     * @param pOptionalName optional name under which the bean should be registered. If not provided,
+     * it depends on whether the MBean to register implements {@link javax.management.MBeanRegistration} or
+     * not.
+     *
+     * @return the name under which the MBean is registered.
      */
-    public ObjectName registerMBean(Object pMBean, String... pOptionalName)
+    ObjectName registerMBean(Object pMBean, String... pOptionalName)
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException;
 
     /**

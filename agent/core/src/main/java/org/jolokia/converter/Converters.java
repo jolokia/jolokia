@@ -59,18 +59,22 @@ public class Converters extends AbstractJolokiaService<JmxSerializer> implements
         toJsonConverter = new ObjectToJsonConverter(toObjectConverter);
     }
 
+    /** {@inheritDoc} */
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException {
         return toJsonConverter.serialize(pValue,pPathParts,pOptions);
     }
 
+    /** {@inheritDoc} */
     public Object deserialize(String pExpectedClassName, Object pValue) {
         return toObjectConverter.deserialize(pExpectedClassName,pValue);
     }
 
+    /** {@inheritDoc} */
     public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         return toJsonConverter.setInnerValue(pOuterObject,pNewValue,pPathParts);
     }
 
+    /** {@inheritDoc} */
     public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
         return toOpenTypeConverter.deserialize(pOpenType,pValue);
     }

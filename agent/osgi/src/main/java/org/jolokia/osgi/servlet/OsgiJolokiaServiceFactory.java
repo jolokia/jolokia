@@ -58,7 +58,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
             // before a service is looked up via the tracker because of the customizer calling
             // service lifecycle methods. getServices() is guaranteed to be called
             // only after the JolokiaService has been setup.
-            tracker = new ServiceTracker(context,pType.getName(),getServiceInitializer());
+            tracker = new ServiceTracker(context,pType.getName(), new JolokiaServiceTrackerCustomizer());
             serviceTrackerMap.put(pType,tracker);
             tracker.open();
         }
@@ -75,38 +75,6 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
         }
     }
 
-    // A customizer is used for the lifecycle of OSGi services
-    private ServiceTrackerCustomizer getServiceInitializer() {
-        return new ServiceTrackerCustomizer() {
-
-            public Object addingService(ServiceReference reference) {
-                JolokiaService jolokiaService = (JolokiaService) context.getService(reference);
-                if (jolokiaService != null) {
-                    if (jolokiaContext != null) {
-                        jolokiaService.init(jolokiaContext);
-                    } else {
-                        throw new ServiceException("Cannot initialize service \"" + jolokiaService + "\" since the JolokiaContext " +
-                                                   "is not yet initialized");
-                    }
-                }
-                return jolokiaService;
-            }
-
-            public void modifiedService(ServiceReference reference, Object service) {
-            }
-
-            public void removedService(ServiceReference reference, Object service) {
-                try {
-                    JolokiaService jolokiaService = (JolokiaService) service;
-                    context.ungetService(reference);
-                    jolokiaService.destroy();
-                } catch (Exception e) {
-                    throw new ServiceException("destroy() on JolokiaService " + service + " failed" + e,e);
-                }
-            }
-        };
-    }
-
     /** {@inheritDoc} */
     public void init(JolokiaContext pJolokiaContext) {
         jolokiaContext = pJolokiaContext;
@@ -118,6 +86,37 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
     public void destroy() {
         for (ServiceTracker tracker : serviceTrackerMap.values()) {
             tracker.close();
+        }
+    }
+
+    // ==========================================================================================================
+    // Service initializer for calling init on all newly added services
+    private  class JolokiaServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+
+        public Object addingService(ServiceReference reference) {
+            JolokiaService jolokiaService = (JolokiaService) context.getService(reference);
+            if (jolokiaService != null) {
+                if (jolokiaContext != null) {
+                    jolokiaService.init(jolokiaContext);
+                } else {
+                    throw new ServiceException("Cannot initialize service \"" + jolokiaService + "\" since the JolokiaContext " +
+                                               "is not yet initialized");
+                }
+            }
+            return jolokiaService;
+        }
+
+        public void modifiedService(ServiceReference reference, Object service) {
+        }
+
+        public void removedService(ServiceReference reference, Object service) {
+            try {
+                JolokiaService jolokiaService = (JolokiaService) service;
+                context.ungetService(reference);
+                jolokiaService.destroy();
+            } catch (Exception e) {
+                throw new ServiceException("destroy() on JolokiaService " + service + " failed" + e,e);
+            }
         }
     }
 }
