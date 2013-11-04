@@ -93,6 +93,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
     // Service initializer for calling init on all newly added services
     private  class JolokiaServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
+        /** {@inheritDoc} */
         public Object addingService(ServiceReference reference) {
             JolokiaService jolokiaService = (JolokiaService) context.getService(reference);
             if (jolokiaService != null) {
@@ -106,9 +107,11 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
             return jolokiaService;
         }
 
+        /** {@inheritDoc} */
         public void modifiedService(ServiceReference reference, Object service) {
         }
 
+        /** {@inheritDoc} */
         public void removedService(ServiceReference reference, Object service) {
             try {
                 JolokiaService jolokiaService = (JolokiaService) service;

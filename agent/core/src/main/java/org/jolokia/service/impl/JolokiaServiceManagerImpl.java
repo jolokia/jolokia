@@ -228,6 +228,18 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         return ret;
     }
 
+    /**
+     * Register a MBean under a certain name to the platform MBeanServer.
+     *
+     * This method delegates to the {@link MBeanRegistry}.
+     * 
+     * @param pMBean MBean to register
+     * @param pOptionalName optional name under which the bean should be registered. If not provided,
+     * it depends on whether the MBean to register implements {@link javax.management.MBeanRegistration} or
+     * not.
+     *
+     * @return the name under which the MBean is registered.
+     */
     public final ObjectName registerMBean(Object pMBean, String... pOptionalName)
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
         return mbeanRegistry.registerMBean(pMBean, pOptionalName);

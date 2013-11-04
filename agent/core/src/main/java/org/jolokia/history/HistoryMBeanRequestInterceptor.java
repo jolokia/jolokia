@@ -32,6 +32,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
         super(RequestInterceptor.class, pOrderId);
     }
 
+    /** {@inheritDoc} */
     public void init(JolokiaContext pCtx) {
         int maxEntries;
         try {
@@ -81,6 +82,4 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
             throw new IllegalStateException("Internal: Cannot call History MBean via reflection",e);
         }
     }
-
-
 }

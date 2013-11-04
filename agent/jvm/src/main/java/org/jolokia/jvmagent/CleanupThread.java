@@ -115,7 +115,7 @@ class CleanupThread extends Thread {
     }
 
 
-    private static String[] DAEMON_THREAD_NAMES = new String[] {
+    private final static String[] DAEMON_THREAD_NAMES = new String[] {
             // Tanuki Java Service Wrapper (#116)
             "WrapperListener_stop_runner",
             // Shutdown thread

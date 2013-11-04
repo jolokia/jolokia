@@ -43,7 +43,9 @@ public class Converters extends AbstractJolokiaService<JmxSerializer> implements
     private StringToObjectConverter toObjectConverter;
     private OpenTypeDeserializer toOpenTypeConverter;
 
-
+    /**
+     * Default constructor
+     */
     public Converters() {
         this(100);
     }
@@ -51,6 +53,7 @@ public class Converters extends AbstractJolokiaService<JmxSerializer> implements
     /**
      * Create converters (string-to-object, string-to-openType and object-to-json)
      *
+     * @param pOrder order to use
      */
     public Converters(int pOrder) {
         super(JmxSerializer.class,pOrder);

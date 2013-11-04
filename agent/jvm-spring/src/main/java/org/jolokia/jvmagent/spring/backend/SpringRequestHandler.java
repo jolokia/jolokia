@@ -30,14 +30,17 @@ public class SpringRequestHandler extends AbstractJolokiaService<RequestHandler>
         super(RequestHandler.class, pOrderId);
     }
 
+    /** {@inheritDoc} */
     public Object handleRequest(JmxRequest pJmxReq) throws JMException, IOException, NotChangedException {
         return null;
     }
 
+    /** {@inheritDoc} */
     public boolean canHandle(JmxRequest pJmxRequest) {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
         return false;
     }
