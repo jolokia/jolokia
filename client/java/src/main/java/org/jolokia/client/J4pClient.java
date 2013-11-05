@@ -16,20 +16,25 @@ package org.jolokia.client;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.net.*;
-import java.util.*;
-
-import org.apache.http.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.*;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
-import org.jolokia.client.request.J4pResponse;
-import org.json.simple.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -80,9 +85,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             httpClient = pHttpClient;
         } else {
             J4pClientBuilder builder = new J4pClientBuilder();
-            HttpParams params = builder.getHttpParams();
-            ClientConnectionManager cm = builder.createClientConnectionManager();
-            httpClient = new DefaultHttpClient(cm, params);
+            httpClient = builder.createHttpClient();
         }
     }
 
@@ -344,6 +347,4 @@ public class J4pClient extends J4pClientBuilderFactory {
     public HttpClient getHttpClient() {
         return httpClient;
     }
-
-
 }
