@@ -301,7 +301,7 @@ public class HistoryStore implements Serializable {
             Object value = attrEntry.getValue();
             HistoryKey key;
             try {
-                String target = pJmxReq.getTargetConfig() != null ? pJmxReq.getTargetConfig().getUrl() : null;
+                String target = pJmxReq.getOption("targetId");
                 key = new HistoryKey(pBeanName,attrName,null /* No path support for complex read handling */,
                                      target);
             } catch (MalformedObjectNameException e) {

@@ -49,7 +49,7 @@ public abstract class JmxRequest {
     private List<String> pathParts;
 
     // Free-form options
-    private Map<String,?> options = null;
+    private JSONObject options = null;
 
     /**
      * Constructor used for representing {@link HttpMethod#GET} requests.
@@ -81,13 +81,18 @@ public abstract class JmxRequest {
             options = reqOptions;
         }
 
-        // For backwards compatibility, examine "target" as well
-        Object targetOptions = pMap.get("target");
+        updateForLegacyProxyConfiguration(pMap);
+    }
+
+    // For backwards compatibility, examine "target" as well
+    private void updateForLegacyProxyConfiguration(Map<String, ?> pMap) {
+        JSONObject targetOptions = (JSONObject) pMap.get("target");
         if (targetOptions != null) {
             if (options == null) {
-                options = new HashMap();
+                options = new JSONObject();
             }
-            options.put("target",pMap.get("target"));
+            options.put("target",targetOptions);
+            options.put("targetId",targetOptions.get("url"));
         }
     }
 
@@ -146,13 +151,15 @@ public abstract class JmxRequest {
     }
 
     /**
-     * Get the proxy target configuration provided with the request
+     * Get an option from the request. Options are used to help request dispatchers in serving
+     * a request for a specific realm. E.g. the Jsr160 request dispatchers uses this in order to
+     * obtain the JSR-160 target information.
      *
-     * @return the proxy target configuration or null if the the request
-     *         is not a proxy based request.
+     * @param pKey get the option for this key
+     * @return the specificied option or or null if no such option was set
      */
-    public ProxyTargetConfig getTargetConfig() {
-        return targetConfig;
+    public <T> T getOption(String pKey) {
+        return options != null ? (T) options.get(pKey) : null;
     }
 
 
@@ -184,8 +191,12 @@ public abstract class JmxRequest {
         if (pathParts != null) {
             ret.append(", path=").append(pathParts);
         }
-        if (targetConfig != null) {
-            ret.append(", target=").append(targetConfig);
+        if (options != null) {
+            ret.append(", options={");
+            for (Map.Entry entry : (Set<Map.Entry>) options.entrySet()) {
+                ret.append(entry.getKey()).append("=").append(entry.getValue());
+            }
+            ret.append("}");
         }
         return ret.length() > 0 ? ret.toString() : null;
     }
@@ -217,15 +228,11 @@ public abstract class JmxRequest {
         JSONObject ret = new JSONObject();
         ret.put("type",type.getName());
 
-        if (targetConfig != null) {
-            ret.put("target", targetConfig.toJSON());
+        if (options != null) {
+            ret.put("options", options);
         }
         if (pathParts != null) {
-            try {
-                ret.put("path",getPath());
-            } catch (UnsupportedOperationException exp) {
-                // Happens when request doesnt support paths
-            }
+            ret.put("path",getPath());
         }
         return ret;
     }

@@ -1,4 +1,4 @@
-package org.jolokia.request;
+package org.jolokia.jsr160;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -41,8 +41,7 @@ public class ProxyTargetConfig {
      * @param pMap map containing configuration
      */
     public ProxyTargetConfig(Map<String,String> pMap) {
-        url = pMap.get("url");
-        if (url == null) {
+        if (pMap == null || (url = pMap.get("url")) == null) {
             throw new IllegalArgumentException("No service url given for JSR-160 target");
         }
         String user = pMap.get("user");

@@ -103,9 +103,7 @@ public class HistoryKey implements Serializable {
         if (pJmxReq.getObjectName().isPattern()) {
             throw new IllegalArgumentException("MBean name must not be a pattern");
         }
-        if (pJmxReq.getTargetConfig() != null) {
-            target = pJmxReq.getTargetConfig().getUrl();
-        }
+        target = pJmxReq.getOption("targetId");
         mBean = pJmxReq.getObjectName();
     }
 
@@ -115,7 +113,7 @@ public class HistoryKey implements Serializable {
      *
      * @param pMBean MBean name
      * @param pOperation operation name
-     * @param pTarget optional target if used in proxy mode
+     * @param pTarget optional target identifer
      * @throws MalformedObjectNameException if the mbean name is invalid
      */
     public HistoryKey(String pMBean, String pOperation, String pTarget) throws MalformedObjectNameException {
@@ -137,7 +135,7 @@ public class HistoryKey implements Serializable {
      * @param pMBean MBean name
      * @param pAttribute attribute
      * @param pPath optional path
-     * @param pTarget optional proxy target
+     * @param pTarget optional target identifier
      * @throws MalformedObjectNameException if the mbean name is invalid
      */
     public HistoryKey(String pMBean, String pAttribute, String pPath,String pTarget) throws MalformedObjectNameException {
