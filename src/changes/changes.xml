@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.1.5-SNAPSHOT" description="Release 1.1.5-SNAPSHOT" date="">
+    <release version="1.1.5" description="Release 1.1.5-SNAPSHOT" date="2013-11-08">
       <action dev="roland" type="fix" date="2013-10-14" issue="63">
         Fixed Glassfish detector's lazy initialization of the AMX boot system.
       </action>
