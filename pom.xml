@@ -516,6 +516,7 @@
             </executions>
             <configuration>
               <useAgent>true</useAgent>
+              <keyname>roland@jolokia.org</keyname>
             </configuration>
           </plugin>
         </plugins>
