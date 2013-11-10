@@ -59,7 +59,7 @@ cd ../..
 # Add new release to jolokia.meta
 vi src/site/resources/jolokia.meta
 # Sign and create checksums
-gpg -a -b src/site/resources/jolokia.meta
+gpg --local-user roland@jolokia.org -a -b src/site/resources/jolokia.meta
 shasum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.sha1
 md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
  

@@ -79,6 +79,18 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Tiny 1.1.5">
+        <div class="news-date">2013-11-08</div>
+        <p>
+          This is by far the smallest release ever: A <a href="https://github.com/rhuss/jolokia/commit/98e62c0478b166d188e0c9f173b278a59eed1fc8#diff-cdf118c56620542b85bc48650eb8ddb6R162">single char</a>
+          has been added on top of 1.1.4 fixing a silly bug when
+          using Glassfish with the AMX system. So, no need to update if you are not using Glassfish.
+        </p>
+        <p>
+          Next week is Devoxx time and as last year (and the years before) you have the change to meet <a href="https://twitter.com/ro14nd">me</a> in
+          Antwerp. Ping me or look for the guy with the <a href="http://jolokia.spreadshirt.de/men-s-hooded-jacket-A17809556/">Jolokia hoodie</a> ;-)
+        </p>
+      </subsection>
       <subsection name="Step by step ... 1.1.4">
         <div class="news-date">2013-09-27</div>
         <p>
