@@ -182,7 +182,7 @@ public abstract class JmxRequest {
 
     /**
      * Textual description of this request containing base information. Can be used in toString() methods
-     * of subclasses
+     * of subclasses.
      *
      * @return description of this base request
      */

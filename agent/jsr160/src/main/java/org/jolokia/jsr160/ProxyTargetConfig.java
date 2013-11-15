@@ -28,7 +28,11 @@ import org.json.simple.JSONObject;
  * @since 15.03.11
  */
 public class ProxyTargetConfig {
+
+    // The target URl
     private String url;
+
+    // Environment used for lookup
     private Map<String,String> env;
 
     /**
