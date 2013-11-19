@@ -29,7 +29,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since 15.03.11
  */
-public class JmxSearchRequest extends JmxObjectNameRequest {
+public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
 
     /**
      * Constructor for GET requests.
@@ -38,7 +38,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxSearchRequest(String pObjectName, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaSearchRequest(String pObjectName, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(RequestType.SEARCH, pObjectName, null, pParams);
     }
 
@@ -49,7 +49,7 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
     }
 
@@ -68,21 +68,21 @@ public class JmxSearchRequest extends JmxObjectNameRequest {
     // ===========================================================================================
 
     /**
-     * Creator for {@link JmxSearchRequest}s
+     * Creator for {@link JolokiaSearchRequest}s
      *
      * @return the creator implementation
      */
-    static RequestCreator<JmxSearchRequest> newCreator() {
-        return new RequestCreator<JmxSearchRequest>() {
+    static RequestCreator<JolokiaSearchRequest> newCreator() {
+        return new RequestCreator<JolokiaSearchRequest>() {
             /** {@inheritDoc} */
-            public JmxSearchRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JmxSearchRequest(pStack.pop(),pParams);
+            public JolokiaSearchRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+                return new JolokiaSearchRequest(pStack.pop(),pParams);
             }
 
             /** {@inheritDoc} */
-            public JmxSearchRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaSearchRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JmxSearchRequest(requestMap,pParams);
+                return new JolokiaSearchRequest(requestMap,pParams);
             }
         };
     }

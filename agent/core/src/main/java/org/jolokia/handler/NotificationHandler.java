@@ -23,7 +23,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.notification.NotificationDispatcher;
-import org.jolokia.request.JmxNotificationRequest;
+import org.jolokia.request.JolokiaNotificationRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since 19.03.13
  */
-public class NotificationHandler extends CommandHandler<JmxNotificationRequest> {
+public class NotificationHandler extends CommandHandler<JolokiaNotificationRequest> {
 
     // Dispatcher for notification registration requests
     private NotificationDispatcher dispatcher;
@@ -57,26 +57,26 @@ public class NotificationHandler extends CommandHandler<JmxNotificationRequest> 
 
     @Override
     /** {@inheritDoc} */
-    public boolean handleAllServersAtOnce(JmxNotificationRequest pRequest) {
+    public boolean handleAllServersAtOnce(JolokiaNotificationRequest pRequest) {
         // We always handler requests on all MBeanServers
         return true;
     }
 
     @Override
     /** {@inheritDoc} */
-    protected void checkForRestriction(JmxNotificationRequest pRequest) {
+    protected void checkForRestriction(JolokiaNotificationRequest pRequest) {
         // Not used currently ...
     }
 
     @Override
     /** {@inheritDoc} */
-    protected Object doHandleRequest(MBeanServerConnection server, JmxNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    protected Object doHandleRequest(MBeanServerConnection server, JolokiaNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         throw new UnsupportedOperationException("Internal: Notification handler works an all MBeanServers, not on single one");
     }
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleRequest(MBeanServerExecutor serverManager, JmxNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return dispatcher.dispatch(serverManager,request.getCommand());
     }
 

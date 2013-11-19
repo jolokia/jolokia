@@ -7,7 +7,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.converter.json.ValueFaultHandler;
-import org.jolokia.request.JmxReadRequest;
+import org.jolokia.request.JolokiaReadRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ReadHandler extends CommandHandler<JmxReadRequest> {
+public class ReadHandler extends CommandHandler<JolokiaReadRequest> {
 
     // MBean Handler used for extracting MBean Meta data
     private static final MBeanServerExecutor.MBeanAction<MBeanInfo> MBEAN_INFO_HANDLER =
@@ -87,7 +87,7 @@ public class ReadHandler extends CommandHandler<JmxReadRequest> {
      *         all attributes.
      */
     @Override
-    public boolean handleAllServersAtOnce(JmxReadRequest pRequest) {
+    public boolean handleAllServersAtOnce(JolokiaReadRequest pRequest) {
         return pRequest.getObjectName().isPattern() || pRequest.isMultiAttributeMode() || !pRequest.hasAttribute();
     }
 
@@ -101,7 +101,7 @@ public class ReadHandler extends CommandHandler<JmxReadRequest> {
      * @return the attribute's value
      */
     @Override
-    public Object doHandleRequest(MBeanServerConnection pServer, JmxReadRequest pRequest)
+    public Object doHandleRequest(MBeanServerConnection pServer, JolokiaReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         checkRestriction(pRequest.getObjectName(), pRequest.getAttributeName());
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
@@ -109,7 +109,7 @@ public class ReadHandler extends CommandHandler<JmxReadRequest> {
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleRequest(MBeanServerExecutor pServerManager, JmxReadRequest pRequest)
+    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         ObjectName oName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
@@ -120,7 +120,7 @@ public class ReadHandler extends CommandHandler<JmxReadRequest> {
         }
     }
 
-    private Object fetchAttributesForMBeanPattern(MBeanServerExecutor pServerManager, JmxReadRequest pRequest)
+    private Object fetchAttributesForMBeanPattern(MBeanServerExecutor pServerManager, JolokiaReadRequest pRequest)
             throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
         ObjectName objectName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
@@ -263,7 +263,7 @@ public class ReadHandler extends CommandHandler<JmxReadRequest> {
      * check during processing of the request.
      */
     @Override
-    protected void checkForRestriction(JmxReadRequest pRequest) {
+    protected void checkForRestriction(JolokiaReadRequest pRequest) {
 
     }
 }

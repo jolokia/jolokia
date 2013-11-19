@@ -23,7 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxExecRequest;
+import org.jolokia.request.JolokiaExecRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
@@ -65,7 +65,7 @@ public class ExecHandlerTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("simple").
                 build();
         assertEquals(handler.getType(), EXEC);
@@ -75,7 +75,7 @@ public class ExecHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void simpleWithWrongArguments() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC, oName).
                 operation("simple").
                 arguments("blub","bla").
                 build();
@@ -84,13 +84,13 @@ public class ExecHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).build();
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC, oName).build();
         handler.handleRequest(getMBeanServer(),request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).operation("koan titel").build();
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC, oName).operation("koan titel").build();
         handler.handleRequest(getMBeanServer(),request);
     }
 
@@ -100,7 +100,7 @@ public class ExecHandlerTest {
         List list = new ArrayList();
         list.add("wollscheid");
 
-        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("withArgs").
                 arguments(10L,list,Boolean.TRUE)
                 .build();
@@ -113,7 +113,7 @@ public class ExecHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("overloaded").
                 build();
         handler.handleRequest(getMBeanServer(),request);
@@ -121,7 +121,7 @@ public class ExecHandlerTest {
 
     @Test
     public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("overloaded(int)").
                 arguments(10).
                 build();
@@ -145,7 +145,7 @@ public class ExecHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void overloadedWrongSignature() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+        JolokiaExecRequest request = new JmxRequestBuilder(EXEC,oName).
                 operation("overloaded(java.lang.Integer)").
                 arguments(1).
                 build();

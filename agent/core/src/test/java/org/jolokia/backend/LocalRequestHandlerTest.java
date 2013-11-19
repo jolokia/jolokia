@@ -11,7 +11,7 @@ import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
@@ -27,7 +27,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class LocalRequestHandlerTest {
 
-    private JmxRequest request;
+    private JolokiaRequest request;
     private LocalRequestHandler requestHandler;
     private CommandHandler commandHandler;
     @BeforeMethod

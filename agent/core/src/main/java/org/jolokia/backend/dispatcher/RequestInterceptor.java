@@ -1,12 +1,12 @@
 package org.jolokia.backend.dispatcher;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaService;
 import org.json.simple.JSONObject;
 
 /**
  * Interface describing an interceptor wrapping around a request processing.
- * As input it gets the original {@link JmxRequest} and the original {@link JSONObject} response
+ * As input it gets the original {@link JolokiaRequest} and the original {@link JSONObject} response
  * sent back to the client. The interceptor might add to the return value any extra
  * information to be sent to the client.
  *
@@ -22,5 +22,5 @@ public interface RequestInterceptor extends JolokiaService<RequestInterceptor> {
      * @param pRequest request received
      * @param pRetValue the value to be returned.
      */
-    void intercept(JmxRequest pRequest, JSONObject pRetValue);
+    void intercept(JolokiaRequest pRequest, JSONObject pRetValue);
 }

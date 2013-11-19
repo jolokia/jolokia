@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.request.JmxWriteRequest;
+import org.jolokia.request.JolokiaWriteRequest;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
@@ -70,7 +70,7 @@ public class WriteHandlerTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        JmxWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("Simple").value("10").build();
+        JolokiaWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("Simple").value("10").build();
         handler.doHandleRequest(getMBeanServer(),req);
         req = new JmxRequestBuilder(WRITE,oName).attribute("Simple").value("20").build();
         Integer ret = (Integer) handler.doHandleRequest(getMBeanServer(),req);
@@ -83,7 +83,7 @@ public class WriteHandlerTest {
     public void map() throws Exception {
         Map map = new HashMap<String,Integer>();
         map.put("answer",42);
-        JmxWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("Map").value(map).build();
+        JolokiaWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("Map").value(map).build();
         handler.doHandleRequest(getMBeanServer(),req);
         req = new JmxRequestBuilder(WRITE,oName).attribute("Map").value(null).build();
         Map ret = (Map) handler.doHandleRequest(getMBeanServer(),req);
@@ -94,13 +94,13 @@ public class WriteHandlerTest {
 
     @Test(expectedExceptions = {AttributeNotFoundException.class})
     public void invalidAttribute() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        JmxWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("ReadOnly").value("Sommer").build();
+        JolokiaWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("ReadOnly").value("Sommer").build();
         handler.doHandleRequest(getMBeanServer(),req);
     }
 
     @Test
     public void invalidValue() throws Exception {
-        JmxWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("Boolean").value(10).build();
+        JolokiaWriteRequest req = new JmxRequestBuilder(WRITE,oName).attribute("Boolean").value(10).build();
         handler.doHandleRequest(getMBeanServer(),req);
     }
 }

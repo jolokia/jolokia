@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.JMException;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 
 /**
@@ -31,14 +31,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     }
 
     /** {@inheritDoc} */
-    public DispatchResult dispatch(JmxRequest pJmxRequest) throws JMException, IOException, NotChangedException {
+    public DispatchResult dispatch(JolokiaRequest pJolokiaRequest) throws JMException, IOException, NotChangedException {
 
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
         for (RequestHandler requestHandler : jolokiaContext.getServices(RequestHandler.class)) {
-            if (requestHandler.canHandle(pJmxRequest)) {
-                Object retValue = requestHandler.handleRequest(pJmxRequest);
-                boolean useValueWithPath = requestHandler.useReturnValueWithPath(pJmxRequest);
-                return new DispatchResult(retValue,useValueWithPath ? pJmxRequest.getPathParts() : null);
+            if (requestHandler.canHandle(pJolokiaRequest)) {
+                Object retValue = requestHandler.handleRequest(pJolokiaRequest);
+                boolean useValueWithPath = requestHandler.useReturnValueWithPath(pJolokiaRequest);
+                return new DispatchResult(retValue,useValueWithPath ? pJolokiaRequest.getPathParts() : null);
             }
         }
         return null;

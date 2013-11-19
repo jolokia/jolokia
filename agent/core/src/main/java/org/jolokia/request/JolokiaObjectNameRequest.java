@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 15.03.11
  */
-public abstract class JmxObjectNameRequest extends JmxRequest {
+public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
 
     // object name of the MBean
     private ObjectName objectName;
@@ -46,7 +46,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pProcessingParams optional init params
      * @throws MalformedObjectNameException if the given MBean name is not a valid object name
      */
-    public JmxObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, ProcessingParameters pProcessingParams)
+    public JolokiaObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, ProcessingParameters pProcessingParams)
             throws MalformedObjectNameException {
         super(pType,pPathParts,pProcessingParams);
         initObjectName(pObjectName);
@@ -59,7 +59,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the given MBean name (key: "mbean") is not a valid object name.
      */
-    public JmxObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    public JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         initObjectName((String) pRequestMap.get("mbean"));
     }

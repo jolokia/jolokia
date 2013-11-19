@@ -6,7 +6,7 @@ import javax.management.JMException;
 
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;
 
 /**
@@ -20,15 +20,15 @@ public class DummyRequestHandler extends AbstractJolokiaService<RequestHandler>
         super(RequestHandler.class,0);
     }
 
-    public Object handleRequest(JmxRequest pJmxReq) throws JMException, IOException, NotChangedException {
+    public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
         return null;
     }
 
-    public boolean canHandle(JmxRequest pJmxRequest) {
+    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         return false;
     }
 
-    public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
+    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
         return false;
     }
 }

@@ -26,7 +26,7 @@ import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.JmxSerializer;
-import org.jolokia.request.JmxExecRequest;
+import org.jolokia.request.JolokiaExecRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
@@ -37,7 +37,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ExecHandler extends CommandHandler<JmxExecRequest> {
+public class ExecHandler extends CommandHandler<JolokiaExecRequest> {
 
     /**
      * Constructor
@@ -55,7 +55,7 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
 
     /** {@inheritDoc} */
     @Override
-    protected void checkForRestriction(JmxExecRequest pRequest) {
+    protected void checkForRestriction(JolokiaExecRequest pRequest) {
         if (!context.isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {
             throw new SecurityException("Operation " + pRequest.getOperation() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
@@ -75,7 +75,7 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
      * @return the return value of the operation call
      */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxExecRequest request)
+    public Object doHandleRequest(MBeanServerConnection server, JolokiaExecRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         OperationAndParamType types = extractOperationTypes(server,request);
         int nrParams = types.paramClasses.length;
@@ -95,7 +95,7 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
     }
 
     // check whether the given arguments are compatible with the signature and if not so, raise an excepton
-    private void verifyArguments(JmxExecRequest request, OperationAndParamType pTypes, int pNrParams, List<Object> pArgs) {
+    private void verifyArguments(JolokiaExecRequest request, OperationAndParamType pTypes, int pNrParams, List<Object> pArgs) {
         if ( (pNrParams > 0 && pArgs == null) || (pArgs != null && pArgs.size() != pNrParams)) {
             throw new IllegalArgumentException("Invalid number of operation arguments. Operation " +
                     request.getOperation() + " on " + request.getObjectName() + " requires " + pTypes.paramClasses.length +
@@ -110,7 +110,7 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
      * @param pRequest the exec request
      * @return combined object containing the operation name and parameter classes
      */
-    private OperationAndParamType extractOperationTypes(MBeanServerConnection pServer, JmxExecRequest pRequest)
+    private OperationAndParamType extractOperationTypes(MBeanServerConnection pServer, JolokiaExecRequest pRequest)
             throws ReflectionException, InstanceNotFoundException, IOException {
         if (pRequest.getOperation() == null) {
             throw new IllegalArgumentException("No operation given for exec Request on MBean " + pRequest.getObjectName());
@@ -156,7 +156,7 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
      * @return a list of signature. If the operation is overloaded, this contains mutliple entries,
      *         otherwise only a single entry is contained
      */
-    private List<MBeanParameterInfo[]> extractMBeanParameterInfos(MBeanServerConnection pServer, JmxExecRequest pRequest,
+    private List<MBeanParameterInfo[]> extractMBeanParameterInfos(MBeanServerConnection pServer, JolokiaExecRequest pRequest,
                                                                   String pOperation)
             throws InstanceNotFoundException, ReflectionException, IOException {
         try {
@@ -232,7 +232,7 @@ public class ExecHandler extends CommandHandler<JmxExecRequest> {
         return ret;
     }
 
-    private String getErrorMessageForMissingSignature(JmxExecRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
+    private String getErrorMessageForMissingSignature(JolokiaExecRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
         StringBuffer msg = new StringBuffer("Operation ");
         msg.append(pOperation).
                 append(" on MBean ").

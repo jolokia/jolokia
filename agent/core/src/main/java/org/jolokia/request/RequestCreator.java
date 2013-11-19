@@ -22,7 +22,7 @@ import javax.management.MalformedObjectNameException;
 
 /**
  * Base class for so called <em>request creators</em>, which are used for creating
- * {@link JmxRequest}s of a specific type. These creators are used by the {@link JmxRequestFactory} for
+ * {@link JolokiaRequest}s of a specific type. These creators are used by the {@link JmxRequestFactory} for
  * creating a request after its type has be determined.
  *
  * Each specific request provides a static method <code>newCreator</code> which returns a factory
@@ -31,7 +31,7 @@ import javax.management.MalformedObjectNameException;
  * @author roland
  * @since 15.09.11
  */
-abstract class RequestCreator<R extends JmxRequest> {
+abstract class RequestCreator<R extends JolokiaRequest> {
 
     /**
      * Create a GET request.

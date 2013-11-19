@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 15.03.11
  */
-public abstract class JmxRequest {
+public abstract class JolokiaRequest {
 
     // Type of request
     private RequestType type;
@@ -59,7 +59,7 @@ public abstract class JmxRequest {
      * @param pProcessingParams init parameters provided as query params for a GET request. They are used to
      *                    to influence the processing.
      */
-    protected JmxRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams) {
+    protected JolokiaRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams) {
         this(pType, HttpMethod.GET, pPathParts, pProcessingParams);
     }
 
@@ -70,7 +70,7 @@ public abstract class JmxRequest {
      * @param pProcessingParams optional processing parameters (obtained as query parameters or from within the
      *        JSON request)
      */
-    public JmxRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams) {
+    public JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
              EscapeUtil.parsePath((String) pMap.get("path")),
@@ -97,7 +97,7 @@ public abstract class JmxRequest {
     }
 
     // Common parts of both constructors
-    private JmxRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams) {
+    private JolokiaRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams) {
         method = pMethod;
         type = pType;
         pathParts = pPathParts;

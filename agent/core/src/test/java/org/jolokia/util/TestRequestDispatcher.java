@@ -8,7 +8,7 @@ import org.jolokia.backend.LocalRequestHandler;
 import org.jolokia.backend.dispatcher.DispatchResult;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 
 /**
@@ -28,9 +28,9 @@ public class TestRequestDispatcher implements RequestDispatcher {
         handler.init(pCtx);
     }
 
-    public DispatchResult dispatch(JmxRequest pJmxRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
-        return new DispatchResult(handler.handleRequest(pJmxRequest),
-                                  handler.useReturnValueWithPath(pJmxRequest) ? pJmxRequest.getPathParts() : null);
+    public DispatchResult dispatch(JolokiaRequest pJolokiaRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
+        return new DispatchResult(handler.handleRequest(pJolokiaRequest),
+                                  handler.useReturnValueWithPath(pJolokiaRequest) ? pJolokiaRequest.getPathParts() : null);
     }
 
     public void destroy() {

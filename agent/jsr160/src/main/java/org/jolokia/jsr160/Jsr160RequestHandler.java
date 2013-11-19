@@ -29,7 +29,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.*;
 
 /**
@@ -73,7 +73,7 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
      * @throws MBeanException
      * @throws IOException
      */
-    public Object handleRequest(JmxRequest pJmxReq)
+    public Object handleRequest(JolokiaRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
         CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
@@ -93,7 +93,7 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
     }
 
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
-    private JMXConnector getConnector(JmxRequest pJmxReq) throws IOException {
+    private JMXConnector getConnector(JolokiaRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = new ProxyTargetConfig((Map<String, String>) pJmxReq.getOption("target"));
         if (targetConfig == null) {
             throw new IllegalArgumentException("No proxy configuration in request " + pJmxReq);
@@ -136,13 +136,13 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
      *
      * {@inheritDoc}
      */
-    public boolean canHandle(JmxRequest pJmxRequest) {
-        return pJmxRequest.getOption("target") != null;
+    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
+        return pJolokiaRequest.getOption("target") != null;
     }
 
     /** {@inheritDoc} */
-    public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxRequest.getType());
+    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
+        CommandHandler handler = commandHandlerManager.getCommandHandler(pJolokiaRequest.getType());
         return handler.useReturnValueWithPath();
     }
 

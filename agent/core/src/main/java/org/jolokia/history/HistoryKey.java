@@ -47,7 +47,7 @@ public class HistoryKey implements Serializable {
      *
      * @param pJmxRequest read request
      */
-    HistoryKey(JmxReadRequest pJmxRequest) {
+    HistoryKey(JolokiaReadRequest pJmxRequest) {
         init(pJmxRequest);
 
         if (pJmxRequest.getAttributeNames() != null && pJmxRequest.getAttributeNames().size() > 1) {
@@ -67,7 +67,7 @@ public class HistoryKey implements Serializable {
      *
      * @param pJmxReq write request
      */
-    HistoryKey(JmxWriteRequest pJmxReq) {
+    HistoryKey(JolokiaWriteRequest pJmxReq) {
         init(pJmxReq);
 
         type = "attribute";
@@ -83,7 +83,7 @@ public class HistoryKey implements Serializable {
      *
      * @param pJmxReq read request
      */
-    HistoryKey(JmxExecRequest pJmxReq) {
+    HistoryKey(JolokiaExecRequest pJmxReq) {
         init(pJmxReq);
 
         type = "operation";
@@ -95,7 +95,7 @@ public class HistoryKey implements Serializable {
     }
 
 
-    private void init(JmxObjectNameRequest pJmxReq) {
+    private void init(JolokiaObjectNameRequest pJmxReq) {
 
         if (pJmxReq.getObjectNameAsString() == null) {
             throw new IllegalArgumentException("MBean name must not be null");

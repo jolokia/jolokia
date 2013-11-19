@@ -24,7 +24,7 @@ import java.util.List;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;
@@ -37,7 +37,7 @@ import static org.testng.Assert.assertTrue;
  */
 public class MBeanServerHandlerTest {
 
-    private JmxRequest request;
+    private JolokiaRequest request;
 
     private MBeanRegistry handler;
 

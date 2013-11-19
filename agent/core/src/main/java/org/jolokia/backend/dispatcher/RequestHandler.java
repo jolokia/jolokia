@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaService;
 
 /*
@@ -33,7 +33,7 @@ import org.jolokia.service.JolokiaService;
  */
 public interface RequestHandler extends JolokiaService<RequestHandler> {
     /**
-     * Dispatch a {@link JmxRequest} to a certain backend
+     * Dispatch a {@link JolokiaRequest} to a certain backend
      * and return the result of the JMX action.
      *
      * @param pJmxReq the request to dispatch
@@ -45,25 +45,25 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
      *         has been set).
      */
-    Object handleRequest(JmxRequest pJmxReq)
+    Object handleRequest(JolokiaRequest pJmxReq)
             throws JMException, IOException, NotChangedException;
 
     /**
      * Check whether current dispatcher can handle the given request
      *
-     * @param pJmxRequest request to check
+     * @param pJolokiaRequest request to check
      * @return true if this dispatcher can handle the request
      */
-    boolean canHandle(JmxRequest pJmxRequest);
+    boolean canHandle(JolokiaRequest pJolokiaRequest);
 
     /**
      * Whether a return value should be returned directly, ignoring any path.
      * E.g for the WriteHandler this is important to return the original value,
      * (using the path would return the new value)
      *
-     * @param pJmxRequest request for getting the handler
+     * @param pJolokiaRequest request for getting the handler
      * @return true if the path within the request should be respected, false
      *         if the value should be directly returned
      */
-    boolean useReturnValueWithPath(JmxRequest pJmxRequest);
+    boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest);
 }

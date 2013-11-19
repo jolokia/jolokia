@@ -2,7 +2,7 @@ package org.jolokia.history;
 
 import javax.management.*;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.json.simple.JSONObject;
 
 /*
@@ -53,7 +53,7 @@ public class History implements HistoryMBean,MBeanRegistration {
     }
 
     /** {@inheritDoc} */
-    public void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson) {
+    public void updateAndAdd(JolokiaRequest pJmxReq, JSONObject pJson) {
         store.updateAndAdd(pJmxReq,pJson);
     }
 

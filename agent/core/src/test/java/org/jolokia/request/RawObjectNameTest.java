@@ -84,7 +84,7 @@ public class RawObjectNameTest {
         if (!canonical) {
             builder = builder.option(ConfigKey.CANONICAL_NAMING, "false");
         }
-        JmxRequest req = builder.build();
+        JolokiaRequest req = builder.build();
         JSONObject json = backendManager.handleRequest(req);
         JSONAware value = (JSONAware) json.get("value");
         String memoryKey = null;

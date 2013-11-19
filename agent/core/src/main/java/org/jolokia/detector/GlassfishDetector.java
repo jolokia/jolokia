@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
@@ -166,7 +166,7 @@ public class GlassfishDetector extends AbstractServerDetector {
 
         @Override
         /** {@inheritDoc} */
-        public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
+        public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JolokiaRequest pJmxReq) {
             if (amxShouldBeBooted) {
                 // Clear flag only of bootAMX succeed or fails with an unrecoverable error
                 amxShouldBeBooted = !bootAmx(pMBeanServerExecutor,jolokiaContext);

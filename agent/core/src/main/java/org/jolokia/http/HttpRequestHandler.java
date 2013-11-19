@@ -70,7 +70,7 @@ public class HttpRequestHandler {
     public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
-        JmxRequest jmxReq =
+        JolokiaRequest jmxReq =
                 JmxRequestFactory.createGetRequest(pathInfo,getProcessingParameter(pParameterMap));
 
         if (jolokiaCtx.isDebug()) {
@@ -107,7 +107,7 @@ public class HttpRequestHandler {
      * @param pInputStream input stream of the post request
      * @param pEncoding optional encoding for the stream. If null, the default encoding is used
      * @param pParameterMap additional processing parameters
-     * @return the JSON object containing the json results for one or more {@link JmxRequest} contained
+     * @return the JSON object containing the json results for one or more {@link JolokiaRequest} contained
      *         within the answer.
      *
      * @throws IOException if reading from the input stream fails
@@ -120,10 +120,10 @@ public class HttpRequestHandler {
 
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof JSONArray) {
-            List<JmxRequest> jmxRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,getProcessingParameter(pParameterMap));
+            List<JolokiaRequest> jolokiaRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,getProcessingParameter(pParameterMap));
 
             JSONArray responseList = new JSONArray();
-            for (JmxRequest jmxReq : jmxRequests) {
+            for (JolokiaRequest jmxReq : jolokiaRequests) {
                 if (jolokiaCtx.isDebug()) {
                     jolokiaCtx.debug("Request: " + jmxReq.toString());
                 }
@@ -133,7 +133,7 @@ public class HttpRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof JSONObject) {
-            JmxRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,getProcessingParameter(pParameterMap));
+            JolokiaRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,getProcessingParameter(pParameterMap));
             return executeRequest(jmxReq);
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);
@@ -183,7 +183,7 @@ public class HttpRequestHandler {
     }
 
     /**
-     * Execute a single {@link JmxRequest}. If a checked  exception occurs,
+     * Execute a single {@link JolokiaRequest}. If a checked  exception occurs,
      * this gets translated into the appropriate JSON object which will get returned.
      * Note, that these exceptions gets *not* translated into an HTTP error, since they are
      * supposed <em>Jolokia</em> specific errors above the transport layer.
@@ -191,7 +191,7 @@ public class HttpRequestHandler {
      * @param pJmxReq the request to execute
      * @return the JSON representation of the answer.
      */
-    private JSONObject executeRequest(JmxRequest pJmxReq) {
+    private JSONObject executeRequest(JolokiaRequest pJmxReq) {
         // Call handler and retrieve return value
         try {
             return backendManager.handleRequest(pJmxReq);
@@ -223,15 +223,15 @@ public class HttpRequestHandler {
 
     /**
      * Utility method for handling single runtime exceptions and errors. This method is called
-     * in addition to and after {@link #executeRequest(JmxRequest)} to catch additional errors.
+     * in addition to and after {@link #executeRequest(JolokiaRequest)} to catch additional errors.
      * They are two different methods because of bulk requests, where each individual request can
      * lead to an error. So, each individual request is wrapped with the error handling of
-     * {@link #executeRequest(JmxRequest)}
+     * {@link #executeRequest(JolokiaRequest)}
      * whereas the overall handling is wrapped with this method. It is hence more coarse grained,
      * leading typically to an status code of 500.
      *
      * Summary: This method should be used as last security belt is some exception should escape
-     * from a single request processing in {@link #executeRequest(JmxRequest)}.
+     * from a single request processing in {@link #executeRequest(JolokiaRequest)}.
      *
      * @param pThrowable exception to handle
      * @return its JSON representation
@@ -257,7 +257,7 @@ public class HttpRequestHandler {
      * @param pJmxReq request from where to get processing options
      * @return the json representation
      */
-    public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JmxRequest pJmxReq) {
+    public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JolokiaRequest pJmxReq) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status",pErrorCode);
         jsonObject.put("error",getExceptionMessage(pExp));
@@ -333,7 +333,7 @@ public class HttpRequestHandler {
     }
 
 
-    private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JmxRequest pJmxReq) {
+    private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
         String includeStackTrace = pJmxReq != null ?
                 pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
         if (includeStackTrace.equalsIgnoreCase("true") ||
@@ -355,7 +355,7 @@ public class HttpRequestHandler {
 
     // Unwrap an exception to get to the 'real' exception
     // and extract the error code accordingly
-    private JSONObject errorForUnwrappedException(Exception e, JmxRequest pJmxReq) {
+    private JSONObject errorForUnwrappedException(Exception e, JolokiaRequest pJmxReq) {
         Throwable cause = e.getCause();
         int code = cause instanceof IllegalArgumentException ? 400 : cause instanceof SecurityException ? 403 : 500;
         return getErrorJSON(code,cause, pJmxReq);

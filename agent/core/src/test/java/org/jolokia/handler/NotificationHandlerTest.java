@@ -20,7 +20,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.JmxNotificationRequest;
+import org.jolokia.request.JolokiaNotificationRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.notification.NotificationCommandType;
 import org.jolokia.util.RequestType;
@@ -59,21 +59,21 @@ public class NotificationHandlerTest extends BaseHandlerTest {
     @Test
     public void testSimple() throws Exception {
         assertEquals(handler.getType(), RequestType.NOTIFICATION);
-        JmxNotificationRequest request = createRequest();
+        JolokiaNotificationRequest request = createRequest();
         // No exception for now
         handler.checkForRestriction(request);
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         handler.doHandleRequest(getMBeanServerManager(connection),request);
     }
 
-    private JmxNotificationRequest createRequest() throws MalformedObjectNameException {
+    private JolokiaNotificationRequest createRequest() throws MalformedObjectNameException {
         return new JmxRequestBuilder(RequestType.NOTIFICATION).
                 command(NotificationCommandType.REGISTER).build();
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testUnsupported() throws Exception {
-        JmxNotificationRequest request = createRequest();
+        JolokiaNotificationRequest request = createRequest();
         assertTrue(handler.handleAllServersAtOnce(request));
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         handler.doHandleRequest(connection,request);

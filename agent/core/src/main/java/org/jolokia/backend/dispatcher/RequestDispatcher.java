@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 
 /**
  * Manager interface for dispatching a request to one {@link RequestHandler}.
@@ -19,7 +19,7 @@ public interface RequestDispatcher {
     /**
      * Dispatch a request to a single {@link RequestHandler}.
      *
-     * @param pJmxRequest the request to dispatch
+     * @param pJolokiaRequest the request to dispatch
      * @return result of the dispatch operation.
      *
      * @throws NotChangedException the request handler detects no change for the requests' result and
@@ -27,5 +27,5 @@ public interface RequestDispatcher {
      * @throws IOException IO Exception during the operation.
      * @throws JMException a JMX operation failed.
      */
-    DispatchResult dispatch(JmxRequest pJmxRequest) throws JMException, NotChangedException, IOException;
+    DispatchResult dispatch(JolokiaRequest pJolokiaRequest) throws JMException, NotChangedException, IOException;
 }

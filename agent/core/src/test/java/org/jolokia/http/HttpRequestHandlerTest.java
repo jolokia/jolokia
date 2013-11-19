@@ -26,8 +26,8 @@ import org.easymock.*;
 import org.jolokia.backend.dispatcher.*;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
-import org.jolokia.request.JmxReadRequest;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaReadRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.test.util.HttpTestUtil;
@@ -71,7 +71,7 @@ public class HttpRequestHandlerTest {
 
     @Test
     public void get() throws Exception {
-        prepareDispatcher(JmxReadRequest.class);
+        prepareDispatcher(JolokiaReadRequest.class);
         JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET_REQUEST, null);
         verifyDispatcher(response);
     }
@@ -96,7 +96,7 @@ public class HttpRequestHandlerTest {
 
     @Test
     public void doublePost() throws Exception {
-        prepareDispatcher(2, JmxReadRequest.class);
+        prepareDispatcher(2, JolokiaReadRequest.class);
         InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
         JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         verifyDispatcher(2, response);
@@ -165,7 +165,7 @@ public class HttpRequestHandlerTest {
             log.debug((String) anyObject());
             expectLastCall().asStub();
             init(log);
-            expect(requestHandler.handleRequest(EasyMock.<JmxRequest>anyObject())).andThrow(e);
+            expect(requestHandler.handleRequest(EasyMock.<JolokiaRequest>anyObject())).andThrow(e);
             replay(requestHandler,log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
@@ -196,8 +196,8 @@ public class HttpRequestHandlerTest {
         requestHandler = createMock(RequestHandler.class);
         requestHandler.destroy();
         expectLastCall().asStub();
-        expect(requestHandler.canHandle((JmxRequest) anyObject())).andStubReturn(true);
-        expect(requestHandler.useReturnValueWithPath((JmxRequest) anyObject())).andStubReturn(false);
+        expect(requestHandler.canHandle((JolokiaRequest) anyObject())).andStubReturn(true);
+        expect(requestHandler.useReturnValueWithPath((JolokiaRequest) anyObject())).andStubReturn(false);
         expect(requestHandler.compareTo((RequestHandler) anyObject())).andStubReturn(1);
         SortedSet<RequestHandler> services = createMock(SortedSet.class);
         expect(services.add(requestHandler)).andStubReturn(true);
@@ -223,7 +223,7 @@ public class HttpRequestHandlerTest {
 
 
     private void prepareDispatcher() throws Exception {
-        prepareDispatcher(1,JmxReadRequest.class);
+        prepareDispatcher(1,JolokiaReadRequest.class);
     }
 
     private void prepareDispatcher(Object pJmxRequest) throws Exception {
@@ -232,14 +232,14 @@ public class HttpRequestHandlerTest {
 
     private void prepareDispatcher(int i, Object pRequest) throws Exception {
         init();
-        if (pRequest instanceof JmxRequest) {
-            expect(requestHandler.handleRequest((JmxRequest) pRequest)).andReturn("hello").times(i);
+        if (pRequest instanceof JolokiaRequest) {
+            expect(requestHandler.handleRequest((JolokiaRequest) pRequest)).andReturn("hello").times(i);
         }
         else if (pRequest instanceof String[]) {
             String a[] = (String[]) pRequest;
             expect(requestHandler.handleRequest(eqReadRequest(a[0], a[1]))).andReturn("hello").times(i);
         } else {
-            expect(requestHandler.handleRequest(isA(JmxRequest.class))).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest(isA(JolokiaRequest.class))).andReturn("hello").times(i);
         }
         replay(requestHandler);
     }
@@ -263,11 +263,11 @@ public class HttpRequestHandlerTest {
     }
 
 
-    private JmxRequest eqReadRequest(final String pMBean, final String pAttribute) {
+    private JolokiaRequest eqReadRequest(final String pMBean, final String pAttribute) {
         EasyMock.reportMatcher(new IArgumentMatcher() {
             public boolean matches(Object argument) {
                 try {
-                    JmxReadRequest req = (JmxReadRequest) argument;
+                    JolokiaReadRequest req = (JolokiaReadRequest) argument;
                     return req.getType() == RequestType.READ &&
                            new ObjectName(pMBean).equals(req.getObjectName()) &&
                            pAttribute.equals(req.getAttributeName());

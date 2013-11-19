@@ -24,7 +24,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.CommandHandler;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 
 /**
  * Singleton responsible for doing the merging of all MBeanServer detected.
@@ -82,7 +82,7 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
      * @throws AttributeNotFoundException
      * @throws InstanceNotFoundException
      */
-    public <R extends JmxRequest> Object handleRequest(CommandHandler<R> pRequestHandler, R pJmxReq)
+    public <R extends JolokiaRequest> Object handleRequest(CommandHandler<R> pRequestHandler, R pJmxReq)
             throws MBeanException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException, NotChangedException {
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;

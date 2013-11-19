@@ -11,7 +11,7 @@ import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
@@ -36,7 +36,7 @@ import static org.jolokia.config.ConfigKey.*;
 
 /**
  * Backendmanager for dispatching to various backends based on a given
- * {@link JmxRequest}
+ * {@link JolokiaRequest}
  *
  * @author roland
  * @since Nov 11, 2009
@@ -73,7 +73,7 @@ public class BackendManager {
      * @throws JMException
      * @throws IOException
      */
-    public JSONObject handleRequest(JmxRequest pJmxReq) throws JMException, IOException {
+    public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException {
         boolean debug = jolokiaCtx.isDebug();
 
         long time = 0;
@@ -105,7 +105,7 @@ public class BackendManager {
     }
 
     // Provide interceptors a change for wrapping around the request
-    private void intercept(JmxRequest pJmxReq, JSONObject pRetValue) {
+    private void intercept(JolokiaRequest pJmxReq, JSONObject pRetValue) {
         Set<RequestInterceptor> interceptors = jolokiaCtx.getServices(RequestInterceptor.class);
         for (RequestInterceptor interceptor : interceptors) {
             try {
@@ -123,7 +123,7 @@ public class BackendManager {
      * @param pJmxReq the request from where to take the serialization options
      * @return the exception.
      */
-    public Object convertExceptionToJson(Throwable pExp, JmxRequest pJmxReq)  {
+    public Object convertExceptionToJson(Throwable pExp, JolokiaRequest pJmxReq)  {
         SerializeOptions opts = getJsonConvertOptions(pJmxReq);
         try {
             JSONObject expObj =
@@ -168,7 +168,7 @@ public class BackendManager {
     }
 
     // call the an appropriate request dispatcher
-    private JSONObject callRequestDispatcher(JmxRequest pJmxReq)
+    private JSONObject callRequestDispatcher(JolokiaRequest pJmxReq)
             throws JMException, IOException, NotChangedException {
         DispatchResult result = requestDispatcher.dispatch(pJmxReq);
         if (result == null) {
@@ -186,7 +186,7 @@ public class BackendManager {
         return jsonObject;
     }
 
-    private SerializeOptions getJsonConvertOptions(JmxRequest pJmxReq) {
+    private SerializeOptions getJsonConvertOptions(JolokiaRequest pJmxReq) {
         return convertOptionsBuilder.
                     maxDepth(pJmxReq.getParameterAsInt(ConfigKey.MAX_DEPTH)).
                     maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).

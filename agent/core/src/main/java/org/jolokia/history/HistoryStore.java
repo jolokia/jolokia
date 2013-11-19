@@ -138,7 +138,7 @@ public class HistoryStore implements Serializable {
      * @param pJmxReq request for which an entry should be added in this history store
      * @param pJson the JSONObject to which to add the history.
      */
-    public synchronized void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson) {
+    public synchronized void updateAndAdd(JolokiaRequest pJmxReq, JSONObject pJson) {
         long timestamp = System.currentTimeMillis() / 1000;
         pJson.put(KEY_TIMESTAMP,timestamp);
 
@@ -175,7 +175,7 @@ public class HistoryStore implements Serializable {
      *
      * @param <R> request type
      */
-    interface HistoryUpdater<R extends JmxRequest> {
+    interface HistoryUpdater<R extends JolokiaRequest> {
         /**
          * Update history
          *
@@ -189,9 +189,9 @@ public class HistoryStore implements Serializable {
     // A set of updaters which are dispatched to for certain request types
     private void initHistoryUpdaters() {
         historyUpdaters.put(RequestType.EXEC,
-                            new HistoryUpdater<JmxExecRequest>() {
+                            new HistoryUpdater<JolokiaExecRequest>() {
                                 /** {@inheritDoc} */
-                                public void updateHistory(JSONObject pJson,JmxExecRequest request, long pTimestamp) {
+                                public void updateHistory(JSONObject pJson,JolokiaExecRequest request, long pTimestamp) {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
@@ -202,9 +202,9 @@ public class HistoryStore implements Serializable {
                                 }
                             });
         historyUpdaters.put(RequestType.WRITE,
-                            new HistoryUpdater<JmxWriteRequest>() {
+                            new HistoryUpdater<JolokiaWriteRequest>() {
                                 /** {@inheritDoc} */
-                                public void updateHistory(JSONObject pJson,JmxWriteRequest request, long pTimestamp) {
+                                public void updateHistory(JSONObject pJson,JolokiaWriteRequest request, long pTimestamp) {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
@@ -215,9 +215,9 @@ public class HistoryStore implements Serializable {
                                 }
                             });
         historyUpdaters.put(RequestType.READ,
-                            new HistoryUpdater<JmxReadRequest>() {
+                            new HistoryUpdater<JolokiaReadRequest>() {
                                 /** {@inheritDoc} */
-                                public void updateHistory(JSONObject pJson,JmxReadRequest request, long pTimestamp) {
+                                public void updateHistory(JSONObject pJson,JolokiaReadRequest request, long pTimestamp) {
                                     updateReadHistory(request,pJson,pTimestamp);
                                 }
                             });
@@ -249,7 +249,7 @@ public class HistoryStore implements Serializable {
 
     // Update potentially multiple history entries for a READ request which could
     // return multiple values with a single request
-    private void updateReadHistory(JmxReadRequest pJmxReq, JSONObject pJson, long pTimestamp)  {
+    private void updateReadHistory(JolokiaReadRequest pJmxReq, JSONObject pJson, long pTimestamp)  {
         ObjectName name = pJmxReq.getObjectName();
         if (name.isPattern()) {
             // We have a pattern and hence a value structure
@@ -293,7 +293,7 @@ public class HistoryStore implements Serializable {
         }
     }
 
-    private JSONObject addAttributesFromComplexValue(JmxRequest pJmxReq,Map<String,Object> pAttributesMap,
+    private JSONObject addAttributesFromComplexValue(JolokiaRequest pJmxReq,Map<String,Object> pAttributesMap,
                                                      String pBeanName,long pTimestamp) {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,Object> attrEntry : pAttributesMap.entrySet()) {

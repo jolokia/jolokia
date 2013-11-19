@@ -33,7 +33,7 @@ import static org.testng.Assert.*;
  * @author roland
  * @since Apr 15, 2010
  */
-public class JmxRequestTest {
+public class JolokiaRequestTest {
 
     ProcessingParameters procParams;
 
@@ -64,9 +64,9 @@ public class JmxRequestTest {
 
     @Test
     public void readRequest() {
-        for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used", procParams),
-                (JmxReadRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaReadRequest req : new JolokiaReadRequest[] {
+                (JolokiaReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used", procParams),
+                (JolokiaReadRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "read", "mbean", "java.lang:type=Memory",
                                   "attribute","HeapMemoryUsage",
                                   "path","used"),procParams)
@@ -85,9 +85,9 @@ public class JmxRequestTest {
 
     @Test
     public void readRequestMultiAttributes() {
-        for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/Heap!/Memory!/Usage,NonHeapMemoryUsage", procParams),
-                (JmxReadRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaReadRequest req : new JolokiaReadRequest[] {
+                (JolokiaReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/Heap!/Memory!/Usage,NonHeapMemoryUsage", procParams),
+                (JolokiaReadRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "read", "mbean", "java.lang:type=Memory",
                                   "attribute",Arrays.asList("Heap/Memory/Usage","NonHeapMemoryUsage")),procParams)
         }) {
@@ -117,9 +117,9 @@ public class JmxRequestTest {
 
     @Test
     public void readRequestNullArguments() {
-        for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory", procParams),
-                (JmxReadRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaReadRequest req : new JolokiaReadRequest[] {
+                (JolokiaReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory", procParams),
+                (JolokiaReadRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "read", "mbean", "java.lang:type=Memory"),procParams)
         }) {
             assertFalse(req.isMultiAttributeMode());
@@ -135,7 +135,7 @@ public class JmxRequestTest {
     public void readRequestMultiNullList() {
         List args = new ArrayList();
         args.add(null);
-        JmxReadRequest req = (JmxReadRequest) JmxRequestFactory.createPostRequest(
+        JolokiaReadRequest req = (JolokiaReadRequest) JmxRequestFactory.createPostRequest(
                 createMap("type", "read", "mbean", "java.lang:type=Memory",
                           "attribute",args),procParams);
         assertFalse(req.isMultiAttributeMode());
@@ -146,9 +146,9 @@ public class JmxRequestTest {
 
     @Test
     public void writeRequest() {
-        for (JmxWriteRequest req : new JmxWriteRequest[] {
-                (JmxWriteRequest) JmxRequestFactory.createGetRequest("write/java.lang:type=Memory/Verbose/true/bla", procParams),
-                (JmxWriteRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaWriteRequest req : new JolokiaWriteRequest[] {
+                (JolokiaWriteRequest) JmxRequestFactory.createGetRequest("write/java.lang:type=Memory/Verbose/true/bla", procParams),
+                (JolokiaWriteRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "write", "mbean", "java.lang:type=Memory",
                                   "attribute","Verbose",
                                   "value", "true",
@@ -170,9 +170,9 @@ public class JmxRequestTest {
 
     @Test
     public void listRequest() {
-        for (JmxListRequest req : new JmxListRequest[] {
-                (JmxListRequest) JmxRequestFactory.createGetRequest("list/java.lang:type=Memory", procParams),
-                (JmxListRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaListRequest req : new JolokiaListRequest[] {
+                (JolokiaListRequest) JmxRequestFactory.createGetRequest("list/java.lang:type=Memory", procParams),
+                (JolokiaListRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "list", "path", "java.lang:type=Memory"),procParams)
         }) {
             assertEquals(req.getType(), RequestType.LIST);
@@ -185,9 +185,9 @@ public class JmxRequestTest {
 
     @Test
     public void versionRequest() {
-        for (JmxVersionRequest req : new JmxVersionRequest[] {
-                (JmxVersionRequest) JmxRequestFactory.createGetRequest("version/java.lang:type=Memory", procParams),
-                (JmxVersionRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaVersionRequest req : new JolokiaVersionRequest[] {
+                (JolokiaVersionRequest) JmxRequestFactory.createGetRequest("version/java.lang:type=Memory", procParams),
+                (JolokiaVersionRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "version", "path", "java.lang:type=Memory"),procParams)
         }) {
             assertEquals(req.getType(),RequestType.VERSION);
@@ -198,9 +198,9 @@ public class JmxRequestTest {
     @Test
     public void execRequest() {
         List args = Arrays.asList(null,"","normal");
-        for (JmxExecRequest req : new JmxExecRequest[] {
-                (JmxExecRequest) JmxRequestFactory.createGetRequest("exec/java.lang:type=Runtime/operation/[null]/\"\"/normal", procParams),
-                (JmxExecRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaExecRequest req : new JolokiaExecRequest[] {
+                (JolokiaExecRequest) JmxRequestFactory.createGetRequest("exec/java.lang:type=Runtime/operation/[null]/\"\"/normal", procParams),
+                (JolokiaExecRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "exec", "mbean", "java.lang:type=Runtime",
                                   "operation","operation","arguments", args), procParams)
         }) {
@@ -229,9 +229,9 @@ public class JmxRequestTest {
     @Test
     public void searchRequest() {
 
-        for (JmxSearchRequest req : new JmxSearchRequest[] {
-                (JmxSearchRequest) JmxRequestFactory.createGetRequest("search/java.lang:*", procParams),
-                (JmxSearchRequest) JmxRequestFactory.createPostRequest(
+        for (JolokiaSearchRequest req : new JolokiaSearchRequest[] {
+                (JolokiaSearchRequest) JmxRequestFactory.createGetRequest("search/java.lang:*", procParams),
+                (JolokiaSearchRequest) JmxRequestFactory.createPostRequest(
                         createMap("type", "search", "mbean", "java.lang:*"),procParams)
         }) {
             assertEquals(req.getType(),RequestType.SEARCH);
@@ -243,7 +243,7 @@ public class JmxRequestTest {
         }
     }
 
-    private void verify(JmxRequest pReq, String pKey, String pValue) {
+    private void verify(JolokiaRequest pReq, String pKey, String pValue) {
         JSONObject json = pReq.toJSON();
         assertEquals(json.get(pKey),pValue);
         String info = pReq.toString();

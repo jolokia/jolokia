@@ -51,7 +51,7 @@ public class HistoryStoreTest {
 
     @Test
     public void invalidHistoryKey() throws MalformedObjectNameException {
-        JmxReadRequest req = new JmxRequestBuilder(READ,"test:type=bla")
+        JolokiaReadRequest req = new JmxRequestBuilder(READ,"test:type=bla")
                 .attributes("bla","bla2")
                 .build();
         try {
@@ -62,7 +62,7 @@ public class HistoryStoreTest {
 
     @Test(groups = "java6")
     public void invalidHistoryKeyWithPattern() throws MalformedObjectNameException {
-        JmxReadRequest req = new JmxRequestBuilder(READ,"test:type=*")
+        JolokiaReadRequest req = new JmxRequestBuilder(READ,"test:type=*")
                 .attribute("bla")
                 .build();
         try {
@@ -73,7 +73,7 @@ public class HistoryStoreTest {
 
     @Test
     public void configure() throws MalformedObjectNameException {
-        JmxExecRequest req =
+        JolokiaExecRequest req =
                 new JmxRequestBuilder(EXEC,"test:type=exec")
                         .operation("op")
                         .build();
@@ -96,7 +96,7 @@ public class HistoryStoreTest {
 
     @Test
     public void reconfigure() throws MalformedObjectNameException {
-        JmxExecRequest req =
+        JolokiaExecRequest req =
                 new JmxRequestBuilder(EXEC,"test:type=exec")
                         .operation("op")
                         .build();
@@ -107,7 +107,7 @@ public class HistoryStoreTest {
     
     @Test
     public void durationBasedEvicting() throws MalformedObjectNameException {
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attribute("attr")
                         .build();
@@ -120,7 +120,7 @@ public class HistoryStoreTest {
     
     @Test
     public void singleAttributeRead() throws Exception {
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attribute("attr")
                         .build();
@@ -132,7 +132,7 @@ public class HistoryStoreTest {
 
     @Test
     public void singleAttributeWrite() throws Exception {
-        JmxWriteRequest req =
+        JolokiaWriteRequest req =
                 new JmxRequestBuilder(WRITE,"test:type=write")
                         .attribute("attr")
                         .value("val1")
@@ -142,7 +142,7 @@ public class HistoryStoreTest {
     }
     @Test
     public void singleAttributeAsListRead() throws Exception {
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=read")
                         .attributes("attr")
                         .build();
@@ -156,7 +156,7 @@ public class HistoryStoreTest {
     @Test
     public void noAttributesRead() throws Exception {
         String mbean = "test:type=read";
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,mbean)
                         .build();
         store.configure(new HistoryKey(mbean,"attr1",null,null), new HistoryLimit(4, 0L));
@@ -172,7 +172,7 @@ public class HistoryStoreTest {
     @Test
     public void multipleAttributeRead() throws Exception {
         String mbean = "test:type=read";
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,mbean)
                         .attributes("attr1","attr2")
                         .build();
@@ -192,7 +192,7 @@ public class HistoryStoreTest {
     public void patternConfigure() throws MalformedObjectNameException {
         store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null), new HistoryLimit(10, 0L));
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
@@ -207,7 +207,7 @@ public class HistoryStoreTest {
         store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null), new HistoryLimit(10, 0L));
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), null);
 
-                JmxReadRequest req =
+                JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
@@ -220,7 +220,7 @@ public class HistoryStoreTest {
     public void patternGetEntries() throws MalformedObjectNameException {
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
 
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
@@ -239,7 +239,7 @@ public class HistoryStoreTest {
 
     @Test(groups = "java6")
     public void patternAttributeRead() throws Exception {
-        JmxReadRequest req =
+        JolokiaReadRequest req =
                 new JmxRequestBuilder(READ,"test:type=*")
                         .attributes("attr1","attr2")
                         .build();
@@ -261,20 +261,20 @@ public class HistoryStoreTest {
         assertEquals("attr2 has 3 history entries",3,((List) ((Map) history.get("test:type=write")).get("attr2")).size());
     }
 
-    private JSONArray updateNTimesAsListWithSleep(JmxReadRequest pReq, int pNr, long pSleep,Object ... pValue) {
+    private JSONArray updateNTimesAsListWithSleep(JolokiaReadRequest pReq, int pNr, long pSleep,Object ... pValue) {
         return (JSONArray) updateNTimes(pReq,pNr,pSleep,pValue);    
     }
 
 
-    private JSONArray updateNTimesAsList(JmxRequest pReq, int pNr,Object ... pValue) {
+    private JSONArray updateNTimesAsList(JolokiaRequest pReq, int pNr,Object ... pValue) {
         return (JSONArray) updateNTimes(pReq, pNr,0L,pValue);
     }
 
-    private JSONObject updateNTimesAsMap(JmxRequest pReq, int pNr,Object ... pValue) {
+    private JSONObject updateNTimesAsMap(JolokiaRequest pReq, int pNr,Object ... pValue) {
         return (JSONObject) updateNTimes(pReq, pNr,0L,pValue);
     }
     
-    private synchronized Object updateNTimes(JmxRequest pReq, int pNr,long pSleep, Object ... pValue) {
+    private synchronized Object updateNTimes(JolokiaRequest pReq, int pNr,long pSleep, Object ... pValue) {
         JSONObject res = new JSONObject();
         if (pValue != null && pValue.length > 0) {
             res.put("value",pValue[0]);

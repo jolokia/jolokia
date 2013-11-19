@@ -35,10 +35,10 @@ public class JmxNotificationRequestTest {
 
     @Test
     public void testSimpleStack() throws Exception {
-        RequestCreator<JmxNotificationRequest> creator = JmxNotificationRequest.newCreator();
+        RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
         Stack<String> args = new Stack<String>();
         args.push("register");
-        JmxNotificationRequest request = creator.create(args,getParams());
+        JolokiaNotificationRequest request = creator.create(args,getParams());
 
         assertEquals(request.getType(), RequestType.NOTIFICATION);
         assertEquals(request.getHttpMethod(), HttpMethod.GET);
@@ -48,12 +48,12 @@ public class JmxNotificationRequestTest {
 
     @Test
     public void testSimpleMap() throws Exception {
-        RequestCreator<JmxNotificationRequest> creator = JmxNotificationRequest.newCreator();
+        RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
         Map<String,String> map = new HashMap<String, String>();
         map.put("type","notification");
         map.put("command","ping");
         map.put("client","dummy");
-        JmxNotificationRequest request = creator.create(map,getParams());
+        JolokiaNotificationRequest request = creator.create(map,getParams());
 
         assertEquals(request.getType(), RequestType.NOTIFICATION);
         assertEquals(request.getHttpMethod(), HttpMethod.POST);
@@ -64,7 +64,7 @@ public class JmxNotificationRequestTest {
 
     @Test
     public void testToJson() throws Exception {
-        RequestCreator<JmxNotificationRequest> creator = JmxNotificationRequest.newCreator();
+        RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("type","notification");
         map.put("command","add");
@@ -73,7 +73,7 @@ public class JmxNotificationRequestTest {
         map.put("mbean","test:type=test");
         map.put("filter",Arrays.asList("filter1","filter2"));
         map.put("config", new HashMap());
-        JmxNotificationRequest request = creator.create(map,getParams());
+        JolokiaNotificationRequest request = creator.create(map,getParams());
         JSONObject ret = request.toJSON();
         assertEquals(ret.size(), 6);
         assertEquals(ret.get("mbean"),"test:type=test");

@@ -31,7 +31,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 15.03.11
  */
-public class JmxReadRequest extends JmxObjectNameRequest {
+public class JolokiaReadRequest extends JolokiaObjectNameRequest {
 
     // One or more attribute names
     private List<String> attributeNames;
@@ -50,8 +50,8 @@ public class JmxReadRequest extends JmxObjectNameRequest {
      * @param pInitParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name.
      */
-    JmxReadRequest(String pObjectName,String pAttribute,List<String> pPathParts,
-                   ProcessingParameters pInitParams) throws MalformedObjectNameException {
+    JolokiaReadRequest(String pObjectName, String pAttribute, List<String> pPathParts,
+                       ProcessingParameters pInitParams) throws MalformedObjectNameException {
         super(RequestType.READ, pObjectName, pPathParts, pInitParams);
         initAttribute(pAttribute);
     }
@@ -63,7 +63,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name extracted is not a proper object name.
      */
-    JmxReadRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaReadRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         initAttribute(pRequestMap.get("attribute"));
     }
@@ -139,15 +139,15 @@ public class JmxReadRequest extends JmxObjectNameRequest {
     // =================================================================
 
     /**
-     * Creator for {@link JmxReadRequest}s
+     * Creator for {@link JolokiaReadRequest}s
      *
      * @return the creator implementation
      */
-    static RequestCreator<JmxReadRequest> newCreator() {
-        return new RequestCreator<JmxReadRequest>() {
+    static RequestCreator<JolokiaReadRequest> newCreator() {
+        return new RequestCreator<JolokiaReadRequest>() {
             /** {@inheritDoc} */
-            public JmxReadRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JmxReadRequest(
+            public JolokiaReadRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+                return new JolokiaReadRequest(
                         pStack.pop(),  // object name
                         popOrNull(pStack), // attribute(s) (can be null)
                         prepareExtraArgs(pStack), // path
@@ -155,9 +155,9 @@ public class JmxReadRequest extends JmxObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JmxReadRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaReadRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JmxReadRequest(requestMap,pParams);
+                return new JolokiaReadRequest(requestMap,pParams);
             }
         };
     }

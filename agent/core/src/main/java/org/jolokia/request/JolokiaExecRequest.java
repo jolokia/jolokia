@@ -31,7 +31,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 15.03.11
  */
-public class JmxExecRequest extends JmxObjectNameRequest {
+public class JolokiaExecRequest extends JolokiaObjectNameRequest {
 
     // Name of operation to execute
     private String operation;
@@ -49,8 +49,8 @@ public class JmxExecRequest extends JmxObjectNameRequest {
      * @param pParams optional params used for processing the request.
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JmxExecRequest(String pObjectName,String pOperation,List pArguments,
-                   ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaExecRequest(String pObjectName, String pOperation, List pArguments,
+                       ProcessingParameters pParams) throws MalformedObjectNameException {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams);
         operation = pOperation;
         arguments = pArguments;
@@ -63,7 +63,7 @@ public class JmxExecRequest extends JmxObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JmxExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         arguments = (List) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
@@ -103,15 +103,15 @@ public class JmxExecRequest extends JmxObjectNameRequest {
     // =================================================================================
 
     /**
-     * Creator for {@link JmxExecRequest}s
+     * Creator for {@link JolokiaExecRequest}s
      *
      * @return the creator implementation
      */
-    static RequestCreator<JmxExecRequest> newCreator() {
-        return new RequestCreator<JmxExecRequest>() {
+    static RequestCreator<JolokiaExecRequest> newCreator() {
+        return new RequestCreator<JolokiaExecRequest>() {
             /** {@inheritDoc} */
-            public JmxExecRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JmxExecRequest(
+            public JolokiaExecRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+                return new JolokiaExecRequest(
                         pStack.pop(), // Object name
                         pStack.pop(), // Operation name
                         convertSpecialStringTags(prepareExtraArgs(pStack)), // arguments
@@ -119,9 +119,9 @@ public class JmxExecRequest extends JmxObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JmxExecRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaExecRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JmxExecRequest(requestMap,pParams);
+                return new JolokiaExecRequest(requestMap,pParams);
             }
         };
     }

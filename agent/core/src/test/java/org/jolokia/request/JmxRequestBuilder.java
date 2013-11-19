@@ -55,17 +55,17 @@ public class JmxRequestBuilder {
         this(pType,pMBean.getCanonicalName());
     }
 
-    public <R extends JmxRequest> R build() throws MalformedObjectNameException {
+    public <R extends JolokiaRequest> R build() throws MalformedObjectNameException {
         RequestType type = RequestType.getTypeByName((String) request.get("type"));
         ProcessingParameters params = new TestProcessingParameters(procConfig);
         switch (type) {
-            case READ: return (R) new JmxReadRequest(request,params);
-            case WRITE: return (R) new JmxWriteRequest(request,params);
-            case EXEC: return (R) new JmxExecRequest(request,params);
-            case VERSION: return (R) new JmxVersionRequest(request,params);
-            case SEARCH: return (R) new JmxSearchRequest(request,params);
-            case LIST: return (R) new JmxListRequest(request,params);
-            case NOTIFICATION: return (R) new JmxNotificationRequest(NotificationCommandFactory.createCommand(request),
+            case READ: return (R) new JolokiaReadRequest(request,params);
+            case WRITE: return (R) new JolokiaWriteRequest(request,params);
+            case EXEC: return (R) new JolokiaExecRequest(request,params);
+            case VERSION: return (R) new JolokiaVersionRequest(request,params);
+            case SEARCH: return (R) new JolokiaSearchRequest(request,params);
+            case LIST: return (R) new JolokiaListRequest(request,params);
+            case NOTIFICATION: return (R) new JolokiaNotificationRequest(NotificationCommandFactory.createCommand(request),
                                                                      params);
         }
         throw new IllegalArgumentException("Unknown type " + type);

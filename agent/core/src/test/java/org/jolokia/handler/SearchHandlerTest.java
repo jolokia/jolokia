@@ -24,7 +24,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JmxRequestBuilder;
-import org.jolokia.request.JmxSearchRequest;
+import org.jolokia.request.JolokiaSearchRequest;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
@@ -55,12 +55,12 @@ public class SearchHandlerTest extends BaseHandlerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
         handler.handleRequest((MBeanServerConnection) null,
-                              new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JmxSearchRequest>build());
+                              new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build());
     }
 
     @Test
     public void handleAllServersAtOnce() throws MalformedObjectNameException {
-        assertTrue(handler.handleAllServersAtOnce(new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JmxSearchRequest>build()));
+        assertTrue(handler.handleAllServersAtOnce(new JmxRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build()));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
     private List<String> doSearch(String pPattern, String pUseCanonicalName, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         ObjectName oName = new ObjectName(pPattern);
-        JmxSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.CANONICAL_NAMING,pUseCanonicalName).build();
+        JolokiaSearchRequest request = new JmxRequestBuilder(RequestType.SEARCH,oName).option(ConfigKey.CANONICAL_NAMING,pUseCanonicalName).build();
 
         server = createMock(MBeanServer.class);
         Set<ObjectName> names = new HashSet<ObjectName>();

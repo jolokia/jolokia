@@ -6,7 +6,7 @@ import java.util.List;
 import javax.management.JMException;
 
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
@@ -22,7 +22,7 @@ import static org.testng.Assert.*;
  */
 public class RequestDispatcherImplTest {
 
-    private JmxRequest request;
+    private JolokiaRequest request;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -95,16 +95,16 @@ public class RequestDispatcherImplTest {
             id = MAX_ID++;
         }
 
-        public Object handleRequest(JmxRequest pJmxReq) throws JMException, IOException, NotChangedException {
+        public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
             handleRequestCalled = true;
             return returnValue;
         }
 
-        public boolean canHandle(JmxRequest pJmxRequest) {
+        public boolean canHandle(JolokiaRequest pJolokiaRequest) {
             return canHandle;
         }
 
-        public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
+        public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
             return useReturnValueWithPath;
         }
 

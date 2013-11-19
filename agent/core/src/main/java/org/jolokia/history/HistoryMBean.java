@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.json.simple.JSONObject;
 
 /**
@@ -28,7 +28,7 @@ public interface HistoryMBean {
      * @param pJmxReq request for which an entry should be added in this history store
      * @param pJson the JSONObject to which to add the history.
      */
-    void updateAndAdd(JmxRequest pJmxReq, JSONObject pJson);
+    void updateAndAdd(JolokiaRequest pJmxReq, JSONObject pJson);
 
     /**
      * Switch on history tracking for a specific attribute. If <code>pMaxEntries</code> is 0

@@ -25,7 +25,7 @@ import org.jolokia.util.RequestType;
 
 
 /**
- * Factory for creating {@link JmxRequest}s
+ * Factory for creating {@link JolokiaRequest}s
  *
  * @author roland
  * @since Oct 29, 2009
@@ -79,9 +79,9 @@ public final class JmxRequestFactory {
      * </ul>
      * @param pPathInfo path info of HTTP request
      * @param pProcessingParameters processing parameters. Must not be null/
-     * @return a newly created {@link JmxRequest}
+     * @return a newly created {@link JolokiaRequest}
      */
-    public static <R extends JmxRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters) {
+    public static <R extends JolokiaRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters) {
         RequestType type = null;
         try {
             String pathInfo = extractPathInfo(pPathInfo, pProcessingParameters);
@@ -103,13 +103,13 @@ public final class JmxRequestFactory {
 
 
     /**
-     * Create a single {@link JmxRequest}s from a JSON map representation of a request
+     * Create a single {@link JolokiaRequest}s from a JSON map representation of a request
      *
-     * @param pRequestMap JSON representation of a {@link JmxRequest}
+     * @param pRequestMap JSON representation of a {@link JolokiaRequest}
      * @param pProcessingParams additional map of operational parameters. Must not be null.
-     * @return the created {@link JmxRequest}
+     * @return the created {@link JolokiaRequest}
      */
-    public static <R extends JmxRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
+    public static <R extends JolokiaRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
         try {
             ProcessingParameters paramsMerged = pProcessingParams.mergedParams((Map<String,String>) pRequestMap.get("config"));
             RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
@@ -120,14 +120,14 @@ public final class JmxRequestFactory {
     }
 
     /**
-     * Create a list of {@link JmxRequest}s from a JSON list representing jmx requests
+     * Create a list of {@link JolokiaRequest}s from a JSON list representing jmx requests
      *
-     * @param pJsonRequests JSON representation of a list of {@link JmxRequest}
+     * @param pJsonRequests JSON representation of a list of {@link JolokiaRequest}
      * @param pProcessingParams processing options. Must not be null.
-     * @return list with one or more {@link JmxRequest}
+     * @return list with one or more {@link JolokiaRequest}
      */
-    public static List<JmxRequest> createPostRequests(List pJsonRequests, ProcessingParameters pProcessingParams) {
-        List<JmxRequest> ret = new ArrayList<JmxRequest>();
+    public static List<JolokiaRequest> createPostRequests(List pJsonRequests, ProcessingParameters pProcessingParams) {
+        List<JolokiaRequest> ret = new ArrayList<JolokiaRequest>();
         for (Object o : pJsonRequests) {
             if (!(o instanceof Map)) {
                 throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
@@ -181,13 +181,13 @@ public final class JmxRequestFactory {
 
     static {
         CREATOR_MAP = new HashMap<RequestType, RequestCreator>();
-        CREATOR_MAP.put(RequestType.READ, JmxReadRequest.newCreator());
-        CREATOR_MAP.put(RequestType.WRITE, JmxWriteRequest.newCreator());
-        CREATOR_MAP.put(RequestType.EXEC, JmxExecRequest.newCreator());
-        CREATOR_MAP.put(RequestType.LIST, JmxListRequest.newCreator());
-        CREATOR_MAP.put(RequestType.VERSION, JmxVersionRequest.newCreator());
-        CREATOR_MAP.put(RequestType.SEARCH, JmxSearchRequest.newCreator());
-        CREATOR_MAP.put(RequestType.NOTIFICATION, JmxNotificationRequest.newCreator());
+        CREATOR_MAP.put(RequestType.READ, JolokiaReadRequest.newCreator());
+        CREATOR_MAP.put(RequestType.WRITE, JolokiaWriteRequest.newCreator());
+        CREATOR_MAP.put(RequestType.EXEC, JolokiaExecRequest.newCreator());
+        CREATOR_MAP.put(RequestType.LIST, JolokiaListRequest.newCreator());
+        CREATOR_MAP.put(RequestType.VERSION, JolokiaVersionRequest.newCreator());
+        CREATOR_MAP.put(RequestType.SEARCH, JolokiaSearchRequest.newCreator());
+        CREATOR_MAP.put(RequestType.NOTIFICATION, JolokiaNotificationRequest.newCreator());
     }
 
 }

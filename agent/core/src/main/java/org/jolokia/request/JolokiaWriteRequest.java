@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 15.03.11
  */
-public class JmxWriteRequest extends JmxObjectNameRequest {
+public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
 
     // The value to set
     private Object value;
@@ -48,8 +48,8 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
      * @param pInitParams optional processing parameter
      * @throws MalformedObjectNameException if the object name is not well formed.
      */
-    JmxWriteRequest(String pObjectName,String pAttribute,Object pValue,List<String> pPathParts,
-                    ProcessingParameters pInitParams) throws MalformedObjectNameException {
+    JolokiaWriteRequest(String pObjectName, String pAttribute, Object pValue, List<String> pPathParts,
+                        ProcessingParameters pInitParams) throws MalformedObjectNameException {
         super(RequestType.WRITE, pObjectName, pPathParts, pInitParams);
         attributeName = pAttribute;
         value = pValue;
@@ -62,7 +62,7 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JmxWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
         value = pRequestMap.get("value");
         attributeName = (String) pRequestMap.get("attribute");
@@ -115,15 +115,15 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
     // ===========================================================================
 
     /**
-     * Creator for {@link JmxWriteRequest}s
+     * Creator for {@link JolokiaWriteRequest}s
      *
      * @return the creator implementation
      */
-    static RequestCreator<JmxWriteRequest> newCreator() {
-        return new RequestCreator<JmxWriteRequest>() {
+    static RequestCreator<JolokiaWriteRequest> newCreator() {
+        return new RequestCreator<JolokiaWriteRequest>() {
             /** {@inheritDoc} */
-            public JmxWriteRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JmxWriteRequest(
+            public JolokiaWriteRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+                return new JolokiaWriteRequest(
                         pStack.pop(), // object name
                         pStack.pop(), // attribute name
                         StringToObjectConverter.convertSpecialStringTags(pStack.pop()), // value
@@ -132,9 +132,9 @@ public class JmxWriteRequest extends JmxObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JmxWriteRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaWriteRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JmxWriteRequest(requestMap,pParams);
+                return new JolokiaWriteRequest(requestMap,pParams);
             }
         };
     }

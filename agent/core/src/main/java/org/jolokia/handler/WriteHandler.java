@@ -9,7 +9,7 @@ import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.JmxSerializer;
-import org.jolokia.request.JmxWriteRequest;
+import org.jolokia.request.JolokiaWriteRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
@@ -36,7 +36,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class WriteHandler extends CommandHandler<JmxWriteRequest> {
+public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
 
     /**
      * Constructor
@@ -56,7 +56,7 @@ public class WriteHandler extends CommandHandler<JmxWriteRequest> {
 
     /** {@inheritDoc} */
     @Override
-    protected void checkForRestriction(JmxWriteRequest pRequest) {
+    protected void checkForRestriction(JolokiaWriteRequest pRequest) {
         if (!context.isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
             throw new SecurityException("Writing attribute " + pRequest.getAttributeName() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
@@ -65,7 +65,7 @@ public class WriteHandler extends CommandHandler<JmxWriteRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxWriteRequest request)
+    public Object doHandleRequest(MBeanServerConnection server, JolokiaWriteRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
 
         try {
@@ -85,7 +85,7 @@ public class WriteHandler extends CommandHandler<JmxWriteRequest> {
     }
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_NULL_ON_SOME_PATH", justification = "aInfo below cant be null. See comment inline.")
-    private Object setAttribute(JmxWriteRequest request, MBeanServerConnection server)
+    private Object setAttribute(JolokiaWriteRequest request, MBeanServerConnection server)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
             ReflectionException, IntrospectionException, InvalidAttributeValueException, IllegalAccessException, InvocationTargetException, IOException {
         // Old value, will throw an exception if attribute is not known. That's good.
@@ -145,7 +145,7 @@ public class WriteHandler extends CommandHandler<JmxWriteRequest> {
      * @throws IllegalAccessException if access to MBean fails
      * @throws InvocationTargetException reflection error when setting an object's attribute
      */
-    private Object[] getValues(String pType, Object pCurrentValue, JmxWriteRequest pRequest)
+    private Object[] getValues(String pType, Object pCurrentValue, JolokiaWriteRequest pRequest)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         List<String> pathParts = pRequest.getPathParts();
         Object newValue = pRequest.getValue();
@@ -172,7 +172,7 @@ public class WriteHandler extends CommandHandler<JmxWriteRequest> {
         }
     }
 
-    private Object[] getValues(OpenType<?> pOpenType, Object pCurrentValue, JmxWriteRequest pRequest) {
+    private Object[] getValues(OpenType<?> pOpenType, Object pCurrentValue, JolokiaWriteRequest pRequest) {
         // TODO: What to do when path is not null ? Simplest: Throw exception. Advanced: Extract other values and create
         // a new CompositeData with old values and the new value.
         // However, since this is probably out of scope, we will simply throw an exception if the path is not empty.

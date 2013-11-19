@@ -7,7 +7,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 
@@ -34,7 +34,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public abstract class CommandHandler<R extends JmxRequest> {
+public abstract class CommandHandler<R extends JolokiaRequest> {
 
     // Restrictor for restricting operations
     protected final JolokiaContext context;
@@ -63,9 +63,9 @@ public abstract class CommandHandler<R extends JmxRequest> {
      *
      * @param pRequest request to decide on whether to handle all request at once
      * @return whether you want to have
-     * {@link #doHandleRequest(MBeanServerConnection, JmxRequest)}
+     * {@link #doHandleRequest(MBeanServerConnection, JolokiaRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(MBeanServerExecutor, JmxRequest)} (<code>true</code>) called.
+     * {@link #doHandleRequest(MBeanServerExecutor, JolokiaRequest)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(R pRequest) {
         return false;
@@ -148,7 +148,7 @@ public abstract class CommandHandler<R extends JmxRequest> {
     /**
      * Override this if you want to have all servers at once for processing the request
      * (like need for merging info as for a <code>list</code> command). This method
-     * is only called when {@link #handleAllServersAtOnce(JmxRequest)} returns <code>true</code>
+     * is only called when {@link #handleAllServersAtOnce(JolokiaRequest)} returns <code>true</code>
      *
      *
      * @param pServerManager server manager holding all MBeans servers detected
@@ -168,7 +168,7 @@ public abstract class CommandHandler<R extends JmxRequest> {
 
     /**
      * Default implementation fo handling a request for multiple servers at once. A subclass, which returns,
-     * <code>true</code> on {@link #handleAllServersAtOnce(JmxRequest)}, needs to override this method.
+     * <code>true</code> on {@link #handleAllServersAtOnce(JolokiaRequest)}, needs to override this method.
      *
      *
      * @param serverManager all MBean servers found in this JVM
@@ -209,7 +209,7 @@ public abstract class CommandHandler<R extends JmxRequest> {
      * @param pRequest the request from where to fetch the timestamp
      * @throws NotChangedException if there has been no REGISTER/UNREGISTER notifications in the meantime
      */
-    protected void checkForModifiedSince(MBeanServerExecutor pServerManager, JmxRequest pRequest)
+    protected void checkForModifiedSince(MBeanServerExecutor pServerManager, JolokiaRequest pRequest)
             throws NotChangedException {
         int ifModifiedSince = pRequest.getParameterAsInt(ConfigKey.IF_MODIFIED_SINCE);
         if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {

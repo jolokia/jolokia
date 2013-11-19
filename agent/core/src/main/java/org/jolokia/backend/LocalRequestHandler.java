@@ -27,7 +27,7 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
 
@@ -74,18 +74,18 @@ public class LocalRequestHandler extends AbstractJolokiaService<RequestHandler> 
 
     // Can handle any request
     /** {@inheritDoc} */
-    public boolean canHandle(JmxRequest pJmxRequest) {
+    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         return true;
     }
 
     /** {@inheritDoc} */
-    public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxRequest.getType());
+    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
+        CommandHandler handler = commandHandlerManager.getCommandHandler(pJolokiaRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
     /** {@inheritDoc} */
-    public Object handleRequest(JmxRequest pJmxReq)
+    public Object handleRequest(JolokiaRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         lazyInitIfNeeded();
 

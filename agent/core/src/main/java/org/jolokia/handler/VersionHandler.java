@@ -7,7 +7,7 @@ import javax.management.*;
 import org.jolokia.Version;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.JmxVersionRequest;
+import org.jolokia.request.JolokiaVersionRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
@@ -35,7 +35,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jun 12, 2009
  */
-public class VersionHandler extends CommandHandler<JmxVersionRequest> {
+public class VersionHandler extends CommandHandler<JolokiaVersionRequest> {
 
     /**
      * Constructor
@@ -55,13 +55,13 @@ public class VersionHandler extends CommandHandler<JmxVersionRequest> {
 
     /** {@inheritDoc} */
     @Override
-    protected void checkForRestriction(JmxVersionRequest pRequest) {
+    protected void checkForRestriction(JolokiaVersionRequest pRequest) {
         checkType();
     }
 
     /** {@inheritDoc} */
     @Override
-    public boolean handleAllServersAtOnce(JmxVersionRequest pRequest) {
+    public boolean handleAllServersAtOnce(JolokiaVersionRequest pRequest) {
         return true;
     }
 
@@ -69,7 +69,7 @@ public class VersionHandler extends CommandHandler<JmxVersionRequest> {
      * @param serverManager
      * @param request*/
     @Override
-    public Object doHandleRequest(MBeanServerExecutor serverManager, JmxVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaVersionRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         JSONObject ret = new JSONObject();
         ret.put("agent",Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
@@ -84,7 +84,7 @@ public class VersionHandler extends CommandHandler<JmxVersionRequest> {
     /** {@inheritDoc} */
     @Override
     // Wont be called
-    public Object doHandleRequest(MBeanServerConnection server, JmxVersionRequest request) {
+    public Object doHandleRequest(MBeanServerConnection server, JolokiaVersionRequest request) {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 

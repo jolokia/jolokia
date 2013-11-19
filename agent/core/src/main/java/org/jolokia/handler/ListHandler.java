@@ -10,7 +10,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.list.MBeanInfoData;
-import org.jolokia.request.JmxListRequest;
+import org.jolokia.request.JolokiaListRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
@@ -39,7 +39,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ListHandler extends CommandHandler<JmxListRequest> {
+public class ListHandler extends CommandHandler<JolokiaListRequest> {
 
 
     /** {@inheritDoc} */
@@ -62,19 +62,19 @@ public class ListHandler extends CommandHandler<JmxListRequest> {
      * @return always true
      */
     @Override
-    public boolean handleAllServersAtOnce(JmxListRequest pRequest) {
+    public boolean handleAllServersAtOnce(JolokiaListRequest pRequest) {
         return true;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void checkForRestriction(JmxListRequest pRequest) {
+    protected void checkForRestriction(JolokiaListRequest pRequest) {
         checkType();
     }
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerExecutor pServerManager, JmxListRequest pRequest)
+    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaListRequest pRequest)
             throws IOException, NotChangedException {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
@@ -109,7 +109,7 @@ public class ListHandler extends CommandHandler<JmxListRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JmxListRequest request)
+    public Object doHandleRequest(MBeanServerConnection server, JolokiaListRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }

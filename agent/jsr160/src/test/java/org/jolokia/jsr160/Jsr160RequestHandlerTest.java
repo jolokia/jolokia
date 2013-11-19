@@ -67,7 +67,7 @@ public class Jsr160RequestHandlerTest {
     @Test
     public void canHandle() {
         assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
-        JmxRequest req = preparePostReadRequest(null);
+        JolokiaRequest req = preparePostReadRequest(null);
         assertTrue(dispatcher.canHandle(req));
     }
 
@@ -83,7 +83,7 @@ public class Jsr160RequestHandlerTest {
 
     @Test(expectedExceptions = IOException.class)
     public void simpleDispatchFail() throws Exception {
-        JmxRequest req = preparePostReadRequest(null);
+        JolokiaRequest req = preparePostReadRequest(null);
         destroy();
         TestJolokiaContext testCtx;
         testCtx = new TestJolokiaContext.Builder().build();
@@ -95,14 +95,14 @@ public class Jsr160RequestHandlerTest {
 
     @Test
     public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxReadRequest req =  preparePostReadRequest(null);
+        JolokiaReadRequest req =  preparePostReadRequest(null);
         Map result = (Map) dispatcher.handleRequest(req);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
     @Test
     public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        JmxReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
+        JolokiaReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
         assertNotNull(dispatcher.handleRequest(req));
     }
 
@@ -110,7 +110,7 @@ public class Jsr160RequestHandlerTest {
     public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         System.setProperty("TEST_WITH_USER","roland");
         try {
-            JmxRequest req = preparePostReadRequest("roland");
+            JolokiaRequest req = preparePostReadRequest("roland");
             Map result = (Map) dispatcher.handleRequest(req);
             assertTrue(result.containsKey("HeapMemoryUsage"));
         } finally {
@@ -121,7 +121,7 @@ public class Jsr160RequestHandlerTest {
 
     // =========================================================================================================
 
-    private JmxReadRequest preparePostReadRequest(String pUser, String... pAttribute) {
+    private JolokiaReadRequest preparePostReadRequest(String pUser, String... pAttribute) {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
         target.put("url","service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi");
@@ -136,7 +136,7 @@ public class Jsr160RequestHandlerTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, new TestProcessingParameters());
+        return (JolokiaReadRequest) JmxRequestFactory.createPostRequest(params, new TestProcessingParameters());
     }
 
 }

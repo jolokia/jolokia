@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -144,7 +144,7 @@ public class ServerHandle {
      * @param pMBeanServerExecutor the detected MBeanServers
      * @param pJmxReq the request to dispatch
      */
-    public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JmxRequest pJmxReq) {
+    public void preDispatch(MBeanServerExecutor pMBeanServerExecutor, JolokiaRequest pJmxReq) {
         // Do nothing
     }
 

@@ -29,14 +29,14 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since 15.03.11
  */
-public class JmxVersionRequest extends JmxRequest {
+public class JolokiaVersionRequest extends JolokiaRequest {
 
     /**
      * A version request for GET requests
      *
      * @param pInitParams optional init parameters
      */
-    JmxVersionRequest(ProcessingParameters pInitParams) {
+    JolokiaVersionRequest(ProcessingParameters pInitParams) {
         super(RequestType.VERSION,null,pInitParams);
     }
 
@@ -46,7 +46,7 @@ public class JmxVersionRequest extends JmxRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JmxVersionRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaVersionRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
         super(pRequestMap, pParams);
     }
 
@@ -58,21 +58,21 @@ public class JmxVersionRequest extends JmxRequest {
     // =================================================================
 
     /**
-     * Creator for {@link JmxVersionRequest}s
+     * Creator for {@link JolokiaVersionRequest}s
      *
      * @return the creator implementation
      */
-    static RequestCreator<JmxVersionRequest> newCreator() {
-        return new RequestCreator<JmxVersionRequest>() {
+    static RequestCreator<JolokiaVersionRequest> newCreator() {
+        return new RequestCreator<JolokiaVersionRequest>() {
             /** {@inheritDoc} */
-            public JmxVersionRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JmxVersionRequest(pParams);
+            public JolokiaVersionRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+                return new JolokiaVersionRequest(pParams);
             }
 
             /** {@inheritDoc} */
-            public JmxVersionRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaVersionRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JmxVersionRequest(requestMap,pParams);
+                return new JolokiaVersionRequest(requestMap,pParams);
             }
         };
     }

@@ -28,7 +28,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since 15.03.11
  */
-public class JmxListRequest extends JmxRequest {
+public class JolokiaListRequest extends JolokiaRequest {
 
     /**
      * Constructor for GET requests.
@@ -36,7 +36,7 @@ public class JmxListRequest extends JmxRequest {
      * @param pPathParts parts of a path to restrict on the return value
      * @param pParams processing parameters
      */
-    JmxListRequest(List<String> pPathParts, ProcessingParameters pParams) {
+    JolokiaListRequest(List<String> pPathParts, ProcessingParameters pParams) {
         super(RequestType.LIST,pPathParts,pParams);
     }
 
@@ -46,7 +46,7 @@ public class JmxListRequest extends JmxRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JmxListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
         super(pRequestMap, pParams);
     }
 
@@ -68,19 +68,19 @@ public class JmxListRequest extends JmxRequest {
      *
      * @return creator
      */
-    static RequestCreator<JmxListRequest> newCreator() {
-        return new RequestCreator<JmxListRequest>() {
+    static RequestCreator<JolokiaListRequest> newCreator() {
+        return new RequestCreator<JolokiaListRequest>() {
             /** {@inheritDoc} */
-            public JmxListRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JmxListRequest(
+            public JolokiaListRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+                return new JolokiaListRequest(
                         prepareExtraArgs(pStack), // path
                         pParams);
             }
 
             /** {@inheritDoc} */
-            public JmxListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JmxListRequest(requestMap,pParams);
+                return new JolokiaListRequest(requestMap,pParams);
             }
         };
     }

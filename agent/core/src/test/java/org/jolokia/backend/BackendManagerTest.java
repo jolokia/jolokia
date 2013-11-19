@@ -27,7 +27,7 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
@@ -60,7 +60,7 @@ public class BackendManagerTest {
     @Test
     public void simpleRead() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[] { ConfigKey.DEBUG,"true"});
-        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
+        JolokiaRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
@@ -77,7 +77,7 @@ public class BackendManagerTest {
     public void lazyInit() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[0]);
 
-        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
+        JolokiaRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
@@ -108,7 +108,7 @@ public class BackendManagerTest {
     public void convertError() throws MalformedObjectNameException {
         BackendManager backendManager = createBackendManager(new Object[0]);
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
-        JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
+        JolokiaRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
         assertTrue(!jsonError.containsKey("stackTrace"));
         assertEquals(jsonError.get("message"), "Hans");
@@ -127,7 +127,7 @@ public class BackendManagerTest {
             assertNotNull(pRestrictor);
         }
 
-        public Object handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JolokiaRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             called = true;
             if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();
@@ -137,11 +137,11 @@ public class BackendManagerTest {
             return null;
         }
 
-        public boolean canHandle(JmxRequest pJmxRequest) {
+        public boolean canHandle(JolokiaRequest pJolokiaRequest) {
             return true;
         }
 
-        public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
+        public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
             return false;
         }
 
@@ -159,15 +159,15 @@ public class BackendManagerTest {
 
         // No special constructor --> fail
 
-        public Object handleRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JolokiaRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             return null;
         }
 
-        public boolean canHandle(JmxRequest pJmxRequest) {
+        public boolean canHandle(JolokiaRequest pJolokiaRequest) {
             return false;
         }
 
-        public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
+        public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
             return false;
         }
 

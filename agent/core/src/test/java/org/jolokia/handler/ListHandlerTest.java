@@ -27,7 +27,7 @@ import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.request.JmxListRequest;
+import org.jolokia.request.JolokiaListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
@@ -63,7 +63,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void singleSlashPath() throws Exception {
         for (String p : new String[]{null, "", "/"}) {
-            JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).path(p).build();
+            JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).path(p).build();
             Map res = execute(request);
             assertTrue(res.containsKey("java.lang"));
             assertTrue(res.get("java.lang") instanceof Map);
@@ -72,7 +72,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void domainPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
         Map res = execute(request);
         assertTrue(res.containsKey("type=Memory"));
         assertTrue(res.get("type=Memory") instanceof Map);
@@ -80,7 +80,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void propertiesPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
         Map res = execute(request);
         for (String k : new String[]{"desc", "op", "attr"}) {
             assertTrue(res.containsKey(k));
@@ -90,21 +90,21 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void attrPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","attr").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","attr").build();
         Map res = execute(request);
         assertTrue(res.containsKey("HeapMemoryUsage"));
     }
 
     @Test
     public void descPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
         String res = (String) handler.handleRequest(executor, request);
         assertNotNull(res);
     }
 
     @Test
     public void descPathWithDepth() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang","type=Memory","desc")
                 .option(ConfigKey.MAX_DEPTH,"4")
                 .build();
@@ -114,14 +114,14 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void opPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","op").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","op").build();
         Map res = execute(request);
         assertTrue(res.containsKey("gc"));
     }
 
     @Test
     public void maxDepth1() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"1").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"1").build();
         Map res = execute(request);
         assertTrue(res.containsKey("java.lang"));
         assertFalse(res.get("java.lang") instanceof Map);
@@ -129,7 +129,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void maxDepth2() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"2").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"2").build();
         Map res = execute(request);
         assertTrue(res.containsKey("java.lang"));
         Map inner = (Map) res.get("java.lang");
@@ -140,7 +140,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void maxDepthAndPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
                 .option(ConfigKey.MAX_DEPTH, "3").build();
         Map res =  execute(request);
         assertEquals(res.size(), 3);
@@ -156,7 +156,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void keyOrder() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.CANONICAL_NAMING,"true").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).option(ConfigKey.CANONICAL_NAMING,"true").build();
         Map res = execute(request);
         Map<String,?> mbeans = (Map<String,?>) res.get("java.lang");
         for (String key : mbeans.keySet()) {
@@ -169,7 +169,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void truncatedList() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
         Map res = execute(request);
         assertFalse(res.containsKey("op"));
         assertEquals(res.size(),2);
@@ -177,7 +177,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void invalidPath() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "attr", "unknownAttribute")
                 .build();
         execute(request);
@@ -185,7 +185,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void invalidPath2() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "op", "bla")
                 .option(ConfigKey.MAX_DEPTH,"3")
                 .build();
@@ -194,7 +194,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void invalidPath3() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "bla")
                 .option(ConfigKey.MAX_DEPTH,"3")
                 .build();
@@ -203,7 +203,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void invalidPath4() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=*")
                 .build();
         execute(request);
@@ -213,7 +213,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void invalidPath5() throws Exception {
         for (String what : new String[] { "attr", "op", "not" }) {
             try {
-                JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+                JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                         .pathParts("java.lang", "type=Memory", what, "HeapMemoryUsage", "bla")
                         .build();
                 execute(request);
@@ -226,20 +226,20 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class }, expectedExceptionsMessageRegExp = ".*bla.*")
     public void invalidPath8() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "desc", "bla")
                 .build();
         execute(request);
     }
 
-    private Map execute(JmxListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
+    private Map execute(JolokiaListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         return (Map) handler.handleRequest(executor, pRequest);
     }
 
 
     @Test
     public void emptyMaps() throws Exception {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "op")
                 .build();
         Map res = (Map) handler.handleRequest(executor,request);
@@ -254,7 +254,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "attr")
                 .build();
         MBeanServerConnection dummyConn = EasyMock.createMock(MBeanServerConnection.class);
@@ -270,7 +270,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
     public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException {
-        JmxListRequest request = new JmxRequestBuilder(RequestType.LIST)
+        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST)
                 .pathParts("bullerbue", "country=sweden")
                 .build();
         MBeanServer dummyConn = EasyMock.createMock(MBeanServer.class);

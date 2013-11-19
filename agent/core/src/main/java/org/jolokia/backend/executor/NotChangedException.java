@@ -1,6 +1,6 @@
 package org.jolokia.backend.executor;
 
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 
 /**
  * Exception thrown when an <code>ifModifiedSince</code> parameter was given and
@@ -10,13 +10,13 @@ import org.jolokia.request.JmxRequest;
  */
 public class NotChangedException extends Exception {
 
-    private JmxRequest request;
+    private JolokiaRequest request;
 
     /**
      * Constructor
      * @param pRequest which lead to this exception
      */
-    public NotChangedException(JmxRequest pRequest) {
+    public NotChangedException(JolokiaRequest pRequest) {
         request = pRequest;
     }
 
@@ -24,7 +24,7 @@ public class NotChangedException extends Exception {
      * Request which lead to this exception
      * @return request
      */
-    public JmxRequest getRequest() {
+    public JolokiaRequest getRequest() {
         return request;
     }
 }

@@ -6,7 +6,7 @@ import javax.management.*;
 
 import org.jolokia.backend.dispatcher.RequestInterceptor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.request.JmxRequest;
+import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.JmxUtil;
@@ -65,14 +65,14 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
      * @param pJmxReq request obtained
      * @param pJson result as included in the response
      */
-    public void intercept(JmxRequest pJmxReq, JSONObject pJson) {
+    public void intercept(JolokiaRequest pJmxReq, JSONObject pJson) {
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         try {
             if (historyObjectName != null) {
                 mBeanServer.invoke(historyObjectName,
                                    "updateAndAdd",
                                    new Object[] { pJmxReq, pJson},
-                                   new String[] { JmxRequest.class.getName(), JSONObject.class.getName() });
+                                   new String[] { JolokiaRequest.class.getName(), JSONObject.class.getName() });
             }
         } catch (InstanceNotFoundException e) {
             // Ignore, no history MBean is enabled, so no update
