@@ -25,7 +25,7 @@ import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
-import static org.jolokia.request.JmxRequestBuilder.createMap;
+import static org.jolokia.request.JolokiaRequestBuilder.createMap;
 import static org.testng.Assert.*;
 
 

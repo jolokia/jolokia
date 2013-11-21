@@ -33,32 +33,32 @@ public class HistoryKeyTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*null.*")
     public void emptyAttributeName() throws MalformedObjectNameException {
-        new HistoryKey((JolokiaWriteRequest) new JmxRequestBuilder(WRITE, "test:type=bla").build());
+        new HistoryKey((JolokiaWriteRequest) new JolokiaRequestBuilder(WRITE, "test:type=bla").build());
 
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*null.*")
     public void emptyOperationName() throws MalformedObjectNameException {
-        new HistoryKey((JolokiaExecRequest) new JmxRequestBuilder(EXEC, "test:type=bla").build());
+        new HistoryKey((JolokiaExecRequest) new JolokiaRequestBuilder(EXEC, "test:type=bla").build());
 
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*more than one.*")
     public void multipleAttributeNames() throws MalformedObjectNameException {
-        new HistoryKey((JolokiaReadRequest) new JmxRequestBuilder(READ, "test:type=bla").attributes("eins","zwei").build());
+        new HistoryKey((JolokiaReadRequest) new JolokiaRequestBuilder(READ, "test:type=bla").attributes("eins","zwei").build());
 
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*pattern.*")
     public void patternMBeanName() throws MalformedObjectNameException {
-        new HistoryKey((JolokiaReadRequest) new JmxRequestBuilder(READ,"test:type=*").build());
+        new HistoryKey((JolokiaReadRequest) new JolokiaRequestBuilder(READ,"test:type=*").build());
     }
 
 
 
     @Test
     public void readRequest() throws MalformedObjectNameException {
-        JolokiaReadRequest req = new JmxRequestBuilder(READ,"test:type=blub")
+        JolokiaReadRequest req = new JolokiaRequestBuilder(READ,"test:type=blub")
                 .attribute("bla")
                 .path("blub")
                 .build();
@@ -80,7 +80,7 @@ public class HistoryKeyTest {
 
     @Test
     public void readRequestForAll() throws MalformedObjectNameException {
-        JolokiaReadRequest req = new JmxRequestBuilder(READ,"test:type=blub")
+        JolokiaReadRequest req = new JolokiaRequestBuilder(READ,"test:type=blub")
                 .build();
 
         HistoryKey key = new HistoryKey(req);
@@ -91,7 +91,7 @@ public class HistoryKeyTest {
 
     @Test
     public void writeRequest() throws MalformedObjectNameException {
-        JolokiaWriteRequest req = new JmxRequestBuilder(WRITE,"test:type=blub")
+        JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,"test:type=blub")
                 .attribute("bla")
                 .build();
 
@@ -103,7 +103,7 @@ public class HistoryKeyTest {
     
     @Test
     public void execRequest() throws MalformedObjectNameException {
-        JolokiaExecRequest req = new JmxRequestBuilder(EXEC,"test:type=blub")
+        JolokiaExecRequest req = new JolokiaRequestBuilder(EXEC,"test:type=blub")
                 .operation("exec")
                 .arguments("eins","zwei")
                 .build();
@@ -122,11 +122,11 @@ public class HistoryKeyTest {
         HistoryKey key = new HistoryKey("test:type=*","bla",null,null);
         assertTrue(key.isMBeanPattern());
         
-        JolokiaReadRequest req2 = new JmxRequestBuilder(READ,"test:type=hello")
+        JolokiaReadRequest req2 = new JolokiaRequestBuilder(READ,"test:type=hello")
                 .attribute("bla")
                 .build();
 
-        JolokiaReadRequest req3 = new JmxRequestBuilder(READ,"test:name=hello")
+        JolokiaReadRequest req3 = new JolokiaRequestBuilder(READ,"test:name=hello")
                 .attribute("bla")
                 .build();
 

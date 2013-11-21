@@ -7,7 +7,7 @@ import javax.management.JMException;
 
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
@@ -26,7 +26,7 @@ public class RequestDispatcherImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").pathParts("used").build();
+        request = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").pathParts("used").build();
 
     }
 

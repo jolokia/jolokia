@@ -18,6 +18,8 @@ package org.jolokia.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -27,29 +29,32 @@ import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**
- * Abstract JMX request which takes an object name.
+ * Abstract Jolokia request which takes an object name.
  *
  * @author roland
  * @since 15.03.11
  */
 public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
 
-    // object name of the MBean
+    // object name without realm
     private ObjectName objectName;
+
+    // realm for this request (since 2.0)
+    private String realm;
 
     /**
      * Constructor for GET requests
      *
      * @param pType request type
-     * @param pObjectName object name, which must not be null.
+     * @param pName object name, which must not be null.
      * @param pPathParts parts of an path
      * @param pProcessingParams optional init params
      * @throws MalformedObjectNameException if the given MBean name is not a valid object name
      */
-    public JolokiaObjectNameRequest(RequestType pType, String pObjectName, List<String> pPathParts, ProcessingParameters pProcessingParams)
+    public JolokiaObjectNameRequest(RequestType pType, String pName, List<String> pPathParts, ProcessingParameters pProcessingParams)
             throws MalformedObjectNameException {
         super(pType,pPathParts,pProcessingParams);
-        initObjectName(pObjectName);
+        initObjectName(pName);
     }
 
     /**
@@ -57,7 +62,8 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      *
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
-     * @throws MalformedObjectNameException if the given MBean name (key: "mbean") is not a valid object name.
+     * @throws MalformedObjectNameException if the given name (key: "name")
+     *        is not a valid object name (with the realm part removed if given).
      */
     public JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams);
@@ -76,6 +82,9 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     @Override
     protected String getInfo() {
         StringBuffer ret = new StringBuffer("objectName = ").append(objectName.getCanonicalName());
+        if (realm != null) {
+            ret.append(", realm = ").append(realm);
+        }
         String baseInfo = super.getInfo();
         if (baseInfo != null) {
             ret.append(", ").append(baseInfo);
@@ -84,12 +93,21 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     }
 
     /**
-     * Get object name of MBean
+     * Get the object name
      *
      * @return the object name
      */
     public ObjectName getObjectName() {
         return objectName;
+    }
+
+    /**
+     * Get the realm of this request
+     *
+     * @return realm
+     */
+    public String getRealm() {
+        return realm;
     }
 
     /**
@@ -122,11 +140,20 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
         }
     }
 
+    // Split pattern for detecting the realm
+    private final static Pattern REALM_SPLIT_PATTERN = Pattern.compile("^([^@:]*)@(.*)$");
+
     private void initObjectName(String pObjectName) throws MalformedObjectNameException {
         if (pObjectName == null) {
             throw new IllegalArgumentException("Objectname can not be null");
         }
-        objectName = new ObjectName(pObjectName);
+        Matcher matcher = REALM_SPLIT_PATTERN.matcher(pObjectName);
+        if (matcher.matches()) {
+            realm = matcher.group(1);
+            objectName = new ObjectName(matcher.group(2));
+        } else {
+            realm = null;
+            objectName = new ObjectName(pObjectName);
+        }
     }
-
 }

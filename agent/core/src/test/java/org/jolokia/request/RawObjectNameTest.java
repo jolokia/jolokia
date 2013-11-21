@@ -68,19 +68,19 @@ public class RawObjectNameTest {
         assertPropertyNamesOrderedCorrectly(searchRequestBuilder(), true);
     }
 
-    private JmxRequestBuilder listRequestBuilder() throws MalformedObjectNameException {
-        return new JmxRequestBuilder(RequestType.LIST).path("java.lang");
+    private JolokiaRequestBuilder listRequestBuilder() throws MalformedObjectNameException {
+        return new JolokiaRequestBuilder(RequestType.LIST).path("java.lang");
     }
 
-    private JmxRequestBuilder readRequestBuilder() throws MalformedObjectNameException {
-        return new JmxRequestBuilder(RequestType.READ,"java.lang:*").option(ConfigKey.IGNORE_ERRORS,"true");
+    private JolokiaRequestBuilder readRequestBuilder() throws MalformedObjectNameException {
+        return new JolokiaRequestBuilder(RequestType.READ,"java.lang:*").option(ConfigKey.IGNORE_ERRORS,"true");
     }
 
-    private JmxRequestBuilder searchRequestBuilder() throws MalformedObjectNameException {
-        return new JmxRequestBuilder(RequestType.SEARCH,"java.lang:*");
+    private JolokiaRequestBuilder searchRequestBuilder() throws MalformedObjectNameException {
+        return new JolokiaRequestBuilder(RequestType.SEARCH,"java.lang:*");
     }
 
-    private void assertPropertyNamesOrderedCorrectly(JmxRequestBuilder builder, boolean canonical) throws Exception {
+    private void assertPropertyNamesOrderedCorrectly(JolokiaRequestBuilder builder, boolean canonical) throws Exception {
         if (!canonical) {
             builder = builder.option(ConfigKey.CANONICAL_NAMING, "false");
         }

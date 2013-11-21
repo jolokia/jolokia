@@ -12,7 +12,7 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
@@ -37,7 +37,7 @@ public class LocalRequestHandlerTest {
         requestHandler = new LocalRequestHandler(10);
         requestHandler.init(ctx);
         commandHandler = injectCommandHandler(requestHandler);
-        request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
+        request = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 
     private CommandHandler injectCommandHandler(LocalRequestHandler pRequestHandler) throws JMException, NoSuchFieldException, IllegalAccessException {

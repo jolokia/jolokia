@@ -25,7 +25,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;
 
@@ -45,7 +45,7 @@ public class MBeanServerHandlerTest {
     public void setup() throws MalformedObjectNameException {
         TestDetector.reset();
         handler = new MBeanRegistry();
-        request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
+        request = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 
     @AfterMethod

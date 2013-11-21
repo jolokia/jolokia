@@ -31,7 +31,7 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 20.03.13
  */
-public class JmxNotificationRequestTest {
+public class JolokiaNotificationRequestTest {
 
     @Test
     public void testSimpleStack() throws Exception {

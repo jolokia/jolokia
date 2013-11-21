@@ -34,24 +34,24 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Mar 6, 2010
  */
-public class JmxRequestBuilder {
+public class JolokiaRequestBuilder {
 
     private JSONObject request = new JSONObject();
 
     private Map<ConfigKey,String> procConfig = new HashMap<ConfigKey,String>();
 
-    public JmxRequestBuilder(RequestType pType) throws MalformedObjectNameException {
+    public JolokiaRequestBuilder(RequestType pType) throws MalformedObjectNameException {
         this(pType,(String) null);
     }
 
-    public JmxRequestBuilder(RequestType pType, String pObjectName) throws MalformedObjectNameException {
+    public JolokiaRequestBuilder(RequestType pType, String pObjectName) throws MalformedObjectNameException {
         request.put("type",pType.getName());
         if (pObjectName != null) {
             request.put("mbean", pObjectName);
         }
     }
 
-    public JmxRequestBuilder(RequestType pType, ObjectName pMBean) throws MalformedObjectNameException {
+    public JolokiaRequestBuilder(RequestType pType, ObjectName pMBean) throws MalformedObjectNameException {
         this(pType,pMBean.getCanonicalName());
     }
 
@@ -71,82 +71,82 @@ public class JmxRequestBuilder {
         throw new IllegalArgumentException("Unknown type " + type);
     }
 
-    public JmxRequestBuilder attribute(String pAttribute) {
+    public JolokiaRequestBuilder attribute(String pAttribute) {
         request.put("attribute",pAttribute);
         return this;
     }
 
-    public JmxRequestBuilder attributes(List<String> pAttributeNames) {
+    public JolokiaRequestBuilder attributes(List<String> pAttributeNames) {
         request.put("attribute", pAttributeNames);
         return this;
     }
 
-    public JmxRequestBuilder attributes(String ... pAttributeNames) {
+    public JolokiaRequestBuilder attributes(String ... pAttributeNames) {
         request.put("attribute", Arrays.asList(pAttributeNames));
         return this;
     }
 
-    public JmxRequestBuilder operation(String pOperation) {
+    public JolokiaRequestBuilder operation(String pOperation) {
         request.put("operation", pOperation);
         return this;
     }
 
-    public JmxRequestBuilder value(Object pValue) {
+    public JolokiaRequestBuilder value(Object pValue) {
         request.put("value", pValue);
         return this;
     }
 
-    public JmxRequestBuilder pathParts(String... pExtraArgs) {
+    public JolokiaRequestBuilder pathParts(String... pExtraArgs) {
         request.put("path", EscapeUtil.combineToPath(Arrays.asList(pExtraArgs)));
         return this;
     }
 
-    public JmxRequestBuilder path(String pPath) {
+    public JolokiaRequestBuilder path(String pPath) {
         request.put("path",pPath);
         return this;
     }
 
-    public JmxRequestBuilder arguments(List<Object> pArguments) {
+    public JolokiaRequestBuilder arguments(List<Object> pArguments) {
         request.put("arguments", pArguments);
         return this;
     }
 
-    public JmxRequestBuilder arguments(Object ... pArguments) {
+    public JolokiaRequestBuilder arguments(Object ... pArguments) {
         request.put("arguments", Arrays.asList(pArguments));
         return this;
     }
 
-    public JmxRequestBuilder command(NotificationCommandType pType) {
+    public JolokiaRequestBuilder command(NotificationCommandType pType) {
         request.put("command",pType.getType());
         return this;
     }
 
-    public JmxRequestBuilder client(String client) {
+    public JolokiaRequestBuilder client(String client) {
         request.put("client",client);
         return this;
     }
 
-    public JmxRequestBuilder handle(String handle) {
+    public JolokiaRequestBuilder handle(String handle) {
         request.put("handle",handle);
         return this;
     }
 
-    public JmxRequestBuilder mode(String mode) {
+    public JolokiaRequestBuilder mode(String mode) {
         request.put("mode",mode);
         return this;
     }
 
-    public JmxRequestBuilder handback(String handback) {
+    public JolokiaRequestBuilder handback(String handback) {
         request.put("handback",handback);
         return this;
     }
 
-    public JmxRequestBuilder filter(String ...filter) {
+    public JolokiaRequestBuilder filter(String ...filter) {
         request.put("filter", Arrays.asList(filter));
         return this;
     }
 
-    public JmxRequestBuilder option(ConfigKey pKey, String pValue) {
+    public JolokiaRequestBuilder option(ConfigKey pKey, String pValue) {
         assert pKey.isRequestConfig();
         procConfig.put(pKey,pValue);
         return this;

@@ -51,7 +51,7 @@ public class HistoryStoreTest {
 
     @Test
     public void invalidHistoryKey() throws MalformedObjectNameException {
-        JolokiaReadRequest req = new JmxRequestBuilder(READ,"test:type=bla")
+        JolokiaReadRequest req = new JolokiaRequestBuilder(READ,"test:type=bla")
                 .attributes("bla","bla2")
                 .build();
         try {
@@ -62,7 +62,7 @@ public class HistoryStoreTest {
 
     @Test(groups = "java6")
     public void invalidHistoryKeyWithPattern() throws MalformedObjectNameException {
-        JolokiaReadRequest req = new JmxRequestBuilder(READ,"test:type=*")
+        JolokiaReadRequest req = new JolokiaRequestBuilder(READ,"test:type=*")
                 .attribute("bla")
                 .build();
         try {
@@ -74,7 +74,7 @@ public class HistoryStoreTest {
     @Test
     public void configure() throws MalformedObjectNameException {
         JolokiaExecRequest req =
-                new JmxRequestBuilder(EXEC,"test:type=exec")
+                new JolokiaRequestBuilder(EXEC,"test:type=exec")
                         .operation("op")
                         .build();
         store.configure(new HistoryKey(req), new HistoryLimit(2, 0L));
@@ -97,7 +97,7 @@ public class HistoryStoreTest {
     @Test
     public void reconfigure() throws MalformedObjectNameException {
         JolokiaExecRequest req =
-                new JmxRequestBuilder(EXEC,"test:type=exec")
+                new JolokiaRequestBuilder(EXEC,"test:type=exec")
                         .operation("op")
                         .build();
 
@@ -108,7 +108,7 @@ public class HistoryStoreTest {
     @Test
     public void durationBasedEvicting() throws MalformedObjectNameException {
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"test:type=read")
+                new JolokiaRequestBuilder(READ,"test:type=read")
                         .attribute("attr")
                         .build();
         HistoryKey key = new HistoryKey(req);
@@ -121,7 +121,7 @@ public class HistoryStoreTest {
     @Test
     public void singleAttributeRead() throws Exception {
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"test:type=read")
+                new JolokiaRequestBuilder(READ,"test:type=read")
                         .attribute("attr")
                         .build();
         store.configure(new HistoryKey(req), new HistoryLimit(3, 0L));
@@ -133,7 +133,7 @@ public class HistoryStoreTest {
     @Test
     public void singleAttributeWrite() throws Exception {
         JolokiaWriteRequest req =
-                new JmxRequestBuilder(WRITE,"test:type=write")
+                new JolokiaRequestBuilder(WRITE,"test:type=write")
                         .attribute("attr")
                         .value("val1")
                         .build();
@@ -143,7 +143,7 @@ public class HistoryStoreTest {
     @Test
     public void singleAttributeAsListRead() throws Exception {
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"test:type=read")
+                new JolokiaRequestBuilder(READ,"test:type=read")
                         .attributes("attr")
                         .build();
         store.configure(new HistoryKey(req), new HistoryLimit(5, 0L));
@@ -157,7 +157,7 @@ public class HistoryStoreTest {
     public void noAttributesRead() throws Exception {
         String mbean = "test:type=read";
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,mbean)
+                new JolokiaRequestBuilder(READ,mbean)
                         .build();
         store.configure(new HistoryKey(mbean,"attr1",null,null), new HistoryLimit(4, 0L));
         store.configure(new HistoryKey(mbean,"attr2",null,null), new HistoryLimit(5, 0L));
@@ -173,7 +173,7 @@ public class HistoryStoreTest {
     public void multipleAttributeRead() throws Exception {
         String mbean = "test:type=read";
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,mbean)
+                new JolokiaRequestBuilder(READ,mbean)
                         .attributes("attr1","attr2")
                         .build();
         store.configure(new HistoryKey(mbean,"attr1",null,null), new HistoryLimit(3, 0L));
@@ -193,7 +193,7 @@ public class HistoryStoreTest {
         store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null), new HistoryLimit(10, 0L));
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"java.lang:type=Memory")
+                new JolokiaRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
 
@@ -208,7 +208,7 @@ public class HistoryStoreTest {
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), null);
 
                 JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"java.lang:type=Memory")
+                new JolokiaRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
 
@@ -221,7 +221,7 @@ public class HistoryStoreTest {
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), new HistoryLimit(3, 0L));
 
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"java.lang:type=Memory")
+                new JolokiaRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
 
@@ -240,7 +240,7 @@ public class HistoryStoreTest {
     @Test(groups = "java6")
     public void patternAttributeRead() throws Exception {
         JolokiaReadRequest req =
-                new JmxRequestBuilder(READ,"test:type=*")
+                new JolokiaRequestBuilder(READ,"test:type=*")
                         .attributes("attr1","attr2")
                         .build();
         store.configure(new HistoryKey("test:type=read","attr1",null,null), new HistoryLimit(3, 0L));

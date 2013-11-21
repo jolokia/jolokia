@@ -8,13 +8,13 @@
 * JolokiaService for the OSGi agent
 * Converters as a service
 * LogHandler for the SpringJolokiaAgent
+* Rename "JmxRequest" to "JolokiaRequest" (and all subclasses, too)
 
 # Open tasks
 
 * Configuration for Pull Backend for Max Entries
 * Extract services from the core module into own modules/bundles
 * Special request dispatcher for giving access to a Spring Context
-* Rename "JmxRequest" to "JolokiaRequest" (and all subclasses, too)
 
 # Optional
 

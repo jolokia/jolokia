@@ -21,7 +21,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JolokiaNotificationRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.request.notification.NotificationCommandType;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
@@ -67,7 +67,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
     }
 
     private JolokiaNotificationRequest createRequest() throws MalformedObjectNameException {
-        return new JmxRequestBuilder(RequestType.NOTIFICATION).
+        return new JolokiaRequestBuilder(RequestType.NOTIFICATION).
                 command(NotificationCommandType.REGISTER).build();
     }
 

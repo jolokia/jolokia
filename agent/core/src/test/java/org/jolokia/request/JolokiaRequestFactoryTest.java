@@ -23,14 +23,14 @@ import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;
 
-import static org.jolokia.request.JmxRequestBuilder.createMap;
+import static org.jolokia.request.JolokiaRequestBuilder.createMap;
 import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
  * @since 16.03.11
  */
-public class JmxRequestFactoryTest {
+public class JolokiaRequestFactoryTest {
 
     private ProcessingParameters procParams;
 

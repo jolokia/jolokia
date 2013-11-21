@@ -22,7 +22,7 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -83,7 +83,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
         expect(server.isRegistered(memoryBean)).andStubReturn(true);
         replay(server);
-        handle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JolokiaRequest>build());
+        handle.preDispatch(servers, new JolokiaRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JolokiaRequest>build());
         verify(server);
     }
 
@@ -110,7 +110,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
         reset(server);
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
         replay(server);
-        pHandle.preDispatch(servers, new JmxRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JolokiaRequest>build());
+        pHandle.preDispatch(servers, new JolokiaRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JolokiaRequest>build());
         verify(server);
     }
 

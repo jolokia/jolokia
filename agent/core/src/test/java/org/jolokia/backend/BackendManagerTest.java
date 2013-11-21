@@ -28,7 +28,7 @@ import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.*;
@@ -60,7 +60,7 @@ public class BackendManagerTest {
     @Test
     public void simpleRead() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[] { ConfigKey.DEBUG,"true"});
-        JolokiaRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
+        JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
@@ -77,7 +77,7 @@ public class BackendManagerTest {
     public void lazyInit() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[0]);
 
-        JolokiaRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
+        JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
         JSONObject ret = backendManager.handleRequest(req);
@@ -108,7 +108,7 @@ public class BackendManagerTest {
     public void convertError() throws MalformedObjectNameException {
         BackendManager backendManager = createBackendManager(new Object[0]);
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
-        JolokiaRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
+        JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
         assertTrue(!jsonError.containsKey("stackTrace"));
         assertEquals(jsonError.get("message"), "Hans");

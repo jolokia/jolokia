@@ -23,7 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.request.JolokiaListRequest;
-import org.jolokia.request.JmxRequestBuilder;
+import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
@@ -49,7 +49,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = { UnsupportedOperationException.class })
     public void wrongMethod() throws Exception {
-        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).build();
 
         // Should always return true in order to be able to merge lists
         assertTrue(handler.handleAllServersAtOnce(request));
@@ -64,7 +64,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
     @Test
     public void plainTest() throws Exception {
 
-        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).build();
 
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         Set<ObjectName> nameSet = new HashSet<ObjectName>();
@@ -95,7 +95,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     @Test
     public void iOException() throws Exception {
-        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).build();
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).build();
 
         MBeanServerConnection connection = prepareForIOException(false);
 
@@ -112,7 +112,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     @Test(expectedExceptions = {IOException.class})
     public void iOExceptionWithPath() throws Exception {
-        JolokiaListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Runtime","attr").build();
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Runtime","attr").build();
 
         MBeanServerConnection server = prepareForIOException(true);
         Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
