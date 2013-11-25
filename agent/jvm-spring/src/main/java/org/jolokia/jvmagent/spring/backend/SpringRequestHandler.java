@@ -37,6 +37,7 @@ public class SpringRequestHandler extends AbstractJolokiaService<RequestHandler>
 
     /** {@inheritDoc} */
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
+        // return checkRealm("spring",pJolokiaRequest);
         return false;
     }
 
