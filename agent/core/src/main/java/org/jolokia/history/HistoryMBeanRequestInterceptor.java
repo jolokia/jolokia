@@ -44,7 +44,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
         try {
             // Register the Config MBean
 
-            String oname = History.OBJECT_NAME + ",agent=" + pCtx.getServerHandle().getJolokiaId();
+            String oname = History.OBJECT_NAME + ",agent=" + pCtx.getConfig(ConfigKey.JOLOKIA_ID);
             History history = new History(historyStore,oname);
             pCtx.registerMBean(history, oname);
 

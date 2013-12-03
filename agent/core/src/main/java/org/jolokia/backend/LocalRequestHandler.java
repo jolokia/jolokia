@@ -115,7 +115,14 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
         commandHandlerManager.destroy();
     }
 
-    // =====================================================================================================
+    /** {@inheritDoc} */
+    @Override
+    public Object getRuntimeInfo() {
+        ServerHandle handle = jolokiaContext.getServerHandle();
+        return handle.getExtraInfo(mBeanServerManager);
+    }
+
+// =====================================================================================================
 
     // Run initialized if not already done
     private void lazyInitIfNeeded() {
@@ -139,5 +146,6 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
             jolokiaContext.setServerHandle(handle);
         }
     }
+
 
 }

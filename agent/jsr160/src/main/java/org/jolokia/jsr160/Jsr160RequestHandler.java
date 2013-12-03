@@ -146,6 +146,14 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
         return handler.useReturnValueWithPath();
     }
 
+    public String getRealm() {
+        return "proxy";
+    }
+
+    public Object getRuntimeInfo() {
+        return null;
+    }
+
     /** {@inheritDoc} */
     public void destroy() throws JMException {
         commandHandlerManager.destroy();

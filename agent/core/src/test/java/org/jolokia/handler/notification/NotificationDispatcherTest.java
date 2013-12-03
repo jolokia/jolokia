@@ -7,6 +7,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.NotificationBackend;
 import org.jolokia.notification.pull.PullNotificationBackend;
@@ -43,11 +44,11 @@ public class NotificationDispatcherTest {
 
     @BeforeMethod
     public void setup() {
-        ServerHandle serverHandle = new ServerHandle(null, null, null, null, null);
-        serverHandle.setJolokiaId("test");
+        ServerHandle serverHandle = new ServerHandle(null, null, null, null);
         pullBackend = new PullNotificationBackend(10);
         ctx = new TestJolokiaContext.Builder()
                 .serverHandle(serverHandle)
+                .config(ConfigKey.JOLOKIA_ID,"test")
                 .services(NotificationBackend.class,pullBackend)
                 .build();
         pullBackend.init(ctx);

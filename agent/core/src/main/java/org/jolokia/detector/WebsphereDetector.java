@@ -113,9 +113,17 @@ public class WebsphereDetector extends AbstractServerDetector {
      */
     static class WebsphereServerHandle extends ServerHandle {
 
+        private Map<String,String> extraInfo;
+
         /** {@inheritDoc} */
         public WebsphereServerHandle(String pVersion, URL pAgenturl, Map<String, String> pExtrainfo) {
-            super("IBM","websphere", pVersion, pAgenturl, pExtrainfo);
+            super("IBM","websphere", pVersion, pAgenturl);
+            extraInfo = pExtrainfo;
+        }
+
+        @Override
+        public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+            return extraInfo;
         }
 
         /*

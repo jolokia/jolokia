@@ -48,7 +48,6 @@ public class CommandHandlerManager {
                 new WriteHandler(pCtx),
                 new ExecHandler(pCtx),
                 new ListHandler(pCtx),
-                new VersionHandler(pCtx),
                 new SearchHandler(pCtx),
                 pUseNotifications ? new NotificationHandler(pCtx) : null
         };

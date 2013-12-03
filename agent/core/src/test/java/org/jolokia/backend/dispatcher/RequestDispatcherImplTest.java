@@ -72,7 +72,7 @@ public class RequestDispatcherImplTest {
 
 
 
-    private static class TestRequestHandler implements RequestHandler {
+    private static class TestRequestHandler extends AbstractRequestHandler {
 
         private boolean canHandle;
         private boolean useReturnValueWithPath;
@@ -90,6 +90,7 @@ public class RequestDispatcherImplTest {
         }
 
         private TestRequestHandler(boolean pCanHandle, boolean pUseReturnValueWithPath) {
+            super("test",0);
             canHandle = pCanHandle;
             useReturnValueWithPath = pUseReturnValueWithPath;
             id = MAX_ID++;
@@ -106,10 +107,6 @@ public class RequestDispatcherImplTest {
 
         public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
             return useReturnValueWithPath;
-        }
-
-        public int getOrder() {
-            return 0;
         }
 
         public Class<RequestHandler> getType() {

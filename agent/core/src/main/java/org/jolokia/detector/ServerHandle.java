@@ -35,11 +35,7 @@ import org.json.simple.parser.JSONParser;
 public class ServerHandle {
 
     // Empty server handle
-    public static final ServerHandle NULL_SERVER_HANDLE = new ServerHandle(null, null, null, null, null);
-
-    // an unique id of the agent for identifying a
-    // Jolokia agent in a JVM (there can be multiple)
-    private String jolokiaId;
+    public static final ServerHandle NULL_SERVER_HANDLE = new ServerHandle(null, null, null,null);
 
     // product name of server running
     private String product;
@@ -49,9 +45,6 @@ public class ServerHandle {
 
     // the agent URL under which this server can be found
     private URL agentUrl;
-
-    // extra information
-    private Map<String,String> extraInfo;
 
     // vendor name
     private String vendor;
@@ -63,13 +56,11 @@ public class ServerHandle {
      * @param product name of the product
      * @param version version
      * @param agentUrl the URL under which the agent is reachable (or null if not detectable)
-     * @param extraInfo free form extra information
      */
-    public ServerHandle(String vendor, String product, String version, URL agentUrl, Map<String, String> extraInfo) {
+    public ServerHandle(String vendor, String product, String version, URL agentUrl) {
         this.product = product;
         this.version = version;
         this.agentUrl = agentUrl;
-        this.extraInfo = extraInfo;
         this.vendor = vendor;
     }
 
@@ -109,35 +100,6 @@ public class ServerHandle {
     }
 
     /**
-     * Get extra information specific to a server. A subclass can overwrite this in order
-     * to provide dynamic information on the server which gets calculated afresh
-     * on each invocation.
-     *
-     * @param pServerManager MBeanServers to query
-     * @return a map of extra info or <code>null</code> if no extra information is given.
-     */
-    public Map<String,String> getExtraInfo(MBeanServerExecutor pServerManager) {
-        return extraInfo;
-    }
-
-    /**
-     * Get the Jolokia id unique for this agent
-     * @return jolokia id
-     */
-    public String getJolokiaId() {
-        return jolokiaId;
-    }
-
-    /**
-     * Set the jolokia agent id
-     *
-     * @param pJolokiaId jolokia agent id
-     */
-    public void setJolokiaId(String pJolokiaId) {
-        jolokiaId = pJolokiaId;
-    }
-
-    /**
      * Hook for performing certain workarounds/pre processing just before
      * a request gets dispatched
      *
@@ -164,25 +126,14 @@ public class ServerHandle {
     /**
      * Return this info as an JSONObject
      *
-     *
-     *
-     * @param pServerManager servers, for which dynamic part might be queried
      * @return this object in JSON representation
      */
-    public JSONObject toJSONObject(MBeanServerExecutor pServerManager) {
+    public JSONObject toJSONObject() {
         JSONObject ret = new JSONObject();
         addNullSafe(ret, "vendor", vendor);
         addNullSafe(ret, "product", product);
         addNullSafe(ret, "version", version);
         addNullSafe(ret, "agent-url", agentUrl != null ? agentUrl.toExternalForm() : null);
-        Map<String,String> extra = getExtraInfo(pServerManager);
-        if (extra != null) {
-            JSONObject jsonExtra = new JSONObject();
-            for (Map.Entry<String,String> entry : extra.entrySet()) {
-                jsonExtra.put(entry.getKey(),entry.getValue());
-            }
-            ret.put("extraInfo", jsonExtra);
-        }
         return ret;
     }
 
@@ -217,6 +168,18 @@ public class ServerHandle {
                 pCtx.error("Could not parse options '" + optionString + "' as JSON object: " + e, e);
             }
         }
+        return null;
+    }
+
+    /**
+     * Extract extra dynamic information specific for this server handle. It can be obtained
+     * from JMX if necessary and hence an server executor is given for enabling a JMX query.
+     * A subclass should override this since this default method returns null.
+     *
+     * @param pServerManager server manager for allowing a query
+     * @return extra information
+     */
+    public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
         return null;
     }
 }

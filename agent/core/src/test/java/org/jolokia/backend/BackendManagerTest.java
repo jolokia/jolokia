@@ -21,8 +21,7 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.backend.dispatcher.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
@@ -117,12 +116,12 @@ public class BackendManagerTest {
 
     // =========================================================================================
 
-    static class RequestHandlerTest extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
+    static class RequestHandlerTest extends AbstractRequestHandler {
 
         static boolean called = false;
 
         public RequestHandlerTest(Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
-            super(RequestHandler.class,1);
+            super("test",1);
             assertNotNull(pConverters);
             assertNotNull(pRestrictor);
         }
@@ -144,17 +143,14 @@ public class BackendManagerTest {
         public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
             return false;
         }
-
-        public void destroy() throws JMException {
-        }
     }
 
     // ========================================================
 
-    static class RequestHandlerWrong extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
+    static class RequestHandlerWrong extends AbstractRequestHandler {
 
         protected RequestHandlerWrong() {
-            super(RequestHandler.class,1);
+            super("wrong",1);
         }
 
         // No special constructor --> fail
@@ -169,9 +165,6 @@ public class BackendManagerTest {
 
         public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
             return false;
-        }
-
-        public void destroy() throws JMException {
         }
     }
 }

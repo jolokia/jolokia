@@ -39,4 +39,19 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
     protected boolean checkRealm(JolokiaObjectNameRequest pRequest) {
         return realm.equals(pRequest.getRealm());
     }
+
+    /** {@inheritDoc} */
+    public String getRealm() {
+        return realm;
+    }
+
+    /**
+     * Default implementation doesnt any extra information
+     *
+     * @return extra runtime information to add for a version request
+     */
+    public Object getRuntimeInfo() {
+        return null;
+    }
+
 }

@@ -55,7 +55,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String version = detectVersion(pMBeanServerExecutor);
         if (version!= null) {
-            return new GlassfishServerHandle(version,null,new HashMap<String, String>());
+            return new GlassfishServerHandle(version,null);
         } else {
             return null;
         }
@@ -148,16 +148,15 @@ public class GlassfishDetector extends AbstractServerDetector {
          *
          * @param version Glassfish version
          * @param agentUrl agent url
-         * @param extraInfo extra infos
          */
-        public GlassfishServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
-            super("Oracle", "glassfish", version, agentUrl, extraInfo);
+        public GlassfishServerHandle(String version, URL agentUrl) {
+            super("Oracle", "glassfish", version, agentUrl);
         }
 
         @Override
         /** {@inheritDoc} */
         public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
-            Map<String,String> extra = super.getExtraInfo(pServerManager);
+            Map<String,String> extra = new HashMap<String, String>();
             if (extra != null && getVersion().startsWith("3")) {
                 extra.put("amxBooted",Boolean.toString(isAmxBooted(pServerManager)));
             }

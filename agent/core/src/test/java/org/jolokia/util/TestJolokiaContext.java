@@ -63,8 +63,7 @@ public class TestJolokiaContext implements JolokiaContext {
                 handle = pHandle;
             } else {
                 URL url = new URL("http://localhost/jolokia");
-                handle = new ServerHandle("vendor","product","version",url,null);
-                handle.setJolokiaId(UUID.randomUUID().toString());
+                handle = new ServerHandle("vendor","product","version",url);
             }
         } catch (MalformedURLException e) {}
 //        this.requestDispatchManager = new RequestDispatchManager(
@@ -195,7 +194,6 @@ public class TestJolokiaContext implements JolokiaContext {
         }
 
         public TestJolokiaContext build() {
-
             return new TestJolokiaContext(
                     config,
                     restrictor,

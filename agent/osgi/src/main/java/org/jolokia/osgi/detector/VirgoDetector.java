@@ -52,9 +52,24 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
             }
             Map<String,String> extraInfo = new HashMap<String,String>();
             extraInfo.put("type",type);
-            return new ServerHandle("Eclipse","Virgo",version,null,extraInfo);
+            return new VirgoServerHandle(version,extraInfo);
         } else {
             return null;
+        }
+    }
+
+    private class VirgoServerHandle extends ServerHandle {
+
+        private final Map<String, String> extraInfo;
+
+        public VirgoServerHandle(String pVersion, Map<String, String> pExtraInfo) {
+            super("Eclipse","Virgo",pVersion,null);
+            extraInfo = pExtraInfo;
+        }
+
+        @Override
+        public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+            return extraInfo;
         }
     }
 }

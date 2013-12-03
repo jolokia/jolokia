@@ -80,6 +80,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         serviceLookups = new ArrayList<JolokiaServiceLookup>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
         staticLowServices = new HashMap<Class<? extends JolokiaService>, JolokiaService>();
+
+        // The version request handler must be always present and always be first
+        addService(new VersionRequestHandler());
     }
 
 

@@ -41,7 +41,7 @@ public class FelixDetector extends AbstractOsgiServerDetector {
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
             String version = getSystemBundleVersion();
-            return new ServerHandle("Apache","felix",version,null,null);
+            return new ServerHandle("Apache","felix",version,null);
         } else {
             return null;
         }

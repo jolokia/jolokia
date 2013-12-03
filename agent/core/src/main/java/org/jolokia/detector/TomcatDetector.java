@@ -56,7 +56,7 @@ public class TomcatDetector extends AbstractServerDetector {
             String version = matcher.group(2);
             // TODO: Extract access URL
             if (product.toLowerCase().contains("tomcat")) {
-                return new ServerHandle("Apache","tomcat",version,null,null);
+                return new ServerHandle("Apache","tomcat",version,null);
             }
         }
         return null;

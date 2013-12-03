@@ -3,7 +3,6 @@ package org.jolokia.detector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Map;
 import java.util.Set;
 
 import javax.management.MBeanServer;
@@ -40,7 +39,7 @@ public class JBossDetector extends AbstractServerDetector {
                     // Strip off boilerplate
                     version = version.substring(0, idx);
                 }
-                return new JBossServerHandle(version, null, null);
+                return new JBossServerHandle(version, null);
             }
         }
         if (mBeanExists(pMBeanServerExecutor, "jboss.system:type=Server")) {
@@ -49,15 +48,15 @@ public class JBossDetector extends AbstractServerDetector {
             if (versionFull != null) {
                 version = versionFull.replaceAll("\\(.*", "").trim();
             }
-            return new JBossServerHandle(version, null, null);
+            return new JBossServerHandle(version, null);
         }
         String version = getSingleStringAttribute(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
         if (version != null) {
-            return new JBossServerHandle(version, null, null);
+            return new JBossServerHandle(version, null);
         }
         if (mBeanExists(pMBeanServerExecutor, "jboss.modules:*")) {
             // It's a JBoss 7, probably a 7.0.x one ...
-            return new JBossServerHandle("7", null, null);
+            return new JBossServerHandle("7", null);
         }
         return null;
     }
@@ -85,10 +84,9 @@ public class JBossDetector extends AbstractServerDetector {
          *
          * @param version             JBoss version
          * @param agentUrl            URL to the agent
-         * @param extraInfo           extra ifo to return
-          */
-        JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
-            super("RedHat", "jboss", version, agentUrl, extraInfo);
+         */
+        JBossServerHandle(String version, URL agentUrl) {
+            super("RedHat", "jboss", version, agentUrl);
         }
     }
 }

@@ -21,7 +21,6 @@ import java.util.*;
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.detector.*;
 import org.jolokia.service.JolokiaContext;
 
@@ -62,7 +61,6 @@ public class ServerHandleFinder {
     public ServerHandle detectServerHandle(MBeanServerExecutor pMBeanServerExecutor) {
         ServerHandle handle = detectServers(pMBeanServerExecutor);
         handle.postDetect(pMBeanServerExecutor, jolokiaContext);
-        handle.setJolokiaId(extractJolokiaId());
         return handle;
     }
 
@@ -72,15 +70,6 @@ public class ServerHandleFinder {
         SortedSet<ServerDetector> detectors = jolokiaContext.getServices(ServerDetector.class);
         detectors.add(new FallbackServerDetector());
         return detectors;
-    }
-
-    // Extract a unique Id for this agent
-    private String extractJolokiaId() {
-        String id = jolokiaContext.getConfig(ConfigKey.JOLOKIA_ID);
-        if (id != null) {
-            return id;
-        }
-        return Integer.toHexString(hashCode()) + "-unknown";
     }
 
     // Detect the server by delegating it to a set of predefined detectors-default. These will be created

@@ -16,6 +16,8 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.util.Set;
+
 import org.apache.http.client.methods.HttpPost;
 import org.jolokia.Version;
 import org.jolokia.client.exception.J4pException;
@@ -47,12 +49,14 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
    private void verifyResponse(J4pVersionResponse pResp) {
-        assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
-        assertEquals("Proper protocol version",Version.getProtocolVersion(), pResp.getProtocolVersion());
-        assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
-        assertEquals("Jetty", "jetty", pResp.getProduct());
-        assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
-        assertNull(pResp.getExtraInfo());
+       assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
+       assertEquals("Proper protocol version",Version.getProtocolVersion(), pResp.getProtocolVersion());
+       assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
+       assertEquals("Jetty", "jetty", pResp.getProduct());
+       assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
+       Set<String> realms = pResp.getRealms();
+       assertTrue(realms.contains("jmx"));
+       assertEquals(pResp.getExtraInfo("jmx").size(),0);
     }
 
 

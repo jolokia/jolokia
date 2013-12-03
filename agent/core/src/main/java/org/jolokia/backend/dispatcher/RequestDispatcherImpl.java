@@ -27,7 +27,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
      */
     public RequestDispatcherImpl(JolokiaContext pPJolokiaContext) {
         jolokiaContext = pPJolokiaContext;
-
     }
 
     /** {@inheritDoc} */

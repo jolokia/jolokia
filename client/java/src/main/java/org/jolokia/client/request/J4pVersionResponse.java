@@ -17,6 +17,7 @@ package org.jolokia.client.request;
  */
 
 import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONObject;
 
@@ -28,17 +29,26 @@ import org.json.simple.JSONObject;
  */
 public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
 
+    private final String jolokiaId;
+
+    private JSONObject info;
+
     private String agentVersion;
 
     private String protocolVersion;
 
-    private JSONObject info;
+    private JSONObject server;
 
     J4pVersionResponse(J4pVersionRequest pRequest, JSONObject pResponse) {
         super(pRequest,pResponse);
         JSONObject value = (JSONObject) getValue();
         agentVersion = (String) value.get("agent");
         protocolVersion = (String) value.get("protocol");
+        server = (JSONObject) value.get("server");
+        jolokiaId = (String) value.get("id");
+        if (server == null) {
+            server = new JSONObject();
+        }
         info = (JSONObject) value.get("info");
         if (info == null) {
             info = new JSONObject();
@@ -71,7 +81,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      *         could not detect it.
      */
     public String getProduct() {
-        return (String) info.get("product");
+        return (String) server.get("product");
     }
 
     /**
@@ -81,17 +91,35 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @return venor name or <code>null</code>
      */
     public String getVendor() {
-        return (String) info.get("vendor");
+        return (String) server.get("vendor");
     }
 
     /**
-     * Any extra information specific to a certain application server type or <code>null</code> if no
-     * extra information is provided
+     * Get the jolokia id of the server
      *
-     * @return map with string keys and value containing extra information on the server or <code>null</code>
+     * @return jolokia id
      */
-    public Map getExtraInfo() {
-        return (Map) info.get("extraInfo");
+    public String getJolokiaId() {
+        return jolokiaId;
+    }
+
+    /**
+     * Get all supported realms
+     *
+     * @return set of supported realms
+     */
+    public Set<String> getRealms() {
+        return info.keySet();
+    }
+
+    /**
+     * Get extra information for a given realm
+     *
+     * @param pRealm realm for which information is requested
+     * @return extra information for the realm, which might be null
+     */
+    public Map getExtraInfo(String pRealm) {
+        return (Map) info.get(pRealm);
     }
 }
 

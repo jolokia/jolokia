@@ -66,4 +66,19 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      *         if the value should be directly returned
      */
     boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest);
+
+    /**
+     * Get the realm for which this handler is responsible
+     *
+     * @return realm name for which this handler is responsible.
+     */
+    String getRealm();
+
+    /**
+     * any extra runtime associated with this handler.
+     *
+     * @return a object containing extra information and which must be serializable
+     */
+    Object getRuntimeInfo();
+
 }

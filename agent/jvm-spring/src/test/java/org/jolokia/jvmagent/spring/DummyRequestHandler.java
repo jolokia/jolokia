@@ -4,20 +4,18 @@ import java.io.IOException;
 
 import javax.management.JMException;
 
-import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.backend.dispatcher.AbstractRequestHandler;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.AbstractJolokiaService;
 
 /**
  * @author roland
  * @since 22.10.13
  */
-public class DummyRequestHandler extends AbstractJolokiaService<RequestHandler>
-        implements RequestHandler {
+public class DummyRequestHandler extends AbstractRequestHandler {
 
     protected DummyRequestHandler() {
-        super(RequestHandler.class,0);
+        super("dummy",0);
     }
 
     public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {

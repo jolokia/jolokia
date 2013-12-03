@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.easymock.EasyMock;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.LogHandler;
@@ -55,7 +56,12 @@ public class ServerHandleTest {
         product = "dukeNukem";
         version = "forEver";
         url = new URL("http://acim.org");
-        serverHandle = new ServerHandle(vendor, product, version, url, extraInfo);
+        serverHandle = new ServerHandle(vendor, product, version, url) {
+            @Override
+            public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+                return extraInfo;
+            }
+        };
     }
 
     @Test
@@ -69,19 +75,18 @@ public class ServerHandleTest {
 
     @Test
     public void toJson() {
-        JSONObject json = serverHandle.toJSONObject(null);
+        JSONObject json = serverHandle.toJSONObject();
         assertEquals(json.get("vendor"),vendor);
         assertEquals(json.get("product"),product);
         assertEquals(json.get("version"),version);
         assertEquals(json.get("agent-url"),url.toExternalForm());
-        assertEquals(((JSONObject) json.get("extraInfo")).get("extra1"),"value1");
     }
 
     @Test
     public void allNull() {
-        ServerHandle handle = new ServerHandle(null,null,null,null,null);
+        ServerHandle handle = new ServerHandle(null,null,null,null);
         assertNull(handle.getVendor());
-        assertNull(handle.toJSONObject(null).get("extraInfo"));
+        assertNull(handle.toJSONObject().get("extraInfo"));
     }
 
     @Test
