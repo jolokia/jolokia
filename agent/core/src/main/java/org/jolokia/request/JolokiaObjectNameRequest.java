@@ -76,6 +76,9 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         ret.put("mbean",getOrderedObjectName(objectName));
+        if (realm != null) {
+            ret.put("realm",realm);
+        }
         return ret;
     }
 

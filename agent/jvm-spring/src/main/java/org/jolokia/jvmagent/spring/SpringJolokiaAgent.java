@@ -21,6 +21,7 @@ import java.util.*;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
+import org.jolokia.jvmagent.spring.backend.SpringRequestHandler;
 import org.jolokia.service.JolokiaService;
 import org.jolokia.util.LogHandler;
 import org.springframework.beans.factory.DisposableBean;
@@ -45,6 +46,9 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
 
     // Whether to lookup Jolokia services from the spring context
     private boolean lookupServices = false;
+
+    // Whether to expose the spring container itself via Jolokia
+    private boolean exposeApplicationContext = false;
 
     // How to deal with system properties
     private SystemPropertyMode systemPropertyMode;
@@ -73,11 +77,15 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
             config.putAll(lookupSystemProperties());
         }
 
-        // Spring specific config 'autoStart' gets removed here
+        // Spring specific config 'autoStart' gets removed herem
         boolean autoStart = Boolean.parseBoolean(config.remove("autoStart"));
 
         LogHandler logHandler = logHandlerHolder != null ? logHandlerHolder.getLogHandler() : null;
         init(new JolokiaServerConfig(config), logHandler);
+
+        if (exposeApplicationContext) {
+            addService(new SpringRequestHandler(context));
+        }
 
         if (lookupServices) {
             lookupServices();
@@ -159,6 +167,16 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         lookupConfig = pLookupConfig;
     }
 
+
+    /**
+     * Whether to expose the spring container itself for outside access via an own Spring reaml '@spring'
+     *
+     * @param pExposeApplicationContext true if the container itself should be exposed via Jolokia. Default is false
+     */
+    public void setExposeApplicationContext(boolean pExposeApplicationContext) {
+        exposeApplicationContext = pExposeApplicationContext;
+    }
+
     /**
      * Whether to lookup {@link JolokiaService}s from the application context. These are
      * added according to their order to the set of the services present.
@@ -183,7 +201,6 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
 
     /**
      * Set the system property mode for how to deal with configuration coming from system properties
-     *
      */
     public void setSystemPropertiesMode(String pMode) {
         systemPropertyMode = SystemPropertyMode.fromMode(pMode);

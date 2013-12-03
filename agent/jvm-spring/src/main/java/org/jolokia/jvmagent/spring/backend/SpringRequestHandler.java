@@ -1,13 +1,18 @@
 package org.jolokia.jvmagent.spring.backend;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.JMException;
 
+import org.jolokia.backend.dispatcher.AbstractRequestHandler;
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.AbstractJolokiaService;
+import org.jolokia.service.JolokiaContext;
+import org.jolokia.util.RequestType;
+import org.springframework.context.ApplicationContext;
 
 /**
  * A request handler which expose the Spring application context over the
@@ -16,33 +21,44 @@ import org.jolokia.service.AbstractJolokiaService;
  * @author roland
  * @since 22.10.13
  */
-public class SpringRequestHandler extends AbstractJolokiaService<RequestHandler>
+public class SpringRequestHandler extends AbstractRequestHandler
         implements RequestHandler {
+
+    // Application context for looking up beans
+    private ApplicationContext appContext;
+
+    // Map for getting to the proper command handler
+    private Map<RequestType,SpringCommandHandler> commandHandlerMap = new HashMap<RequestType, SpringCommandHandler>();
 
     /**
      * Construction of a spring request handler
      *
-     * @param pOrderId order id. A user of JolokiaService <em>must ensure</em> that the given
-     *                 order id is unique for the given type. It used for ordering the services but is also
-     *                 used as an id when storing it in  a set.
      */
-    protected SpringRequestHandler(int pOrderId) {
-        super(RequestHandler.class, pOrderId);
+    public SpringRequestHandler(ApplicationContext pAppContext) {
+        super("spring",100);
+        this.appContext = pAppContext;
     }
 
     /** {@inheritDoc} */
     public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
-        // return checkRealm("spring",pJolokiaRequest);
-        return false;
+        SpringCommandHandler handler = commandHandlerMap.get(pJmxReq.getType());
+        if (handler == null) {
+            throw new UnsupportedOperationException("No spring command handler for type " + pJmxReq.getType() + " registered");
+        }
+        return handler.handleRequest(pJmxReq);
     }
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-        return false;
+        return true;
+    }
+
+    @Override
+    public void init(JolokiaContext pJolokiaContext) {
+        for (SpringCommandHandler handler : new SpringCommandHandler[] {
+                new SpringReadHandler(appContext,pJolokiaContext)
+        }) {
+            commandHandlerMap.put(handler.getType(),handler);
+        }
     }
 }

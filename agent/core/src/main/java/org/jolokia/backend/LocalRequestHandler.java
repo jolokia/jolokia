@@ -20,15 +20,14 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.RequestHandler;
-import org.jolokia.backend.dispatcher.ServerHandleFinder;
+import org.jolokia.backend.dispatcher.*;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
+import org.jolokia.request.JolokiaObjectNameRequest;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
 
 /**
@@ -37,7 +36,7 @@ import org.jolokia.service.JolokiaContext;
  * @author roland
  * @since Nov 11, 2009
  */
-public class LocalRequestHandler extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
+public class LocalRequestHandler extends AbstractRequestHandler implements RequestHandler {
 
     private MBeanServerExecutorLocal mBeanServerManager;
     private CommandHandlerManager commandHandlerManager;
@@ -52,7 +51,7 @@ public class LocalRequestHandler extends AbstractJolokiaService<RequestHandler> 
      * Create a new local dispatcher which accesses local MBeans.
      */
     public LocalRequestHandler(int pOrder) {
-        super(RequestHandler.class,pOrder);
+        super("jmx",pOrder);
     }
 
     /** {@inheritDoc} */
@@ -72,10 +71,15 @@ public class LocalRequestHandler extends AbstractJolokiaService<RequestHandler> 
         }
     }
 
-    // Can handle any request
+    // Can handle all request starting with "jmx" or with a null realm
     /** {@inheritDoc} */
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
-        return true;
+        if (pJolokiaRequest instanceof JolokiaObjectNameRequest) {
+            JolokiaObjectNameRequest oReq = (JolokiaObjectNameRequest) pJolokiaRequest;
+            return oReq.getRealm() == null || checkRealm(oReq);
+        } else {
+            return true;
+        }
     }
 
     /** {@inheritDoc} */

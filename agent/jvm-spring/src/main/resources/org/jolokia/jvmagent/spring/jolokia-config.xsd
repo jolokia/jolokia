@@ -61,6 +61,14 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="exposeApplicationContext" type="xs:boolean" use="optional">
+        <xs:annotation>
+          <xs:documentation>
+            If set to true, the application context itself is exposed over the Jolokia protocol.
+            The container can be reached by using the realm 'spring@'.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="systemPropertiesMode">
         <xs:annotation>
           <xs:documentation><![CDATA[
@@ -139,7 +147,6 @@
           <xs:enumeration value="sl4j"/>
           <xs:enumeration value="jul"/>
           <xs:enumeration value="commons"/>
-          <xs:enumeration value="logback"/>
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>

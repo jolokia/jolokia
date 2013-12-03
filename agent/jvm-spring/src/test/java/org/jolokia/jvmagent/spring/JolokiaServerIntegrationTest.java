@@ -42,6 +42,7 @@ public class JolokiaServerIntegrationTest extends BaseServerTest {
 
         MBeanServer mbeanServer = (MBeanServer) ctx.getBean("jolokiaMBeanServer");
         assertNotNull(mbeanServer);
+        //Thread.sleep(1000 * 3600);
         checkServerAndStop(server);
     }
 }

@@ -15,6 +15,9 @@
 * Configuration for Pull Backend for Max Entries
 * Extract services from the core module into own modules/bundles
 * Special request dispatcher for giving access to a Spring Context
+* Restrictor must be able to handle realms
+* OrderId for services must be simplified since not every service has
+  an order (i.e. allow an order id of '0')
 
 # Optional
 
@@ -26,3 +29,6 @@
 
 * Spring "log" configuration
 * Spring "lookupServices" config
+* Spring "exposeApplicationContext" config
+* "version" command should not be dispatched
+* "version" should include a list of all available services.

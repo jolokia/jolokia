@@ -54,6 +54,10 @@ public class AgentBeanDefinitionParser extends AbstractBeanDefinitionParser {
         if (StringUtils.hasLength(systemPropertiesMode)) {
             builder.addPropertyValue("systemPropertiesMode",systemPropertiesMode);
         }
+        String exposeApplicationContext = element.getAttribute("exposeApplicationContext");
+        if (StringUtils.hasLength(exposeApplicationContext)) {
+            builder.addPropertyValue("exposeApplicationContext",exposeApplicationContext);
+        }
         return builder.getBeanDefinition();
     }
 
