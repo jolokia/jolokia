@@ -14,9 +14,12 @@ import org.jolokia.util.RequestType;
 abstract public class AbstractRequestHandler extends AbstractJolokiaService<RequestHandler>
         implements RequestHandler {
 
+    // Realm of this request handler
     protected String realm;
 
-    private Set<RequestType> mergedTypes = new HashSet<RequestType>(Arrays.asList(RequestType.SEARCH,RequestType.LIST));
+    // Set of types which should be called for all realms
+    private Set<RequestType> mergedTypes =
+            new HashSet<RequestType>(Arrays.asList(RequestType.SEARCH,RequestType.LIST));
 
     /** {@inheritDoc} */
     protected AbstractRequestHandler(String pRealm,int pOrderId) {
@@ -24,6 +27,8 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
         this.realm = pRealm;
     }
 
+    /** {@inheritDoc} */
+    // Returns if type matches
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         return mergedTypes.contains(pJolokiaRequest.getType()) ||
                ((pJolokiaRequest instanceof JolokiaObjectNameRequest) &&
@@ -46,7 +51,7 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
     }
 
     /**
-     * Default implementation doesnt any extra information
+     * Default implementation doesn't return any extra information, but <code>null</code>
      *
      * @return extra runtime information to add for a version request
      */

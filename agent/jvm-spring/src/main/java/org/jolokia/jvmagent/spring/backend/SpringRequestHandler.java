@@ -33,9 +33,11 @@ public class SpringRequestHandler extends AbstractRequestHandler
     /**
      * Construction of a spring request handler
      *
+     * @param pAppContext the application context from where to fetch the spring beans
+     * @param pOrder order of this service
      */
-    public SpringRequestHandler(ApplicationContext pAppContext) {
-        super("spring",100);
+    public SpringRequestHandler(ApplicationContext pAppContext,int pOrder) {
+        super("spring",pOrder);
         this.appContext = pAppContext;
     }
 

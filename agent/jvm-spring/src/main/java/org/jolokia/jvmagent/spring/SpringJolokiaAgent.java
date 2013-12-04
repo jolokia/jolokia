@@ -84,7 +84,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         init(new JolokiaServerConfig(config), logHandler);
 
         if (exposeApplicationContext) {
-            addService(new SpringRequestHandler(context));
+            addService(new SpringRequestHandler(context,100));
         }
 
         if (lookupServices) {
