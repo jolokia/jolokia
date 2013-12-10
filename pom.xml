@@ -336,8 +336,8 @@
   </scm>
   
   <ciManagement>
-    <system>hudson</system>
-    <url>http://labs.consol.de/hudson/job/jolokia</url>
+    <system>jenkins</system>
+    <url>http://labs.consol.de/jenkins/job/jolokia</url>
   </ciManagement>
     
   <licenses>

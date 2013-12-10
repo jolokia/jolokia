@@ -46,12 +46,9 @@ var gcCount2 = jolokia.metric(
 var agentRequest = jolokia.metric(
     {type:        "read", mbean:"Jolokia:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
         attribute:"requestCount"}, {name:"Jolokia", delta:10 * 1000});
-var hudsonRequest = jolokia.metric(
-    {type:        "read", mbean:"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/hudson,j2eeType=Servlet,name=Stapler",
-        attribute:"requestCount"}, {name:"Hudson", delta:10 * 1000});
-var sonarRequest = jolokia.metric(
-    {type:        "read", mbean:"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/sonar,j2eeType=Servlet,name=default",
-        attribute:"requestCount"}, {name:"Sonar", delta:10 * 1000});
+var jenkinsRequest = jolokia.metric(
+    {type:        "read", mbean:"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jenkins,j2eeType=Servlet,name=Stapler",
+        attribute:"requestCount"}, {name:"Jenkins", delta:10 * 1000});
 var allRequests = jolokia.metric(
     function (resp) {
         var attrs = resp.value;
@@ -108,7 +105,7 @@ $(function () {
 
 
         div.selectAll(".horizon")
-            .data([agentRequest, hudsonRequest, sonarRequest, allRequests])
+            .data([agentRequest, jenkinsRequest, allRequests])
             .enter()
             .append("div")
             .attr("class", "horizon")
