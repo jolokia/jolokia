@@ -62,8 +62,7 @@
       <subsection name="HeapMemory">
         <p>
           The following demo directly queries Jolokia's <a
-          href="http://labs.consol.de/hudson">CI</a> and <a
-          href="http://labs.consol.de/sonar">Sonar</a> server which
+          href="http://labs.consol.de/jenkins">CI</a> which
           is a plain Tomcat 7. The memory charts show the heap memory
           usage as a fraction of the maximum available heap. Note that
           different colors indicate different value ranges in this <a
@@ -82,10 +81,8 @@
           this Tomcat instance. The requests are grouped by 10s, so
           the values are the number of requests received in the last
           10 seconds. The green charts show the requests for the <a
-          href="http://jolokia.org/jolokia">Jolokia agent</a>, the <a
-          href="http://labs.consol.de/hudson">Hudson CI server</a>
-          and the <a href="http://labs.consol.de/sonar">Sonar Code
-          Metrics</a> server. Since this demo queries the Jolokia
+          href="http://jolokia.org/jolokia">Jolokia agent</a> and the <a
+          href="http://labs.consol.de/jenkins">Jenkins  CI server</a>. Since this demo queries the Jolokia
           agent every second, the first chart should show up at least
           10 request per 10 seconds. Finally the number of requests
           served by all deployed servlets is drawn in blue. 

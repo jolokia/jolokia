@@ -270,7 +270,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
-          <version>2.0</version>
+          <version>2.2</version>
         </plugin>
 
       </plugins>
@@ -336,8 +336,8 @@
   </scm>
   
   <ciManagement>
-    <system>hudson</system>
-    <url>http://labs.consol.de/hudson/job/jolokia</url>
+    <system>jenkins</system>
+    <url>http://labs.consol.de/jenkins/job/jolokia</url>
   </ciManagement>
     
   <licenses>
