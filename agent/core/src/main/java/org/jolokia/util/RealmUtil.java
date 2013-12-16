@@ -73,7 +73,7 @@ public final class RealmUtil {
     /**
      * Helper class holding the realm (can be null) and an object name belonging to this realm)
      */
-    public final static class RealmObjectNamePair {
+    public static final class RealmObjectNamePair {
         private String realm;
         private ObjectName objectName;
 
