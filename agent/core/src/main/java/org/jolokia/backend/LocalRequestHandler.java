@@ -83,13 +83,7 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
     }
 
     /** {@inheritDoc} */
-    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-        CommandHandler handler = commandHandlerManager.getCommandHandler(pJolokiaRequest.getType());
-        return handler.useReturnValueWithPath();
-    }
-
-    /** {@inheritDoc} */
-    public Object handleRequest(JolokiaRequest pJmxReq)
+    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         lazyInitIfNeeded();
 
@@ -97,7 +91,7 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
         jolokiaContext.getServerHandle().preDispatch(mBeanServerManager, pJmxReq);
         if (handler.handleAllServersAtOnce(pJmxReq)) {
             try {
-                return handler.handleRequest(mBeanServerManager, pJmxReq);
+                return handler.handleRequest(mBeanServerManager, pJmxReq, pPreviousResult);
             } catch (IOException e) {
                 throw new IllegalStateException("Internal: IOException " + e + ". Shouldn't happen.",e);
             }

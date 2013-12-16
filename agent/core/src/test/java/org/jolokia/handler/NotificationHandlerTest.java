@@ -63,7 +63,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
         // No exception for now
         handler.checkForRestriction(request);
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        handler.doHandleRequest(getMBeanServerManager(connection),request);
+        handler.doHandleRequest(getMBeanServerManager(connection),request, null);
     }
 
     private JolokiaNotificationRequest createRequest() throws MalformedObjectNameException {

@@ -48,7 +48,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext();
-        handler = new SearchHandler(ctx);
+        handler = new SearchHandler(ctx, null);
     }
 
 
@@ -111,6 +111,6 @@ public class SearchHandlerTest extends BaseHandlerTest {
         }
         expect(server.queryNames(oName,null)).andReturn(names);
         replay(server);
-        return (List<String>) handler.handleRequest(getMBeanServerManager(server),request);
+        return (List<String>) handler.handleRequest(getMBeanServerManager(server),request, null);
     }
 }

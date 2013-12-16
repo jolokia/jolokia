@@ -1,13 +1,13 @@
 package org.jolokia.backend.dispatcher;
 
-import java.util.*;
-
 import org.jolokia.request.JolokiaObjectNameRequest;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;
-import org.jolokia.util.RequestType;
 
 /**
+ * Base class for request handlers which provides some utilities methods like deciding on
+ * a request based on a configured realm.
+ *
  * @author roland
  * @since 21.11.13
  */
@@ -16,10 +16,6 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
 
     // Realm of this request handler
     protected String realm;
-
-    // Set of types which should be called for all realms
-    private Set<RequestType> mergedTypes =
-            new HashSet<RequestType>(Arrays.asList(RequestType.SEARCH,RequestType.LIST));
 
     /** {@inheritDoc} */
     protected AbstractRequestHandler(String pRealm,int pOrderId) {
@@ -30,9 +26,7 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
     /** {@inheritDoc} */
     // Returns if type matches
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
-        return mergedTypes.contains(pJolokiaRequest.getType()) ||
-               ((pJolokiaRequest instanceof JolokiaObjectNameRequest) &&
-               checkRealm((JolokiaObjectNameRequest) pJolokiaRequest));
+        return !pJolokiaRequest.isExclusive() || checkRealm(pJolokiaRequest);
     }
 
     /**
@@ -41,8 +35,9 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
      * @param pRequest request to check
      * @return true if this handler can handle this.
      */
-    protected boolean checkRealm(JolokiaObjectNameRequest pRequest) {
-        return realm.equals(pRequest.getRealm());
+    protected boolean checkRealm(JolokiaRequest pRequest) {
+        return pRequest instanceof JolokiaObjectNameRequest &&
+               realm.equals(((JolokiaObjectNameRequest) pRequest).getRealm());
     }
 
     /** {@inheritDoc} */
@@ -51,7 +46,7 @@ abstract public class AbstractRequestHandler extends AbstractJolokiaService<Requ
     }
 
     /**
-     * Default implementation doesn't return any extra information, but <code>null</code>
+     * Default implementation doesn't return any extra information, but <code>null</code>.
      *
      * @return extra runtime information to add for a version request
      */

@@ -76,7 +76,6 @@ public class WriteHandlerTest {
         Integer ret = (Integer) handler.doHandleRequest(getMBeanServer(),req);
         assertEquals(ret,new Integer(10));
         assertEquals(handler.getType(),WRITE);
-        assertFalse(handler.useReturnValueWithPath());
     }
 
     @Test

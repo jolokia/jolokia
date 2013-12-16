@@ -51,7 +51,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      */
     JolokiaExecRequest(String pObjectName, String pOperation, List pArguments,
                        ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams);
+        super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams, true);
         operation = pOperation;
         arguments = pArguments;
     }
@@ -64,7 +64,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
     JolokiaExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams, true);
         arguments = (List) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
     }

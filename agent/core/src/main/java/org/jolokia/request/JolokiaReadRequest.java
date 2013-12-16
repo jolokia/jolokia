@@ -52,7 +52,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
      */
     JolokiaReadRequest(String pObjectName, String pAttribute, List<String> pPathParts,
                        ProcessingParameters pInitParams) throws MalformedObjectNameException {
-        super(RequestType.READ, pObjectName, pPathParts, pInitParams);
+        super(RequestType.READ, pObjectName, pPathParts, pInitParams, true);
         initAttribute(pAttribute);
     }
 
@@ -64,7 +64,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
      * @throws MalformedObjectNameException if the object name extracted is not a proper object name.
      */
     JolokiaReadRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams, true);
         initAttribute(pRequestMap.get("attribute"));
     }
 

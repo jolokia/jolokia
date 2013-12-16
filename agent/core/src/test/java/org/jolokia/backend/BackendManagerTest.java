@@ -126,7 +126,7 @@ public class BackendManagerTest {
             assertNotNull(pRestrictor);
         }
 
-        public Object handleRequest(JolokiaRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JolokiaRequest pJmxReq,Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             called = true;
             if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();
@@ -155,7 +155,7 @@ public class BackendManagerTest {
 
         // No special constructor --> fail
 
-        public Object handleRequest(JolokiaRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JolokiaRequest pJmxReq, Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             return null;
         }
 

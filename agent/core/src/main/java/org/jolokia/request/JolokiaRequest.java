@@ -51,30 +51,42 @@ public abstract class JolokiaRequest {
     // Free-form options
     private JSONObject options = null;
 
+    // 'exclusive' (like 'read') or not (like 'list')
+    private boolean exclusive = true;
+
     /**
      * Constructor used for representing {@link HttpMethod#GET} requests.
      *
+     * The final parameter <code>pExclusive</code> decides whether this request
+     * is an 'exclusive' request, i.e. whether the processing is done exclusively by
+     * a handler or whether multiple requests handlers can add to the result.
+     * Good examples are "list" requests which collects the results from multiple request
+     * handlers whereas "read" only reads the values from a single requesthandler
+     *
      * @param pType request type
-     * @param pPathParts an optional path, splitted up in parts. Not all requests do handle a path.
+     * @param pPathParts an optional path, split up in parts. Not all requests do handle a path.
      * @param pProcessingParams init parameters provided as query params for a GET request. They are used to
      *                    to influence the processing.
+     * @param pExclusive whether the request is an 'exclusive' request or not.
      */
-    protected JolokiaRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams) {
-        this(pType, HttpMethod.GET, pPathParts, pProcessingParams);
+    protected JolokiaRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive) {
+        this(pType, HttpMethod.GET, pPathParts, pProcessingParams,pExclusive);
     }
 
     /**
      * Constructor used for {@link HttpMethod#POST} requests, which receive a JSON payload.
      *
-     * @param pMap map containing requests parameters
+     * @param pMap map containing requests parameters§
      * @param pProcessingParams optional processing parameters (obtained as query parameters or from within the
      *        JSON request)
+     * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
      */
-    public JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams) {
+    protected JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams,boolean pExclusive) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
              EscapeUtil.parsePath((String) pMap.get("path")),
-             pProcessingParams);
+             pProcessingParams,
+             pExclusive);
 
         JSONObject reqOptions = (JSONObject) pMap.get("options");
         if (reqOptions != null) {
@@ -97,10 +109,11 @@ public abstract class JolokiaRequest {
     }
 
     // Common parts of both constructors
-    private JolokiaRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams) {
+    private JolokiaRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive) {
         method = pMethod;
         type = pType;
         pathParts = pPathParts;
+        exclusive = pExclusive;
 
         initParameters(pProcessingParams);
     }
@@ -164,6 +177,16 @@ public abstract class JolokiaRequest {
 
 
     /**
+     * Whether this request is an exclusive request or not. See {@link #JolokiaRequest(RequestType, List, ProcessingParameters, boolean)}
+     * for details
+     *
+     * @return true if this is a request handled by a single handler.
+     */
+    public boolean isExclusive() {
+        return exclusive;
+    }
+
+    /**
      * HTTP method used for creating this request
      *
      * @return HTTP method which lead to this request
@@ -179,6 +202,21 @@ public abstract class JolokiaRequest {
     public ValueFaultHandler getValueFaultHandler() {
         return valueFaultHandler;
     }
+
+    /**
+     * Whether a return value should be returned directly, ignoring any path. In this
+     * case this method should return false.
+     *
+     * By default, a path needs to be applied to the returned value afterwards in order to
+     * get the desired value.
+     *
+     * @return true if the path within the request should be respected when generating the answer later,
+     *         false if the value should be directly returned
+     */
+    public boolean useReturnValueWithPath() {
+        return true;
+    }
+
 
     /**
      * Textual description of this request containing base information. Can be used in toString() methods

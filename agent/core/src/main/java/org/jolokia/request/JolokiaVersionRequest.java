@@ -37,7 +37,7 @@ public class JolokiaVersionRequest extends JolokiaRequest {
      * @param pInitParams optional init parameters
      */
     JolokiaVersionRequest(ProcessingParameters pInitParams) {
-        super(RequestType.VERSION,null,pInitParams);
+        super(RequestType.VERSION,null,pInitParams,true);
     }
 
     /**
@@ -47,7 +47,7 @@ public class JolokiaVersionRequest extends JolokiaRequest {
      * @param pParams processing parameters
      */
     JolokiaVersionRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams,true);
     }
 
     @Override

@@ -42,17 +42,12 @@ public class SpringRequestHandler extends AbstractRequestHandler
     }
 
     /** {@inheritDoc} */
-    public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
+    public Object handleRequest(JolokiaRequest pJmxReq,Object pPreviousResult) throws JMException, IOException, NotChangedException {
         SpringCommandHandler handler = commandHandlerMap.get(pJmxReq.getType());
         if (handler == null) {
             throw new UnsupportedOperationException("No spring command handler for type " + pJmxReq.getType() + " registered");
         }
         return handler.handleRequest(pJmxReq);
-    }
-
-    /** {@inheritDoc} */
-    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-        return true;
     }
 
     @Override

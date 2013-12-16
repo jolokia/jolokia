@@ -92,7 +92,7 @@ public class MBeanInfoData {
     private Stack<String> pathStack;
 
     // Map holding information
-    private JSONObject infoMap;
+    private Map infoMap;
 
     // Initialise updaters
     private static final Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
@@ -111,6 +111,9 @@ public class MBeanInfoData {
         }
     }
 
+    // Realm to prepend (if not null)
+    private String realm;
+
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
@@ -121,11 +124,12 @@ public class MBeanInfoData {
      *                   and is left untouched.
      * @param pUseCanonicalName whether to use canonical name in listings
      */
-    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
+    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pRealm) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
         pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<String>();
         infoMap = new JSONObject();
+        realm = pRealm;
     }
 
     /**
@@ -144,11 +148,11 @@ public class MBeanInfoData {
         if (maxDepth == 1 && pathStack.size() == 0) {
             // Only add domain names with a dummy value if max depth is restricted to 1
             // But only when used without path
-            infoMap.put(pName.getDomain(), 1);
+            infoMap.put(addRealmIfNeeded(pName.getDomain()), 1);
             return true;
         } else if (maxDepth == 2 && pathStack.size() == 0) {
             // Add domain an object name into the map, final value is a dummy value
-            JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
+            Map mBeansMap = getOrCreateJSONObject(infoMap, addRealmIfNeeded(pName.getDomain()));
             mBeansMap.put(getKeyPropertyString(pName),1);
             return true;
         }
@@ -170,8 +174,8 @@ public class MBeanInfoData {
     public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
-        JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
+        Map mBeansMap = getOrCreateJSONObject(infoMap, addRealmIfNeeded(pName.getDomain()));
+        Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         // Trim down stack to get rid of domain/property list
         Stack<String> stack = truncatePathStack(2);
         if (stack.empty()) {
@@ -183,9 +187,13 @@ public class MBeanInfoData {
         if (mBeanMap.size() == 0) {
             mBeansMap.remove(getKeyPropertyString(pName));
             if (mBeansMap.size() == 0) {
-                infoMap.remove(pName.getDomain());
+                infoMap.remove(addRealmIfNeeded(pName.getDomain()));
             }
         }
+    }
+
+    private String addRealmIfNeeded(String pDomain) {
+        return realm != null ? realm + "@" + pDomain : pDomain;
     }
 
     /**
@@ -228,8 +236,8 @@ public class MBeanInfoData {
 
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
-        JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());
-        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
+        Map mBeansMap = getOrCreateJSONObject(infoMap, addRealmIfNeeded(pName.getDomain()));
+        Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 
@@ -241,7 +249,7 @@ public class MBeanInfoData {
      *
      * @return either a Map for a subtree or the leaf value as an object
      */
-    public Object truncate() {
+    public Object applyPath() {
         Object value = navigatePath();
         if (maxDepth == 0) {
             return value;
@@ -256,13 +264,13 @@ public class MBeanInfoData {
 
     // =====================================================================================================
 
-    private void addFullMBeanInfo(JSONObject pMBeanMap, MBeanInfo pMBeanInfo) {
+    private void addFullMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo) {
         for (DataUpdater updater : UPDATERS.values()) {
             updater.update(pMBeanMap,pMBeanInfo,null);
         }
     }
 
-    private void addPartialMBeanInfo(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+    private void addPartialMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
         String what = pPathStack.empty() ? null : pPathStack.pop();
         DataUpdater updater = UPDATERS.get(what);
         if (updater != null) {
@@ -272,8 +280,8 @@ public class MBeanInfoData {
         }
     }
 
-    private JSONObject getOrCreateJSONObject(JSONObject pMap, String pKey) {
-        JSONObject nMap = (JSONObject) pMap.get(pKey);
+    private Map getOrCreateJSONObject(Map pMap, String pKey) {
+        Map nMap = (Map) pMap.get(pKey);
         if (nMap == null) {
             nMap = new JSONObject();
             pMap.put(pKey, nMap);
@@ -317,7 +325,7 @@ public class MBeanInfoData {
     // Navigate to sub map or leaf value
     private Object navigatePath() {
         int size = pathStack.size();
-        JSONObject innerMap = infoMap;
+        Map innerMap = infoMap;
 
         while (size > 0) {
             Collection vals = innerMap.values();

@@ -56,7 +56,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         context = pJolokiaContext;
     }
 
-    public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
+    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
         JSONObject ret = new JSONObject();
         ret.put("agent", Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());

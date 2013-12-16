@@ -76,7 +76,7 @@ public class NotificationHandler extends CommandHandler<JolokiaNotificationReque
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaNotificationRequest request, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return dispatcher.dispatch(serverManager,request.getCommand());
     }
 

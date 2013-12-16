@@ -18,7 +18,7 @@ public class DummyRequestHandler extends AbstractRequestHandler {
         super("dummy",0);
     }
 
-    public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
+    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
         return null;
     }
 
@@ -26,7 +26,4 @@ public class DummyRequestHandler extends AbstractRequestHandler {
         return false;
     }
 
-    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-        return false;
-    }
 }

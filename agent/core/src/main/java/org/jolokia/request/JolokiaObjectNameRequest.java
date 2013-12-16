@@ -18,13 +18,12 @@ package org.jolokia.request;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.config.ConfigKey;
+import org.jolokia.util.RealmUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -49,11 +48,13 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      * @param pName object name, which must not be null.
      * @param pPathParts parts of an path
      * @param pProcessingParams optional init params
+     * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
      * @throws MalformedObjectNameException if the given MBean name is not a valid object name
      */
-    public JolokiaObjectNameRequest(RequestType pType, String pName, List<String> pPathParts, ProcessingParameters pProcessingParams)
+    protected JolokiaObjectNameRequest(RequestType pType, String pName, List<String> pPathParts,
+                                       ProcessingParameters pProcessingParams, boolean pExclusive)
             throws MalformedObjectNameException {
-        super(pType,pPathParts,pProcessingParams);
+        super(pType,pPathParts,pProcessingParams,pExclusive);
         initObjectName(pName);
     }
 
@@ -62,11 +63,13 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      *
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
+     * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only    
      * @throws MalformedObjectNameException if the given name (key: "name")
      *        is not a valid object name (with the realm part removed if given).
      */
-    public JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(pRequestMap, pParams);
+    protected JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams, boolean pExclusive)
+            throws MalformedObjectNameException {
+        super(pRequestMap, pParams, pExclusive);
         initObjectName((String) pRequestMap.get("mbean"));
     }
 
@@ -143,20 +146,9 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
         }
     }
 
-    // Split pattern for detecting the realm
-    private final static Pattern REALM_SPLIT_PATTERN = Pattern.compile("^([^@:]*)@(.*)$");
-
     private void initObjectName(String pObjectName) throws MalformedObjectNameException {
-        if (pObjectName == null) {
-            throw new IllegalArgumentException("Objectname can not be null");
-        }
-        Matcher matcher = REALM_SPLIT_PATTERN.matcher(pObjectName);
-        if (matcher.matches()) {
-            realm = matcher.group(1);
-            objectName = new ObjectName(matcher.group(2));
-        } else {
-            realm = null;
-            objectName = new ObjectName(pObjectName);
-        }
+        RealmUtil.RealmObjectNamePair pair = RealmUtil.extractRealm(pObjectName);
+        realm = pair.getRealm();
+        objectName = pair.getObjectName();
     }
 }

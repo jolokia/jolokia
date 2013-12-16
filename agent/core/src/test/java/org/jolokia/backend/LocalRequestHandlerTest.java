@@ -69,7 +69,7 @@ public class LocalRequestHandlerTest {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(commandHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
         replay(commandHandler);
-        assertEquals(requestHandler.handleRequest(request),result);
+        assertEquals(requestHandler.handleRequest(request,null),result);
     }
 
 
@@ -93,7 +93,7 @@ public class LocalRequestHandlerTest {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(commandHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(commandHandler);
-        requestHandler.handleRequest(request);
+        requestHandler.handleRequest(request,null);
     }
 
     @Test
@@ -101,17 +101,17 @@ public class LocalRequestHandlerTest {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andReturn(result);
+        expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request), isNull())).andReturn(result);
         replay(commandHandler);
-        assertEquals(requestHandler.handleRequest(request),result);
+        assertEquals(requestHandler.handleRequest(request,null),result);
     }
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request))).andThrow(new IOException());
+        expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request), isNull())).andThrow(new IOException());
         replay(commandHandler);
-        requestHandler.handleRequest(request);
+        requestHandler.handleRequest(request,null);
     }
 
 }

@@ -5,12 +5,16 @@ import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.backend.LocalRequestHandler;
 import org.jolokia.request.notification.NotificationCommand;
 import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**
+ * A request dealing with notification requests. These are only used
+ * for the {@link LocalRequestHandler} currently.
+ *
  * @author roland
  * @since 19.03.13
  */
@@ -26,7 +30,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      * @param pParams processing parameters
      */
     JolokiaNotificationRequest(NotificationCommand pCommand, ProcessingParameters pParams) {
-        super(RequestType.NOTIFICATION, null, pParams);
+        super(RequestType.NOTIFICATION, null, pParams, true);
         command = pCommand;
     }
 
@@ -38,7 +42,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      * @param pParams processing parameters
      */
     JolokiaNotificationRequest(NotificationCommand pCommand, Map<String, ?> pRequestMap, ProcessingParameters pParams) {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams, true);
         command = pCommand;
     }
 

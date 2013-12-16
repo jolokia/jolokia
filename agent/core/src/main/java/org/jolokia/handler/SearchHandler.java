@@ -35,13 +35,18 @@ import org.jolokia.util.RequestType;
  */
 public class SearchHandler extends CommandHandler<JolokiaSearchRequest> {
 
+    // A realm which is prefixed to the search result if given
+    private String realm;
+
     /**
      * Create search handler
-     * 
+     *
      * @param pContext jolokia context to use
+     * @param pRealm
      */
-    public SearchHandler(JolokiaContext pContext) {
+    public SearchHandler(JolokiaContext pContext, String pRealm) {
         super(pContext);
+        this.realm = pRealm;
     }
 
     /** {@inheritDoc} */
@@ -56,21 +61,21 @@ public class SearchHandler extends CommandHandler<JolokiaSearchRequest> {
         checkType();
     }
 
-    /** {@inheritDoc}
-     * @param serverManager
-     * @param request*/
+    // Previous result must be a Collection
+    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaSearchRequest request)
+    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaSearchRequest request, Object pPreviousResult)
             throws MBeanException, IOException, NotChangedException {
         checkForModifiedSince(serverManager,request);
         Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
-        Set<String> ret = new LinkedHashSet<String>();
 
+        Collection ret = pPreviousResult != null ? (Collection) pPreviousResult : new ArrayList<String>();
         for (ObjectName name : names) {
-            ret.add(request.getOrderedObjectName(name));
+            String oName = request.getOrderedObjectName(name);
+            ret.add(realm != null ? realm + "@" + oName : oName);
         }
-        return new ArrayList<String>(ret);
+        return ret;
     }
 
     /** {@inheritDoc} */

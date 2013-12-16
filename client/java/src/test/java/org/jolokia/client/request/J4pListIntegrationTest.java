@@ -53,7 +53,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         ObjectName objectName = new ObjectName("java.lang:type=Memory");
         for (J4pListRequest req : new J4pListRequest[]{
                 new J4pListRequest(objectName),
-                new J4pListRequest(getTargetProxyConfig(), objectName)
+                new J4pListRequest(getTargetProxyConfig(), new ObjectName("proxy@" + objectName))
         }) {
             J4pListResponse resp = j4pClient.execute(req);
             Map val = resp.getValue();

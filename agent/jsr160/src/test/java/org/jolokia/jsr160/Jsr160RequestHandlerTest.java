@@ -71,14 +71,9 @@ public class Jsr160RequestHandlerTest {
         assertTrue(dispatcher.canHandle(req));
     }
 
-    @Test
-    public void useReturnValue() {
-        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
-    }
-
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        dispatcher.handleRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()));
+        dispatcher.handleRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()),null);
     }
 
     @Test(expectedExceptions = IOException.class)
@@ -89,21 +84,21 @@ public class Jsr160RequestHandlerTest {
         testCtx = new TestJolokiaContext.Builder().build();
         Jsr160RequestHandler handler = new Jsr160RequestHandler(0);
         handler.init(testCtx);
-        handler.handleRequest(req);
+        handler.handleRequest(req,null);
         setup();
     }
 
     @Test
     public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JolokiaReadRequest req =  preparePostReadRequest(null);
-        Map result = (Map) dispatcher.handleRequest(req);
+        Map result = (Map) dispatcher.handleRequest(req,null);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
     @Test
     public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JolokiaReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
-        assertNotNull(dispatcher.handleRequest(req));
+        assertNotNull(dispatcher.handleRequest(req,null));
     }
 
     @Test
@@ -111,7 +106,7 @@ public class Jsr160RequestHandlerTest {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JolokiaRequest req = preparePostReadRequest("roland");
-            Map result = (Map) dispatcher.handleRequest(req);
+            Map result = (Map) dispatcher.handleRequest(req,null);
             assertTrue(result.containsKey("HeapMemoryUsage"));
         } finally {
             System.clearProperty("TEST_WITH_USER");

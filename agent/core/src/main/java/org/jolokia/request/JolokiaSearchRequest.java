@@ -39,7 +39,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
     JolokiaSearchRequest(String pObjectName, ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(RequestType.SEARCH, pObjectName, null, pParams);
+        super(RequestType.SEARCH, pObjectName, null, pParams, false);
     }
 
     /**
@@ -50,7 +50,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
     JolokiaSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams, false);
     }
 
 

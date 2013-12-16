@@ -32,38 +32,38 @@ public class RequestDispatcherImplTest {
 
     @Test
     public void requestDispatcherNoHandlingHandler() throws JMException, IOException, NotChangedException {
+
         TestRequestHandler testHandler = new TestRequestHandler(false);
-        JolokiaContext context = new TestJolokiaContext.Builder()
-                .services(RequestHandler.class,testHandler)
-                .build();
-        RequestDispatcherImpl requestDispatcher = new RequestDispatcherImpl(context);
-        assertNull(requestDispatcher.dispatch(request));
-        assertFalse(testHandler.handleRequestCalled);
+        try {
+            JolokiaContext context = new TestJolokiaContext.Builder()
+                    .services(RequestHandler.class,testHandler)
+                    .build();
+            RequestDispatcherImpl requestDispatcher = new RequestDispatcherImpl(context);
+            requestDispatcher.dispatch(request);
+            fail("Exception should be thrown");
+        } catch (IllegalStateException exp) {
+            assertFalse(testHandler.handleRequestCalled);
+        }
     }
 
-
-    @Test
-    public void withoutPathParts() throws NotChangedException, IOException, JMException {
-        callRequestHandler(false,null);
-    }
 
     @Test
     public void withPathParts() throws NotChangedException, IOException, JMException {
-        callRequestHandler(true,request.getPathParts());
+        callRequestHandler(request.getPathParts());
     }
 
-    private void callRequestHandler(boolean withPath, List<String> pathParts) throws JMException, IOException, NotChangedException {
+    private void callRequestHandler(List<String> pathParts) throws JMException, IOException, NotChangedException {
         TestRequestHandler h1 = new TestRequestHandler(false);
-        TestRequestHandler h2 = new TestRequestHandler(true,withPath);
+        TestRequestHandler h2 = new TestRequestHandler(true);
         TestRequestHandler h3 = new TestRequestHandler(true);
 
         JolokiaContext context = new TestJolokiaContext.Builder()
                 .services(RequestHandler.class,h1,h2,h3)
                 .build();
         RequestDispatcherImpl requestDispatcher = new RequestDispatcherImpl(context);
-        DispatchResult result = requestDispatcher.dispatch(request);
-        assertEquals(result.getValue(),h2.returnValue);
-        assertEquals(result.getPathParts(),pathParts);
+        Object result = requestDispatcher.dispatch(request);
+        assertEquals(result,h2.returnValue);
+        assertEquals(request.getPathParts(),pathParts);
         assertFalse(h1.handleRequestCalled);
         assertTrue(h2.handleRequestCalled);
         assertFalse(h3.handleRequestCalled);
@@ -75,7 +75,6 @@ public class RequestDispatcherImplTest {
     private static class TestRequestHandler extends AbstractRequestHandler {
 
         private boolean canHandle;
-        private boolean useReturnValueWithPath;
 
         private boolean handleRequestCalled = false;
 
@@ -86,27 +85,18 @@ public class RequestDispatcherImplTest {
         private int id = 0;
 
         private TestRequestHandler(boolean pCanHandle) {
-            this(pCanHandle,false);
-        }
-
-        private TestRequestHandler(boolean pCanHandle, boolean pUseReturnValueWithPath) {
             super("test",0);
             canHandle = pCanHandle;
-            useReturnValueWithPath = pUseReturnValueWithPath;
             id = MAX_ID++;
         }
 
-        public Object handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, NotChangedException {
+        public Object handleRequest(JolokiaRequest pJmxReq, Object pPrevious) throws JMException, IOException, NotChangedException {
             handleRequestCalled = true;
             return returnValue;
         }
 
         public boolean canHandle(JolokiaRequest pJolokiaRequest) {
             return canHandle;
-        }
-
-        public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-            return useReturnValueWithPath;
         }
 
         public Class<RequestHandler> getType() {

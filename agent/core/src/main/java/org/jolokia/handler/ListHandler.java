@@ -2,7 +2,7 @@ package org.jolokia.handler;
 
 
 import java.io.IOException;
-import java.util.Stack;
+import java.util.*;
 
 import javax.management.*;
 
@@ -12,8 +12,7 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JolokiaListRequest;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.EscapeUtil;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -41,6 +40,8 @@ import org.jolokia.util.RequestType;
  */
 public class ListHandler extends CommandHandler<JolokiaListRequest> {
 
+    // Realm used as a prefix
+    private String realm;
 
     /** {@inheritDoc} */
     public RequestType getType() {
@@ -51,9 +52,11 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
      * Constructor
      *
      * @param pContext jolokia context
+     * @param pRealm realm to prepend to all objects names in the returned meta data
      */
-    public ListHandler(JolokiaContext pContext) {
+    public ListHandler(JolokiaContext pContext, String pRealm) {
         super(pContext);
+        this.realm = pRealm;
     }
 
     /**
@@ -72,9 +75,10 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
         checkType();
     }
 
+    // pPreviousResult must be a Map according to the "list" data format specification
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaListRequest pRequest)
+    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaListRequest pRequest, Object pPreviousResult)
             throws IOException, NotChangedException {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
@@ -88,14 +92,21 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
             oName = objectNameFromPath(pathStack);
 
-            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth,pathStack,useCanonicalName);
+            if (oName != null) {
+                if (RealmUtil.matchesRealm(realm, oName)) {
+                    oName = RealmUtil.extractRealm(oName).getObjectName();
+                } else {
+                    return pPreviousResult;
+                }
+            }
+
+            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth,pathStack,useCanonicalName,realm);
             if (oName == null || oName.isPattern()) {
                 pServerManager.each(oName, action);
             } else {
                 pServerManager.call(oName,action);
             }
-
-            return action.getResult();
+            return action.getResult((Map) pPreviousResult);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         } catch (InstanceNotFoundException e) {
@@ -105,25 +116,11 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
         }
     }
 
-    // will not be called
-
     /** {@inheritDoc} */
     @Override
     public Object doHandleRequest(MBeanServerConnection server, JolokiaListRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
-    }
-    @Override
-
-    /**
-     * Path handling is done directly within this handler to avoid
-     * excessive memory consumption by building up the whole list
-     * into memory only for extracting a part from it. So we return false here.
-     *
-     * @return always false
-     */
-    public boolean useReturnValueWithPath() {
-        return false;
     }
 
     // ==========================================================================================================
@@ -154,7 +151,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
     private static class ListMBeanEachAction implements MBeanServerExecutor.MBeanEachCallback, MBeanServerExecutor.MBeanAction<Void> {
 
         // Meta data which will get collected
-        private final MBeanInfoData infoMap;
+        private final MBeanInfoData infoData;
 
         /**
          * Handler used during iterations whe collecting MBean Meta data
@@ -162,10 +159,10 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
          * @param pMaxDepth max depth for the list tree to return
          * @param pPathStack optional stack for picking out a certain path from the list tree
          * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
-         *                          name
+         * @param pRealm realm to prepend to any domain (if not null)
          */
-        public ListMBeanEachAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName) {
-            infoMap = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName);
+        public ListMBeanEachAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pRealm) {
+            infoData = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName,pRealm);
         }
 
         /**
@@ -202,14 +199,14 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
         }
 
         private void lookupMBeanInfo(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, ReflectionException, IOException {
-            if (!infoMap.handleFirstOrSecondLevel(pName)) {
+            if (!infoData.handleFirstOrSecondLevel(pName)) {
                 try {
                     MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);
-                    infoMap.addMBeanInfo(mBeanInfo, pName);
+                    infoData.addMBeanInfo(mBeanInfo, pName);
                 } catch (IOException exp) {
-                    infoMap.handleException(pName, exp);
+                    infoData.handleException(pName, exp);
                 } catch (IllegalStateException exp) {
-                    infoMap.handleException(pName, exp);
+                    infoData.handleException(pName, exp);
                 } catch (IntrospectionException exp) {
                     throw new IllegalArgumentException("Cannot extra MBeanInfo for " + pName + ": " + exp,exp);
                 }
@@ -218,13 +215,26 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
 
 
         /**
-         * Get the overall result
+         * Get the overall result and add it to given value. The values from
+         * the map of this handlers are copied top level in a given base map
+         * (if any was given).
          *
          * @return the meta data suitable for JSON serialization
+         * @param pBaseMap the base map to merge in the result
          */
-        public Object getResult() {
-            return infoMap.truncate();
-        }
+        public Object getResult(Map pBaseMap) {
 
+            Object result = infoData.applyPath();
+            if (pBaseMap != null && result instanceof Map) {
+                // Its not a final value, so we merge it in at the top level
+                Map resultMap = (Map) result;
+                for (Map.Entry entry : (Set<Map.Entry>) resultMap.entrySet()) {
+                    pBaseMap.put(entry.getKey(),entry.getValue());
+                }
+                return pBaseMap;
+            } else {
+                return result;
+            }
+        }
     }
 }

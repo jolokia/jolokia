@@ -30,17 +30,25 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     }
 
     /** {@inheritDoc} */
-    public DispatchResult dispatch(JolokiaRequest pJolokiaRequest) throws JMException, IOException, NotChangedException {
+    public Object dispatch(JolokiaRequest pJolokiaRequest)
+            throws JMException, IOException, NotChangedException {
 
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
+        boolean found = false;
+        Object result = null;
         for (RequestHandler requestHandler : jolokiaContext.getServices(RequestHandler.class)) {
             if (requestHandler.canHandle(pJolokiaRequest)) {
-                Object retValue = requestHandler.handleRequest(pJolokiaRequest);
-                boolean useValueWithPath = requestHandler.useReturnValueWithPath(pJolokiaRequest);
-                return new DispatchResult(retValue,useValueWithPath ? pJolokiaRequest.getPathParts() : null);
+                if (pJolokiaRequest.isExclusive()) {
+                    return requestHandler.handleRequest(pJolokiaRequest,null);
+                } else {
+                    result = requestHandler.handleRequest(pJolokiaRequest,result);
+                }
+                found = true;
             }
         }
-        return null;
+        if (!found) {
+            throw new IllegalStateException("Internal error: No request handler found for handling " + pJolokiaRequest);
+        }
+        return result;
     }
-
 }

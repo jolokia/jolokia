@@ -37,7 +37,7 @@ public class JolokiaListRequest extends JolokiaRequest {
      * @param pParams processing parameters
      */
     JolokiaListRequest(List<String> pPathParts, ProcessingParameters pParams) {
-        super(RequestType.LIST,pPathParts,pParams);
+        super(RequestType.LIST,pPathParts,pParams,false);
     }
 
     /**
@@ -47,7 +47,7 @@ public class JolokiaListRequest extends JolokiaRequest {
      * @param pParams processing parameters
      */
     JolokiaListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams,false);
     }
 
     @Override
@@ -59,6 +59,18 @@ public class JolokiaListRequest extends JolokiaRequest {
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    /**
+     * Path handling is done directly within this handler to avoid
+     * excessive memory consumption by building up the whole list
+     * into memory only for extracting a part from it. So we return false here.
+     *
+     * @return always false
+     */
+    @Override
+    public boolean useReturnValueWithPath() {
+        return false;
     }
 
     // ====================================================================================

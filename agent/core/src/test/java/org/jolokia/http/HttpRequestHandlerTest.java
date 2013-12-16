@@ -165,7 +165,7 @@ public class HttpRequestHandlerTest {
             log.debug((String) anyObject());
             expectLastCall().asStub();
             init(log);
-            expect(requestHandler.handleRequest(EasyMock.<JolokiaRequest>anyObject())).andThrow(e);
+            expect(requestHandler.handleRequest(EasyMock.<JolokiaRequest>anyObject(),EasyMock.anyObject())).andThrow(e);
             replay(requestHandler,log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
@@ -197,7 +197,6 @@ public class HttpRequestHandlerTest {
         requestHandler.destroy();
         expectLastCall().asStub();
         expect(requestHandler.canHandle((JolokiaRequest) anyObject())).andStubReturn(true);
-        expect(requestHandler.useReturnValueWithPath((JolokiaRequest) anyObject())).andStubReturn(false);
         expect(requestHandler.compareTo((RequestHandler) anyObject())).andStubReturn(1);
         SortedSet<RequestHandler> services = createMock(SortedSet.class);
         expect(services.add(requestHandler)).andStubReturn(true);
@@ -233,13 +232,13 @@ public class HttpRequestHandlerTest {
     private void prepareDispatcher(int i, Object pRequest) throws Exception {
         init();
         if (pRequest instanceof JolokiaRequest) {
-            expect(requestHandler.handleRequest((JolokiaRequest) pRequest)).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest((JolokiaRequest) pRequest,anyObject())).andReturn("hello").times(i);
         }
         else if (pRequest instanceof String[]) {
             String a[] = (String[]) pRequest;
-            expect(requestHandler.handleRequest(eqReadRequest(a[0], a[1]))).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest(eqReadRequest(a[0], a[1]),anyObject())).andReturn("hello").times(i);
         } else {
-            expect(requestHandler.handleRequest(isA(JolokiaRequest.class))).andReturn("hello").times(i);
+            expect(requestHandler.handleRequest(isA(JolokiaRequest.class),anyObject())).andReturn("hello").times(i);
         }
         replay(requestHandler);
     }

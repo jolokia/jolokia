@@ -114,19 +114,6 @@ public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
     }
 
     /**
-     * The old value is returned directly, hence we do not want any path conversion
-     * on this value
-     *
-     * @return false;
-     */
-    @Override
-    public boolean useReturnValueWithPath() {
-        return false;
-    }
-
-
-
-    /**
      * Get values for a write request. This method returns an array with two objects.
      * If no path is given (<code>pRequest.getExtraArgs() == null</code>), the returned values
      * are the new value and the old value. However, if a path is set, the returned new value

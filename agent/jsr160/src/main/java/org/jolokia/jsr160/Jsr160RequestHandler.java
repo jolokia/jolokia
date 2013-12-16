@@ -24,13 +24,13 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.backend.dispatcher.AbstractRequestHandler;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.handler.CommandHandler;
 import org.jolokia.handler.CommandHandlerManager;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.*;
+import org.jolokia.service.JolokiaContext;
 
 /**
  * Dispatcher for calling JSR-160 connectors
@@ -38,7 +38,7 @@ import org.jolokia.service.*;
  * @author roland
  * @since Nov 11, 2009
  */
-public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
+public class Jsr160RequestHandler extends AbstractRequestHandler {
 
     // request handler for specific request types
     private CommandHandlerManager commandHandlerManager;
@@ -49,7 +49,7 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
      * @param pOrder service order as given during construction.
      */
     public Jsr160RequestHandler(int pOrder) {
-        super(RequestHandler.class, pOrder);
+        super("proxy",pOrder);
     }
 
     /**
@@ -58,7 +58,7 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
      * @param pContext the jolokia context
      */
     public void init(JolokiaContext pContext) {
-        commandHandlerManager = new CommandHandlerManager(pContext,false);
+        commandHandlerManager = new CommandHandlerManager(pContext,false,getRealm());
     }
 
     /**
@@ -73,9 +73,8 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
      * @throws MBeanException
      * @throws IOException
      */
-    public Object handleRequest(JolokiaRequest pJmxReq)
+    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-
         CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);
         try {
@@ -83,7 +82,7 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
                 MBeanServerExecutor manager = new MBeanServerExecutorRemote(connection);
-                return handler.handleRequest(manager,pJmxReq);
+                return handler.handleRequest(manager,pJmxReq, pPreviousResult);
             } else {
                 return handler.handleRequest(connection,pJmxReq);
             }
@@ -132,18 +131,13 @@ public class Jsr160RequestHandler extends AbstractJolokiaService<RequestHandler>
     }
 
     /**
-     * The request can be handled when a target configuration is given.
+     * The request can be handled when a target configuration is given. The realm name space is optional
+     * here for backwards compatibility.
      *
      * {@inheritDoc}
      */
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         return pJolokiaRequest.getOption("target") != null;
-    }
-
-    /** {@inheritDoc} */
-    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-        CommandHandler handler = commandHandlerManager.getCommandHandler(pJolokiaRequest.getType());
-        return handler.useReturnValueWithPath();
     }
 
     public String getRealm() {

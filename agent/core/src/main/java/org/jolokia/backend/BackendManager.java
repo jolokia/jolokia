@@ -6,7 +6,8 @@ import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.JMException;
 
-import org.jolokia.backend.dispatcher.*;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.dispatcher.RequestInterceptor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.JmxSerializer;
@@ -170,15 +171,15 @@ public class BackendManager {
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JolokiaRequest pJmxReq)
             throws JMException, IOException, NotChangedException {
-        DispatchResult result = requestDispatcher.dispatch(pJmxReq);
-        if (result == null) {
-            throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
-        }
+        Object result = requestDispatcher.dispatch(pJmxReq);
 
         SerializeOptions opts = getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
-                jolokiaCtx.getService(JmxSerializer.class).serialize(result.getValue(), result.getPathParts(), opts);
+                jolokiaCtx.getService(JmxSerializer.class).serialize(
+                        result,
+                        pJmxReq.useReturnValueWithPath() ? pJmxReq.getPathParts() : null,
+                        opts);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);

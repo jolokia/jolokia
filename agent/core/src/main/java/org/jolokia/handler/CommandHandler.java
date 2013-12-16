@@ -65,7 +65,7 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @return whether you want to have
      * {@link #doHandleRequest(MBeanServerConnection, JolokiaRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(MBeanServerExecutor, JolokiaRequest)} (<code>true</code>) called.
+     * {@link #doHandleRequest(MBeanServerExecutor, JolokiaRequest, Object)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(R pRequest) {
         return false;
@@ -150,9 +150,9 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * (like need for merging info as for a <code>list</code> command). This method
      * is only called when {@link #handleAllServersAtOnce(JolokiaRequest)} returns <code>true</code>
      *
-     *
      * @param pServerManager server manager holding all MBeans servers detected
      * @param request request to process
+     * @param pPreviousResult a previous result which for merging requests can be used to merge files
      * @return the object found
      * @throws IOException
      * @throws AttributeNotFoundException
@@ -160,19 +160,19 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object handleRequest(MBeanServerExecutor pServerManager, R request)
+    public Object handleRequest(MBeanServerExecutor pServerManager, R request, Object pPreviousResult)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         checkForRestriction(request);
-        return doHandleRequest(pServerManager,request);
+        return doHandleRequest(pServerManager,request, pPreviousResult);
     }
 
     /**
      * Default implementation fo handling a request for multiple servers at once. A subclass, which returns,
      * <code>true</code> on {@link #handleAllServersAtOnce(JolokiaRequest)}, needs to override this method.
      *
-     *
      * @param serverManager all MBean servers found in this JVM
      * @param request the original request
+     * @param pPreviousResult a previous result which for merging requests can be used to merge files
      * @return the result of the the request.
      * @throws IOException
      * @throws AttributeNotFoundException
@@ -180,18 +180,9 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object doHandleRequest(MBeanServerExecutor serverManager, R request)
+    public Object doHandleRequest(MBeanServerExecutor serverManager, R request, Object pPreviousResult)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return null;
-    }
-
-    /**
-     * Use the path for the return value by default
-     *
-     * @return true
-     */
-    public boolean useReturnValueWithPath() {
-        return true;
     }
 
     /**

@@ -16,6 +16,7 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Map;
 import java.util.Stack;
 
 import javax.management.MBeanInfo;
@@ -38,14 +39,14 @@ abstract class DataUpdater {
     abstract String getKey();
 
     /**
-     * Update the given JSON object with the data extracted from the given
+     * Update the given map object with the data extracted from the given
      * MBeanInfo
      *
-     * @param pJSONObject JSON object to update
+     * @param pMap map to update
      * @param pMBeanInfo info to extract from
      * @param pPathStack stack for further constraining the result
      */
-    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+    void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
 
         boolean isPathEmpty = pPathStack == null || pPathStack.empty();
         String filter = pPathStack != null && !pPathStack.empty() ? pPathStack.pop() : null;
@@ -54,7 +55,7 @@ abstract class DataUpdater {
         JSONObject attrMap = extractData(pMBeanInfo,filter);
 
         if (attrMap.size() > 0) {
-            pJSONObject.put(getKey(), attrMap);
+            pMap.put(getKey(), attrMap);
         } else if (!isPathEmpty) {
             throw new IllegalArgumentException("Path given but extracted value is empty");
         }

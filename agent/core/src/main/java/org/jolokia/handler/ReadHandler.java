@@ -109,8 +109,11 @@ public class ReadHandler extends CommandHandler<JolokiaReadRequest> {
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaReadRequest pRequest)
+    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaReadRequest pRequest, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        // Read command is still exclusive yet (no merging of bulk read requests). If a non-exclusive usage
+        // is going to be implemented, then pPreviousResult must taken care of that it might hold bulk read results
+        // from previous calls.
         ObjectName oName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
         if (oName.isPattern()) {

@@ -16,13 +16,12 @@ package org.jolokia.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Map;
 import java.util.Stack;
 
 import javax.management.MBeanInfo;
 
-import org.json.simple.JSONObject;
-
-import static org.jolokia.handler.list.DataKeys.*;
+import static org.jolokia.handler.list.DataKeys.DESCRIPTION;
 
 /**
  * InfoData updater for the MBean description
@@ -45,8 +44,8 @@ class DescriptionDataUpdater extends DataUpdater {
      * {@inheritDoc}
      * */
      @Override
-    void update(JSONObject pJSONObject, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+    void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
         verifyThatPathIsEmpty(pPathStack);
-        pJSONObject.put(getKey(), pMBeanInfo.getDescription());
+        pMap.put(getKey(), pMBeanInfo.getDescription());
     }
 }

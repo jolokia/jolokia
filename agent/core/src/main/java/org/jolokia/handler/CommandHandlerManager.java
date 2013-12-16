@@ -26,7 +26,9 @@ import org.jolokia.util.RequestType;
 
 /**
  * A request handler manager is responsible for managing so called "request handlers" which
- * are used to dispatch for all command types known to Jolokia
+ * are used to dispatch for all command types known to the Jolokia protocol. Its main purpose
+ * is to keep a mapping between request types and the handler which can deal with that
+ * request type.
  *
  * @author roland
  * @since Nov 13, 2009
@@ -43,12 +45,26 @@ public class CommandHandlerManager {
      * @param pUseNotifications whether notifications should be enabled
      */
     public CommandHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
+        this(pCtx, pUseNotifications,null);
+    }
+
+
+    /**
+     * Constructor, which creates the manager. This object can be used as a singleton
+     * since it doesnt keep a reference to a request being processed
+     *
+     * @param pCtx jolokia context for retrieving various services
+     * @param pUseNotifications whether notifications should be enabled
+     * @param pRealm realm to use for returned names. Certain handlers need this information for returning meta
+     *               data with the proper realm prefixed.
+     */
+    public CommandHandlerManager(JolokiaContext pCtx, boolean pUseNotifications, String pRealm) {
         CommandHandler handlers[] = {
                 new ReadHandler(pCtx),
                 new WriteHandler(pCtx),
                 new ExecHandler(pCtx),
-                new ListHandler(pCtx),
-                new SearchHandler(pCtx),
+                new ListHandler(pCtx, pRealm),
+                new SearchHandler(pCtx, pRealm),
                 pUseNotifications ? new NotificationHandler(pCtx) : null
         };
         for (CommandHandler handler : handlers) {

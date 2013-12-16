@@ -50,7 +50,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
      */
     JolokiaWriteRequest(String pObjectName, String pAttribute, Object pValue, List<String> pPathParts,
                         ProcessingParameters pInitParams) throws MalformedObjectNameException {
-        super(RequestType.WRITE, pObjectName, pPathParts, pInitParams);
+        super(RequestType.WRITE, pObjectName, pPathParts, pInitParams, true);
         attributeName = pAttribute;
         value = pValue;
     }
@@ -63,7 +63,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
     JolokiaWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
-        super(pRequestMap, pParams);
+        super(pRequestMap, pParams, true);
         value = pRequestMap.get("value");
         attributeName = (String) pRequestMap.get("attribute");
     }
@@ -86,6 +86,16 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
         return attributeName;
     }
 
+    /**
+     * The old value is returned directly, hence we do not want any path conversion
+     * on this value
+     *
+     * @return false;
+     */
+    @Override
+    public boolean useReturnValueWithPath() {
+        return false;
+    }
 
     @Override
     public String toString() {

@@ -34,9 +34,31 @@ import org.jolokia.service.JolokiaService;
 public interface RequestHandler extends JolokiaService<RequestHandler> {
     /**
      * Dispatch a {@link JolokiaRequest} to a certain backend
-     * and return the result of the JMX action.
+     * and return the result of the JMX action. Request can be divided can be in two categories:
+     * One which are dealt exclusively with a single handler within a single realm and others which response
+     * is merged from the outcome from several request handlers.
+     *
+     * For non-exclusive requests, multiple request handlers are called in sequence,
+     * where a latter request handler gets the result from a former as argument. In this
+     * case the request handler must either update the give object or return a new object
+     * from the same type with its own results appended.
+     *
+     * Each request type has a fixed type for the
+     * result objects (given and to be returned):
+     *
+     * <dl
+     *     <dt><code>list</code></dt>
+     *     <dd>java.util.Map</dd>
+     *
+     *     <dt><code>search</code></dt>
+     *     <dd>java.util.List</dd>
+     * </dl>
+     *
+     * For exclusive requests, the given object is null
      *
      * @param pJmxReq the request to dispatch
+     * @param pPreviousResult a result object from a previous {@link #handleRequest(JolokiaRequest, Object)} call when
+     *                {@link JolokiaRequest#isExclusive()} is <code>false</code>. This argument can be <code>null</code>
      * @return result object
      * @throws InstanceNotFoundException when a certain MBean could not be found
      * @throws AttributeNotFoundException in case an attributes couldn't be resolved
@@ -45,7 +67,7 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
      *         has been set).
      */
-    Object handleRequest(JolokiaRequest pJmxReq)
+    Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
             throws JMException, IOException, NotChangedException;
 
     /**
@@ -57,17 +79,6 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
     boolean canHandle(JolokiaRequest pJolokiaRequest);
 
     /**
-     * Whether a return value should be returned directly, ignoring any path.
-     * E.g for the WriteHandler this is important to return the original value,
-     * (using the path would return the new value)
-     *
-     * @param pJolokiaRequest request for getting the handler
-     * @return true if the path within the request should be respected, false
-     *         if the value should be directly returned
-     */
-    boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest);
-
-    /**
      * Get the realm for which this handler is responsible
      *
      * @return realm name for which this handler is responsible.
@@ -75,7 +86,8 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
     String getRealm();
 
     /**
-     * any extra runtime associated with this handler.
+     * Any extra runtime associated with this handler, which is used in a "version" request
+     * to get information about request handlers
      *
      * @return a object containing extra information and which must be serializable
      */

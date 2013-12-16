@@ -218,11 +218,11 @@ public abstract class J4pRequest {
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("!(.)");
 
     /**
-     * Split up a path taking into account proper escaping (as descibed in the
+     * Split up a path taking into account proper escaping (as described in the
      * <a href="http://www.jolokia.org/reference">reference manual</a>).
      *
      * @param pArg string to split with escaping taken into account
-     * @return splitted element or null if the argument was null.
+     * @return split element or null if the argument was null.
      */
     protected List<String> splitPath(String pArg) {
         List<String> ret = new ArrayList<String>();

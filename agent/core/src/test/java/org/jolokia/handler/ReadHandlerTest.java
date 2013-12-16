@@ -82,7 +82,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         }
         replay(server);
 
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request,null);
         verify(server);
         for (int i=0;i<attrs.length;i++) {
             assertEquals(vals[i],res.get(attrs[i]));
@@ -103,7 +103,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(testBeanName,"attr1")).andReturn("val1");
         replay(server);
 
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request, null);
         verify(server);
         assertEquals("val0",res.get("attr0"));
         assertEquals("val1",res.get("attr1"));
@@ -121,7 +121,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.queryNames(patternMBean,null)).andReturn(new HashSet());
         replay(server);
         try {
-            handler.handleRequest(getMBeanServerManager(server),request);
+            handler.handleRequest(getMBeanServerManager(server),request, null);
             fail("Exception should be thrown");
         } catch (InstanceNotFoundException exp) {}
     }
@@ -141,7 +141,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
 
         replay(server);
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(1,res.size());
         assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
@@ -176,7 +176,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
             expect(server.getAttribute(beans[1],"common")).andReturn("commonVal1");
             replay(server);
 
-            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request, null);
 
             assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
             assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
@@ -207,7 +207,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[1],"gc0")).andReturn("gcval0");
         replay(server);
 
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request, null);
 
         // Only a single entry fetched
         assertEquals(res.size(),1);
@@ -230,7 +230,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
         replay(server);
         try {
-            handler.handleRequest(getMBeanServerManager(server), request);
+            handler.handleRequest(getMBeanServerManager(server), request, null);
         } catch (IllegalArgumentException exp) {
             // expected
         }
@@ -253,7 +253,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
 
         replay(server);
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(2,res.size());
         assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
@@ -276,7 +276,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         replay(server);
 
         try {
-            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request, null);
             fail("Request should fail since attribute name doesn't match any MBean's attribute");
         } catch (IllegalArgumentException exp) {
             // Expect this since no MBean matches the given attribute
@@ -299,7 +299,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[1],"common")).andReturn("com2");
 
         replay(server);
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+        Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(2,res.size());
         assertEquals("com1",((Map) res.get("java.lang:type=Memory")).get("common"));
@@ -356,7 +356,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         MBeanServer server = createMock(MBeanServer.class);
         replay(restrictor,server);
         try {
-            handler.handleRequest(getMBeanServerManager(server),request);
+            handler.handleRequest(getMBeanServerManager(server),request, null);
             fail("Restrictor should forbid access");
         } catch (SecurityException exp) {}
         verify(restrictor,server);
