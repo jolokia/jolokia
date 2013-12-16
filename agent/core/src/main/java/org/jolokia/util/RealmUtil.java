@@ -14,8 +14,10 @@ import javax.management.ObjectName;
  */
 public class RealmUtil {
 
+    private RealmUtil() { }
+
     // Split pattern for detecting the realm ($1: realm, $2: remaining part)
-    public final static Pattern REALM_PATTERN = Pattern.compile("^([^@:]*)@(.*)$");
+    public static final Pattern REALM_PATTERN = Pattern.compile("^([^@:]*)@(.*)$");
 
     /**
      * Extract an realm part from an {@link ObjectName}.
@@ -71,7 +73,7 @@ public class RealmUtil {
     /**
      * Helper class holding the realm (can be null) and an object name belonging to this realm)
      */
-    public static class RealmObjectNamePair {
+    public final static class RealmObjectNamePair {
         private String realm;
         private ObjectName objectName;
 

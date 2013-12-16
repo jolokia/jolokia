@@ -11,11 +11,11 @@ import org.jolokia.service.AbstractJolokiaService;
  * @author roland
  * @since 21.11.13
  */
-abstract public class AbstractRequestHandler extends AbstractJolokiaService<RequestHandler>
+public abstract class AbstractRequestHandler extends AbstractJolokiaService<RequestHandler>
         implements RequestHandler {
 
     // Realm of this request handler
-    protected String realm;
+    private String realm;
 
     /** {@inheritDoc} */
     protected AbstractRequestHandler(String pRealm,int pOrderId) {

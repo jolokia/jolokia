@@ -5,7 +5,6 @@ import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.backend.LocalRequestHandler;
 import org.jolokia.request.notification.NotificationCommand;
 import org.jolokia.request.notification.NotificationCommandFactory;
 import org.jolokia.util.RequestType;
@@ -13,7 +12,7 @@ import org.json.simple.JSONObject;
 
 /**
  * A request dealing with notification requests. These are only used
- * for the {@link LocalRequestHandler} currently.
+ * for the {@link org.jolokia.backend.LocalRequestHandler} currently.
  *
  * @author roland
  * @since 19.03.13

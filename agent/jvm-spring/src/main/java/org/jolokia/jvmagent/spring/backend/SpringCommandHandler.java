@@ -9,6 +9,8 @@ import org.jolokia.util.RequestType;
 import org.springframework.context.ApplicationContext;
 
 /**
+ * Base class for Jolokia commands accessing the spring container
+ *
  * @author roland
  * @since 02.12.13
  */

@@ -94,9 +94,6 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
     private JMXConnector getConnector(JolokiaRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = new ProxyTargetConfig((Map<String, String>) pJmxReq.getOption("target"));
-        if (targetConfig == null) {
-            throw new IllegalArgumentException("No proxy configuration in request " + pJmxReq);
-        }
         String urlS = targetConfig.getUrl();
         JMXServiceURL url = new JMXServiceURL(urlS);
         Map<String,Object> env = prepareEnv(targetConfig.getEnv());

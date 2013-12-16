@@ -45,9 +45,10 @@ public class ProxyTargetConfig {
      * @param pMap map containing configuration
      */
     public ProxyTargetConfig(Map<String,String> pMap) {
-        if (pMap == null || (url = pMap.get("url")) == null) {
+        if (pMap == null ||  pMap.get("url") == null) {
             throw new IllegalArgumentException("No service url given for JSR-160 target");
         }
+        url = pMap.get("url");
         String user = pMap.get("user");
         if (user != null) {
             env = new HashMap<String, String>();

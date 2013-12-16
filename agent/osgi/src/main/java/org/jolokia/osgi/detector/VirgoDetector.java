@@ -58,7 +58,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
         }
     }
 
-    private class VirgoServerHandle extends ServerHandle {
+    private static class VirgoServerHandle extends ServerHandle {
 
         private final Map<String, String> extraInfo;
 
