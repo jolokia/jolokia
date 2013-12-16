@@ -58,9 +58,8 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
                                                  " found on bean " + beanName + "(class " + clazz + ") while processing " + oName);
 
         } catch (NoSuchBeanDefinitionException exp) {
-            InstanceNotFoundException iexp = new InstanceNotFoundException("No bean with name " + beanName + " found in application context");
-            iexp.initCause(exp);
-            throw iexp;
+            throw (InstanceNotFoundException)
+                    new InstanceNotFoundException("No bean with name " + beanName + " found in application context").initCause(exp);
         }
     }
 }

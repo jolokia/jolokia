@@ -12,7 +12,7 @@ import javax.management.ObjectName;
  * @author roland
  * @since 16.12.13
  */
-public class RealmUtil {
+public final class RealmUtil {
 
     private RealmUtil() { }
 
