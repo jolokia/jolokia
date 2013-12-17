@@ -102,12 +102,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
             }
 
             ListMBeanEachAction action = new ListMBeanEachAction(maxDepth,pathStack,useCanonicalName,realm);
-            if (oName == null || oName.isPattern()) {
-                pServerManager.each(oName, action);
-            } else {
-                pServerManager.call(oName,action);
-            }
-            return action.getResult((Map) pPreviousResult);
+            return executeListAction(pServerManager, (Map) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         } catch (InstanceNotFoundException e) {
@@ -115,6 +110,16 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
         } catch (JMException e) {
             throw new IllegalStateException("Internal error while retrieving list: " + e, e);
         }
+    }
+
+    private Object executeListAction(MBeanServerExecutor pServerManager, Map pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
+            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
+        if (pName == null || pName.isPattern()) {
+            pServerManager.each(pName, pAction);
+        } else {
+            pServerManager.call(pName, pAction);
+        }
+        return pAction.getResult((Map) pPreviousResult);
     }
 
     /** {@inheritDoc} */
