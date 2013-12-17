@@ -43,6 +43,8 @@ import static org.testng.Assert.*;
 public class ListHandlerTest extends BaseHandlerTest {
 
     private ListHandler              handler;
+    private ListHandler              handlerWithRealm;
+
     private MBeanServerExecutorLocal executor;
 
     private TestJolokiaContext ctx;
@@ -51,6 +53,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext();
         handler = new ListHandler(ctx, null);
+        handlerWithRealm = new ListHandler(ctx, "proxy");
         executor = new MBeanServerExecutorLocal();
         executor.init(Collections.<MBeanServerConnection>emptySet());
     }
@@ -64,34 +67,74 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void singleSlashPath() throws Exception {
         for (String p : new String[]{null, "", "/"}) {
             JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).path(p).build();
-            Map res = execute(request);
+
+            Map res = execute(handler,request);
             assertTrue(res.containsKey("java.lang"));
             assertTrue(res.get("java.lang") instanceof Map);
+
+            res = execute(handlerWithRealm,request);
+            assertTrue(res.containsKey("proxy@java.lang"));
+            assertTrue(res.get("proxy@java.lang") instanceof Map);
+
+            Map baseMap = createMap("first","second");
+            res = execute(handler,request,baseMap);
+            assertTrue(res.containsKey("java.lang"));
+            assertEquals(res.get("first"), "second");
         }
+    }
+
+    private Map createMap(String... args) {
+        Map map = new HashMap();
+        for (int i = 0; i < args.length; i+=2) {
+            map.put(args[i], args[i + 1]);
+        }
+        return map;
     }
 
     @Test
     public void domainPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
-        Map res = execute(request);
+        Map res = execute(handler, request);
         assertTrue(res.containsKey("type=Memory"));
-        assertTrue(res.get("type=Memory") instanceof Map);
+        assertTrue(res.get("type=Memory") instanceof Map); 
+
+        res = execute(handlerWithRealm,request);
+        assertEquals(res.size(),0);
+
+        res = execute(handlerWithRealm, request, createMap("first","second"));
+        assertEquals(res.size(),1);
+        assertTrue(res.containsKey("first"));
     }
 
     @Test
     public void propertiesPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
-        Map res = execute(request);
-        for (String k : new String[]{"desc", "op", "attr"}) {
-            assertTrue(res.containsKey(k));
+        Map res = execute(handler, request);
+        checkKeys(res, "desc", "op", "attr");
+
+        res = execute(handlerWithRealm,request);
+        checkKeys(res);
+    }
+
+    private void checkKeys(Map pRes, String ... pKeys) {
+        for (String k : pKeys) {
+            assertTrue(pRes.containsKey(k));
         }
-        assertEquals(res.size(), 3);
+        assertEquals(pRes.size(), pKeys.length);
     }
 
     @Test
     public void attrPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","attr").build();
-        Map res = execute(request);
+
+        Map res = execute(handler, request);
+        assertTrue(res.containsKey("HeapMemoryUsage"));
+
+        res = execute(handlerWithRealm, request);
+        checkKeys(res);
+
+        request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("proxy@java.lang","type=Memory","attr").build();
+        res = execute(handlerWithRealm, request);
         assertTrue(res.containsKey("HeapMemoryUsage"));
     }
 
@@ -115,14 +158,14 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void opPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","op").build();
-        Map res = execute(request);
+        Map res = execute(handler, request);
         assertTrue(res.containsKey("gc"));
     }
 
     @Test
     public void maxDepth1() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"1").build();
-        Map res = execute(request);
+        Map res = execute(handler, request);
         assertTrue(res.containsKey("java.lang"));
         assertFalse(res.get("java.lang") instanceof Map);
     }
@@ -130,7 +173,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void maxDepth2() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"2").build();
-        Map res = execute(request);
+        Map res = execute(handler, request);
         assertTrue(res.containsKey("java.lang"));
         Map inner = (Map) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
@@ -142,7 +185,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void maxDepthAndPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
                 .option(ConfigKey.MAX_DEPTH, "3").build();
-        Map res =  execute(request);
+        Map res =  execute(handler, request);
         assertEquals(res.size(), 3);
         Map ops = (Map) res.get("op");
         assertTrue(ops.containsKey("gc"));
@@ -152,12 +195,23 @@ public class ListHandlerTest extends BaseHandlerTest {
         assertEquals(attrs.size(),attrs.containsKey("ObjectName") ? 5 : 4);
         assertTrue(attrs.get("HeapMemoryUsage") instanceof Map);
         assertTrue(res.get("desc") instanceof String);
+
+    }
+
+    @Test
+    public void leafValue() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory", "desc").build();
+        String value = (String) handler.handleRequest(executor, request, null);
+        assertNotNull(value);
+
+        String newValue = (String) handler.handleRequest(executor, request, createMap("first","second"));
+        assertEquals(newValue,value);
     }
 
     @Test
     public void keyOrder() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).option(ConfigKey.CANONICAL_NAMING,"true").build();
-        Map res = execute(request);
+        Map res = execute(handler, request);
         Map<String,?> mbeans = (Map<String,?>) res.get("java.lang");
         for (String key : mbeans.keySet()) {
             String parts[] = key.split(",");
@@ -170,7 +224,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void truncatedList() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
-        Map res = execute(request);
+        Map res = execute(handler, request);
         assertFalse(res.containsKey("op"));
         assertEquals(res.size(),2);
     }
@@ -180,7 +234,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "attr", "unknownAttribute")
                 .build();
-        execute(request);
+        execute(handler, request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
@@ -189,7 +243,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .pathParts("java.lang", "type=Runtime", "op", "bla")
                 .option(ConfigKey.MAX_DEPTH,"3")
                 .build();
-        execute(request);
+        execute(handler, request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
@@ -198,7 +252,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .pathParts("java.lang", "type=Runtime", "bla")
                 .option(ConfigKey.MAX_DEPTH,"3")
                 .build();
-        execute(request);
+        execute(handler, request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
@@ -206,7 +260,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=*")
                 .build();
-        execute(request);
+        execute(handler, request);
     }
 
     @Test
@@ -216,7 +270,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                         .pathParts("java.lang", "type=Memory", what, "HeapMemoryUsage", "bla")
                         .build();
-                execute(request);
+                execute(handler, request);
                 fail();
             } catch (IllegalArgumentException exp) {
                 assertTrue(exp.getMessage().contains("bla"));
@@ -229,11 +283,12 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "desc", "bla")
                 .build();
-        execute(request);
+        execute(handler, request);
     }
 
-    private Map execute(JolokiaListRequest pRequest) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
-        return (Map) handler.handleRequest(executor, pRequest, null);
+    private Map execute(ListHandler pHandler, JolokiaListRequest pRequest, Map ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
+        return (Map) pHandler.handleRequest(executor, pRequest,
+                                            pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
     }
 
 

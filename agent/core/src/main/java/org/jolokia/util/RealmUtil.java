@@ -59,12 +59,10 @@ public final class RealmUtil {
      */
     public static boolean matchesRealm(String pRealm,ObjectName pName) {
         String domain = pName.getDomain();
-        if (domain != null) {
-            Matcher matcher = REALM_PATTERN.matcher(domain);
-            if (matcher.matches()) {
-                String realmFromName = matcher.group(1);
-                return realmFromName.equals(pRealm);
-            }
+        Matcher matcher = REALM_PATTERN.matcher(domain);
+        if (matcher.matches()) {
+            String realmFromName = matcher.group(1);
+            return realmFromName.equals(pRealm);
         }
         // If no realm given in the name or no domain was given, check whether our realm is null
         return pRealm == null;

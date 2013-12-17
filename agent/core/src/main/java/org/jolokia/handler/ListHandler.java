@@ -13,6 +13,7 @@ import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JolokiaListRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.*;
+import org.json.simple.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -96,7 +97,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
                 if (RealmUtil.matchesRealm(realm, oName)) {
                     oName = RealmUtil.extractRealm(oName).getObjectName();
                 } else {
-                    return pPreviousResult;
+                    return pPreviousResult != null ? pPreviousResult : new JSONObject();
                 }
             }
 
