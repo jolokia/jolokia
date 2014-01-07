@@ -23,7 +23,7 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
     }
 
     @Override
-    public Object handleRequest(JolokiaReadRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException {
+    public Object handleRequest(JolokiaReadRequest pJmxReq, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException {
         ObjectName oName = pJmxReq.getObjectName();
         String beanName = oName.getKeyProperty("name");
         if (beanName == null) {

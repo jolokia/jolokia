@@ -43,5 +43,5 @@ public abstract class SpringCommandHandler<T extends JolokiaRequest> {
         return applicationContext;
     }
 
-    public abstract Object handleRequest(T pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException;
+    public abstract Object handleRequest(T pJmxReq, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException;
 }

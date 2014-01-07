@@ -47,13 +47,14 @@ public class SpringRequestHandler extends AbstractRequestHandler
         if (handler == null) {
             throw new UnsupportedOperationException("No spring command handler for type " + pJmxReq.getType() + " registered");
         }
-        return handler.handleRequest(pJmxReq);
+        return handler.handleRequest(pJmxReq,pPreviousResult);
     }
 
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         for (SpringCommandHandler handler : new SpringCommandHandler[] {
-                new SpringReadHandler(appContext,pJolokiaContext)
+                new SpringReadHandler(appContext,pJolokiaContext),
+                new SpringListHandler(appContext,pJolokiaContext)
         }) {
             commandHandlerMap.put(handler.getType(),handler);
         }
