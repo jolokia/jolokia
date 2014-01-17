@@ -16,8 +16,9 @@ package org.jolokia.osgi.detector;
  * limitations under the License.
  */
 
-import org.jolokia.backend.executor.MBeanServerExecutor;
-import org.jolokia.detector.ServerHandle;
+
+import org.jolokia.backend.ServerHandle;
+import org.jolokia.jmx.MBeanServerExecutor;
 
 /**
  * Detector for the Apache Felix OSGi Platform

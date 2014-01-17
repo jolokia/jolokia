@@ -41,6 +41,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jmx</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <scope>test</scope>

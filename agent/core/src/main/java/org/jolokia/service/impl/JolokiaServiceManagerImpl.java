@@ -22,8 +22,8 @@ import javax.management.*;
 
 import org.jolokia.backend.MBeanRegistry;
 import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.backend.ServerDetector;
 import org.jolokia.config.Configuration;
-import org.jolokia.detector.ServerDetector;
 import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.*;

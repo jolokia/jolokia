@@ -26,7 +26,6 @@ import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -63,39 +62,50 @@ public class BackendManagerTest {
 
     @Test
     public void simpleRead() throws JMException, IOException {
-        BackendManager backendManager = createBackendManager(new Object[] { ConfigKey.DEBUG,"true"});
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
+
+        BackendManager backendManager = createBackendManager(new Object[]{ConfigKey.DEBUG, "true"},
+                                                             createDispatcher(req,"used",123456L));
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
     }
 
-    private BackendManager createBackendManager(Object[] pContextParams) {
-        JolokiaContext ctx = createContext(pContextParams);
-        return new BackendManager(ctx, new TestRequestDispatcher(ctx));
+    private TestRequestDispatcher createDispatcher(Object ... pReq) {
+        TestRequestDispatcher.Builder builder = new TestRequestDispatcher.Builder();
+        for (int i = 0; i < pReq.length; i+=3) {
+            builder.request((JolokiaRequest) pReq[i]).andReturnMapValue(pReq[i+1],pReq[i+2]);
+        }
+        return builder.build();
     }
 
+    private BackendManager createBackendManager(Object[] pContextParams, RequestDispatcher dispatcher) {
+        JolokiaContext ctx = createContext(pContextParams);
+        return new BackendManager(ctx, dispatcher);
+    }
 
     @Test
     public void lazyInit() throws JMException, IOException {
-        BackendManager backendManager = createBackendManager(new Object[0]);
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
+
+        BackendManager backendManager = createBackendManager(new Object[0], createDispatcher(req, "used", 123456L));
+
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
     }
 
    @Test
     public void defaultConfig() {
-        BackendManager backendManager = createBackendManager(new Object[] {  ConfigKey.DEBUG_MAX_ENTRIES,"blabal" });
+        BackendManager backendManager = createBackendManager(new Object[] {  ConfigKey.DEBUG_MAX_ENTRIES,"blabal" },createDispatcher());
     }
 
     @Test
     public void doubleInit() {
         JolokiaContext ctx = createContext();
-        RequestDispatcher dispatcher = new TestRequestDispatcher(ctx);
+        RequestDispatcher dispatcher = createDispatcher();
         BackendManager b1 = new BackendManager(ctx, dispatcher);
         BackendManager b2 = new BackendManager(ctx, dispatcher);
     }
@@ -103,13 +113,13 @@ public class BackendManagerTest {
     @Test
     public void remoteAccessCheck() {
         ctx = new TestJolokiaContext.Builder().restrictor(new AllowAllRestrictor()).build();
-        BackendManager backendManager = new BackendManager(ctx, new TestRequestDispatcher(ctx));
+        BackendManager backendManager = new BackendManager(ctx, createDispatcher());
         assertTrue(backendManager.isRemoteAccessAllowed("localhost", "127.0.0.1"));
     }
 
     @Test
     public void convertError() throws MalformedObjectNameException {
-        BackendManager backendManager = createBackendManager(new Object[0]);
+        BackendManager backendManager = createBackendManager(new Object[0],createDispatcher());
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
@@ -171,4 +181,5 @@ static class RequestHandlerTest extends AbstractRequestHandler {
             return false;
         }
     }
+
 }

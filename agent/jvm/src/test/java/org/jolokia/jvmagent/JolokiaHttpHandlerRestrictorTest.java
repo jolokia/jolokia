@@ -33,7 +33,7 @@ public class JolokiaHttpHandlerRestrictorTest {
     }
 
     private void checkRestrictor(String pParam, TestJolokiaContext pTestContext) throws URISyntaxException, IOException, ParseException, JMException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(pTestContext, new TestRequestDispatcher(pTestContext));
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(pTestContext, new TestRequestDispatcher.Builder().build());
         HttpExchange exchange = JolokiaHttpHandlerTest.prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
         // Simple GET method
         expect(exchange.getRequestMethod()).andReturn("GET");
@@ -43,7 +43,6 @@ public class JolokiaHttpHandlerRestrictorTest {
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
         assertTrue(resp.containsKey("error"));
         assertTrue(((String) resp.get("error")).contains(pParam));
-
     }
 
 

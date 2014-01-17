@@ -1,14 +1,14 @@
 package org.jolokia.util;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.backend.LocalRequestHandler;
+import org.jolokia.backend.NotChangedException;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.JolokiaContext;
 
 /**
  * @author roland
@@ -16,21 +16,48 @@ import org.jolokia.service.JolokiaContext;
  */
 public class TestRequestDispatcher implements RequestDispatcher {
 
-    LocalRequestHandler handler;
+    private final Map stateMap;
 
-    public TestRequestDispatcher() {
-        this(new TestJolokiaContext());
-    }
-
-    public TestRequestDispatcher(JolokiaContext pCtx) {
-        handler = new LocalRequestHandler(0);
-        handler.init(pCtx);
+    private TestRequestDispatcher(Map pStateMap) {
+        stateMap = pStateMap;
     }
 
     public Object dispatch(JolokiaRequest pJolokiaRequest) throws AttributeNotFoundException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, MBeanException {
-        return handler.handleRequest(pJolokiaRequest,null);
+        if (stateMap != null) {
+            return stateMap.get(pJolokiaRequest.toString());
+        } else {
+            return null;
+        }
     }
 
     public void destroy() {
+    }
+
+    public static class Builder {
+
+        JolokiaRequest req;
+        Map stateMap = new HashMap();
+
+        public Builder request(JolokiaRequest pReq) {
+            req = pReq;
+            return this;
+        }
+
+        public Builder andReturnMapValue(Object ... pArgs) {
+            if (req == null) {
+                throw new IllegalArgumentException("No request stored before");
+            }
+            Map value = new HashMap();
+            for (int i = 0; i < pArgs.length; i += 2) {
+                value.put(pArgs[i],pArgs[i+1]);
+            };
+            stateMap.put(req.toString(),value);
+            req = null;
+            return this;
+        }
+
+        public TestRequestDispatcher build() {
+            return new TestRequestDispatcher(stateMap);
+        }
     }
 }

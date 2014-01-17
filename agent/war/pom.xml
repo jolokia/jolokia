@@ -33,9 +33,15 @@
   </parent>
 
   <dependencies>
+
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jmx</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

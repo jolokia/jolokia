@@ -1,8 +1,4 @@
 # ============================================
-# Request Handlers
-org.jolokia.backend.LocalRequestHandler,1000
-
-# ============================================
 # Notification backend
 org.jolokia.notification.pull.PullNotificationBackend
 
@@ -17,14 +13,3 @@ org.jolokia.discovery.JolokiaDiscovery
 # ============================================
 # JSON Serializer
 org.jolokia.converter.Converters
-
-# ===========================================
-# Server Detectors
-org.jolokia.detector.GeronimoDetector
-org.jolokia.detector.JBossDetector
-org.jolokia.detector.TomcatDetector
-org.jolokia.detector.JettyDetector
-org.jolokia.detector.GlassfishDetector
-org.jolokia.detector.WeblogicDetector
-org.jolokia.detector.WebsphereDetector
-

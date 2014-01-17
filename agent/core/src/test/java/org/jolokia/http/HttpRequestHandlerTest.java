@@ -72,7 +72,7 @@ public class HttpRequestHandlerTest {
     @Test
     public void get() throws Exception {
         prepareDispatcher(JolokiaReadRequest.class);
-        JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.HEAP_MEMORY_GET_REQUEST, null);
+        JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.VERSION_GET_REQUEST, null);
         verifyDispatcher(response);
     }
 
@@ -88,7 +88,7 @@ public class HttpRequestHandlerTest {
     @Test
     public void singlePost() throws Exception {
         prepareDispatcher();
-        InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
+        InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.VERSION_POST_REQUEST);
         JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         verifyDispatcher(response);
     }
@@ -97,7 +97,7 @@ public class HttpRequestHandlerTest {
     @Test
     public void doublePost() throws Exception {
         prepareDispatcher(2, JolokiaReadRequest.class);
-        InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "," + HttpTestUtil.HEAP_MEMORY_POST_REQUEST + "]");
+        InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.VERSION_POST_REQUEST + "," + HttpTestUtil.VERSION_POST_REQUEST + "]");
         JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         verifyDispatcher(2, response);
     }

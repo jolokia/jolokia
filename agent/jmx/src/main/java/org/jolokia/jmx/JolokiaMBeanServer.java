@@ -26,6 +26,7 @@ import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.Converters;
+import org.jolokia.converter.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.converter.json.ValueFaultHandler;
 
@@ -41,7 +42,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
     private MBeanServer     delegateServer;
     private Set<ObjectName> delegatedMBeans;
 
-    private Converters converters;
+    private JmxSerializer converters;
 
     /**
      * Create a private MBean server
@@ -60,7 +61,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
         // Register MBean first on this MBean Server
         ObjectInstance ret = super.registerMBean(object, name);
 
-        // Check, whether it is annotated with @JsonMBean. Only the outermost class of an inheritance is
+        // Check, whether it is annotated with @JsonMBean. Only the outermost class of an inheritance chain is
         // considered.
         JsonMBean anno = extractJsonMBeanAnnotation(object);
         if (anno != null) {

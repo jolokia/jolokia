@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.easymock.EasyMock;
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.Version;
+import org.jolokia.config.*;
 import org.jolokia.config.Configuration;
 import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -250,13 +252,13 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         StringWriter sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         replay(request, response);
 
         servlet.doGet(request, response);
 
-        assertTrue(sw.toString().contains("used"));
+        assertTrue(sw.toString().contains(Version.getAgentVersion()));
         servlet.destroy();
     }
 
@@ -270,7 +272,7 @@ public class AgentServletTest {
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
-                        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+                        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
                         expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
                         Vector params = new Vector();
                         params.add("debug");
@@ -295,13 +297,13 @@ public class AgentServletTest {
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
 
-        preparePostRequest(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
+        preparePostRequest(HttpTestUtil.VERSION_POST_REQUEST);
 
         replay(request, response);
 
         servlet.doPost(request, response);
 
-        assertTrue(responseWriter.toString().contains("used"));
+        assertTrue(responseWriter.toString().contains(Version.getAgentVersion()));
         servlet.destroy();
     }
 
@@ -319,14 +321,14 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
 
         replay(request, response);
 
         servlet.doGet(request, response);
 
-        assertTrue(sw.toString().contains("used"));
+        assertTrue(sw.toString().contains(Version.getAgentVersion()));
         servlet.destroy();
     }
 
@@ -393,7 +395,7 @@ public class AgentServletTest {
                 }
 
         );
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         replay(request, response);
 
@@ -423,7 +425,7 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
 
         replay(request, response);
 
@@ -477,20 +479,20 @@ public class AgentServletTest {
         servlet.init(config);
 
         StringWriter sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         replay(request, response);
 
         servlet.doGet(request, response);
 
-        assertTrue(sw.toString().contains("used"));
+        assertTrue(sw.toString().contains(Version.getAgentVersion()));
         servlet.destroy();
     }
 
 
     @BeforeMethod
     void resetTestDetector() {
-        TestDetector.reset();
+//        TestDetector.reset();
     }
     
     //@AfterMethod
@@ -519,7 +521,6 @@ public class AgentServletTest {
         }
         context.log((String) anyObject());
         EasyMock.expectLastCall().asStub();
-        context.log(find("TestDetector"),isA(RuntimeException.class));
     }
 
     private String[] prepareDebugLogging(String[] pInitParams) {

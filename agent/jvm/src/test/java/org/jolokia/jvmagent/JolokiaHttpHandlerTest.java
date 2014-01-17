@@ -22,15 +22,17 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
-import org.jolokia.util.TestJolokiaContext;
-import org.jolokia.util.TestRequestDispatcher;
+import org.jolokia.request.JolokiaRequestBuilder;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -47,20 +49,21 @@ public class JolokiaHttpHandlerTest {
 
     private JolokiaHttpHandler handler;
     private TestJolokiaContext ctx;
-    private TestRequestDispatcher requestDispatcher;
+    private RequestDispatcher requestDispatcher;
 
 
     @BeforeMethod
-    public void setup() {
+    public void setup() throws MalformedObjectNameException {
         ctx = getContext();
-        requestDispatcher = new TestRequestDispatcher(ctx);
+        requestDispatcher = new TestRequestDispatcher.Builder()
+                .request(new JolokiaRequestBuilder(RequestType.READ, "java.lang:type=Memory").attribute("HeapMemoryUsage").build())
+                .andReturnMapValue("used",4711L).build();
         handler = new JolokiaHttpHandler(ctx, requestDispatcher);
     }
 
     @AfterMethod
     public void tearDown() throws JMException {
         if (handler != null) {
-            requestDispatcher.destroy();
             handler = null;
         }
     }

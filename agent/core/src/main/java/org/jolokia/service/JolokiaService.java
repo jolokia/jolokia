@@ -21,8 +21,7 @@ package org.jolokia.service;
  * for various tasks. Each service has a specific type describing its API. Also, it has an
  * order which is used when multiple services exist. Services can be created in many ways, either
  * statically (and then registered at the {@link JolokiaServiceManager}) or dynamically via a
- * {@link JolokiaServiceLookup}
- * (which is especially suited for looking up OSGi services).
+ * {@link JolokiaServiceLookup} (which is especially suited for looking up OSGi services).
  *
  * @author roland
  * @since 28.03.13
@@ -35,7 +34,7 @@ public interface JolokiaService<T extends JolokiaService> extends Comparable<T> 
 
     /**
      * Order of the service. The higher the number, the later in the list of services this service appears.
-     * Default order is 100 by convention.
+     * Default order is 100.
      *
      * @return the order of this service
      */

@@ -6,10 +6,10 @@ import java.util.Set;
 import javax.management.JMException;
 
 import org.jolokia.Version;
+import org.jolokia.backend.NotChangedException;
+import org.jolokia.backend.ServerHandle;
 import org.jolokia.backend.dispatcher.RequestHandler;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;

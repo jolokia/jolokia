@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import javax.management.JMException;
 
+import org.jolokia.backend.NotChangedException;
 import org.jolokia.backend.dispatcher.AbstractRequestHandler;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
 
 /**

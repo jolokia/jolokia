@@ -8,7 +8,6 @@ import javax.management.JMException;
 
 import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.dispatcher.RequestInterceptor;
-import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;

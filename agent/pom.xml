@@ -42,6 +42,7 @@
     <module>osgi</module>
     <module>osgi-bundle</module>
     <module>jmx</module>
+    <module>service/jmx</module>
   </modules>
 
   <profiles>
