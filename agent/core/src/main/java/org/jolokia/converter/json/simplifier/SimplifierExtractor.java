@@ -136,6 +136,11 @@ abstract class SimplifierExtractor<T> implements Extractor {
      */
     interface AttributeExtractor<T> {
         /**
+         * Exception to be thrown when the result of this extractor should be omitted in the response
+         */
+        class SkipAttributeException extends Exception {}
+
+        /**
          * Extract the real value from a given value
          * @param value to extract from
          * @return the extracted value
@@ -143,11 +148,6 @@ abstract class SimplifierExtractor<T> implements Extractor {
          *                                should be omitted in the result
          */
         Object extract(T value) throws SkipAttributeException;
-
-        /**
-         * Exception to be thrown when the result of this extractor should be ommitted in the response
-         */
-        class SkipAttributeException extends Exception {}
     }
 
 
