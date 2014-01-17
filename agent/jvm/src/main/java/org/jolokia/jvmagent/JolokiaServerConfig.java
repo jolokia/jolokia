@@ -16,19 +16,17 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import com.sun.net.httpserver.Authenticator;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+
+import com.sun.net.httpserver.Authenticator;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 
 /**
  * Configuration required for the JolokiaServer
@@ -237,37 +235,45 @@ public class JolokiaServerConfig {
                 Class authClass = Class.forName(authenticatorClass);
                 if (!Authenticator.class.isAssignableFrom(authClass)) {
                     throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
-                            "] is not a subclass of Authenticator");
+                                                       "] is not a subclass of Authenticator");
                 }
-
-                try {
-                    // prefer constructor that takes configuration
-                    try {
-                        Constructor constructorThatTakesConfiguration = authClass.getConstructor(Configuration.class);
-                        authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
-                    } catch (NoSuchMethodException ignore) {
-
-                        // fallback to default constructor
-                        try {
-                            Constructor defaultConstructor = authClass.getConstructor();
-                            authenticator = (Authenticator) defaultConstructor.newInstance();
-                        } catch (NoSuchMethodException e) {
-                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
-                        } catch (InvocationTargetException e) {
-                            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
-                        }
-
-                    } catch (InvocationTargetException e) {
-                        throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
-                    }
-                } catch (InstantiationException e) {
-                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
-                }
+                lookupAuthenticator(authClass);
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Cannot find authenticator class", e);
             }
+        }
+    }
+
+    private void lookupAuthenticator(Class pAuthClass) {
+        try {
+            // prefer constructor that takes configuration
+            try {
+                Constructor constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+                authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
+            } catch (NoSuchMethodException ignore) {
+                // Next try
+                authenticator = lookupAuthenticatorWithDefaultConstructor(pAuthClass, ignore);
+            } catch (InvocationTargetException e) {
+                throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
+            }
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+        }
+    }
+
+    private Authenticator lookupAuthenticatorWithDefaultConstructor(Class pAuthClass, NoSuchMethodException ignore) throws InstantiationException, IllegalAccessException {
+        // fallback to default constructor
+        try {
+            Constructor defaultConstructor = pAuthClass.getConstructor();
+            return (Authenticator) defaultConstructor.newInstance();
+        } catch (NoSuchMethodException e) {
+            e.initCause(ignore);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
+        } catch (InvocationTargetException e) {
+            e.initCause(ignore);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
         }
     }
 

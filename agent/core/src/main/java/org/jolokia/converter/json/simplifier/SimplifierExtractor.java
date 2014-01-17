@@ -142,7 +142,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
          * @throws SkipAttributeException if this value which is about to be extracted
          *                                should be omitted in the result
          */
-        Object extract(T value) throws AttributeExtractor.SkipAttributeException;
+        Object extract(T value) throws SkipAttributeException;
 
         /**
          * Exception to be thrown when the result of this extractor should be ommitted in the response

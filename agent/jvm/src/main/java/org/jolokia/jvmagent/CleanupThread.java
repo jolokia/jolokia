@@ -101,8 +101,8 @@ class CleanupThread extends Thread {
             if (t.isDaemon() ||
                     t.getThreadGroup() == null || // has died on us
                     t.getThreadGroup().equals(threadGroup) ||
-                    t.getName().startsWith("WrapperListener_stop_runner") || // Tanuki Java Service Wrapper (#116)
-                    t.getName().startsWith("DestroyJavaVM")) {
+                    checkExcludedNames(t.getName()))
+            {
                 // These are threads which should not prevent the server from stopping.
                 continue;
             }
@@ -119,5 +119,16 @@ class CleanupThread extends Thread {
         return false;
     }
 
+    private boolean checkExcludedNames(String pName) {
+        for (String s : new String[] {
+                "WrapperListener_stop_runner", // Tanuki Java Service Wrapper (#116)
+                "DestroyJavaVM"
+        }) {
+            if (pName.startsWith(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
