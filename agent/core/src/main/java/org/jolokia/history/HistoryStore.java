@@ -35,9 +35,7 @@ import org.json.simple.JSONObject;
  * @since Jun 12, 2009
  */
 @SuppressWarnings("IS2_INCONSISTENT_SYNC") // FindBugs gets confused with inner classes accessing objects in the parent
-public class HistoryStore implements Serializable {
-
-    private static final long serialVersionUID = 42L;
+public class HistoryStore {
 
     // Hard limit for number of entries for a single history track
     private int globalMaxEntries;
@@ -329,7 +327,7 @@ public class HistoryStore implements Serializable {
         }
     }
 
-    private HistoryEntry getEntry(HistoryKey pKey,Object pValue,long pTimestamp) {
+    private synchronized HistoryEntry getEntry(HistoryKey pKey,Object pValue,long pTimestamp) {
         HistoryEntry entry = historyStore.get(pKey);
         if (entry != null) {
             return entry;

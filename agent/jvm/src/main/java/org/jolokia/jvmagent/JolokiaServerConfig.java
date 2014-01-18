@@ -303,7 +303,7 @@ public class JolokiaServerConfig {
             }
             return authClass;
         } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Cannot find authenticator class " + pAuthenticatorClass, e);
+            throw new IllegalArgumentException("Cannot find authenticator class", e);
         }
     }
 
