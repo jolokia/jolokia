@@ -83,7 +83,6 @@ public class JolokiaServlet extends AgentServlet {
     /** {@inheritDoc} */
     @Override
     public void init(ServletConfig pServletConfig) throws ServletException {
-        pServletConfig.getServletContext().getRealPath()
         // We are making the bundle context available here as a thread local
         // so that the server detector has access to the bundle in order to detect
         // the Osgi-Environment
