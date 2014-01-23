@@ -16,6 +16,9 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
+import org.jolokia.discovery.AgentDetails;
+import org.jolokia.discovery.JolokiaDiscovery;
+
 import java.io.IOException;
 
 
@@ -89,7 +92,10 @@ public final class JvmAgent {
             server.start();
             setStateMarker();
 
-            System.out.println("Jolokia: Agent started with URL " + server.getUrl());
+            AgentDetails details = server.getDetails();
+            JolokiaDiscovery.getInstance().agentStarted(details);
+            System.out.println("Jolokia: Agent started with URL " + details.getLocation()
+                    + " and name: " + details.getName());
         } catch (RuntimeException exp) {
             System.err.println("Could not start Jolokia agent: " + exp);
         } catch (IOException exp) {
@@ -98,11 +104,14 @@ public final class JvmAgent {
     }
 
     private static void stopAgent() {
+        AgentDetails details = server.getDetails();
         try {
             server.stop();
             clearStateMarker();
         } catch (RuntimeException exp) {
             System.err.println("Could not stop Jolokia agent: " + exp);
+        } finally {
+            JolokiaDiscovery.getInstance().agentStopped(details);
         }
     }
 

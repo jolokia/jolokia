@@ -51,6 +51,7 @@ public class JolokiaServerConfig {
     private boolean       useSslClientAuthentication;
     private char[]        keystorePassword;
     private Authenticator authenticator;
+    private String        name;
 
     /**
      * Constructor which prepares the server configuration from a map
@@ -127,6 +128,15 @@ public class JolokiaServerConfig {
      */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * Returns the name of this agent when used with discovery
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -218,6 +228,7 @@ public class JolokiaServerConfig {
 
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
+        name = agentConfig.get("name");
     }
 
     private void initAuthenticator() {
