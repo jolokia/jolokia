@@ -17,10 +17,15 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.IOException;
+import java.util.List;
 
-import org.jolokia.jvmagent.JvmAgent;
+import org.jolokia.discovery.AgentDetails;
+import org.jolokia.discovery.file.FileDiscovery;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -36,8 +41,23 @@ public class JvmAgentTest {
 
     @Test
     public void agentmain() throws IOException {
-        JvmAgent.agentmain("mode=start,port=" + EnvTestUtil.getFreePort());
+        JvmAgent.agentmain("mode=start,name=Test Jolokia Agent,port=" + EnvTestUtil.getFreePort());
+
+        // now we should be able to discover the available agent URLs
+        FileDiscovery discovery = FileDiscovery.getInstance();
+        assertNotNull(discovery, "should have found an discovery");
+        List<AgentDetails> agents = discovery.findAgents();
+        assertTrue(agents.size() > 0, "Should have found at least one agent");
+        System.out.println("Found agents: " + agents);
+
         JvmAgent.agentmain("mode=stop");
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        System.out.println("Now has agents: " + discovery.findAgents());
     }
 
     @Test

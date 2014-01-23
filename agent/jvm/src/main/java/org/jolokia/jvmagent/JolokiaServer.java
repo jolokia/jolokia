@@ -26,6 +26,7 @@ import java.util.concurrent.*;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import org.jolokia.discovery.AgentDetails;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -54,6 +55,9 @@ public class JolokiaServer {
 
     // Agent URL
     private String url;
+
+    /// Agent details (URL and name mostly, for discovery)
+    private AgentDetails details;
 
     // Handler for jolokia requests
     private JolokiaHttpHandler jolokiaHttpHandler;
@@ -140,6 +144,16 @@ public class JolokiaServer {
     }
 
     /**
+     * Returns the details of this agent (the name and URL) for how this agent
+     * will appear in discovery JMX calls or tools
+     *
+     * @return the details of the agent (such as its name and URL)
+     */
+    public AgentDetails getDetails() {
+        return details;
+    }
+
+    /**
      * Get configuration for this server
      *
      * @return server configuration
@@ -199,6 +213,9 @@ public class JolokiaServer {
         }
         url = String.format("%s://%s:%d%s",
                             pConfig.getProtocol(),realAddress.getCanonicalHostName(),port,contextPath);
+
+        String name = pConfig.getName();
+        details = new AgentDetails(url, name);
     }
 
     /**

@@ -36,6 +36,7 @@
 
   <modules>
     <module>core</module>
+    <module>zeroconf</module>
     <module>war</module>
     <module>jsr160</module>
     <module>mule</module>
