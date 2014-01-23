@@ -1,4 +1,4 @@
-package org.jolokia.jmx;
+package org.jolokia.util.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -27,7 +27,6 @@ import javax.management.*;
  * access to the MBeanServers are required. This interface is also suitable for implementations with
  * remote {@link MBeanServerConnection}s, e.g. for implementing it with JSR-160 connections.
  *
- * A {@link MBeanServerExecutor} is used
  *
  * @author roland
  * @since 17.01.13

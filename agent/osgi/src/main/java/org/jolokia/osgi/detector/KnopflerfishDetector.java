@@ -17,7 +17,7 @@ package org.jolokia.osgi.detector;
  */
 
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for the Apache Felix OSGi Platform

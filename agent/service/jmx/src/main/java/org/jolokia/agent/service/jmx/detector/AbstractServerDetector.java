@@ -22,8 +22,8 @@ import java.util.Set;
 
 import javax.management.*;
 
-import org.jolokia.backend.ServerDetector;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.service.detector.ServerDetector;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.service.AbstractJolokiaService;
 
 /**

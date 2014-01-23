@@ -24,8 +24,8 @@ import java.util.List;
 import javax.management.*;
 
 import org.jolokia.backend.MBeanRegistry;
-import org.jolokia.jmx.LocalMBeanServerExecutor;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.LocalMBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.util.RequestType;

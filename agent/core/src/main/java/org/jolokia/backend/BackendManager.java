@@ -6,10 +6,9 @@ import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.JMException;
 
-import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.backend.dispatcher.RequestInterceptor;
+import org.jolokia.service.request.RequestInterceptor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.converter.JmxSerializer;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;

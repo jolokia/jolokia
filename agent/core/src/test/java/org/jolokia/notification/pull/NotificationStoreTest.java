@@ -18,7 +18,7 @@ package org.jolokia.notification.pull;
 
 import javax.management.Notification;
 
-import org.jolokia.notification.NotificationSubscription;
+import org.jolokia.service.notification.NotificationSubscription;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.management.ObjectName;
 
-import org.jolokia.notification.NotificationSubscription;
+import org.jolokia.service.notification.NotificationSubscription;
 import org.jolokia.request.notification.AddCommand;
 
 /**

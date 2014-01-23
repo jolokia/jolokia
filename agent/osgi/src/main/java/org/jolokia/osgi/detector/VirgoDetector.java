@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for Eclipse Virgo

@@ -1,4 +1,4 @@
-package org.jolokia.util;
+package org.jolokia.util.jmx;
 
 import java.io.IOException;
 

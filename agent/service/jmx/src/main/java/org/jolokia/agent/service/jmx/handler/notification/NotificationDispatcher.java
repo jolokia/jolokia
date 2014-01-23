@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.notification.*;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;

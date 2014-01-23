@@ -23,9 +23,11 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.*;
-import org.jolokia.backend.dispatcher.*;
+import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.converter.Converters;
-import org.jolokia.converter.JmxSerializer;
+import org.jolokia.service.request.RequestHandler;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.request.JolokiaReadRequest;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;

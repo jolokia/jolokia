@@ -6,9 +6,12 @@ import java.util.List;
 import javax.management.JMException;
 
 import org.jolokia.backend.NotChangedException;
+import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.request.AbstractRequestHandler;
+import org.jolokia.service.request.RequestHandler;
 import org.jolokia.util.RequestType;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.BeforeMethod;

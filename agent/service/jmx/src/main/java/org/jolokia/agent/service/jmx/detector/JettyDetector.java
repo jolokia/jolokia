@@ -19,7 +19,7 @@ package org.jolokia.agent.service.jmx.detector;
 import java.lang.reflect.*;
 
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 
 /**

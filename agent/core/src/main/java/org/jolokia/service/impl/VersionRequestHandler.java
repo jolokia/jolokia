@@ -8,7 +8,7 @@ import javax.management.JMException;
 import org.jolokia.Version;
 import org.jolokia.backend.NotChangedException;
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.service.request.RequestHandler;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;

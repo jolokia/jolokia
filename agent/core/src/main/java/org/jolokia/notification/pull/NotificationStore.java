@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.management.Notification;
 
-import org.jolokia.notification.NotificationSubscription;
+import org.jolokia.service.notification.NotificationSubscription;
 
 /**
  * Store for a single subscription. It holds the notifications collected

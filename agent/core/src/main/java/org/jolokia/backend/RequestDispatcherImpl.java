@@ -1,12 +1,12 @@
-package org.jolokia.backend.dispatcher;
+package org.jolokia.backend;
 
 import java.io.IOException;
 
 import javax.management.JMException;
 
-import org.jolokia.backend.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.request.RequestHandler;
 
 /**
  * Manager object responsible for finding a {@link RequestHandler} and

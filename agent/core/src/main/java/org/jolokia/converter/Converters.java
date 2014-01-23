@@ -11,6 +11,7 @@ import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.converter.object.OpenTypeDeserializer;
 import org.jolokia.converter.object.StringToObjectConverter;
 import org.jolokia.service.AbstractJolokiaService;
+import org.jolokia.service.serializer.JmxSerializer;
 
 /*
  * Copyright 2009-2013 Roland Huss

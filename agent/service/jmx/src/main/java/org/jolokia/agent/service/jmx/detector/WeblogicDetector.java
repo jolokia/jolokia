@@ -24,7 +24,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for Weblogic Appservers

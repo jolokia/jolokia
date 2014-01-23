@@ -22,11 +22,11 @@ import javax.management.MBeanServerConnection;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.ServerDetector;
+import org.jolokia.service.detector.ServerDetector;
 import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.StaticConfiguration;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.test.util.HttpTestUtil;

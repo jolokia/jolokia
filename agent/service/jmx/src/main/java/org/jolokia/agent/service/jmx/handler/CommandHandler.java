@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.backend.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JolokiaRequest;

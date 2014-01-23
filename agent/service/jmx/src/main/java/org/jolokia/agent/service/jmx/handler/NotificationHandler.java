@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.backend.NotChangedException;
 import org.jolokia.agent.service.jmx.handler.notification.NotificationDispatcher;
 import org.jolokia.request.JolokiaNotificationRequest;

@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.backend.NotChangedException;
 import org.jolokia.request.JolokiaSearchRequest;
 import org.jolokia.service.JolokiaContext;

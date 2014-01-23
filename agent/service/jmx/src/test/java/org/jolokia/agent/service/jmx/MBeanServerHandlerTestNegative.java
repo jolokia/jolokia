@@ -23,8 +23,8 @@ import java.util.List;
 import javax.management.*;
 
 import org.jolokia.backend.MBeanRegistry;
-import org.jolokia.jmx.LocalMBeanServerExecutor;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.LocalMBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;

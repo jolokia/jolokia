@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.jmx;
+package org.jolokia.util.jmx;
 
 import java.lang.management.ManagementFactory;
 import java.util.Set;

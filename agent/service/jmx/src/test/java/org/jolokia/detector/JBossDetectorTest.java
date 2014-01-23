@@ -22,7 +22,7 @@ import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.JBossDetector;
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.util.RequestType;

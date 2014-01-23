@@ -7,8 +7,8 @@ import java.util.Map;
 import javax.management.JMException;
 
 import org.jolokia.backend.NotChangedException;
-import org.jolokia.backend.dispatcher.AbstractRequestHandler;
-import org.jolokia.backend.dispatcher.RequestHandler;
+import org.jolokia.service.request.AbstractRequestHandler;
+import org.jolokia.service.request.RequestHandler;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;

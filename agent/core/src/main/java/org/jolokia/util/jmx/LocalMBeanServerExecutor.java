@@ -1,4 +1,4 @@
-package org.jolokia.jmx;
+package org.jolokia.util.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.*;
 
 import javax.management.*;
-
-import org.jolokia.util.JmxUtil;
 
 /**
  * Base class for providing access to the list of MBeanServer handled by this agent.

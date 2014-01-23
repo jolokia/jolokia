@@ -8,9 +8,9 @@ import javax.management.*;
 
 import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.jmx.MBeanServerExecutor;
-import org.jolokia.jmx.SingleMBeanServerExecutor;
-import org.jolokia.notification.NotificationBackend;
+import org.jolokia.util.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.SingleMBeanServerExecutor;
+import org.jolokia.service.notification.NotificationBackend;
 import org.jolokia.notification.pull.PullNotificationBackend;
 import org.jolokia.request.notification.*;
 import org.jolokia.util.TestJolokiaContext;

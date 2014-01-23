@@ -1,4 +1,4 @@
-package org.jolokia.notification;
+package org.jolokia.service.notification;
 
 import java.util.List;
 import java.util.Map;

@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.converter.json.ValueFaultHandler;
 import org.jolokia.request.JolokiaReadRequest;
 import org.jolokia.service.JolokiaContext;

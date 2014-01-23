@@ -26,7 +26,7 @@ import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.converter.Converters;
-import org.jolokia.converter.JmxSerializer;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.converter.json.ValueFaultHandler;
 

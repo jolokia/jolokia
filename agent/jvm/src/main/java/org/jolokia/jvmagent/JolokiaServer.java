@@ -26,8 +26,8 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
-import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
+import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.discovery.DiscoveryMulticastResponder;

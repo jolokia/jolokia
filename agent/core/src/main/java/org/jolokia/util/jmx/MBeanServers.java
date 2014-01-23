@@ -1,11 +1,9 @@
-package org.jolokia.jmx;
+package org.jolokia.util.jmx;
 
 import java.lang.management.ManagementFactory;
 import java.util.*;
 
 import javax.management.*;
-
-import org.jolokia.util.JmxUtil;
 
 import static javax.management.MBeanServerNotification.*;
 

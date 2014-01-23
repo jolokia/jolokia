@@ -5,9 +5,11 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.notification.*;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.JmxUtil;
+import org.jolokia.service.notification.*;
+import org.jolokia.util.jmx.JmxUtil;
 import org.json.simple.JSONObject;
 
 /**

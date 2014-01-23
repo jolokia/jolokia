@@ -8,7 +8,7 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.converter.JmxSerializer;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.request.JolokiaWriteRequest;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.RequestType;

@@ -19,7 +19,7 @@ package org.jolokia.agent.service.jmx.handler.notification;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.notification.NotificationBackend;
+import org.jolokia.service.notification.NotificationBackend;
 import org.jolokia.service.JolokiaContext;
 
 /**

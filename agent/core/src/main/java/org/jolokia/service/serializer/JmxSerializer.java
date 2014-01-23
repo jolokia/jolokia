@@ -1,4 +1,4 @@
-package org.jolokia.converter;
+package org.jolokia.service.serializer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;

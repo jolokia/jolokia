@@ -22,7 +22,7 @@ import java.util.HashSet;
 import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.WebsphereDetector;
-import org.jolokia.backend.ServerDetector;
+import org.jolokia.service.detector.ServerDetector;
 import org.jolokia.backend.ServerHandle;
 import org.testng.annotations.Test;
 

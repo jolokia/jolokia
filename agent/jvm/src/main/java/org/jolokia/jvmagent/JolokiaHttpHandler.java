@@ -28,7 +28,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.service.JolokiaContext;

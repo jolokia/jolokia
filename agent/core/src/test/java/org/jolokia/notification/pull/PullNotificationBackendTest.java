@@ -24,7 +24,7 @@ import javax.management.*;
 
 import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.notification.BackendCallback;
+import org.jolokia.service.notification.BackendCallback;
 import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;

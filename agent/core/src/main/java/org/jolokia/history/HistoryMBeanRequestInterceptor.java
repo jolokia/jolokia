@@ -4,12 +4,12 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.RequestInterceptor;
+import org.jolokia.service.request.RequestInterceptor;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.JmxUtil;
+import org.jolokia.util.jmx.JmxUtil;
 import org.json.simple.JSONObject;
 
 /**

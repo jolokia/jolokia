@@ -1,4 +1,4 @@
-package org.jolokia.backend;
+package org.jolokia.service.detector;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -20,7 +20,8 @@ import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.backend.ServerHandle;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.service.JolokiaService;
 
 /**

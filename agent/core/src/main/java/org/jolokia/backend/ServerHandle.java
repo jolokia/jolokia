@@ -19,7 +19,7 @@ package org.jolokia.backend;
 import java.util.Map;
 
 import org.jolokia.config.ConfigKey;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONObject;

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.BackendManager;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.*;
 import org.jolokia.service.JolokiaContext;

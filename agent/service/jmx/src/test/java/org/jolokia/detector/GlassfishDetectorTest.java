@@ -22,9 +22,9 @@ import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.GlassfishDetector;
 import org.jolokia.backend.ServerHandle;
-import org.jolokia.backend.ServerDetector;
+import org.jolokia.service.detector.ServerDetector;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.TestJolokiaContext;

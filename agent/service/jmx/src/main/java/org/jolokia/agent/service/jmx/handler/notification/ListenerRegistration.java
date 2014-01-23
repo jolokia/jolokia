@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.notification.BackendCallback;
+import org.jolokia.service.notification.BackendCallback;
 import org.jolokia.request.notification.AddCommand;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

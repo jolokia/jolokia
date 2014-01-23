@@ -21,11 +21,10 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.AbstractRequestHandler;
-import org.jolokia.backend.dispatcher.RequestDispatcher;
+import org.jolokia.service.request.AbstractRequestHandler;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
-import org.jolokia.converter.JmxSerializer;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;

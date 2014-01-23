@@ -10,7 +10,7 @@ import org.jolokia.backend.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.agent.service.jmx.handler.CommandHandler;
 import org.jolokia.agent.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.service.JolokiaContext;

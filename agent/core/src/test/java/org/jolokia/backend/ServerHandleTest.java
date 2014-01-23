@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.TestJolokiaContext;

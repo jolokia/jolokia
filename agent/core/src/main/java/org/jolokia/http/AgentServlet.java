@@ -8,7 +8,7 @@ import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
+import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.config.*;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.PolicyRestrictorFactory;

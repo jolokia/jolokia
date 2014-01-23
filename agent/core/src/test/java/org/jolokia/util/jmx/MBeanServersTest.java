@@ -1,4 +1,4 @@
-package org.jolokia.jmx;
+package org.jolokia.util.jmx;
 
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.management.*;
 
+import org.jolokia.util.jmx.MBeanServers;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

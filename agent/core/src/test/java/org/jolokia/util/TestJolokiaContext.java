@@ -24,12 +24,13 @@ import javax.management.*;
 import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
-import org.jolokia.converter.JmxSerializer;
 import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaService;
+import org.jolokia.service.serializer.JmxSerializer;
+import org.jolokia.util.jmx.JmxUtil;
 
 /**
  * @author roland
@@ -127,7 +128,7 @@ public class TestJolokiaContext implements JolokiaContext {
     }
 
     public void error(String message, Throwable t) {
-        logHandler.error(message,t);
+        logHandler.error(message, t);
     }
 
     public boolean isDebug() {

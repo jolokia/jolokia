@@ -18,8 +18,8 @@ package org.jolokia.detector;
 
 import javax.management.MBeanServer;
 
-import org.jolokia.jmx.MBeanServerExecutor;
-import org.jolokia.jmx.SingleMBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.SingleMBeanServerExecutor;
 
 /**
  * @author roland

@@ -1,4 +1,4 @@
-package org.jolokia.backend.dispatcher;
+package org.jolokia.service.request;
 
 import java.io.IOException;
 

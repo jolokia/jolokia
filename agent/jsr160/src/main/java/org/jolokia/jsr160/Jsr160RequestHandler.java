@@ -24,12 +24,12 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.agent.service.jmx.handler.CommandHandler;
 import org.jolokia.agent.service.jmx.handler.CommandHandlerManager;
 import org.jolokia.backend.NotChangedException;
-import org.jolokia.backend.dispatcher.AbstractRequestHandler;
-import org.jolokia.jmx.SingleMBeanServerExecutor;
+import org.jolokia.service.request.AbstractRequestHandler;
+import org.jolokia.util.jmx.SingleMBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
 

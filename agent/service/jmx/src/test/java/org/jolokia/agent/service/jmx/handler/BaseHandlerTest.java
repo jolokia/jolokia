@@ -18,8 +18,8 @@ package org.jolokia.agent.service.jmx.handler;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.jmx.MBeanServerExecutor;
-import org.jolokia.jmx.SingleMBeanServerExecutor;
+import org.jolokia.util.jmx.MBeanServerExecutor;
+import org.jolokia.util.jmx.SingleMBeanServerExecutor;
 
 /**
  * @author roland
