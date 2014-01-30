@@ -45,7 +45,7 @@ public class MulticastUtil {
             throw new UnknownHostException("Cannot find address of local host which can be used for multicasting");
         }
         MulticastSocket socket = new MulticastSocket(pPort);
-        socket.setReuseAddress(false);
+        socket.setReuseAddress(true);
         socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
         socket.setTimeToLive(255);
         // V6: ffx8::/16
@@ -53,22 +53,30 @@ public class MulticastUtil {
         return socket;
     }
 
-    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg,InetAddress pSourceAddress, int pPort) throws IOException {
-        MulticastSocket socket = newSocket(pSourceAddress,pPort);
+    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg) throws IOException {
+        InetAddress address = getLocalAddress();
+        if (address == null) {
+            throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
+        }
+        final DatagramSocket socket = new DatagramSocket(0,address);
         try {
-            socket.setSoTimeout(2000);
+            socket.setSoTimeout(1000);
 
+            // Discover UDP packet send to multicast address
             DatagramPacket out = pOutMsg.getDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP),
                                                            JOLOKIA_MULTICAST_PORT);
             socket.send(out);
+
             List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
             try {
                 do {
                     byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
-                    DatagramPacket in = new DatagramPacket(buf, buf.length);
+                            DatagramPacket in = new DatagramPacket(buf, buf.length);
                     socket.receive(in);
                     DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
-                    ret.add(inMsg);
+                    if (!inMsg.isQuery()) {
+                        ret.add(inMsg);
+                    }
                 } while (true); // should leave loop by SocketTimeoutException
             } catch (SocketTimeoutException exp) {
                 // Expected

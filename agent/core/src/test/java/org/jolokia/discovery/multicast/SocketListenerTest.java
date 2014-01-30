@@ -45,7 +45,7 @@ public class SocketListenerTest {
                 .build();
         for (int port = 22332; port < 22500; port++) {
             try {
-                List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,null,port);
+                List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out);
                 for (DiscoveryIncomingMessage in : discovered) {
                     System.out.println(in);
                 }
