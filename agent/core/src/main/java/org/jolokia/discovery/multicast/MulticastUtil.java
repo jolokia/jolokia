@@ -1,0 +1,140 @@
+package org.jolokia.discovery.multicast;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.*;
+import java.util.*;
+
+/**
+ * Utility class for handling multicast stuff
+ *
+ * @author roland
+ * @since 28.01.14
+ */
+public class MulticastUtil {
+
+    // IPv4 Address for Jolokia's Multicast group
+    public static final String JOLOKIA_MULTICAST_GROUP = "239.192.48.84";
+
+    public static final int JOLOKIA_MULTICAST_PORT = 24884;
+
+    // Only available for Java 6
+    private static Method isUp;
+    private static Method supportsMulticast;
+
+    static {
+        // Check for JDK method which are available only for JDK6
+        try {
+            isUp = NetworkInterface.class.getMethod("isUp", (Class<?>[]) null);
+            supportsMulticast = NetworkInterface.class.getMethod("supportsMulticast", (Class<?>[]) null);
+        } catch (NoSuchMethodException e) {
+            isUp = null;
+            supportsMulticast = null;
+        }
+    }
+
+    public static MulticastSocket newSocket() throws IOException {
+        return newSocket(null,JOLOKIA_MULTICAST_PORT);
+    }
+
+    public static MulticastSocket newSocket(InetAddress pAddress,int pPort) throws IOException {
+
+        InetAddress address = pAddress != null ? pAddress : getLocalAddress();
+        if (address == null) {
+            throw new UnknownHostException("Cannot find address of local host which can be used for multicasting");
+        }
+        MulticastSocket socket = new MulticastSocket(pPort);
+        socket.setReuseAddress(false);
+        socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
+        socket.setTimeToLive(255);
+        // V6: ffx8::/16
+        socket.joinGroup(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP));
+        return socket;
+    }
+
+    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg,InetAddress pSourceAddress, int pPort) throws IOException {
+        MulticastSocket socket = newSocket(pSourceAddress,pPort);
+        try {
+            socket.setSoTimeout(2000);
+
+            DatagramPacket out = pOutMsg.getDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP),
+                                                           JOLOKIA_MULTICAST_PORT);
+            socket.send(out);
+            List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
+            try {
+                do {
+                    byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
+                    DatagramPacket in = new DatagramPacket(buf, buf.length);
+                    socket.receive(in);
+                    DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
+                    ret.add(inMsg);
+                } while (true); // should leave loop by SocketTimeoutException
+            } catch (SocketTimeoutException exp) {
+                // Expected
+            }
+            return ret;
+        } finally {
+            socket.close();
+        }
+    }
+
+    private static InetAddress getLocalAddress() throws UnknownHostException {
+        InetAddress addr = InetAddress.getLocalHost();
+        if (addr.isLoopbackAddress()) {
+            // Find local address that isn't a loopback address
+            InetAddress lookedUpAddr = findLocalAddress();
+            // If a local, multicast enable address can be found, use it. Otherwise
+            // we are using the local address, which might not be what you want
+            if (lookedUpAddr != null) {
+                addr = lookedUpAddr;
+            }
+        }
+        return addr;
+    }
+
+    private static InetAddress findLocalAddress() {
+        Set<InetAddress> result = new HashSet<InetAddress>();
+
+        Enumeration<NetworkInterface> networkInterfaces;
+        try {
+            networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            return null;
+        }
+
+        while (networkInterfaces.hasMoreElements()) {
+            NetworkInterface nif = networkInterfaces.nextElement();
+            for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements();) {
+                InetAddress interfaceAddress = addrEnum.nextElement();
+                if (useInetAddress(nif, interfaceAddress)) {
+                    return interfaceAddress;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Only use the given interface on the given network interface if it is up and supports multicast
+    private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress) {
+        return checkMethod(networkInterface, isUp) &&
+               checkMethod(networkInterface, supportsMulticast) &&
+               !interfaceAddress.isLoopbackAddress();
+    }
+
+    // Call a method and return the result as boolean. In case of problems, return false.
+    private static Boolean checkMethod(NetworkInterface iface, Method toCheck) {
+        if (toCheck != null) {
+            try {
+                return (Boolean) toCheck.invoke(iface, (Object[]) null);
+            } catch (IllegalAccessException e) {
+                return false;
+            } catch (InvocationTargetException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+
+}

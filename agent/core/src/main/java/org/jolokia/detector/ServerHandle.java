@@ -43,7 +43,7 @@ public class ServerHandle {
     // version number
     private String version;
 
-    // the aent URL under which this server can be found
+    // the agent URL under which this server can be found
     private URL agentUrl;
 
     // extra information

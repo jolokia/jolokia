@@ -150,7 +150,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         /** {@inheritDoc} */
         public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
             Map<String,String> extra = super.getExtraInfo(pServerManager);
-            if (extra != null && getVersion().startsWith("3")) {
+            if (pServerManager != null && extra != null && getVersion().startsWith("3")) {
                 extra.put("amxBooted",Boolean.toString(isAmxBooted(pServerManager)));
             }
             return extra;
