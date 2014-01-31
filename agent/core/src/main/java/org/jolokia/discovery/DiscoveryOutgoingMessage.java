@@ -1,15 +1,8 @@
-package org.jolokia.discovery.multicast;
+package org.jolokia.discovery;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jolokia.Version;
-import org.jolokia.detector.ServerHandle;
-
-import static org.jolokia.discovery.multicast.AbstractDiscoveryMessage.Payload.*;
 
 /**
  * Class representing an outgoing message
@@ -25,11 +18,11 @@ public class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
     private DiscoveryOutgoingMessage(MessageType pType,
                                      InetAddress pTargetAddress,
                                      int pTargetPort,
-                                     Map<Payload, String> pPayload) {
+                                     AgentDetails pAgentDetails) {
         this.targetAddress = pTargetAddress;
         this.targetPort = pTargetPort;
         setType(pType);
-        setPayload(pPayload);
+        setAgentDetails(pAgentDetails);
     }
 
     public InetAddress getTargetAddress() {
@@ -47,7 +40,7 @@ public class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
 
     static public class Builder {
 
-        private ServerHandle handle;
+        private AgentDetails agentDetails;
         private MessageType type;
         private InetAddress targetAddress;
         private int targetPort;
@@ -56,8 +49,8 @@ public class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
             type = pType;
         }
 
-        public Builder handle(ServerHandle pHandle) {
-            this.handle  = pHandle;
+        public Builder agentDetails(AgentDetails pAgentDetails) {
+            this.agentDetails = pAgentDetails;
             return this;
         }
 
@@ -70,18 +63,11 @@ public class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         }
 
         public DiscoveryOutgoingMessage build() throws IOException {
-            Map<Payload,String> payload = new HashMap<Payload, String>();
-            if (handle != null) {
-                payload.put(URL,handle.getAgentUrl().toString());
-                payload.put(SERVER_VENDOR,handle.getVendor());
-                payload.put(SERVER_VERSION,handle.getVersion());
-                payload.put(VERSION, Version.getAgentVersion());
-            }
             return new DiscoveryOutgoingMessage(
                     type,
                     targetAddress,
                     targetPort,
-                    payload);
+                    agentDetails);
         }
     }
 }

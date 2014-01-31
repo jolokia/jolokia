@@ -1,4 +1,4 @@
-package org.jolokia.discovery.multicast;
+package org.jolokia.discovery;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -13,8 +13,8 @@ import java.util.Map;
  */
 public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
 
-    // UDP packet received (if incoming)
-    private DatagramPacket packet;
+    private InetAddress sourceAddress;
+    private int sourcePort;
 
     /**
      * Parse a message from a datagram packet.
@@ -23,14 +23,16 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
      * @throws IOException if reading/parsing failed.
      */
     public DiscoveryIncomingMessage(DatagramPacket pPacket) throws IOException {
-        packet = pPacket;
-        Map<Payload, String> msgData = parseData(packet.getData(), packet.getLength());
+        sourceAddress = pPacket.getAddress();
+        sourcePort = pPacket.getPort();
+
+        Map<Payload, String> msgData = parseData(pPacket.getData(), pPacket.getLength());
         String typeS = msgData.remove(Payload.TYPE);
         if (typeS == null) {
             throw new IOException("No type given in request");
         }
         setType(AbstractDiscoveryMessage.MessageType.valueOf(typeS.toUpperCase()));
-        setPayload(msgData);
+        setAgentDetails(new AgentDetails(msgData));
     }
 
     private Map<Payload, String> parseData(byte[] pData, int pLength) throws IOException {
@@ -49,11 +51,11 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
     }
 
     public InetAddress getSourceAddress() {
-        return packet.getAddress();
+        return sourceAddress;
     }
 
     public int getSourcePort() {
-        return packet.getPort();
+        return sourcePort;
     }
 
     @Override
@@ -61,8 +63,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
         return "JolokiaDiscoveryIncomingMessage{" +
                "source = " + getSourceAddress() + ":" + getSourcePort() + ", " +
                 "type = " + type + ", " +
-                "payload = " + payload + ", " +
-                "url = " + payload.get(Payload.URL) +
+                "details = " + agentDetails +
                '}';
     }
 }

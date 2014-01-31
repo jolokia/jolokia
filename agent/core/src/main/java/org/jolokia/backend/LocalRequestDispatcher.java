@@ -70,6 +70,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         // Request handling manager 
         requestHandlerManager =
                 new RequestHandlerManager(pConverters,mBeanServerHandler.getServerHandle(),pRestrictor);
+
     }
 
     // Can handle any request

@@ -1,7 +1,6 @@
-package org.jolokia.discovery.multicast;
+package org.jolokia.discovery;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * A Jolokia discover message which can be either a request
@@ -19,14 +18,14 @@ abstract class AbstractDiscoveryMessage {
     protected MessageType type;
 
     // Payload of the message
-    protected Map<Payload,String> payload;
+    protected AgentDetails agentDetails;
 
     final protected void setType(MessageType pType) {
         type = pType;
     }
 
-    final protected void setPayload(Map<Payload,String> pPayload) {
-        payload = pPayload;
+    final protected void setAgentDetails(AgentDetails pAgentDetails) {
+        agentDetails = pAgentDetails;
     }
 
     public boolean isQuery() {
@@ -35,15 +34,19 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         StringBuilder respond = new StringBuilder();
-        respond.append("type:").append(type.toString()).append("\n");
-        for (Payload key : payload.keySet()) {
-           respond.append(key.toString().toUpperCase()).append(":").append(payload.get(key)).append("\n");
+        respond.append("type:").append(type.toString().toLowerCase()).append("\n");
+        if (agentDetails != null) {
+            respond.append(agentDetails.toMessagePayload());
         }
         byte[] ret = respond.toString().getBytes(StandardCharsets.UTF_8);
         if (ret.length > MAX_MSG_SIZE) {
             throw new IllegalArgumentException("Message to send is longer than maximum size of " + MAX_MSG_SIZE + " bytes.");
         }
         return ret;
+    }
+
+    public AgentDetails getAgentDetails() {
+        return agentDetails;
     }
 
     /**

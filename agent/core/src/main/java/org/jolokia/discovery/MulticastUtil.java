@@ -1,4 +1,4 @@
-package org.jolokia.discovery.multicast;
+package org.jolokia.discovery;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -15,8 +15,10 @@ import java.util.*;
 public class MulticastUtil {
 
     // IPv4 Address for Jolokia's Multicast group
-    public static final String JOLOKIA_MULTICAST_GROUP = "239.192.48.84";
+    public static final String JOLOKIA_MULTICAST_GROUP_IP4 = "239.192.48.84";
+    public static final String JOLOKIA_MULTICAST_GROUP_IP6 = "FF08::48:84";
 
+    // Multicast port where to listen for queries
     public static final int JOLOKIA_MULTICAST_PORT = 24884;
 
     // Only available for Java 6
@@ -34,23 +36,27 @@ public class MulticastUtil {
         }
     }
 
-    public static MulticastSocket newSocket() throws IOException {
-        return newSocket(null,JOLOKIA_MULTICAST_PORT);
+    static MulticastSocket newMulticastSocket() throws IOException {
+        return newMulticastSocket(null);
     }
 
-    public static MulticastSocket newSocket(InetAddress pAddress,int pPort) throws IOException {
+    static MulticastSocket newMulticastSocket(InetAddress pAddress) throws IOException {
 
         InetAddress address = pAddress != null ? pAddress : getLocalAddress();
         if (address == null) {
             throw new UnknownHostException("Cannot find address of local host which can be used for multicasting");
         }
-        MulticastSocket socket = new MulticastSocket(pPort);
+        MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
         socket.setReuseAddress(true);
         socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
         socket.setTimeToLive(255);
         // V6: ffx8::/16
-        socket.joinGroup(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP));
+        socket.joinGroup(getMulticastGroup(address));
         return socket;
+    }
+
+    private static InetAddress getMulticastGroup(InetAddress pAddress) throws UnknownHostException {
+        return InetAddress.getByName(pAddress instanceof Inet6Address ? JOLOKIA_MULTICAST_GROUP_IP6 : JOLOKIA_MULTICAST_GROUP_IP4);
     }
 
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg) throws IOException {
@@ -63,7 +69,7 @@ public class MulticastUtil {
             socket.setSoTimeout(1000);
 
             // Discover UDP packet send to multicast address
-            DatagramPacket out = pOutMsg.getDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP),
+            DatagramPacket out = pOutMsg.getDatagramPacket(getMulticastGroup(address),
                                                            JOLOKIA_MULTICAST_PORT);
             socket.send(out);
 
@@ -92,7 +98,7 @@ public class MulticastUtil {
         if (addr.isLoopbackAddress()) {
             // Find local address that isn't a loopback address
             InetAddress lookedUpAddr = findLocalAddress();
-            // If a local, multicast enable address can be found, use it. Otherwise
+            // If a local, multicast enabled address can be found, use it. Otherwise
             // we are using the local address, which might not be what you want
             if (lookedUpAddr != null) {
                 addr = lookedUpAddr;
@@ -102,8 +108,6 @@ public class MulticastUtil {
     }
 
     private static InetAddress findLocalAddress() {
-        Set<InetAddress> result = new HashSet<InetAddress>();
-
         Enumeration<NetworkInterface> networkInterfaces;
         try {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();
