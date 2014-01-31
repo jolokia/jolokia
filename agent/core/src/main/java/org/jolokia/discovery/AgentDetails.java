@@ -93,13 +93,7 @@ public class AgentDetails {
         return resp.toString();
     }
 
-    private void append(StringBuffer buf, Payload pPayload, String pVal) {
-        if (pVal != null) {
-            buf.append(pPayload.toString().toLowerCase()).append(":").append(pVal).append("\n");
-        }
-    }
-
-    public JSONObject asJson() {
+    public JSONObject toJSONObject() {
         JSONObject resp = new JSONObject();
         add(resp,Payload.URL,url);
         if (confidence != 0) {
@@ -114,6 +108,14 @@ public class AgentDetails {
         add(resp, Payload.VERSION, version);
 
         return resp;
+    }
+
+    // ======================================================================================================
+
+    private void append(StringBuffer buf, Payload pPayload, String pVal) {
+        if (pVal != null) {
+            buf.append(pPayload.toString().toLowerCase()).append(":").append(pVal).append("\n");
+        }
     }
 
     private void add(JSONObject pResp, Payload pKey, String pValue) {

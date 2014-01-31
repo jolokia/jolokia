@@ -21,7 +21,7 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
         List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
-            ret.add(in.getAgentDetails().asJson());
+            ret.add(in.getAgentDetails().toJSONObject());
         }
         return ret;
     }

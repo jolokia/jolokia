@@ -79,7 +79,7 @@ public class MulticastSocketListenerTest {
         DiscoveryIncomingMessage in = discovered.get(0);
         assertFalse(in.isQuery());
         AgentDetails agentDetails = in.getAgentDetails();
-        JSONObject details = agentDetails.asJson();
+        JSONObject details = agentDetails.toJSONObject();
         assertEquals(details.get("url"), JOLOKIA_URL);
         assertEquals(details.get("server_vendor"),"jolokia");
         assertEquals(details.get("version"), Version.getAgentVersion());
