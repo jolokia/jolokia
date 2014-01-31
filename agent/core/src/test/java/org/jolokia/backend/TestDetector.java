@@ -55,7 +55,7 @@ public class TestDetector implements ServerDetector {
             throw new RuntimeException();
         } else if (nr == 3 && !fallThrough) {
             // Break detector chain
-            return new ServerHandle(null,null,null,null,null);
+            return new ServerHandle(null,null,null, null);
         } else {
             return null;
         }

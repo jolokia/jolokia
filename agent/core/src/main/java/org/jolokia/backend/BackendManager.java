@@ -309,7 +309,7 @@ public class BackendManager {
                                                      restrictor,
                                                      pConfig,
                                                      logHandler);
-        ServerHandle serverHandle = localDispatcher.getServerInfo();
+        ServerHandle serverHandle = localDispatcher.getServerHandle();
         requestDispatchers = createRequestDispatchers(pConfig.get(DISPATCHER_CLASSES),
                                                       converters,serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);

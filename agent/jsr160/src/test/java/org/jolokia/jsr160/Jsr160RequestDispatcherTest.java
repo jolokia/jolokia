@@ -121,7 +121,7 @@ public class Jsr160RequestDispatcherTest {
 
     private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer() {
         Converters converters = new Converters();
-        ServerHandle handle = new ServerHandle(null,null,null,null,null);
+        ServerHandle handle = new ServerHandle(null,null,null, null);
         return  new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor()) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
@@ -137,7 +137,7 @@ public class Jsr160RequestDispatcherTest {
 
     private Jsr160RequestDispatcher getOriginalDispatcher() {
         return new Jsr160RequestDispatcher(new Converters(),
-                                           new ServerHandle(null,null,null,null,null),
+                                           new ServerHandle(null,null,null, null),
                                            new AllowAllRestrictor());
     }
 

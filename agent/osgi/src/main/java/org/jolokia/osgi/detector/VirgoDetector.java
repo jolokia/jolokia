@@ -43,7 +43,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
             }
             Map<String,String> extraInfo = new HashMap<String,String>();
             extraInfo.put("type",type);
-            return new ServerHandle("Eclipse","Virgo",version,null,extraInfo);
+            return new ServerHandle("Eclipse","Virgo",version, extraInfo);
         } else {
             return null;
         }

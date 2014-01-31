@@ -143,7 +143,7 @@ public class GlassfishDetector extends AbstractServerDetector {
          * @param extraInfo extra infos
          */
         public GlassfishServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
-            super("Oracle", "glassfish", version, agentUrl, extraInfo);
+            super("Oracle", "glassfish", version, extraInfo);
         }
 
         @Override

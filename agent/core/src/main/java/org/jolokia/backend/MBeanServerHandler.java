@@ -295,7 +295,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
          * Empty constructor initializing the server handle completely with null values.
          */
         public NullServerHandle() {
-            super(null,null,null,null,null);
+            super(null,null,null, null);
         }
     }
 

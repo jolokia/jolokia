@@ -78,7 +78,7 @@ public class JBossDetector extends AbstractServerDetector {
          * @param extraInfo           extra ifo to return
           */
         JBossServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
-            super("RedHat", "jboss", version, agentUrl, extraInfo);
+            super("RedHat", "jboss", version, extraInfo);
         }
     }
 }

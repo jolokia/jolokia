@@ -150,7 +150,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * Get information about the current server
      * @return the server information
      */
-    public ServerHandle getServerInfo() {
+    public ServerHandle getServerHandle() {
         return mBeanServerHandler.getServerHandle();
     }
 

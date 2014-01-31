@@ -138,7 +138,7 @@ public class JolokiaServletTest {
     public static class CatchAllDetector implements ServerDetector {
 
         public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
-            return new ServerHandle(null,null,null,null,null);
+            return new ServerHandle(null,null,null, null);
         }
 
         public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {

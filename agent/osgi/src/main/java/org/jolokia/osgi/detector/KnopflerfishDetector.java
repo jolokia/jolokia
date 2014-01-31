@@ -33,7 +33,7 @@ public class KnopflerfishDetector extends AbstractOsgiServerDetector {
         // Probably a bit unspecific, but that's kopflerfish's fault
         if (checkSystemBundleForSymbolicName("org.knopflerfish.framework")) {
             String version = getSystemBundleVersion();
-            return new ServerHandle("Knopflerfish","knopflerfish",version,null,null);
+            return new ServerHandle("Knopflerfish","knopflerfish",version, null);
         } else {
             return null;
         }

@@ -107,7 +107,7 @@ public class WebsphereDetector extends AbstractServerDetector {
 
         /** {@inheritDoc} */
         public WebsphereServerHandle(String pVersion, URL pAgenturl, Map<String, String> pExtrainfo) {
-            super("IBM","websphere", pVersion, pAgenturl, pExtrainfo);
+            super("IBM","websphere", pVersion, pExtrainfo);
         }
 
         /** {@inheritDoc} */

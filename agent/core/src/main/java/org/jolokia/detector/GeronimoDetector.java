@@ -31,7 +31,7 @@ public class GeronimoDetector extends AbstractServerDetector {
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String version = getSingleStringAttribute(pMBeanServerExecutor,"geronimo:j2eeType=J2EEServer,*","serverVersion");
         if (version != null) {
-            return new ServerHandle("Apache","geronimo",version,null,null);
+            return new ServerHandle("Apache","geronimo",version, null);
         } else {
             return null;
         }

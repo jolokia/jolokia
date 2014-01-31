@@ -16,15 +16,14 @@ package org.jolokia.detector;
  * limitations under the License.
  */
 
-import java.net.URL;
 import java.util.Map;
 
 import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -43,9 +42,6 @@ public class ServerHandle {
     // version number
     private String version;
 
-    // the agent URL under which this server can be found
-    private URL agentUrl;
-
     // extra information
     private Map<String,String> extraInfo;
 
@@ -58,13 +54,11 @@ public class ServerHandle {
      * @param vendor product vendor (like RedHat or Oracle)
      * @param product name of the product
      * @param version version
-     * @param agentUrl the URL under which the agent is reachable (or null if not detectable)
      * @param extraInfo free form extra information
      */
-    public ServerHandle(String vendor, String product, String version, URL agentUrl, Map<String, String> extraInfo) {
+    public ServerHandle(String vendor, String product, String version, Map<String, String> extraInfo) {
         this.product = product;
         this.version = version;
-        this.agentUrl = agentUrl;
         this.extraInfo = extraInfo;
         this.vendor = vendor;
     }
@@ -91,17 +85,6 @@ public class ServerHandle {
      */
     public String getVersion() {
         return version;
-    }
-
-    /**
-     * URL under which the agent can be reached. Note, that this information
-     * is hard to detect, especially when the server is hidden behind some reverse
-     * proxy. Hence the result is more a heuristic.
-     *
-     * @return agent url
-     */
-    public URL getAgentUrl() {
-        return agentUrl;
     }
 
     /**
@@ -181,7 +164,6 @@ public class ServerHandle {
         addNullSafe(ret, "vendor", vendor);
         addNullSafe(ret, "product", product);
         addNullSafe(ret, "version", version);
-        addNullSafe(ret, "agent-url", agentUrl != null ? agentUrl.toExternalForm() : null);
         Map<String,String> extra = getExtraInfo(pServerManager);
         if (extra != null) {
             JSONObject jsonExtra = new JSONObject();
