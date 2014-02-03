@@ -30,8 +30,7 @@ import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.discovery.*;
+import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.ClassUtil;
@@ -44,7 +43,7 @@ import org.json.simple.JSONAware;
  * @author roland
  * @since Mar 3, 2010
  */
-public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
+public class JolokiaHttpHandler implements HttpHandler {
 
     // Backendmanager for doing request
     private BackendManager backendManager;
@@ -59,7 +58,7 @@ public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Configuration of this handler
-    private       Configuration    configuration;
+    private Configuration    configuration;
 
     // Formatted for formatting Date response headers
     private final SimpleDateFormat rfc1123Format;
@@ -69,9 +68,6 @@ public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
 
     // Respond for discovery mc requests
     private DiscoveryMulticastResponder discoveryMulticastResponder;
-
-    // Details about the agent
-    private AgentDetails agentDetails;
 
     // Address on which the server binds
     private final InetAddress serverAddress;
@@ -116,12 +112,31 @@ public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
         Restrictor restrictor = createRestrictor(configuration);
         backendManager = new BackendManager(configuration, logHandler, restrictor, pLazy);
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
+        if (listenForDiscoveryMcRequests(configuration))
         try {
-            discoveryMulticastResponder = new DiscoveryMulticastResponder(serverAddress,this,restrictor,logHandler);
+            discoveryMulticastResponder = new DiscoveryMulticastResponder(serverAddress,backendManager,restrictor,logHandler);
             discoveryMulticastResponder.start();
         } catch (IOException e) {
             logHandler.error("Cannot start discovery multicast handler: " + e,e);
         }
+    }
+
+    private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
+        String enable = pConfig.get(ConfigKey.DISCOVERY_MULTICAST_ENABLED);
+        return enable == null || Boolean.valueOf(enable);
+    }
+
+    /**
+     * Start the handler and remember connection details which are useful for discovery messages
+     *
+     * @param pLazy whether initialisation should be done lazy.
+     * @param pUrl agent URL
+     * @param pConfidence how sure the URL is
+     * @param pSecured whether the communication is secured or not
+     */
+    public void start(boolean pLazy, String pUrl, int pConfidence, boolean pSecured) {
+        start(pLazy);
+        backendManager.getAgentDetails().updateAgentParameters(pUrl, pConfidence, pSecured);
     }
 
     /**
@@ -181,6 +196,9 @@ public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
         }
     }
 
+    // ========================================================================
+
+
     private Restrictor createRestrictor(Configuration pConfig) {
         String location = pConfig.get(ConfigKey.POLICY_LOCATION);
         try {
@@ -199,11 +217,9 @@ public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
         }
     }
 
-
     private JSONAware executeGetRequest(ParsedUri parsedUri) {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
-
 
     private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {
         String encoding = null;
@@ -321,19 +337,5 @@ public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
                 }
             };
         }
-    }
-
-    @Override
-    public AgentDetails getAgentDetails() {
-        if (agentDetails == null) {
-            agentDetails = new AgentDetails();
-        }
-        if (backendManager != null) {
-            ServerHandle handle = backendManager.getServerHandle();
-            if (handle != null) {
-                agentDetails.setServerInfo(handle.getVendor(),handle.getProduct(),handle.getVersion());
-            }
-        }
-        return agentDetails;
     }
 }

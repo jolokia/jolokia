@@ -133,6 +133,18 @@ public enum ConfigKey {
      */
     IF_MODIFIED_SINCE("ifModifiedSince",false,true),
 
+    /**
+     * Whether to enable listening and responding to discovery multicast requests
+     * for discovering agent details.
+     */
+    DISCOVERY_MULTICAST_ENABLED("discoveryMulticastEnabled",true,false),
+
+    /**
+     * Specify the agent URL to return for an discovery multicast request. If this option
+     * is given {@link #DISCOVERY_MULTICAST_ENABLED} is set to <code>true</code> automatically.
+     */
+    DISCOVERY_MULTICAST_AGENT_URL("discoveryMulticastAgentUrl",true,false),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 

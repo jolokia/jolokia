@@ -12,6 +12,8 @@ import java.nio.channels.ClosedByInterruptException;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 
+import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.RESPONSE;
+
 /**
  * A listener runnable which should be used in thread and which reads from a multicast socket
  * incoming request to which it responds with this agent details.
@@ -75,7 +77,7 @@ class MulticastSocketListener implements Runnable {
 
     private void handleQuery(DiscoveryIncomingMessage pMsg) throws IOException {
         DiscoveryOutgoingMessage answer =
-                new DiscoveryOutgoingMessage.Builder(AbstractDiscoveryMessage.MessageType.RESPONSE)
+                new DiscoveryOutgoingMessage.Builder(RESPONSE)
                         .respondTo(pMsg)
                         .agentDetails(agentDetailsHolder.getAgentDetails())
                         .build();

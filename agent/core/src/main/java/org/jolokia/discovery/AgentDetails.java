@@ -6,6 +6,7 @@ import org.jolokia.Version;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.Payload;
+
 /**
  * Agent details describing this agent. This information during
  * discovery of the agent. This object is mutable so that since
@@ -41,18 +42,18 @@ public class AgentDetails {
      * Constructor used when the input has been parsed
      * @param pMsgData
      */
-    public AgentDetails(Map<Payload, String> pMsgData) {
-        serverVendor = pMsgData.get(Payload.SERVER_VENDOR);
-        serverProduct = pMsgData.get(Payload.SERVER_PRODUCT);
-        serverVersion = pMsgData.get(Payload.SERVER_VERSION);
-        url = pMsgData.get(Payload.URL);
+    public AgentDetails(Map<Payload, Object> pMsgData) {
+        serverVendor = (String) pMsgData.get(Payload.SERVER_VENDOR);
+        serverProduct = (String) pMsgData.get(Payload.SERVER_PRODUCT);
+        serverVersion = (String) pMsgData.get(Payload.SERVER_VERSION);
+        url = (String) pMsgData.get(Payload.URL);
         if (pMsgData.containsKey(Payload.CONFIDENCE)) {
-            confidence = Integer.parseInt(pMsgData.get(Payload.CONFIDENCE));
+            confidence = ((Long) pMsgData.get(Payload.CONFIDENCE)).intValue();
         }
         if (pMsgData.containsKey(Payload.SECURED)) {
-            secured = Boolean.parseBoolean(pMsgData.get(Payload.SECURED));
+            secured = (Boolean) pMsgData.get(Payload.SECURED);
         }
-        version = pMsgData.get(Payload.VERSION);
+        version = (String) pMsgData.get(Payload.VERSION);
     }
 
     public void setServerInfo(String pVendor, String pProduct, String pVersion) {
@@ -61,19 +62,10 @@ public class AgentDetails {
         serverVersion = pVersion;
     }
 
-    public void setConnectionParameters(String pUrl, int pConfidence, Boolean pSecured) {
+    public void updateAgentParameters(String pUrl, int pConfidence, Boolean pSecured) {
         url = pUrl;
         confidence = pConfidence;
         secured = pSecured;
-    }
-
-    public String toMessagePayload() {
-        Map<String,Object> payload = toJSONObject();
-        StringBuffer resp = new StringBuffer();
-        for (Map.Entry<String,Object> entry : payload.entrySet()) {
-            resp.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
-        }
-        return resp.toString();
     }
 
     /**
@@ -105,4 +97,5 @@ public class AgentDetails {
             pResp.put(pKey.toString().toLowerCase(),pValue);
         }
     }
+
 }

@@ -26,7 +26,6 @@ import java.util.concurrent.*;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
-import org.jolokia.discovery.AgentDetails;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -100,7 +99,7 @@ public class JolokiaServer {
      * be started as well.
      */
     public void start() {
-        jolokiaHttpHandler.start(lazy);
+        jolokiaHttpHandler.start(lazy,url,100, config.getAuthenticator() != null);
 
         if (httpServer != null) {
             // Starting our own server in an own thread group with a fixed name
@@ -203,13 +202,6 @@ public class JolokiaServer {
         url = String.format("%s://%s:%d%s",
                             pConfig.getProtocol(),realAddress.getCanonicalHostName(),port,contextPath);
 
-        updateAgentDetails(url,pConfig.getAuthenticator() != null);
-    }
-
-    // Update agent details with URL and other params.
-    private void updateAgentDetails(String pUrl, boolean pIsAuthenticated) {
-        AgentDetails details = jolokiaHttpHandler.getAgentDetails();
-        details.setConnectionParameters(pUrl, 100, pIsAuthenticated);
     }
 
     /**

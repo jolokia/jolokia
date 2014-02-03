@@ -16,6 +16,8 @@ public class MulticastUtil {
 
     // IPv4 Address for Jolokia's Multicast group
     public static final String JOLOKIA_MULTICAST_GROUP_IP4 = "239.192.48.84";
+
+    // IpV6 multicast address (not yet supported)
     public static final String JOLOKIA_MULTICAST_GROUP_IP6 = "FF08::48:84";
 
     // Multicast port where to listen for queries
@@ -42,7 +44,8 @@ public class MulticastUtil {
 
     static MulticastSocket newMulticastSocket(InetAddress pAddress) throws IOException {
 
-        InetAddress address = pAddress != null ? pAddress : getLocalAddress();
+        // TODO: IpV6
+        InetAddress address = pAddress != null && pAddress instanceof Inet4Address ? pAddress : getLocalAddress();
         if (address == null) {
             throw new UnknownHostException("Cannot find address of local host which can be used for multicasting");
         }
@@ -60,6 +63,8 @@ public class MulticastUtil {
     }
 
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg) throws IOException {
+        // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
+        // should be sent, on each interface respectively. Currently, only IpV4 is supported.
         InetAddress address = getLocalAddress();
         if (address == null) {
             throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
@@ -131,6 +136,8 @@ public class MulticastUtil {
     private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress) {
         return checkMethod(networkInterface, isUp) &&
                checkMethod(networkInterface, supportsMulticast) &&
+               // TODO: IpV6 support
+               ! (interfaceAddress instanceof Inet6Address) &&
                !interfaceAddress.isLoopbackAddress();
     }
 

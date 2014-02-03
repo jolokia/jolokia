@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.json.simple.JSONArray;
 
+import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
+
 /**
  * Discover Jolokia agents via multicast
  *
@@ -16,7 +18,7 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
     /** {@inheritDoc} */
     public List lookupAgents() throws IOException {
         DiscoveryOutgoingMessage out =
-                new DiscoveryOutgoingMessage.Builder(AbstractDiscoveryMessage.MessageType.QUERY)
+                new DiscoveryOutgoingMessage.Builder(QUERY)
                         .build();
         List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out);
         JSONArray ret = new JSONArray();

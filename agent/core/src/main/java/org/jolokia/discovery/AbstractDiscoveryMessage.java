@@ -3,6 +3,8 @@ package org.jolokia.discovery;
 
 import java.io.UnsupportedEncodingException;
 
+import org.json.simple.JSONObject;
+
 /**
  * A Jolokia discover message which can be either a request
  * or a response.
@@ -34,12 +36,12 @@ abstract class AbstractDiscoveryMessage {
     }
 
     public byte[] getData() {
-        StringBuilder respond = new StringBuilder();
-        respond.append("type:").append(type.toString().toLowerCase()).append("\n");
+        JSONObject respond = new JSONObject();
+        respond.put(Payload.TYPE.name().toLowerCase(),type.toString().toLowerCase());
         if (agentDetails != null) {
-            respond.append(agentDetails.toMessagePayload());
+            respond.putAll(agentDetails.toJSONObject());
         }
-        byte[] ret = getBytes(respond.toString());
+        byte[] ret = getBytes(respond.toJSONString());
         if (ret.length > MAX_MSG_SIZE) {
             throw new IllegalArgumentException("Message to send is longer than maximum size of " + MAX_MSG_SIZE + " bytes.");
         }
@@ -57,17 +59,8 @@ abstract class AbstractDiscoveryMessage {
             return pRespond.getBytes();
         }
     }
-    /**
-     * Type of message. The constant names are used as type value for the payload
-     */
-    enum MessageType {
-        // Discovery query
-        QUERY,
-        // Response to a discovery query
-        RESPONSE
-    }
 
-    /**
+        /**
      * Enum holding the possible values for the discovery request/response. Note that the
      * name of the enum is used literally in the message and must not be changed.
      */
@@ -89,4 +82,15 @@ abstract class AbstractDiscoveryMessage {
         // Agent version
         VERSION
     }
+
+    /**
+     * Type of message. The constant names are used as type value for the payload
+     */
+    enum MessageType {
+        // Discovery query
+        QUERY,
+        // Response to a discovery query
+        RESPONSE
+    }
+
 }

@@ -27,22 +27,17 @@ public class DiscoveryMulticastResponder {
     private InetAddress hostAddress;
 
     /**
-     * Create the responder which can be started and stopped
+     * Create the responder which can be started and stopped and which detects the address to listen on on its own.
      *
-     * @param pHost host address from which the binding is performed
      * @param pDetailsHolder holds the details for an agent
      * @param pRestrictor restrictor used for avoiding responding to sites which are not allowed to connect
      * @param pLogHandler used for logging and debugging
      * @throws IOException when the host is not known.
      */
-    public DiscoveryMulticastResponder(String pHost,
-                                       AgentDetailsHolder pDetailsHolder,
+    public DiscoveryMulticastResponder(AgentDetailsHolder pDetailsHolder,
                                        Restrictor pRestrictor,
                                        LogHandler pLogHandler) throws UnknownHostException {
-        this(pHost != null ? InetAddress.getByName(pHost) : null,
-             pDetailsHolder,
-             pRestrictor,
-             pLogHandler);
+        this(null, pDetailsHolder, pRestrictor, pLogHandler);
     }
 
     /**

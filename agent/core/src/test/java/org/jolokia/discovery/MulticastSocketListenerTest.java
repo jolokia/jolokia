@@ -11,6 +11,7 @@ import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
+import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
 import static org.jolokia.discovery.MulticastUtil.*;
 import static org.testng.Assert.*;
 
@@ -31,7 +32,7 @@ public class MulticastSocketListenerTest {
         socket = newMulticastSocket();
         url = new URL(JOLOKIA_URL);
         final AgentDetails details = new AgentDetails();
-        details.setConnectionParameters(JOLOKIA_URL,100,false);
+        details.updateAgentParameters(JOLOKIA_URL, 100, false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
         listener = new MulticastSocketListener(socket,
@@ -70,7 +71,7 @@ public class MulticastSocketListenerTest {
     public void simple() throws IOException {
 
         DiscoveryOutgoingMessage out =
-                new DiscoveryOutgoingMessage.Builder(AbstractDiscoveryMessage.MessageType.QUERY)
+                new DiscoveryOutgoingMessage.Builder(QUERY)
                 .build();
         List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out);
 

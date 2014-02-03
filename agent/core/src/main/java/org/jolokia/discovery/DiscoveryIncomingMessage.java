@@ -6,6 +6,10 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 /**
  * @author roland
  * @since 27.01.14
@@ -25,28 +29,18 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
         sourceAddress = pPacket.getAddress();
         sourcePort = pPacket.getPort();
 
-        Map<Payload, String> msgData = parseData(pPacket.getData(), pPacket.getLength());
-        String typeS = msgData.remove(Payload.TYPE);
+        Map<Payload,Object> inData = parseData(pPacket.getData(), pPacket.getLength());
+        String typeS = (String) inData.remove(Payload.TYPE);
         if (typeS == null) {
-            throw new IOException("No type given in request");
+            throw new IOException("No message type given in discovery message " + inData);
         }
-        setType(AbstractDiscoveryMessage.MessageType.valueOf(typeS.toUpperCase()));
-        setAgentDetails(new AgentDetails(msgData));
-    }
-
-    private Map<Payload, String> parseData(byte[] pData, int pLength) throws IOException {
-        ByteArrayInputStream is = new ByteArrayInputStream(pData,0,pLength);
-        LineNumberReader reader = new LineNumberReader(new InputStreamReader(is, "UTF-8"));
-        String line;
-        Map<Payload,String> ret = new HashMap<Payload, String>();
-        while ( (line = reader.readLine()) != null) {
-            String parts[] = line.split(":",2);
-            if (parts.length != 2) {
-                throw new IOException("Cannot parse line " + line + " since it doesn't contains a ':' separator");
-            }
-            ret.put(Payload.valueOf(parts[0].toUpperCase()),parts[1]);
+        try {
+            MessageType type = MessageType.valueOf(typeS.toUpperCase());
+            setType(type);
+        } catch (IllegalArgumentException exp) {
+            throw new IOException("Invalid type " + typeS + " given in discovery message");
         }
-        return ret;
+        setAgentDetails(new AgentDetails(inData));
     }
 
     public InetAddress getSourceAddress() {
@@ -65,4 +59,24 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
                 "details = " + agentDetails +
                '}';
     }
+
+    public static Map<Payload,Object> parseData(byte[] pData, int pLength) throws IOException {
+        JSONParser parser = new JSONParser();
+        ByteArrayInputStream is = new ByteArrayInputStream(pData,0,pLength);
+        try {
+            JSONObject inMsg = (JSONObject) parser.parse(new InputStreamReader(is, "UTF-8"));
+            Map<Payload, Object> data = new HashMap<Payload, Object>();
+            for (Object key : inMsg.keySet()) {
+                try {
+                    data.put(Payload.valueOf(key.toString().toUpperCase()), inMsg.get(key));
+                } catch (IllegalArgumentException exp) {
+                    // We simply ignore key which are unknown
+                }
+            }
+            return data;
+        } catch (ParseException e) {
+            throw new IOException("Cannot parse discovery message as JSON",e);
+        }
+    }
+
 }

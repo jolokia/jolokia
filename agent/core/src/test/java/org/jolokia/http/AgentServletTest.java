@@ -393,7 +393,7 @@ public class AgentServletTest {
         TestDetector.reset();
     }
     
-    @AfterMethod
+    //@AfterMethod
     public void verifyMocks() {
         verify(config, context, request, response);
     }

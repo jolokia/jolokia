@@ -13,6 +13,8 @@ import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.json.JsonConvertOptions;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.AgentDetails;
+import org.jolokia.discovery.AgentDetailsHolder;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -46,7 +48,7 @@ import static org.jolokia.config.ConfigKey.*;
  * @author roland
  * @since Nov 11, 2009
  */
-public class BackendManager {
+public class BackendManager implements AgentDetailsHolder {
 
     // Dispatches request to local MBeanServer
     private LocalRequestDispatcher localDispatcher;
@@ -77,6 +79,9 @@ public class BackendManager {
     // ("volatile: because we use double-checked locking later on
     // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
     private volatile Initializer initializer;
+
+    // Details about the agent inclding the server handle
+    private AgentDetails agentDetails;
 
     /**
      * Construct a new backend manager with the given configuration and which allows
@@ -115,6 +120,9 @@ public class BackendManager {
 
         // Log handler for putting out debug
         logHandler = pLogHandler;
+
+        // Details about the agent, used for discovery
+        agentDetails = new AgentDetails();
 
         if (pLazy) {
             initializer = new Initializer(pConfig);
@@ -269,6 +277,17 @@ public class BackendManager {
     }
 
 
+    /**
+     * Get the details for the agent which can be updated or used
+     *
+     * @return agent details
+     */
+    public AgentDetails getAgentDetails() {
+        return agentDetails;
+    }
+
+
+
     // ==========================================================================================================
 
     // Initialized used for late initialisation as it is required for the agent when used
@@ -315,7 +334,9 @@ public class BackendManager {
         requestDispatchers.add(localDispatcher);
 
         // Backendstore for remembering agent state
-        initStores(pConfig);
+        initMBeans(pConfig);
+
+        agentDetails.setServerInfo(serverHandle.getVendor(),serverHandle.getProduct(),serverHandle.getVersion());
     }
 
 
@@ -430,7 +451,7 @@ public class BackendManager {
     }
 
     // init various application wide stores for handling history and debug output.
-    private void initStores(Configuration pConfig) {
+    private void initMBeans(Configuration pConfig) {
         int maxEntries = pConfig.getAsInt(HISTORY_MAX_ENTRIES);
         int maxDebugEntries = pConfig.getAsInt(DEBUG_MAX_ENTRIES);
 

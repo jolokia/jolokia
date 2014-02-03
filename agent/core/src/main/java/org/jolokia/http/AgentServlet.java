@@ -9,9 +9,7 @@ import javax.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
-import org.jolokia.detector.ServerHandle;
-import org.jolokia.discovery.AgentDetails;
-import org.jolokia.discovery.AgentDetailsHolder;
+import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.ClassUtil;
 import org.jolokia.util.LogHandler;
@@ -47,7 +45,7 @@ import org.json.simple.JSONAware;
  * @author roland@jolokia.org
  * @since Apr 18, 2009
  */
-public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
+public class AgentServlet extends HttpServlet {
 
     private static final long serialVersionUID = 42L;
 
@@ -69,7 +67,11 @@ public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
     // Mime type used for returning the answer
     private String configMimeType;
 
-    private AgentDetails agentDetails;
+    // Listen for discovery request (if switched on)
+    private DiscoveryMulticastResponder discoveryMulticastResponder;
+
+    // If discovery multicast is enabled and URL should be initialized by request
+    private boolean initAgentUrlFromRequest = false;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -157,6 +159,43 @@ public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
 
+        initDiscoveryMulticast(pServletConfig,config);
+    }
+
+    private void initDiscoveryMulticast(ServletConfig pServletConfig,Configuration pConfig) {
+        if (listenForDiscoveryMcRequests(pConfig)) {
+            String url = findAgentUrl(pConfig);
+            if (url == null) {
+                initAgentUrlFromRequest = true;
+            } else {
+                initAgentUrlFromRequest = false;
+                backendManager.getAgentDetails().updateAgentParameters(url,100,null);
+            }
+            try {
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
+                discoveryMulticastResponder.start();
+            } catch (IOException e) {
+                logHandler.error("Cannot start discovery multicast handler: " + e,e);
+            }
+        }
+    }
+
+    // Try to find an URL for system props or config
+    private String findAgentUrl(Configuration pConfig) {
+        // System property has precedence
+        String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_MULTICAST_AGENT_URL.getKeyValue());
+        if (url == null) {
+            url = pConfig.get(ConfigKey.DISCOVERY_MULTICAST_AGENT_URL);
+        }
+        return url;
+    }
+
+    // For war agent needs to be switched on
+    private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
+        return System.getProperty("jolokia." + ConfigKey.DISCOVERY_MULTICAST_ENABLED.getKeyValue()) != null ||
+               System.getProperty("jolokia." + ConfigKey.DISCOVERY_MULTICAST_AGENT_URL.getKeyValue()) != null ||
+               pConfig.getAsBoolean(ConfigKey.DISCOVERY_MULTICAST_ENABLED) ||
+               pConfig.get(ConfigKey.DISCOVERY_MULTICAST_AGENT_URL) != null;
     }
 
     /**
@@ -190,6 +229,10 @@ public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
     @Override
     public void destroy() {
         backendManager.destroy();
+        if (discoveryMulticastResponder != null) {
+            discoveryMulticastResponder.stop();
+            discoveryMulticastResponder = null;
+        }
         super.destroy();
     }
 
@@ -231,6 +274,11 @@ public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
             // Check access policy
             requestHandler.checkClientIPAccess(pReq.getRemoteHost(),pReq.getRemoteAddr());
 
+            // Lookup the Agent URL if needed
+            if (initAgentUrlFromRequest) {
+                updateAgentUrl(pReq.getRequestURL().toString(),pReq.getContextPath(),pReq.getAuthType() != null);
+                initAgentUrlFromRequest = false;
+            }
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
         } catch (Throwable exp) {
@@ -253,11 +301,23 @@ public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
         }
     }
 
+    // Update the URL in the AgentDetails
+    private void updateAgentUrl(String pUrl, String pServletPath, boolean pIsAuthenticated) {
+        int idx = pUrl.indexOf(pServletPath);
+        String url;
+        if (idx != -1) {
+            url = pUrl.substring(0,idx) + pServletPath;
+        } else {
+            url = pUrl;
+        }
+        backendManager.getAgentDetails().updateAgentParameters(url,100,pIsAuthenticated);
+    }
+
     // Set an appropriate CORS header if requested and if allowed
     private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
         String origin = requestHandler.extractCorsOrigin(pReq.getHeader("Origin"));
         if (origin != null) {
-            pResp.setHeader("Access-Control-Allow-Origin",origin);
+            pResp.setHeader("Access-Control-Allow-Origin", origin);
             pResp.setHeader("Access-Control-Allow-Credentials","true");
         }
     }
@@ -269,17 +329,6 @@ public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
             return requestMimeType;
         }
         return configMimeType;
-    }
-
-    public AgentDetails getAgentDetails() {
-        if (agentDetails == null) {
-            agentDetails = new AgentDetails();
-        }
-        if (backendManager != null) {
-            ServerHandle handle = backendManager.getServerHandle();
-            agentDetails.setServerInfo(handle.getVendor(),handle.getProduct(),handle.getVersion());
-        }
-        return agentDetails;
     }
 
     private interface ServletRequestHandler {
