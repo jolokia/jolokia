@@ -51,7 +51,7 @@ public class MulticastUtil {
         }
         MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
         socket.setReuseAddress(true);
-        socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
+        //socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
         socket.setTimeToLive(255);
         // V6: ffx8::/16
         socket.joinGroup(getMulticastGroup(address));
