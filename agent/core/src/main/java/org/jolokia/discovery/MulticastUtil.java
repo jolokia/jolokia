@@ -51,6 +51,11 @@ public class MulticastUtil {
         }
         MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
         socket.setReuseAddress(true);
+        if (address instanceof Inet6Address) {
+            throw new IllegalArgumentException("Wrong address " + address + " found");
+        }
+        System.out.println("Address: " + address);
+        System.out.println("NI: " + NetworkInterface.getByInetAddress(address));
         socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
         socket.setTimeToLive(255);
         // V6: ffx8::/16
