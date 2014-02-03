@@ -155,7 +155,7 @@ public class JolokiaHttpHandlerTest {
 
     @Test
     public void customLogHandler1() throws Exception {
-        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(),new CustomLogHandler());
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(), null, new CustomLogHandler());
         handler.start(false);
         handler.stop();
         assertTrue(CustomLogHandler.infoCount  > 0);

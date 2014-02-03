@@ -17,8 +17,7 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.URI;
+import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -31,6 +30,8 @@ import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.*;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.ClassUtil;
@@ -43,7 +44,7 @@ import org.json.simple.JSONAware;
  * @author roland
  * @since Mar 3, 2010
  */
-public class JolokiaHttpHandler implements HttpHandler {
+public class JolokiaHttpHandler implements HttpHandler, AgentDetailsHolder {
 
     // Backendmanager for doing request
     private BackendManager backendManager;
@@ -66,28 +67,42 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Loghandler to use
     private final LogHandler logHandler;
 
-    /**
-     * Create a new HttpHandler for processing HTTP request
-     *
-     * @param pConfig jolokia specific config tuning the processing behaviour
-     */
+    // Respond for discovery mc requests
+    private DiscoveryMulticastResponder discoveryMulticastResponder;
+
+    // Details about the agent
+    private AgentDetails agentDetails;
+
+    // Address on which the server binds
+    private final InetAddress serverAddress;
+
     public JolokiaHttpHandler(Configuration pConfig) {
-        this(pConfig,null);
+        this(pConfig, null, null);
     }
 
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pConfig jolokia specific config tuning the processing behaviour
+     */
+    public JolokiaHttpHandler(Configuration pConfig, InetAddress pServerAddress) {
+        this(pConfig, pServerAddress, null);
+    }
+
+    /**
+     * Create a new HttpHandler for processing HTTP request
+     *
+     * @param pConfig jolokia specific config tuning the processing behaviour
+     * @param pServerAddress address on which the server binds.
      * @param pLogHandler log-handler the log handler to use for jolokia
      */
-    public JolokiaHttpHandler(Configuration pConfig, LogHandler pLogHandler) {
+    public JolokiaHttpHandler(Configuration pConfig, InetAddress pServerAddress, LogHandler pLogHandler) {
         configuration = pConfig;
         context = pConfig.get(ConfigKey.AGENT_CONTEXT);
         if (!context.endsWith("/")) {
             context += "/";
         }
-
+        serverAddress = pServerAddress;
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS));
@@ -98,17 +113,26 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        backendManager = new BackendManager(configuration, logHandler, createRestrictor(configuration), pLazy);
+        Restrictor restrictor = createRestrictor(configuration);
+        backendManager = new BackendManager(configuration, logHandler, restrictor, pLazy);
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
+        try {
+            discoveryMulticastResponder = new DiscoveryMulticastResponder(serverAddress,this,restrictor,logHandler);
+            discoveryMulticastResponder.start();
+        } catch (IOException e) {
+            logHandler.error("Cannot start discovery multicast handler: " + e,e);
+        }
     }
 
     /**
      * Stop the handler
      */
     public void stop() {
+        discoveryMulticastResponder.stop();
         backendManager.destroy();
         backendManager = null;
         requestHandler = null;
+        discoveryMulticastResponder = null;
     }
 
     /**
@@ -297,5 +321,19 @@ public class JolokiaHttpHandler implements HttpHandler {
                 }
             };
         }
+    }
+
+    @Override
+    public AgentDetails getAgentDetails() {
+        if (agentDetails == null) {
+            agentDetails = new AgentDetails();
+        }
+        if (backendManager != null) {
+            ServerHandle handle = backendManager.getServerHandle();
+            if (handle != null) {
+                agentDetails.setServerInfo(handle.getVendor(),handle.getProduct(),handle.getVersion());
+            }
+        }
+        return agentDetails;
     }
 }

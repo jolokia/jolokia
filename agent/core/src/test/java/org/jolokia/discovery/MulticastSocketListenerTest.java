@@ -31,15 +31,13 @@ public class MulticastSocketListenerTest {
         socket = newMulticastSocket();
         url = new URL(JOLOKIA_URL);
         final AgentDetails details = new AgentDetails();
-        details.setUrl(JOLOKIA_URL);
-        details.setConfidence(100);
+        details.setConnectionParameters(JOLOKIA_URL,100,false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
         listener = new MulticastSocketListener(socket,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
                                                emptyLogHandler());
-
         Thread thread = new Thread(listener);
         thread.start();
     }
@@ -75,13 +73,17 @@ public class MulticastSocketListenerTest {
                 new DiscoveryOutgoingMessage.Builder(AbstractDiscoveryMessage.MessageType.QUERY)
                 .build();
         List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out);
-        assertEquals(discovered.size(),1);
-        DiscoveryIncomingMessage in = discovered.get(0);
-        assertFalse(in.isQuery());
-        AgentDetails agentDetails = in.getAgentDetails();
-        JSONObject details = agentDetails.toJSONObject();
-        assertEquals(details.get("url"), JOLOKIA_URL);
-        assertEquals(details.get("server_vendor"),"jolokia");
-        assertEquals(details.get("version"), Version.getAgentVersion());
+
+        for (DiscoveryIncomingMessage in : discovered) {
+            assertFalse(in.isQuery());
+            AgentDetails agentDetails = in.getAgentDetails();
+            JSONObject details = agentDetails.toJSONObject();
+            if (details.get("server_vendor").equals("jolokia")) {
+                assertEquals(details.get("url"), JOLOKIA_URL);
+                assertEquals(details.get("version"), Version.getAgentVersion());
+                return;
+            }
+        }
+        fail("No message found");
     }
 }

@@ -25,6 +25,8 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.JolokiaDiscovery;
+import org.jolokia.discovery.JolokiaDiscoveryMBean;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.history.HistoryStore;
@@ -93,8 +95,9 @@ public class LocalRequestDispatcher implements RequestDispatcher {
     }
 
     /**
-     * Initialise this reques dispatcher, which will register a {@link ConfigMBean} for easy external
-     * access to the {@link HistoryStore} and {@link DebugStore}.
+     * Initialise this request dispatcher, which will register a {@link ConfigMBean} for easy external
+     * access to the {@link HistoryStore} and {@link DebugStore}. Also a {@link JolokiaDiscoveryMBean}
+     * is registered
      *
      * @param pHistoryStore history store to be managed from within an MBean
      * @param pDebugStore managed debug store
@@ -134,6 +137,13 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         } catch (InstanceAlreadyExistsException exp) {
             log.info("Cannot register (legacy) MBean handler for config store with name " + legacyOName + " since it already exists. " +
                      "This is the case if another agent has been already started within the same JVM. The registration is skipped.");
+        }
+
+        try {
+            mBeanServerHandler.registerMBean(new JolokiaDiscovery(),JolokiaDiscoveryMBean.OBJECT_NAME);
+        } catch (InstanceAlreadyExistsException e) {
+            // Ignore since there is already one registered.
+            log.info("Jolokia Discovery MBean registration is skipped because there is already one registered.");
         }
     }
 

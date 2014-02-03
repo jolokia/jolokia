@@ -79,7 +79,7 @@ public class BackendManager {
     private volatile Initializer initializer;
 
     /**
-     * Constrcuct a new backend manager with the given configuration and which allows
+     * Construct a new backend manager with the given configuration and which allows
      * every operation (no restrictor)
      *
      * @param pConfig configuration used for tuning this handler's behaviour
@@ -145,7 +145,7 @@ public class BackendManager {
         if (debug) {
             time = System.currentTimeMillis();
         }
-        JSONObject json = null;
+        JSONObject json;
         try {
             json = callRequestDispatcher(pJmxReq);
 
@@ -316,6 +316,19 @@ public class BackendManager {
 
         // Backendstore for remembering agent state
         initStores(pConfig);
+    }
+
+
+    /**
+     * Get the server handle or null if none has been detected yet
+     * @return server handler
+     */
+    public ServerHandle getServerHandle() {
+        if (localDispatcher != null) {
+            return localDispatcher.getServerHandle();
+        } else {
+            return null;
+        }
     }
 
     private void initLimits(Configuration pConfig) {

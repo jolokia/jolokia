@@ -26,6 +26,7 @@ import java.util.concurrent.*;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import org.jolokia.discovery.AgentDetails;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -177,7 +178,9 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = pConfig.getContextPath();
-        jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig());
+        InetSocketAddress isocketAddress = pServer.getAddress();
+        InetAddress address = isocketAddress != null ? isocketAddress.getAddress() : null;
+        jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig(), address);
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Add authentication if configured
@@ -186,7 +189,6 @@ public class JolokiaServer {
             context.setAuthenticator(authenticator);
         }
 
-        // Get own URL for later reference
         serverAddress= pServer.getAddress();
         InetAddress realAddress;
         int port;
@@ -197,8 +199,17 @@ public class JolokiaServer {
             realAddress = pConfig.getAddress();
             port = pConfig.getPort();
         }
+
         url = String.format("%s://%s:%d%s",
                             pConfig.getProtocol(),realAddress.getCanonicalHostName(),port,contextPath);
+
+        updateAgentDetails(url,pConfig.getAuthenticator() != null);
+    }
+
+    // Update agent details with URL and other params.
+    private void updateAgentDetails(String pUrl, boolean pIsAuthenticated) {
+        AgentDetails details = jolokiaHttpHandler.getAgentDetails();
+        details.setConnectionParameters(pUrl, 100, pIsAuthenticated);
     }
 
     /**

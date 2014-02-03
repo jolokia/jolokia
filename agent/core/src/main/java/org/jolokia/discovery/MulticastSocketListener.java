@@ -49,11 +49,11 @@ class MulticastSocketListener implements Runnable {
         agentDetailsHolder = pAgentDetailsHolder;
         restrictor = pRestrictor;
         logHandler = pLogHandler;
-        running = true;
     }
 
     /** {@inheritDoc} */
     public void run() {
+        running = true;
         byte buf[] = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
         DatagramPacket packet = new DatagramPacket(buf, buf.length);
         while (isRunning()) {
@@ -101,9 +101,5 @@ class MulticastSocketListener implements Runnable {
 
     public void stop() {
         running = false;
-    }
-
-    public void start() {
-        running = true;
     }
 }

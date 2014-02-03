@@ -61,64 +61,46 @@ public class AgentDetails {
         serverVersion = pVersion;
     }
 
-    public void setUrl(String pUrl) {
+    public void setConnectionParameters(String pUrl, int pConfidence, Boolean pSecured) {
         url = pUrl;
-    }
-
-    public void setConfidence(int pConfidence) {
         confidence = pConfidence;
-    }
-
-    public void setSecured(Boolean pSecured) {
         secured = pSecured;
     }
 
-    public void setVersion(String  pVersion) {
-        version = pVersion;
-    }
-
     public String toMessagePayload() {
+        Map<String,Object> payload = toJSONObject();
         StringBuffer resp = new StringBuffer();
-        append(resp, Payload.URL,url);
-        if (confidence != 0) {
-            append(resp, Payload.CONFIDENCE,"" + confidence);
+        for (Map.Entry<String,Object> entry : payload.entrySet()) {
+            resp.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
         }
-        if (secured != null) {
-            append(resp, Payload.SECURED,secured.toString());
-        }
-        append(resp,Payload.SERVER_VENDOR,serverVendor);
-        append(resp,Payload.SERVER_PRODUCT,serverProduct);
-        append(resp,Payload.SERVER_VERSION,serverVendor);
-        append(resp,Payload.VERSION, version);
         return resp.toString();
     }
 
+    /**
+     * Get the details as JSON Object
+     *
+     * @return
+     */
     public JSONObject toJSONObject() {
         JSONObject resp = new JSONObject();
         add(resp,Payload.URL,url);
         if (confidence != 0) {
-            add(resp, Payload.CONFIDENCE, "" + confidence);
+            add(resp, Payload.CONFIDENCE,confidence);
         }
         if (secured != null) {
-            add(resp, Payload.SECURED, secured.toString());
+            add(resp, Payload.SECURED, secured);
         }
         add(resp, Payload.SERVER_VENDOR, serverVendor);
         add(resp, Payload.SERVER_PRODUCT, serverProduct);
-        add(resp, Payload.SERVER_VERSION, serverVendor);
+        add(resp, Payload.SERVER_VERSION, serverVersion);
         add(resp, Payload.VERSION, version);
 
         return resp;
     }
 
-    // ======================================================================================================
+    // =======================================================================================
 
-    private void append(StringBuffer buf, Payload pPayload, String pVal) {
-        if (pVal != null) {
-            buf.append(pPayload.toString().toLowerCase()).append(":").append(pVal).append("\n");
-        }
-    }
-
-    private void add(JSONObject pResp, Payload pKey, String pValue) {
+    private void add(JSONObject pResp, Payload pKey, Object pValue) {
         if (pValue != null) {
             pResp.put(pKey.toString().toLowerCase(),pValue);
         }

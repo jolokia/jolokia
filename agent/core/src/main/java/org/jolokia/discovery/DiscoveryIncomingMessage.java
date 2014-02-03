@@ -3,7 +3,6 @@ package org.jolokia.discovery;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +36,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
 
     private Map<Payload, String> parseData(byte[] pData, int pLength) throws IOException {
         ByteArrayInputStream is = new ByteArrayInputStream(pData,0,pLength);
-        LineNumberReader reader = new LineNumberReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        LineNumberReader reader = new LineNumberReader(new InputStreamReader(is, "UTF-8"));
         String line;
         Map<Payload,String> ret = new HashMap<Payload, String>();
         while ( (line = reader.readLine()) != null) {

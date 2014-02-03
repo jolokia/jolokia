@@ -1,6 +1,7 @@
 package org.jolokia.discovery;
 
-import java.nio.charset.StandardCharsets;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * A Jolokia discover message which can be either a request
@@ -38,7 +39,7 @@ abstract class AbstractDiscoveryMessage {
         if (agentDetails != null) {
             respond.append(agentDetails.toMessagePayload());
         }
-        byte[] ret = respond.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] ret = getBytes(respond.toString());
         if (ret.length > MAX_MSG_SIZE) {
             throw new IllegalArgumentException("Message to send is longer than maximum size of " + MAX_MSG_SIZE + " bytes.");
         }
@@ -49,6 +50,13 @@ abstract class AbstractDiscoveryMessage {
         return agentDetails;
     }
 
+    protected byte[] getBytes(String pRespond) {
+        try {
+            return pRespond.getBytes("UTF8");
+        } catch (UnsupportedEncodingException e) {
+            return pRespond.getBytes();
+        }
+    }
     /**
      * Type of message. The constant names are used as type value for the payload
      */

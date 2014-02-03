@@ -9,6 +9,9 @@ import javax.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
+import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.AgentDetails;
+import org.jolokia.discovery.AgentDetailsHolder;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.ClassUtil;
 import org.jolokia.util.LogHandler;
@@ -44,7 +47,7 @@ import org.json.simple.JSONAware;
  * @author roland@jolokia.org
  * @since Apr 18, 2009
  */
-public class AgentServlet extends HttpServlet {
+public class AgentServlet extends HttpServlet implements AgentDetailsHolder {
 
     private static final long serialVersionUID = 42L;
 
@@ -65,6 +68,8 @@ public class AgentServlet extends HttpServlet {
     
     // Mime type used for returning the answer
     private String configMimeType;
+
+    private AgentDetails agentDetails;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -151,6 +156,7 @@ public class AgentServlet extends HttpServlet {
         configMimeType = config.get(ConfigKey.MIME_TYPE);
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
+
     }
 
     /**
@@ -263,6 +269,17 @@ public class AgentServlet extends HttpServlet {
             return requestMimeType;
         }
         return configMimeType;
+    }
+
+    public AgentDetails getAgentDetails() {
+        if (agentDetails == null) {
+            agentDetails = new AgentDetails();
+        }
+        if (backendManager != null) {
+            ServerHandle handle = backendManager.getServerHandle();
+            agentDetails.setServerInfo(handle.getVendor(),handle.getProduct(),handle.getVersion());
+        }
+        return agentDetails;
     }
 
     private interface ServletRequestHandler {

@@ -1,8 +1,7 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
-
-import org.json.simple.JSONArray;
+import java.util.List;
 
 /**
  * MBean for looking up other agents
@@ -11,10 +10,12 @@ import org.json.simple.JSONArray;
  */
 public interface JolokiaDiscoveryMBean {
 
+    String OBJECT_NAME = "jolokia:type=Discovery";
+
     /**
      * Lookup agents.
      *
      * @return an array with JSON objects containing the agent details discovered
      */
-    JSONArray lookupAgents() throws IOException;
+    List lookupAgents() throws IOException;
 }

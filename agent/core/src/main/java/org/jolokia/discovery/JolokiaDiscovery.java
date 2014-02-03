@@ -14,7 +14,7 @@ import org.json.simple.JSONArray;
 public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
 
     /** {@inheritDoc} */
-    public JSONArray lookupAgents() throws IOException {
+    public List lookupAgents() throws IOException {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(AbstractDiscoveryMessage.MessageType.QUERY)
                         .build();
