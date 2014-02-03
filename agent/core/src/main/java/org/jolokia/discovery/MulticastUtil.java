@@ -100,7 +100,7 @@ public class MulticastUtil {
 
     private static InetAddress getLocalAddress() throws UnknownHostException {
         InetAddress addr = InetAddress.getLocalHost();
-        if (addr.isLoopbackAddress()) {
+        if (addr.isLoopbackAddress() || addr instanceof Inet6Address) {
             // Find local address that isn't a loopback address
             InetAddress lookedUpAddr = findLocalAddress();
             // If a local, multicast enabled address can be found, use it. Otherwise
