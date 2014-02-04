@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.jolokia.Version;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.StdoutLogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -38,20 +38,11 @@ public class MulticastSocketListenerTest {
         listener = new MulticastSocketListener(socket,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
-                                               emptyLogHandler());
+                                               new StdoutLogHandler());
         Thread thread = new Thread(listener);
         thread.start();
     }
 
-    private LogHandler emptyLogHandler() {
-        return new LogHandler() {
-            public void debug(String message) { }
-
-            public void info(String message) { }
-
-            public void error(String message, Throwable t) { }
-        };
-    }
 
     private AgentDetailsHolder getAgentDetailsHolder(final AgentDetails pDetails) {
         return new AgentDetailsHolder() {
@@ -74,12 +65,11 @@ public class MulticastSocketListenerTest {
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                 .build();
         List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out);
-
         for (DiscoveryIncomingMessage in : discovered) {
             assertFalse(in.isQuery());
             AgentDetails agentDetails = in.getAgentDetails();
             JSONObject details = agentDetails.toJSONObject();
-            if (details.get("server_vendor").equals("jolokia")) {
+            if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
                 assertEquals(details.get("url"), JOLOKIA_URL);
                 assertEquals(details.get("version"), Version.getAgentVersion());
                 return;

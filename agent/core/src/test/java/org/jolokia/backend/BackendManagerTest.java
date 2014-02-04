@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
@@ -28,8 +29,7 @@ import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -40,10 +40,11 @@ import static org.testng.Assert.*;
  * @author roland
  * @since Jun 15, 2010
  */
-public class BackendManagerTest implements LogHandler {
+public class BackendManagerTest {
 
     Configuration config;
 
+    private LogHandler log = new StdoutLogHandler();
     @BeforeTest
     public void setup() {
         config = new Configuration();
@@ -52,7 +53,7 @@ public class BackendManagerTest implements LogHandler {
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         config = new Configuration(ConfigKey.DEBUG,"true");
 
-        BackendManager backendManager = new BackendManager(config, this);
+        BackendManager backendManager = new BackendManager(config, log);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -62,8 +63,18 @@ public class BackendManagerTest implements LogHandler {
     }
 
     @Test
+    public void notChanged() throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, IOException {
+        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
+        BackendManager backendManager = new BackendManager(config, log);
+        JmxRequest req = new JmxRequestBuilder(RequestType.LIST).build();
+        JSONObject ret = backendManager.handleRequest(req);
+        assertEquals(ret.get("status"),304);
+        backendManager.destroy();
+    }
+
+    @Test
     public void lazyInit() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        BackendManager backendManager = new BackendManager(config, this, null, true /* Lazy Init */ );
+        BackendManager backendManager = new BackendManager(config, log, null, true /* Lazy Init */ );
 
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
@@ -77,7 +88,7 @@ public class BackendManagerTest implements LogHandler {
     @Test
     public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
-        BackendManager backendManager = new BackendManager(config, this);
+        BackendManager backendManager = new BackendManager(config, log);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         backendManager.handleRequest(req);
         assertTrue(RequestDispatcherTest.called);
@@ -87,13 +98,13 @@ public class BackendManagerTest implements LogHandler {
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*invalid constructor.*")
     public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,log);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
     public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         config = new Configuration(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,log);
     }
 
     @Test
@@ -116,35 +127,35 @@ public class BackendManagerTest implements LogHandler {
     @Test
     public void defaultConfig() {
         config = new Configuration(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,log);
         backendManager.destroy();
     }
 
     @Test
     public void doubleInit() {
-        BackendManager b1 = new BackendManager(config,this);
-        BackendManager b2 = new BackendManager(config,this);
+        BackendManager b1 = new BackendManager(config,log);
+        BackendManager b2 = new BackendManager(config,log);
         b2.destroy();
         b1.destroy();
     }
 
     @Test
     public void remoteAccessCheck() {
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,log);
         assertTrue(backendManager.isRemoteAccessAllowed("localhost","127.0.0.1"));
         backendManager.destroy();
     }
 
     @Test
     public void corsAccessCheck() {
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,log);
         assertTrue(backendManager.isCorsAccessAllowed("http://bla.com"));
         backendManager.destroy();
     }
 
     @Test
     public void convertError() throws MalformedObjectNameException {
-        BackendManager backendManager = new BackendManager(config,this);
+        BackendManager backendManager = new BackendManager(config,log);
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
@@ -152,18 +163,6 @@ public class BackendManagerTest implements LogHandler {
         assertEquals(jsonError.get("message"),"Hans");
         assertEquals(((JSONObject) jsonError.get("cause")).get("message"),"Kalb");
         backendManager.destroy();
-    }
-    public void debug(String message) {
-        System.out.println("D> " + message);
-    }
-
-    public void info(String message) {
-        System.out.println("I> " + message);
-    }
-
-    public void error(String message, Throwable t) {
-        System.out.println("E> " + message);
-        t.printStackTrace(System.out);
     }
 
     // =========================================================================================
@@ -177,12 +176,14 @@ public class BackendManagerTest implements LogHandler {
             assertNotNull(pRestrictor);
         }
 
-        public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object dispatchRequest(JmxRequest pJmxReq) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
             called = true;
             if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();
             } else if (pJmxReq.getType() == RequestType.WRITE) {
                 return "faultyFormat";
+            } else if (pJmxReq.getType() == RequestType.LIST) {
+                throw new NotChangedException(pJmxReq);
             }
             return null;
         }

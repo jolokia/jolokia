@@ -26,8 +26,7 @@ import javax.management.MalformedObjectNameException;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.RequestType;
+import org.jolokia.util.*;
 import org.json.simple.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -39,20 +38,7 @@ import static org.testng.Assert.*;
  */
 public class RawObjectNameTest {
     private Configuration config     = new Configuration();
-    private LogHandler    logHandler = new LogHandler() {
-        public void debug(String message) {
-            System.out.println("[DEBUG] " + message);
-        }
-
-        public void info(String message) {
-            System.out.println("[INFO] " + message);
-        }
-
-        public void error(String message, Throwable t) {
-            System.out.println("[ERROR] " + message);
-            t.printStackTrace();
-        }
-    };
+    private LogHandler    logHandler = new StdoutLogHandler();
 
     private BackendManager backendManager = new BackendManager(config, logHandler, null, true /* Lazy Init */);
 

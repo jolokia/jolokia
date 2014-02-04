@@ -90,6 +90,11 @@ public class AgentDetails {
         return resp;
     }
 
+    @Override
+    public String toString() {
+        return "AgentDetails{" + toJSONObject().toJSONString() + "}";
+    }
+
     // =======================================================================================
 
     private void add(JSONObject pResp, Payload pKey, Object pValue) {

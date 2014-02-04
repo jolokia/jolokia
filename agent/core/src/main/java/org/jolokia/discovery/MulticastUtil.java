@@ -27,6 +27,9 @@ public class MulticastUtil {
     private static Method isUp;
     private static Method supportsMulticast;
 
+    // Utility class
+    private MulticastUtil() {}
+
     static {
         // Check for JDK method which are available only for JDK6
         try {
@@ -51,9 +54,6 @@ public class MulticastUtil {
         }
         MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
         socket.setReuseAddress(true);
-        if (address instanceof Inet6Address) {
-            throw new IllegalArgumentException("Wrong address " + address + " found");
-        }
         socket.setNetworkInterface(NetworkInterface.getByInetAddress(address));
         socket.setTimeToLive(255);
         // V6: ffx8::/16
@@ -115,7 +115,8 @@ public class MulticastUtil {
         return addr;
     }
 
-    private static InetAddress findLocalAddress() {
+    // returns null if none has been found
+    static InetAddress findLocalAddress() {
         Enumeration<NetworkInterface> networkInterfaces;
         try {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();

@@ -92,7 +92,7 @@ class MulticastSocketListener implements Runnable {
                                    pAnswer.getTargetAddress(),pAnswer.getTargetPort());
 
         logHandler.debug(new String(message));
-        if (socket != null && !socket.isClosed()) {
+        if (!socket.isClosed()) {
             socket.send(packet);
         }
     }

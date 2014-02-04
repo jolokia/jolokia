@@ -17,6 +17,7 @@ package org.jolokia.http;
  */
 
 import java.io.*;
+import java.util.List;
 import java.util.Vector;
 
 import javax.servlet.*;
@@ -25,10 +26,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
-import org.testng.annotations.*;
+import org.json.simple.JSONObject;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -127,6 +131,36 @@ public class AgentServletTest {
         servlet.destroy();
 
         assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    @Test
+    public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException {
+        String url = "http://localhost:8080/jolokia";
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_MULTICAST_AGENT_URL.getKeyValue(), url);
+        try {
+            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            List<JSONObject> in = discovery.lookupAgents();
+            for (JSONObject json : in) {
+                if (json.get("url") != null && json.get("url").equals(url)) {
+                    return;
+                }
+            }
+            fail("No agent found");
+        } finally {
+            servlet.destroy();
+        }
+    }
+
+    @Test
+    public void initWithAgentDiscoveryAndUrlLookup() throws ServletException, IOException {
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_MULTICAST_ENABLED.getKeyValue(), "true");
+        try {
+            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            List<JSONObject> in = discovery.lookupAgents();
+            assertTrue(in.size() > 0);
+        } finally {
+            servlet.destroy();
+        }
     }
 
     public static class CustomLogHandler implements LogHandler {
@@ -418,6 +452,8 @@ public class AgentServletTest {
                 context.log((String) anyObject());
             }
         }
+        context.log((String) anyObject());
+        expectLastCall().anyTimes();
         context.log(find("TestDetector"),isA(RuntimeException.class));
     }
 
@@ -451,9 +487,9 @@ public class AgentServletTest {
         expect(request.getInputStream()).andReturn(is);
     }
 
-    private void prepareStandardInitialisation() throws ServletException {
+    private void prepareStandardInitialisation(String ... params) throws ServletException {
         servlet = new AgentServlet(new AllowAllRestrictor());
-        initConfigMocks(null, null,"custom access", null);
+        initConfigMocks(params.length > 0 ? params : null, null,"custom access", null);
         replay(config, context);
         servlet.init(config);
     }

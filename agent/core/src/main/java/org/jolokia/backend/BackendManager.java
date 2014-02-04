@@ -339,19 +339,6 @@ public class BackendManager implements AgentDetailsHolder {
         agentDetails.setServerInfo(serverHandle.getVendor(),serverHandle.getProduct(),serverHandle.getVersion());
     }
 
-
-    /**
-     * Get the server handle or null if none has been detected yet
-     * @return server handler
-     */
-    public ServerHandle getServerHandle() {
-        if (localDispatcher != null) {
-            return localDispatcher.getServerHandle();
-        } else {
-            return null;
-        }
-    }
-
     private void initLimits(Configuration pConfig) {
         // Max traversal depth
         if (pConfig != null) {

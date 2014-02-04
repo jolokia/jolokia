@@ -43,7 +43,7 @@ abstract class AbstractDiscoveryMessage {
         }
         byte[] ret = getBytes(respond.toJSONString());
         if (ret.length > MAX_MSG_SIZE) {
-            throw new IllegalArgumentException("Message to send is longer than maximum size of " + MAX_MSG_SIZE + " bytes.");
+            throw new IllegalArgumentException("Message to send is larger (" + ret.length + " bytes) than maximum size of " + MAX_MSG_SIZE + " bytes.");
         }
         return ret;
     }
