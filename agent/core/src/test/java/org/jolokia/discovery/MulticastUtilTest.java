@@ -2,6 +2,7 @@ package org.jolokia.discovery;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Enumeration;
 
 import org.testng.annotations.Test;
 
@@ -22,7 +23,11 @@ public class MulticastUtilTest {
 
     @Test
     public void findLocalAddress() throws SocketException {
-        NetworkInterface.getNetworkInterfaces();
+        Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
+        System.out.println("IFs");
+        while (ifs.hasMoreElements()) {
+            System.out.println(ifs.nextElement());
+        }
         InetAddress addr = MulticastUtil.findLocalAddressViaNetworkInterface();
         assertNotNull(addr);
         assertTrue(addr instanceof Inet4Address);
