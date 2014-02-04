@@ -18,7 +18,6 @@ package org.jolokia.detector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -62,11 +61,11 @@ public class WebsphereDetector extends AbstractServerDetector {
                 if (date != null) {
                     extraInfo.put("buildDate",date);
                 }
-                return new WebsphereServerHandle(version,null,extraInfo.size() > 0 ? extraInfo : null);
+                return new WebsphereServerHandle(version, extraInfo.size() > 0 ? extraInfo : null);
             }
             return null;
         } else if (isWebsphere) {
-            return new WebsphereServerHandle(isWebsphere6 ? "6" : "7 or 8",null,null);
+            return new WebsphereServerHandle(isWebsphere6 ? "6" : "7 or 8", null);
         }
         return null;
     }
@@ -106,7 +105,7 @@ public class WebsphereDetector extends AbstractServerDetector {
     class WebsphereServerHandle extends ServerHandle {
 
         /** {@inheritDoc} */
-        public WebsphereServerHandle(String pVersion, URL pAgenturl, Map<String, String> pExtrainfo) {
+        public WebsphereServerHandle(String pVersion, Map<String, String> pExtrainfo) {
             super("IBM","websphere", pVersion, pExtrainfo);
         }
 

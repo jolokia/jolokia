@@ -17,7 +17,6 @@ package org.jolokia.detector;
  */
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -47,7 +46,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String version = detectVersion(pMBeanServerExecutor);
         if (version!= null) {
-            return new GlassfishServerHandle(version,null,new HashMap<String, String>());
+            return new GlassfishServerHandle(version, new HashMap<String, String>());
         } else {
             return null;
         }
@@ -139,10 +138,9 @@ public class GlassfishDetector extends AbstractServerDetector {
          * Server handle for a glassfish server
          *
          * @param version Glassfish version
-         * @param agentUrl agent url
          * @param extraInfo extra infos
          */
-        public GlassfishServerHandle(String version, URL agentUrl, Map<String, String> extraInfo) {
+        public GlassfishServerHandle(String version, Map<String, String> extraInfo) {
             super("Oracle", "glassfish", version, extraInfo);
         }
 

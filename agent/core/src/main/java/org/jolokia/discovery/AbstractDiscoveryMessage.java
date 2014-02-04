@@ -18,16 +18,16 @@ abstract class AbstractDiscoveryMessage {
     public static final int MAX_MSG_SIZE = 8972;
 
     // Type of the message
-    protected MessageType type;
+    private MessageType type;
 
     // Payload of the message
-    protected AgentDetails agentDetails;
+    private AgentDetails agentDetails;
 
-    final protected void setType(MessageType pType) {
+    protected final void setType(MessageType pType) {
         type = pType;
     }
 
-    final protected void setAgentDetails(AgentDetails pAgentDetails) {
+    protected final void setAgentDetails(AgentDetails pAgentDetails) {
         agentDetails = pAgentDetails;
     }
 
@@ -37,7 +37,7 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
-        respond.put(Payload.TYPE.name().toLowerCase(),type.toString().toLowerCase());
+        respond.put(Payload.TYPE.name().toLowerCase(), type.toString().toLowerCase());
         if (agentDetails != null) {
             respond.putAll(agentDetails.toJSONObject());
         }
@@ -93,4 +93,11 @@ abstract class AbstractDiscoveryMessage {
         RESPONSE
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+               "type=" + type +
+               ", agentDetails=" + agentDetails +
+               '}';
+    }
 }

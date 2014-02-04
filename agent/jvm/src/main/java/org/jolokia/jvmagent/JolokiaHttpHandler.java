@@ -112,12 +112,13 @@ public class JolokiaHttpHandler implements HttpHandler {
         Restrictor restrictor = createRestrictor(configuration);
         backendManager = new BackendManager(configuration, logHandler, restrictor, pLazy);
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
-        if (listenForDiscoveryMcRequests(configuration))
-        try {
-            discoveryMulticastResponder = new DiscoveryMulticastResponder(serverAddress,backendManager,restrictor,logHandler);
-            discoveryMulticastResponder.start();
-        } catch (IOException e) {
-            logHandler.error("Cannot start discovery multicast handler: " + e,e);
+        if (listenForDiscoveryMcRequests(configuration)) {
+            try {
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(serverAddress,backendManager,restrictor,logHandler);
+                discoveryMulticastResponder.start();
+            } catch (IOException e) {
+                logHandler.error("Cannot start discovery multicast handler: " + e,e);
+            }
         }
     }
 
@@ -136,6 +137,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      */
     public void start(boolean pLazy, String pUrl, int pConfidence, boolean pSecured) {
         start(pLazy);
+
         backendManager.getAgentDetails().updateAgentParameters(pUrl, pConfidence, pSecured);
     }
 
@@ -280,7 +282,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 String json = pJson.toJSONString();
                 String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
                 String content = callback == null ? json : callback + "(" + json + ");";
-                byte[] response = content.getBytes();
+                byte[] response = content.getBytes("UTF8");
                 pExchange.sendResponseHeaders(200,response.length);
                 out = pExchange.getResponseBody();
                 out.write(response);

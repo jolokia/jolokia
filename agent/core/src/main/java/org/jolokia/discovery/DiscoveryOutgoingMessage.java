@@ -10,7 +10,7 @@ import java.net.InetAddress;
  * @author roland
  * @since 27.01.14
  */
-public class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
+public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
 
     private final InetAddress targetAddress;
     private final int targetPort;
@@ -38,7 +38,7 @@ public class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         return new DatagramPacket(out,out.length,address,port);
     }
 
-    static public class Builder {
+    public static class Builder {
 
         private AgentDetails agentDetails;
         private MessageType type;

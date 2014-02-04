@@ -90,7 +90,7 @@ public final class ServiceObjectFactory {
         Exception error = null;
         LineNumberReader reader = null;
         try {
-            reader = new LineNumberReader(new InputStreamReader(pUrl.openStream()));
+            reader = new LineNumberReader(new InputStreamReader(pUrl.openStream(),"UTF8"));
             line = reader.readLine();
             while (line != null) {
                 createOrRemoveService(pExtractorMap, line);

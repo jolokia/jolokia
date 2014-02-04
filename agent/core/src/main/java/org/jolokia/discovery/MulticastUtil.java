@@ -12,7 +12,7 @@ import java.util.*;
  * @author roland
  * @since 28.01.14
  */
-public class MulticastUtil {
+public final class MulticastUtil {
 
     // IPv4 Address for Jolokia's Multicast group
     public static final String JOLOKIA_MULTICAST_GROUP_IP4 = "239.192.48.84";

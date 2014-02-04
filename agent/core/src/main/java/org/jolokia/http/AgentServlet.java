@@ -159,10 +159,10 @@ public class AgentServlet extends HttpServlet {
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
 
-        initDiscoveryMulticast(pServletConfig,config);
+        initDiscoveryMulticast(config);
     }
 
-    private void initDiscoveryMulticast(ServletConfig pServletConfig,Configuration pConfig) {
+    private void initDiscoveryMulticast(Configuration pConfig) {
         if (listenForDiscoveryMcRequests(pConfig)) {
             String url = findAgentUrl(pConfig);
             if (url == null) {

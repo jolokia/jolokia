@@ -158,6 +158,48 @@ public class AgentServletTest {
             JolokiaDiscovery discovery = new JolokiaDiscovery();
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
+            // At least one doesnt have an URL (remove this part if a way could be found for getting
+            // to the URL
+            for (JSONObject json : in) {
+                if (json.get("url") == null) {
+                    return;
+                }
+            }
+            fail("Every message has an URL");
+        } finally {
+            servlet.destroy();
+        }
+    }
+
+    @Test
+    public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException {
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_MULTICAST_ENABLED.getKeyValue(), "true");
+        try {
+            StringWriter sw = initRequestResponseMocks();
+            expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+            expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+            String url = "http://pirx:9876/jolokia";
+            StringBuffer buf = new StringBuffer();
+            buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+            expect(request.getRequestURL()).andReturn(buf);
+            expect(request.getContextPath()).andReturn("/jolokia");
+            expect(request.getAuthType()).andReturn("BASIC");
+            replay(request, response);
+
+            servlet.doGet(request, response);
+
+            assertTrue(sw.toString().contains("used"));
+
+            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            List<JSONObject> in = discovery.lookupAgents();
+            assertTrue(in.size() > 0);
+            for (JSONObject json : in) {
+                if (json.get("url") != null && json.get("url").equals(url)) {
+                    assertTrue((Boolean) json.get("secured"));
+                    return;
+                }
+            }
+            fail("Every message has no URL");
         } finally {
             servlet.destroy();
         }

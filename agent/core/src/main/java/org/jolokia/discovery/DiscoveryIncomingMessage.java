@@ -3,8 +3,7 @@ package org.jolokia.discovery;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,7 +37,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
             MessageType type = MessageType.valueOf(typeS.toUpperCase());
             setType(type);
         } catch (IllegalArgumentException exp) {
-            throw new IOException("Invalid type " + typeS + " given in discovery message");
+            throw new IOException("Invalid type " + typeS + " given in discovery message",exp);
         }
         setAgentDetails(new AgentDetails(inData));
     }
@@ -54,10 +53,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
     @Override
     public String toString() {
         return "JolokiaDiscoveryIncomingMessage{" +
-               "source = " + getSourceAddress() + ":" + getSourcePort() + ", " +
-                "type = " + type + ", " +
-                "details = " + agentDetails +
-               '}';
+               "source = " + getSourceAddress() + ":" + getSourcePort() + ": " + super.toString() + "}";
     }
 
     public static Map<Payload,Object> parseData(byte[] pData, int pLength) throws IOException {
@@ -66,9 +62,9 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
         try {
             JSONObject inMsg = (JSONObject) parser.parse(new InputStreamReader(is, "UTF-8"));
             Map<Payload, Object> data = new HashMap<Payload, Object>();
-            for (Object key : inMsg.keySet()) {
+            for (Map.Entry entry : (Set<Map.Entry>) inMsg.entrySet()) {
                 try {
-                    data.put(Payload.valueOf(key.toString().toUpperCase()), inMsg.get(key));
+                    data.put(Payload.valueOf(entry.getKey().toString().toUpperCase()), entry.getValue());
                 } catch (IllegalArgumentException exp) {
                     // We simply ignore key which are unknown
                 }
