@@ -24,14 +24,14 @@ public class MulticastUtilTest {
     public void findLocalAddress() throws SocketException {
         Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
         System.out.println("IFs");
-        boolean nonLoopback = false;
+        boolean found = false;
         while (ifs.hasMoreElements()) {
             NetworkInterface intf = ifs.nextElement();
             System.out.println(intf + " is loopback: " + intf.isLoopback());
-            nonLoopback = nonLoopback || !intf.isLoopback();
+            found = found || (!intf.isLoopback() && intf.supportsMulticast() && intf.isUp());
         }
         InetAddress addr = MulticastUtil.findLocalAddressViaNetworkInterface();
-        assertTrue(nonLoopback ? addr != null : addr == null);
+        assertTrue(found ? addr != null : addr == null);
         assertTrue(addr instanceof Inet4Address);
     }
 }
