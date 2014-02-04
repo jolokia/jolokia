@@ -105,7 +105,7 @@ public final class MulticastUtil {
         InetAddress addr = InetAddress.getLocalHost();
         if (addr.isLoopbackAddress() || addr instanceof Inet6Address || NetworkInterface.getByInetAddress(addr) == null) {
             // Find local address that isn't a loopback address
-            InetAddress lookedUpAddr = findLocalAddress();
+            InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface();
             // If a local, multicast enabled address can be found, use it. Otherwise
             // we are using the local address, which might not be what you want
             if (lookedUpAddr != null) {
@@ -116,7 +116,7 @@ public final class MulticastUtil {
     }
 
     // returns null if none has been found
-    static InetAddress findLocalAddress() {
+    static InetAddress findLocalAddressViaNetworkInterface() {
         Enumeration<NetworkInterface> networkInterfaces;
         try {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();

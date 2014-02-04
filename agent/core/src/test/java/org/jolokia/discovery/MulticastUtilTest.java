@@ -21,8 +21,9 @@ public class MulticastUtilTest {
     }
 
     @Test
-    public void findLocalAddress() {
-        InetAddress addr = MulticastUtil.findLocalAddress();
+    public void findLocalAddress() throws SocketException {
+        NetworkInterface.getNetworkInterfaces();
+        InetAddress addr = MulticastUtil.findLocalAddressViaNetworkInterface();
         assertNotNull(addr);
         assertTrue(addr instanceof Inet4Address);
     }
