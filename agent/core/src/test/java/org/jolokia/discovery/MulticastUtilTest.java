@@ -6,7 +6,6 @@ import java.util.Enumeration;
 
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -25,11 +24,14 @@ public class MulticastUtilTest {
     public void findLocalAddress() throws SocketException {
         Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
         System.out.println("IFs");
+        boolean nonLoopback = false;
         while (ifs.hasMoreElements()) {
-            System.out.println(ifs.nextElement());
+            NetworkInterface intf = ifs.nextElement();
+            System.out.println(intf + " is loopback: " + intf.isLoopback());
+            nonLoopback = nonLoopback || !intf.isLoopback();
         }
         InetAddress addr = MulticastUtil.findLocalAddressViaNetworkInterface();
-        assertNotNull(addr);
+        assertTrue(nonLoopback ? addr != null : addr == null);
         assertTrue(addr instanceof Inet4Address);
     }
 }
