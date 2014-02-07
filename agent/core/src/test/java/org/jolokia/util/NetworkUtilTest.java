@@ -15,7 +15,11 @@ public class NetworkUtilTest {
 
     @Test
     public void dump() throws SocketException, UnknownHostException {
-        System.out.println(NetworkUtil.dumpLocalNetworkInfo());
+        try {
+            System.out.println(NetworkUtil.dumpLocalNetworkInfo());
+        } catch (Exception exp) {
+            exp.printStackTrace();
+        }
     }
 
     @Test
