@@ -33,7 +33,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         return targetPort;
     }
 
-    public DatagramPacket getDatagramPacket(InetAddress address, int port) {
+    public DatagramPacket createDatagramPacket(InetAddress address, int port) {
         byte[] out = getData();
         return new DatagramPacket(out,out.length,address,port);
     }

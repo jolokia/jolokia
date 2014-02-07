@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.NetworkUtil;
 import org.jolokia.util.StdoutLogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -20,7 +21,7 @@ public class DiscoveryMulticastResponderTest {
     public void simple() throws IOException {
         AgentDetailsHolder holder = new TestAgentsDetailsHolder();
         DiscoveryMulticastResponder responder =
-                new DiscoveryMulticastResponder(holder,new AllowAllRestrictor(),new StdoutLogHandler());
+                new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),new StdoutLogHandler());
         responder.start();
         JolokiaDiscovery discovery = new JolokiaDiscovery();
         List<JSONObject> msgs = discovery.lookupAgents();

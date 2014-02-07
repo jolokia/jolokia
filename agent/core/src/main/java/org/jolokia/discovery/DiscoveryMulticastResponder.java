@@ -1,8 +1,7 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
@@ -63,7 +62,8 @@ public class DiscoveryMulticastResponder {
      */
     public void start() throws IOException {
         if (listener == null) {
-            listener = new MulticastSocketListener(MulticastUtil.newMulticastSocket(hostAddress),
+            MulticastSocket socket = MulticastUtil.newMulticastSocket(hostAddress);
+            listener = new MulticastSocketListener(socket,
                                                    detailsHolder,
                                                    restrictor,
                                                    logHandler);

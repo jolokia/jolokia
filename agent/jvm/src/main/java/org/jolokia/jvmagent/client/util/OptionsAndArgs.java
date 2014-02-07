@@ -40,7 +40,7 @@ public final class OptionsAndArgs {
                 "host", "port", "agentContext", "user", "password",
                 "quiet!", "verbose!", "version!", "executor", "threadNr",
                 "backlog", "protocol", "keystore", "keystorePassword",
-                "useSslClientAuthentication!",
+                "useSslClientAuthentication!","hide!",
                 // Jolokia options:
                 "historyMaxEntries","debug!","debugMaxEntries",
                 "dispatcherClasses", "maxDepth", "maxCollectionSize",

@@ -82,6 +82,8 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --keystore <keystore>          Path to keystore (https only)\n" +
 "    --keystorePassword <pwd>       Password to the keystore (https only)\n" +
 "    --useSslClientAuthentication   Use client certificate authentication (https only)\n" +
+"    --discoveryDisabled            Don't listen for discovery multicast requests\n" +
+"    --discoveryAgentUrl <url>      The URL to use for answering discovery requests. Will be autodetected if not given.\n" +
 "    --debug                        Switch on agent debugging\n" +
 "    --debugMaxEntries <nr>         Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
 "    --maxDepth <depth>             Maximum number of levels for serialization of beans (default: " + ConfigKey.MAX_DEPTH.getDefaultValue() + ")\n" +

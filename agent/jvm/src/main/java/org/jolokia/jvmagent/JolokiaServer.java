@@ -18,14 +18,16 @@ package org.jolokia.jvmagent;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.net.*;
 import java.security.*;
 import java.util.concurrent.*;
 
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.Authenticator;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.util.NetworkUtil;
 
 /**
  * Factory for creating the HttpServer used for exporting
@@ -99,7 +101,9 @@ public class JolokiaServer {
      * be started as well.
      */
     public void start() {
-        jolokiaHttpHandler.start(lazy,url,100, config.getAuthenticator() != null);
+        // URL as configured takes precedence
+        String configUrl = config.getJolokiaConfig().get(ConfigKey.DISCOVERY_AGENT_URL);
+        jolokiaHttpHandler.start(lazy,configUrl != null ? configUrl : url,100, config.getAuthenticator() != null);
 
         if (httpServer != null) {
             // Starting our own server in an own thread group with a fixed name
@@ -188,20 +192,35 @@ public class JolokiaServer {
             context.setAuthenticator(authenticator);
         }
 
+        url = detectAgentUrl(pServer, pConfig, contextPath);
+    }
+
+    private String detectAgentUrl(HttpServer pServer, JolokiaServerConfig pConfig, String pContextPath) {
         serverAddress= pServer.getAddress();
         InetAddress realAddress;
         int port;
         if (serverAddress != null) {
             realAddress = serverAddress.getAddress();
+            if (realAddress.isAnyLocalAddress()) {
+                try {
+                    realAddress = NetworkUtil.getLocalAddress();
+                } catch (IOException e) {
+                    try {
+                        realAddress = InetAddress.getLocalHost();
+                    } catch (UnknownHostException e1) {
+                        // Ok, ok. We take the orginal one
+                        realAddress = serverAddress.getAddress();
+                    }
+                }
+            }
             port = serverAddress.getPort();
         } else {
             realAddress = pConfig.getAddress();
             port = pConfig.getPort();
         }
 
-        url = String.format("%s://%s:%d%s",
-                            pConfig.getProtocol(),realAddress.getCanonicalHostName(),port,contextPath);
-
+        return String.format("%s://%s:%d%s",
+                             pConfig.getProtocol(),realAddress.getCanonicalHostName(),port, pContextPath);
     }
 
     /**

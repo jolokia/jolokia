@@ -64,7 +64,7 @@ public class MulticastSocketListenerTest {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                 .build();
-        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out);
+        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,500);
         for (DiscoveryIncomingMessage in : discovered) {
             assertFalse(in.isQuery());
             AgentDetails agentDetails = in.getAgentDetails();

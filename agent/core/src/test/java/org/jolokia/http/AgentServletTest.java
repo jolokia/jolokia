@@ -136,7 +136,7 @@ public class AgentServletTest {
     @Test
     public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException {
         String url = "http://localhost:8080/jolokia";
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_MULTICAST_AGENT_URL.getKeyValue(), url);
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url);
         try {
             JolokiaDiscovery discovery = new JolokiaDiscovery();
             List<JSONObject> in = discovery.lookupAgents();
@@ -153,7 +153,7 @@ public class AgentServletTest {
 
     @Test
     public void initWithAgentDiscoveryAndUrlLookup() throws ServletException, IOException {
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_MULTICAST_ENABLED.getKeyValue(), "true");
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             JolokiaDiscovery discovery = new JolokiaDiscovery();
             List<JSONObject> in = discovery.lookupAgents();
@@ -173,7 +173,7 @@ public class AgentServletTest {
 
     @Test
     public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException {
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_MULTICAST_ENABLED.getKeyValue(), "true");
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             StringWriter sw = initRequestResponseMocks();
             expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);

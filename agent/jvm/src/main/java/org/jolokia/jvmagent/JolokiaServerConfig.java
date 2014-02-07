@@ -139,7 +139,6 @@ public class JolokiaServerConfig {
         return authenticator;
     }
 
-
     /**
      * Backlog of the HTTP server, which is the number of requests to keep before throwing them away
      * @return backlog

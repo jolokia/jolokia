@@ -70,9 +70,11 @@ public class Configuration {
      */
     public void updateGlobalConfiguration(Map<String, String> pConfig) {
         for (ConfigKey c : ConfigKey.values()) {
-            String value = pConfig.get(c.getKeyValue());
-            if (value != null) {
-                globalConfig.put(c,value);
+            if (c.isGlobalConfig()) {
+                String value = pConfig.get(c.getKeyValue());
+                if (value != null) {
+                    globalConfig.put(c,value);
+                }
             }
         }
     }

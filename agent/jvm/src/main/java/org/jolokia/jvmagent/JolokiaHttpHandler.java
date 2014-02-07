@@ -101,7 +101,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         serverAddress = pServerAddress;
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
-        logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS));
+        logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS),pConfig.get(ConfigKey.DEBUG));
     }
 
     /**
@@ -123,8 +123,9 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
-        String enable = pConfig.get(ConfigKey.DISCOVERY_MULTICAST_ENABLED);
-        return enable == null || Boolean.valueOf(enable);
+        String enable = pConfig.get(ConfigKey.DISCOVERY_ENABLED);
+        String url = pConfig.get(ConfigKey.DISCOVERY_AGENT_URL);
+        return url != null || enable == null || Boolean.valueOf(enable);
     }
 
     /**
@@ -315,27 +316,30 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // Creat a log handler from either the given class or by creating a default log handler printing
     // out to stderr
-    private LogHandler createLogHandler(String pLogHandlerClass) {
+    private LogHandler createLogHandler(String pLogHandlerClass, String pDebug) {
         if (pLogHandlerClass != null) {
             return ClassUtil.newInstance(pLogHandlerClass);
         } else {
+            final boolean debug = Boolean.valueOf(pDebug);
             return new LogHandler() {
                 @Override
                 @SuppressWarnings("PMD.SystemPrintln")
                 public final void debug(String message) {
-                    System.err.println("DEBUG: " + message);
+                    if (debug) {
+                        System.err.println("D> " + message);
+                    }
                 }
 
                 @Override
                 @SuppressWarnings("PMD.SystemPrintln")
                 public final void info(String message) {
-                    System.err.println("INFO: " + message);
+                    System.err.println("I> " + message);
                 }
 
                 @Override
                 @SuppressWarnings("PMD.SystemPrintln")
                 public final void error(String message, Throwable t) {
-                    System.err.println("ERROR: " + message);
+                    System.err.println("E> " + message + " (Exception: " + t + ")");
                 }
             };
         }

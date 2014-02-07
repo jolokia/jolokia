@@ -137,13 +137,13 @@ public enum ConfigKey {
      * Whether to enable listening and responding to discovery multicast requests
      * for discovering agent details.
      */
-    DISCOVERY_MULTICAST_ENABLED("discoveryMulticastEnabled",true,false),
+    DISCOVERY_ENABLED("discoveryEnabled",true,false),
 
     /**
      * Specify the agent URL to return for an discovery multicast request. If this option
-     * is given {@link #DISCOVERY_MULTICAST_ENABLED} is set to <code>true</code> automatically.
+     * is given {@link #DISCOVERY_ENABLED} is set to <code>true</code> automatically.
      */
-    DISCOVERY_MULTICAST_AGENT_URL("discoveryMulticastAgentUrl",true,false),
+    DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
 
     // ================================================================================
     // Configuration relevant for OSGI container
@@ -151,12 +151,12 @@ public enum ConfigKey {
     /**
      *  User for authentication purposes. Used by OSGi and JDK agent.
      */
-    USER("user", false, true),
+    USER("user", true, false),
 
     /**
      *  Password for authentication purposes. Used by OSGi and JDK agent
      */
-    PASSWORD("password", false, true),
+    PASSWORD("password", true, false),
 
     /**
      * Custom authenticator to be used instead of default user/password one

@@ -183,19 +183,19 @@ public class AgentServlet extends HttpServlet {
     // Try to find an URL for system props or config
     private String findAgentUrl(Configuration pConfig) {
         // System property has precedence
-        String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_MULTICAST_AGENT_URL.getKeyValue());
+        String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue());
         if (url == null) {
-            url = pConfig.get(ConfigKey.DISCOVERY_MULTICAST_AGENT_URL);
+            url = pConfig.get(ConfigKey.DISCOVERY_AGENT_URL);
         }
         return url;
     }
 
     // For war agent needs to be switched on
     private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
-        return System.getProperty("jolokia." + ConfigKey.DISCOVERY_MULTICAST_ENABLED.getKeyValue()) != null ||
-               System.getProperty("jolokia." + ConfigKey.DISCOVERY_MULTICAST_AGENT_URL.getKeyValue()) != null ||
-               pConfig.getAsBoolean(ConfigKey.DISCOVERY_MULTICAST_ENABLED) ||
-               pConfig.get(ConfigKey.DISCOVERY_MULTICAST_AGENT_URL) != null;
+        return System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null ||
+               System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue()) != null ||
+               pConfig.getAsBoolean(ConfigKey.DISCOVERY_ENABLED) ||
+               pConfig.get(ConfigKey.DISCOVERY_AGENT_URL) != null;
     }
 
     /**
