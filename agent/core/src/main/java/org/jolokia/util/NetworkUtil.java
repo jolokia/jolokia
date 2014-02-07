@@ -146,7 +146,11 @@ public class NetworkUtil {
     }
 
     private static String getNetworkInterfaceInfo(NetworkInterface pNif) throws SocketException {
-        return pNif.getDisplayName() + " [up: " + pNif.isUp() + ", mc: " + pNif.supportsMulticast() + ", lb: " + pNif.isLoopback() + ", hw: " + formatHwAddress(pNif.getHardwareAddress()) + "]";
+        if (pNif == null) {
+            return "[null]";
+        }
+        return pNif.getDisplayName() + " [up: " + pNif.isUp() + ", mc: " + pNif.supportsMulticast() +
+               ", lb: " + pNif.isLoopback() + ", hw: " + formatHwAddress(pNif.getHardwareAddress()) + "]";
     }
 
     private static String formatHwAddress(byte[] pHardwareAddress) {
