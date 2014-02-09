@@ -66,34 +66,30 @@ public interface LogHandler {
     /**
      * Loghandler for printing to stdout
      */
-    static LogHandler STDOUT = new LogHandler() {
-        public void debug(String message) { }
+    class StdoutLogHandler implements LogHandler {
+        private boolean doDebug;
 
-        public void info(String message) {
-            System.out.println("I> " + message);
+        public StdoutLogHandler(boolean pDoDebug) {
+            doDebug = pDoDebug;
         }
 
-        public void error(String message, Throwable t) {
-            System.out.println("E> " + message);
-            t.printStackTrace();
-        }
-    };
-
-    /**
-     * Loghandler for printing to stdout
-     */
-    static LogHandler STDOUT_DBG = new LogHandler() {
         public void debug(String message) {
-            System.out.println("D> " + message);
+            if (doDebug) {
+                log("D> " + message);
+            }
         }
 
         public void info(String message) {
-            System.out.println("I> " + message);
+            log("I> " + message);
         }
 
         public void error(String message, Throwable t) {
-            System.out.println("E> " + message);
+            log("E> " + message);
             t.printStackTrace();
         }
-    };
+
+        private void log(String message) {
+            System.out.println(message); //NOSONAR
+        }
+    }
 }

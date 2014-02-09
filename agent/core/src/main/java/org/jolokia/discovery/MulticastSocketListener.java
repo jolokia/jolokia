@@ -62,7 +62,7 @@ class MulticastSocketListener implements Runnable {
 
     /** {@inheritDoc} */
     public void run() {
-        running = true;
+        setRunning(true);
 
         try {
             while (isRunning()) {
@@ -82,6 +82,21 @@ class MulticastSocketListener implements Runnable {
             }
         }
     }
+
+    private synchronized void setRunning(boolean pRunning) {
+        running = pRunning;
+    }
+
+    public synchronized boolean isRunning() {
+        return running;
+    }
+
+    public synchronized void stop() {
+        setRunning(false);
+        socket.close();
+    }
+
+    // ====================================================================================
 
     private boolean shouldMessageBeProcessed(DiscoveryIncomingMessage pMsg) {
         return pMsg != null &&
@@ -129,8 +144,6 @@ class MulticastSocketListener implements Runnable {
         final DatagramPacket packet =
                 new DatagramPacket(message, message.length,
                                    pAnswer.getTargetAddress(),pAnswer.getTargetPort());
-
-        logHandler.debug(new String(message));
         if (!socket.isClosed()) {
             try {
                 socket.send(packet);
@@ -140,18 +153,12 @@ class MulticastSocketListener implements Runnable {
         }
     }
 
-    public synchronized boolean isRunning() {
-        return running;
-    }
 
-    public synchronized void stop() {
-        running = false;
-        socket.close();
-    }
-
-    private class SocketVerificationFailedException extends RuntimeException {
+    // Exception thrown when verification fails
+    private static class SocketVerificationFailedException extends RuntimeException {
         public SocketVerificationFailedException(IOException e) {
             super(e);
         }
     }
+
 }

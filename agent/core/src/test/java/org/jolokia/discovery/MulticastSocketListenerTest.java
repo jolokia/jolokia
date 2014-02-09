@@ -36,7 +36,7 @@ public class MulticastSocketListenerTest {
         listener = new MulticastSocketListener(null,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
-                                               LogHandler.STDOUT_DBG);
+                                               new LogHandler.StdoutLogHandler(true));
         thread = new Thread(listener);
         thread.start();
         Thread.sleep(500);
@@ -62,7 +62,7 @@ public class MulticastSocketListenerTest {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                 .build();
-        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,LogHandler.STDOUT_DBG,500);
+        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,new LogHandler.StdoutLogHandler(true),500);
         for (DiscoveryIncomingMessage in : discovered) {
             assertFalse(in.isQuery());
             AgentDetails agentDetails = in.getAgentDetails();

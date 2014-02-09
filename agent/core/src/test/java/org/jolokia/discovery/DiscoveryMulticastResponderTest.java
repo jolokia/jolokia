@@ -20,7 +20,7 @@ public class DiscoveryMulticastResponderTest {
     public void simple() throws IOException, InterruptedException {
         AgentDetailsHolder holder = new TestAgentsDetailsHolder();
         DiscoveryMulticastResponder responder =
-                new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),LogHandler.STDOUT_DBG);
+                new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),new LogHandler.StdoutLogHandler(true));
         responder.start();
         // Warming up
         Thread.sleep(500);

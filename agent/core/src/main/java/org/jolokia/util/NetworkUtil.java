@@ -28,7 +28,7 @@ public class NetworkUtil {
 
     // Debug info
     public static void main(String[] args) throws UnknownHostException, SocketException {
-        System.out.println(dumpLocalNetworkInfo());
+        System.out.println(dumpLocalNetworkInfo()); // NOSONAR
     }
 
     public static InetAddress getLocalAddress() throws UnknownHostException, SocketException {
