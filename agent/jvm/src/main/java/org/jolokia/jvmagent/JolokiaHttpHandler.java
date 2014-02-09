@@ -321,27 +321,32 @@ public class JolokiaHttpHandler implements HttpHandler {
             return ClassUtil.newInstance(pLogHandlerClass);
         } else {
             final boolean debug = Boolean.valueOf(pDebug);
-            return new LogHandler() {
-                @Override
-                @SuppressWarnings("PMD.SystemPrintln")
-                public final void debug(String message) {
-                    if (debug) {
-                        System.err.println("D> " + message);
-                    }
-                }
+            return new PlainLogHandler(debug);
+        }
+    }
 
-                @Override
-                @SuppressWarnings("PMD.SystemPrintln")
-                public final void info(String message) {
-                    System.err.println("I> " + message);
-                }
+    private static class PlainLogHandler implements LogHandler {
+        private final boolean debug;
 
-                @Override
-                @SuppressWarnings("PMD.SystemPrintln")
-                public final void error(String message, Throwable t) {
-                    System.err.println("E> " + message + " (Exception: " + t + ")");
-                }
-            };
+        public PlainLogHandler(boolean pDebug) {
+            debug = pDebug;
+        }
+
+        @Override
+        public final void debug(String message) {
+            if (debug) {
+                System.err.println("D> " + message);
+            }
+        }
+
+        @Override
+        public final void info(String message) {
+            System.err.println("I> " + message);
+        }
+
+        @Override
+        public final void error(String message, Throwable t) {
+            System.err.println("E> " + message + " (Exception: " + t + ")");
         }
     }
 }

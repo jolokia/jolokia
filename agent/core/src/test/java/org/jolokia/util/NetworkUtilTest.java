@@ -33,7 +33,10 @@ public class NetworkUtilTest {
             found = found || (!intf.isLoopback() && intf.supportsMulticast() && intf.isUp());
         }
         InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface();
+        System.out.println("Address found via NIF: " + addr);
         assertTrue(found ? addr != null : addr == null);
-        assertTrue(addr instanceof Inet4Address);
+        if (addr != null) {
+            assertTrue(addr instanceof Inet4Address);
+        }
     }
 }

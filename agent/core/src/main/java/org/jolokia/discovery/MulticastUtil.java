@@ -17,26 +17,18 @@ import org.jolokia.util.NetworkUtil;
 public final class MulticastUtil {
 
     // IPv4 Address for Jolokia's Multicast group
-    public static final String JOLOKIA_MULTICAST_GROUP_IP4 = "239.192.48.84";
-
-    // IpV6 multicast address (not yet supported)
-    public static final String JOLOKIA_MULTICAST_GROUP_IP6 = "FF08::48:84";
+    public static final String JOLOKIA_MULTICAST_GROUP = "239.192.48.84";
 
     // Multicast port where to listen for queries
     public static final int JOLOKIA_MULTICAST_PORT = 24884;
-    public static final int TIMEOUT = 1000;
 
     // Utility class
     private MulticastUtil() {}
 
-    static MulticastSocket newMulticastSocket() throws IOException {
-        return newMulticastSocket(null);
-    }
-
     static MulticastSocket newMulticastSocket(InetAddress pAddress) throws IOException {
         // TODO: IpV6 (not supported yet)
         InetSocketAddress socketAddress =
-                new InetSocketAddress(JOLOKIA_MULTICAST_GROUP_IP4, JOLOKIA_MULTICAST_PORT);
+                new InetSocketAddress(JOLOKIA_MULTICAST_GROUP, JOLOKIA_MULTICAST_PORT);
 
         MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
         socket.setReuseAddress(true);
@@ -46,6 +38,69 @@ public final class MulticastUtil {
         joinMcGroupsOnAllNetworkIntefaces(socket, socketAddress);
         return socket;
     }
+
+    /**
+     * Sent out a message to Jolokia's multicast group over all network interfaces supporting multicast request (and no
+     * logging is used)
+     *
+     * @param pOutMsg the message to send
+     * @param pTimeout timeout used for how long to wait for discovery messages
+     * @return list of received answers, never null
+     *
+     * @throws IOException if something fails during the discovery request
+     */
+    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout) throws IOException {
+        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, LogHandler.QUIET);
+    }
+
+    /**
+     * Sent out a message to Jolokia's multicast group over all network interfaces supporting multicasts
+     *
+     *
+     * @param pOutMsg the message to send
+     * @param pTimeout timeout used for how long to wait for discovery messages
+     * @param pLogHandler a log handler for printing out logging information
+     * @return list of received answers, never null
+     *
+     * @throws IOException if something fails during the discovery request
+     */
+    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg,
+                                                                            int pTimeout,
+                                                                            LogHandler pLogHandler) throws IOException {
+        // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
+        // should be sent, on each interface respectively. Currently, only IpV4 is supported.
+        List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
+        if (addresses.size() == 0) {
+            throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
+        }
+        ExecutorService executor = Executors.newFixedThreadPool(addresses.size());
+        //ExecutorService executor = Executors.newSingleThreadExecutor();
+        final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<Future<List<DiscoveryIncomingMessage>>>(addresses.size());
+        for (InetAddress address : addresses) {
+            // Discover UDP packet send to multicast address
+            DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP), JOLOKIA_MULTICAST_PORT);
+            Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address,out, pTimeout, pLogHandler);
+            futures.add(executor.submit(findAgentsCallable));
+        }
+        List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
+        for (Future<List<DiscoveryIncomingMessage>> future : futures) {
+            try {
+                // Has been cancelled if overal
+                List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
+                ret.addAll(inMsgs);
+            } catch (InterruptedException exp) {
+                // Try next one ...
+            } catch (ExecutionException e) {
+                // Didnt worked a given address, which can happen e.g. when multicast is not routed or in other cases
+                // throw new IOException("Error while performing a discovery call " + e,e);
+            } catch (TimeoutException e) {
+                // Timeout occured while waiting for the results. So we go to the next one ...
+            }
+        }
+        return ret;
+    }
+
+    // ==============================================================================================================
 
     private static InetAddress sanitizeLocalAddress(InetAddress pAddress) throws UnknownHostException, SocketException {
         InetAddress address = pAddress != null && pAddress instanceof Inet4Address ? pAddress : NetworkUtil.getLocalAddress();
@@ -73,50 +128,12 @@ public final class MulticastUtil {
         }
     }
 
-    private static InetAddress getMulticastGroup(InetAddress pAddress) throws UnknownHostException {
-        return InetAddress.getByName(pAddress instanceof Inet6Address ? JOLOKIA_MULTICAST_GROUP_IP6 : JOLOKIA_MULTICAST_GROUP_IP4);
-    }
 
-    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, LogHandler pLogHandler, int pTimeout) throws IOException {
-        // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
-        // should be sent, on each interface respectively. Currently, only IpV4 is supported.
-        List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
-        if (addresses.size() == 0) {
-            throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
-        }
-        ExecutorService executor = Executors.newFixedThreadPool(addresses.size());
-        //ExecutorService executor = Executors.newSingleThreadExecutor();
-        final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<Future<List<DiscoveryIncomingMessage>>>(addresses.size());
-        for (InetAddress address : addresses) {
-            // Discover UDP packet send to multicast address
-            DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP_IP4), JOLOKIA_MULTICAST_PORT);
-            Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address,out, pTimeout, pLogHandler);
-            futures.add(executor.submit(findAgentsCallable));
-        }
-        List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
-        for (Future<List<DiscoveryIncomingMessage>> future : futures) {
-            try {
-                // Has been cancelled if overal
-                List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
-                ret.addAll(inMsgs);
-            } catch (InterruptedException exp) {
-                // Try next one ...
-            } catch (ExecutionException e) {
-                // Didnt worked a given address, which can happen e.g. when multicast is not routed or in other cases
-                // throw new IOException("Error while performing a discovery call " + e,e);
-            } catch (TimeoutException e) {
-                // Timeout occured while waiting for the results. So we go to the next one ...
-            }
-        }
-        return ret;
-    }
-
-    private static class FindAgentsCallable implements Callable<List<DiscoveryIncomingMessage>> {
-
-        final InetAddress address;
-        final DatagramPacket outPacket;
-        final int timeout;
-        final LogHandler logHandler;
+    private final static class FindAgentsCallable implements Callable<List<DiscoveryIncomingMessage>> {
+        final private InetAddress address;
+        final private DatagramPacket outPacket;
+        final private int timeout;
+        final private LogHandler logHandler;
 
         private FindAgentsCallable(InetAddress pAddress, DatagramPacket pOutPacket, int pTimeout, LogHandler pLogHandler) {
             address = pAddress;
@@ -125,7 +142,7 @@ public final class MulticastUtil {
             logHandler = pLogHandler;
         }
 
-        public List<DiscoveryIncomingMessage> call() throws Exception {
+        public List<DiscoveryIncomingMessage> call() throws SocketException {
                 final DatagramSocket socket = new DatagramSocket(0, address);
                 List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
                 try {
@@ -159,5 +176,4 @@ public final class MulticastUtil {
                 }
             }
     }
-
 }

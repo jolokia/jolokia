@@ -7,7 +7,9 @@ import java.util.List;
 import org.jolokia.Version;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
+import org.testng.SkipException;
 import org.testng.annotations.*;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
@@ -58,11 +60,13 @@ public class MulticastSocketListenerTest {
 
     @Test
     public void simple() throws IOException {
-
+        if (!NetworkUtil.isMulticastSupported()) {
+            throw new SkipException("No multicast supported");
+        }
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                 .build();
-        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,new LogHandler.StdoutLogHandler(true),500);
+        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
         for (DiscoveryIncomingMessage in : discovered) {
             assertFalse(in.isQuery());
             AgentDetails agentDetails = in.getAgentDetails();

@@ -6,6 +6,7 @@ import java.util.List;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;
@@ -18,6 +19,9 @@ public class DiscoveryMulticastResponderTest {
 
     @Test
     public void simple() throws IOException, InterruptedException {
+        if (!NetworkUtil.isMulticastSupported()) {
+            throw new SkipException("No multicast interface found, skipping test ");
+        }
         AgentDetailsHolder holder = new TestAgentsDetailsHolder();
         DiscoveryMulticastResponder responder =
                 new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),new LogHandler.StdoutLogHandler(true));

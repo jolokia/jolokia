@@ -49,7 +49,7 @@ public interface LogHandler {
     /**
      * Loghandler which doesn not output anything
      */
-    static LogHandler QUIET = new LogHandler() {
+    LogHandler QUIET = new LogHandler() {
 
         /** {@inheritDoc} */
         public void debug(String message) { }

@@ -26,6 +26,9 @@ public class NetworkUtil {
         }
     }
 
+    // Utility class
+    private NetworkUtil() {}
+
     // Debug info
     public static void main(String[] args) throws UnknownHostException, SocketException {
         System.out.println(dumpLocalNetworkInfo()); // NOSONAR
@@ -64,28 +67,13 @@ public class NetworkUtil {
         return null;
     }
 
-    // Only use the given interface on the given network interface if it is up and supports multicast
-    private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress) {
-        return checkMethod(networkInterface, isUp) &&
-               checkMethod(networkInterface, supportsMulticast) &&
-               // TODO: IpV6 support
-               ! (interfaceAddress instanceof Inet6Address) &&
-               !interfaceAddress.isLoopbackAddress();
-    }
-
-    // Call a method and return the result as boolean. In case of problems, return false.
-    private static Boolean checkMethod(NetworkInterface iface, Method toCheck) {
-        if (toCheck != null) {
-            try {
-                return (Boolean) toCheck.invoke(iface, (Object[]) null);
-            } catch (IllegalAccessException e) {
-                return false;
-            } catch (InvocationTargetException e) {
-                return false;
-            }
-        }
-        // Cannot check, hence we assume that is true
-        return true;
+    /**
+     * Check, whether multicast is supported at all
+     *
+     * @return true if at least one network interface supports multicast
+     */
+    public static boolean isMulticastSupported() throws SocketException {
+        return getMulticastAddresses().size() != 0;
     }
 
     /**
@@ -109,6 +97,32 @@ public class NetworkUtil {
             }
         }
         return ret;
+    }
+
+    // =======================================================================================================
+
+    // Only use the given interface on the given network interface if it is up and supports multicast
+    private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress) {
+        return checkMethod(networkInterface, isUp) &&
+               checkMethod(networkInterface, supportsMulticast) &&
+               // TODO: IpV6 support
+               ! (interfaceAddress instanceof Inet6Address) &&
+               !interfaceAddress.isLoopbackAddress();
+    }
+
+    // Call a method and return the result as boolean. In case of problems, return false.
+    private static Boolean checkMethod(NetworkInterface iface, Method toCheck) {
+        if (toCheck != null) {
+            try {
+                return (Boolean) toCheck.invoke(iface, (Object[]) null);
+            } catch (IllegalAccessException e) {
+                return false;
+            } catch (InvocationTargetException e) {
+                return false;
+            }
+        }
+        // Cannot check, hence we assume that is true
+        return true;
     }
 
     /**
@@ -159,8 +173,9 @@ public class NetworkUtil {
         }
         StringBuilder sb = new StringBuilder(18);
         for (byte b : pHardwareAddress) {
-            if (sb.length() > 0)
+            if (sb.length() > 0) {
                 sb.append(':');
+            }
             sb.append(String.format("%02x", b));
         }
         return sb.toString();

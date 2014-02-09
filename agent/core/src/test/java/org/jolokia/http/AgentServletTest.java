@@ -17,6 +17,7 @@ package org.jolokia.http;
  */
 
 import java.io.*;
+import java.net.SocketException;
 import java.util.List;
 import java.util.Vector;
 
@@ -30,7 +31,9 @@ import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -135,6 +138,7 @@ public class AgentServletTest {
 
     @Test
     public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException, InterruptedException {
+        checkMulticastAvailable();
         String url = "http://localhost:8080/jolokia";
         prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url,ConfigKey.DEBUG.getKeyValue(),"true");
         // Wait listening thread to warm up
@@ -155,6 +159,7 @@ public class AgentServletTest {
 
     @Test
     public void initWithAgentDiscoveryAndUrlLookup() throws ServletException, IOException {
+        checkMulticastAvailable();
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             JolokiaDiscovery discovery = new JolokiaDiscovery();
@@ -173,8 +178,15 @@ public class AgentServletTest {
         }
     }
 
+    private void checkMulticastAvailable() throws SocketException {
+        if (!NetworkUtil.isMulticastSupported()) {
+            throw new SkipException("No multicast interface found, skipping test ");
+        }
+    }
+
     @Test
     public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException {
+        checkMulticastAvailable();
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             StringWriter sw = initRequestResponseMocks();
