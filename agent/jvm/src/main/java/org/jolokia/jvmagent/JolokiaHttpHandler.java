@@ -188,9 +188,6 @@ public class JolokiaHttpHandler implements HttpHandler {
             } else {
                 throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
             }
-            if (backendManager.isDebug()) {
-                backendManager.info("Response: " + json);
-            }
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);

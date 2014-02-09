@@ -9,7 +9,7 @@ import java.util.*;
  * @author roland
  * @since 05.02.14
  */
-public class NetworkUtil {
+public final class NetworkUtil {
 
     // Only available for Java 6
     private static Method isUp;

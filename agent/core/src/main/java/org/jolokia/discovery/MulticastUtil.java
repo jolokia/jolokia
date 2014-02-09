@@ -129,11 +129,11 @@ public final class MulticastUtil {
     }
 
 
-    private final static class FindAgentsCallable implements Callable<List<DiscoveryIncomingMessage>> {
-        final private InetAddress address;
-        final private DatagramPacket outPacket;
-        final private int timeout;
-        final private LogHandler logHandler;
+    private static final class FindAgentsCallable implements Callable<List<DiscoveryIncomingMessage>> {
+        private final InetAddress address;
+        private final DatagramPacket outPacket;
+        private final int timeout;
+        private final LogHandler logHandler;
 
         private FindAgentsCallable(InetAddress pAddress, DatagramPacket pOutPacket, int pTimeout, LogHandler pLogHandler) {
             address = pAddress;
