@@ -1,6 +1,5 @@
 package org.jolokia.discovery;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 
@@ -62,7 +61,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
             return this;
         }
 
-        public DiscoveryOutgoingMessage build() throws IOException {
+        public DiscoveryOutgoingMessage build() {
             return new DiscoveryOutgoingMessage(
                     type,
                     targetAddress,

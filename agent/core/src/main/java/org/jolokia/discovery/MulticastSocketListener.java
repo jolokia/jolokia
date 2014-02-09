@@ -5,9 +5,7 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.MulticastSocket;
-import java.nio.channels.ClosedByInterruptException;
+import java.net.*;
 
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
@@ -22,9 +20,6 @@ import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.RESPONS
  */
 class MulticastSocketListener implements Runnable {
 
-    // Socket to read from
-    private final MulticastSocket socket;
-
     // From where to get agent details
     private final AgentDetailsHolder agentDetailsHolder;
 
@@ -33,49 +28,93 @@ class MulticastSocketListener implements Runnable {
 
     private final LogHandler logHandler;
 
+    // Address to listen to
+    private final InetAddress address;
+
     // Lifecycle flag
     private boolean running;
+
+    // Socket used for listening
+    private MulticastSocket socket;
 
     /**
      * Constructor, used internally.
      *
-     * @param pSocket socket to get data from
+     * @param pHostAddress host address for creating a socket to listen to
      * @param pAgentDetailsHolder the holder which has the agent details
      * @param pRestrictor restrictor to check whether an incoming package should be answered which
      *                    is done only when {@link Restrictor#isRemoteAccessAllowed(String...)} returns true for
      *                    the address from which the packet was received.
      * @param pLogHandler log handler used for logging
      */
-    MulticastSocketListener(MulticastSocket pSocket, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) {
-        socket = pSocket;
+    MulticastSocketListener(InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) throws IOException {
+        address = pHostAddress;
         agentDetailsHolder = pAgentDetailsHolder;
         restrictor = pRestrictor;
         logHandler = pLogHandler;
+        //logHandler = new StdoutLogHandler();
+
+        logHandler.debug("Listening on " + address);
+        socket = MulticastUtil.newMulticastSocket(address);
     }
+
+
 
     /** {@inheritDoc} */
     public void run() {
         running = true;
-        byte buf[] = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
-        DatagramPacket packet = new DatagramPacket(buf, buf.length);
-        while (isRunning()) {
-            try {
-                packet.setLength(buf.length);
-                socket.receive(packet);
-                DiscoveryIncomingMessage msg = new DiscoveryIncomingMessage(packet);
-                if (restrictor.isRemoteAccessAllowed(msg.getSourceAddress().getHostAddress())
-                    && msg.isQuery()) {
+
+        try {
+            while (isRunning()) {
+                refreshSocket();
+                logHandler.debug("Start receiving");
+                DiscoveryIncomingMessage msg = receiveMessage();
+                if (shouldMessageBeProcessed(msg)) {
                     handleQuery(msg);
                 }
-            } catch (ClosedByInterruptException e) {
-                // Ok, lets reevaluate the loop
-            } catch (IOException e) {
-                logHandler.info("Error while handling discovery request from " + packet.getAddress() + ". Ignoring the request. " + e);
+            }
+        }
+        catch (IllegalStateException e) {
+            logHandler.error("Cannot reopen socket, exiting listener thread: " + e.getCause(),e.getCause());
+        } finally {
+            if (socket != null) {
+                socket.close();
             }
         }
     }
 
-    private void handleQuery(DiscoveryIncomingMessage pMsg) throws IOException {
+    private boolean shouldMessageBeProcessed(DiscoveryIncomingMessage pMsg) {
+        return pMsg != null &&
+               restrictor.isRemoteAccessAllowed(pMsg.getSourceAddress().getHostAddress())
+               && pMsg.isQuery();
+    }
+
+    private DiscoveryIncomingMessage receiveMessage() {
+        byte buf[] = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
+        DatagramPacket packet = new DatagramPacket(buf, buf.length);
+        try {
+            packet.setLength(buf.length);
+            socket.receive(packet);
+            return new DiscoveryIncomingMessage(packet);
+        }  catch (IOException e) {
+            logHandler.info("Error while handling discovery request from " + packet.getAddress() +
+                            ". Ignoring this request. --> " + e);
+            return null;
+        }
+    }
+
+    private void refreshSocket() {
+        if (socket.isClosed()) {
+            logHandler.info("Socket closed, reopening it ...");
+            try {
+                socket = MulticastUtil.newMulticastSocket(address);
+            } catch (IOException exp) {
+                throw new SocketVerificationFailedException(exp);
+            }
+        }
+    }
+
+    private void handleQuery(DiscoveryIncomingMessage pMsg) {
         DiscoveryOutgoingMessage answer =
                 new DiscoveryOutgoingMessage.Builder(RESPONSE)
                         .respondTo(pMsg)
@@ -85,7 +124,7 @@ class MulticastSocketListener implements Runnable {
         send(answer);
     }
 
-    private void send(DiscoveryOutgoingMessage pAnswer) throws IOException {
+    private void send(DiscoveryOutgoingMessage pAnswer) {
         byte[] message = pAnswer.getData();
         final DatagramPacket packet =
                 new DatagramPacket(message, message.length,
@@ -93,15 +132,26 @@ class MulticastSocketListener implements Runnable {
 
         logHandler.debug(new String(message));
         if (!socket.isClosed()) {
-            socket.send(packet);
+            try {
+                socket.send(packet);
+            } catch (IOException exp) {
+                logHandler.info("Can not send discovery response to " + packet.getAddress());
+            }
         }
     }
 
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return running;
     }
 
-    public void stop() {
+    public synchronized void stop() {
         running = false;
+        socket.close();
+    }
+
+    private class SocketVerificationFailedException extends RuntimeException {
+        public SocketVerificationFailedException(IOException e) {
+            super(e);
+        }
     }
 }

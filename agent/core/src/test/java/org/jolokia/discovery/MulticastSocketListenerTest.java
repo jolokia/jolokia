@@ -1,18 +1,17 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
-import java.net.MulticastSocket;
 import java.net.URL;
 import java.util.List;
 
 import org.jolokia.Version;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.StdoutLogHandler;
+import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
-import static org.jolokia.discovery.MulticastUtil.*;
+import static org.jolokia.discovery.MulticastUtil.sendQueryAndCollectAnswers;
 import static org.testng.Assert.*;
 
 /**
@@ -24,23 +23,23 @@ public class MulticastSocketListenerTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
     URL url;
-    private MulticastSocket socket;
     private MulticastSocketListener listener;
+    private Thread thread;
 
     @BeforeClass
-    public void startSocketListener() throws IOException {
-        socket = newMulticastSocket();
+    public void startSocketListener() throws IOException, InterruptedException {
         url = new URL(JOLOKIA_URL);
         final AgentDetails details = new AgentDetails();
         details.updateAgentParameters(JOLOKIA_URL, 100, false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
-        listener = new MulticastSocketListener(socket,
+        listener = new MulticastSocketListener(null,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
-                                               new StdoutLogHandler());
-        Thread thread = new Thread(listener);
+                                               LogHandler.STDOUT_DBG);
+        thread = new Thread(listener);
         thread.start();
+        Thread.sleep(500);
     }
 
 
@@ -55,7 +54,6 @@ public class MulticastSocketListenerTest {
     @AfterClass
     public void stopSocketListener() {
         listener.stop();
-        socket.close();
     }
 
     @Test
@@ -64,7 +62,7 @@ public class MulticastSocketListenerTest {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                 .build();
-        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,500);
+        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out,LogHandler.STDOUT_DBG,500);
         for (DiscoveryIncomingMessage in : discovered) {
             assertFalse(in.isQuery());
             AgentDetails agentDetails = in.getAgentDetails();

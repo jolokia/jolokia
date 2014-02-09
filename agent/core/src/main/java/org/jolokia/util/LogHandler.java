@@ -43,4 +43,57 @@ public interface LogHandler {
      * @param t exception causing this error
      * */
     void error(String message, Throwable t);
+
+    // =============================================================================================================
+
+    /**
+     * Loghandler which doesn not output anything
+     */
+    static LogHandler QUIET = new LogHandler() {
+
+        /** {@inheritDoc} */
+        public void debug(String message) { }
+
+        /** {@inheritDoc} */
+        public void info(String message) { }
+
+        /** {@inheritDoc} */
+        public void error(String message, Throwable t) { }
+    };
+
+    // ====================================================================
+
+    /**
+     * Loghandler for printing to stdout
+     */
+    static LogHandler STDOUT = new LogHandler() {
+        public void debug(String message) { }
+
+        public void info(String message) {
+            System.out.println("I> " + message);
+        }
+
+        public void error(String message, Throwable t) {
+            System.out.println("E> " + message);
+            t.printStackTrace();
+        }
+    };
+
+    /**
+     * Loghandler for printing to stdout
+     */
+    static LogHandler STDOUT_DBG = new LogHandler() {
+        public void debug(String message) {
+            System.out.println("D> " + message);
+        }
+
+        public void info(String message) {
+            System.out.println("I> " + message);
+        }
+
+        public void error(String message, Throwable t) {
+            System.out.println("E> " + message);
+            t.printStackTrace();
+        }
+    };
 }

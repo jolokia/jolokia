@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
 
 /**
@@ -76,7 +77,7 @@ public final class MulticastUtil {
         return InetAddress.getByName(pAddress instanceof Inet6Address ? JOLOKIA_MULTICAST_GROUP_IP6 : JOLOKIA_MULTICAST_GROUP_IP4);
     }
 
-    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout) throws IOException {
+    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, LogHandler pLogHandler, int pTimeout) throws IOException {
         // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
         // should be sent, on each interface respectively. Currently, only IpV4 is supported.
         List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
@@ -89,7 +90,7 @@ public final class MulticastUtil {
         for (InetAddress address : addresses) {
             // Discover UDP packet send to multicast address
             DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP_IP4), JOLOKIA_MULTICAST_PORT);
-            Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = createFindAgentsCallable(address,out, pTimeout);
+            Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address,out, pTimeout, pLogHandler);
             futures.add(executor.submit(findAgentsCallable));
         }
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
@@ -110,30 +111,42 @@ public final class MulticastUtil {
         return ret;
     }
 
-    // Create a callable for sending and receiving multicast queries
-    private static Callable<List<DiscoveryIncomingMessage>> createFindAgentsCallable(final InetAddress pAddress,
-                                                                                     final DatagramPacket pOut,
-                                                                                     final int pTimeout) {
-        return new Callable<List<DiscoveryIncomingMessage>>() {
+    private static class FindAgentsCallable implements Callable<List<DiscoveryIncomingMessage>> {
 
-            public List<DiscoveryIncomingMessage> call() throws Exception {
-                final DatagramSocket socket = new DatagramSocket(0,pAddress);
+        final InetAddress address;
+        final DatagramPacket outPacket;
+        final int timeout;
+        final LogHandler logHandler;
+
+        private FindAgentsCallable(InetAddress pAddress, DatagramPacket pOutPacket, int pTimeout, LogHandler pLogHandler) {
+            address = pAddress;
+            outPacket = pOutPacket;
+            timeout = pTimeout;
+            logHandler = pLogHandler;
+        }
+
+        public List<DiscoveryIncomingMessage> call() throws Exception {
+                final DatagramSocket socket = new DatagramSocket(0, address);
                 List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
                 try {
-                    socket.setSoTimeout(pTimeout);
-                    socket.send(pOut);
+                    socket.setSoTimeout(timeout);
+                    logHandler.debug("Sending from " + address);
+                    socket.send(outPacket);
 
                     try {
                         do {
                             byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
                             DatagramPacket in = new DatagramPacket(buf, buf.length);
+                            logHandler.debug(System.currentTimeMillis() + "Receiving answer for " + address);
                             socket.receive(in);
+                            logHandler.debug(System.currentTimeMillis() + "Received answer for " + address);
                             DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
                             if (!inMsg.isQuery()) {
                                 ret.add(inMsg);
                             }
                         } while (true); // Leave loop with a SocketTimeoutException in receive()
                     } catch (SocketTimeoutException exp) {
+                        logHandler.debug("Timeout (from " + address + ")");
                         // Expected until no responses are returned anymore
                     }
                     return ret;
@@ -145,8 +158,6 @@ public final class MulticastUtil {
                     socket.close();
                 }
             }
-        };
     }
-
 
 }

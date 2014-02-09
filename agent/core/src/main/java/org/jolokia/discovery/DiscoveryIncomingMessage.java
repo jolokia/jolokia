@@ -21,7 +21,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
     /**
      * Parse a message from a datagram packet.
      *
-     * @param packet packet received
+     * @param pPacket packet received
      * @throws IOException if reading/parsing failed.
      */
     public DiscoveryIncomingMessage(DatagramPacket pPacket) throws IOException {

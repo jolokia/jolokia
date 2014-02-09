@@ -62,8 +62,7 @@ public class DiscoveryMulticastResponder {
      */
     public void start() throws IOException {
         if (listener == null) {
-            MulticastSocket socket = MulticastUtil.newMulticastSocket(hostAddress);
-            listener = new MulticastSocketListener(socket,
+            listener = new MulticastSocketListener(hostAddress,
                                                    detailsHolder,
                                                    restrictor,
                                                    logHandler);

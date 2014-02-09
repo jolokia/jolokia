@@ -134,9 +134,11 @@ public class AgentServletTest {
     }
 
     @Test
-    public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException {
+    public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException, InterruptedException {
         String url = "http://localhost:8080/jolokia";
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url);
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url,ConfigKey.DEBUG.getKeyValue(),"true");
+        // Wait listening thread to warm up
+        Thread.sleep(1000);
         try {
             JolokiaDiscovery discovery = new JolokiaDiscovery();
             List<JSONObject> in = discovery.lookupAgents();

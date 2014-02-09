@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.util.NetworkUtil;
-import org.jolokia.util.StdoutLogHandler;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
@@ -18,11 +17,13 @@ import static org.testng.Assert.assertTrue;
 public class DiscoveryMulticastResponderTest {
 
     @Test
-    public void simple() throws IOException {
+    public void simple() throws IOException, InterruptedException {
         AgentDetailsHolder holder = new TestAgentsDetailsHolder();
         DiscoveryMulticastResponder responder =
-                new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),new StdoutLogHandler());
+                new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),LogHandler.STDOUT_DBG);
         responder.start();
+        // Warming up
+        Thread.sleep(500);
         JolokiaDiscovery discovery = new JolokiaDiscovery();
         List<JSONObject> msgs = discovery.lookupAgents();
         assertTrue(msgs.size() > 0);

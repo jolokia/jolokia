@@ -44,7 +44,7 @@ public class BackendManagerTest {
 
     Configuration config;
 
-    private LogHandler log = new StdoutLogHandler();
+    private LogHandler log = LogHandler.STDOUT_DBG;
     @BeforeTest
     public void setup() {
         config = new Configuration();

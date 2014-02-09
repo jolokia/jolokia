@@ -38,7 +38,7 @@ import static org.testng.Assert.*;
  */
 public class RawObjectNameTest {
     private Configuration config     = new Configuration();
-    private LogHandler    logHandler = new StdoutLogHandler();
+    private LogHandler    logHandler = LogHandler.STDOUT;
 
     private BackendManager backendManager = new BackendManager(config, logHandler, null, true /* Lazy Init */);
 
