@@ -17,10 +17,15 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
 
     /** {@inheritDoc} */
     public List lookupAgents() throws IOException {
+        return lookupAgentsWithTimeout(1000);
+    }
+
+    /** {@inheritDoc} */
+    public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                         .build();
-        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, 1000);
+        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
             ret.add(in.getAgentDetails().toJSONObject());
