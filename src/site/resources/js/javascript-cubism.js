@@ -16,7 +16,6 @@
 
 var j4p = new Jolokia({url: "http://jolokia.org/jolokia", fetchInterval: 1000});
 
-
 var context = cubism.context()
     .serverDelay(0)
     .clientDelay(0)
