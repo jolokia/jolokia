@@ -133,6 +133,25 @@
       <param-name>serializeException</param-name>
       <param-value>false</param-value>
     </init-param>
+    <init-param>
+      <description>
+        If discoveryEnabled is set to true, then this servlet will listen
+        for multicast discovery request and responds with its agent URL and
+        other server specific information. Instead of setting this confog variable,
+        discovery can be also enabled via the system property "jolokia.discoveryEnabled"
+        or the environment variable "JOLOKIA_DISCOVERY_ENABLED".
+
+        In addition the config parameter "discoveryAgentUrl" can be used to set the the agent's URL.
+        By default, auto detection (after the first request was processed by the servlet)) of the URL is used.
+        If the URL is set, then discovery is automatically enabled (i.e. there is
+        no need to set "discoveryEnabled=true"). This configuration option
+        is especially useful if the WAR is used in a proxy setup. Instead of setting the URL
+        here, it can be set also either via the system property "jolokia.discoveryAgentUrl" or the
+        environment variable "JOLOKIA_DISCOVERY_AGENT_URL".
+      </description>
+      <param-name>discoveryEnabled</param-name>
+      <param-value>false</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
 

@@ -112,8 +112,10 @@ class MulticastSocketListener implements Runnable {
             socket.receive(packet);
             return new DiscoveryIncomingMessage(packet);
         }  catch (IOException e) {
-            logHandler.info("Error while handling discovery request from " + packet.getAddress() +
-                            ". Ignoring this request. --> " + e);
+            if (!socket.isClosed()) {
+                logHandler.info("Error while handling discovery request" + (packet.getAddress() != null ? " from " + packet.getAddress() : "") +
+                                ". Ignoring this request. --> " + e);
+            }
             return null;
         }
     }

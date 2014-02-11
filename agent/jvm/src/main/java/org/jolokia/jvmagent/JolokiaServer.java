@@ -220,7 +220,7 @@ public class JolokiaServer {
         }
 
         return String.format("%s://%s:%d%s",
-                             pConfig.getProtocol(),realAddress.getCanonicalHostName(),port, pContextPath);
+                             pConfig.getProtocol(),realAddress.getHostAddress(),port, pContextPath);
     }
 
     /**

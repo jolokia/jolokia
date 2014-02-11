@@ -1,6 +1,7 @@
 package org.jolokia.http;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
@@ -185,19 +186,26 @@ public class AgentServlet extends HttpServlet {
         // System property has precedence
         String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue());
         if (url == null) {
-            url = pConfig.get(ConfigKey.DISCOVERY_AGENT_URL);
+            url = System.getenv("JOLOKIA_DISCOVERY_AGENT_URL");
+            if (url == null) {
+                url = pConfig.get(ConfigKey.DISCOVERY_AGENT_URL);
+            }
         }
         return url;
     }
 
     // For war agent needs to be switched on
     private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
-        return System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null ||
-               System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue()) != null ||
-               pConfig.getAsBoolean(ConfigKey.DISCOVERY_ENABLED) ||
-               pConfig.get(ConfigKey.DISCOVERY_AGENT_URL) != null;
+        // Check for system props, system env and agent config
+        boolean sysProp =
+                System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null ||
+                System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue()) != null;
+        boolean env = System.getenv("JOLOKIA_DISCOVERY_AGENT_URL") != null ||
+                      System.getenv("JOLOKIA_ENABLED") != null;
+        boolean config = pConfig.getAsBoolean(ConfigKey.DISCOVERY_ENABLED) ||
+                         pConfig.get(ConfigKey.DISCOVERY_AGENT_URL) != null;
+        return sysProp || env || config;
     }
-
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
      * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
@@ -302,15 +310,44 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Update the URL in the AgentDetails
-    private void updateAgentUrl(String pUrl, String pServletPath, boolean pIsAuthenticated) {
-        int idx = pUrl.indexOf(pServletPath);
+    private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
+        String url = getBaseUrl(pRequestUrl, pServletPath);
+        backendManager.getAgentDetails().updateAgentParameters(url,100,pIsAuthenticated);
+    }
+
+    // Strip off everything unneeded
+    private String getBaseUrl(String pUrl, String pServletPath) {
+        String sUrl;
+        try {
+            URL url = new URL(pUrl);
+            String host = getIpIfPossible(url.getHost());
+            sUrl = new URL(url.getProtocol(),host,url.getPort(),pServletPath).toExternalForm();
+        } catch (MalformedURLException exp) {
+            sUrl = plainReplacement(pUrl, pServletPath);
+        }
+        return sUrl;
+    }
+
+    // Check for an IP, since this seems to be safer to return then a plain name
+    private String getIpIfPossible(String pHost) {
+        try {
+            InetAddress address = InetAddress.getByName(pHost);
+            return address.getHostAddress();
+        } catch (UnknownHostException e) {
+            return pHost;
+        }
+    }
+
+    // Fallback used if URL creation didnt work
+    private String plainReplacement(String pUrl, String pServletPath) {
+        int idx = pUrl.lastIndexOf(pServletPath);
         String url;
         if (idx != -1) {
             url = pUrl.substring(0,idx) + pServletPath;
         } else {
             url = pUrl;
         }
-        backendManager.getAgentDetails().updateAgentParameters(url,100,pIsAuthenticated);
+        return url;
     }
 
     // Set an appropriate CORS header if requested and if allowed
