@@ -82,10 +82,20 @@ public class JolokiaServerConfig {
         finalCfg.putAll(pConfig);
 
         prepareDetectorOptions(finalCfg);
+        addJolokiaId(finalCfg);
 
         jolokiaConfig = new Configuration();
         jolokiaConfig.updateGlobalConfiguration(finalCfg);
         initConfigAndValidate(finalCfg);
+    }
+
+    // Add a unique jolokia id for this agent
+    private void addJolokiaId(Map<String, String> pFinalCfg) {
+        if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
+            String id = Integer.toHexString(hashCode()) + "-jvm";
+            pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), id);
+        }
+        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(),"jvm");
     }
 
     protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
