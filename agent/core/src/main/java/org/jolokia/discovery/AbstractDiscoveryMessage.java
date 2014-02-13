@@ -20,11 +20,22 @@ abstract class AbstractDiscoveryMessage {
     // Type of the message
     private MessageType type;
 
+    // Id of this message
+    private String id;
+
     // Payload of the message
     private AgentDetails agentDetails;
 
     protected final void setType(MessageType pType) {
         type = pType;
+    }
+
+    protected final void setId(String pId) {
+        id = pId;
+    }
+
+    public String getId() {
+        return id;
     }
 
     protected final void setAgentDetails(AgentDetails pAgentDetails) {
@@ -67,6 +78,8 @@ abstract class AbstractDiscoveryMessage {
     public enum Payload {
         // Type of request (see Message type)
         TYPE,
+        // Message ID
+        ID,
         // Agent URL as the agent sees itself
         URL,
         // How accurate it the URL ? (100: Sure that URL is ok, 50: 50% sure). That's an heuristic value

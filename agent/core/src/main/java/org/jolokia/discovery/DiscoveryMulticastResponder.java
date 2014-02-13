@@ -1,10 +1,13 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.*;
 
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.NetworkUtil;
 
 /**
  * A receiver which binds to a multicast sockets and responds to multicast requests.
@@ -19,11 +22,11 @@ public class DiscoveryMulticastResponder {
     private final Restrictor restrictor;
     private final LogHandler logHandler;
 
-    // Listener responsible for creating the response as soon as a discovery request
-    // arrives.
-    private MulticastSocketListener listener;
-    private Thread runner;
     private InetAddress hostAddress;
+
+    // Listener threads responsible for creating the response as soon as a discovery request
+    // arrives.
+    private List<MulticastSocketListenerThread> listenerThreads;
 
     /**
      * Create the responder which can be started and stopped and which detects the address to listen on on its own.
@@ -55,31 +58,41 @@ public class DiscoveryMulticastResponder {
         detailsHolder = pDetailsHolder;
         restrictor = pRestrictor;
         logHandler = pLogHandler;
+        listenerThreads = new ArrayList<MulticastSocketListenerThread>();
     }
 
     /**
      * Start the responder (if not already started)
      */
-    public void start() throws IOException {
-        if (listener == null) {
-            listener = new MulticastSocketListener(hostAddress,
-                                                   detailsHolder,
-                                                   restrictor,
-                                                   logHandler);
-            runner = new Thread(listener);
-            runner.start();
+    public synchronized void start() throws IOException {
+        if (listenerThreads.size() == 0) {
+            List<InetAddress> addresses = hostAddress == null ? NetworkUtil.getMulticastAddresses() : Arrays.asList(hostAddress);
+            if (addresses.size() == 0) {
+                logHandler.info("No suitable address found for listening on multicast discovery requests");
+                return;
+            }
+            for (InetAddress addr : addresses) {
+                MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr,
+                                                                                         detailsHolder,
+                                                                                         restrictor,
+                                                                                         logHandler);
+                thread.start();
+                listenerThreads.add(thread);
+                // One thread is enough for now.
+                break;
+            }
         }
     }
 
     /**
      * Stop the responder (if not already stopped). Can be restarted aftewards.
      */
-    public void stop() {
-        if (listener != null && listener.isRunning()) {
-            listener.stop();
-            runner.interrupt();
-            runner = null;
-            listener = null;
+    public synchronized void stop() {
+        if (listenerThreads.size() > 0) {
+            for (MulticastSocketListenerThread thread : listenerThreads) {
+                thread.shutdown();
+            }
         }
+        listenerThreads.clear();
     }
 }

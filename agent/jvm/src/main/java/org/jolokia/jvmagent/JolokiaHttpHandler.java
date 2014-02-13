@@ -69,36 +69,27 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Respond for discovery mc requests
     private DiscoveryMulticastResponder discoveryMulticastResponder;
 
-    // Address on which the server binds
-    private final InetAddress serverAddress;
-
-    public JolokiaHttpHandler(Configuration pConfig) {
-        this(pConfig, null, null);
-    }
-
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pConfig jolokia specific config tuning the processing behaviour
      */
-    public JolokiaHttpHandler(Configuration pConfig, InetAddress pServerAddress) {
-        this(pConfig, pServerAddress, null);
+    public JolokiaHttpHandler(Configuration pConfig) {
+        this(pConfig, null);
     }
 
     /**
      * Create a new HttpHandler for processing HTTP request
      *
      * @param pConfig jolokia specific config tuning the processing behaviour
-     * @param pServerAddress address on which the server binds.
      * @param pLogHandler log-handler the log handler to use for jolokia
      */
-    public JolokiaHttpHandler(Configuration pConfig, InetAddress pServerAddress, LogHandler pLogHandler) {
+    public JolokiaHttpHandler(Configuration pConfig, LogHandler pLogHandler) {
         configuration = pConfig;
         context = pConfig.get(ConfigKey.AGENT_CONTEXT);
         if (!context.endsWith("/")) {
             context += "/";
         }
-        serverAddress = pServerAddress;
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS),pConfig.get(ConfigKey.DEBUG));
@@ -114,7 +105,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
         if (listenForDiscoveryMcRequests(configuration)) {
             try {
-                discoveryMulticastResponder = new DiscoveryMulticastResponder(serverAddress,backendManager,restrictor,logHandler);
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
                 discoveryMulticastResponder.start();
             } catch (IOException e) {
                 logHandler.error("Cannot start discovery multicast handler: " + e,e);

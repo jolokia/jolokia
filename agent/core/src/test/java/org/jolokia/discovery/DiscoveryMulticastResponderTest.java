@@ -24,7 +24,7 @@ public class DiscoveryMulticastResponderTest {
         }
         AgentDetailsHolder holder = new TestAgentsDetailsHolder();
         DiscoveryMulticastResponder responder =
-                new DiscoveryMulticastResponder(NetworkUtil.getLocalAddress(),holder,new AllowAllRestrictor(),new LogHandler.StdoutLogHandler(true));
+                new DiscoveryMulticastResponder(holder,new AllowAllRestrictor(),new LogHandler.StdoutLogHandler(true));
         responder.start();
         // Warming up
         Thread.sleep(500);

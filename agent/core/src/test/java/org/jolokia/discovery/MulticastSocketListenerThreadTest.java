@@ -21,11 +21,11 @@ import static org.testng.Assert.*;
  * @since 27.01.14
  */
 
-public class MulticastSocketListenerTest {
+public class MulticastSocketListenerThreadTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
     URL url;
-    private MulticastSocketListener listener;
+    private MulticastSocketListenerThread listener;
     private Thread thread;
 
     @BeforeClass
@@ -35,7 +35,7 @@ public class MulticastSocketListenerTest {
         details.updateAgentParameters(JOLOKIA_URL, 100, false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
-        listener = new MulticastSocketListener(null,
+        listener = new MulticastSocketListenerThread(null,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
                                                new LogHandler.StdoutLogHandler(true));

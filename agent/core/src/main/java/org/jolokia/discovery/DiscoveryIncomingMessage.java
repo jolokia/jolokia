@@ -39,6 +39,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
         } catch (IllegalArgumentException exp) {
             throw new IOException("Invalid type " + typeS + " given in discovery message",exp);
         }
+        setId((String) inData.remove(Payload.ID));
         setAgentDetails(new AgentDetails(inData));
     }
 

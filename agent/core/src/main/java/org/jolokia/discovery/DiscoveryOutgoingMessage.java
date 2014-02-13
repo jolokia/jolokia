@@ -2,6 +2,7 @@ package org.jolokia.discovery;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.UUID;
 
 /**
  * Class representing an outgoing message
@@ -15,6 +16,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
     private final int targetPort;
 
     private DiscoveryOutgoingMessage(MessageType pType,
+                                     String pMessageId,
                                      InetAddress pTargetAddress,
                                      int pTargetPort,
                                      AgentDetails pAgentDetails) {
@@ -22,6 +24,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         this.targetPort = pTargetPort;
         setType(pType);
         setAgentDetails(pAgentDetails);
+        setId(pMessageId != null ? pMessageId : UUID.randomUUID().toString());
     }
 
     public InetAddress getTargetAddress() {
@@ -43,6 +46,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         private MessageType type;
         private InetAddress targetAddress;
         private int targetPort;
+        private String id;
 
         public Builder(MessageType pType) {
             type = pType;
@@ -57,6 +61,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
             if (pMsg != null) {
                 targetAddress = pMsg.getSourceAddress();
                 targetPort = pMsg.getSourcePort();
+                id = pMsg.getId();
             }
             return this;
         }
@@ -64,6 +69,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         public DiscoveryOutgoingMessage build() {
             return new DiscoveryOutgoingMessage(
                     type,
+                    id,
                     targetAddress,
                     targetPort,
                     agentDetails);

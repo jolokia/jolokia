@@ -9,6 +9,7 @@ import java.net.*;
 
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.NetworkUtil;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.RESPONSE;
 
@@ -18,7 +19,7 @@ import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.RESPONS
  *
  * @since 31.01.2014
  */
-class MulticastSocketListener implements Runnable {
+class MulticastSocketListenerThread extends Thread {
 
     // From where to get agent details
     private final AgentDetailsHolder agentDetailsHolder;
@@ -47,27 +48,25 @@ class MulticastSocketListener implements Runnable {
      *                    the address from which the packet was received.
      * @param pLogHandler log handler used for logging
      */
-    MulticastSocketListener(InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) throws IOException {
-        address = pHostAddress;
+    MulticastSocketListenerThread(InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) throws IOException {
+        address = pHostAddress != null ? pHostAddress : NetworkUtil.getLocalAddressWithMulticast();
         agentDetailsHolder = pAgentDetailsHolder;
         restrictor = pRestrictor;
         logHandler = pLogHandler;
+        // For debugging, uncomment:
         //logHandler = new StdoutLogHandler();
 
-        logHandler.debug("Listening on " + address);
+        logHandler.debug(address + "<-- Listening for queries");
         socket = MulticastUtil.newMulticastSocket(address);
     }
-
-
 
     /** {@inheritDoc} */
     public void run() {
         setRunning(true);
-
         try {
             while (isRunning()) {
                 refreshSocket();
-                logHandler.debug("Start receiving");
+                logHandler.debug(address + "<-- Waiting");
                 DiscoveryIncomingMessage msg = receiveMessage();
                 if (shouldMessageBeProcessed(msg)) {
                     handleQuery(msg);
@@ -75,12 +74,13 @@ class MulticastSocketListener implements Runnable {
             }
         }
         catch (IllegalStateException e) {
-            logHandler.error("Cannot reopen socket, exiting listener thread: " + e.getCause(),e.getCause());
+            logHandler.error(address + "<-- Cannot reopen socket, exiting listener thread: " + e.getCause(),e.getCause());
         } finally {
             if (socket != null) {
                 socket.close();
             }
         }
+        logHandler.debug(address + "<-- Stop listening");
     }
 
     private synchronized void setRunning(boolean pRunning) {
@@ -91,8 +91,9 @@ class MulticastSocketListener implements Runnable {
         return running;
     }
 
-    public synchronized void stop() {
+    public synchronized void shutdown() {
         setRunning(false);
+        interrupt();
         socket.close();
     }
 
@@ -122,7 +123,7 @@ class MulticastSocketListener implements Runnable {
 
     private void refreshSocket() {
         if (socket.isClosed()) {
-            logHandler.info("Socket closed, reopening it ...");
+            logHandler.info(address + "<-- Socket closed, reopening it");
             try {
                 socket = MulticastUtil.newMulticastSocket(address);
             } catch (IOException exp) {
@@ -137,7 +138,7 @@ class MulticastSocketListener implements Runnable {
                         .respondTo(pMsg)
                         .agentDetails(agentDetailsHolder.getAgentDetails())
                         .build();
-        logHandler.debug("Discovery request from " + pMsg.getSourceAddress() + ":" + pMsg.getSourcePort());
+        logHandler.debug(address + "<-- Discovery request from " + pMsg.getSourceAddress() + ":" + pMsg.getSourcePort());
         send(answer);
     }
 
@@ -150,7 +151,7 @@ class MulticastSocketListener implements Runnable {
             try {
                 socket.send(packet);
             } catch (IOException exp) {
-                logHandler.info("Can not send discovery response to " + packet.getAddress());
+                logHandler.info(address + "<-- Can not send discovery response to " + packet.getAddress());
             }
         }
     }

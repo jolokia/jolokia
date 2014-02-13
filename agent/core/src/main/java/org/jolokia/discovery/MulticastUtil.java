@@ -23,7 +23,8 @@ public final class MulticastUtil {
     public static final int JOLOKIA_MULTICAST_PORT = 24884;
 
     // Utility class
-    private MulticastUtil() {}
+    private MulticastUtil() {
+    }
 
     static MulticastSocket newMulticastSocket(InetAddress pAddress) throws IOException {
         // TODO: IpV6 (not supported yet)
@@ -32,10 +33,9 @@ public final class MulticastUtil {
 
         MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
         socket.setReuseAddress(true);
-
         setOutgoingInterfaceForMulticastRequest(pAddress, socket);
         socket.setTimeToLive(255);
-        joinMcGroupsOnAllNetworkIntefaces(socket, socketAddress);
+        joinMcGroupsOnAllNetworkInterfaces(socket, socketAddress);
         return socket;
     }
 
@@ -43,10 +43,9 @@ public final class MulticastUtil {
      * Sent out a message to Jolokia's multicast group over all network interfaces supporting multicast request (and no
      * logging is used)
      *
-     * @param pOutMsg the message to send
+     * @param pOutMsg  the message to send
      * @param pTimeout timeout used for how long to wait for discovery messages
      * @return list of received answers, never null
-     *
      * @throws IOException if something fails during the discovery request
      */
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout) throws IOException {
@@ -56,12 +55,10 @@ public final class MulticastUtil {
     /**
      * Sent out a message to Jolokia's multicast group over all network interfaces supporting multicasts
      *
-     *
-     * @param pOutMsg the message to send
-     * @param pTimeout timeout used for how long to wait for discovery messages
+     * @param pOutMsg     the message to send
+     * @param pTimeout    timeout used for how long to wait for discovery messages
      * @param pLogHandler a log handler for printing out logging information
      * @return list of received answers, never null
-     *
      * @throws IOException if something fails during the discovery request
      */
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg,
@@ -79,15 +76,22 @@ public final class MulticastUtil {
         for (InetAddress address : addresses) {
             // Discover UDP packet send to multicast address
             DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP), JOLOKIA_MULTICAST_PORT);
-            Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address,out, pTimeout, pLogHandler);
+            Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address, out, pTimeout, pLogHandler);
             futures.add(executor.submit(findAgentsCallable));
         }
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
+        Set<String> seen = new HashSet<String>();
         for (Future<List<DiscoveryIncomingMessage>> future : futures) {
             try {
-                // Has been cancelled if overal
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
-                ret.addAll(inMsgs);
+                for (DiscoveryIncomingMessage inMsg : inMsgs) {
+                    String id = inMsg.getId();
+                    // There can be multiples answers with the same message id
+                    if (!seen.contains(id)) {
+                        ret.add(inMsg);
+                        seen.add(id);
+                    }
+                }
             } catch (InterruptedException exp) {
                 // Try next one ...
             } catch (ExecutionException e) {
@@ -102,27 +106,20 @@ public final class MulticastUtil {
 
     // ==============================================================================================================
 
-    private static InetAddress sanitizeLocalAddress(InetAddress pAddress) throws UnknownHostException, SocketException {
-        InetAddress address = pAddress != null && pAddress instanceof Inet4Address ? pAddress : NetworkUtil.getLocalAddress();
-        if (address == null) {
-            throw new UnknownHostException("Cannot find address of local host which can be used for multicasting");
-        }
-        return address;
-    }
-
     // We are using all interfaces available and try to join them
-    private static void joinMcGroupsOnAllNetworkIntefaces(MulticastSocket pSocket, InetSocketAddress pSocketAddress) throws IOException {
+    private static void joinMcGroupsOnAllNetworkInterfaces(MulticastSocket pSocket, InetSocketAddress pSocketAddress) throws IOException {
         // V6: ffx8::/16
         Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
         while (nifs.hasMoreElements()) {
             NetworkInterface n = nifs.nextElement();
-            pSocket.joinGroup(pSocketAddress, n);
+            if (NetworkUtil.isMulticastSupported(n)) {
+                pSocket.joinGroup(pSocketAddress, n);
+            }
         }
     }
 
     private static void setOutgoingInterfaceForMulticastRequest(InetAddress pAddress, MulticastSocket pSocket) throws SocketException, UnknownHostException {
-        InetAddress address = sanitizeLocalAddress(pAddress);
-        NetworkInterface nif = NetworkInterface.getByInetAddress(address);
+        NetworkInterface nif = NetworkInterface.getByInetAddress(pAddress);
         if (nif != null) {
             pSocket.setNetworkInterface(nif);
         }
@@ -143,37 +140,36 @@ public final class MulticastUtil {
         }
 
         public List<DiscoveryIncomingMessage> call() throws SocketException {
-                final DatagramSocket socket = new DatagramSocket(0, address);
-                List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
-                try {
-                    socket.setSoTimeout(timeout);
-                    logHandler.debug("Sending from " + address);
-                    socket.send(outPacket);
+            final DatagramSocket socket = new DatagramSocket(0, address);
 
-                    try {
-                        do {
-                            byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
-                            DatagramPacket in = new DatagramPacket(buf, buf.length);
-                            logHandler.debug(System.currentTimeMillis() + "Receiving answer for " + address);
-                            socket.receive(in);
-                            logHandler.debug(System.currentTimeMillis() + "Received answer for " + address);
-                            DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
-                            if (!inMsg.isQuery()) {
-                                ret.add(inMsg);
-                            }
-                        } while (true); // Leave loop with a SocketTimeoutException in receive()
-                    } catch (SocketTimeoutException exp) {
-                        logHandler.debug("Timeout (from " + address + ")");
-                        // Expected until no responses are returned anymore
-                    }
-                    return ret;
-                } catch (IOException exp) {
-                    //System.out.println("Exception (" + pAddress + ") : " + exp);
-                    //exp.printStackTrace();
-                    return ret;
-                } finally {
-                    socket.close();
+            List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
+            try {
+                socket.setSoTimeout(timeout);
+                logHandler.debug(address + "--> Sending");
+                socket.send(outPacket);
+
+                try {
+                    do {
+                        byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
+                        DatagramPacket in = new DatagramPacket(buf, buf.length);
+                        socket.receive(in);
+                        logHandler.debug(address + "--> Received answer");
+                        DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
+                        if (!inMsg.isQuery()) {
+                            ret.add(inMsg);
+                        }
+                    } while (true); // Leave loop with a SocketTimeoutException in receive()
+                } catch (SocketTimeoutException exp) {
+                    logHandler.debug(address + "--> Timeout");
+                    // Expected until no responses are returned anymore
                 }
+                return ret;
+            } catch (IOException exp) {
+                logHandler.debug(address + "--> Could not send multicast over : " + exp);
+                return ret;
+            } finally {
+                socket.close();
             }
+        }
     }
 }

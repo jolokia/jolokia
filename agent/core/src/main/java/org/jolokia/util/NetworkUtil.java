@@ -34,9 +34,16 @@ public final class NetworkUtil {
         System.out.println(dumpLocalNetworkInfo()); // NOSONAR
     }
 
+    /**
+     * Get a local, IP4 Address, preferable a non-loopback address which is bound to an interface.
+     * @return
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
     public static InetAddress getLocalAddress() throws UnknownHostException, SocketException {
         InetAddress addr = InetAddress.getLocalHost();
-        if (addr.isLoopbackAddress() || addr instanceof Inet6Address || NetworkInterface.getByInetAddress(addr) == null) {
+        NetworkInterface nif = NetworkInterface.getByInetAddress(addr);
+        if (addr.isLoopbackAddress() || addr instanceof Inet6Address || nif == null) {
             // Find local address that isn't a loopback address
             InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface();
             // If a local, multicast enabled address can be found, use it. Otherwise
@@ -44,6 +51,35 @@ public final class NetworkUtil {
             addr = lookedUpAddr != null ? lookedUpAddr : InetAddress.getByName("127.0.0.1");
         }
         return addr;
+    }
+
+    /**
+     * Get a local address which supports multicast. A loopback adress is returned, but only if not
+     * another is available
+     *
+     * @return a multicast enabled address of null if none could be found
+     *
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
+    public static InetAddress getLocalAddressWithMulticast() throws UnknownHostException, SocketException {
+        InetAddress addr = InetAddress.getLocalHost();
+        NetworkInterface nif = NetworkInterface.getByInetAddress(addr);
+        if (addr.isLoopbackAddress() || addr instanceof Inet6Address || !isMulticastSupported(nif)) {
+            // Find local address that isn't a loopback address
+            InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface();
+            // If a local, multicast enabled address can be found, use it. Otherwise
+            // we are using the local address, which might not be what you want
+            if (lookedUpAddr != null) {
+                return lookedUpAddr;
+            }
+            addr = InetAddress.getByName("127.0.0.1");
+        }
+        if (isMulticastSupported(addr)) {
+            return addr;
+        } else {
+            throw new UnknownHostException("Cannot find address of local host which can be used for multicasting");
+        }
     }
 
     // returns null if none has been found
@@ -68,12 +104,33 @@ public final class NetworkUtil {
     }
 
     /**
-     * Check, whether multicast is supported at all
+     * Check, whether multicast is supported at all by at least one interface
      *
      * @return true if at least one network interface supports multicast
      */
     public static boolean isMulticastSupported() throws SocketException {
         return getMulticastAddresses().size() != 0;
+    }
+
+    /**
+     * Check whether the given interface supports multicast and is up
+     *
+     * @param pNif check whether the given interface supports multicast
+     * @return true if multicast is supported and the interface is up
+     */
+    public static boolean isMulticastSupported(NetworkInterface pNif) {
+        return pNif != null && checkMethod(pNif, isUp) && checkMethod(pNif,supportsMulticast);
+    }
+
+    /**
+     * Check whether the given address' interface supports multicast
+     *
+     * @param pAddr address to check
+     * @return true if the underlying networkinterface is up and supports multicast
+     * @throws SocketException
+     */
+    public static boolean isMulticastSupported(InetAddress pAddr) throws SocketException {
+        return isMulticastSupported(NetworkInterface.getByInetAddress(pAddr));
     }
 
     /**

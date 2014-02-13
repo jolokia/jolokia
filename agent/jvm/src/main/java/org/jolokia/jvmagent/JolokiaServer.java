@@ -181,9 +181,7 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = pConfig.getContextPath();
-        InetSocketAddress isocketAddress = pServer.getAddress();
-        InetAddress address = isocketAddress != null ? isocketAddress.getAddress() : null;
-        jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig(), address);
+        jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig());
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Add authentication if configured
