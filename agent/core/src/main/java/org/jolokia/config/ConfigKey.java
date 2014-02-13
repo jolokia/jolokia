@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Enumeration defining the various configuration constant names which
  * can be used to configure the agent globally (e.g. in web.xml) or
- * as proccessing parameters (e.g. as query params).
+ * as processing parameters (e.g. as query params).
  *
  * @author roland
  * @since Jan 1, 2010
@@ -208,7 +208,28 @@ public enum ConfigKey {
      *     }
      * </pre>
      */
-    DETECTOR_OPTIONS("detectorOptions",true, false);
+    DETECTOR_OPTIONS("detectorOptions",true, false),
+
+    /**
+     * The ID to uniquely identify this agent within a JVM. There
+     * can be multiple agents registered a JVM. This id is e.g. used to
+     * uniquely create MBean names.
+     */
+    AGENT_ID("agentId", true, false),
+
+    /**
+     * The agent type holds the information which kind of agent (war,jvm,osgi,mule)
+     * is in use. This configuration cannot be set from the outside but is
+     * written by the agent itself
+     */
+    AGENT_TYPE("agentType", true, false),
+
+    /**
+     * A description which can be used to describe the agent further. Typically
+     * this can be used by clients to provide additional information to
+     * the user.
+     */
+    AGENT_DESCRIPTION("agentDescription",true,false);
 
     private String key;
     private String defaultValue;
