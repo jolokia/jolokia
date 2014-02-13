@@ -427,11 +427,15 @@ public class AgentServlet extends HttpServlet {
     // Examines servlet config and servlet context for configuration parameters.
     // Configuration from the servlet context overrides servlet parameters defined in web.xml
     Configuration initConfig(ServletConfig pConfig) {
-        Configuration config = new Configuration();
+        Configuration config = new Configuration(
+                ConfigKey.AGENT_ID,Integer.toHexString(hashCode()) + "-servlet");
         // From ServletContext ....
         config.updateGlobalConfiguration(new ServletConfigFacade(pConfig));
         // ... and ServletConfig
         config.updateGlobalConfiguration(new ServletContextFacade(getServletContext()));
+
+        // Set type last and overwrite anything written
+        config.updateGlobalConfiguration(Collections.singletonMap(ConfigKey.AGENT_TYPE.getKeyValue(),"servlet"));
         return config;
     }
 
