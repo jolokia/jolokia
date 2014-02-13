@@ -1,6 +1,7 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.List;
 
@@ -25,23 +26,21 @@ public class MulticastSocketListenerThreadTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
     URL url;
-    private MulticastSocketListenerThread listener;
-    private Thread thread;
 
-    @BeforeClass
-    public void startSocketListener() throws IOException, InterruptedException {
+
+    private MulticastSocketListenerThread startSocketListener() throws IOException, InterruptedException {
         url = new URL(JOLOKIA_URL);
         final AgentDetails details = new AgentDetails();
         details.updateAgentParameters(JOLOKIA_URL, 100, false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
-        listener = new MulticastSocketListenerThread(null,
+        MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread(null,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
                                                new LogHandler.StdoutLogHandler(true));
-        thread = new Thread(listener);
-        thread.start();
+        listenerThread.start();
         Thread.sleep(500);
+        return listenerThread;
     }
 
 
@@ -53,30 +52,47 @@ public class MulticastSocketListenerThreadTest {
         };
     }
 
-    @AfterClass
-    public void stopSocketListener() {
-        listener.stop();
+    @Test
+    public void simple() throws IOException, InterruptedException {
+        checkForMulticastSupport();
+
+        MulticastSocketListenerThread listenerThread = startSocketListener();
+
+        try {
+            DiscoveryOutgoingMessage out =
+                    new DiscoveryOutgoingMessage.Builder(QUERY)
+                            .id("test-42")
+                            .build();
+            List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
+            int idCount = 0;
+            int urlCount = 0;
+            for (DiscoveryIncomingMessage in : discovered) {
+                if (in.getId().equals("test-42")) {
+                    idCount++;
+                }
+                if (JOLOKIA_URL.equals(in.getAgentDetails().toJSONObject().get("url"))) {
+                    urlCount++;
+                }
+                assertFalse(in.isQuery());
+                AgentDetails agentDetails = in.getAgentDetails();
+                JSONObject details = agentDetails.toJSONObject();
+                if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
+                    assertEquals(details.get("url"), JOLOKIA_URL);
+                    assertEquals(details.get("version"), Version.getAgentVersion());
+                    return;
+                }
+            }
+            assertEquals(idCount,1,"Exactly one in message with the send id should have been received");
+            assertEquals(urlCount,1,"Only one message with the url should be included");
+            fail("No message found");
+        } finally {
+            listenerThread.shutdown();
+        }
     }
 
-    @Test
-    public void simple() throws IOException {
+    private void checkForMulticastSupport() throws SocketException {
         if (!NetworkUtil.isMulticastSupported()) {
             throw new SkipException("No multicast supported");
         }
-        DiscoveryOutgoingMessage out =
-                new DiscoveryOutgoingMessage.Builder(QUERY)
-                .build();
-        List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
-        for (DiscoveryIncomingMessage in : discovered) {
-            assertFalse(in.isQuery());
-            AgentDetails agentDetails = in.getAgentDetails();
-            JSONObject details = agentDetails.toJSONObject();
-            if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
-                assertEquals(details.get("url"), JOLOKIA_URL);
-                assertEquals(details.get("version"), Version.getAgentVersion());
-                return;
-            }
-        }
-        fail("No message found");
     }
 }

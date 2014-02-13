@@ -34,8 +34,7 @@ import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -213,7 +212,7 @@ public class AgentServletTest {
                     return;
                 }
             }
-            fail("Every message has no URL");
+            fail("Failed, because no message had an URL");
         } finally {
             servlet.destroy();
         }

@@ -65,7 +65,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
             Map<Payload, Object> data = new HashMap<Payload, Object>();
             for (Map.Entry entry : (Set<Map.Entry>) inMsg.entrySet()) {
                 try {
-                    data.put(Payload.valueOf(entry.getKey().toString().toUpperCase()), entry.getValue());
+                    data.put(Payload.fromKey(entry.getKey().toString()), entry.getValue());
                 } catch (IllegalArgumentException exp) {
                     // We simply ignore key which are unknown
                 }

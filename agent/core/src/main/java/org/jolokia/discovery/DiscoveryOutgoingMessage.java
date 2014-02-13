@@ -66,6 +66,11 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
             return this;
         }
 
+        public Builder id(String pId) {
+            id = pId;
+            return this;
+        }
+
         public DiscoveryOutgoingMessage build() {
             return new DiscoveryOutgoingMessage(
                     type,

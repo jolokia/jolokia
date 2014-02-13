@@ -48,7 +48,8 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
-        respond.put(Payload.TYPE.name().toLowerCase(), type.toString().toLowerCase());
+        respond.put(Payload.TYPE.asKey(), type.toString().toLowerCase());
+        respond.put(Payload.ID.asKey(),id);
         if (agentDetails != null) {
             respond.putAll(agentDetails.toJSONObject());
         }
@@ -76,24 +77,32 @@ abstract class AbstractDiscoveryMessage {
      * name of the enum is used literally in the message and must not be changed.
      */
     public enum Payload {
-        // Type of request (see Message type)
-        TYPE,
-        // Message ID
-        ID,
-        // Agent URL as the agent sees itself
-        URL,
-        // How accurate it the URL ? (100: Sure that URL is ok, 50: 50% sure). That's an heuristic value
-        CONFIDENCE,
-        // Whether the agent is secured and an authentication is required (0,1). If not given, this info is not known
-        SECURED,
-        // Vendor of the detected container
-        SERVER_VENDOR,
-        // The product in which the agent is running
-        SERVER_PRODUCT,
-        // Version of the server
-        SERVER_VERSION,
-        // Agent version
-        VERSION
+            // Type of request (see Message type)
+            TYPE,
+            // Message ID
+            ID,
+            // Agent URL as the agent sees itself
+            URL,
+            // How accurate it the URL ? (100: Sure that URL is ok, 50: 50% sure). That's an heuristic value
+            CONFIDENCE,
+            // Whether the agent is secured and an authentication is required (0,1). If not given, this info is not known
+            SECURED,
+            // Vendor of the detected container
+            SERVER_VENDOR,
+            // The product in which the agent is running
+            SERVER_PRODUCT,
+            // Version of the server
+            SERVER_VERSION,
+            // Agent version
+            VERSION;
+
+            String asKey() {
+                return this.name().toLowerCase();
+            }
+
+            public static Payload fromKey(String pKey) {
+                return Payload.valueOf(pKey.toUpperCase());
+            }
     }
 
     /**
@@ -110,6 +119,7 @@ abstract class AbstractDiscoveryMessage {
     public String toString() {
         return "{" +
                "type=" + type +
+               ",id=" + id +
                ", agentDetails=" + agentDetails +
                '}';
     }
