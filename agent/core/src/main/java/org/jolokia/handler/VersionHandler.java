@@ -92,10 +92,8 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
         JSONObject info = new JSONObject();
         if (config != null) {
             for (ConfigKey key : ConfigKey.values()) {
-                if (key.isGlobalConfig()) {
-                    if (config.containsKey(key)) {
-                        info.put(key.getKeyValue(), config.get(key));
-                    }
+                if (key.isGlobalConfig() && config.containsKey(key)) {
+                    info.put(key.getKeyValue(), config.get(key));
                 }
             }
         }

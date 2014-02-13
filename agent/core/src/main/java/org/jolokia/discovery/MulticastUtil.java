@@ -64,14 +64,19 @@ public final class MulticastUtil {
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg,
                                                                             int pTimeout,
                                                                             LogHandler pLogHandler) throws IOException {
+        final List<Future<List<DiscoveryIncomingMessage>>> futures = sendDiscoveryRequests(pOutMsg, pTimeout, pLogHandler);
+        return collectIncomingMessages(pTimeout, futures);
+    }
+    
+    // ==============================================================================================================
+    // Send requests in parallel threads, return the futures for getting the result
+    private static List<Future<List<DiscoveryIncomingMessage>>> sendDiscoveryRequests(DiscoveryOutgoingMessage pOutMsg,
+                                                                                      int pTimeout,
+                                                                                      LogHandler pLogHandler) throws SocketException, UnknownHostException {
         // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
         // should be sent, on each interface respectively. Currently, only IpV4 is supported.
-        List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
-        if (addresses.size() == 0) {
-            throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
-        }
+        List<InetAddress> addresses = getMulticastAddresses();
         ExecutorService executor = Executors.newFixedThreadPool(addresses.size());
-        //ExecutorService executor = Executors.newSingleThreadExecutor();
         final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<Future<List<DiscoveryIncomingMessage>>>(addresses.size());
         for (InetAddress address : addresses) {
             // Discover UDP packet send to multicast address
@@ -79,9 +84,23 @@ public final class MulticastUtil {
             Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address, out, pTimeout, pLogHandler);
             futures.add(executor.submit(findAgentsCallable));
         }
+        return futures;
+    }
+
+    // All addresses which can be used for sending multicast addresses
+    private static List<InetAddress> getMulticastAddresses() throws SocketException, UnknownHostException {
+        List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
+        if (addresses.size() == 0) {
+            throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
+        }
+        return addresses;
+    }
+
+    // Collect the incoming messages and filter out duplicates
+    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures) {
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
         Set<String> seen = new HashSet<String>();
-        for (Future<List<DiscoveryIncomingMessage>> future : futures) {
+        for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
             try {
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
                 for (DiscoveryIncomingMessage inMsg : inMsgs) {
@@ -103,8 +122,6 @@ public final class MulticastUtil {
         }
         return ret;
     }
-
-    // ==============================================================================================================
 
     // We are using all interfaces available and try to join them
     private static void joinMcGroupsOnAllNetworkInterfaces(MulticastSocket pSocket, InetSocketAddress pSocketAddress) throws IOException {
