@@ -218,7 +218,7 @@ public enum ConfigKey {
      * can be multiple agents registered a JVM. This id is e.g. used to
      * uniquely create MBean names.
      */
-    JOLOKIA_ID("jolokiaId", true, false);
+    AGENT_ID("agentId", true, false);
 
     private String  key;
     private String  defaultValue;

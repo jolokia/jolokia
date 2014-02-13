@@ -45,7 +45,7 @@ public class PullNotificationBackendTest {
         ServerHandle handle = ServerHandle.NULL_SERVER_HANDLE;
         JolokiaContext ctx = new TestJolokiaContext.Builder()
                 .serverHandle(handle)
-                .config(ConfigKey.JOLOKIA_ID,"test")
+                .config(ConfigKey.AGENT_ID,"test")
                 .build();
         backend = new PullNotificationBackend(0);
         backend.init(ctx);

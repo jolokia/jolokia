@@ -45,7 +45,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
     public void setUp() throws Exception {
         ServerHandle serverHandle = new ServerHandle(null,null,null,null);
         ctx = new TestJolokiaContext.Builder().serverHandle(serverHandle)
-                                              .config(ConfigKey.JOLOKIA_ID,"test")
+                                              .config(ConfigKey.AGENT_ID,"test")
                                               .build();
 
         handler = new NotificationHandler(ctx);

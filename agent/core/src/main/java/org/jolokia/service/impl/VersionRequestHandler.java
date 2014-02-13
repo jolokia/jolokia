@@ -60,7 +60,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         JSONObject ret = new JSONObject();
         ret.put("agent", Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
-        ret.put("id",context.getConfig(ConfigKey.JOLOKIA_ID));
+        ret.put("id",context.getConfig(ConfigKey.AGENT_ID));
         ServerHandle serverHandle = context.getServerHandle();
         if (serverHandle != null) {
             ret.put("server", serverHandle.toJSONObject());

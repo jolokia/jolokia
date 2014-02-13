@@ -96,9 +96,9 @@ public class JolokiaServerConfig {
 
     // Add a unique jolokia id for this agent
     private void addJolokiaId(Map<String, String> pFinalCfg) {
-        if (!pFinalCfg.containsKey(ConfigKey.JOLOKIA_ID.getKeyValue())) {
+        if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
             String id = Integer.toHexString(hashCode()) + "-jvm";
-            pFinalCfg.putAll(Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
+            pFinalCfg.putAll(Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
                                                       id));
         }
     }

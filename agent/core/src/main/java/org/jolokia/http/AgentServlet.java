@@ -135,7 +135,7 @@ public class AgentServlet extends HttpServlet {
      */
     protected Configuration createConfig(ServletConfig pServletConfig) {
         StaticConfiguration config = new StaticConfiguration(
-                Collections.singletonMap(ConfigKey.JOLOKIA_ID.getKeyValue(),
+                Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
                                          Integer.toHexString(hashCode()) + "-servlet"));
         // From ServletContext ....
         config.update(new ServletConfigFacade(pServletConfig));
@@ -276,7 +276,7 @@ public class AgentServlet extends HttpServlet {
     private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
         String origin = requestHandler.extractCorsOrigin(pReq.getHeader("Origin"));
         if (origin != null) {
-            pResp.setHeader("Access-Control-Allow-Origin",origin);
+            pResp.setHeader("Access-Control-Allow-Origin", origin);
             pResp.setHeader("Access-Control-Allow-Credentials","true");
         }
     }

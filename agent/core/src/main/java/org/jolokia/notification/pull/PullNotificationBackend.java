@@ -41,7 +41,7 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
 
     /** {@inheritDoc} */
     public void init(JolokiaContext pContext) {
-        String jolokiaId = pContext.getConfig(ConfigKey.JOLOKIA_ID);
+        String jolokiaId = pContext.getConfig(ConfigKey.AGENT_ID);
         // TODO: Get configuration parameter for maxEntries
         store = new PullNotificationStore(maxEntries);
         mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + jolokiaId);

@@ -146,9 +146,9 @@ public class JolokiaActivator implements BundleActivator, JolokiaServletConfigur
                 config.put(key.getKeyValue(),value);
             }
         }
-        String jolokiaId = config.get(ConfigKey.JOLOKIA_ID.getKeyValue());
+        String jolokiaId = config.get(ConfigKey.AGENT_ID.getKeyValue());
         if (jolokiaId == null) {
-            config.put(ConfigKey.JOLOKIA_ID.getKeyValue(),
+            config.put(ConfigKey.AGENT_ID.getKeyValue(),
                        Integer.toHexString(hashCode()) + "-osgi");
         }
         return config;
