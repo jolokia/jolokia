@@ -1171,40 +1171,16 @@
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">7.0</emphasis>
+        protocol version <emphasis role="bold">7.1</emphasis>
       </para>
       <variablelist>
         <varlistentry>
-          <term><emphasis role="bold">7.0</emphasis> (since 1.1.0)</term>
+          <term><emphasis role="bold">7.1</emphasis> (since 1.2.0)</term>
           <listitem>
             <para>
-              The <emphasis
-              role="bold"><constant>maxDepth</constant></emphasis>
-              parameter (either as processing parameter or as
-              configuration value) is now 1 based. I.e. 0 means always
-              "no limit" (be careful with this, though), 1 implies
-              truncating the value on the first level for READ
-              request. This was already true for LIST requests and the
-              other limit values (maxCollectionSize and maxObjects) so
-              this change is used in order to harmonize the overall
-              behaviour with regard to limits.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Enums are now serialized downstream (full support)
-              and upstream (for type accessible to the agent).
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              New query parameter options
-              <constant>serializeException</constant> (for setting an
-              <constant>error_value</constant> in case of an
-              exception), <constant>canonicalNaming</constant>
-              (influences how object names are returned) and
-              <constant>includeStackTrace</constant> (for adding or
-              omitting stacktraces in error responses).
+              The <literal>version</literal> command returns now the configuration
+              global information as well with the key <code>config</code> in the
+              returned value.
             </para>
           </listitem>
         </varlistentry>

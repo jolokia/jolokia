@@ -192,7 +192,7 @@ public enum ConfigKey {
      * <p>Note this will be combined with the objectClass filter for HttpService with
      * the and (&amp;) operator.</p>
      */
-    HTTP_SERVICE_FILTER("httpServiceFilter",true,false,""),
+    HTTP_SERVICE_FILTER("httpServiceFilter",true,false),
 
     /**
      * Extra options passed to a server handle after it has been detected. The value

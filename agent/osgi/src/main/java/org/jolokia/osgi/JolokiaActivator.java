@@ -148,6 +148,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
                 config.put(key.getKeyValue(),value);
             }
         }
+        String jolokiaId = config.get(ConfigKey.AGENT_ID.getKeyValue());
+        if (jolokiaId == null) {
+            config.put(ConfigKey.AGENT_ID.getKeyValue(),
+                       Integer.toHexString(hashCode()) + "-osgi");
+        }
+        config.put(ConfigKey.AGENT_TYPE.getKeyValue(),"osgi");
         return config;
     }
 
@@ -162,7 +168,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
     private Filter buildHttpServiceFilter(BundleContext pBundleContext) {
         String customFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
-        String filter = customFilter.trim().length() > 0 ?
+        String filter = customFilter != null && customFilter.trim().length() > 0 ?
                 "(&" + HTTP_SERVICE_FILTER_BASE + customFilter + ")" :
                 HTTP_SERVICE_FILTER_BASE;
         try {

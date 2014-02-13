@@ -147,4 +147,13 @@ public class Configuration {
     public int size() {
         return globalConfig.size();
     }
+
+    /**
+     * Check whether a key is explicitely provided
+     * @param pKey key to check
+     * @return true if the key is contained in the configuration, false otherwise
+     */
+    public boolean containsKey(ConfigKey pKey) {
+        return globalConfig.containsKey(pKey);
+    }
 }

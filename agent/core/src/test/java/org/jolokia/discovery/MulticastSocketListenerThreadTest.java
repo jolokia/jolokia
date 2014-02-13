@@ -31,7 +31,7 @@ public class MulticastSocketListenerThreadTest {
     private MulticastSocketListenerThread startSocketListener() throws IOException, InterruptedException {
         url = new URL(JOLOKIA_URL);
         final AgentDetails details = new AgentDetails();
-        details.updateAgentParameters(JOLOKIA_URL, 100, false);
+        details.updateAgentParameters(JOLOKIA_URL, false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
         MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread(null,
@@ -78,7 +78,7 @@ public class MulticastSocketListenerThreadTest {
                 JSONObject details = agentDetails.toJSONObject();
                 if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
                     assertEquals(details.get("url"), JOLOKIA_URL);
-                    assertEquals(details.get("version"), Version.getAgentVersion());
+                    assertEquals(details.get("agent_version"), Version.getAgentVersion());
                     return;
                 }
             }

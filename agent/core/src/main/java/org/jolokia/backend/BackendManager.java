@@ -122,7 +122,7 @@ public class BackendManager implements AgentDetailsHolder {
         logHandler = pLogHandler;
 
         // Details about the agent, used for discovery
-        agentDetails = new AgentDetails();
+        agentDetails = new AgentDetails(pConfig);
 
         if (pLazy) {
             initializer = new Initializer(pConfig);

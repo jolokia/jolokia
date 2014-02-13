@@ -124,13 +124,12 @@ public class JolokiaHttpHandler implements HttpHandler {
      *
      * @param pLazy whether initialisation should be done lazy.
      * @param pUrl agent URL
-     * @param pConfidence how sure the URL is
      * @param pSecured whether the communication is secured or not
      */
-    public void start(boolean pLazy, String pUrl, int pConfidence, boolean pSecured) {
+    public void start(boolean pLazy, String pUrl, boolean pSecured) {
         start(pLazy);
 
-        backendManager.getAgentDetails().updateAgentParameters(pUrl, pConfidence, pSecured);
+        backendManager.getAgentDetails().updateAgentParameters(pUrl, pSecured);
     }
 
     /**

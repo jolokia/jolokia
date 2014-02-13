@@ -3,9 +3,12 @@ package org.jolokia.discovery;
 import java.util.Map;
 
 import org.jolokia.Version;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.Payload;
+import static org.jolokia.discovery.AbstractDiscoveryMessage.Payload.*;
 
 /**
  * Agent details describing this agent. This information during
@@ -24,47 +27,62 @@ public class AgentDetails {
     // The URL on which an agent is listening
     private String url;
 
-    // How high is the probability that the URL is correct ? (0 .. 100)
-    private int confidence;
-
     // Whether the agent is secure via. If null, not information about the security
     // mode could be collected.
     private Boolean secured;
 
     // Agent version
-    private String version;
+    private String agentVersion;
+
+    // Agent id
+    private String agentId;
+
+    // Description for the agent
+    private String agentDescription;
 
     public AgentDetails() {
-        version = Version.getAgentVersion();
+        agentVersion = Version.getAgentVersion();
+    }
+
+    public AgentDetails(Configuration pConfig) {
+        this();
+        agentId = pConfig.get(ConfigKey.AGENT_ID);
+        agentDescription = pConfig.get(ConfigKey.AGENT_DESCRIPTION);
     }
 
     /**
      * Constructor used when the input has been parsed
-     * @param pMsgData
+     *
+     * @param pMsgData data send via multicast
      */
     public AgentDetails(Map<Payload, Object> pMsgData) {
-        serverVendor = (String) pMsgData.get(Payload.SERVER_VENDOR);
-        serverProduct = (String) pMsgData.get(Payload.SERVER_PRODUCT);
-        serverVersion = (String) pMsgData.get(Payload.SERVER_VERSION);
-        url = (String) pMsgData.get(Payload.URL);
-        if (pMsgData.containsKey(Payload.CONFIDENCE)) {
-            confidence = ((Long) pMsgData.get(Payload.CONFIDENCE)).intValue();
+        serverVendor = (String) pMsgData.get(SERVER_VENDOR);
+        serverProduct = (String) pMsgData.get(SERVER_PRODUCT);
+        serverVersion = (String) pMsgData.get(SERVER_VERSION);
+        url = (String) pMsgData.get(URL);
+        if (pMsgData.containsKey(SECURED)) {
+            secured = (Boolean) pMsgData.get(SECURED);
         }
-        if (pMsgData.containsKey(Payload.SECURED)) {
-            secured = (Boolean) pMsgData.get(Payload.SECURED);
-        }
-        version = (String) pMsgData.get(Payload.VERSION);
+        agentVersion = (String) pMsgData.get(AGENT_VERSION);
+        agentDescription = (String) pMsgData.get(AGENT_DESCRIPTION);
+        agentId = (String) pMsgData.get(AGENT_ID);
     }
 
+    /**
+     * Single method for updating the server information when the server has been detected
+     *
+     * @param pVendor vendor of the deteted container
+     * @param pProduct name of the contained
+     * @param pVersion server version (not Jolokia's version!)
+     */
     public void setServerInfo(String pVendor, String pProduct, String pVersion) {
         serverVendor = pVendor;
         serverProduct = pProduct;
         serverVersion = pVersion;
     }
 
-    public void updateAgentParameters(String pUrl, int pConfidence, Boolean pSecured) {
+    public void updateAgentParameters(String pUrl, Boolean pSecured) {
         url = pUrl;
-        confidence = pConfidence;
         secured = pSecured;
     }
 
@@ -75,18 +93,16 @@ public class AgentDetails {
      */
     public JSONObject toJSONObject() {
         JSONObject resp = new JSONObject();
-        add(resp,Payload.URL,url);
-        if (confidence != 0) {
-            add(resp, Payload.CONFIDENCE,confidence);
-        }
+        add(resp, URL,url);
         if (secured != null) {
-            add(resp, Payload.SECURED, secured);
+            add(resp, SECURED, secured);
         }
-        add(resp, Payload.SERVER_VENDOR, serverVendor);
-        add(resp, Payload.SERVER_PRODUCT, serverProduct);
-        add(resp, Payload.SERVER_VERSION, serverVersion);
-        add(resp, Payload.VERSION, version);
-
+        add(resp, SERVER_VENDOR, serverVendor);
+        add(resp, SERVER_PRODUCT, serverProduct);
+        add(resp, SERVER_VERSION, serverVersion);
+        add(resp, AGENT_VERSION, agentVersion);
+        add(resp, AGENT_ID,agentId);
+        add(resp, AGENT_DESCRIPTION,agentDescription);
         return resp;
     }
 

@@ -6,6 +6,8 @@ import javax.management.*;
 
 import org.jolokia.Version;
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.request.JmxVersionRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -37,17 +39,20 @@ import org.json.simple.JSONObject;
  */
 public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
 
+    private final Configuration config;
     private ServerHandle serverHandle;
 
     /**
      * Constructor
      *
-     * @param pRestrictor access restrions
+     * @param pConfig configuration holding additional meta data. Might be null.
+     * @param pRestrictor access restrictions
      * @param pServerHandle a server handle as obtained from a {@link org.jolokia.detector.ServerDetector}
      */
-    public VersionHandler(Restrictor pRestrictor, ServerHandle pServerHandle) {
+    public VersionHandler(Configuration pConfig, Restrictor pRestrictor, ServerHandle pServerHandle) {
         super(pRestrictor);
         serverHandle = pServerHandle;
+        config = pConfig;
     }
 
     /** {@inheritDoc} */
@@ -79,7 +84,22 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
         if (serverHandle != null) {
             ret.put("info", serverHandle.toJSONObject(serverManager));
         }
+        ret.put("config", configToJSONObject());
         return ret;
+    }
+
+    private JSONObject configToJSONObject() {
+        JSONObject info = new JSONObject();
+        if (config != null) {
+            for (ConfigKey key : ConfigKey.values()) {
+                if (key.isGlobalConfig()) {
+                    if (config.containsKey(key)) {
+                        info.put(key.getKeyValue(), config.get(key));
+                    }
+                }
+            }
+        }
+        return info;
     }
 
     /** {@inheritDoc} */

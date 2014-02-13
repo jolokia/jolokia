@@ -46,6 +46,7 @@ public final class OptionsAndArgs {
                 "dispatcherClasses", "maxDepth", "maxCollectionSize",
                 "maxObjects", "policyLocation", "mbeanQualifier",
                 "canonicalNaming","includeStackTrace","serializeException",
+                "discoveryEnabled","discoveryAgentUrl","agentId","agentDescription",
                 // Others:
                 "config", "help!"));
 

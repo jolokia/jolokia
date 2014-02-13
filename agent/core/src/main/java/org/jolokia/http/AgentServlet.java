@@ -170,7 +170,7 @@ public class AgentServlet extends HttpServlet {
                 initAgentUrlFromRequest = true;
             } else {
                 initAgentUrlFromRequest = false;
-                backendManager.getAgentDetails().updateAgentParameters(url,100,null);
+                backendManager.getAgentDetails().updateAgentParameters(url,null);
             }
             try {
                 discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
@@ -312,7 +312,7 @@ public class AgentServlet extends HttpServlet {
     // Update the URL in the AgentDetails
     private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
         String url = getBaseUrl(pRequestUrl, pServletPath);
-        backendManager.getAgentDetails().updateAgentParameters(url,100,pIsAuthenticated);
+        backendManager.getAgentDetails().updateAgentParameters(url,pIsAuthenticated);
     }
 
     // Strip off everything unneeded

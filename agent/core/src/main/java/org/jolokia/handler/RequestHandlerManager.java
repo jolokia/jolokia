@@ -19,6 +19,7 @@ package org.jolokia.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.restrictor.Restrictor;
@@ -39,22 +40,34 @@ public class RequestHandlerManager {
     /**
      * Manager and dispatcher for incoming requests
      *
+     * @param pConfig configuration from which to obtain agent meta information
      * @param pConverters string/object converters
      * @param pServerHandle server handle for obtaining MBeanServer
      * @param pRestrictor handler for access restrictions
      */
-    public RequestHandlerManager(Converters pConverters,ServerHandle pServerHandle, Restrictor pRestrictor) {
+    public RequestHandlerManager(Configuration pConfig, Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
         JsonRequestHandler handlers[] = {
                 new ReadHandler(pRestrictor),
                 new WriteHandler(pRestrictor, pConverters),
                 new ExecHandler(pRestrictor, pConverters),
                 new ListHandler(pRestrictor),
-                new VersionHandler(pRestrictor, pServerHandle),
+                new VersionHandler(pConfig,pRestrictor, pServerHandle),
                 new SearchHandler(pRestrictor)
         };
         for (JsonRequestHandler handler : handlers) {
             requestHandlerMap.put(handler.getType(),handler);
         }
+    }
+
+    /**
+     * Manager and dispatcher for incoming requests
+     *
+     * @param pConverters string/object converters
+     * @param pServerHandle server handle for obtaining MBeanServer
+     * @param pRestrictor handler for access restrictions
+     */
+    public RequestHandlerManager(Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
+        this(null,pConverters,pServerHandle,pRestrictor);
     }
 
     /**

@@ -103,7 +103,7 @@ public class JolokiaServer {
     public void start() {
         // URL as configured takes precedence
         String configUrl = config.getJolokiaConfig().get(ConfigKey.DISCOVERY_AGENT_URL);
-        jolokiaHttpHandler.start(lazy,configUrl != null ? configUrl : url,100, config.getAuthenticator() != null);
+        jolokiaHttpHandler.start(lazy,configUrl != null ? configUrl : url, config.getAuthenticator() != null);
 
         if (httpServer != null) {
             // Starting our own server in an own thread group with a fixed name

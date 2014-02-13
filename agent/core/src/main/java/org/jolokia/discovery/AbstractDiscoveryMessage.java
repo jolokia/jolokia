@@ -72,7 +72,7 @@ abstract class AbstractDiscoveryMessage {
         }
     }
 
-        /**
+    /**
      * Enum holding the possible values for the discovery request/response. Note that the
      * name of the enum is used literally in the message and must not be changed.
      */
@@ -83,8 +83,6 @@ abstract class AbstractDiscoveryMessage {
             ID,
             // Agent URL as the agent sees itself
             URL,
-            // How accurate it the URL ? (100: Sure that URL is ok, 50: 50% sure). That's an heuristic value
-            CONFIDENCE,
             // Whether the agent is secured and an authentication is required (0,1). If not given, this info is not known
             SECURED,
             // Vendor of the detected container
@@ -93,8 +91,12 @@ abstract class AbstractDiscoveryMessage {
             SERVER_PRODUCT,
             // Version of the server
             SERVER_VERSION,
-            // Agent version
-            VERSION;
+            // Version of the agent
+            AGENT_VERSION,
+            // The agent id
+            AGENT_ID,
+            // Description of the agent (if any)
+            AGENT_DESCRIPTION;
 
             String asKey() {
                 return this.name().toLowerCase();

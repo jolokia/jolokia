@@ -127,6 +127,4 @@ public class JvmAgentConfig extends JolokiaServerConfig {
             throw new IllegalArgumentException("jolokia: Can not find configuration file " + pFilename,e);
         }
     }
-
-
 }
