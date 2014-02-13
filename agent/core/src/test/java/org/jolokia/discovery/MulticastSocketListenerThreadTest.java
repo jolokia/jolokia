@@ -67,7 +67,7 @@ public class MulticastSocketListenerThreadTest {
             int idCount = 0;
             int urlCount = 0;
             for (DiscoveryIncomingMessage in : discovered) {
-                if (in.getId().equals("test-42")) {
+                if (in.getId() != null && in.getId().equals("test-42")) {
                     idCount++;
                 }
                 if (JOLOKIA_URL.equals(in.getAgentDetails().toJSONObject().get("url"))) {
