@@ -2,6 +2,7 @@ package org.jolokia.discovery;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.*;
@@ -36,7 +37,7 @@ public class DiscoveryMulticastResponderTest {
 
     private class TestAgentsDetailsHolder implements AgentDetailsHolder {
 
-        AgentDetails details = new AgentDetails();
+        AgentDetails details = new AgentDetails(UUID.randomUUID().toString());
 
         public AgentDetails getAgentDetails() {
             return details;

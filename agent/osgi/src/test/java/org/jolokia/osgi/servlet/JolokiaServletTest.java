@@ -98,7 +98,7 @@ public class JolokiaServletTest {
         servlet.init(config);
         assertNull(JolokiaServlet.getCurrentBundleContext());
 
-        LogHandler handler = servlet.createLogHandler(config);
+        LogHandler handler = servlet.createLogHandler(config, true);
         handler.debug("Debug");
         handler.info("Info");
         handler.error("Error",new Exception());

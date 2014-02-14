@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.List;
+import java.util.UUID;
 
 import org.jolokia.Version;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -11,7 +12,7 @@ import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
-import org.testng.annotations.*;
+import org.testng.annotations.Test;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
 import static org.jolokia.discovery.MulticastUtil.sendQueryAndCollectAnswers;
@@ -25,12 +26,14 @@ import static org.testng.Assert.*;
 public class MulticastSocketListenerThreadTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
-    URL url;
+    private URL url;
+    private String id;
 
 
     private MulticastSocketListenerThread startSocketListener() throws IOException, InterruptedException {
         url = new URL(JOLOKIA_URL);
-        final AgentDetails details = new AgentDetails();
+        id = UUID.randomUUID().toString();
+        final AgentDetails details = new AgentDetails(id);
         details.updateAgentParameters(JOLOKIA_URL, false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
@@ -61,20 +64,19 @@ public class MulticastSocketListenerThreadTest {
         try {
             DiscoveryOutgoingMessage out =
                     new DiscoveryOutgoingMessage.Builder(QUERY)
-                            .id("test-42")
                             .build();
             List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
             int idCount = 0;
             int urlCount = 0;
             for (DiscoveryIncomingMessage in : discovered) {
-                if (in.getId() != null && in.getId().equals("test-42")) {
+                AgentDetails agentDetails = in.getAgentDetails();
+                if (agentDetails.getAgentId().equals(id)) {
                     idCount++;
                 }
                 if (JOLOKIA_URL.equals(in.getAgentDetails().toJSONObject().get("url"))) {
                     urlCount++;
                 }
                 assertFalse(in.isQuery());
-                AgentDetails agentDetails = in.getAgentDetails();
                 JSONObject details = agentDetails.toJSONObject();
                 if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
                     assertEquals(details.get("url"), JOLOKIA_URL);

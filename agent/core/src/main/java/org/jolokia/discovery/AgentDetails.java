@@ -40,13 +40,16 @@ public class AgentDetails {
     // Description for the agent
     private String agentDescription;
 
-    public AgentDetails() {
+    public AgentDetails(String pAgentId) {
         agentVersion = Version.getAgentVersion();
+        agentId = pAgentId;
+        if (agentId == null) {
+            throw new IllegalArgumentException("No agent id given");
+        }
     }
 
     public AgentDetails(Configuration pConfig) {
-        this();
-        agentId = pConfig.get(ConfigKey.AGENT_ID);
+        this(pConfig.get(ConfigKey.AGENT_ID));
         agentDescription = pConfig.get(ConfigKey.AGENT_DESCRIPTION);
     }
 
@@ -66,6 +69,9 @@ public class AgentDetails {
         agentVersion = (String) pMsgData.get(AGENT_VERSION);
         agentDescription = (String) pMsgData.get(AGENT_DESCRIPTION);
         agentId = (String) pMsgData.get(AGENT_ID);
+        if (agentId == null) {
+            throw new IllegalArgumentException("No agent id given");
+        }
     }
 
     /**
@@ -84,6 +90,14 @@ public class AgentDetails {
     public void updateAgentParameters(String pUrl, Boolean pSecured) {
         url = pUrl;
         secured = pSecured;
+    }
+
+    /**
+     * Get the ID specific for these agent
+     * @return unique id identifying this agent or null if no ID was given.
+     */
+    public String getAgentId() {
+        return agentId;
     }
 
     /**
@@ -118,5 +132,6 @@ public class AgentDetails {
             pResp.put(pKey.toString().toLowerCase(),pValue);
         }
     }
+
 
 }

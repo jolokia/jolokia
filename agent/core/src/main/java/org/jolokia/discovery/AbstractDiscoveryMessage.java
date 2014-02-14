@@ -20,22 +20,11 @@ abstract class AbstractDiscoveryMessage {
     // Type of the message
     private MessageType type;
 
-    // Id of this message
-    private String id;
-
     // Payload of the message
     private AgentDetails agentDetails;
 
     protected final void setType(MessageType pType) {
         type = pType;
-    }
-
-    protected final void setId(String pId) {
-        id = pId;
-    }
-
-    public String getId() {
-        return id;
     }
 
     protected final void setAgentDetails(AgentDetails pAgentDetails) {
@@ -46,10 +35,13 @@ abstract class AbstractDiscoveryMessage {
         return type == MessageType.QUERY;
     }
 
+    public boolean isResponse() {
+        return type == MessageType.RESPONSE;
+    }
+
     public byte[] getData() {
         JSONObject respond = new JSONObject();
         respond.put(Payload.TYPE.asKey(), type.toString().toLowerCase());
-        respond.put(Payload.ID.asKey(),id);
         if (agentDetails != null) {
             respond.putAll(agentDetails.toJSONObject());
         }
@@ -79,8 +71,6 @@ abstract class AbstractDiscoveryMessage {
     public enum Payload {
             // Type of request (see Message type)
             TYPE,
-            // Message ID
-            ID,
             // Agent URL as the agent sees itself
             URL,
             // Whether the agent is secured and an authentication is required (0,1). If not given, this info is not known
@@ -121,7 +111,6 @@ abstract class AbstractDiscoveryMessage {
     public String toString() {
         return "{" +
                "type=" + type +
-               ",id=" + id +
                ", agentDetails=" + agentDetails +
                '}';
     }

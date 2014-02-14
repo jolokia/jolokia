@@ -12,8 +12,7 @@ import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.*;
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.*;
 import org.json.simple.JSONAware;
 
 /*
@@ -131,7 +130,7 @@ public class AgentServlet extends HttpServlet {
 
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig)}
+     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig, boolean)}
      *
      * @param pServletConfig servlet configuration
      */
@@ -145,7 +144,7 @@ public class AgentServlet extends HttpServlet {
         String logHandlerClass =  config.get(ConfigKey.LOGHANDLER_CLASS);
         logHandler = logHandlerClass != null ?
                 (LogHandler) ClassUtil.newInstance(logHandlerClass) :
-                createLogHandler(pServletConfig);
+                createLogHandler(pServletConfig,Boolean.valueOf(config.get(ConfigKey.DEBUG)));
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -213,12 +212,15 @@ public class AgentServlet extends HttpServlet {
      *
      * @return a default log handler
      * @param pServletConfig servlet config from where to get information to build up the log handler
+     * @param pDebug whether to print out  debug information.
      */
-    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
+    protected LogHandler createLogHandler(ServletConfig pServletConfig, final boolean pDebug) {
         return new LogHandler() {
             /** {@inheritDoc} */
             public void debug(String message) {
-                log(message);
+                if (pDebug) {
+                    log(message);
+                }
             }
 
             /** {@inheritDoc} */
@@ -428,7 +430,7 @@ public class AgentServlet extends HttpServlet {
     // Configuration from the servlet context overrides servlet parameters defined in web.xml
     Configuration initConfig(ServletConfig pConfig) {
         Configuration config = new Configuration(
-                ConfigKey.AGENT_ID,Integer.toHexString(hashCode()) + "-servlet");
+                ConfigKey.AGENT_ID, NetworkUtil.getAgentId(hashCode(),"servlet"));
         // From ServletContext ....
         config.updateGlobalConfiguration(new ServletConfigFacade(pConfig));
         // ... and ServletConfig

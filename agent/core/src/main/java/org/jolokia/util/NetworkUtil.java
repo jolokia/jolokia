@@ -1,5 +1,7 @@
 package org.jolokia.util;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
@@ -154,6 +156,25 @@ public final class NetworkUtil {
             }
         }
         return ret;
+    }
+
+    public static String getAgentId(int objectId, String type) {
+        String selfName = ManagementFactory.getRuntimeMXBean().getName();
+        final int selfPid = Integer.valueOf(selfName.substring(0, selfName.indexOf('@')));
+        String address;
+        try {
+            address = getLocalAddress().getHostAddress();
+        } catch (IOException exp) {
+            address = "local";
+        }
+        return address + "-" + getProcessId() + "-" + Integer.toHexString(objectId) + "-" + type;
+    }
+
+    private static String getProcessId() {
+        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+        final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        final int index = jvmName.indexOf('@');
+        return index < 0 ? jvmName : jvmName.substring(0, index);
     }
 
     // =======================================================================================================

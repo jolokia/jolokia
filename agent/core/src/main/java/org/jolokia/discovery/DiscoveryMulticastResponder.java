@@ -79,7 +79,7 @@ public class DiscoveryMulticastResponder {
                 thread.start();
                 listenerThreads.add(thread);
                 // One thread is enough for now.
-                break;
+                //break;
             }
         }
     }

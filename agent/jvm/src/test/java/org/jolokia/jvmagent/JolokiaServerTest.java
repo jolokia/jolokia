@@ -100,7 +100,6 @@ public class JolokiaServerTest {
 
     // ==================================================================
 
-
     private String getKeystorePath() {
         URL ksURL = this.getClass().getResource("/keystore");
         if (ksURL != null && "file".equalsIgnoreCase(ksURL.getProtocol())) {

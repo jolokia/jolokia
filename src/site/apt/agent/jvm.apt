@@ -1,7 +1,7 @@
 JVM Agent
 
   Jolokia has also a native Java JVM agent. The only dependency is on
-  Sun's JDK 6, which contains a lightweight HTTP Server used for
+  Oracle's JDK 6 or later, which contains a lightweight HTTP Server used for
   exporting the jolokia protocol. This is the most generic agent which can
   instrument <any> Java application using a JDK6. It is suitable for
   situations where the other agents don't fit.

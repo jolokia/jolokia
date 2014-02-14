@@ -18,8 +18,7 @@ package org.jolokia.http;
 
 import java.io.*;
 import java.net.SocketException;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +33,8 @@ import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -122,7 +122,7 @@ public class AgentServletTest {
         config = createMock(ServletConfig.class);
         context = createMock(ServletContext.class);
 
-        HttpTestUtil.prepareServletConfigMock(config,new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
+        HttpTestUtil.prepareServletConfigMock(config, new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
         HttpTestUtil.prepareServletContextMock(context,null);
 
         expect(config.getServletContext()).andReturn(context).anyTimes();
@@ -139,12 +139,12 @@ public class AgentServletTest {
     public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException, InterruptedException {
         checkMulticastAvailable();
         String url = "http://localhost:8080/jolokia";
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url,ConfigKey.DEBUG.getKeyValue(),"true");
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url);
         // Wait listening thread to warm up
         Thread.sleep(1000);
         try {
             JolokiaDiscovery discovery = new JolokiaDiscovery();
-            List<JSONObject> in = discovery.lookupAgents();
+            List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
             for (JSONObject json : in) {
                 if (json.get("url") != null && json.get("url").equals(url)) {
                     return;
@@ -492,7 +492,11 @@ public class AgentServletTest {
         config = createMock(ServletConfig.class);
         context = createMock(ServletContext.class);
 
-        HttpTestUtil.prepareServletConfigMock(config,pInitParams);
+
+        String[] params = pInitParams != null ? Arrays.copyOf(pInitParams,pInitParams.length + 2) : new String[2];
+        params[params.length - 2] = ConfigKey.DEBUG.getKeyValue();
+        params[params.length - 1] = "true";
+        HttpTestUtil.prepareServletConfigMock(config,params);
         HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
 

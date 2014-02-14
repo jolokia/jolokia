@@ -67,7 +67,7 @@ public final class MulticastUtil {
         final List<Future<List<DiscoveryIncomingMessage>>> futures = sendDiscoveryRequests(pOutMsg, pTimeout, pLogHandler);
         return collectIncomingMessages(pTimeout, futures);
     }
-    
+
     // ==============================================================================================================
     // Send requests in parallel threads, return the futures for getting the result
     private static List<Future<List<DiscoveryIncomingMessage>>> sendDiscoveryRequests(DiscoveryOutgoingMessage pOutMsg,
@@ -104,7 +104,8 @@ public final class MulticastUtil {
             try {
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
                 for (DiscoveryIncomingMessage inMsg : inMsgs) {
-                    String id = inMsg.getId();
+                    AgentDetails details = inMsg.getAgentDetails();
+                    String id = details.getAgentId();
                     // There can be multiples answers with the same message id
                     if (!seen.contains(id)) {
                         ret.add(inMsg);

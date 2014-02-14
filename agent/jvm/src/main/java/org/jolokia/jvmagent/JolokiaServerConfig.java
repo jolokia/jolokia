@@ -27,6 +27,7 @@ import java.util.*;
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.util.NetworkUtil;
 
 /**
  * Configuration required for the JolokiaServer
@@ -92,8 +93,7 @@ public class JolokiaServerConfig {
     // Add a unique jolokia id for this agent
     private void addJolokiaId(Map<String, String> pFinalCfg) {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
-            String id = Integer.toHexString(hashCode()) + "-jvm";
-            pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), id);
+            pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), NetworkUtil.getAgentId(hashCode(),"jvm"));
         }
         pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(),"jvm");
     }

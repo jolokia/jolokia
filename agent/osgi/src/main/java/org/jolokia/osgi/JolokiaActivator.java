@@ -9,6 +9,7 @@ import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
@@ -151,7 +152,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         String jolokiaId = config.get(ConfigKey.AGENT_ID.getKeyValue());
         if (jolokiaId == null) {
             config.put(ConfigKey.AGENT_ID.getKeyValue(),
-                       Integer.toHexString(hashCode()) + "-osgi");
+                       NetworkUtil.getAgentId(hashCode(),"-osgi"));
         }
         config.put(ConfigKey.AGENT_TYPE.getKeyValue(),"osgi");
         return config;

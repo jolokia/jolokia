@@ -37,7 +37,7 @@
       url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
       Agent interface</ulink> for linking into any JVM. Under the
       hood it uses an HTTP-Server, which is available on every
-      Oracle/Sun JVM from verion 1.6 upwards.
+      Oracle/Sun JVM from verison 1.6 upwards.
     </para>
     <sidebar>
       The JDK embedded HTTP-Server is not the fastest one (it is used
