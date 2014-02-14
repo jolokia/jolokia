@@ -97,7 +97,7 @@
           All the nifty details can be found in the <a href="reference/html/index.html">reference manual</a>.
         </p>
         <p>
-          The protocol for the discovery mechanism is also <a href="">specified</a> in the reference manual. One of the first clients
+          The protocol for the discovery mechanism is also <a href="reference/html/protocol.html#discovery">specified</a> in the reference manual. One of the first clients
           supporting this discovery mode is <a href="http://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm">Jmx4Perl</a> in its newest version. The Jolokia
           Java client will follow in one of the next releases.
         </p>
