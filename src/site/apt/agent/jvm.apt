@@ -1,16 +1,18 @@
 JVM Agent
 
-  Jolokia has also a native Java JVM agent. The only dependency is on
-  Oracle's JDK 6 or later, which contains a lightweight HTTP Server used for
-  exporting the jolokia protocol. This is the most generic agent which can
+  Another variant is Jolokia's JVM agent which does not need any special container
+  environment. The only dependency is on Oracle's JDK 6 or later as runtime,
+  since it contains a lightweight HTTP Server used for
+  exporting the Jolokia protocol. This agent is the most generic one which can
   instrument <any> Java application using a JDK6. It is suitable for
-  situations where the other agents don't fit.
+  situations where the other agents don't fit. Also, it can be used for dynamically
+  attaching an agent to a running Java process.
 
   For using this agent, the following argument to the Java
   application to instrument has to be given:
 
 -----
-  -javaagent:/path/to/jolokia-jvm-jdk6-<version>-agent.jar
+  -javaagent:/path/to/jolokia-jvm-<version>-agent.jar
 -----
 
   By default, the agent will listen on port 8778, but this can be configured
@@ -34,3 +36,13 @@ JVM Agent
 
   Options are used in the given precedence, the former overwriting
   the later values.
+
+  For attaching the agent dynamically to a running Java process, the following
+  command can be used to get a quick help
+
+----
+  java -jar /path/to/jolokia-jvm-<version>-agent.jar --help
+----
+
+  For more details and usage examples please refer to the
+  {{{../reference/html/agents.html#agents-jvm} reference manual}}.

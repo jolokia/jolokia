@@ -79,6 +79,44 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Find your agents with 1.2.0">
+        <div class="news-date">2014-02-16</div>
+        <p>
+          New year, new release. Ok, it's not the BIG 2.0 which I already somewhat promised. Anyways,
+          another big feature jumped on the 1.x train in the last minute. It is now possible to find agents in your network by sending
+          an UDP packet to the multicast group 239.192.48.84, port 24884. Agents having this discovery mechanism enabled
+          will respond with its meta data including the access URL. This is especially
+          useful for clients who want to provide access to agents without much configuration. I.e.
+          the excellent <a href="http://hawt.io">hawt.io</a> will use it one way or the other. In fact, it was hawt.io
+          which put me <a href="https://github.com/rhuss/jolokia/pull/126">on track</a> for this feature.
+        </p>
+        <p>
+          Discovery is enabled by default for the <a href="reference/html/agents.html#agents-jvm">JVM agent</a>, but not for
+          the <a href="reference/html/agents.html#agents-war">WAR</a> agent.
+          It can be easily enabled for the WAR agent by using servlet init parameters, system properties or environment variables.
+          All the nifty details can be found in the <a href="reference/html/index.html">reference manual</a>.
+        </p>
+        <p>
+          The protocol for the discovery mechanism is also <a href="">specified</a> in the reference manual. One of the first clients
+          supporting this discovery mode is <a href="http://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm">Jmx4Perl</a> in its newest version. The Jolokia
+          Java client will follow in one of the next releases.
+        </p>
+        <p>
+          But you don't need client support for multicast requests if you know already the URL for one agent. Each
+          agent registers a MBean <code>jolokia:type=Discovery</code> which perform the multicast discovery request for
+          you if you trigger the operation <code>lookupAgents</code>. The returned value contains the agent information
+          is described <a href="reference/html/mbeans.html#mbean-discovery">here</a>.
+        </p>
+        <p>
+          This feature has been tested in various environments, but since low level networking can, well, "painful", I would
+          ask you to open an <a href="https://github.com/rhuss/jolokia/issues">issue</a> in case of any problems.
+        </p>
+        <p>
+          Although it has been quiet some time with respect to the shiny new Jolokia 2.0, I'm quite close to a first
+          milestone. All planned features has been implemented in an initial version, what's missing is to finish the heavy
+          refactoring and modularisation of the Jolokia core. More on this later, please stay tuned ...
+        </p>
+      </subsection>
       <subsection name="Tiny 1.1.5">
         <div class="news-date">2013-11-08</div>
         <p>
@@ -412,53 +450,6 @@ jolokia.start(1000);</pre>
           too, although slower than expected. The main focus of the
           next months will to be bring that Javascript JMX application
           on and out. Stay tuned ...
-        </p>
-      </subsection>
-      <subsection name="1.0.3 with CORS support">
-        <div class="news-date">2012-04-11</div>
-        <p>
-          This minor release adds cross-origin resource sharing (<a href="http://www.w3.org/TR/cors/">CORS</a>)
-          support to all Jolokia agents. Cross domain access can be
-          easily restricted with Jolokia's <a
-                href="features/security.html">security setup</a>. The <a
-                href="client/javascript.html">Javascript</a> library already
-          support CORS for most browsers out of the box, for IE8 and
-          larger some special setup is still required. Transparent
-          CORS client support for all browsers will be added to the
-          Jolokia Javascript client in one of the next releases.
-        </p>
-        <p>
-          In addition the following new features were added:
-        </p>
-        <ul>
-          <li><a
-                  href="https://github.com/amdjs/amdjs-api/wiki/AMD">AMD</a>
-            support for jolokia.js and jolokia-simple.js</li>
-          <li>Time based eviction of historical values remembered on
-            the client side, in addition to count based eviction</li>
-          <li>New configuration option <code>httpServiceFilter</code>
-            for the OSGi agent for selection of a specific HttpService
-            to bind to.</li>
-          <li>None-caching headers added to the response</li>
-        </ul>
-        <p>
-          All thdeses changes plus the bug fixes are listed in the <a
-                href="changes-report.html">change log</a>.
-        </p>
-        <p>
-          Starting with this release, bug tracking and release planning
-          switches over to Jolokia's <a
-                href="http://jolokia.jira.com">JIRA</a> instance, kindly
-          donated by the fine folks from <a
-                href="http://www.atlassian.com">Atlassian</a>.
-        </p>
-        <p>
-          Also, there has been some (minor) progress with the new kid in
-          the Chili garden, <a
-                href="https://github.com/rhuss/aji">Ají</a>, a Javascript
-          single-page-application with an MBeanBrowser and a
-          Dashboard. I'm still looking for helping hands, there is
-          quite a lot to do here ;-)
         </p>
       </subsection>
   </section>

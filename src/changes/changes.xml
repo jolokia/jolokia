@@ -23,7 +23,22 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.1.5" description="Release 1.1.5-SNAPSHOT" date="2013-11-08">
+    <release version="1.2.0" description="Release 1.2.0" date="2014-02-14">
+      <action dev="roland" type="add" date="2013-02-14" issue="127">
+        Agents can be configured to answer to discovery multicast request with there URL. This
+        features is enabled by default for the JVM agent, and must enabled for the WAR
+        agent with a configuration option.
+      </action>
+      <action dev="roland" type="add" date="2013-02-14" issue="127">
+        New MBean "jolokia:type=Discovery" for sending multicast request for detecting other agents.
+      </action>
+      <action dev="roland" type="update" date="2013-02-14">
+        "version" command response contains configuration information which differs from the default values. In
+        addition "agentType", "agentDescription" and "agentId" are added as possible configuration
+        options.
+      </action>
+    </release>
+    <release version="1.1.5" description="Release 1.1.5" date="2013-11-08">
       <action dev="roland" type="fix" date="2013-10-14" issue="63">
         Fixed Glassfish detector's lazy initialization of the AMX boot system.
       </action>

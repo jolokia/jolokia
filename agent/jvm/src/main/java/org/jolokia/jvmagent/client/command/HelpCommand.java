@@ -18,9 +18,10 @@ package org.jolokia.jvmagent.client.command;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.jolokia.Version;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
-import org.jolokia.config.ConfigKey;
 
 /**
  * Print out usage information
@@ -98,7 +99,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --serializeException <t|f>     whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
 "    --config <configfile>          Path to a property file from where to read the configuration\n" +
 "    --help                         This help documentation\n" +
-"    --version                      Version of this agent\n" +
+"    --version                      Version of this agent (it's " + Version.getAgentVersion() + " btw :)\n" +
 "\n" +
 "<pid/regexp> can be either a numeric process id or a regular expression. A regular expression is matched\n" +
 "against the processes' names (ignoring case) and must be specific enough to select exactly one process.\n" +

@@ -164,6 +164,25 @@
         <td>Context path of the agent servlet</td>
       </tr>
       <tr>
+        <td>org.jolokia.agentId</td>
+        <td></td>
+        <td>
+          A unique ID for this agent. By default a unique id is
+          calculated. If provided it should be ensured that this id is
+          unique among all agent reachable via multicast requests used
+          by the discovery mechanism. It is recommended not to set
+          this value. 
+        </td>        
+      </tr>
+      <tr>
+        <td>org.jolokia.agentDecription</td>
+        <td></td>
+        <td>
+          An optional description which can be used for clients to
+          present a humand readable label for this agent.
+        </td>        
+      </tr>
+      <tr>
         <td>org.jolokia.dispatcherClasses</td>
         <td></td>
         <td>
@@ -309,6 +328,33 @@
           An optional JSON representation for application specific
           options used by detectors for post-initialization steps. See
           <xref linkend="agent-war-init-params"/> for details. 
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.discoveryEnabled</td>
+        <td>false</td>
+        <td>
+          Is set to <literal>true</literal> then this servlet will
+          listen for multicast request (multicastgroup 239.192.48.84,
+          port 24884). By default this option is disabled in order to
+          avoid conflicts with an JEE standards (though this should't
+          harm anyways). This option can also be switched on with an 
+          environment variable
+          <literal>JOLOKIA_DISOVERY_ENABLED</literal> or the system
+          property <literal>jolokia.discoveryEnabled</literal> set to
+          <literal>true</literal>.
+        </td>
+      </tr>
+      <tr>
+        <td>org.jolokia.discoveryAgentUrl</td>
+        <td></td>
+        <td>
+          Sets the URL to respond for multicast discovery requests. If
+          given, <constant>discoveryEnabled</constant> is set
+          implicetly to true. This URL can also be provied by an
+          environment variable
+          <literal>JOLOKIA_DISCOVERY_URL</literal> or the system
+          property <literal>jolokia.discoveryUrl</literal>
         </td>
       </tr>
     </table>

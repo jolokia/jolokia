@@ -12,3 +12,6 @@ Webarchive (WAR) Agent
 ------
 http://localhost:8080/jolokia
 ------
+
+   Setup and configuration of the WAR agent is explained detailed in
+   the {{{../reference/html/agents.html#agents-war} reference manual}}.
