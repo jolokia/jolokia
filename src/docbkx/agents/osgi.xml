@@ -340,7 +340,7 @@
           avoid conflicts with an JEE standards (though this should't
           harm anyways). This option can also be switched on with an 
           environment variable
-          <literal>JOLOKIA_DISOVERY_ENABLED</literal> or the system
+          <literal>JOLOKIA_DISCOVERY</literal> or the system
           property <literal>jolokia.discoveryEnabled</literal> set to
           <literal>true</literal>.
         </td>

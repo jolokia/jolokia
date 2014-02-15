@@ -52,9 +52,9 @@ class MulticastSocketListenerThread extends Thread {
         address = pHostAddress != null ? pHostAddress : NetworkUtil.getLocalAddressWithMulticast();
         agentDetailsHolder = pAgentDetailsHolder;
         restrictor = pRestrictor;
-        //logHandler = pLogHandler;
+        logHandler = pLogHandler;
         // For debugging, uncomment:
-        logHandler = new LogHandler.StdoutLogHandler(true);
+        //logHandler = new LogHandler.StdoutLogHandler(true);
 
         logHandler.debug(address + "<-- Listening for queries");
         socket = MulticastUtil.newMulticastSocket(address);

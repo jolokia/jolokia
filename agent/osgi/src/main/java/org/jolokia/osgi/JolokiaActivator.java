@@ -152,7 +152,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         String jolokiaId = config.get(ConfigKey.AGENT_ID.getKeyValue());
         if (jolokiaId == null) {
             config.put(ConfigKey.AGENT_ID.getKeyValue(),
-                       NetworkUtil.getAgentId(hashCode(),"-osgi"));
+                       NetworkUtil.getAgentId(hashCode(),"osgi"));
         }
         config.put(ConfigKey.AGENT_TYPE.getKeyValue(),"osgi");
         return config;

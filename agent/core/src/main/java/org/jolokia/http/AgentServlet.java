@@ -163,13 +163,13 @@ public class AgentServlet extends HttpServlet {
     }
 
     private void initDiscoveryMulticast(Configuration pConfig) {
-        if (listenForDiscoveryMcRequests(pConfig)) {
-            String url = findAgentUrl(pConfig);
+        String url = findAgentUrl(pConfig);
+        if (url != null || listenForDiscoveryMcRequests(pConfig)) {
             if (url == null) {
                 initAgentUrlFromRequest = true;
             } else {
                 initAgentUrlFromRequest = false;
-                backendManager.getAgentDetails().updateAgentParameters(url,null);
+                backendManager.getAgentDetails().updateAgentParameters(url, null);
             }
             try {
                 discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
@@ -196,13 +196,9 @@ public class AgentServlet extends HttpServlet {
     // For war agent needs to be switched on
     private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
         // Check for system props, system env and agent config
-        boolean sysProp =
-                System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null ||
-                System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue()) != null;
-        boolean env = System.getenv("JOLOKIA_DISCOVERY_AGENT_URL") != null ||
-                      System.getenv("JOLOKIA_ENABLED") != null;
-        boolean config = pConfig.getAsBoolean(ConfigKey.DISCOVERY_ENABLED) ||
-                         pConfig.get(ConfigKey.DISCOVERY_AGENT_URL) != null;
+        boolean sysProp = System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null;
+        boolean env     = System.getenv("JOLOKIA_DISCOVERY") != null;
+        boolean config  = pConfig.getAsBoolean(ConfigKey.DISCOVERY_ENABLED);
         return sysProp || env || config;
     }
     /**
@@ -284,11 +280,9 @@ public class AgentServlet extends HttpServlet {
             // Check access policy
             requestHandler.checkClientIPAccess(pReq.getRemoteHost(),pReq.getRemoteAddr());
 
-            // Lookup the Agent URL if needed
-            if (initAgentUrlFromRequest) {
-                updateAgentUrl(pReq.getRequestURL().toString(),pReq.getContextPath(),pReq.getAuthType() != null);
-                initAgentUrlFromRequest = false;
-            }
+            // Remember the agent URL upon the first request. Needed for discovery
+            updateAgentUrlIfNeeded(pReq);
+
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
         } catch (Throwable exp) {
@@ -309,6 +303,19 @@ public class AgentServlet extends HttpServlet {
                 sendResponse(pResp, getMimeType(pReq),answer);
             }
         }
+    }
+
+    // Update the agent URL in the agent details if not already done
+    private void updateAgentUrlIfNeeded(HttpServletRequest pReq) {
+        // Lookup the Agent URL if needed
+        if (initAgentUrlFromRequest) {
+            updateAgentUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()), extractServletPath(pReq),pReq.getAuthType() != null);
+            initAgentUrlFromRequest = false;
+        }
+    }
+
+    private String extractServletPath(HttpServletRequest pReq) {
+        return pReq.getRequestURI().substring(0,pReq.getContextPath().length());
     }
 
     // Update the URL in the AgentDetails

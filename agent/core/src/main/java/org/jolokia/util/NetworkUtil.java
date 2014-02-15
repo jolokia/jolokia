@@ -8,6 +8,8 @@ import java.net.*;
 import java.util.*;
 
 /**
+ * Utility class for network related stuff
+ *
  * @author roland
  * @since 05.02.14
  */
@@ -18,7 +20,7 @@ public final class NetworkUtil {
     private static Method supportsMulticast;
 
     static {
-        // Check for JDK metho  d which are available only for JDK6
+        // Check for JDK method  d which are available only for JDK6
         try {
             isUp = NetworkInterface.class.getMethod("isUp", (Class<?>[]) null);
             supportsMulticast = NetworkInterface.class.getMethod("supportsMulticast", (Class<?>[]) null);
@@ -105,6 +107,7 @@ public final class NetworkUtil {
         return null;
     }
 
+
     /**
      * Check, whether multicast is supported at all by at least one interface
      *
@@ -170,11 +173,25 @@ public final class NetworkUtil {
         return address + "-" + getProcessId() + "-" + Integer.toHexString(objectId) + "-" + type;
     }
 
-    private static String getProcessId() {
-        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
-        final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
-        final int index = jvmName.indexOf('@');
-        return index < 0 ? jvmName : jvmName.substring(0, index);
+    /**
+     * Examine the given URL and replace the host with a non-loopback host if possible. It is checked,
+     * whether the port is open as well.
+     *
+     * A replaced host uses the  IP address instead of a (possibly non resolvable) name.
+     *
+     * @param pRequestURL url to examine and to update
+     * @return the 'sane' URL (or the original one if no san
+     */
+    public static String sanitizeLocalUrl(String pRequestURL) {
+        try {
+            URL url = new URL(pRequestURL);
+            String host = url.getHost();
+            InetAddress address = findLocalAddressListeningOnPort(host,url.getPort());
+            return new URL(url.getProtocol(),address.getHostAddress(),url.getPort(),url.getFile()).toExternalForm();
+        } catch (IOException e) {
+            // Best effort, we at least tried it
+            return pRequestURL;
+        }
     }
 
     // =======================================================================================================
@@ -203,6 +220,74 @@ public final class NetworkUtil {
         return true;
     }
 
+    // Check for an non-loopback, local adress listening on the given port
+    private static InetAddress findLocalAddressListeningOnPort(String pHost, int pPort) throws UnknownHostException, SocketException {
+        InetAddress address = InetAddress.getByName(pHost);
+        if (address.isLoopbackAddress()) {
+            // First check local address
+            InetAddress localAddress = getLocalAddress();
+            if (!localAddress.isLoopbackAddress() && isPortOpen(localAddress, pPort)) {
+                return localAddress;
+            }
+
+            // Then try all addresses attache to all interfaces
+            localAddress = getLocalAddressFromNetworkInterfacesListeningOnPort(pPort);
+            if (localAddress != null) {
+                return localAddress;
+            }
+        }
+        return address;
+    }
+
+    private static InetAddress getLocalAddressFromNetworkInterfacesListeningOnPort(int pPort) {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces;
+            networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface nif = networkInterfaces.nextElement();
+                for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements();) {
+                    InetAddress interfaceAddress = addrEnum.nextElement();
+                    if (!interfaceAddress.isLoopbackAddress() && checkMethod(nif, isUp) && isPortOpen(interfaceAddress, pPort)) {
+                        return interfaceAddress;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            return null;
+        }
+        return null;
+    }
+
+    // Check a port by connecting to it. Try only 200ms.
+    private static boolean isPortOpen(InetAddress pAddress, int pPort) {
+        Socket socket = null;
+        try {
+            socket = new Socket();
+            socket.setReuseAddress(true);
+            SocketAddress sa = new InetSocketAddress(pAddress, pPort);
+            socket.connect(sa, 200);
+            return socket.isConnected();
+        } catch (IOException e) {
+            return false;
+        } finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // Best effort. Hate that close throws an IOException, btw. Never saw a real use case for that.
+                }
+            }
+        }
+    }
+
+    // Hack for finding the process id. Used in creating an unique agent id.
+    private static String getProcessId() {
+        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+        final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        final int index = jvmName.indexOf('@');
+        return index < 0 ? jvmName : jvmName.substring(0, index);
+    }
+
     /**
      * Get the local network info as a string
      *
@@ -228,6 +313,9 @@ public final class NetworkUtil {
         }
         return buffer.toString();
     }
+
+    // ==============================================================================================================================================
+    // Dump methods
 
     private static String getAddrInfo(InetAddress pAddr) throws SocketException {
         String ret = pAddr.getHostName() != null ? pAddr.getHostName() + " (" + pAddr.getHostAddress() + ")" : pAddr.getHostAddress();

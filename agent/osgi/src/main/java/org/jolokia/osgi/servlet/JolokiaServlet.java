@@ -110,7 +110,7 @@ public class JolokiaServlet extends AgentServlet {
             // Track logging service
             logTracker = new ServiceTracker(ctx, LogService.class.getName(), null);
             logTracker.open();
-            return new ActivatorLogHandler(logTracker);
+            return new ActivatorLogHandler(logTracker,pDebug);
         } else {
             // Use default log handler
             return super.createLogHandler(pServletConfig, pDebug);
@@ -157,10 +157,12 @@ public class JolokiaServlet extends AgentServlet {
     // it uses simply the servlets log facility
     private final class ActivatorLogHandler implements LogHandler {
 
-        private ServiceTracker logTracker;
+        private final boolean doDebug;
+        private final ServiceTracker logTracker;
 
-        private ActivatorLogHandler(ServiceTracker pLogTracker) {
+        private ActivatorLogHandler(ServiceTracker pLogTracker, boolean pDebug) {
             logTracker = pLogTracker;
+            doDebug = pDebug;
         }
 
         /** {@inheritDoc} */
@@ -178,7 +180,9 @@ public class JolokiaServlet extends AgentServlet {
             if (logService != null) {
                 logService.log(level,message);
             } else {
-                log(message);
+                if (level != LogService.LOG_DEBUG || doDebug) {
+                    log(message);
+                }
             }
         }
 
