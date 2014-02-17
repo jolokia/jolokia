@@ -52,6 +52,7 @@ public class MulticastSocketListenerThreadTest {
         try {
             DiscoveryOutgoingMessage out =
                     new DiscoveryOutgoingMessage.Builder(QUERY)
+                            .agentId(UUID.randomUUID().toString())
                             .build();
             List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
             int idCount = 0;

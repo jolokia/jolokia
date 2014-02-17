@@ -21,6 +21,7 @@ public class DiscoveryMulticastResponderTest {
 
     @Test
     public void simple() throws IOException, InterruptedException {
+        System.out.println("=================================================");
         if (!NetworkUtil.isMulticastSupported()) {
             throw new SkipException("No multicast interface found, skipping test ");
         }
@@ -29,10 +30,12 @@ public class DiscoveryMulticastResponderTest {
                 new DiscoveryMulticastResponder(context);
         responder.start();
         // Warming up
-        Thread.sleep(500);
-        JolokiaDiscovery discovery = new JolokiaDiscovery();
+        Thread.sleep(1000);
+        JolokiaDiscovery discovery = new JolokiaDiscovery("test");
         List<JSONObject> msgs = discovery.lookupAgents();
+        System.out.println("=================================================");
         assertTrue(msgs.size() > 0);
         responder.stop();
+
     }
 }

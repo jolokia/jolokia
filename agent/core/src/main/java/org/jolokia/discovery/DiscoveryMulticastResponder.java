@@ -79,6 +79,7 @@ public class DiscoveryMulticastResponder {
                 thread.shutdown();
             }
         }
+
         listenerThreads.clear();
     }
 }

@@ -65,7 +65,7 @@ public final class MulticastUtil {
                                                                             int pTimeout,
                                                                             LogHandler pLogHandler) throws IOException {
         final List<Future<List<DiscoveryIncomingMessage>>> futures = sendDiscoveryRequests(pOutMsg, pTimeout, pLogHandler);
-        return collectIncomingMessages(pTimeout, futures);
+        return collectIncomingMessages(pTimeout, futures, pLogHandler);
     }
 
     // ==============================================================================================================
@@ -97,7 +97,7 @@ public final class MulticastUtil {
     }
 
     // Collect the incoming messages and filter out duplicates
-    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures) {
+    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures, LogHandler pLogHandler) {
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
         Set<String> seen = new HashSet<String>();
         for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
@@ -115,10 +115,11 @@ public final class MulticastUtil {
             } catch (InterruptedException exp) {
                 // Try next one ...
             } catch (ExecutionException e) {
-                // Didnt worked a given address, which can happen e.g. when multicast is not routed or in other cases
+                // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
                 // throw new IOException("Error while performing a discovery call " + e,e);
+                pLogHandler.debug("--> Exception during lookup: " + e);
             } catch (TimeoutException e) {
-                // Timeout occured while waiting for the results. So we go to the next one ...
+                // Timeout occurred while waiting for the results. So we go to the next one ...
             }
         }
         return ret;
@@ -171,11 +172,8 @@ public final class MulticastUtil {
                         byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
                         DatagramPacket in = new DatagramPacket(buf, buf.length);
                         socket.receive(in);
-                        logHandler.debug(address + "--> Received answer");
-                        DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
-                        if (!inMsg.isQuery()) {
-                            ret.add(inMsg);
-                        }
+                        logHandler.debug(address + "--> Received answer from " + in.getAddress());
+                        addIncomingMessage(ret, in);
                     } while (true); // Leave loop with a SocketTimeoutException in receive()
                 } catch (SocketTimeoutException exp) {
                     logHandler.debug(address + "--> Timeout");
@@ -187,6 +185,17 @@ public final class MulticastUtil {
                 return ret;
             } finally {
                 socket.close();
+            }
+        }
+
+        private void addIncomingMessage(List<DiscoveryIncomingMessage> ret, DatagramPacket in) {
+            try {
+                DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
+                if (!inMsg.isQuery()) {
+                    ret.add(inMsg);
+                }
+            } catch (Exception exp) {
+                logHandler.debug("Invalid incoming package from " + in.getAddress() + "  --> " + exp + ". Ignoring");
             }
         }
     }

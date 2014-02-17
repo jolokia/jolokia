@@ -29,6 +29,7 @@ public class DiscoveryMessageTest {
                 "type", AbstractDiscoveryMessage.MessageType.RESPONSE.toString().toLowerCase(),
                 "blubber","bla",
                 "url","http://localhost:8080/jolokia",
+                "agent_id","test",
                 "secured",false));
         String inS = in.toString();
         assertFalse(inS.contains("blubber"));

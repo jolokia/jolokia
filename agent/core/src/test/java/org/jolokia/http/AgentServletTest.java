@@ -146,7 +146,7 @@ public class AgentServletTest {
         // Wait listening thread to warm up
         Thread.sleep(1000);
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test");
             List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
             for (JSONObject json : in) {
                 if (json.get("url") != null && json.get("url").equals(url)) {
@@ -164,7 +164,7 @@ public class AgentServletTest {
         checkMulticastAvailable();
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test");
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
             // At least one doesnt have an URL (remove this part if a way could be found for getting
@@ -198,6 +198,7 @@ public class AgentServletTest {
             StringBuffer buf = new StringBuffer();
             buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
             expect(request.getRequestURL()).andReturn(buf);
+            expect(request.getRequestURI()).andReturn(buf.toString());
             expect(request.getContextPath()).andReturn("/jolokia");
             expect(request.getAuthType()).andReturn("BASIC");
             replay(request, response);
@@ -206,7 +207,7 @@ public class AgentServletTest {
 
             assertTrue(sw.toString().contains("used"));
 
-            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test");
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
             for (JSONObject json : in) {
@@ -435,6 +436,7 @@ public class AgentServletTest {
     @Test
     public void withException() throws ServletException, IOException {
         servlet = new AgentServlet(new AllowAllRestrictor());
+
         initConfigMocks(new String[] { ConfigKey.DEBUG.getKeyValue(), "true" }, null,"500", IllegalStateException.class);
         replay(config, context);
         servlet.init(config);

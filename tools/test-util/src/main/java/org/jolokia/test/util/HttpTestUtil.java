@@ -105,7 +105,6 @@ public class HttpTestUtil {
                 EasyMock.expect(pContext.getInitParameter(entry.getKey())).andReturn(entry.getValue()).anyTimes();
             }
         }
-
         final Vector paramNames = new Vector(configParams.keySet());
         EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
             public Enumeration answer() throws Throwable {

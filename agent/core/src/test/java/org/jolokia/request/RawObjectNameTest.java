@@ -16,8 +16,7 @@ package org.jolokia.request;
  * limitations under the License.
  */
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

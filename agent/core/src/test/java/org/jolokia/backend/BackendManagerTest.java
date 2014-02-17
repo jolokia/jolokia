@@ -55,6 +55,7 @@ public class BackendManagerTest {
         if (configKeysAndValues.length > 0) {
             builder.config(ConfigKey.DEBUG, "true");
         }
+        builder.config(ConfigKey.AGENT_ID,"test");
         ctx = builder.build();
         return ctx;
     }
@@ -84,7 +85,6 @@ public class BackendManagerTest {
         JSONObject ret = backendManager.handleRequest(req);
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
     }
-
 
    @Test
     public void defaultConfig() {
