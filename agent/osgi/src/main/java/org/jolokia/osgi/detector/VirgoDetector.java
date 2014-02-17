@@ -63,7 +63,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
         private final Map<String, String> extraInfo;
 
         public VirgoServerHandle(String pVersion, Map<String, String> pExtraInfo) {
-            super("Eclipse","Virgo",pVersion,null);
+            super("Eclipse","Virgo",pVersion);
             extraInfo = pExtraInfo;
         }
 

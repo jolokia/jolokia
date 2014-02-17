@@ -7,6 +7,7 @@ import javax.management.*;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 
@@ -86,4 +87,14 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @param pHandle handle to use.
      */
     void setServerHandle(ServerHandle pHandle);
+
+
+    /**
+     * Get the details which specify the current agent. The returned
+     * details should not be kept but instead each time details are needed
+     * this interface should be queried again.
+     *
+     * @return the details for this agent.
+     */
+    AgentDetails getAgentDetails();
 }

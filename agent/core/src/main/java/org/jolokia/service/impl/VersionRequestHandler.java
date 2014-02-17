@@ -1,6 +1,7 @@
 package org.jolokia.service.impl;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.management.JMException;
 
@@ -78,6 +79,8 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
             info.put(handler.getRealm(),rtInfo != null ? rtInfo : new JSONObject());
         }
         ret.put("info",info);
+        ret.put("config", configToJSONObject());
+
         return ret;
     }
 
@@ -92,6 +95,20 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
     }
 
     // ========================================================================
+
+    private JSONObject configToJSONObject() {
+        JSONObject info = new JSONObject();
+        Set<ConfigKey> keys = context.getConfigKeys();
+        for (ConfigKey key : keys) {
+                if (key.isGlobalConfig()) {
+                    info.put(key.getKeyValue(), context.getConfig(key));
+                }
+        }
+        return info;
+    }
+
+
+
     // Not used here
     public String getRealm() {
         return null;

@@ -180,7 +180,7 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object doHandleRequest(MBeanServerExecutor serverManager, R request, Object pPreviousResult)
+    protected Object doHandleRequest(MBeanServerExecutor serverManager, R request, Object pPreviousResult)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return null;
     }

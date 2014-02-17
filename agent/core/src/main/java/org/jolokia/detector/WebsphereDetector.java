@@ -18,13 +18,13 @@ package org.jolokia.detector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.*;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
@@ -71,11 +71,11 @@ public class WebsphereDetector extends AbstractServerDetector {
                 if (date != null) {
                     extraInfo.put("buildDate",date);
                 }
-                return new WebsphereServerHandle(version,null,extraInfo.size() > 0 ? extraInfo : null);
+                return new WebsphereServerHandle(version,extraInfo.size() > 0 ? extraInfo : null);
             }
             return null;
         } else if (isWebsphere) {
-            return new WebsphereServerHandle(isWebsphere6 ? "6" : "7 or 8",null,null);
+            return new WebsphereServerHandle(isWebsphere6 ? "6" : "7 or 8",null);
         }
         return null;
     }
@@ -116,8 +116,8 @@ public class WebsphereDetector extends AbstractServerDetector {
         private Map<String,String> extraInfo;
 
         /** {@inheritDoc} */
-        public WebsphereServerHandle(String pVersion, URL pAgenturl, Map<String, String> pExtrainfo) {
-            super("IBM","websphere", pVersion, pAgenturl);
+        public WebsphereServerHandle(String pVersion, Map<String, String> pExtrainfo) {
+            super("IBM","websphere", pVersion);
             extraInfo = pExtrainfo;
         }
 

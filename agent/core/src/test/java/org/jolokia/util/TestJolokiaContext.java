@@ -16,8 +16,6 @@
 
 package org.jolokia.util;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 
 import javax.management.*;
@@ -26,6 +24,7 @@ import org.jolokia.config.*;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
@@ -43,9 +42,10 @@ public class TestJolokiaContext implements JolokiaContext {
     Configuration config;
     Converters converters;
     ServerHandle handle;
+    private AgentDetails agentDetails;
 
     public TestJolokiaContext() {
-        this(null,null,null,null,null);
+        this(null,null,null,null,null,null);
         services.put(JmxSerializer.class,new TreeSet<JmxSerializer>(Arrays.asList(new Converters())));
     }
 
@@ -53,22 +53,18 @@ public class TestJolokiaContext implements JolokiaContext {
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
                                ServerHandle pHandle,
-                               Map<Class, SortedSet> pServices) {
+                               Map<Class, SortedSet> pServices,
+                               AgentDetails pAgentDetails) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
-        this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler();
+        this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler(true);
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
         this.services = pServices != null ? pServices : new HashMap();
-        try {
-            if (pHandle != null) {
-                handle = pHandle;
-            } else {
-                URL url = new URL("http://localhost/jolokia");
-                handle = new ServerHandle("vendor","product","version",url);
-            }
-        } catch (MalformedURLException e) {}
-//        this.requestDispatchManager = new RequestDispatchManager(
-//                pDispatchers != null ? pDispatchers :
-//                        Arrays.<RequestDispatcher>asList(new LocalRequestDispatcher(this)));
+        this.agentDetails = pAgentDetails != null ? pAgentDetails : new AgentDetails(UUID.randomUUID().toString());
+        if (pHandle != null) {
+            handle = pHandle;
+        } else {
+            handle = new ServerHandle("vendor","product","version");
+        }
         converters = new Converters(0);
     }
 
@@ -101,6 +97,10 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public void setServerHandle(ServerHandle pHandle) {
         handle = pHandle;
+    }
+
+    public AgentDetails getAgentDetails() {
+        return agentDetails;
     }
 
     public void debug(String message) {
@@ -151,11 +151,12 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public static class Builder {
 
-        LogHandler logHandler;
-        Restrictor restrictor;
-        Configuration config;
-        ServerHandle handle;
-        Map<Class,SortedSet> services = new HashMap<Class, SortedSet>();
+        private LogHandler logHandler;
+        private Restrictor restrictor;
+        private Configuration config;
+        private ServerHandle handle;
+        private Map<Class,SortedSet> services = new HashMap<Class, SortedSet>();
+        private AgentDetails agentDetails;
 
         public Builder config(Configuration config) {
             this.config = config;
@@ -182,6 +183,10 @@ public class TestJolokiaContext implements JolokiaContext {
             return this;
         }
 
+        public Builder agentDetails(AgentDetails pAgentDetails) {
+            agentDetails = pAgentDetails;
+            return this;
+        }
         public <T extends JolokiaService> Builder services(Class<T> pType, T ... pServices) {
             SortedSet<T> serviceSet = new TreeSet(Arrays.asList(pServices));
             services.put(pType, serviceSet);
@@ -199,7 +204,8 @@ public class TestJolokiaContext implements JolokiaContext {
                     restrictor,
                     logHandler,
                     handle,
-                    services
+                    services,
+                    agentDetails
             );
         }
 

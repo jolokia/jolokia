@@ -26,6 +26,8 @@ import javax.management.MalformedObjectNameException;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.*;
+import org.jolokia.config.Configuration;
+import org.jolokia.util.*;
 import org.json.simple.*;
 import org.testng.annotations.Test;
 

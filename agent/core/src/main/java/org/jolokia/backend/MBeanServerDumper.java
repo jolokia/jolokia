@@ -63,6 +63,7 @@ final class MBeanServerDumper {
         return ret.toString();
     }
 
+
     private static void appendDomainInfo(StringBuffer pRet, MBeanServer pServer, String pDomain) {
         try {
             pRet.append("         == ").append(pDomain).append("\n");

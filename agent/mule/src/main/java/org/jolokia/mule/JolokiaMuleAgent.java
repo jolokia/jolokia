@@ -1,8 +1,8 @@
 package org.jolokia.mule;
 
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
+import java.io.IOException;
 
+import org.jolokia.util.NetworkUtil;
 import org.mule.AbstractAgent;
 import org.mule.api.MuleException;
 import org.mule.api.lifecycle.*;
@@ -81,9 +81,9 @@ public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
         String hostDescr = host;
         try {
             if (hostDescr == null) {
-                hostDescr = Inet4Address.getLocalHost().getHostName();
+                hostDescr = NetworkUtil.getLocalAddress().getHostName();
             }
-        } catch (UnknownHostException e) {
+        } catch (IOException e) {
             hostDescr = "localhost";
         }
         return "Jolokia Agent: http://" + hostDescr + ":" + getPort() + "/jolokia";

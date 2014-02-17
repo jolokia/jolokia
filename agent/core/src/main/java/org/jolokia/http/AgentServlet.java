@@ -1,6 +1,7 @@
 package org.jolokia.http;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
@@ -9,14 +10,14 @@ import javax.servlet.http.*;
 
 import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.config.*;
+import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaServiceManager;
 import org.jolokia.service.impl.ClasspathServiceCreator;
 import org.jolokia.service.impl.JolokiaServiceManagerImpl;
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.*;
 import org.json.simple.JSONAware;
 
 /*
@@ -65,6 +66,15 @@ public class AgentServlet extends HttpServlet {
     // The Jolokia service manager
     private transient JolokiaServiceManager serviceManager;
 
+    // Listen for discovery request (if switched on)
+    private DiscoveryMulticastResponder discoveryMulticastResponder;
+
+    // If discovery multicast is enabled and URL should be initialized by request
+    private boolean initAgentUrlFromRequest = false;
+
+    // context for this servlet
+    private JolokiaContext jolokiaContext;
+
     /**
      * No argument constructor, used e.g. by an servlet
      * descriptor when creating the servlet out of web.xml
@@ -107,13 +117,16 @@ public class AgentServlet extends HttpServlet {
         initServiceManager(pServletConfig, serviceManager);
 
         // Start it up ....
-        JolokiaContext ctx = serviceManager.start();
-        requestHandler = new HttpRequestHandler(ctx, new RequestDispatcherImpl(ctx));
+        jolokiaContext = serviceManager.start();
+        requestHandler = new HttpRequestHandler(jolokiaContext, new RequestDispatcherImpl(jolokiaContext));
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
+   
+        initDiscoveryMulticast();
     }
+
 
     /**
      * Initialize services and register service factoris
@@ -159,8 +172,6 @@ public class AgentServlet extends HttpServlet {
                 (LogHandler) ClassUtil.newInstance(logHandlerClass) :
                 new ServletLogHandler(Boolean.parseBoolean(pConfig.getConfig(ConfigKey.DEBUG)));
     }
-
-
     /**
      * Create a restrictor to use. By default this methods returns the restrictor given in the
      * constructor or does a lookup for a policy fule,
@@ -174,6 +185,48 @@ public class AgentServlet extends HttpServlet {
                 PolicyRestrictorFactory.createRestrictor(pConfig.getConfig(ConfigKey.POLICY_LOCATION), pLogHandler);
     }
 
+    // ==============================================================================================
+
+    private void initDiscoveryMulticast() {
+        String url = findAgentUrl(jolokiaContext);
+        if (url != null || listenForDiscoveryMcRequests(jolokiaContext)) {
+            if (url == null) {
+                initAgentUrlFromRequest = true;
+            } else {
+                initAgentUrlFromRequest = false;
+                jolokiaContext.getAgentDetails().updateAgentParameters(url, null);
+            }
+            try {
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(jolokiaContext);
+                discoveryMulticastResponder.start();
+            } catch (IOException e) {
+                jolokiaContext.error("Cannot start discovery multicast handler: " + e, e);
+            }
+        }
+    }
+
+    // Try to find an URL for system props or config
+    private String findAgentUrl(JolokiaContext pContext) {
+        // System property has precedence
+        String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue());
+        if (url == null) {
+            url = System.getenv("JOLOKIA_DISCOVERY_AGENT_URL");
+            if (url == null) {
+                url = pContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
+            }
+        }
+        return url;
+    }
+
+    // For war agent needs to be switched on
+    private boolean listenForDiscoveryMcRequests(JolokiaContext pContext) {
+        // Check for system props, system env and agent config
+        boolean sysProp = System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null;
+        boolean env     = System.getenv("JOLOKIA_DISCOVERY") != null;
+        boolean config  = Boolean.parseBoolean(pContext.getConfig(ConfigKey.DISCOVERY_ENABLED));
+        return sysProp || env || config;
+    }
+
     // A loghandler using a servlets log facilities
     private final class ServletLogHandler implements LogHandler {
 
@@ -185,6 +238,7 @@ public class AgentServlet extends HttpServlet {
 
         /** {@inheritDoc} */
         public void debug(String message) {
+            
             log(message);
         }
 
@@ -208,7 +262,10 @@ public class AgentServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     public void destroy() {
-        serviceManager.stop();
+        if (discoveryMulticastResponder != null) {
+            discoveryMulticastResponder.stop();
+            discoveryMulticastResponder = null;
+        }
         super.destroy();
     }
 
@@ -250,6 +307,9 @@ public class AgentServlet extends HttpServlet {
             // Check access policy
             requestHandler.checkClientIPAccess(pReq.getRemoteHost(),pReq.getRemoteAddr());
 
+            // Remember the agent URL upon the first request. Needed for discovery
+            updateAgentUrlIfNeeded(pReq);
+
             // Dispatch for the proper HTTP request method
             json = pReqHandler.handleRequest(pReq,pResp);
         } catch (Throwable exp) {
@@ -272,11 +332,67 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
+
+    // Update the agent URL in the agent details if not already done
+    private void updateAgentUrlIfNeeded(HttpServletRequest pReq) {
+        // Lookup the Agent URL if needed
+        if (initAgentUrlFromRequest) {
+            updateAgentUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()), extractServletPath(pReq),pReq.getAuthType() != null);
+            initAgentUrlFromRequest = false;
+        }
+    }
+
+    // Update the URL in the AgentDetails
+    private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
+        String url = getBaseUrl(pRequestUrl, pServletPath);
+        jolokiaContext.getAgentDetails().updateAgentParameters(url,pIsAuthenticated);
+    }
+
+    // Strip off everything unneeded
+    private String getBaseUrl(String pUrl, String pServletPath) {
+        String sUrl;
+        try {
+            URL url = new URL(pUrl);
+            String host = getIpIfPossible(url.getHost());
+            sUrl = new URL(url.getProtocol(),host,url.getPort(),pServletPath).toExternalForm();
+        } catch (MalformedURLException exp) {
+            sUrl = plainReplacement(pUrl, pServletPath);
+        }
+        return sUrl;
+    }
+
+    // Check for an IP, since this seems to be safer to return then a plain name
+    private String getIpIfPossible(String pHost) {
+        try {
+            InetAddress address = InetAddress.getByName(pHost);
+            return address.getHostAddress();
+        } catch (UnknownHostException e) {
+            return pHost;
+        }
+    }
+
+    // Fallback used if URL creation didnt work
+    private String plainReplacement(String pUrl, String pServletPath) {
+        int idx = pUrl.lastIndexOf(pServletPath);
+        String url;
+        if (idx != -1) {
+            url = pUrl.substring(0,idx) + pServletPath;
+        } else {
+            url = pUrl;
+        }
+        return url;
+    }
+
+    // Check the proper servlet path
+    private String extractServletPath(HttpServletRequest pReq) {
+        return pReq.getRequestURI().substring(0,pReq.getContextPath().length());
+    }
+
     // Set an appropriate CORS header if requested and if allowed
     private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
         String origin = requestHandler.extractCorsOrigin(pReq.getHeader("Origin"));
         if (origin != null) {
-            pResp.setHeader("Access-Control-Allow-Origin", origin);
+            pResp.setHeader("Access-Control-Allow-Origin",origin);
             pResp.setHeader("Access-Control-Allow-Credentials","true");
         }
     }
@@ -300,7 +416,6 @@ public class AgentServlet extends HttpServlet {
          */
         JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                 throws IOException;
-
     }
 
     // factory method for POST request handler
@@ -315,7 +430,7 @@ public class AgentServlet extends HttpServlet {
              }
         };
     }
-
+    
     // factory method for GET request handler
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {

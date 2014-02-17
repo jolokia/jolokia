@@ -17,7 +17,8 @@ package org.jolokia.http;
  */
 
 import java.io.*;
-import java.util.Vector;
+import java.net.SocketException;
+import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -27,10 +28,16 @@ import org.easymock.EasyMock;
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.*;
 import org.jolokia.config.Configuration;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
-import org.testng.annotations.*;
+import org.jolokia.util.NetworkUtil;
+import org.json.simple.JSONObject;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
@@ -118,7 +125,7 @@ public class AgentServletTest {
         config = createMock(ServletConfig.class);
         context = createMock(ServletContext.class);
 
-        HttpTestUtil.prepareServletConfigMock(config,new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
+        HttpTestUtil.prepareServletConfigMock(config, new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
         HttpTestUtil.prepareServletContextMock(context,null);
 
         expect(config.getServletContext()).andReturn(context).anyTimes();
@@ -129,6 +136,89 @@ public class AgentServletTest {
         servlet.destroy();
 
         assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    @Test
+    public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException, InterruptedException {
+        checkMulticastAvailable();
+        String url = "http://localhost:8080/jolokia";
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url);
+        // Wait listening thread to warm up
+        Thread.sleep(1000);
+        try {
+            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
+            for (JSONObject json : in) {
+                if (json.get("url") != null && json.get("url").equals(url)) {
+                    return;
+                }
+            }
+            fail("No agent found");
+        } finally {
+            servlet.destroy();
+        }
+    }
+
+    @Test
+    public void initWithAgentDiscoveryAndUrlLookup() throws ServletException, IOException {
+        checkMulticastAvailable();
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
+        try {
+            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            List<JSONObject> in = discovery.lookupAgents();
+            assertTrue(in.size() > 0);
+            // At least one doesnt have an URL (remove this part if a way could be found for getting
+            // to the URL
+            for (JSONObject json : in) {
+                if (json.get("url") == null) {
+                    return;
+                }
+            }
+            fail("Every message has an URL");
+        } finally {
+            servlet.destroy();
+        }
+    }
+
+    private void checkMulticastAvailable() throws SocketException {
+        if (!NetworkUtil.isMulticastSupported()) {
+            throw new SkipException("No multicast interface found, skipping test ");
+        }
+    }
+
+    @Test
+    public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException {
+        checkMulticastAvailable();
+        prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
+        try {
+            StringWriter sw = initRequestResponseMocks();
+            expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+            expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+            String url = "http://pirx:9876/jolokia";
+            StringBuffer buf = new StringBuffer();
+            buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+            expect(request.getRequestURL()).andReturn(buf);
+            expect(request.getContextPath()).andReturn("/jolokia");
+            expect(request.getAuthType()).andReturn("BASIC");
+            replay(request, response);
+
+            servlet.doGet(request, response);
+
+            assertTrue(sw.toString().contains("used"));
+
+            JolokiaDiscovery discovery = new JolokiaDiscovery();
+            List<JSONObject> in = discovery.lookupAgents();
+            assertTrue(in.size() > 0);
+            for (JSONObject json : in) {
+                if (json.get("url") != null && json.get("url").equals(url)) {
+                    assertTrue((Boolean) json.get("secured"));
+                    return;
+                }
+            }
+            fail("Failed, because no message had an URL");
+        } finally {
+            servlet.destroy();
+        }
     }
 
     public static class CustomLogHandler implements LogHandler {
@@ -401,7 +491,7 @@ public class AgentServletTest {
         TestDetector.reset();
     }
     
-    @AfterMethod
+    //@AfterMethod
     public void verifyMocks() {
 //        verify(config, context, request, response);
     }
@@ -411,7 +501,11 @@ public class AgentServletTest {
         config = createMock(ServletConfig.class);
         context = createMock(ServletContext.class);
 
-        HttpTestUtil.prepareServletConfigMock(config,pInitParams);
+
+        String[] params = pInitParams != null ? Arrays.copyOf(pInitParams,pInitParams.length + 2) : new String[2];
+        params[params.length - 2] = ConfigKey.DEBUG.getKeyValue();
+        params[params.length - 1] = "true";
+        HttpTestUtil.prepareServletConfigMock(config,params);
         HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
         expect(config.getServletContext()).andReturn(context).anyTimes();
@@ -458,9 +552,9 @@ public class AgentServletTest {
         expect(request.getInputStream()).andReturn(is);
     }
 
-    private void prepareStandardInitialisation() throws ServletException {
+    private void prepareStandardInitialisation(String ... params) throws ServletException {
         servlet = new AgentServlet(new AllowAllRestrictor());
-        initConfigMocks(null, null,"custom access", null);
+        initConfigMocks(params.length > 0 ? params : null, null,"custom access", null);
         replay(config, context);
         servlet.init(config);
     }

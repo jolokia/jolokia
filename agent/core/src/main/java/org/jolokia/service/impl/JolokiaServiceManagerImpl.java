@@ -24,15 +24,21 @@ import org.jolokia.backend.MBeanRegistry;
 import org.jolokia.backend.dispatcher.RequestHandler;
 import org.jolokia.config.Configuration;
 import org.jolokia.detector.ServerDetector;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;
 
 /**
+ * The service manager for handling all the service organisation stuff.
+ *
  * @author roland
  * @since 28.03.13
  */
 public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
+
+    // Details of this agent
+    private final AgentDetails agentDetails;
 
     // Overall configuration
     private Configuration configuration;
@@ -77,6 +83,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         logHandler = pLogHandler;
         restrictor = pRestrictor;
         isInitialized = false;
+        agentDetails = new AgentDetails(pConfig);
         serviceLookups = new ArrayList<JolokiaServiceLookup>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
         staticLowServices = new HashMap<Class<? extends JolokiaService>, JolokiaService>();
@@ -232,10 +239,18 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /**
+     * Return the details of this agent
+     * @return the nifty details
+     */
+    public AgentDetails getAgentDetails() {
+        return agentDetails;
+    }
+
+    /**
      * Register a MBean under a certain name to the platform MBeanServer.
      *
      * This method delegates to the {@link MBeanRegistry}.
-     * 
+     *
      * @param pMBean MBean to register
      * @param pOptionalName optional name under which the bean should be registered. If not provided,
      * it depends on whether the MBean to register implements {@link javax.management.MBeanRegistration} or

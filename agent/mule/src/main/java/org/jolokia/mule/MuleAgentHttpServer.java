@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jolokia.http.AgentServlet;
+import org.jolokia.util.NetworkUtil;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.*;
@@ -151,6 +152,8 @@ public class MuleAgentHttpServer {
         ret.put("maxDepth","" + pConfig.getMaxDepth());
         ret.put("maxObjects", "" + pConfig.getMaxObjects());
         ret.put("debug","" + pConfig.isDebug());
+        ret.put("agentType","mule");
+        ret.put("agentId", NetworkUtil.getAgentId(hashCode(),"mule"));
         return ret;
     }
 

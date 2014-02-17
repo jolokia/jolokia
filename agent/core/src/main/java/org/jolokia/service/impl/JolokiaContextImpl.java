@@ -8,6 +8,7 @@ import javax.management.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.detector.ServerHandle;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaService;
@@ -53,6 +54,13 @@ public class JolokiaContextImpl implements JolokiaContext {
     /** {@inheritDoc} */
     public void setServerHandle(ServerHandle pServerHandle) {
         serverHandle = pServerHandle;
+        AgentDetails details = getAgentDetails();
+        details.setServerInfo(pServerHandle.getVendor(),pServerHandle.getProduct(),pServerHandle.getVersion());
+    }
+
+    /** {@inheritDoc} */
+    public AgentDetails getAgentDetails() {
+        return serviceManager.getAgentDetails();
     }
 
     /** {@inheritDoc} */

@@ -53,14 +53,21 @@
     "status":200,
     "request":{"type":"version"},
     "value":{
-              "protocol":"4.0",
-              "agent":"0.80",
+              "protocol":"7.1",
+              "agent":"1.2.0",
+              "config": {
+                 "agentDescription": "Servicemix ESB",
+                 "agentId": "EF87BE-jvm",
+                 "agentType": "jvm",
+                 "serializeException": "false"
+              },
               "info": {
-                 product: "glassfish",
-                 vendor": "Sun",
-                 extraInfo: {
-                    amxBooted: false
-                 }
+                 "product": "glassfish",
+                 "vendor": "Oracle",
+                 "version": "4.0",
+                 "extraInfo": {
+                    "amxBooted": false
+                 },
              }
  }]]></programlisting>
   </section>

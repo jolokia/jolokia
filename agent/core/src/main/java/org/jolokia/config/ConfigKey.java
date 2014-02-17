@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Enumeration defining the various configuration constant names which
  * can be used to configure the agent globally (e.g. in web.xml) or
- * as proccessing parameters (e.g. as query params).
+ * as processing parameters (e.g. as query params).
  *
  * @author roland
  * @since Jan 1, 2010
@@ -139,18 +139,30 @@ public enum ConfigKey {
      */
     PATH_QUERY_PARAM("p",false,true),
 
+    /**
+     * Whether to enable listening and responding to discovery multicast requests
+     * for discovering agent details.
+     */
+    DISCOVERY_ENABLED("discoveryEnabled",true,false),
+
+    /**
+     * Specify the agent URL to return for an discovery multicast request. If this option
+     * is given {@link #DISCOVERY_ENABLED} is set to <code>true</code> automatically.
+     */
+    DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 
     /**
      *  User for authentication purposes. Used by OSGi and JDK agent.
      */
-    USER("user", false, true),
+    USER("user", true, false),
 
     /**
      *  Password for authentication purposes. Used by OSGi and JDK agent
      */
-    PASSWORD("password", false, true),
+    PASSWORD("password", true, false),
 
     /**
      * Custom authenticator to be used instead of default user/password one
@@ -186,7 +198,7 @@ public enum ConfigKey {
      * <p>Note this will be combined with the objectClass filter for HttpService with
      * the and (&amp;) operator.</p>
      */
-    HTTP_SERVICE_FILTER("httpServiceFilter",true,false,""),
+    HTTP_SERVICE_FILTER("httpServiceFilter",true,false),
 
     /**
      * Extra options passed to a server handle after it has been detected. The value
@@ -205,20 +217,34 @@ public enum ConfigKey {
     DETECTOR_OPTIONS("detectorOptions",true, false),
 
     /**
+     * The ID to uniquely identify this agent within a JVM. There
+     * can be multiple agents registered a JVM. This id is e.g. used to
+     * uniquely create MBean names.
+     */
+    AGENT_ID("agentId", true, false),
+
+    /**
+     * The agent type holds the information which kind of agent (war,jvm,osgi,mule)
+     * is in use. This configuration cannot be set from the outside but is
+     * written by the agent itself
+     */
+    AGENT_TYPE("agentType", true, false),
+
+    /**
+     * A description which can be used to describe the agent further. Typically
+     * this can be used by clients to provide additional information to
+     * the user.
+     */
+    AGENT_DESCRIPTION("agentDescription",true,false),
+
+    /**
      * Set to true if a lazy detection is required, i.e. the detection will happen during the first request.
      * This can be set in order to avoid a missed detection because of the start-up order of the
      * Jolokia agent and the instrumented server. I.e. the JVM Agent when configured for attaching during startup
      * uses this flag to delay the detection. This options is mostly of internal use and should not necessarily
      * used otherwise.
      */
-    LAZY_SERVER_DETECTION("lazyServerDetection", true, false, Constants.FALSE),
-
-    /**
-     * The ID to uniquely identify this agent within a JVM. There
-     * can be multiple agents registered a JVM. This id is e.g. used to
-     * uniquely create MBean names.
-     */
-    AGENT_ID("agentId", true, false);
+    LAZY_SERVER_DETECTION("lazyServerDetection", true, false, Constants.FALSE);
 
     private String  key;
     private String  defaultValue;

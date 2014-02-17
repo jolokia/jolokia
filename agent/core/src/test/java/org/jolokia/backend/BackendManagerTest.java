@@ -21,7 +21,8 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.backend.dispatcher.*;
+import org.jolokia.backend.dispatcher.AbstractRequestHandler;
+import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.Converters;
 import org.jolokia.converter.JmxSerializer;
@@ -30,7 +31,7 @@ import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.*;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -44,6 +45,8 @@ import static org.testng.Assert.*;
 public class BackendManagerTest {
 
     private TestJolokiaContext ctx;
+
+    private LogHandler log = new LogHandler.StdoutLogHandler(true);
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
         TestJolokiaContext.Builder builder =
@@ -75,7 +78,6 @@ public class BackendManagerTest {
     @Test
     public void lazyInit() throws JMException, IOException {
         BackendManager backendManager = createBackendManager(new Object[0]);
-
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -83,7 +85,8 @@ public class BackendManagerTest {
         assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
     }
 
-    @Test
+
+   @Test
     public void defaultConfig() {
         BackendManager backendManager = createBackendManager(new Object[] {  ConfigKey.DEBUG_MAX_ENTRIES,"blabal" });
     }
@@ -116,7 +119,7 @@ public class BackendManagerTest {
 
     // =========================================================================================
 
-    static class RequestHandlerTest extends AbstractRequestHandler {
+static class RequestHandlerTest extends AbstractRequestHandler {
 
         static boolean called = false;
 

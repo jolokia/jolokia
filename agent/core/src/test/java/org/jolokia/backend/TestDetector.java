@@ -57,7 +57,7 @@ public class TestDetector extends AbstractJolokiaService<ServerDetector> impleme
             throw new RuntimeException();
         } else if (nr == 3 && !fallThrough) {
             // Break detector chain
-            return new ServerHandle(null,null,null,null);
+            return ServerHandle.NULL_SERVER_HANDLE;
         } else {
             return null;
         }

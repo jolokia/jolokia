@@ -117,7 +117,7 @@ public class JolokiaServlet extends AgentServlet {
             return new ActivatorLogHandler(logTracker,Boolean.parseBoolean(pConfiguration.getConfig(ConfigKey.DEBUG)));
         } else {
             // Use default log handler
-            return super.createLogHandler(pServletConfig, pConfiguration);
+            return super.createLogHandler(pServletConfig,pConfiguration);
         }
     }
 
@@ -199,7 +199,9 @@ public class JolokiaServlet extends AgentServlet {
             if (logService != null) {
                 logService.log(level,message);
             } else {
-                log(message);
+                if (level != LogService.LOG_DEBUG || debug) {
+                    log(message);
+                }
             }
         }
 

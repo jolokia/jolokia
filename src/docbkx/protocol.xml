@@ -1163,6 +1163,188 @@
       </para>
     </section>
     
+    <section id="discovery">
+      <title>Agent Discovery</title>
+      <para>
+        Jolokia agents are able to respond to certain multicast
+        requests in order to allow clients to detect automatically
+        connection parameters. The agent URL to expose can be either
+        manually configured for an agent or an agent can try to detect
+        its URL automatically. This works fine for the JVM agent, for
+        the WAR agent it only works after the first HTTP request has
+        been processed by the agent. Due to limitations of the Servlet
+        API the agent servlet has no clue about its own URL until this
+        first request, which contains the request URL. Of course, the
+        URL obtained that way can be bogus as well, since the agent
+        might hide behind a proxy, too. So, if in doubt you should
+        configure the agent URL from outside to allow external clients
+        to be discovered. The configuration options for enabling
+        multicast requests are described in the <xref
+        linkend="agent-jvm-config">JVM</xref> and <xref
+        linkend="agent-war-init-params">WAR</xref> agent configuration 
+        sections.         
+      </para>
+      <para>
+        A agent which is enabled for multicast discovery will only
+        respond to a multicast request if the <xref
+        linkend="security-policy">restrictor</xref> allows 
+        connections from the source IP. Otherwise a multicast request
+        will be simply ignored. For example, if you have configured
+        your agent to only allow request from a central monitoring
+        host, only this host is able to detect these agents. Beside
+        security aspects it wouldn't make sense to expose the URL as
+        any other host is not able to connect anyways.
+      </para>
+      <para>
+        Starting with version 1.2.0 the Jolokia JVM agent has this
+        discovery feature enabled by default which can be switched off
+        via <literal>--discoveryEnabled=true</literal> command line parameter or the
+        corresponding configuration option. For the WAR agent and OSGi
+        agents this feature is switched off by default since auto
+        detection doesn't work always. It can be enabled with the init
+        parameter <literal>discoveryEnabled</literal> (in which case the auto discovery
+        described above is enabled) or better with <literal>discoveryAgentUrl</literal>
+        with the URL. Alternatively, a system property can be used
+        with a <literal>jolokia.</literal> prefix
+        (e.g. <literal>jolokia.discoveryEnabled</literal>). More on the configuration
+        options can be found in the agent's configuration sections.
+      </para>
+      <para>
+        For sending a multicast request discovery message, an UDP
+        message should be send to the address <literal>239.192.48.84</literal>, port
+        <literal>24884</literal> which contains a JSON message encoded in UTF-8 with
+        the following format 
+      </para>      
+      <programlisting><![CDATA[
+  {
+    "type": "query"
+  }]]></programlisting>
+      <para>
+        Any agent enabled for disovery will respond to requestor on the same socket with an answer which looks like 
+      </para>
+      <programlisting><![CDATA[
+  {
+    "type": "response",
+    "agent_description" : "Atlantis Tomcat",
+    "agent_id" : "10.9.11.18-58613-81b087d-servlet",
+    "url": "http://10.9.11.25:8778/jolokia",
+    "server_vendor" : "Apache", 
+    "server_product" : "Tomcat",
+    "server_version" : "7.0.35"
+  }]]></programlisting>      
+      <para>
+        The response itself is a JSON object and is restricted to 8192
+        bytes maximum. The request type is either
+        <constant>query</constant> or <constant>response</constant>. A
+        <constant>query</constant> request is sent via multicast by an
+        interested client and each agent responds with a response of
+        type <constant>response</constant>.  Query requests contain
+        only the type as property. Responses are sent back to the
+        address and port of the sender of the query request.
+      </para>
+      <para>
+        Please note, that IPv6 is currently not supported yet but likely
+        in the future.
+      </para>
+      <table id="discovery-response">
+      <title>Response properties</title>
+      <thead>
+        <tr>
+          <td>Property</td>
+          <td>Description</td>
+          <td>Example</td>
+        </tr>        
+      </thead>
+      <tr>
+        <td><constant>type</constant></td>
+        <td>
+          Request type, either <constant>query</constant> or
+          <constant>response</constant>. 
+        </td>
+        <td>
+          <constant>query</constant> or <constant>response</constant>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>agent_id</constant></td>
+        <td>
+          Each agent has a unique id which can be either provided
+          during startup of the agent in form of a configuration
+          parameter or being autodetected. If autodected, the id has
+          several parts: The IP, the process id, hashcode of the agent
+          and its type. This field will be always provided.
+        </td>
+        <td>
+          10.9.11.87-23455-9184ef-osgi
+        </td>
+      </tr>
+      <tr>
+        <td><constant>agent_description</constant></td>
+        <td>
+          An optional description which can be used as a UI label if
+          given. 
+        </td>
+        <td>
+          ServiceMix ESB
+        </td>
+      </tr>
+      <tr>
+        <td><constant>url</constant></td>
+        <td>
+          The URL how this agent can be contacted. This URL is
+          typically autodetected. For the JVM agent it should be
+          highly accurate. For the servlet based agents, it
+          depends. If configured via an initialisation parameter this
+          URL is used. If autodetected it is taken from the first HTTP
+          request processed by the servlet. Hence no URL is available
+          until this first request was processed. This property might
+          be empty.
+        </td>
+        <td>
+          http://10.9.11.87:8080/jolokia
+        </td>
+      </tr>
+      <tr>
+        <td><constant>secured</constant></td>
+        <td>
+          Whether the agent was configured for authentication or not. 
+        </td>
+        <td>
+          false
+        </td>
+      </tr>
+      <tr>
+        <td><constant>server_vendor</constant></td>
+        <td>
+          The vendor of the container the agent is running in. This
+          field is included if it could be automatically detected.
+        </td>
+        <td>
+          Apache
+        </td>
+      </tr>
+      <tr>
+        <td><constant>server_product</constant></td>
+        <td>
+          The container product if detected
+        </td>
+        <td>
+          tomcat
+        </td>
+      </tr>
+      <tr>
+        <td><constant>server_version</constant></td>
+        <td>
+          The container's version (if detected)
+        </td>
+        <td>
+          7.0.50
+        </td>
+      </tr>
+           </table>
+
+    </section>
+
     <section id="versions">
       <title>Jolokia protocol versions</title>
       <para>
@@ -1171,9 +1353,19 @@
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
-        protocol version <emphasis role="bold">7.0</emphasis>
+        protocol version <emphasis role="bold">7.1</emphasis>.
       </para>
       <variablelist>
+        <varlistentry>
+          <term><emphasis role="bold">7.1</emphasis> (since 1.2.0)</term>
+          <listitem>
+            <para>
+              The <literal>version</literal> command returns now the configuration
+              global information as well with the key <code>config</code> in the
+              returned value.
+            </para>
+          </listitem>
+        </varlistentry>
         <varlistentry>
           <term><emphasis role="bold">7.0</emphasis> (since 1.1.0)</term>
           <listitem>

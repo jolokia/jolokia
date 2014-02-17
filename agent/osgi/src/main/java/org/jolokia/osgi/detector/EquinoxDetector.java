@@ -42,7 +42,7 @@ public class EquinoxDetector extends AbstractOsgiServerDetector {
         if (checkSystemBundleForSymbolicName("org.eclipse.osgi")) {
             String version = getSystemBundleVersion();
             version = version.replaceFirst("\\.v\\d+$","");
-            return new ServerHandle("Eclipse","equinox",version,null);
+            return new ServerHandle("Eclipse","equinox",version);
         } else {
             return null;
         }

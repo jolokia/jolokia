@@ -18,18 +18,19 @@ package org.jolokia.jvmagent;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.net.*;
 import java.security.*;
 import java.util.concurrent.*;
 
 import javax.net.ssl.*;
 
+import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.dispatcher.RequestDispatcherImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.service.*;
 import org.jolokia.service.impl.ClasspathServiceCreator;
@@ -72,6 +73,9 @@ public class JolokiaServer {
 
     // HttpContext created when we start it up
     private HttpContext httpContext;
+
+
+    private DiscoveryMulticastResponder discoveryMulticastResponder;
 
     /**
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests. This
@@ -123,12 +127,27 @@ public class JolokiaServer {
         RequestDispatcher requestDispatcher = new RequestDispatcherImpl(jolokiaContext);
         JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
 
+        // URL as configured takes precedence
+        String configUrl = config.getJolokiaConfig().getConfig(ConfigKey.DISCOVERY_AGENT_URL);
+        jolokiaContext.getAgentDetails().updateAgentParameters(configUrl != null ? configUrl : url,
+                                                               config.getAuthenticator() != null);
+
         httpContext = httpServer.createContext(config.getContextPath(), jolokiaHttpHandler);
         // Add authentication if configured
         final Authenticator authenticator = config.getAuthenticator();
         if (authenticator != null) {
             httpContext.setAuthenticator(authenticator);
         }
+
+        if (listenForDiscoveryMcRequests(jolokiaContext)) {
+            try {
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(jolokiaContext);
+                discoveryMulticastResponder.start();
+            } catch (IOException e) {
+                jolokiaContext.error("Cannot start discovery multicast handler: " + e,e);
+            }
+        }
+
 
         if (useOwnServer) {
             // Starting our own server in an own thread group with a fixed name
@@ -148,10 +167,21 @@ public class JolokiaServer {
         }
     }
 
+    private boolean listenForDiscoveryMcRequests(JolokiaContext pContext) {
+        String enable = pContext.getConfig(ConfigKey.DISCOVERY_ENABLED);
+        String url = pContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
+        return url != null || enable == null || Boolean.valueOf(enable);
+    }
+
     /**
      * Stop the HTTP server
      */
     public void stop() {
+        if (discoveryMulticastResponder != null) {
+            discoveryMulticastResponder.stop();
+            discoveryMulticastResponder = null;
+        }
+
         httpServer.removeContext(httpContext);
         serviceManager.stop();
 
@@ -219,7 +249,7 @@ public class JolokiaServer {
 
         // Get own URL for later reference
         serverAddress = pServer.getAddress();
-        url = extractUrl(pConfig);
+        url = detectAgentUrl(pServer, pConfig, pConfig.getContextPath());
     }
 
     /**
@@ -242,18 +272,31 @@ public class JolokiaServer {
         }
     }
 
-    private String extractUrl(JolokiaServerConfig pConfig) {
+    private String detectAgentUrl(HttpServer pServer, JolokiaServerConfig pConfig, String pContextPath) {
+        serverAddress= pServer.getAddress();
         InetAddress realAddress;
         int port;
         if (serverAddress != null) {
             realAddress = serverAddress.getAddress();
+            if (realAddress.isAnyLocalAddress()) {
+                try {
+                    realAddress = NetworkUtil.getLocalAddress();
+                } catch (IOException e) {
+                    try {
+                        realAddress = InetAddress.getLocalHost();
+                    } catch (UnknownHostException e1) {
+                        // Ok, ok. We take the orginal one
+                        realAddress = serverAddress.getAddress();
+                    }
+                }
+            }
             port = serverAddress.getPort();
         } else {
             realAddress = pConfig.getAddress();
             port = pConfig.getPort();
         }
         return String.format("%s://%s:%d%s",
-                            pConfig.getProtocol(),realAddress.getCanonicalHostName(),port, pConfig.getContextPath());
+                             pConfig.getProtocol(),realAddress.getHostAddress(),port, pContextPath);
     }
 
     /**

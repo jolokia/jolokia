@@ -6,14 +6,17 @@ import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.JMException;
 
+import com.sun.org.omg.CORBA.Initializer;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.backend.dispatcher.RequestInterceptor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.converter.JmxSerializer;
 import org.jolokia.converter.json.SerializeOptions;
+import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.util.DebugStore;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.config.ConfigKey.*;
@@ -52,6 +55,17 @@ public class BackendManager {
 
     // Hard limits for conversion
     private SerializeOptions.Builder convertOptionsBuilder;
+
+    // History handler
+    private HistoryStore historyStore;
+
+    // Storage for storing debug information
+    private DebugStore debugStore;
+
+    // Initialize used for late initialization
+    // ("volatile: because we use double-checked locking later on
+    // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
+    private volatile Initializer initializer;
 
     /**
      * Construct a new backend manager with the given configuration.
@@ -149,7 +163,6 @@ public class BackendManager {
     }
 
     // ==========================================================================================================
-
 
     private void init(JolokiaContext pCtx) {
         // Init limits

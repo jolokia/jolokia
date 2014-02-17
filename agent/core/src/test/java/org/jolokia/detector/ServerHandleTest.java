@@ -17,7 +17,6 @@ package org.jolokia.detector;
  */
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +44,6 @@ public class ServerHandleTest {
     private String vendor;
     private String product;
     private String version;
-    private URL url;
     private Map<String,String> extraInfo;
 
     @BeforeMethod
@@ -55,8 +53,7 @@ public class ServerHandleTest {
         vendor = "acim";
         product = "dukeNukem";
         version = "forEver";
-        url = new URL("http://acim.org");
-        serverHandle = new ServerHandle(vendor, product, version, url) {
+        serverHandle = new ServerHandle(vendor, product, version) {
             @Override
             public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
                 return extraInfo;
@@ -66,7 +63,6 @@ public class ServerHandleTest {
 
     @Test
     public void basics() throws MalformedURLException {
-        assertEquals(serverHandle.getAgentUrl(), url);
         assertEquals(serverHandle.getProduct(),product);
         assertEquals(serverHandle.getVendor(),vendor);
         assertEquals(serverHandle.getExtraInfo(null).get("extra1"),"value1");
@@ -79,12 +75,12 @@ public class ServerHandleTest {
         assertEquals(json.get("vendor"),vendor);
         assertEquals(json.get("product"),product);
         assertEquals(json.get("version"),version);
-        assertEquals(json.get("agent-url"),url.toExternalForm());
+        assertEquals(((JSONObject) json.get("extraInfo")).get("extra1"),"value1");
     }
 
     @Test
     public void allNull() {
-        ServerHandle handle = new ServerHandle(null,null,null,null);
+        ServerHandle handle = ServerHandle.NULL_SERVER_HANDLE;
         assertNull(handle.getVendor());
         assertNull(handle.toJSONObject().get("extraInfo"));
     }

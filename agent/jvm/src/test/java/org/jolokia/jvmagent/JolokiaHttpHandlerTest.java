@@ -208,6 +208,8 @@ public class JolokiaHttpHandlerTest {
         list.add("/jolokia");
         list.add(ConfigKey.DEBUG);
         list.add(debugToggle ? "true" : "false");
+        list.add(ConfigKey.AGENT_ID);
+        list.add(UUID.randomUUID().toString());
         for (Object e : extra) {
             list.add(e);
         }

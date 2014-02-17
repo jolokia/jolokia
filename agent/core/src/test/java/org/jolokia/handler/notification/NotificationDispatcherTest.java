@@ -44,7 +44,7 @@ public class NotificationDispatcherTest {
 
     @BeforeMethod
     public void setup() {
-        ServerHandle serverHandle = new ServerHandle(null, null, null, null);
+        ServerHandle serverHandle = ServerHandle.NULL_SERVER_HANDLE;
         pullBackend = new PullNotificationBackend(10);
         ctx = new TestJolokiaContext.Builder()
                 .serverHandle(serverHandle)

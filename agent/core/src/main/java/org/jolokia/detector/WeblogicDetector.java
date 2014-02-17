@@ -76,7 +76,7 @@ public class WeblogicDetector extends AbstractServerDetector {
          * @param version  version used
          */
         public WeblogicServerHandle(String version) {
-            super("Oracle", "weblogic", version, null);
+            super("Oracle", "weblogic", version);
         }
     }
 }

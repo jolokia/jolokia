@@ -113,16 +113,12 @@ class CleanupThread extends Thread {
         // All 'foreign' threads has finished, hence we are prepared to stop
         return false;
     }
-
-
-    private static final String[] DAEMON_THREAD_NAMES = new String[] {
+  private static final String[] DAEMON_THREAD_NAMES = new String[] {
             // Tanuki Java Service Wrapper (#116)
             "WrapperListener_stop_runner",
             // Shutdown thread
             "DestroyJavaVM"
-    };
-
-    // Check for threads which should not prevent the server from stopping.
+    }; // Check for threads which should not prevent the server from stopping.
     private boolean isDaemonLikeThread(Thread pThread) {
         // Daemon or part of our thread group
         if (pThread.isDaemon() ||

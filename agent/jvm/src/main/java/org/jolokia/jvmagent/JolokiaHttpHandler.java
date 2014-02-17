@@ -28,8 +28,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
+import org.jolokia.backend.BackendManager;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONAware;
@@ -41,6 +43,9 @@ import org.json.simple.JSONAware;
  * @since Mar 3, 2010
  */
 public class JolokiaHttpHandler implements HttpHandler {
+
+    // Backendmanager for doing request
+    private BackendManager backendManager;
 
     // The HttpRequestHandler
     private HttpRequestHandler requestHandler;
@@ -57,6 +62,9 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Global context
     private JolokiaContext jolokiaContext;
 
+    // Respond for discovery mc requests
+    private DiscoveryMulticastResponder discoveryMulticastResponder;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -72,12 +80,12 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
-
         requestHandler = new HttpRequestHandler(jolokiaContext, pRequestDispatcher);
     }
 
+
     /**
-     * Handle a request.
+     * Handler a request. If the handler is not yet started, an exception is thrown
      *
      * @param pExchange the request/response object
      * @throws IOException if something fails during handling
@@ -182,7 +190,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 String json = pJson.toJSONString();
                 String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
                 String content = callback == null ? json : callback + "(" + json + ");";
-                byte[] response = content.getBytes();
+                byte[] response = content.getBytes("UTF8");
                 pExchange.sendResponseHeaders(200,response.length);
                 out = pExchange.getResponseBody();
                 out.write(response);

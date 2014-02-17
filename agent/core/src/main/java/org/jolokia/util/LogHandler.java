@@ -48,6 +48,64 @@ public interface LogHandler {
      * */
     void error(String message, Throwable t);
 
+    // =============================================================================================================
+
+    /**
+     * Loghandler which doesn not output anything
+     */
+    LogHandler QUIET = new LogHandler() {
+
+        /** {@inheritDoc} */
+        public void debug(String message) { }
+
+        /** {@inheritDoc} */
+        public void info(String message) { }
+
+        /** {@inheritDoc} */
+        public void error(String message, Throwable t) { }
+
+        /** {@inheritDoc} */
+        public boolean isDebug() {
+            return false;
+        }
+    };
+
+    // ====================================================================
+
+    /**
+     * Loghandler for printing to stdout
+     */
+    class StdoutLogHandler implements LogHandler {
+        private boolean doDebug;
+
+        public StdoutLogHandler(boolean pDoDebug) {
+            doDebug = pDoDebug;
+        }
+
+        public void debug(String message) {
+            if (doDebug) {
+                log("D> " + message);
+            }
+        }
+
+        public void info(String message) {
+            log("I> " + message);
+        }
+
+        public void error(String message, Throwable t) {
+            log("E> " + message);
+            t.printStackTrace();
+        }
+
+        public boolean isDebug() {
+            return doDebug;
+        }
+
+        private void log(String message) {
+            System.out.println(message); //NOSONAR
+        }
+    }
+
     /**
      * Check whether debug is switched on
      *
