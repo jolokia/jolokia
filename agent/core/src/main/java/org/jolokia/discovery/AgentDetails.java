@@ -115,7 +115,7 @@ public class AgentDetails {
         add(resp, SERVER_PRODUCT, serverProduct);
         add(resp, SERVER_VERSION, serverVersion);
         add(resp, AGENT_VERSION, agentVersion);
-        add(resp, AGENT_ID,agentId);
+        add(resp, AGENT_ID, agentId);
         add(resp, AGENT_DESCRIPTION,agentDescription);
         return resp;
     }

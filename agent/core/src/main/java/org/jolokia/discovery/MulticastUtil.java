@@ -174,10 +174,7 @@ public final class MulticastUtil {
                         DatagramPacket in = new DatagramPacket(buf, buf.length);
                         socket.receive(in);
                         logHandler.debug(address + "--> Received answer from " + in.getAddress());
-                        DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
-                        if (!inMsg.isQuery()) {
-                            ret.add(inMsg);
-                        }
+                        addIncomingMessage(ret, in);
                     } while (true); // Leave loop with a SocketTimeoutException in receive()
                 } catch (SocketTimeoutException exp) {
                     logHandler.debug(address + "--> Timeout");
@@ -189,6 +186,17 @@ public final class MulticastUtil {
                 return ret;
             } finally {
                 socket.close();
+            }
+        }
+
+        private void addIncomingMessage(List<DiscoveryIncomingMessage> ret, DatagramPacket in) throws IOException {
+            try {
+                DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
+                if (!inMsg.isQuery()) {
+                    ret.add(inMsg);
+                }
+            } catch (IllegalArgumentException exp) {
+                logHandler.debug("Invalid incoming package from " + in.getAddress() + "  --> " + exp + ". Ignoring");
             }
         }
     }
