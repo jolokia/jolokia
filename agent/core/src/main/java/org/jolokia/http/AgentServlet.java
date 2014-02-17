@@ -287,8 +287,7 @@ public class AgentServlet extends HttpServlet {
             json = pReqHandler.handleRequest(pReq,pResp);
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
-                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp
-                    );
+                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
         } finally {
             setCorsHeader(pReq, pResp);
 

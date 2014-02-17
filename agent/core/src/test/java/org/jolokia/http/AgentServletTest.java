@@ -195,6 +195,7 @@ public class AgentServletTest {
             StringBuffer buf = new StringBuffer();
             buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
             expect(request.getRequestURL()).andReturn(buf);
+            expect(request.getRequestURI()).andReturn(buf.toString());
             expect(request.getContextPath()).andReturn("/jolokia");
             expect(request.getAuthType()).andReturn("BASIC");
             replay(request, response);
@@ -427,8 +428,10 @@ public class AgentServletTest {
 
     @Test
     public void withException() throws ServletException, IOException {
-        prepareStandardInitialisation();
-
+        servlet = new AgentServlet(new AllowAllRestrictor());
+        initConfigMocks(null, null,"Error 500", IllegalStateException.class);
+        replay(config, context);
+        servlet.init(config);
         StringWriter sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {

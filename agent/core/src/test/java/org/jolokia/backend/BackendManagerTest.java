@@ -48,11 +48,11 @@ public class BackendManagerTest {
 
     @BeforeTest
     public void setup() {
-        config = new Configuration();
+        config = new Configuration(ConfigKey.AGENT_ID,"test");
     }
     @Test
     public void simpleRead() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DEBUG,"true");
+        Configuration config = new Configuration(ConfigKey.DEBUG,"true",ConfigKey.AGENT_ID,"test");
 
         BackendManager backendManager = new BackendManager(config, log);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory")
@@ -65,7 +65,7 @@ public class BackendManagerTest {
 
     @Test
     public void notChanged() throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, IOException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
+        Configuration config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName(),ConfigKey.AGENT_ID,"test");
         BackendManager backendManager = new BackendManager(config, log);
         JmxRequest req = new JmxRequestBuilder(RequestType.LIST).build();
         JSONObject ret = backendManager.handleRequest(req);
@@ -88,7 +88,7 @@ public class BackendManagerTest {
 
     @Test
     public void requestDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName());
+        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherTest.class.getName(),ConfigKey.AGENT_ID,"test");
         BackendManager backendManager = new BackendManager(config, log);
         JmxRequest req = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         backendManager.handleRequest(req);
@@ -98,14 +98,14 @@ public class BackendManagerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*invalid constructor.*")
     public void requestDispatcherWithWrongDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName());
-        BackendManager backendManager = new BackendManager(config,log);
+        Configuration config = new Configuration(ConfigKey.DISPATCHER_CLASSES,RequestDispatcherWrong.class.getName(),ConfigKey.AGENT_ID,"test");
+        new BackendManager(config,log);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.bla.Dispatcher.*")
     public void requestDispatcherWithUnkownDispatcher() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        config = new Configuration(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher");
-        BackendManager backendManager = new BackendManager(config,log);
+        Configuration config = new Configuration(ConfigKey.DISPATCHER_CLASSES,"blub.bla.Dispatcher",ConfigKey.AGENT_ID,"test");
+        new BackendManager(config,log);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class BackendManagerTest {
 
     @Test
     public void defaultConfig() {
-        config = new Configuration(ConfigKey.DEBUG_MAX_ENTRIES,"blabal");
+        Configuration config = new Configuration(ConfigKey.DEBUG_MAX_ENTRIES,"blabal",ConfigKey.AGENT_ID,"test");
         BackendManager backendManager = new BackendManager(config,log);
         backendManager.destroy();
     }

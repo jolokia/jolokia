@@ -16,8 +16,7 @@ package org.jolokia.request;
  * limitations under the License.
  */
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +36,7 @@ import static org.testng.Assert.*;
 /**
  */
 public class RawObjectNameTest {
-    private Configuration config     = new Configuration();
+    private Configuration config     = new Configuration(ConfigKey.AGENT_ID, UUID.randomUUID().toString());
     private LogHandler    logHandler = new LogHandler.StdoutLogHandler(false);
 
     private BackendManager backendManager = new BackendManager(config, logHandler, null, true /* Lazy Init */);
