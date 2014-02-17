@@ -32,9 +32,9 @@ public class DiscoveryMulticastResponderTest {
         Thread.sleep(1000);
         JolokiaDiscovery discovery = new JolokiaDiscovery();
         List<JSONObject> msgs = discovery.lookupAgents();
+        System.out.println("=================================================");
         assertTrue(msgs.size() > 0);
         responder.stop();
-        System.out.println("=================================================");
 
     }
 

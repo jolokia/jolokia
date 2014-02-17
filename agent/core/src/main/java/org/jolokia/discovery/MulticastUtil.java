@@ -103,9 +103,11 @@ public final class MulticastUtil {
         for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
             try {
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
+                System.out.println(">>>> inMsgs: " + inMsgs + "(" + inMsgs.size() + ")" );
                 for (DiscoveryIncomingMessage inMsg : inMsgs) {
                     AgentDetails details = inMsg.getAgentDetails();
                     String id = details.getAgentId();
+                    System.out.println(" -- id: " + id + ", seen = " + seen.contains(id));
                     // There can be multiples answers with the same message id
                     if (!seen.contains(id)) {
                         ret.add(inMsg);
