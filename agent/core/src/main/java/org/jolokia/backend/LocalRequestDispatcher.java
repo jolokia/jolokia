@@ -43,6 +43,9 @@ import org.jolokia.util.LogHandler;
  */
 public class LocalRequestDispatcher implements RequestDispatcher {
 
+    // Agent ID
+    private final String agentId;
+
     // Handler for finding and merging the various MBeanHandler
     private MBeanServerHandler mBeanServerHandler;
 
@@ -68,6 +71,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         log = pLogHandler;
+        agentId = pConfig.get(ConfigKey.AGENT_ID);
 
         // Request handling manager 
         requestHandlerManager =
@@ -140,7 +144,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         }
 
         try {
-            mBeanServerHandler.registerMBean(new JolokiaDiscovery(),JolokiaDiscoveryMBean.OBJECT_NAME);
+            mBeanServerHandler.registerMBean(new JolokiaDiscovery(agentId),JolokiaDiscoveryMBean.OBJECT_NAME);
         } catch (InstanceAlreadyExistsException e) {
             // Ignore since there is already one registered.
             log.info("Jolokia Discovery MBean registration is skipped because there is already one registered.");

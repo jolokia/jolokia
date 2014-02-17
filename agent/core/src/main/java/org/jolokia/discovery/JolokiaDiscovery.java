@@ -16,6 +16,13 @@ import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
  */
 public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
 
+    // Agent id used for use in the query
+    private final String agentId;
+
+    public JolokiaDiscovery(String agentId) {
+        this.agentId = agentId;
+    }
+
     /** {@inheritDoc} */
     public List lookupAgents() throws IOException {
         return lookupAgentsWithTimeout(1000);
@@ -25,6 +32,7 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
     public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
+                        .agentId(agentId)
                         .build();
         List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, new LogHandler.StdoutLogHandler(true));
         JSONArray ret = new JSONArray();

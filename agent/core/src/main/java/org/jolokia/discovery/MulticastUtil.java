@@ -65,7 +65,7 @@ public final class MulticastUtil {
                                                                             int pTimeout,
                                                                             LogHandler pLogHandler) throws IOException {
         final List<Future<List<DiscoveryIncomingMessage>>> futures = sendDiscoveryRequests(pOutMsg, pTimeout, pLogHandler);
-        return collectIncomingMessages(pTimeout, futures);
+        return collectIncomingMessages(pTimeout, futures, pLogHandler);
     }
 
     // ==============================================================================================================
@@ -97,18 +97,15 @@ public final class MulticastUtil {
     }
 
     // Collect the incoming messages and filter out duplicates
-    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures) {
+    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures, LogHandler pLogHandler) {
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
         Set<String> seen = new HashSet<String>();
-        System.out.println("Timeout: " + pTimeout);
         for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
             try {
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
-                System.out.println(">>>> inMsgs: " + inMsgs + "(" + inMsgs.size() + ")" );
                 for (DiscoveryIncomingMessage inMsg : inMsgs) {
                     AgentDetails details = inMsg.getAgentDetails();
                     String id = details.getAgentId();
-                    System.out.println(" -- id: " + id + ", seen = " + seen.contains(id));
                     // There can be multiples answers with the same message id
                     if (!seen.contains(id)) {
                         ret.add(inMsg);
@@ -116,15 +113,14 @@ public final class MulticastUtil {
                     }
                 }
             } catch (InterruptedException exp) {
-                exp.printStackTrace();
                 // Try next one ...
             } catch (ExecutionException e) {
                 e.printStackTrace();
                 // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
                 // throw new IOException("Error while performing a discovery call " + e,e);
+                pLogHandler.debug("--> Exception during lookup: " + e);
             } catch (TimeoutException e) {
                 // Timeout occurred while waiting for the results. So we go to the next one ...
-               e.printStackTrace();
             }
         }
         return ret;
@@ -177,7 +173,7 @@ public final class MulticastUtil {
                         byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
                         DatagramPacket in = new DatagramPacket(buf, buf.length);
                         socket.receive(in);
-                        logHandler.debug(address + "--> Received answer");
+                        logHandler.debug(address + "--> Received answer from " + in.getAddress());
                         DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
                         if (!inMsg.isQuery()) {
                             ret.add(inMsg);

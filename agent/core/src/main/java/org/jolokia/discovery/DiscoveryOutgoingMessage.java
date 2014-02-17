@@ -43,6 +43,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
         private MessageType type;
         private InetAddress targetAddress;
         private int targetPort;
+        private String agentId;
 
         public Builder(MessageType pType) {
             type = pType;
@@ -50,6 +51,11 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
 
         public Builder agentDetails(AgentDetails pAgentDetails) {
             this.agentDetails = pAgentDetails;
+            return this;
+        }
+
+        public Builder agentId(String pAgentId) {
+            this.agentId = pAgentId;
             return this;
         }
 
@@ -67,7 +73,8 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
                     type,
                     targetAddress,
                     targetPort,
-                    agentDetails);
+                    agentDetails != null ? agentDetails : new AgentDetails(agentId));
         }
+
     }
 }
