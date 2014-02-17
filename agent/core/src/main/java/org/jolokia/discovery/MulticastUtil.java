@@ -189,13 +189,13 @@ public final class MulticastUtil {
             }
         }
 
-        private void addIncomingMessage(List<DiscoveryIncomingMessage> ret, DatagramPacket in) throws IOException {
+        private void addIncomingMessage(List<DiscoveryIncomingMessage> ret, DatagramPacket in) {
             try {
                 DiscoveryIncomingMessage inMsg = new DiscoveryIncomingMessage(in);
                 if (!inMsg.isQuery()) {
                     ret.add(inMsg);
                 }
-            } catch (IllegalArgumentException exp) {
+            } catch (Exception exp) {
                 logHandler.debug("Invalid incoming package from " + in.getAddress() + "  --> " + exp + ". Ignoring");
             }
         }
