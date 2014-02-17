@@ -162,8 +162,6 @@ public final class NetworkUtil {
     }
 
     public static String getAgentId(int objectId, String type) {
-        String selfName = ManagementFactory.getRuntimeMXBean().getName();
-        final int selfPid = Integer.valueOf(selfName.substring(0, selfName.indexOf('@')));
         String address;
         try {
             address = getLocalAddress().getHostAddress();

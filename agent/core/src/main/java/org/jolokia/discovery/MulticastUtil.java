@@ -115,7 +115,6 @@ public final class MulticastUtil {
             } catch (InterruptedException exp) {
                 // Try next one ...
             } catch (ExecutionException e) {
-                e.printStackTrace();
                 // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
                 // throw new IOException("Error while performing a discovery call " + e,e);
                 pLogHandler.debug("--> Exception during lookup: " + e);
