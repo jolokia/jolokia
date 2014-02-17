@@ -88,11 +88,13 @@ public class DiscoveryMulticastResponder {
      * Stop the responder (if not already stopped). Can be restarted aftewards.
      */
     public synchronized void stop() {
+        logHandler.debug("===== Stopping listener threads");
         if (listenerThreads.size() > 0) {
             for (MulticastSocketListenerThread thread : listenerThreads) {
                 thread.shutdown();
             }
         }
+
         listenerThreads.clear();
     }
 }

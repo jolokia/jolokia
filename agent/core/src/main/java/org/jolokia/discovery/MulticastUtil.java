@@ -115,10 +115,10 @@ public final class MulticastUtil {
             } catch (InterruptedException exp) {
                 // Try next one ...
             } catch (ExecutionException e) {
-                // Didnt worked a given address, which can happen e.g. when multicast is not routed or in other cases
+                // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
                 // throw new IOException("Error while performing a discovery call " + e,e);
             } catch (TimeoutException e) {
-                // Timeout occured while waiting for the results. So we go to the next one ...
+                // Timeout occurred while waiting for the results. So we go to the next one ...
             }
         }
         return ret;

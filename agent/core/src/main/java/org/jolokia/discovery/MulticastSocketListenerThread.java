@@ -92,6 +92,7 @@ class MulticastSocketListenerThread extends Thread {
     }
 
     public synchronized void shutdown() {
+        logHandler.debug("==== Shutdown");
         setRunning(false);
         interrupt();
         socket.close();
