@@ -100,6 +100,7 @@ public final class MulticastUtil {
     private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures) {
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
         Set<String> seen = new HashSet<String>();
+        System.out.println("Timeout: " + pTimeout);
         for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
             try {
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
@@ -115,12 +116,15 @@ public final class MulticastUtil {
                     }
                 }
             } catch (InterruptedException exp) {
+                exp.printStackTrace();
                 // Try next one ...
             } catch (ExecutionException e) {
+                e.printStackTrace();
                 // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
                 // throw new IOException("Error while performing a discovery call " + e,e);
             } catch (TimeoutException e) {
                 // Timeout occurred while waiting for the results. So we go to the next one ...
+               e.printStackTrace();
             }
         }
         return ret;
