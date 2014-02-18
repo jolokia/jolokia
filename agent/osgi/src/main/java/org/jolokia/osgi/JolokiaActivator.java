@@ -167,7 +167,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaServletConfigur
 
     private Filter buildHttpServiceFilter(BundleContext pBundleContext) {
         String customFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
-        String filter = customFilter.trim().length() > 0 ?
+        String filter = customFilter != null && customFilter.trim().length() > 0 ?
                 "(&" + HTTP_SERVICE_FILTER_BASE + customFilter + ")" :
                 HTTP_SERVICE_FILTER_BASE;
         try {

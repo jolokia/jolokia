@@ -75,7 +75,6 @@ public class ServerHandleTest {
         assertEquals(json.get("vendor"),vendor);
         assertEquals(json.get("product"),product);
         assertEquals(json.get("version"),version);
-        assertEquals(((JSONObject) json.get("extraInfo")).get("extra1"),"value1");
     }
 
     @Test
