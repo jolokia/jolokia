@@ -169,8 +169,8 @@ public class JolokiaServer {
 
     private boolean listenForDiscoveryMcRequests(JolokiaContext pContext) {
         String enable = pContext.getConfig(ConfigKey.DISCOVERY_ENABLED);
-        String url = pContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
-        return url != null || enable == null || Boolean.valueOf(enable);
+        String urlFromConfig = pContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
+        return urlFromConfig != null || enable == null || Boolean.valueOf(enable);
     }
 
     /**

@@ -28,10 +28,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
-import org.jolokia.backend.BackendManager;
 import org.jolokia.backend.dispatcher.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.service.JolokiaContext;
 import org.json.simple.JSONAware;
@@ -43,9 +41,6 @@ import org.json.simple.JSONAware;
  * @since Mar 3, 2010
  */
 public class JolokiaHttpHandler implements HttpHandler {
-
-    // Backendmanager for doing request
-    private BackendManager backendManager;
 
     // The HttpRequestHandler
     private HttpRequestHandler requestHandler;
@@ -61,9 +56,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // Global context
     private JolokiaContext jolokiaContext;
-
-    // Respond for discovery mc requests
-    private DiscoveryMulticastResponder discoveryMulticastResponder;
 
     /**
      * Create a new HttpHandler for processing HTTP request
@@ -128,7 +120,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     private JSONAware executeGetRequest(ParsedUri parsedUri) {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
-
 
     private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {
         String encoding = null;
