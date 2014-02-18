@@ -83,7 +83,6 @@ public class JolokiaHttpHandler implements HttpHandler {
         requestHandler = new HttpRequestHandler(jolokiaContext, pRequestDispatcher);
     }
 
-
     /**
      * Handler a request. If the handler is not yet started, an exception is thrown
      *
