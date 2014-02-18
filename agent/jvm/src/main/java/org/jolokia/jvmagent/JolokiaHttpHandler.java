@@ -136,11 +136,13 @@ public class JolokiaHttpHandler implements HttpHandler {
      * Stop the handler
      */
     public void stop() {
-        discoveryMulticastResponder.stop();
+        if (discoveryMulticastResponder != null) {
+            discoveryMulticastResponder.stop();
+            discoveryMulticastResponder = null;
+        }
         backendManager.destroy();
         backendManager = null;
         requestHandler = null;
-        discoveryMulticastResponder = null;
     }
 
     /**
