@@ -56,6 +56,7 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
         } catch (JMException e) {
             throw new IllegalArgumentException("Cannot register MBean " + objectName + " as notification pull store: " + e,e);
         }
+        logHandler = pJolokiaContext;
     }
 
     /** {@inheritDoc} */
