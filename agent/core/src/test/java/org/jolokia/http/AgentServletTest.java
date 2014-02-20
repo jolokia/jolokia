@@ -25,10 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.TestDetector;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.Version;
-import org.jolokia.config.*;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -194,11 +192,11 @@ public class AgentServletTest {
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             StringWriter sw = initRequestResponseMocks();
-            expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+            expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
             expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
             String url = "http://pirx:9876/jolokia";
             StringBuffer buf = new StringBuffer();
-            buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+            buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
             expect(request.getRequestURL()).andReturn(buf);
             expect(request.getRequestURI()).andReturn(buf.toString());
             expect(request.getContextPath()).andReturn("/jolokia");
@@ -207,7 +205,7 @@ public class AgentServletTest {
 
             servlet.doGet(request, response);
 
-            assertTrue(sw.toString().contains("used"));
+            assertTrue(sw.toString().contains("version"));
 
             JolokiaDiscovery discovery = new JolokiaDiscovery("test");
             List<JSONObject> in = discovery.lookupAgents();
