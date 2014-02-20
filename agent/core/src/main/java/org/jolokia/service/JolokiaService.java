@@ -20,13 +20,18 @@ package org.jolokia.service;
  * Interface describing a Jolokia Service. Jolokia Services are used within Jolokia
  * for various tasks. Each service has a specific type describing its API. Also, it has an
  * order which is used when multiple services exist. Services can be created in many ways, either
- * statically (and then registered at the {@link JolokiaServiceManager}) or dynamically via a {@link JolokiaServiceLookup}
+ * statically (and then registered at the {@link JolokiaServiceManager}) or dynamically via a
+ * {@link JolokiaServiceLookup}
  * (which is especially suited for looking up OSGi services).
  *
  * @author roland
  * @since 28.03.13
  */
 public interface JolokiaService<T extends JolokiaService> extends Comparable<T> {
+
+    // Marker interface for services which only want to take part in the
+    // service's lifecycle.
+    public interface Init extends JolokiaService<Init> {}
 
     /**
      * Order of the service. The higher the number, the later in the list of services this service appears.

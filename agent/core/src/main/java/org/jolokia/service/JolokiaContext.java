@@ -61,7 +61,7 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return the name under which the MBean is registered.
      */
     ObjectName registerMBean(Object pMBean, String... pOptionalName)
-            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException;
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException;
 
     /**
      * Get a configuration value if set as configuration or the default

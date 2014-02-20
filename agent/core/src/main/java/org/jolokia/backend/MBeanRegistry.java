@@ -46,7 +46,7 @@ public class MBeanRegistry {
      * @return the name under which the MBean is registered.
      */
     public final ObjectName registerMBean(Object pMBean, String... pOptionalName)
-            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
         synchronized (mBeanHandles) {
             MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             try {
@@ -55,8 +55,6 @@ public class MBeanRegistry {
                 mBeanHandles.add(new MBeanHandle(server,registeredName));
                 return registeredName;
             } catch (RuntimeException exp) {
-                throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
-            } catch (MBeanRegistrationException exp) {
                 throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
             }
         }
@@ -78,13 +76,8 @@ public class MBeanRegistry {
      */
     private ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName)
             throws MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException, MalformedObjectNameException {
-        if (pName != null) {
-            ObjectName oName = new ObjectName(pName);
-            return pServer.registerMBean(pMBean,oName).getObjectName();
-        } else {
-            // Needs to implement MBeanRegistration interface
-            return pServer.registerMBean(pMBean,null).getObjectName();
-        }
+        ObjectName oName = pName != null ? new ObjectName(pName) : null;
+        return pServer.registerMBean(pMBean,oName).getObjectName();
     }
 
 

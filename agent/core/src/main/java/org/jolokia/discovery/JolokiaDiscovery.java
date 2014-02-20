@@ -3,6 +3,9 @@ package org.jolokia.discovery;
 import java.io.IOException;
 import java.util.List;
 
+import javax.management.JMException;
+
+import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONArray;
 
@@ -14,13 +17,41 @@ import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
  * @author roland
  * @since 31.01.14
  */
-public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
+public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init>
+        implements JolokiaDiscoveryMBean, JolokiaService.Init {
 
     // Agent id used for use in the query
-    private final String agentId;
+    private String agentId = null;
 
-    public JolokiaDiscovery(String agentId) {
-        this.agentId = agentId;
+    /**
+     * Constructor to be called when called as a service
+     * @param pOrder service order
+     */
+    public JolokiaDiscovery(int pOrder) {
+        super(JolokiaService.Init.class,pOrder);
+    }
+
+    /**
+     * Constructor called for programmatic lookup of the agent
+     *
+     * @param pAgentId agent id to be used for correlating messages
+     */
+    public JolokiaDiscovery(String pAgentId) {
+        super(JolokiaService.Init.class, 0);
+        agentId = pAgentId;
+    }
+
+    @Override
+    public void init(JolokiaContext pJolokiaContext) {
+        super.init(pJolokiaContext);
+        AgentDetails details = pJolokiaContext.getAgentDetails();
+        agentId = details.getAgentId();
+        String objectName = JolokiaDiscoveryMBean.OBJECT_NAME + ",agent=" + agentId;
+        try {
+            pJolokiaContext.registerMBean(this,objectName);
+        } catch (JMException e) {
+            throw new IllegalArgumentException("Cannot register MBean " + objectName + " as notification pull store: " + e,e);
+        }
     }
 
     /** {@inheritDoc} */

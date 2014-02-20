@@ -63,8 +63,10 @@ public class NotificationDispatcherTest {
     }
 
     @AfterMethod
-    public void tearDown() throws JMException {
+    public void tearDown() throws Exception {
         pullBackend.destroy();
+        // Unregister all MBeans
+        ctx.destroy();
     }
 
     @Test

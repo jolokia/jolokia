@@ -42,8 +42,8 @@ import static org.testng.Assert.*;
  */
 public class ListHandlerTest extends BaseHandlerTest {
 
-    private ListHandler              handler;
-    private ListHandler              handlerWithRealm;
+    private ListHandler handler;
+    private ListHandler handlerWithRealm;
 
     private MBeanServerExecutorLocal executor;
 

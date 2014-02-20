@@ -16,6 +16,7 @@
 
 package org.jolokia.util;
 
+import java.lang.management.ManagementFactory;
 import java.util.*;
 
 import javax.management.*;
@@ -36,6 +37,9 @@ import org.jolokia.service.JolokiaService;
  */
 public class TestJolokiaContext implements JolokiaContext {
 
+    // Switch on for more debuggin
+    private static final boolean DEBUG = false;
+    
     Map<Class,SortedSet> services;
     LogHandler logHandler;
     Restrictor restrictor;
@@ -43,6 +47,7 @@ public class TestJolokiaContext implements JolokiaContext {
     Converters converters;
     ServerHandle handle;
     private AgentDetails agentDetails;
+    private Set<ObjectName> mbeans;
 
     public TestJolokiaContext() {
         this(null,null,null,null,null,null);
@@ -56,16 +61,18 @@ public class TestJolokiaContext implements JolokiaContext {
                                Map<Class, SortedSet> pServices,
                                AgentDetails pAgentDetails) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
-        this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler(true);
+        this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler(DEBUG);
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
         this.services = pServices != null ? pServices : new HashMap();
-        this.agentDetails = pAgentDetails != null ? pAgentDetails : new AgentDetails(UUID.randomUUID().toString());
+        String agentId = pConfig != null ? pConfig.getConfig(ConfigKey.AGENT_ID) : null;
+        this.agentDetails = pAgentDetails != null ? pAgentDetails : new AgentDetails(agentId != null ? agentId : UUID.randomUUID().toString());
         if (pHandle != null) {
             handle = pHandle;
         } else {
             handle = new ServerHandle("vendor","product","version");
         }
         converters = new Converters(0);
+        mbeans = new HashSet<ObjectName>();
     }
 
     public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
@@ -83,8 +90,11 @@ public class TestJolokiaContext implements JolokiaContext {
     }
 
     public ObjectName registerMBean(Object pMBean, String... pOptionalName)
-            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
-        return null;
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectInstance instance = mbeanServer.registerMBean(pMBean, pOptionalName.length > 0 ? JmxUtil.newObjectName(pOptionalName[0]) : null);
+        mbeans.add(instance.getObjectName());
+        return instance.getObjectName();
     }
 
     public String getConfig(ConfigKey pKey) {
@@ -145,6 +155,14 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public boolean isCorsAccessAllowed(String pOrigin) {
         return restrictor.isCorsAccessAllowed(pOrigin);
+    }
+
+    // Should be called when MBeans were registered for the test. Not part of the JolokiaContext interface
+    public void destroy() throws MBeanRegistrationException, InstanceNotFoundException {
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        for (ObjectName objectName : mbeans) {
+            mbeanServer.unregisterMBean(objectName);
+        }
     }
 
     // ==================================================================

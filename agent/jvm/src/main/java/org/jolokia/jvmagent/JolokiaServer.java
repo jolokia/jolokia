@@ -268,7 +268,7 @@ public class JolokiaServer {
         if (pLogHandlerClass != null) {
             return ClassUtil.newInstance(pLogHandlerClass);
         } else {
-            return new StdoutLogHandler(pIsDebug);
+            return new LogHandler.StdoutLogHandler(pIsDebug);
         }
     }
 

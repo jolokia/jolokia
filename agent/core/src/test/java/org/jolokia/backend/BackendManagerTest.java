@@ -46,7 +46,7 @@ public class BackendManagerTest {
 
     private TestJolokiaContext ctx;
 
-    private LogHandler log = new LogHandler.StdoutLogHandler(true);
+    private LogHandler log = new LogHandler.StdoutLogHandler(false);
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
         TestJolokiaContext.Builder builder =
@@ -56,6 +56,7 @@ public class BackendManagerTest {
             builder.config(ConfigKey.DEBUG, "true");
         }
         builder.config(ConfigKey.AGENT_ID,"test");
+        builder.logHandler(log);
         ctx = builder.build();
         return ctx;
     }

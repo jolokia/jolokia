@@ -1,11 +1,9 @@
 package org.jolokia.notification.pull;
 
-import java.lang.management.ManagementFactory;
 import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.config.ConfigKey;
 import org.jolokia.notification.*;
 import org.jolokia.service.AbstractJolokiaService;
 import org.jolokia.service.JolokiaContext;
@@ -41,12 +39,12 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
 
     /** {@inheritDoc} */
     public void init(JolokiaContext pContext) {
-        String jolokiaId = pContext.getConfig(ConfigKey.AGENT_ID);
+        String jolokiaId = pContext.getAgentDetails().getAgentId();
         // TODO: Get configuration parameter for maxEntries
         store = new PullNotificationStore(maxEntries);
         mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + jolokiaId);
         try {
-            getMBeanServer().registerMBean(store, mbeanName);
+            pContext.registerMBean(store, mbeanName.getCanonicalName());
         } catch (JMException e) {
             throw new IllegalArgumentException("Cannot register MBean " + mbeanName + " as notification pull store: " + e,e);
         }
@@ -83,15 +81,5 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
         ret.put("store",mbeanName.toString());
         ret.put("maxEntries",maxEntries);
         return ret;
-    }
-
-    /** {@inheritDoc} */
-    public void destroy() throws JMException {
-        getMBeanServer().unregisterMBean(mbeanName);
-    }
-
-    // We use the platform MBeanServer for
-    private MBeanServer getMBeanServer() {
-        return ManagementFactory.getPlatformMBeanServer();
     }
 }

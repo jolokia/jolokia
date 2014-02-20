@@ -11,6 +11,10 @@ org.jolokia.notification.pull.PullNotificationBackend
 org.jolokia.history.HistoryMBeanRequestInterceptor
 
 # ============================================
+# Discovery MBean registration
+org.jolokia.discovery.JolokiaDiscovery
+
+# ============================================
 # JSON Serializer
 org.jolokia.converter.Converters
 
@@ -23,3 +27,4 @@ org.jolokia.detector.JettyDetector
 org.jolokia.detector.GlassfishDetector
 org.jolokia.detector.WeblogicDetector
 org.jolokia.detector.WebsphereDetector
+

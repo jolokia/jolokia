@@ -26,9 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.TestDetector;
-import org.jolokia.config.*;
-import org.jolokia.config.Configuration;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.test.util.HttpTestUtil;
@@ -48,6 +47,7 @@ import static org.testng.Assert.*;
  */
 public class AgentServletTest {
 
+    private static final boolean DEBUG = false;
     private ServletContext context;
     private ServletConfig config;
 
@@ -504,9 +504,7 @@ public class AgentServletTest {
         context = createMock(ServletContext.class);
 
 
-        String[] params = pInitParams != null ? Arrays.copyOf(pInitParams,pInitParams.length + 2) : new String[2];
-        params[params.length - 2] = ConfigKey.DEBUG.getKeyValue();
-        params[params.length - 1] = "true";
+        String[] params = prepareDebugLogging(pInitParams);
         HttpTestUtil.prepareServletConfigMock(config,params);
         HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
@@ -522,6 +520,22 @@ public class AgentServletTest {
         context.log((String) anyObject());
         EasyMock.expectLastCall().asStub();
         context.log(find("TestDetector"),isA(RuntimeException.class));
+    }
+
+    private String[] prepareDebugLogging(String[] pInitParams) {
+        if (pInitParams != null) {
+            // If already set we do nothing
+            for (int i = 0; i < pInitParams.length; i +=2) {
+                if (ConfigKey.DEBUG.getKeyValue().equals(pInitParams[i])) {
+                    return pInitParams;
+                }
+            }
+        }
+        // otherwise add debug config
+        String[] params = pInitParams != null ? Arrays.copyOf(pInitParams, pInitParams.length + 2) : new String[2];
+        params[params.length - 2] = ConfigKey.DEBUG.getKeyValue();
+        params[params.length - 1] = DEBUG ? "true" : "false";
+        return params;
     }
 
     private StringWriter initRequestResponseMocks() throws IOException {

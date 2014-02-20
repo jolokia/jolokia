@@ -2,8 +2,6 @@ package org.jolokia.notification;
 
 import java.util.Map;
 
-import javax.management.JMException;
-
 import org.jolokia.service.JolokiaService;
 
 /**
@@ -42,7 +40,6 @@ public interface NotificationBackend extends JolokiaService<NotificationBackend>
      */
     void unsubscribe(String pClientId, String pHandle);
 
-
     /**
      * Unregister a client
      *
@@ -58,9 +55,4 @@ public interface NotificationBackend extends JolokiaService<NotificationBackend>
      * @return the backend specific global configuration
      */
     Map<String,?> getConfig();
-
-    /**
-     * Called when agent shuts down
-     */
-    void destroy() throws JMException;
 }

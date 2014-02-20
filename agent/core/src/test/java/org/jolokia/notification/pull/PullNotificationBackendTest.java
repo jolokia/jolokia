@@ -25,7 +25,6 @@ import javax.management.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.notification.BackendCallback;
-import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -39,22 +38,24 @@ import static org.testng.Assert.*;
 public class PullNotificationBackendTest {
 
     private PullNotificationBackend backend;
+    private TestJolokiaContext context;
 
     @BeforeMethod
     public void setUp() throws Exception {
         ServerHandle handle = ServerHandle.NULL_SERVER_HANDLE;
-        JolokiaContext ctx = new TestJolokiaContext.Builder()
+        context = new TestJolokiaContext.Builder()
                 .serverHandle(handle)
                 .config(ConfigKey.AGENT_ID,"test")
                 .build();
         backend = new PullNotificationBackend(0);
-        backend.init(ctx);
+        backend.init(context);
         assertEquals(backend.getNotifType(),"pull");
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
         backend.destroy();
+        context.destroy();
     }
 
     @Test

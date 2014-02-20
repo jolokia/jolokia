@@ -47,7 +47,7 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     /** {@inheritDoc} */
     public ObjectName registerMBean(Object pMBean, String... pOptionalName)
-            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
+            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
         return serviceManager.registerMBean(pMBean,pOptionalName);
     }
 

@@ -129,7 +129,7 @@ public class AgentServlet extends HttpServlet {
 
 
     /**
-     * Initialize services and register service factoris
+     * Initialize services and register service factories
      * @param pServletConfig servlet configuration
      * @param pServiceManager service manager to which to add services
      */
@@ -149,7 +149,7 @@ public class AgentServlet extends HttpServlet {
     protected Configuration createConfig(ServletConfig pServletConfig) {
         StaticConfiguration config = new StaticConfiguration(
                 Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
-                                         Integer.toHexString(hashCode()) + "-servlet"));
+                                         NetworkUtil.getAgentId(this.hashCode(),"servlet")));
         // From ServletContext ....
         config.update(new ServletConfigFacade(pServletConfig));
         // ... and ServletConfig

@@ -181,7 +181,7 @@ public class HttpRequestHandlerTest {
 
 
     private void init() throws Exception {
-        init(new AllowAllRestrictor(),new StdoutLogHandler());
+        init(new AllowAllRestrictor(),new LogHandler.StdoutLogHandler(false));
     }
 
     private void init(LogHandler pLogHandler) throws Exception {
@@ -189,7 +189,7 @@ public class HttpRequestHandlerTest {
     }
 
     private void init(Restrictor pRestrictor) throws Exception {
-        init(pRestrictor,new StdoutLogHandler());
+        init(pRestrictor,new LogHandler.StdoutLogHandler(false));
     }
 
     private void init(Restrictor pRestrictor, LogHandler pLogHandler) throws Exception {

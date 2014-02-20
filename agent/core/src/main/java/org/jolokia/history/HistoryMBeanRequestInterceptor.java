@@ -44,7 +44,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
         try {
             // Register the Config MBean
 
-            String oname = History.OBJECT_NAME + ",agent=" + pCtx.getConfig(ConfigKey.AGENT_ID);
+            String oname = History.OBJECT_NAME + ",agent=" + pCtx.getAgentDetails().getAgentId();
             History history = new History(historyStore,oname);
             pCtx.registerMBean(history, oname);
 
@@ -55,6 +55,8 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
             pCtx.error("Error registering config MBean: " + e, e);
         } catch (MalformedObjectNameException e) {
             pCtx.error("Invalid name for config MBean: " + e, e);
+        } catch (MBeanRegistrationException e) {
+            pCtx.error("MBean Registration Error: " + e,e);
         }
         //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
