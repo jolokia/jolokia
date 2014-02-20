@@ -1,4 +1,4 @@
-package org.jolokia.agent.service.jmx.handler.notification;
+package org.jolokia.service.notification;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 18.03.13
  */
-class Client {
+public class Client {
 
     // Client ID
     private String id;
@@ -33,7 +33,7 @@ class Client {
     /**
      * Initialize
      */
-    Client(String pId) {
+    public Client(String pId) {
         id = pId;
         listenerConfigMap = new HashMap<String, ListenerRegistration>();
         usedBackends = new HashSet<String>();
@@ -44,7 +44,7 @@ class Client {
      * Get a set of all known handles
      * @return handles
      */
-     Set<String> getHandles() {
+    public Set<String> getHandles() {
         return listenerConfigMap.keySet();
     }
 
@@ -54,7 +54,7 @@ class Client {
      * @param pRegistration registration to add
      * @param pHandle to add to
      */
-    void addNotification(String pHandle, ListenerRegistration pRegistration) {
+    public void addNotification(String pHandle, ListenerRegistration pRegistration) {
         listenerConfigMap.put(pHandle,pRegistration);
     }
 
@@ -64,7 +64,7 @@ class Client {
      *
      * @return next handle
      */
-    String getNextHandle() {
+    public String getNextHandle() {
         return Long.toString(handleSequence.incrementAndGet());
     }
 
@@ -75,7 +75,7 @@ class Client {
      * @param pHandle handle to lookup
      * @return registration object
      */
-     ListenerRegistration get(String pHandle) {
+    public ListenerRegistration get(String pHandle) {
         ListenerRegistration config = listenerConfigMap.get(pHandle);
         if (config == null) {
             throw new IllegalArgumentException("No listener with handle " + pHandle + " created");
@@ -88,7 +88,7 @@ class Client {
      *
      * @param pHandle handle to remove.
      */
-     void remove(String pHandle) {
+    public void remove(String pHandle) {
         listenerConfigMap.remove(pHandle);
     }
 
@@ -97,7 +97,7 @@ class Client {
      * to the current time.
      *
      */
-    void refresh() {
+    public void refresh() {
         lastRefresh = System.currentTimeMillis();
     }
 
@@ -107,7 +107,7 @@ class Client {
      *
      * @return JSON object for this configuration.
      */
-    JSONObject list() {
+    public JSONObject list() {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,ListenerRegistration> entry : listenerConfigMap.entrySet()) {
             ret.put(entry.getKey(),entry.getValue().toJson());
@@ -128,7 +128,7 @@ class Client {
      * UUID of this client
      * @return id
      */
-    String getId() {
+    public String getId() {
         return id;
     }
 
@@ -136,7 +136,7 @@ class Client {
      * Add a backend which is used by this client
      * @param pType backend type
      */
-    void addUsedBackend(String pType) {
+    public void addUsedBackend(String pType) {
         usedBackends.add(pType);
     }
 

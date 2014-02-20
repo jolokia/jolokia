@@ -1,4 +1,4 @@
-package org.jolokia.notification.pull;
+package org.jolokia.agent.service.pullnotif;
 
 /**
  * MBean for accessing pull requests.

@@ -59,7 +59,7 @@ class NotificationListenerDelegate implements NotificationListener {
     }
 
     /**
-     * Register a client. A uniqued ID is generated which must be provided in subsequent
+     * Register a client. A unique ID is generated which must be provided in subsequent
      * request
      *
      * @return client id

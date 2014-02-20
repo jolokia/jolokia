@@ -1,8 +1,4 @@
 # ============================================
-# Notification backend
-org.jolokia.notification.pull.PullNotificationBackend
-
-# ============================================
 # History MBean interceptor
 org.jolokia.history.HistoryMBeanRequestInterceptor
 

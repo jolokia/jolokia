@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
+import org.jolokia.service.notification.NotificationBackendManager;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.notification.*;
 import org.jolokia.service.JolokiaContext;
@@ -20,7 +21,7 @@ public class NotificationDispatcher {
 
     // Delegate for doing the actual registration stuff
     private final NotificationListenerDelegate listenerDelegate;
-    private final NotificationBackendManager   backendManager;
+    private final NotificationBackendManager backendManager;
 
     /**
      * Initialize backends and delegate

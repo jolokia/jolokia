@@ -43,6 +43,7 @@
     <module>osgi-bundle</module>
     <module>jmx</module>
     <module>service/jmx</module>
+    <module>service/pullnotif</module>
   </modules>
 
   <profiles>

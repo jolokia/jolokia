@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.notification.pull;
+package org.jolokia.agent.service.pullnotif;
 
 import java.util.List;
 import java.util.Map;

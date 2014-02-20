@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jolokia.agent.service.jmx.handler.notification;
+package org.jolokia.service.notification;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.service.notification.NotificationBackend;
 import org.jolokia.service.JolokiaContext;
 
 /**
@@ -29,7 +28,7 @@ import org.jolokia.service.JolokiaContext;
  * @author roland
  * @since 22.03.13
  */
-class NotificationBackendManager {
+public class NotificationBackendManager {
 
     // Map mode to Backend and configs
     private final JolokiaContext context;
@@ -39,7 +38,7 @@ class NotificationBackendManager {
      *
      * @param pContext jolokia context
      */
-    NotificationBackendManager(JolokiaContext pContext) {
+    public NotificationBackendManager(JolokiaContext pContext) {
         context = pContext;
     }
 
@@ -50,7 +49,7 @@ class NotificationBackendManager {
      * @return map with backend types as keys and their configuration as values (which
      *         is probably also a map)
      */
-    Map<String, ?> getBackendConfig() {
+    public Map<String, ?> getBackendConfig() {
         Map<String, Map<String, ?>> configMap = new HashMap<String, Map<String, ?>>();
 
         for (NotificationBackend backend : context.getServices(NotificationBackend.class)) {
@@ -64,7 +63,7 @@ class NotificationBackendManager {
      *
      * @param pType backend type to lookup
      */
-    NotificationBackend getBackend(String pType) {
+    public NotificationBackend getBackend(String pType) {
         for (NotificationBackend backend : context.getServices(NotificationBackend.class)) {
             if (backend.getNotifType().equalsIgnoreCase(pType)) {
                 return backend;
@@ -80,7 +79,7 @@ class NotificationBackendManager {
      * @param pClient client id
      * @param pHandle notification handle
      */
-    void unsubscribe(String pType, String pClient, String pHandle) {
+    public void unsubscribe(String pType, String pClient, String pHandle) {
         NotificationBackend backend = getBackend(pType);
         backend.unsubscribe(pClient,pHandle);
     }
@@ -91,7 +90,7 @@ class NotificationBackendManager {
      *
      * @param pClient client to unregister.
      */
-    void unregister(Client pClient) {
+    public void unregister(Client pClient) {
         for (String mode : pClient.getUsedBackendModes()) {
             NotificationBackend backend = getBackend(mode);
             backend.unregister(pClient.getId());

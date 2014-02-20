@@ -1,11 +1,10 @@
-package org.jolokia.agent.service.jmx.handler.notification;
+package org.jolokia.service.notification;
 
 import java.util.List;
 import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.service.notification.BackendCallback;
 import org.jolokia.request.notification.AddCommand;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,7 +16,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 18.03.13
  */
-class ListenerRegistration {
+public class ListenerRegistration {
 
     // the callback to be called when notifications come in
     private final BackendCallback callback;
@@ -43,7 +42,7 @@ class ListenerRegistration {
      * @param pCommand command from where to extract parameters
      * @param pCallback callback to call when a notification arrives
      */
-    ListenerRegistration(AddCommand pCommand, BackendCallback pCallback) {
+    public ListenerRegistration(AddCommand pCommand, BackendCallback pCallback) {
         callback = pCallback;
         mbeanName = pCommand.getObjectName();
         handback = pCommand.getHandback();
@@ -56,7 +55,7 @@ class ListenerRegistration {
      * Return a JSON representation of this config (used for list)
      * @return JSON representation
      */
-     JSONObject toJson() {
+    public JSONObject toJson() {
         JSONObject ret = new JSONObject();
         ret.put("mbean", mbeanName.toString());
         if (filter != null) {
@@ -72,22 +71,22 @@ class ListenerRegistration {
     }
 
     /** Get callback */
-    BackendCallback getCallback() {
+    public BackendCallback getCallback() {
         return callback;
     }
 
     /** Get Filter */
-    NotificationFilter getFilter() {
+    public NotificationFilter getFilter() {
         return filter;
     }
 
     /** Get Objectname */
-    ObjectName getMBeanName() {
+    public ObjectName getMBeanName() {
         return mbeanName;
     }
 
     /** Get the handback used for the JMX listener */
-    Object getHandback() {
+    public Object getHandback() {
         return handback;
     }
 
@@ -97,7 +96,7 @@ class ListenerRegistration {
     }
 
     /** Backend used */
-    String getBackendMode() {
+    public String getBackendMode() {
         return backendMode;
     }
 

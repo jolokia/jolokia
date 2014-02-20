@@ -6,14 +6,15 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.easymock.EasyMock;
 import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.request.notification.*;
+import org.jolokia.service.AbstractJolokiaService;
+import org.jolokia.service.notification.*;
+import org.jolokia.util.TestJolokiaContext;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.util.jmx.SingleMBeanServerExecutor;
-import org.jolokia.service.notification.NotificationBackend;
-import org.jolokia.notification.pull.PullNotificationBackend;
-import org.jolokia.request.notification.*;
-import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -36,8 +37,8 @@ public class NotificationDispatcherTest {
         }
     }
 
-    private NotificationDispatcher      dispatcher;
-    private MBeanServerConnection       connection;
+    private NotificationDispatcher dispatcher;
+    private MBeanServerConnection connection;
     private MBeanServerExecutor executor;
 
     private TestJolokiaContext ctx;
@@ -46,13 +47,12 @@ public class NotificationDispatcherTest {
     @BeforeMethod
     public void setup() {
         ServerHandle serverHandle = ServerHandle.NULL_SERVER_HANDLE;
-        pullBackend = new PullNotificationBackend(10);
+        pullBackend = new TestNotificationBackend();
         ctx = new TestJolokiaContext.Builder()
                 .serverHandle(serverHandle)
                 .config(ConfigKey.AGENT_ID,"test")
                 .services(NotificationBackend.class,pullBackend)
                 .build();
-        pullBackend.init(ctx);
         dispatcher = new NotificationDispatcher(ctx);
         connection = createMock(MBeanServerConnection.class);
         executor = new SingleMBeanServerExecutor(connection);
@@ -60,7 +60,6 @@ public class NotificationDispatcherTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        pullBackend.destroy();
         // Unregister all MBeans
         ctx.destroy();
     }
@@ -97,7 +96,7 @@ public class NotificationDispatcherTest {
     public void testUnregisterWithListeners() throws Exception {
         String id = registerClient();
         setupConnectionForAdd();
-        AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","pull");
+        AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","test");
         String handle = dispatch(addCmd);
         UnregisterCommand uregCmd = createCommand(UnregisterCommand.class,"client",id);
         dispatch(uregCmd);
@@ -105,9 +104,10 @@ public class NotificationDispatcherTest {
 
     @Test
     public void testAddAndRemove() throws Exception {
+
         String id = registerClient();
         setupConnectionForAdd();
-        AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","pull");
+        AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","test");
         String handle = dispatch(addCmd);
         ListCommand listCmd = createCommand(ListCommand.class,"client",id);
         JSONObject list = dispatch(listCmd);
@@ -120,8 +120,8 @@ public class NotificationDispatcherTest {
 
     private void setupConnectionForAdd() throws IOException, InstanceNotFoundException, NoSuchFieldException, IllegalAccessException, ListenerNotFoundException {
         expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
-        connection.addNotificationListener(eq(TEST_NAME), eq(getNotificationListener()), (NotificationFilter) isNull(), isA(ListenerRegistration.class));
-        connection.removeNotificationListener(eq(TEST_NAME), eq(getNotificationListener()), (NotificationFilter) isNull(), isA(ListenerRegistration.class));
+        connection.addNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), (NotificationFilter) EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
+        connection.removeNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), (NotificationFilter) EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
         replay(connection);
     }
 
@@ -167,6 +167,33 @@ public class NotificationDispatcherTest {
                 args.put(keyValues[i],keyValues[i+1]);
             }
             return constructor.newInstance(args);
+        }
+    }
+
+    private class TestNotificationBackend extends AbstractJolokiaService<NotificationBackend> implements NotificationBackend {
+
+        protected TestNotificationBackend() {
+            super(NotificationBackend.class, 0);
+        }
+
+        public String getNotifType() {
+            return "test";
+        }
+
+        public BackendCallback subscribe(NotificationSubscription pSubscription) {
+            return null;
+        }
+
+        public void unsubscribe(String pClientId, String pHandle) {
+
+        }
+
+        public void unregister(String pClientId) {
+
+        }
+
+        public Map<String, ?> getConfig() {
+            return new HashMap<String, Object>();
         }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.notification.pull;
+package org.jolokia.agent.service.pullnotif;
 
 import java.lang.management.ManagementFactory;
 import java.util.Map;
@@ -27,9 +27,10 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.service.notification.BackendCallback;
 import org.jolokia.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
+import org.testng.Assert;
 import org.testng.annotations.*;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -61,8 +62,8 @@ public class PullNotificationBackendTest {
     @Test
     public void testConfig() throws Exception {
         JSONObject cfg = (JSONObject) backend.getConfig();
-        assertEquals(cfg.get("store"),"jolokia:type=NotificationStore,agent=test");
-        assertTrue(cfg.containsKey("maxEntries"));
+        Assert.assertEquals(cfg.get("store"), "jolokia:type=NotificationStore,agent=test");
+        Assert.assertTrue(cfg.containsKey("maxEntries"));
     }
 
    @Test
@@ -98,7 +99,7 @@ public class PullNotificationBackendTest {
         backend.unsubscribe(client,handle);
 
         NotificationResult notifs = jmxPull(client, handle);
-        assertNull(notifs);
+        Assert.assertNull(notifs);
     }
 
     @Test
@@ -116,7 +117,7 @@ public class PullNotificationBackendTest {
         backend.unregister(client);
 
         NotificationResult notifs = jmxPull(client, handle);
-        assertNull(notifs);
+        Assert.assertNull(notifs);
     }
 
     private NotificationResult jmxPull(String pClient, String pHandle) throws MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
