@@ -5,10 +5,10 @@ import java.util.SortedSet;
 
 import javax.management.*;
 
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.discovery.AgentDetails;
+import org.jolokia.service.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.service.JolokiaService;

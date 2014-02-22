@@ -6,9 +6,11 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
 
+import org.jolokia.agent.service.serializer.Converters;
 import org.jolokia.backend.NotChangedException;
 import org.jolokia.request.JolokiaExecRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
@@ -40,7 +42,7 @@ public class OpenExecHandlerTest {
 
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        ctx = new TestJolokiaContext();
+        ctx = new TestJolokiaContext.Builder().services(JmxSerializer.class,new Converters()).build();
         handler = new ExecHandler(ctx);
     }
 

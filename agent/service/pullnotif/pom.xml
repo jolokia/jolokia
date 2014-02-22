@@ -23,7 +23,7 @@
   <artifactId>jolokia-service-pullnotif</artifactId>
   <version>1.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>jolokia-service-jmx</name>
+  <name>jolokia-service-pullnotif</name>
   <description>Jolokia :: Service :: Pull Notification</description>
 
   <url>http://www.jolokia.org/jolokia-agent-parent/jolokia-service-pullnotif</url>

@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -136,7 +136,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
                 return new JolokiaWriteRequest(
                         pStack.pop(), // object name
                         pStack.pop(), // attribute name
-                        StringToObjectConverter.convertSpecialStringTags(pStack.pop()), // value
+                        EscapeUtil.convertSpecialStringTags(pStack.pop()), // value
                         prepareExtraArgs(pStack), // path
                         pParams);
             }

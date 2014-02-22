@@ -23,15 +23,12 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.*;
-import org.jolokia.backend.RequestDispatcher;
-import org.jolokia.backend.RequestDispatcherImpl;
-import org.jolokia.converter.Converters;
-import org.jolokia.service.request.RequestHandler;
-import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.request.JolokiaReadRequest;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.service.request.RequestHandler;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.*;
 import org.json.simple.*;
@@ -214,10 +211,9 @@ public class HttpRequestHandlerTest {
                 .restrictor(pRestrictor)
                 .logHandler(pLogHandler)
                 .services(RequestHandler.class,services)
-                .services(JmxSerializer.class,new Converters())
+                .services(JmxSerializer.class,new TestJmxSerializer())
                 .build();
-        RequestDispatcher dispatcher = new RequestDispatcherImpl(ctx);
-        handler = new HttpRequestHandler(ctx, dispatcher);
+        handler = new HttpRequestHandler(ctx);
     }
 
 
@@ -251,13 +247,15 @@ public class HttpRequestHandlerTest {
 
     private void verifyDispatcher(int i, JSONAware response) {
         if (i == 1) {
-            assertEquals(((JSONObject) response).get("value"),"hello");
+            JSONObject val = (JSONObject) ((JSONObject) response).get("value");
+            assertEquals(val.get("testString"),"hello");
         } else {
             JSONArray ret = (JSONArray) response;
             assertEquals(ret.size(),i);
             for (int j = 0; j < i; j++) {
-                JSONObject val = (JSONObject) ret.get(j);
-                assertEquals(val.get("value"),"hello");
+                JSONObject resp = (JSONObject) ret.get(j);
+                JSONObject val = (JSONObject) resp.get("value");
+                assertEquals(val.get("testString"),"hello");
             }
         }
         verify(requestHandler);

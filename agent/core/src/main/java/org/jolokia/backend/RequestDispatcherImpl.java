@@ -15,7 +15,7 @@ import org.jolokia.service.request.RequestHandler;
  * @author roland
  * @since 11.06.13
  */
-public class RequestDispatcherImpl implements RequestDispatcher {
+class RequestDispatcherImpl implements RequestDispatcher {
 
     // Service manager for looking up services
     private final JolokiaContext jolokiaContext;
@@ -25,7 +25,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
      *
      * @param pPJolokiaContext service manager for looking up all services
      */
-    public RequestDispatcherImpl(JolokiaContext pPJolokiaContext) {
+    RequestDispatcherImpl(JolokiaContext pPJolokiaContext) {
         jolokiaContext = pPJolokiaContext;
     }
 

@@ -115,8 +115,8 @@
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.util;version="${project.version}",
               org.jolokia.converter;version="${project.version}",
-              org.jolokia.converter.json;version="${project.version}",
-              org.jolokia.converter.object;version="${project.version}",
+              org.jolokia.agent.service.serializer.json;version="${project.version}",
+              org.jolokia.agent.service.serializer.object;version="${project.version}",
             </Export-Package>
             <Import-Package>
               org.jolokia.osgi.servlet;version="${project.version}",

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.Version;
+import org.jolokia.service.AgentDetails;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;

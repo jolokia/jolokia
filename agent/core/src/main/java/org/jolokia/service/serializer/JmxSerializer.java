@@ -6,7 +6,6 @@ import java.util.List;
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.service.JolokiaService;
 
 /**

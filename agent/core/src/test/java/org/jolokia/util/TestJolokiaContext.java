@@ -21,14 +21,11 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.*;
-import org.jolokia.converter.Converters;
-import org.jolokia.discovery.AgentDetails;
+import org.jolokia.service.AgentDetails;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.JolokiaService;
+import org.jolokia.service.*;
 import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.util.jmx.JmxUtil;
 
@@ -51,7 +48,7 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public TestJolokiaContext() {
         this(null,null,null,null,null,null);
-        services.put(JmxSerializer.class,new TreeSet<JmxSerializer>(Arrays.asList(new Converters())));
+        services.put(JmxSerializer.class,new TreeSet<JmxSerializer>(Arrays.asList(new TestJmxSerializer())));
     }
 
     private TestJolokiaContext(Configuration pConfig,

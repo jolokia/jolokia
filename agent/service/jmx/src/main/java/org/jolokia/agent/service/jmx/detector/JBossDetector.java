@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.util.ClassUtil;
 

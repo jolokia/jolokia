@@ -44,6 +44,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>annotations</artifactId>
     </dependency>

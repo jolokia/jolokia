@@ -20,11 +20,10 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanRegistry;
 import org.jolokia.service.request.RequestHandler;
 import org.jolokia.service.detector.ServerDetector;
 import org.jolokia.config.Configuration;
-import org.jolokia.discovery.AgentDetails;
+import org.jolokia.service.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;

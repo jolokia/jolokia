@@ -19,7 +19,7 @@ package org.jolokia.agent.service.jmx.detector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 
 /**

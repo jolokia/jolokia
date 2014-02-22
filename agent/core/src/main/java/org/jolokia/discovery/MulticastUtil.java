@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+import org.jolokia.service.AgentDetails;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
 

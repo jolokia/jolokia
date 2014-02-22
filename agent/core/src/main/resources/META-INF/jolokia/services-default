@@ -5,7 +5,3 @@ org.jolokia.history.HistoryMBeanRequestInterceptor
 # ============================================
 # Discovery MBean registration
 org.jolokia.discovery.JolokiaDiscovery
-
-# ============================================
-# JSON Serializer
-org.jolokia.converter.Converters

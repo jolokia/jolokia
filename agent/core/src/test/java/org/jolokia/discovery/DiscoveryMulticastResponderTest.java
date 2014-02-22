@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.jolokia.service.AgentDetails;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
@@ -20,7 +21,6 @@ public class DiscoveryMulticastResponderTest {
 
     @Test
     public void simple() throws IOException, InterruptedException {
-        System.out.println("=================================================");
         if (!NetworkUtil.isMulticastSupported()) {
             throw new SkipException("No multicast interface found, skipping test ");
         }
@@ -32,7 +32,6 @@ public class DiscoveryMulticastResponderTest {
         Thread.sleep(1000);
         JolokiaDiscovery discovery = new JolokiaDiscovery("test");
         List<JSONObject> msgs = discovery.lookupAgents();
-        System.out.println("=================================================");
         assertTrue(msgs.size() > 0);
         responder.stop();
 

@@ -17,6 +17,7 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -27,11 +28,12 @@ import javax.management.MalformedObjectNameException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
+import org.jolokia.backend.BackendManager;
 import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.converter.Converters;
-import org.jolokia.service.serializer.JmxSerializer;
+import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.request.JolokiaRequestBuilder;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -53,12 +55,28 @@ public class JolokiaHttpHandlerTest {
 
 
     @BeforeMethod
-    public void setup() throws MalformedObjectNameException {
+    public void setup() throws MalformedObjectNameException, NoSuchFieldException, IllegalAccessException {
         ctx = getContext();
         requestDispatcher = new TestRequestDispatcher.Builder()
                 .request(new JolokiaRequestBuilder(RequestType.READ, "java.lang:type=Memory").attribute("HeapMemoryUsage").build())
                 .andReturnMapValue("used",4711L).build();
-        handler = new JolokiaHttpHandler(ctx, requestDispatcher);
+        handler = new JolokiaHttpHandler(ctx);
+        // Not optimal since diving into internal, but the overall test is not very
+        // optimal.
+        injectRequestDispatcher(handler,requestDispatcher);
+    }
+
+    // Quick fix for replacing the request dispatcher
+    private void injectRequestDispatcher(JolokiaHttpHandler pHandler, RequestDispatcher pRequestDispatcher) throws NoSuchFieldException, IllegalAccessException {
+        Field field = pHandler.getClass().getDeclaredField("requestHandler");
+        field.setAccessible(true);
+        HttpRequestHandler rHandler = (HttpRequestHandler) field.get(pHandler);
+        field = HttpRequestHandler.class.getDeclaredField("backendManager");
+        field.setAccessible(true);
+        BackendManager bManager = (BackendManager) field.get(rHandler);
+        field = BackendManager.class.getDeclaredField("requestDispatcher");
+        field.setAccessible(true);
+        field.set(bManager,pRequestDispatcher);
     }
 
     @AfterMethod
@@ -93,7 +111,6 @@ public class JolokiaHttpHandlerTest {
                                                 "Origin",null
                                                );
 
-        // Simple GET method
         prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(exchange, header);
@@ -219,7 +236,7 @@ public class JolokiaHttpHandlerTest {
         debugToggle = !debugToggle;
         return new TestJolokiaContext.Builder()
                 .config(list.toArray())
-                .services(JmxSerializer.class,new Converters())
+                .services(JmxSerializer.class,new TestJmxSerializer())
                 .build();
     }
 }

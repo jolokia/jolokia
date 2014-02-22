@@ -23,7 +23,7 @@ import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.WebsphereDetector;
 import org.jolokia.service.detector.ServerDetector;
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;

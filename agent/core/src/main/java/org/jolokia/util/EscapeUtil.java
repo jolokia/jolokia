@@ -200,4 +200,33 @@ public final class EscapeUtil {
     }
 
 
+    /**
+     * For GET requests, where operation arguments and values to write are given in
+     * string representation as part of the URL, certain special tags are used to indicate
+     * special values:
+     *
+     * <ul>
+     *    <li><code>[null]</code> for indicating a null value</li>
+     *    <li><code>""</code> for indicating an empty string</li>
+     * </ul>
+     *
+     * This method converts these tags to the proper value. If not a tag, the original
+     * value is returned.
+     *
+     * If you need this tag values in the original semantics, please use POST requests.
+     *
+     * @param pValue the string value to check for a tag
+     * @return the converted value or the original one if no tag has been found.
+     */
+    public static String convertSpecialStringTags(String pValue) {
+        if ("[null]".equals(pValue)) {
+            // Null marker for get requests
+            return null;
+        } else if ("\"\"".equals(pValue)) {
+            // Special string value for an empty String
+            return "";
+        } else {
+            return pValue;
+        }
+    }
 }

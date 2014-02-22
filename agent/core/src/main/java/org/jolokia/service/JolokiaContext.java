@@ -5,9 +5,7 @@ import java.util.SortedSet;
 
 import javax.management.*;
 
-import org.jolokia.backend.ServerHandle;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.discovery.AgentDetails;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.LogHandler;
 

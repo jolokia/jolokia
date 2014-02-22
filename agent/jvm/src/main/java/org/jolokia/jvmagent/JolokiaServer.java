@@ -26,8 +26,6 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
-import org.jolokia.backend.RequestDispatcher;
-import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
@@ -73,7 +71,6 @@ public class JolokiaServer {
 
     // HttpContext created when we start it up
     private HttpContext httpContext;
-
 
     private DiscoveryMulticastResponder discoveryMulticastResponder;
 
@@ -124,8 +121,7 @@ public class JolokiaServer {
      */
     public void start() {
         JolokiaContext jolokiaContext = serviceManager.start();
-        RequestDispatcher requestDispatcher = new RequestDispatcherImpl(jolokiaContext);
-        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, requestDispatcher);
+        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
 
         // URL as configured takes precedence
         String configUrl = config.getJolokiaConfig().getConfig(ConfigKey.DISCOVERY_AGENT_URL);

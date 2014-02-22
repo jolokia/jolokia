@@ -16,7 +16,7 @@ package org.jolokia.osgi.detector;
  * limitations under the License.
  */
 
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 
 /**

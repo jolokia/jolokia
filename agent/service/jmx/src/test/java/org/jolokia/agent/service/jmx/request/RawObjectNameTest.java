@@ -24,16 +24,14 @@ import java.util.regex.Pattern;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.agent.service.jmx.LocalRequestHandler;
+import org.jolokia.agent.service.serializer.Converters;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.converter.Converters;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.service.request.RequestHandler;
 import org.jolokia.service.serializer.JmxSerializer;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.util.*;
 import org.json.simple.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,7 +55,7 @@ public class RawObjectNameTest {
                 .services(JmxSerializer.class,new Converters())
                 .build();
         ctx.init();
-        backendManager = new BackendManager(ctx, new RequestDispatcherImpl(ctx));
+        backendManager = new BackendManager(ctx);
     }
 
     @Test

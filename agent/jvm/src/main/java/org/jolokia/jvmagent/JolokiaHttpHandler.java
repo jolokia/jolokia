@@ -28,7 +28,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 
 import com.sun.net.httpserver.*;
-import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.service.JolokiaContext;
@@ -62,7 +61,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      *
      * @param pJolokiaContext jolokia context
      */
-    public JolokiaHttpHandler(JolokiaContext pJolokiaContext, RequestDispatcher pRequestDispatcher) {
+    public JolokiaHttpHandler(JolokiaContext pJolokiaContext) {
         jolokiaContext = pJolokiaContext;
 
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
@@ -72,7 +71,7 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
-        requestHandler = new HttpRequestHandler(jolokiaContext, pRequestDispatcher);
+        requestHandler = new HttpRequestHandler(jolokiaContext);
     }
 
     /**

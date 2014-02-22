@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;

@@ -22,7 +22,7 @@ import java.util.List;
 
 import javax.management.*;
 
-import org.jolokia.backend.MBeanRegistry;
+import org.jolokia.service.impl.MBeanRegistry;
 import org.jolokia.util.jmx.LocalMBeanServerExecutor;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 import org.testng.annotations.Test;

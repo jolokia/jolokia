@@ -3,6 +3,7 @@ package org.jolokia.discovery;
 
 import java.io.UnsupportedEncodingException;
 
+import org.jolokia.service.AgentDetails;
 import org.json.simple.JSONObject;
 
 /**
@@ -41,7 +42,7 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
-        respond.put(Payload.TYPE.asKey(), type.toString().toLowerCase());
+        respond.put(MESSAGE_TYPE, type.toString().toLowerCase());
         if (agentDetails != null) {
             respond.putAll(agentDetails.toJSONObject());
         }
@@ -64,38 +65,7 @@ abstract class AbstractDiscoveryMessage {
         }
     }
 
-    /**
-     * Enum holding the possible values for the discovery request/response. Note that the
-     * name of the enum is used literally in the message and must not be changed.
-     */
-    public enum Payload {
-            // Type of request (see Message type)
-            TYPE,
-            // Agent URL as the agent sees itself
-            URL,
-            // Whether the agent is secured and an authentication is required (0,1). If not given, this info is not known
-            SECURED,
-            // Vendor of the detected container
-            SERVER_VENDOR,
-            // The product in which the agent is running
-            SERVER_PRODUCT,
-            // Version of the server
-            SERVER_VERSION,
-            // Version of the agent
-            AGENT_VERSION,
-            // The agent id
-            AGENT_ID,
-            // Description of the agent (if any)
-            AGENT_DESCRIPTION;
-
-            String asKey() {
-                return this.name().toLowerCase();
-            }
-
-            public static Payload fromKey(String pKey) {
-                return Payload.valueOf(pKey.toUpperCase());
-            }
-    }
+    protected static String MESSAGE_TYPE = "type";
 
     /**
      * Type of message. The constant names are used as type value for the payload

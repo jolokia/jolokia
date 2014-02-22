@@ -25,10 +25,8 @@ import javax.management.*;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.converter.Converters;
-import org.jolokia.service.serializer.JmxSerializer;
-import org.jolokia.converter.json.SerializeOptions;
-import org.jolokia.converter.json.ValueFaultHandler;
+import org.jolokia.agent.service.serializer.Converters;
+import org.jolokia.service.serializer.*;
 
 /**
  * Dedicate MBeanServer for registering Jolokia-only MBeans
@@ -42,7 +40,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
     private MBeanServer     delegateServer;
     private Set<ObjectName> delegatedMBeans;
 
-    private JmxSerializer converters;
+    private JmxSerializer serializer;
 
     /**
      * Create a private MBean server
@@ -51,7 +49,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
         MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
         delegatedMBeans = new HashSet<ObjectName>();
         delegateServer = ManagementFactory.getPlatformMBeanServer();
-        converters = new Converters(0);
+        serializer = createSerializer();
         init(mBeanServer);
     }
 
@@ -86,6 +84,11 @@ class JolokiaMBeanServer extends MBeanServerProxy {
             }
         }
         return ret;
+    }
+
+    private JmxSerializer createSerializer() {
+        // TODO: Hardcoded for now
+        return new Converters();
     }
 
     // Lookup a JsonMBean annotation
@@ -149,7 +152,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      */
     String toJson(Object object, SerializeOptions pConvertOptions) {
         try {
-            Object ret = converters.serialize(object, null, pConvertOptions);
+            Object ret = serializer.serialize(object, null, pConvertOptions);
             return ret.toString();
         } catch (AttributeNotFoundException exp) {
             // Cannot happen, since we dont use a path
@@ -166,7 +169,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      * @return the deserialized object
      */
     Object fromJson(String type, String json) {
-        return converters.deserialize(type, json);
+        return serializer.deserialize(type, json);
     }
 
     /**
@@ -177,7 +180,7 @@ class JolokiaMBeanServer extends MBeanServerProxy {
      * @return the converted object
      */
     Object fromJson(OpenType type, String json) {
-        return converters.deserializeOpenType(type, json);
+        return serializer.deserializeOpenType(type, json);
     }
 
     // Extract convert options from annotation

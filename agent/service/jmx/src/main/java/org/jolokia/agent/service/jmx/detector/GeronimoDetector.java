@@ -16,7 +16,7 @@ package org.jolokia.agent.service.jmx.detector;
  * limitations under the License.
  */
 
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.util.jmx.MBeanServerExecutor;
 
 /**

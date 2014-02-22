@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.util.EscapeUtil;
 import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -133,7 +133,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
         }
         List<String> args = new ArrayList<String>();
         for (String arg : extraArgs) {
-            args.add(StringToObjectConverter.convertSpecialStringTags(arg));
+            args.add(EscapeUtil.convertSpecialStringTags(arg));
         }
         return args;
     }

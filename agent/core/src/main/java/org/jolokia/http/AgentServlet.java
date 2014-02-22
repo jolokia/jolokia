@@ -8,7 +8,6 @@ import javax.management.RuntimeMBeanException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.jolokia.backend.RequestDispatcherImpl;
 import org.jolokia.config.*;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
@@ -118,7 +117,7 @@ public class AgentServlet extends HttpServlet {
 
         // Start it up ....
         jolokiaContext = serviceManager.start();
-        requestHandler = new HttpRequestHandler(jolokiaContext, new RequestDispatcherImpl(jolokiaContext));
+        requestHandler = new HttpRequestHandler(jolokiaContext);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();

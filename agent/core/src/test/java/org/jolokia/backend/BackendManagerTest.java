@@ -21,15 +21,13 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.service.request.AbstractRequestHandler;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.converter.Converters;
-import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.request.JolokiaRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.request.AbstractRequestHandler;
+import org.jolokia.service.serializer.JmxSerializer;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -47,9 +45,7 @@ public class BackendManagerTest {
     private LogHandler log = new LogHandler.StdoutLogHandler(false);
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
-        TestJolokiaContext.Builder builder =
-                new TestJolokiaContext.Builder()
-                .services(JmxSerializer.class,new Converters());
+        TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder().services(JmxSerializer.class,new TestJmxSerializer());
         if (configKeysAndValues.length > 0) {
             builder.config(ConfigKey.DEBUG, "true");
         }
@@ -122,21 +118,18 @@ public class BackendManagerTest {
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
-        assertTrue(!jsonError.containsKey("stackTrace"));
-        assertEquals(jsonError.get("message"), "Hans");
-        assertEquals(((JSONObject) jsonError.get("cause")).get("message"), "Kalb");
+        assertEquals(jsonError.get("testClass"), IllegalArgumentException.class.toString());
+        assertTrue(((String) jsonError.get("testString")).contains("Hans"));
     }
 
     // =========================================================================================
 
-static class RequestHandlerTest extends AbstractRequestHandler {
+    static class RequestHandlerTest extends AbstractRequestHandler {
 
         static boolean called = false;
 
-        public RequestHandlerTest(Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
-            super("test",1);
-            assertNotNull(pConverters);
-            assertNotNull(pRestrictor);
+        public RequestHandlerTest() {
+            super("test", 1);
         }
 
         public Object handleRequest(JolokiaRequest pJmxReq,Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {

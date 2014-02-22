@@ -3,6 +3,7 @@ package org.jolokia.backend;
 import javax.management.*;
 
 import org.jolokia.history.History;
+import org.jolokia.service.impl.MBeanRegistry;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.assertEquals;

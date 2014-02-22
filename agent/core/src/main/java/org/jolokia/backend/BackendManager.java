@@ -6,12 +6,12 @@ import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.JMException;
 
-import org.jolokia.service.request.RequestInterceptor;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.service.serializer.JmxSerializer;
-import org.jolokia.converter.json.SerializeOptions;
 import org.jolokia.request.JolokiaRequest;
 import org.jolokia.service.JolokiaContext;
+import org.jolokia.service.request.RequestInterceptor;
+import org.jolokia.service.serializer.JmxSerializer;
+import org.jolokia.service.serializer.SerializeOptions;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.config.ConfigKey.*;
@@ -52,12 +52,22 @@ public class BackendManager {
     private SerializeOptions.Builder convertOptionsBuilder;
 
     /**
-     * Construct a new backend manager with the given configuration.
+     * Construct a new backend manager with the given configuration and with the default
+     * request dispatcher
      *
      * @param pJolokiaCtx jolokia context for accessing internal services
-     * @param pRequestDispatcher
      */
-    public BackendManager(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
+    public BackendManager(JolokiaContext pJolokiaCtx) {
+        this(pJolokiaCtx, new RequestDispatcherImpl(pJolokiaCtx));
+    }
+
+    /**
+     * Create a backend manager with a custom request dispatcher
+     *
+     * @param pJolokiaCtx context used as service locator
+     * @param pRequestDispatcher the request dispatcher to use.
+     */
+    BackendManager(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
         jolokiaCtx = pJolokiaCtx;
         requestDispatcher = pRequestDispatcher;
         init(pJolokiaCtx);
@@ -123,12 +133,9 @@ public class BackendManager {
      * @return the exception.
      */
     public Object convertExceptionToJson(Throwable pExp, JolokiaRequest pJmxReq)  {
-        SerializeOptions opts = getJsonConvertOptions(pJmxReq);
+        SerializeOptions opts = getSerializeOptions(pJmxReq);
         try {
-            JSONObject expObj =
-                    (JSONObject) jolokiaCtx.getService(JmxSerializer.class).serialize(pExp, null, opts);
-            return expObj;
-
+            return jolokiaCtx.getService(JmxSerializer.class).serialize(pExp, null, opts);
         } catch (AttributeNotFoundException e) {
             // Cannot happen, since we dont use a path
             return null;
@@ -170,7 +177,7 @@ public class BackendManager {
             throws JMException, IOException, NotChangedException {
         Object result = requestDispatcher.dispatch(pJmxReq);
 
-        SerializeOptions opts = getJsonConvertOptions(pJmxReq);
+        SerializeOptions opts = getSerializeOptions(pJmxReq);
 
         Object jsonResult =
                 jolokiaCtx.getService(JmxSerializer.class).serialize(
@@ -184,7 +191,7 @@ public class BackendManager {
         return jsonObject;
     }
 
-    private SerializeOptions getJsonConvertOptions(JolokiaRequest pJmxReq) {
+    private SerializeOptions getSerializeOptions(JolokiaRequest pJmxReq) {
         return convertOptionsBuilder.
                     maxDepth(pJmxReq.getParameterAsInt(ConfigKey.MAX_DEPTH)).
                     maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).

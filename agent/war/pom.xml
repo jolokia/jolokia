@@ -46,6 +46,11 @@
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-pullnotif</artifactId>
       <version>${project.version}</version>
     </dependency>

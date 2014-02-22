@@ -11,8 +11,7 @@ import org.jolokia.util.RequestType;
 import org.json.simple.JSONObject;
 
 /**
- * A request dealing with notification requests. These are only used
- * for the {@link org.jolokia.backend.LocalRequestHandler} currently.
+ * A request dealing with notification requests.
  *
  * @author roland
  * @since 19.03.13

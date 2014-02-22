@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import javax.management.*;
 
 import org.jolokia.backend.BackendManager;
-import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.request.*;
 import org.jolokia.service.JolokiaContext;
@@ -55,8 +54,8 @@ public class HttpRequestHandler {
      *
      * @param pJolokiaCtx jolokia context
      */
-    public HttpRequestHandler(JolokiaContext pJolokiaCtx, RequestDispatcher pRequestDispatcher) {
-        backendManager = new BackendManager(pJolokiaCtx,pRequestDispatcher);
+    public HttpRequestHandler(JolokiaContext pJolokiaCtx) {
+        backendManager = new BackendManager(pJolokiaCtx);
         jolokiaCtx = pJolokiaCtx;
     }
 

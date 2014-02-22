@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.GlassfishDetector;
-import org.jolokia.backend.ServerHandle;
+import org.jolokia.service.ServerHandle;
 import org.jolokia.service.detector.ServerDetector;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.jmx.MBeanServerExecutor;

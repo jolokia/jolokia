@@ -44,6 +44,7 @@
     <module>jmx</module>
     <module>service/jmx</module>
     <module>service/pullnotif</module>
+    <module>service/serializer</module>
   </modules>
 
   <profiles>

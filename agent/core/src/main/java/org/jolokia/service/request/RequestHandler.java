@@ -2,7 +2,7 @@ package org.jolokia.service.request;
 
 import java.io.IOException;
 
-import javax.management.*;
+import javax.management.JMException;
 
 import org.jolokia.backend.NotChangedException;
 import org.jolokia.request.JolokiaRequest;
@@ -60,10 +60,8 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * @param pPreviousResult a result object from a previous {@link #handleRequest(JolokiaRequest, Object)} call when
      *                {@link JolokiaRequest#isExclusive()} is <code>false</code>. This argument can be <code>null</code>
      * @return result object
-     * @throws InstanceNotFoundException when a certain MBean could not be found
-     * @throws AttributeNotFoundException in case an attributes couldn't be resolved
-     * @throws ReflectionException
-     * @throws MBeanException
+     * @throws JMException if performing of the actions failes
+     * @throws IOException if handling fails
      * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
      *         has been set).
      */
@@ -92,5 +90,4 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * @return a object containing extra information and which must be serializable
      */
     Object getRuntimeInfo();
-
 }
