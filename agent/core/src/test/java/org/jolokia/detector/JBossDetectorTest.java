@@ -54,10 +54,10 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
         for (String name : new String[]{
                 "jboss.system:type=Server",
-                "jboss.as:management-root=server",
+                "jboss.as:*",
                 "jboss.modules:*"
         }) {
-            expect(server.queryNames(new ObjectName(name), null)).andReturn(Collections.<ObjectName>emptySet());
+            expect(server.queryNames(new ObjectName(name), null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         }
         replay(server);
         assertNull(detector.detect(servers));
@@ -67,7 +67,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
     @Test
     public void simpleFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IntrospectionException {
 
-
+        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(Collections.EMPTY_SET);
         ObjectName oName = prepareQuery("jboss.system:type=Server");
         expect(server.isRegistered(oName)).andStubReturn(true);
         expect(server.getAttribute(oName, "Version")).andReturn("5.1.0");
@@ -91,9 +91,8 @@ public class JBossDetectorTest extends BaseDetectorTest {
     public void version71() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
 
         expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
-        prepareQuery("jboss.as:management-root=server");
+        prepareQuery("jboss.as:*");
         ObjectName oName = new ObjectName("jboss.as:management-root=server");
-        expect(server.isRegistered(oName)).andStubReturn(true);
         expect(server.getAttribute(oName,"releaseVersion")).andReturn("7.1.1.Final");
         replay(server);
         ServerHandle handle = detector.detect(servers);
@@ -118,7 +117,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
     public void version7() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException {
 
         expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
-        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        expect(server.queryNames(new ObjectName("jboss.as:*"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.modules:*");
         replay(server);
         ServerHandle handle = detector.detect(servers);

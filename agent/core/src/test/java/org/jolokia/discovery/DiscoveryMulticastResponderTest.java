@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.NetworkUtil;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.util.*;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
 import org.testng.annotations.Test;

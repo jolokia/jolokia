@@ -23,6 +23,9 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
     // Agent id used for use in the query
     private String agentId = null;
 
+    // Used for logging when doing lookups
+    private LogHandler logHandler = LogHandler.QUIET;
+
     /**
      * Constructor to be called when called as a service
      * @param pOrder service order
@@ -44,6 +47,7 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         super.init(pJolokiaContext);
+        logHandler = pJolokiaContext;
         AgentDetails details = pJolokiaContext.getAgentDetails();
         agentId = details.getAgentId();
         String objectName = JolokiaDiscoveryMBean.OBJECT_NAME + ",agent=" + agentId;
@@ -65,7 +69,7 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                         .agentId(agentId)
                         .build();
-        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, new LogHandler.StdoutLogHandler(true));
+        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, logHandler);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
             ret.add(in.getAgentDetails().toJSONObject());
