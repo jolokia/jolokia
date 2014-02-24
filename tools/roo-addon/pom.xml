@@ -27,12 +27,12 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.1.6-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <properties>
-    <roo.version>1.2.3.RELEASE</roo.version>
+    <roo.version>1.2.5.RELEASE</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jolokia.version>${project.version}</jolokia.version>
   </properties>
@@ -125,6 +125,7 @@
         </executions>
         <configuration>
           <useAgent>true</useAgent>
+          <keyname>roland@jolokia.org</keyname>
         </configuration>
       </plugin>
       <plugin>
