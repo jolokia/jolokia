@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.2.0" description="Release 1.2.0" date="2014-02-14">
+    <release version="1.2.0" description="Release 1.2.0" date="2014-02-24">
       <action dev="roland" type="add" date="2013-02-14" issue="127">
         Agents can be configured to answer to discovery multicast request with there URL. This
         features is enabled by default for the JVM agent, and must enabled for the WAR
