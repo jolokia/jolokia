@@ -18,9 +18,11 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
 
     // Agent id used for use in the query
     private final String agentId;
+    private final LogHandler logHandler;
 
-    public JolokiaDiscovery(String agentId) {
-        this.agentId = agentId;
+    public JolokiaDiscovery(String pAgentId,LogHandler pLogHandler) {
+        agentId = pAgentId;
+        logHandler = pLogHandler;
     }
 
     /** {@inheritDoc} */
@@ -34,7 +36,7 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                         .agentId(agentId)
                         .build();
-        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, new LogHandler.StdoutLogHandler(true));
+        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, logHandler);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
             ret.add(in.getAgentDetails().toJSONObject());

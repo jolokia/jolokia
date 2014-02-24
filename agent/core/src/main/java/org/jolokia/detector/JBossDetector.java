@@ -1,7 +1,6 @@
 package org.jolokia.detector;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +20,20 @@ public class JBossDetector extends AbstractServerDetector {
 
     /** {@inheritDoc} */
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        ServerHandle handle = checkFromJSR77(pMBeanServerExecutor);
+        if (handle == null) {
+            handle = checkFor5viaJMX(pMBeanServerExecutor);
+            if (handle == null) {
+                handle = checkForManagementRootServerViaJMX(pMBeanServerExecutor);
+                if (handle == null) {
+                    handle = fallbackForVersion7Check(pMBeanServerExecutor);
+                }
+            }
+        }
+        return handle;
+    }
+
+    private ServerHandle checkFromJSR77(MBeanServerExecutor pMBeanServerExecutor) {
         if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JSR77 call
             String version = getVersionFromJsr77(pMBeanServerExecutor);
@@ -33,6 +46,10 @@ public class JBossDetector extends AbstractServerDetector {
                 return new JBossServerHandle(version, null);
             }
         }
+        return null;
+    }
+
+    private ServerHandle checkFor5viaJMX(MBeanServerExecutor pMBeanServerExecutor) {
         if (mBeanExists(pMBeanServerExecutor, "jboss.system:type=Server")) {
             String versionFull = getAttributeValue(pMBeanServerExecutor, "jboss.system:type=Server", "Version");
             String version = null;
@@ -41,10 +58,22 @@ public class JBossDetector extends AbstractServerDetector {
             }
             return new JBossServerHandle(version, null);
         }
-        String version = getSingleStringAttribute(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
-        if (version != null) {
-            return new JBossServerHandle(version, null);
+        return null;
+    }
+
+    private ServerHandle checkForManagementRootServerViaJMX(MBeanServerExecutor pMBeanServerExecutor) {
+        // Bug (or not ?) in Wildfly 8.0: Search for jboss.as:management-root=server return null but accessing this
+        // MBean works. So we are looking, whether the JMX domain jboss.as exists and fetch the version directly.
+        if (searchMBeans(pMBeanServerExecutor,"jboss.as:*").size() != 0) {
+            String version = getAttributeValue(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
+            if (version != null) {
+                return new JBossServerHandle(version, null);
+            }
         }
+        return null;
+    }
+
+    private ServerHandle fallbackForVersion7Check(MBeanServerExecutor pMBeanServerExecutor) {
         if (mBeanExists(pMBeanServerExecutor, "jboss.modules:*")) {
             // It's a JBoss 7, probably a 7.0.x one ...
             return new JBossServerHandle("7", null);

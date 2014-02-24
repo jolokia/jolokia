@@ -144,7 +144,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         }
 
         try {
-            mBeanServerHandler.registerMBean(new JolokiaDiscovery(agentId),JolokiaDiscoveryMBean.OBJECT_NAME);
+            mBeanServerHandler.registerMBean(new JolokiaDiscovery(agentId,log),JolokiaDiscoveryMBean.OBJECT_NAME);
         } catch (InstanceAlreadyExistsException e) {
             // Ignore since there is already one registered.
             log.info("Jolokia Discovery MBean registration is skipped because there is already one registered.");

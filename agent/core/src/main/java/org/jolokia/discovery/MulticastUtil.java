@@ -84,6 +84,7 @@ public final class MulticastUtil {
             Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address, out, pTimeout, pLogHandler);
             futures.add(executor.submit(findAgentsCallable));
         }
+        executor.shutdownNow();
         return futures;
     }
 
