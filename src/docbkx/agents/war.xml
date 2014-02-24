@@ -305,7 +305,7 @@
         <td><constant>agentDescription</constant></td>
         <td>
           An optional description which can be used for clients to
-          present a humand readable label for this agent.
+          present a human readable label for this agent.
         </td>
         <td>          
           <constant>Intranet Timebooking Server</constant>

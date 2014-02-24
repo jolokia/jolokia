@@ -85,10 +85,10 @@
           New year, new release. Ok, it's not the BIG 2.0 which I already somewhat promised. Anyways,
           another big feature jumped on the 1.x train in the last minute. It is now possible to find agents in your network by sending
           an UDP packet to the multicast group 239.192.48.84, port 24884. Agents having this discovery mechanism enabled
-          will respond with its meta data including the access URL. This is especially
+          will respond with their meta data including the access URL. This is especially
           useful for clients who want to provide access to agents without much configuration. I.e.
-          the excellent <a href="http://hawt.io">hawt.io</a> will use it one way or the other. In fact, it was hawt.io
-          which put me <a href="https://github.com/rhuss/jolokia/pull/126">on track</a> for this feature.
+          the excellent <a href="http://hawt.io">hawt.io</a> will probably use it one way or the other. In fact, it was hawt.io
+          which put me <a href="https://github.com/rhuss/jolokia/pull/126">on track</a> for this nice little feature ;-)
         </p>
         <p>
           Discovery is enabled by default for the <a href="reference/html/agents.html#agents-jvm">JVM agent</a>, but not for
@@ -99,16 +99,16 @@
         <p>
           The protocol for the discovery mechanism is also <a href="reference/html/protocol.html#discovery">specified</a> in the reference manual. One of the first clients
           supporting this discovery mode is <a href="http://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm">Jmx4Perl</a> in its newest version. The Jolokia
-          Java client will follow in one of the next releases.
+          Java client will follow in one of the next minor releases.
         </p>
         <p>
           But you don't need client support for multicast requests if you know already the URL for one agent. Each
           agent registers a MBean <code>jolokia:type=Discovery</code> which perform the multicast discovery request for
           you if you trigger the operation <code>lookupAgents</code>. The returned value contains the agent information
-          is described <a href="reference/html/mbeans.html#mbean-discovery">here</a>.
+          and is described <a href="reference/html/mbeans.html#mbean-discovery">here</a>.
         </p>
         <p>
-          This feature has been tested in various environments, but since low level networking can, well, "painful", I would
+          This feature has been tested in various environments, but since low level networking can be, well, "painful", I would
           ask you to open an <a href="https://github.com/rhuss/jolokia/issues">issue</a> in case of any problems.
         </p>
         <p>
