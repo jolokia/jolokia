@@ -1,4 +1,4 @@
-package org.jolokia.discovery;
+package org.jolokia.agent.service.discovery;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -6,9 +6,8 @@ import java.util.Arrays;
 
 import org.jolokia.service.AgentDetails;
 import org.json.simple.JSONObject;
+import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -33,14 +32,14 @@ public class DiscoveryMessageTest {
                 "agent_id","test",
                 "secured",false));
         String inS = in.toString();
-        assertFalse(inS.contains("blubber"));
-        assertTrue(inS.contains("url"));
+        Assert.assertFalse(inS.contains("blubber"));
+        Assert.assertTrue(inS.contains("url"));
 
         AgentDetails details = in.getAgentDetails();
         JSONObject json = details.toJSONObject();
-        assertEquals(json.get("secured"),false);
-        assertEquals(json.get("url"),"http://localhost:8080/jolokia");
-        assertNull(json.get("blubber"));
+        Assert.assertEquals(json.get("secured"), false);
+        Assert.assertEquals(json.get("url"), "http://localhost:8080/jolokia");
+        Assert.assertNull(json.get("blubber"));
     }
 
     @Test(expectedExceptions = IOException.class,expectedExceptionsMessageRegExp = ".*type.*")

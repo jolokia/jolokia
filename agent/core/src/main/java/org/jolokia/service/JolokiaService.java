@@ -29,7 +29,7 @@ package org.jolokia.service;
 public interface JolokiaService<T extends JolokiaService> extends Comparable<T> {
 
     // Marker interface for services which only want to take part in the
-    // service's lifecycle.
+    // service's lifecycle and are never looked up.
     public interface Init extends JolokiaService<Init> {}
 
     /**

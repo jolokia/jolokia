@@ -1,4 +1,4 @@
-package org.jolokia.discovery;
+package org.jolokia.agent.service.discovery;
 
 import java.io.IOException;
 import java.util.List;

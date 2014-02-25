@@ -1,4 +1,4 @@
-package org.jolokia.discovery;
+package org.jolokia.agent.service.discovery;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.jolokia.service.*;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONArray;
 
-import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
+import static org.jolokia.agent.service.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
 
 /**
  * Discover Jolokia agents via multicast

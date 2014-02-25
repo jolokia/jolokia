@@ -17,8 +17,8 @@ package org.jolokia.http;
  */
 
 import java.io.*;
-import java.net.SocketException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Vector;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -28,17 +28,16 @@ import org.easymock.EasyMock;
 import org.jolokia.Version;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.service.JolokiaContext;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
-import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
-import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
+import static org.jolokia.test.util.ReflectionTestUtil.getField;
 import static org.testng.Assert.*;
 
 /**
@@ -139,56 +138,44 @@ public class AgentServletTest {
     }
 
     @Test
-    public void initWithAgentDiscoveryAndGivenUrl() throws ServletException, IOException, InterruptedException {
-        checkMulticastAvailable();
+    public void initWithAgentDiscoveryAndGivenUrlAsSysProp() throws ServletException, IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String url = "http://localhost:8080/jolokia";
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url);
-        // Wait listening thread to warm up
-        Thread.sleep(1000);
+        System.setProperty(ConfigKey.DISCOVERY_AGENT_URL.asSystemProperty(),url);
+        System.setProperty(ConfigKey.DISCOVERY_ENABLED.asSystemProperty(),"true");
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test");
-            List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
-            for (JSONObject json : in) {
-                if (json.get("url") != null && json.get("url").equals(url)) {
-                    return;
-                }
-            }
-            fail("No agent found");
+            prepareStandardInitialisation();
+            JolokiaContext ctx = (JolokiaContext) getField(servlet, "jolokiaContext");
+            assertEquals(ctx.getConfig(ConfigKey.DISCOVERY_AGENT_URL),url);
+            JSONObject json = ctx.getAgentDetails().toJSONObject();
+            assertEquals(json.get("url"),url);
+            assertTrue(Boolean.parseBoolean(ctx.getConfig(ConfigKey.DISCOVERY_ENABLED)));
         } finally {
-            servlet.destroy();
+            System.clearProperty(ConfigKey.DISCOVERY_AGENT_URL.asSystemProperty());
+            System.clearProperty(ConfigKey.DISCOVERY_ENABLED.asSystemProperty());
+        }
+    }
+
+    @Test(enabled = false)
+    public void initWithAgentDiscoveryAndUrlAsSysEnv() throws ServletException, IOException, NoSuchFieldException, IllegalAccessException {
+        prepareStandardInitialisation();
+        String url = "http://localhost:8080/jolokia";
+        try {
+            System.getenv().put(ConfigKey.DISCOVERY_AGENT_URL.asEnvVariable(),url);
+            System.getenv().put(ConfigKey.DISCOVERY_ENABLED.asEnvVariable(),"true");
+            prepareStandardInitialisation();
+            JolokiaContext ctx = (JolokiaContext) getField(servlet, "jolokiaContext");
+            assertEquals(ctx.getConfig(ConfigKey.DISCOVERY_AGENT_URL),url);
+            JSONObject json = ctx.getAgentDetails().toJSONObject();
+            assertEquals(json.get("url"),url);
+            assertTrue(Boolean.parseBoolean(ctx.getConfig(ConfigKey.DISCOVERY_ENABLED)));
+        } finally {
+            System.getenv().put(ConfigKey.DISCOVERY_AGENT_URL.asEnvVariable(), null);
+            System.getenv().put(ConfigKey.DISCOVERY_ENABLED.asEnvVariable(), null);
         }
     }
 
     @Test
-    public void initWithAgentDiscoveryAndUrlLookup() throws ServletException, IOException {
-        checkMulticastAvailable();
-        prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
-        try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test");
-            List<JSONObject> in = discovery.lookupAgents();
-            assertTrue(in.size() > 0);
-            // At least one doesnt have an URL (remove this part if a way could be found for getting
-            // to the URL
-            for (JSONObject json : in) {
-                if (json.get("url") == null) {
-                    return;
-                }
-            }
-            fail("Every message has an URL");
-        } finally {
-            servlet.destroy();
-        }
-    }
-
-    private void checkMulticastAvailable() throws SocketException {
-        if (!NetworkUtil.isMulticastSupported()) {
-            throw new SkipException("No multicast interface found, skipping test ");
-        }
-    }
-
-    @Test
-    public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException {
-        checkMulticastAvailable();
+    public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException, NoSuchFieldException, IllegalAccessException {
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             StringWriter sw = initRequestResponseMocks();
@@ -198,7 +185,7 @@ public class AgentServletTest {
             StringBuffer buf = new StringBuffer();
             buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
             expect(request.getRequestURL()).andReturn(buf);
-            expect(request.getRequestURI()).andReturn(buf.toString());
+            expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.VERSION_GET_REQUEST);
             expect(request.getContextPath()).andReturn("/jolokia");
             expect(request.getAuthType()).andReturn("BASIC");
             replay(request, response);
@@ -207,16 +194,9 @@ public class AgentServletTest {
 
             assertTrue(sw.toString().contains("version"));
 
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test");
-            List<JSONObject> in = discovery.lookupAgents();
-            assertTrue(in.size() > 0);
-            for (JSONObject json : in) {
-                if (json.get("url") != null && json.get("url").equals(url)) {
-                    assertTrue((Boolean) json.get("secured"));
-                    return;
-                }
-            }
-            fail("Failed, because no message had an URL");
+            JolokiaContext ctx = (JolokiaContext) getField(servlet, "jolokiaContext");
+            JSONObject json = ctx.getAgentDetails().toJSONObject();
+            assertEquals(json.get("url"),url);
         } finally {
             servlet.destroy();
         }
@@ -590,7 +570,11 @@ public class AgentServletTest {
                 expect(request.getHeader("Origin")).andReturn(null);
                 expect(request.getRemoteHost()).andReturn("localhost");
                 expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                expect(request.getRequestURI()).andReturn("/jolokia/");
+                expect(request.getRequestURI()).andStubReturn("/jolokia/");
+                expect(request.getRequestURL()).andStubReturn(new StringBuffer("http://localhost:127.0.0.1/jolokia/"));
+                expect(request.getContextPath()).andStubReturn("/jolokia");
+                expect(request.getAuthType()).andStubReturn(null);
+
                 expect(request.getParameterMap()).andReturn(null);
             }
         };

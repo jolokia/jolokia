@@ -1,4 +1,4 @@
-package org.jolokia.discovery;
+package org.jolokia.agent.service.discovery;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -11,12 +11,12 @@ import org.jolokia.service.AgentDetails;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
+import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 
-import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
-import static org.jolokia.discovery.MulticastUtil.sendQueryAndCollectAnswers;
-import static org.testng.Assert.*;
+import static org.jolokia.agent.service.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
+import static org.jolokia.agent.service.discovery.MulticastUtil.sendQueryAndCollectAnswers;
 
 /**
  * @author roland
@@ -66,17 +66,17 @@ public class MulticastSocketListenerThreadTest {
                 if (JOLOKIA_URL.equals(in.getAgentDetails().toJSONObject().get("url"))) {
                     urlCount++;
                 }
-                assertFalse(in.isQuery());
+                Assert.assertFalse(in.isQuery());
                 JSONObject details = agentDetails.toJSONObject();
                 if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
-                    assertEquals(details.get("url"), JOLOKIA_URL);
-                    assertEquals(details.get("agent_version"), Version.getAgentVersion());
+                    Assert.assertEquals(details.get("url"), JOLOKIA_URL);
+                    Assert.assertEquals(details.get("agent_version"), Version.getAgentVersion());
                     return;
                 }
             }
-            assertEquals(idCount,1,"Exactly one in message with the send id should have been received");
-            assertEquals(urlCount,1,"Only one message with the url should be included");
-            fail("No message found");
+            Assert.assertEquals(idCount, 1, "Exactly one in message with the send id should have been received");
+            Assert.assertEquals(urlCount, 1, "Only one message with the url should be included");
+            Assert.fail("No message found");
         } finally {
             listenerThread.shutdown();
         }

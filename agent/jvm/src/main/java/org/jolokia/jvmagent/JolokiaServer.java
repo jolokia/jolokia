@@ -28,7 +28,6 @@ import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.service.*;
 import org.jolokia.service.impl.ClasspathServiceCreator;
@@ -71,8 +70,6 @@ public class JolokiaServer {
 
     // HttpContext created when we start it up
     private HttpContext httpContext;
-
-    private DiscoveryMulticastResponder discoveryMulticastResponder;
 
     /**
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests. This
@@ -135,16 +132,6 @@ public class JolokiaServer {
             httpContext.setAuthenticator(authenticator);
         }
 
-        if (listenForDiscoveryMcRequests(jolokiaContext)) {
-            try {
-                discoveryMulticastResponder = new DiscoveryMulticastResponder(jolokiaContext);
-                discoveryMulticastResponder.start();
-            } catch (IOException e) {
-                jolokiaContext.error("Cannot start discovery multicast handler: " + e,e);
-            }
-        }
-
-
         if (useOwnServer) {
             // Starting our own server in an own thread group with a fixed name
             // so that the cleanup thread can recognize it.
@@ -163,20 +150,10 @@ public class JolokiaServer {
         }
     }
 
-    private boolean listenForDiscoveryMcRequests(JolokiaContext pContext) {
-        String enable = pContext.getConfig(ConfigKey.DISCOVERY_ENABLED);
-        String urlFromConfig = pContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
-        return urlFromConfig != null || enable == null || Boolean.valueOf(enable);
-    }
-
     /**
      * Stop the HTTP server
      */
     public void stop() {
-        if (discoveryMulticastResponder != null) {
-            discoveryMulticastResponder.stop();
-            discoveryMulticastResponder = null;
-        }
 
         httpServer.removeContext(httpContext);
         serviceManager.stop();

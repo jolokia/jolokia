@@ -75,6 +75,17 @@ public class StaticConfiguration implements Configuration {
         }
     }
 
+    /**
+     * Update from another configuration object whose values take precedence
+     *
+     * @param pConfig update configuration from the given config
+     */
+    public void update(Configuration pConfig) {
+        for (ConfigKey key : pConfig.getConfigKeys()) {
+            configMap.put(key,pConfig.getConfig(key));
+        }
+    }
+
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
         String value = configMap.get(pKey);

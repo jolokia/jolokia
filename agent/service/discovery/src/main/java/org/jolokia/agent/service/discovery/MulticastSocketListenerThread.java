@@ -2,7 +2,7 @@
 // Licensed under Apache License version 2.0
 // Original license LGPL
 
-package org.jolokia.discovery;
+package org.jolokia.agent.service.discovery;
 
 import java.io.IOException;
 import java.net.*;
@@ -10,7 +10,7 @@ import java.net.*;
 import org.jolokia.service.JolokiaContext;
 import org.jolokia.util.NetworkUtil;
 
-import static org.jolokia.discovery.AbstractDiscoveryMessage.MessageType.RESPONSE;
+import static org.jolokia.agent.service.discovery.AbstractDiscoveryMessage.MessageType.RESPONSE;
 
 /**
  * A listener runnable which should be used in thread and which reads from a multicast socket

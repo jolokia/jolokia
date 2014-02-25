@@ -344,6 +344,40 @@ public enum ConfigKey {
         return requestConfig;
     }
 
+    /**
+     * Get the value of this key as it could be possibly used as
+     * a system property to {@link System#getProperty(String)}. Note, that
+     * only a few config values can be set that way
+     *
+     * @return key, pefixed with "jolokia."
+     */
+    public String asSystemProperty() {
+        return "jolokia." + getKeyValue();
+    }
+
+    /**
+     * Get the value of this key as it could be possibly used as
+     * an environment variable in {@link System#getenv(String)}. Note, that
+     * only a few config values can be set that way.
+     *
+     * @return key, pefixed with "jolokia."
+     */
+    public String asEnvVariable() {
+        String key = getKeyValue();
+        StringBuffer buf = new StringBuffer();
+        boolean notFirst = false;
+        for (char c : key.toCharArray()) {
+            if (Character.isUpperCase(c) && notFirst) {
+                buf.append("_").append(c);
+            } else {
+                buf.append(Character.toUpperCase(c));
+            }
+            notFirst = true;
+        }
+        return "JOLOKIA_" + buf.toString();
+    }
+
+
     // Constants used for boolean values
     private static class Constants {
         public static final String FALSE = "false";

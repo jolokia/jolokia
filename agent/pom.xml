@@ -45,6 +45,7 @@
     <module>service/jmx</module>
     <module>service/pullnotif</module>
     <module>service/serializer</module>
+    <module>service/discovery</module>
   </modules>
 
   <profiles>

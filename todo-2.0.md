@@ -18,6 +18,8 @@
 * Restrictor must be able to handle realms
 * OrderId for services must be simplified since not every service has
   an order (i.e. allow an order id of '0')
+* JmxSerializer API must be simplified to be independent from JMX types and exceptions
+  (Idea: Discriminating on OpenType detection after the 'curtain', not before the API)
 
 # Optional
 

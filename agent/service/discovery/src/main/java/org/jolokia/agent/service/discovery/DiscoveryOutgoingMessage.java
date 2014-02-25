@@ -1,4 +1,4 @@
-package org.jolokia.discovery;
+package org.jolokia.agent.service.discovery;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;

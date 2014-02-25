@@ -142,23 +142,28 @@ public final class NetworkUtil {
      * Get all local addresses on which a multicast can be send
      * @return list of all multi cast capable addresses
      */
-    public static List<InetAddress> getMulticastAddresses() throws SocketException {
-        Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
-        List<InetAddress> ret = new ArrayList<InetAddress>();
-        while (nifs.hasMoreElements()) {
-            NetworkInterface nif = nifs.nextElement();
-            if (checkMethod(nif, supportsMulticast) && checkMethod(nif,isUp)) {
-                Enumeration<InetAddress> addresses = nif.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    // TODO: IpV6 support
-                    if (!(addr instanceof Inet6Address)) {
+    public static List<InetAddress> getMulticastAddresses() {
+        Enumeration<NetworkInterface> nifs;
+        try {
+            nifs = NetworkInterface.getNetworkInterfaces();
+            List<InetAddress> ret = new ArrayList<InetAddress>();
+            while (nifs.hasMoreElements()) {
+                NetworkInterface nif = nifs.nextElement();
+                if (checkMethod(nif, supportsMulticast) && checkMethod(nif,isUp)) {
+                    Enumeration<InetAddress> addresses = nif.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        // TODO: IpV6 support
+                        if (!(addr instanceof Inet6Address)) {
                         ret.add(addr);
+                        }
                     }
                 }
             }
+            return ret;
+        } catch (SocketException exp) {
+            return Collections.emptyList();
         }
-        return ret;
     }
 
     public static String getAgentId(int objectId, String type) {

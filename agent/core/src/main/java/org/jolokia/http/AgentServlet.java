@@ -9,7 +9,6 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.jolokia.config.*;
-import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.PolicyRestrictorFactory;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.service.JolokiaContext;
@@ -64,9 +63,6 @@ public class AgentServlet extends HttpServlet {
     
     // The Jolokia service manager
     private transient JolokiaServiceManager serviceManager;
-
-    // Listen for discovery request (if switched on)
-    private DiscoveryMulticastResponder discoveryMulticastResponder;
 
     // If discovery multicast is enabled and URL should be initialized by request
     private boolean initAgentUrlFromRequest = false;
@@ -123,7 +119,7 @@ public class AgentServlet extends HttpServlet {
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
    
-        initDiscoveryMulticast();
+        initAgentUrl();
     }
 
 
@@ -153,7 +149,26 @@ public class AgentServlet extends HttpServlet {
         config.update(new ServletConfigFacade(pServletConfig));
         // ... and ServletConfig
         config.update(new ServletContextFacade(getServletContext()));
+        // Add any environment parameters found
+        config.update(configFromEnvironment());
         return config;
+    }
+
+    private Configuration configFromEnvironment() {
+        Map<String,String> envConfig = new HashMap<String, String>();
+        for (ConfigKey key : new ConfigKey[] {
+                // Todo: Might be even more generic as part of the key
+                ConfigKey.DISCOVERY_AGENT_URL,
+                ConfigKey.DISCOVERY_ENABLED }) {
+            String value = System.getProperty(key.asSystemProperty());
+            if (value == null) {
+                value = System.getenv(key.asEnvVariable());
+            }
+            if (value != null) {
+                envConfig.put(key.getKeyValue(), value);
+            }
+        }
+        return new StaticConfiguration(envConfig);
     }
 
     /**
@@ -186,21 +201,13 @@ public class AgentServlet extends HttpServlet {
 
     // ==============================================================================================
 
-    private void initDiscoveryMulticast() {
-        String url = findAgentUrl(jolokiaContext);
-        if (url != null || listenForDiscoveryMcRequests(jolokiaContext)) {
-            if (url == null) {
-                initAgentUrlFromRequest = true;
-            } else {
-                initAgentUrlFromRequest = false;
-                jolokiaContext.getAgentDetails().updateAgentParameters(url, null);
-            }
-            try {
-                discoveryMulticastResponder = new DiscoveryMulticastResponder(jolokiaContext);
-                discoveryMulticastResponder.start();
-            } catch (IOException e) {
-                jolokiaContext.error("Cannot start discovery multicast handler: " + e, e);
-            }
+    private void initAgentUrl() {
+        String url = jolokiaContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
+        if (url == null) {
+            initAgentUrlFromRequest = true;
+        } else {
+            initAgentUrlFromRequest = false;
+            jolokiaContext.getAgentDetails().updateAgentParameters(url, null);
         }
     }
 
@@ -261,10 +268,6 @@ public class AgentServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     public void destroy() {
-        if (discoveryMulticastResponder != null) {
-            discoveryMulticastResponder.stop();
-            discoveryMulticastResponder = null;
-        }
         super.destroy();
     }
 

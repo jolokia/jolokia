@@ -20,7 +20,8 @@ import java.util.Enumeration;
 
 /**
  * Interface used for extracting configuration from various backend
- * configuration like SevletContext or servlet config
+ * configuration like ServletContext or ServletConfig
+ *
  * @author roland
  * @since 07.02.13
  */
