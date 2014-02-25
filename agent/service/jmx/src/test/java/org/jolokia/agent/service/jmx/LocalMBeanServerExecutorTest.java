@@ -22,8 +22,8 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.agent.core.util.jmx.LocalMBeanServerExecutor;
+import org.jolokia.agent.core.util.jmx.MBeanServerExecutor;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;

@@ -9,7 +9,7 @@ import java.util.*;
 
 import javax.management.ObjectName;
 
-import org.jolokia.core.util.*;
+import org.jolokia.agent.core.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;

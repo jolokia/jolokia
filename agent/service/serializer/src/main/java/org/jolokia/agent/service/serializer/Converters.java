@@ -7,11 +7,11 @@ import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.agent.service.serializer.json.ObjectToJsonConverter;
-import org.jolokia.core.service.serializer.SerializeOptions;
+import org.jolokia.agent.core.service.serializer.SerializeOptions;
 import org.jolokia.agent.service.serializer.object.OpenTypeDeserializer;
 import org.jolokia.agent.service.serializer.object.StringToObjectConverter;
-import org.jolokia.core.service.AbstractJolokiaService;
-import org.jolokia.core.service.serializer.JmxSerializer;
+import org.jolokia.agent.core.service.AbstractJolokiaService;
+import org.jolokia.agent.core.service.serializer.JmxSerializer;
 
 /*
  * Copyright 2009-2013 Roland Huss

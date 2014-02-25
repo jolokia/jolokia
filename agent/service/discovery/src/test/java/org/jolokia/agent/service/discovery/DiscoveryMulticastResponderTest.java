@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.NetworkUtil;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.agent.core.config.ConfigKey;
+import org.jolokia.agent.core.service.AgentDetails;
+import org.jolokia.agent.core.service.JolokiaContext;
+import org.jolokia.agent.core.util.NetworkUtil;
+import org.jolokia.agent.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.SkipException;

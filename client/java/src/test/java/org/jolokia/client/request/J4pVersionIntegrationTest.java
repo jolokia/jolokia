@@ -19,7 +19,7 @@ package org.jolokia.client.request;
 import java.util.Set;
 
 import org.apache.http.client.methods.HttpPost;
-import org.jolokia.core.Version;
+import org.jolokia.agent.core.Version;
 import org.jolokia.client.exception.J4pException;
 import org.testng.annotations.Test;
 

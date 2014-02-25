@@ -17,22 +17,43 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia</artifactId>
-  <version>1.2.1-SNAPSHOT</version>
-  <name>jolokia-parent</name>
-  <description>jolokia parent pom</description>
 
+  <groupId>org.jolokia</groupId>
+  <artifactId>jolokia-parent</artifactId>
+  <version>1.2.1-SNAPSHOT</version>
+
+  <name>${artifactId}</name>
+  <description>Jolokia :: Parent :: POM</description>
   <packaging>pom</packaging>
 
   <url>http://www.jolokia.org</url>
   
   <modules>
-    <module>agent</module>
-    <module>it</module>
-    <module>client</module>  
+    <module>agent/core</module>
+    <module>agent/war</module>
+    <module>agent/mule</module>
+    <module>agent/osgi</module>
+    <module>agent/osgi/bundle</module>
+    <module>agent/jvm</module>
+
+    <module>agent/service/jmx</module>
+    <module>agent/service/pullnotif</module>
+    <module>agent/service/serializer</module>
+    <module>agent/service/discovery</module>
+    <module>agent/service/jsr160</module>
+
+    <module>it/core</module>
+    <module>it/war</module>
+
+    <module>client/java</module>
+    <module>client/javascript</module>
+
+    <module>support/jmx</module>
+    <module>support/jvm-spring</module>
+
     <module>tools/test-util</module>
   </modules>
+
 
   <build>
 
@@ -372,7 +393,24 @@
           <email>georgy@bolyuba.com</email>
       </contributor>
   </contributors>
-   
+
+  <!-- Test dependencies for all modules-->
+  <dependencies>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.1.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>3.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <!-- Overall version management -->
   <dependencyManagement>
     <dependencies>
@@ -404,20 +442,6 @@
         <scope>provided</scope>
       </dependency>
       
-      <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>6.1.1</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>3.0</version>
-        <scope>test</scope>
-      </dependency>
-
       <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
@@ -618,7 +642,7 @@
     <profile>
       <id>roo</id>
       <modules>
-        <module>tools/roo-addon</module>
+        <module>tools/roo</module>
       </modules>
   </profile>
   </profiles>

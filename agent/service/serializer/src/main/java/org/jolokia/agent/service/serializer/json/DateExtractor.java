@@ -7,7 +7,7 @@ import java.util.Stack;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.agent.service.serializer.object.StringToObjectConverter;
-import org.jolokia.core.util.DateUtil;
+import org.jolokia.agent.core.util.DateUtil;
 
 /*
  * Copyright 2009-2013 Roland Huss

@@ -22,8 +22,8 @@ import java.util.HashSet;
 import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.WebsphereDetector;
-import org.jolokia.core.service.detector.ServerDetector;
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.agent.core.service.detector.ServerDetector;
+import org.jolokia.agent.core.service.ServerHandle;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;

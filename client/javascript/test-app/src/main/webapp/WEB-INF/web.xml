@@ -23,7 +23,7 @@
 
   <servlet>
     <servlet-name>jolokia-agent</servlet-name>
-    <servlet-class>org.jolokia.core.http.AgentServlet</servlet-class>
+    <servlet-class>org.jolokia.agent.core.http.AgentServlet</servlet-class>
     <init-param>
       <description>
         Classnames (comma separated) of RequestDispatcher used in addition

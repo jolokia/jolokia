@@ -18,7 +18,7 @@ package org.jolokia.mule;
 
 /**
  * Agent Configuration. For documentation of the configuration
- * parameters please refer to {@link org.jolokia.core.config.ConfigKey}
+ * parameters please refer to {@link org.jolokia.agent.core.config.ConfigKey}
  *
  * @author roland
  * @since 30.08.11

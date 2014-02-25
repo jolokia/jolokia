@@ -274,7 +274,7 @@
         <td>false</td>
         <td>
           If <literal>true</literal> the Jolokia agent will use any
-          <classname>org.jolokia.core.restrictor.Restrictor</classname>
+          <classname>org.jolokia.agent.core.restrictor.Restrictor</classname>
           service for applying access restrictions. If this option is
           <literal>false</literal> the standard method of looking up a
           security policy file is used, as described in <xref
@@ -488,12 +488,12 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       As described in <xref linkend="security-restrictor"/>, the
       Jolokia agent can use custom restrictors implementing the
       interface
-      <classname>org.jolokia.core.restrictor.Restrictor</classname>. If the
+      <classname>org.jolokia.agent.core.restrictor.Restrictor</classname>. If the
       bundle property
       <literal>org.jolokia.useRestrictorService</literal> is set to
       true and no restrictor is configured by other means, the agent
       will use one or more OSGi service which register under the name
-      <classname>org.jolokia.core.restrictor.Restrictor</classname>. If no
+      <classname>org.jolokia.agent.core.restrictor.Restrictor</classname>. If no
       such service is available, access to the agent is always
       denied. If one such restrictor service is available, the access
       decision is delegated to this service. When more than one

@@ -23,8 +23,8 @@ import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jolokia.core.service.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.agent.core.service.ServerHandle;
+import org.jolokia.agent.core.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for Weblogic Appservers

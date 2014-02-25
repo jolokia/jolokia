@@ -21,8 +21,8 @@
 
   <skin> 
     <groupId>org.jolokia</groupId> 
-    <artifactId>jolokia-site-skin</artifactId>
-    <version>1.2.0</version>
+    <artifactId>jolokia-tools-siteskin</artifactId>
+    <version>1.2.1-SNAPSHOT</version>
   </skin>  
   
   <bannerLeft>

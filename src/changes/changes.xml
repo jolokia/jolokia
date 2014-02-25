@@ -459,7 +459,7 @@
       <action dev="roland" type="add" date="2011-03-24">
         The activator in jolokia-osgi and jolokia-osgi-bundle can now
         use an OSGi restrictor service implementing
-        org.jolokia.core.restrictor.Restrictor when bundle property
+        org.jolokia.agent.core.restrictor.Restrictor when bundle property
         org.jolokia.useRestrictorService is set to true.
       </action>
       <action dev="roland" type="add" date="2011-03-24">
@@ -470,7 +470,7 @@
       </action>
       <action dev="roland" type="update" date="2011-03-24">
         Refactored restrictor handling and exported
-        org.jolokia.core.restrictor in the OSGi bundles. JolokiaServlet can
+        org.jolokia.agent.core.restrictor in the OSGi bundles. JolokiaServlet can
         take now an Restrictor object as constructor parameter.
       </action>
       <action dev="roland" type="update" date="2011-03-24">

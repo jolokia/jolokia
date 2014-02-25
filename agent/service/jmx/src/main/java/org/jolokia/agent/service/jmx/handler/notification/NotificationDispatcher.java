@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.service.notification.NotificationBackendManager;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.request.notification.*;
-import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.agent.core.service.notification.NotificationBackendManager;
+import org.jolokia.agent.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.agent.core.request.notification.*;
+import org.jolokia.agent.core.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**

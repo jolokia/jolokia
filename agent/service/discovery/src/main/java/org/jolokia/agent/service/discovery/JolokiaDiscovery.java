@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.management.JMException;
 
-import org.jolokia.core.service.*;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.agent.core.service.*;
+import org.jolokia.agent.core.util.LogHandler;
 import org.json.simple.JSONArray;
 
 import static org.jolokia.agent.service.discovery.AbstractDiscoveryMessage.MessageType.QUERY;

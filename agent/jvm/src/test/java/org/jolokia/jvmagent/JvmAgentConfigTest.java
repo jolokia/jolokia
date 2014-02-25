@@ -22,9 +22,9 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 
 import com.sun.net.httpserver.Authenticator;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.config.Configuration;
-import org.jolokia.core.util.EscapeUtil;
+import org.jolokia.agent.core.config.ConfigKey;
+import org.jolokia.agent.core.config.Configuration;
+import org.jolokia.agent.core.util.EscapeUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

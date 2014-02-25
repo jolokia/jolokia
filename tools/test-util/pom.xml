@@ -19,33 +19,26 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-test-util</artifactId>
+  <artifactId>jolokia-tools-test</artifactId>
   <version>1.2.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>jolokia-test-util</name>
-  <description>test utility classes</description>
 
-  <url>http://www.jolokia.org/jolokia-parent/jolokia-test-util/</url>
+  <name>jolokia-tools-test</name>
+  <description>Jolokia :: Tools :: Test utilities</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia</artifactId>
+    <artifactId>jolokia-parent</artifactId>
     <version>1.2.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <scope>compile</scope>
+      <version>3.2</version>
     </dependency>
 
     <dependency>

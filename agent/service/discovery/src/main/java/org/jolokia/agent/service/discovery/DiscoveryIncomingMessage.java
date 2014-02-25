@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.*;
 
-import org.jolokia.core.service.AgentDetails;
+import org.jolokia.agent.core.service.AgentDetails;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;

@@ -1,7 +1,6 @@
 package org.jolokia.osgi.restrictor;
 
-import org.jolokia.core.restrictor.Restrictor;
-import org.osgi.framework.*;
+import org.jolokia.agent.core.restrictor.Restrictor;
 
 /*
  * Copyright 2009-2013 Roland Huss

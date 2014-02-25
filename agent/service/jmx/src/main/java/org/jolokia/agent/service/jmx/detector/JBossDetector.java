@@ -7,9 +7,9 @@ import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.service.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.util.ClassUtil;
+import org.jolokia.agent.core.service.ServerHandle;
+import org.jolokia.agent.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.agent.core.util.ClassUtil;
 
 /**
  * Detector for JBoss

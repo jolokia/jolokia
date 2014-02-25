@@ -21,15 +21,15 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.request.JolokiaReadRequest;
-import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.restrictor.Restrictor;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.agent.core.request.JolokiaReadRequest;
+import org.jolokia.agent.core.request.JolokiaRequestBuilder;
+import org.jolokia.agent.core.restrictor.Restrictor;
+import org.jolokia.agent.core.util.TestJolokiaContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.core.util.RequestType.READ;
+import static org.jolokia.agent.core.util.RequestType.READ;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 

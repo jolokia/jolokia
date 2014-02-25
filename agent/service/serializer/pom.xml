@@ -19,48 +19,36 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
   <artifactId>jolokia-service-serializer</artifactId>
   <version>1.2.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>jolokia-service-serializer</name>
-  <description>Jolokia :: Service :: JSON Serializer</description>
 
-  <url>http://www.jolokia.org/jolokia-agent-parent/jolokia-service-serializer</url>
+  <description>Jolokia :: Service :: JSON Serializer</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-agent-parent</artifactId>
+    <artifactId>jolokia-parent</artifactId>
     <version>1.2.1-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
 
   <dependencies>
-
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-agent-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-agent-core</artifactId>
       <scope>test</scope>
       <classifier>tests</classifier>
       <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
   <build/>
-
 
   <reporting>
     <plugins>

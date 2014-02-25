@@ -18,7 +18,7 @@ package org.jolokia.agent.service.jmx.handler;
 
 import java.util.*;
 
-import org.jolokia.core.util.DateUtil;
+import org.jolokia.agent.core.util.DateUtil;
 import org.json.simple.JSONObject;
 
 /**

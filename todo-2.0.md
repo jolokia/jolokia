@@ -3,7 +3,7 @@
 
 * History Handling
 * MBean registration 
-* org.jolokia.core.backend.BackendManagerTest -> RequestDispatcherTest must
+* org.jolokia.agent.core.backend.BackendManagerTest -> RequestDispatcherTest must
   be moved
 * JolokiaService for the OSGi agent
 * Converters as a service

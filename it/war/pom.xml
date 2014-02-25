@@ -18,18 +18,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
   <artifactId>jolokia-it-war</artifactId>
   <version>1.2.1-SNAPSHOT</version>
-  <name>jolokia-it-war</name>
   <packaging>war</packaging>
-  <description>Servlet for integration tests</description>
+
+  <description>Jolokia :: IT :: Servlet</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-it-parent</artifactId>
+    <artifactId>jolokia-parent</artifactId>
     <version>1.2.1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <dependencies>

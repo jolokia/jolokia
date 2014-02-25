@@ -6,10 +6,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
-import org.jolokia.core.Version;
-import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.*;
+import org.jolokia.agent.core.Version;
+import org.jolokia.agent.core.service.AgentDetails;
+import org.jolokia.agent.core.service.JolokiaContext;
+import org.jolokia.agent.core.util.*;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.SkipException;

@@ -10,7 +10,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.agent.service.serializer.object.StringToObjectConverter;
-import org.jolokia.core.service.serializer.ValueFaultHandler;
+import org.jolokia.agent.core.service.serializer.ValueFaultHandler;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 

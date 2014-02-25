@@ -5,9 +5,9 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.*;
-import org.jolokia.core.util.NetworkUtil;
+import org.jolokia.agent.core.config.ConfigKey;
+import org.jolokia.agent.core.service.*;
+import org.jolokia.agent.core.util.NetworkUtil;
 
 /**
  * A receiver which binds to a multicast sockets and responds to multicast requests.

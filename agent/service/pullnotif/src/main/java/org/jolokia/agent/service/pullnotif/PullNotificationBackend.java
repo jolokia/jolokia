@@ -4,10 +4,10 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.core.service.AbstractJolokiaService;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.service.notification.*;
-import org.jolokia.core.util.jmx.JmxUtil;
+import org.jolokia.agent.core.service.AbstractJolokiaService;
+import org.jolokia.agent.core.service.JolokiaContext;
+import org.jolokia.agent.core.service.notification.*;
+import org.jolokia.agent.core.util.jmx.JmxUtil;
 import org.json.simple.JSONObject;
 
 /**
