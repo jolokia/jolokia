@@ -333,7 +333,7 @@
         In order to provide fine grained security, Jolokia using the
         abstract concept of an <emphasis>Restrictor</emphasis>. It is
         represented by the Java interface
-        <classname>org.jolokia.restrictor.Restrictor</classname> and
+        <classname>org.jolokia.core.restrictor.Restrictor</classname> and
         comes with several implementations. The most prominent one is
         the <classname>PolicyRestrictor</classname> which is described
         in <xref linkend="security-policy"/>. This is also the 
@@ -341,13 +341,13 @@
         possible to provide a custom implementation of this
         interface for the WAR and OSGi agents. It is recommended to
         subclass either
-        <classname>org.jolokia.restrictor.AllowAllRestrictor</classname>
+        <classname>org.jolokia.core.restrictor.AllowAllRestrictor</classname>
         or
-        <classname>org.jolokia.restrictor.DenyAllRestrictor</classname>. 
+        <classname>org.jolokia.core.restrictor.DenyAllRestrictor</classname>.
       </para>
       <para>
         For the WAR agent (<xref linkend="agents-war"/>), a subclass
-        of <classname>org.jolokia.http.AgentServlet</classname> should
+        of <classname>org.jolokia.core.http.AgentServlet</classname> should
         be created which overrides the
         <methodname>createRestrictor()</methodname>
       </para>

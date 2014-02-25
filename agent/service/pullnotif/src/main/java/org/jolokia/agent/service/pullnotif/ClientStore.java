@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.management.Notification;
 
-import org.jolokia.service.notification.NotificationSubscription;
+import org.jolokia.core.service.notification.NotificationSubscription;
 
 /**
  * A Client store is responsible for holding all notifications

@@ -18,12 +18,12 @@ package org.jolokia.osgi.servlet;
 
 import javax.servlet.*;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
-import org.jolokia.http.AgentServlet;
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.service.JolokiaServiceManager;
-import org.jolokia.util.LogHandler;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.config.Configuration;
+import org.jolokia.core.http.AgentServlet;
+import org.jolokia.core.restrictor.Restrictor;
+import org.jolokia.core.service.JolokiaServiceManager;
+import org.jolokia.core.util.LogHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;

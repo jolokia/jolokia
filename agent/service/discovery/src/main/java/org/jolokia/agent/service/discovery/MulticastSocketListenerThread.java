@@ -7,8 +7,8 @@ package org.jolokia.agent.service.discovery;
 import java.io.IOException;
 import java.net.*;
 
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.NetworkUtil;
+import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.util.NetworkUtil;
 
 import static org.jolokia.agent.service.discovery.AbstractDiscoveryMessage.MessageType.RESPONSE;
 

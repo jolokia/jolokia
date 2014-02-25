@@ -21,13 +21,13 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.GlassfishDetector;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.service.detector.ServerDetector;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;

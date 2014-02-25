@@ -23,8 +23,8 @@ import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.agent.service.serializer.object.StringToObjectConverter;
-import org.jolokia.converter.util.CompositeTypeAndJson;
-import org.jolokia.converter.util.TabularTypeAndJson;
+import org.jolokia.agent.service.serializer.util.CompositeTypeAndJson;
+import org.jolokia.agent.service.serializer.util.TabularTypeAndJson;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 

@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.*;
 import javax.management.openmbean.*;
 
-import org.jolokia.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.SerializeOptions;
 
 /**
  * A {@link DynamicMBean} used to wrap an MBean registered at the Jolokia MBeanServer and translated

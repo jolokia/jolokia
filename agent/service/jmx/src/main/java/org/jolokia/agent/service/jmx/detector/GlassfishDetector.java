@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.service.ServerHandle;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.core.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**

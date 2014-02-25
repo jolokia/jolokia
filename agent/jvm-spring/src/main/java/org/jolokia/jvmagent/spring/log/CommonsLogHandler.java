@@ -2,7 +2,7 @@ package org.jolokia.jvmagent.spring.log;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jolokia.util.LogHandler;
+import org.jolokia.core.util.LogHandler;
 
 /**
  * Log Handler useing SL4J (which is a dependency of Spring anyways.

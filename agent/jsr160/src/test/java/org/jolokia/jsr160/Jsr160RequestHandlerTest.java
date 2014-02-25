@@ -22,9 +22,9 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.backend.NotChangedException;
-import org.jolokia.request.*;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.*;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 

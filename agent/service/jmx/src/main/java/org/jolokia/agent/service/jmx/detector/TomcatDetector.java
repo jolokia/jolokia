@@ -19,8 +19,8 @@ package org.jolokia.agent.service.jmx.detector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jolokia.service.ServerHandle;
-import org.jolokia.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for Tomcat

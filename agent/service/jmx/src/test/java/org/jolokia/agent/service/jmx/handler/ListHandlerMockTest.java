@@ -22,10 +22,10 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.request.JolokiaListRequest;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.request.JolokiaListRequest;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.util.RequestType;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;

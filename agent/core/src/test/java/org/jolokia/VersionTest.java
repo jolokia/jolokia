@@ -16,6 +16,8 @@ package org.jolokia;
  * limitations under the License.
  */
 
+import org.jolokia.core.Version;
+
 import static org.testng.Assert.*;
 
 /**

@@ -19,9 +19,9 @@ package org.jolokia.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.HttpMethod;
-import org.jolokia.util.RequestType;
+import org.jolokia.core.restrictor.Restrictor;
+import org.jolokia.core.util.HttpMethod;
+import org.jolokia.core.util.RequestType;
 import org.osgi.framework.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -54,7 +54,7 @@ public class DelegatingRestrictorTest {
         } else {
             refs = null;
         }
-        expect(context.getServiceReferences("org.jolokia.restrictor.Restrictor", null)).andReturn(refs).anyTimes();
+        expect(context.getServiceReferences("org.jolokia.core.restrictor.Restrictor", null)).andReturn(refs).anyTimes();
         replay(context);
     }
 
@@ -88,7 +88,7 @@ public class DelegatingRestrictorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Impossible.*")
     public void invalidSyntax() throws InvalidSyntaxException {
-        expect(context.getServiceReferences("org.jolokia.restrictor.Restrictor", null)).andThrow(new InvalidSyntaxException("", null));
+        expect(context.getServiceReferences("org.jolokia.core.restrictor.Restrictor", null)).andThrow(new InvalidSyntaxException("", null));
         replay(context);
         restrictor.isHttpMethodAllowed(HttpMethod.GET);
     }

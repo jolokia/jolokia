@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.management.ObjectName;
 
-import org.jolokia.service.notification.NotificationSubscription;
+import org.jolokia.core.service.notification.NotificationSubscription;
 
 /**
 * @author roland

@@ -6,13 +6,13 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.backend.NotChangedException;
-import org.jolokia.config.ConfigKey;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.config.ConfigKey;
 import org.jolokia.agent.service.jmx.handler.list.MBeanInfoData;
-import org.jolokia.request.JolokiaListRequest;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.util.*;
+import org.jolokia.core.request.JolokiaListRequest;
+import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.util.*;
 import org.json.simple.JSONObject;
 
 /*

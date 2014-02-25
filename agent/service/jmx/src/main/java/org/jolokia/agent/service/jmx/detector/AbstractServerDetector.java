@@ -22,9 +22,9 @@ import java.util.Set;
 
 import javax.management.*;
 
-import org.jolokia.service.detector.ServerDetector;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.service.AbstractJolokiaService;
+import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.AbstractJolokiaService;
 
 /**
  * Base class for server detectors.

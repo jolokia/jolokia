@@ -56,6 +56,11 @@
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-discovery</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-jsr160</artifactId>
       <version>${project.version}</version>
     </dependency>

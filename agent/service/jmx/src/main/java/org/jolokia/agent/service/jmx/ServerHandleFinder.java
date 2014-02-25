@@ -21,10 +21,10 @@ import java.util.*;
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.agent.service.jmx.detector.AbstractServerDetector;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.service.detector.ServerDetector;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.JolokiaContext;
 
 /**
  * Helper class for detecting a server handle

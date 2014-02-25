@@ -29,4 +29,14 @@
       <useProjectArtifact>true</useProjectArtifact>
     </dependencySet>
   </dependencySets>
+
+  <containerDescriptorHandlers>
+    <containerDescriptorHandler>
+      <handlerName>file-aggregator</handlerName>
+      <configuration>
+        <filePattern>.+/services-default</filePattern>
+        <outputPath>META-INF/jolokia/services-default</outputPath>
+      </configuration>
+    </containerDescriptorHandler>
+  </containerDescriptorHandlers>
 </assembly>

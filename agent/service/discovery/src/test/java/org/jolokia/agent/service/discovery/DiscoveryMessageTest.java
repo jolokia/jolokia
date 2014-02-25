@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.Arrays;
 
-import org.jolokia.service.AgentDetails;
+import org.jolokia.core.service.AgentDetails;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;

@@ -21,7 +21,7 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.service.impl.MBeanRegistry;
+import org.jolokia.core.service.impl.MBeanRegistry;
 import org.testng.Assert;
 import org.testng.annotations.*;
 

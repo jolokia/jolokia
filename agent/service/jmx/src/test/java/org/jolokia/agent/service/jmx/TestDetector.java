@@ -22,10 +22,10 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.service.detector.ServerDetector;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.service.AbstractJolokiaService;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.AbstractJolokiaService;
 
 import static org.easymock.EasyMock.*;
 

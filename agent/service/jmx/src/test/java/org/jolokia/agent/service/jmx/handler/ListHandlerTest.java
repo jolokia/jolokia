@@ -23,14 +23,14 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.backend.NotChangedException;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.request.JolokiaListRequest;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.request.JolokiaListRequest;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.util.RequestType;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;

@@ -3,8 +3,8 @@
 # Default Implementations
 # ================================================
 
-org.jolokia.util.LocalServiceFactoryTest$Test1,1000
-org.jolokia.util.LocalServiceFactoryTest$Test2
-org.jolokia.util.LocalServiceFactoryTest$Test5,200
-org.jolokia.util.LocalServiceFactoryTest$Test4
-org.jolokia.util.LocalServiceFactoryTest$Test3,5
+org.jolokia.core.util.LocalServiceFactoryTest$Test1,1000
+org.jolokia.core.util.LocalServiceFactoryTest$Test2
+org.jolokia.core.util.LocalServiceFactoryTest$Test5,200
+org.jolokia.core.util.LocalServiceFactoryTest$Test4
+org.jolokia.core.util.LocalServiceFactoryTest$Test3,5

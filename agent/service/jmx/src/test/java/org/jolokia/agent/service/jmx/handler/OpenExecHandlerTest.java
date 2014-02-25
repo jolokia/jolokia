@@ -7,14 +7,14 @@ import javax.management.*;
 import javax.management.openmbean.CompositeData;
 
 import org.jolokia.agent.service.serializer.Converters;
-import org.jolokia.backend.NotChangedException;
-import org.jolokia.request.JolokiaExecRequest;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.service.serializer.JmxSerializer;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.JolokiaExecRequest;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.service.serializer.JmxSerializer;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
-import static org.jolokia.util.RequestType.EXEC;
+import static org.jolokia.core.util.RequestType.EXEC;
 import static org.testng.Assert.*;
 
 /*

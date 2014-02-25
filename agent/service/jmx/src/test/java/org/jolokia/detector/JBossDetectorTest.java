@@ -21,11 +21,11 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.agent.service.jmx.detector.JBossDetector;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.util.RequestType;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

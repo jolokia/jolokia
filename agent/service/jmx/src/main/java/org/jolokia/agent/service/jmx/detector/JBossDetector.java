@@ -2,16 +2,14 @@ package org.jolokia.agent.service.jmx.detector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.*;
-import java.util.Map;
 import java.util.Set;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.service.ServerHandle;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.util.ClassUtil;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.ClassUtil;
 
 /**
  * Detector for JBoss

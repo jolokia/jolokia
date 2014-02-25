@@ -2,8 +2,8 @@ package org.jolokia.agent.service.serializer.json;
 
 import java.util.*;
 
-import org.jolokia.service.serializer.SerializeOptions;
-import org.jolokia.service.serializer.ValueFaultHandler;
+import org.jolokia.core.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.ValueFaultHandler;
 
 /*
  * Copyright 2009-2011 Roland Huss

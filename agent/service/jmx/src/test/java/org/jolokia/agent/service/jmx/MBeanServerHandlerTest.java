@@ -23,12 +23,12 @@ import java.util.List;
 
 import javax.management.*;
 
-import org.jolokia.service.impl.MBeanRegistry;
-import org.jolokia.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.request.JolokiaRequest;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.util.RequestType;
+import org.jolokia.core.service.impl.MBeanRegistry;
+import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.util.RequestType;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.assertTrue;

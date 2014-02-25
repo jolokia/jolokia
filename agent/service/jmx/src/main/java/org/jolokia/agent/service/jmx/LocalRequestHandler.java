@@ -22,15 +22,15 @@ import javax.management.*;
 
 import org.jolokia.agent.service.jmx.handler.CommandHandler;
 import org.jolokia.agent.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.backend.NotChangedException;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.service.request.AbstractRequestHandler;
-import org.jolokia.service.request.RequestHandler;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.request.JolokiaObjectNameRequest;
-import org.jolokia.request.JolokiaRequest;
-import org.jolokia.service.JolokiaContext;
+import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.request.AbstractRequestHandler;
+import org.jolokia.core.service.request.RequestHandler;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
+import org.jolokia.core.request.JolokiaObjectNameRequest;
+import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.core.service.JolokiaContext;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.

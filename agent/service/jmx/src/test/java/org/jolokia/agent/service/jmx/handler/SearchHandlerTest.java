@@ -21,12 +21,12 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.backend.NotChangedException;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.request.JolokiaSearchRequest;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.request.JolokiaSearchRequest;
+import org.jolokia.core.util.RequestType;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;

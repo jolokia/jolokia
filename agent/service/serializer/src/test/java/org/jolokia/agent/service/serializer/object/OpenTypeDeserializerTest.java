@@ -6,8 +6,8 @@ import java.util.Set;
 import javax.management.*;
 import javax.management.openmbean.*;
 
-import org.jolokia.converter.util.CompositeTypeAndJson;
-import org.jolokia.converter.util.TabularTypeAndJson;
+import org.jolokia.agent.service.serializer.util.CompositeTypeAndJson;
+import org.jolokia.agent.service.serializer.util.TabularTypeAndJson;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

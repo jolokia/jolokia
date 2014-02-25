@@ -18,7 +18,7 @@ package org.jolokia.osgi.servlet;
 
 import java.util.*;
 
-import org.jolokia.service.*;
+import org.jolokia.core.service.*;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;

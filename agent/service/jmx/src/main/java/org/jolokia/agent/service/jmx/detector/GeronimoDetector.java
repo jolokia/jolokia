@@ -16,8 +16,8 @@ package org.jolokia.agent.service.jmx.detector;
  * limitations under the License.
  */
 
-import org.jolokia.service.ServerHandle;
-import org.jolokia.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for the Geronimo JEE Server

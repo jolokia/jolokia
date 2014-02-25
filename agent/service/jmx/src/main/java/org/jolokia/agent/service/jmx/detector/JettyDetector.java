@@ -18,9 +18,9 @@ package org.jolokia.agent.service.jmx.detector;
 
 import java.lang.reflect.*;
 
-import org.jolokia.service.ServerHandle;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.util.ClassUtil;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.ClassUtil;
 
 /**
  * A detector for jetty

@@ -7,14 +7,14 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.request.notification.*;
-import org.jolokia.service.AbstractJolokiaService;
-import org.jolokia.service.notification.*;
-import org.jolokia.util.TestJolokiaContext;
-import org.jolokia.util.jmx.MBeanServerExecutor;
-import org.jolokia.util.jmx.SingleMBeanServerExecutor;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.request.notification.*;
+import org.jolokia.core.service.AbstractJolokiaService;
+import org.jolokia.core.service.notification.*;
+import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 

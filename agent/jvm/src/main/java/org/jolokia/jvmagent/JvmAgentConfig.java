@@ -19,8 +19,8 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.util.*;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.EscapeUtil;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.util.EscapeUtil;
 
 /**
  * Holds all Http-Server and Jolokia configuration.

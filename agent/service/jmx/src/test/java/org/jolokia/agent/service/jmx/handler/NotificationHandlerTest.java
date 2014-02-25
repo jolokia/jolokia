@@ -19,13 +19,13 @@ package org.jolokia.agent.service.jmx.handler;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.config.ConfigKey;
-import org.jolokia.service.ServerHandle;
-import org.jolokia.request.JolokiaNotificationRequest;
-import org.jolokia.request.JolokiaRequestBuilder;
-import org.jolokia.request.notification.NotificationCommandType;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.TestJolokiaContext;
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.request.JolokiaNotificationRequest;
+import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.request.notification.NotificationCommandType;
+import org.jolokia.core.util.RequestType;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.createMock;

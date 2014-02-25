@@ -5,11 +5,11 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.request.JolokiaReadRequest;
-import org.jolokia.service.JolokiaContext;
-import org.jolokia.service.serializer.ValueFaultHandler;
-import org.jolokia.util.RequestType;
-import org.jolokia.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.request.JolokiaReadRequest;
+import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.service.serializer.ValueFaultHandler;
+import org.jolokia.core.util.RequestType;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /*
  * Copyright 2009-2013 Roland Huss

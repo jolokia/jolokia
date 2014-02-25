@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.management.Notification;
 
-import org.jolokia.service.notification.NotificationSubscription;
+import org.jolokia.core.service.notification.NotificationSubscription;
 
 /**
  * Implementation of store holding notifications which can be pulled via JMX.
