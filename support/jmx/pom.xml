@@ -34,7 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-agent-core</artifactId>
+      <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -51,7 +51,7 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-agent-core</artifactId>
+      <artifactId>jolokia-core</artifactId>
       <scope>test</scope>
       <classifier>tests</classifier>
       <version>${project.version}</version>

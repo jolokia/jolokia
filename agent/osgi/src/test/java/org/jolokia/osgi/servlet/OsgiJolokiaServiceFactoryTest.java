@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.agent.core.service.request.RequestHandler;
-import org.jolokia.agent.core.service.JolokiaContext;
+import org.jolokia.core.service.request.RequestHandler;
+import org.jolokia.core.service.JolokiaContext;
 import org.osgi.framework.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,7 +31,7 @@ public class OsgiJolokiaServiceFactoryTest {
         factory = new OsgiJolokiaServiceFactory(ctx);
 
         filter = createMock(Filter.class);
-        String filterExpr = "(objectClass=org.jolokia.agent.core.service.request.RequestHandler)";
+        String filterExpr = "(objectClass=org.jolokia.core.service.request.RequestHandler)";
         expect(ctx.createFilter(filterExpr)).andReturn(filter);
 
         listener = null;

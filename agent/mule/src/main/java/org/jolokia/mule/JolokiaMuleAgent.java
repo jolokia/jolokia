@@ -2,7 +2,7 @@ package org.jolokia.mule;
 
 import java.io.IOException;
 
-import org.jolokia.agent.core.util.NetworkUtil;
+import org.jolokia.core.util.NetworkUtil;
 import org.mule.AbstractAgent;
 import org.mule.api.MuleException;
 import org.mule.api.lifecycle.*;

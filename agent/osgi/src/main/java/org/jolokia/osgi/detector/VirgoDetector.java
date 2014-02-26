@@ -19,8 +19,8 @@ package org.jolokia.osgi.detector;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.agent.core.service.ServerHandle;
-import org.jolokia.agent.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
  * Detector for Eclipse Virgo

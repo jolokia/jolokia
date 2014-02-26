@@ -29,18 +29,19 @@
   <url>http://www.jolokia.org</url>
   
   <modules>
-    <module>agent/core</module>
+    <module>core</module>
+
     <module>agent/war</module>
     <module>agent/mule</module>
     <module>agent/osgi</module>
     <module>agent/osgi/bundle</module>
     <module>agent/jvm</module>
 
-    <module>agent/service/jmx</module>
-    <module>agent/service/pullnotif</module>
-    <module>agent/service/serializer</module>
-    <module>agent/service/discovery</module>
-    <module>agent/service/jsr160</module>
+    <module>service/jmx</module>
+    <module>service/pullnotif</module>
+    <module>service/serializer</module>
+    <module>service/discovery</module>
+    <module>service/jsr160</module>
 
     <module>it/core</module>
     <module>it/war</module>
@@ -49,7 +50,7 @@
     <module>client/javascript</module>
 
     <module>support/jmx</module>
-    <module>support/jvm-spring</module>
+    <module>support/spring</module>
 
     <module>tools/test-util</module>
   </modules>

@@ -34,7 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-agent-core</artifactId>
+      <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -76,7 +76,7 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-agent-core</artifactId>
+      <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
@@ -111,7 +111,7 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <artifactSet>
                 <includes>
-                  <include>org.jolokia:jolokia-agent-core</include>
+                  <include>org.jolokia:jolokia-core</include>
                   <include>org.jolokia:jolokia-service-jmx</include>
                   <include>org.jolokia:jolokia-service-serializer</include>
                   <include>org.jolokia:jolokia-service-pullnotif</include>

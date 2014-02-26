@@ -2,7 +2,7 @@ package org.jolokia.jvmagent;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpExchange;
-import org.jolokia.agent.core.config.Configuration;
+import org.jolokia.core.config.Configuration;
 
 /**
  * Class that facilitates custom authenticator tests

@@ -2,9 +2,9 @@ package org.jolokia.osgi;
 
 import javax.management.ObjectName;
 
-import org.jolokia.agent.core.restrictor.Restrictor;
-import org.jolokia.agent.core.util.HttpMethod;
-import org.jolokia.agent.core.util.RequestType;
+import org.jolokia.core.restrictor.Restrictor;
+import org.jolokia.core.util.HttpMethod;
+import org.jolokia.core.util.RequestType;
 import org.osgi.framework.*;
 
 /*

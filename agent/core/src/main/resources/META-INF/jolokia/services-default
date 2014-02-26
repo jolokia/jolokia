@@ -1,3 +1,0 @@
-# ============================================
-# History MBean interceptor
-org.jolokia.agent.core.history.HistoryMBeanRequestInterceptor

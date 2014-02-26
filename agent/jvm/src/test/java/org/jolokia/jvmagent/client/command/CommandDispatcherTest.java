@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import com.sun.tools.attach.*;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.agent.core.Version;
+import org.jolokia.core.Version;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.jvmagent.client.util.*;
 import org.testng.annotations.*;

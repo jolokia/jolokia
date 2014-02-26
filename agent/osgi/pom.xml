@@ -34,7 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-agent-core</artifactId>
+      <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -99,16 +99,16 @@
             </Embed-Dependency>
             <Export-Package>
               org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
-              org.jolokia.agent.core.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
-              org.jolokia.agent.core.util;version="${project.version}",
+              org.jolokia.core.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
+              org.jolokia.core.util;version="${project.version}",
               org.jolokia.converter;version="${project.version}",
               org.jolokia.agent.service.serializer.json;version="${project.version}",
               org.jolokia.agent.service.serializer.object;version="${project.version}",
             </Export-Package>
             <Import-Package>
               org.jolokia.osgi.servlet;version="${project.version}",
-              org.jolokia.agent.core.restrictor;version="${project.version}",
-              org.jolokia.agent.core.util;version="${project.version}",
+              org.jolokia.core.restrictor;version="${project.version}",
+              org.jolokia.core.util;version="${project.version}",
               org.osgi.framework;version="[1.0.0,2.0.0)",
               org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
               org.osgi.service.log;version="[1.0.0,2.0.0)",

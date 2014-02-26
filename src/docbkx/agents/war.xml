@@ -378,14 +378,14 @@
       The Jolokia agent servlet can be integrated into one's own
       web-applications as well. Simply add a servlet with
       the servlet class
-      <classname>org.jolokia.agent.core.http.AgentServlet</classname> to your
+      <classname>org.jolokia.core.http.AgentServlet</classname> to your
       own <filename>web.xml</filename>. The following example maps
       the agent to the context <literal>/jolokia</literal>:
     </para>
-    <programlisting language="xml"><![CDATA[<![CDATA[<![CDATA[
+    <programlisting language="xml"><![CDATA[<![CDATA[<![CDATA[<![CDATA[
     <servlet>
       <servlet-name>jolokia-agent</servlet-name>
-      <servlet-class>org.jolokia.agent.core.http.AgentServlet</servlet-class>
+      <servlet-class>org.jolokia.core.http.AgentServlet</servlet-class>
       <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -393,7 +393,7 @@
       <servlet-name>jolokia-agent</servlet-name>
       <url-pattern>/jolokia/*</url-pattern>
     </servlet-mapping>
-    ]]>]]>]]></programlisting>
+    ]]>]]>]]>]]></programlisting>
     <para>
       Of course, any init parameter as described in <xref
       linkend="agent-war-init-params"/> can be used here as well. 
@@ -427,14 +427,14 @@
       </repositories>
     </project>]]></programlisting>
     <para>
-      The <classname>org.jolokia.agent.core.http.Agent</classname> can be
+      The <classname>org.jolokia.core.http.Agent</classname> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <xref linkend="security-restrictor"/>
       for details.<footnote>
       <para>
         Replace
         <classname>org.jolokia.osgi.http.AgentServlet</classname> with
-        <classname>org.jolokia.agent.core.http.AgentServlet</classname> to use
+        <classname>org.jolokia.core.http.AgentServlet</classname> to use
         the servlet in a non-OSGi environment.
       </para>
     </footnote>

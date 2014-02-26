@@ -191,7 +191,7 @@ public class JolokiaCommands implements CommandMarker {
         if (pAddDefaultInitParams) {
             initParams = getDefaultParams(pConfiguration);
         }
-        WebXmlUtils.addServlet("jolokia", "org.jolokia.agent.core.http.AgentServlet", "/jolokia/*", 10,
+        WebXmlUtils.addServlet("jolokia", "org.jolokia.core.http.AgentServlet", "/jolokia/*", 10,
                                webXmlDoc, "Jolokia Agent", initParams);
     }
 
