@@ -105,7 +105,9 @@
             </goals>
             <configuration>
               <minimizeJar>false</minimizeJar>
-              <shadedArtifactAttached>false</shadedArtifactAttached>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <finalName>jolokia-agent</finalName>
+              <shadedClassifierName>agent</shadedClassifierName>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <artifactSet>
                 <includes>
