@@ -1,4 +1,4 @@
-package org.jolokia.core.service;
+package org.jolokia.core.service.detector;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -19,21 +19,19 @@ package org.jolokia.core.service;
 import java.util.Map;
 
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 /**
  * Information about the the server product the agent is running in.
- * 
+ *
  * @author roland
  * @since 05.11.10
  */
-public class ServerHandle {
-
-    // Empty server handle
-    public static final ServerHandle NULL_SERVER_HANDLE = new ServerHandle(null, null, null);
+public class DefaultServerHandle implements ServerHandle {
 
     // product name of server running
     private String product;
@@ -51,65 +49,32 @@ public class ServerHandle {
      * @param product name of the product
      * @param version version
      */
-    public ServerHandle(String vendor, String product, String version) {
+    public DefaultServerHandle(String vendor, String product, String version) {
         this.product = product;
         this.version = version;
         this.vendor = vendor;
     }
 
-    /**
-     * Get name of vendor
-     */
     public String getVendor() {
         return vendor;
     }
 
-    /**
-     * Get the name of the server this agent is running in
-     *
-     * @return server name
-     */
     public String getProduct() {
         return product;
     }
 
-    /**
-     * Get version number of the agent server
-     * @return version number
-     */
     public String getVersion() {
         return version;
     }
 
-    /**
-     * Hook for performing certain workarounds/pre processing just before
-     * a request gets dispatched
-     *
-     * @param pExecutor a JMX executor for easy JMX access
-     * @param pJmxReq the request to dispatch
-     */
     public void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq) {
         // Do nothing
     }
 
-    /**
-     * Hook called after the detection phase. This can be used by a handle to perform
-     * some specific action, possibly based on the configuration given.
-     *
-     * The default is a no-op.
-     *
-     * @param pExecutor JMX executor for allowing easy JMX accessing
-     * @param pContext the Jolokia Context
-     */
     public void postDetect(MBeanServerExecutor pExecutor, JolokiaContext pContext) {
         // Do nothing
     }
 
-    /**
-     * Return this info as an JSONObject
-     *
-     * @return this object in JSON representation
-     */
     public JSONObject toJSONObject() {
         JSONObject ret = new JSONObject();
         addNullSafe(ret, "vendor", vendor);
@@ -152,14 +117,6 @@ public class ServerHandle {
         return null;
     }
 
-    /**
-     * Extract extra dynamic information specific for this server handle. It can be obtained
-     * from JMX if necessary and hence an server executor is given for enabling a JMX query.
-     * A subclass should override this since this default method returns null.
-     *
-     * @param pServerManager server manager for allowing a query
-     * @return extra information
-     */
     public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
         return null;
     }

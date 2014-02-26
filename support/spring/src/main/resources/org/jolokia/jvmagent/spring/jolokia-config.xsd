@@ -127,7 +127,7 @@
     <xs:attribute name="log-ref" type="xs:IDREF">
       <xs:annotation>
         <xs:documentation>
-          Referencd to a Sring Bean implementing org.jolokia.core.util.LogHandler which then is used
+          Referencd to a Sring Bean implementing org.jolokia.core.service.LogHandler which then is used
           for logging.
         </xs:documentation>
       </xs:annotation>

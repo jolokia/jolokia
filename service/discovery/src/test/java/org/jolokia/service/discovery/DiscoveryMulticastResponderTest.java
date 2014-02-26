@@ -38,8 +38,8 @@ public class DiscoveryMulticastResponderTest {
                 .config(ConfigKey.DISCOVERY_ENABLED,Boolean.toString(enabled))
                 .agentDetails(new AgentDetails(UUID.randomUUID().toString()))
                 .build();
-        DiscoveryMulticastResponderImpl responder =
-                new DiscoveryMulticastResponderImpl();
+        DiscoveryMulticastResponder responder =
+                new DiscoveryMulticastResponder();
         responder.init(context);
         // Warming up
         Thread.sleep(enabled ? 300 : 100);

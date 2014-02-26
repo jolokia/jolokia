@@ -24,10 +24,11 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.*;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**
@@ -139,7 +140,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         }
     }
 
-    private class GlassfishServerHandle extends ServerHandle {
+    private class GlassfishServerHandle extends DefaultServerHandle {
         private boolean amxShouldBeBooted = false;
         private JolokiaContext jolokiaContext;
 

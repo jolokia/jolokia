@@ -16,7 +16,8 @@ package org.jolokia.service.jmx.detector;
  * limitations under the License.
  */
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
@@ -41,7 +42,7 @@ public class GeronimoDetector extends AbstractServerDetector {
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String version = getSingleStringAttribute(pMBeanServerExecutor,"geronimo:j2eeType=J2EEServer,*","serverVersion");
         if (version != null) {
-            return new ServerHandle("Apache","geronimo",version);
+            return new DefaultServerHandle("Apache","geronimo",version);
         } else {
             return null;
         }

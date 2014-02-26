@@ -5,13 +5,11 @@ import java.util.SortedSet;
 
 import javax.management.*;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.*;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.Configuration;
-import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.restrictor.Restrictor;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.service.JolokiaService;
+import org.jolokia.core.service.Restrictor;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.*;
 
 /**

@@ -26,7 +26,8 @@ import java.util.regex.Pattern;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.util.ClassUtil;
 import org.json.simple.JSONObject;
@@ -112,7 +113,7 @@ public class WebsphereDetector extends AbstractServerDetector {
     /**
      * Server handle for Websphere platforms
      */
-    static class WebsphereServerHandle extends ServerHandle {
+    static class WebsphereServerHandle extends DefaultServerHandle {
 
         private Map<String,String> extraInfo;
 

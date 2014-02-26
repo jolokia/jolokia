@@ -10,9 +10,8 @@ import javax.servlet.http.*;
 
 import org.jolokia.core.config.*;
 import org.jolokia.core.restrictor.PolicyRestrictorFactory;
-import org.jolokia.core.restrictor.Restrictor;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.service.JolokiaServiceManager;
+import org.jolokia.core.service.Restrictor;
+import org.jolokia.core.service.*;
 import org.jolokia.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.core.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.core.util.*;

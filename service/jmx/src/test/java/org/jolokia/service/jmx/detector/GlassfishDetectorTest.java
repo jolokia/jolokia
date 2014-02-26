@@ -20,12 +20,12 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.service.detector.ServerDetector;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.LogHandler;
 import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.Test;
 

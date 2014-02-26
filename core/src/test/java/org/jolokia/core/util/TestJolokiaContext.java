@@ -24,8 +24,9 @@ import javax.management.*;
 import org.jolokia.core.config.*;
 import org.jolokia.core.service.AgentDetails;
 import org.jolokia.core.restrictor.AllowAllRestrictor;
-import org.jolokia.core.restrictor.Restrictor;
+import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.service.*;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.service.serializer.JmxSerializer;
 import org.jolokia.core.util.jmx.JmxUtil;
 
@@ -66,7 +67,7 @@ public class TestJolokiaContext implements JolokiaContext {
         if (pHandle != null) {
             handle = pHandle;
         } else {
-            handle = new ServerHandle("vendor","product","version");
+            handle = ServerHandle.NULL_SERVER_HANDLE;
         }
         mbeans = new HashSet<ObjectName>();
     }

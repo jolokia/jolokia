@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent.spring.log;
 
 import org.apache.log4j.Logger;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.LogHandler;
 
 /**
  * Loghandler using Log4j

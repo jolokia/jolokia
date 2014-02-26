@@ -333,7 +333,7 @@
         In order to provide fine grained security, Jolokia using the
         abstract concept of an <emphasis>Restrictor</emphasis>. It is
         represented by the Java interface
-        <classname>org.jolokia.core.restrictor.Restrictor</classname> and
+        <classname>org.jolokia.core.service.Restrictor</classname> and
         comes with several implementations. The most prominent one is
         the <classname>PolicyRestrictor</classname> which is described
         in <xref linkend="security-policy"/>. This is also the 

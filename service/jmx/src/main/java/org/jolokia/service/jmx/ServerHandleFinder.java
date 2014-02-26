@@ -20,9 +20,8 @@ import java.util.*;
 
 import javax.management.MBeanServerConnection;
 
+import org.jolokia.core.service.detector.*;
 import org.jolokia.service.jmx.detector.AbstractServerDetector;
-import org.jolokia.core.service.ServerHandle;
-import org.jolokia.core.service.detector.ServerDetector;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.service.JolokiaContext;
 
@@ -91,7 +90,7 @@ public class ServerHandleFinder {
                 jolokiaContext.error("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp,exp);
             }
         }
-        return ServerHandle.NULL_SERVER_HANDLE;
+        return DefaultServerHandle.NULL_SERVER_HANDLE;
     }
 
     // ==================================================================================

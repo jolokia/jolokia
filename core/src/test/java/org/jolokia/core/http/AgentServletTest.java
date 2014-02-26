@@ -31,7 +31,7 @@ import org.jolokia.core.config.Configuration;
 import org.jolokia.core.restrictor.AllowAllRestrictor;
 import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.test.util.HttpTestUtil;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.LogHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

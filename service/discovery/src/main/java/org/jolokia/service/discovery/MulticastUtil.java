@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.LogHandler;
 import org.jolokia.core.util.NetworkUtil;
 
 /**

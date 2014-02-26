@@ -16,7 +16,8 @@ package org.jolokia.osgi.detector;
  * limitations under the License.
  */
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
@@ -42,7 +43,7 @@ public class EquinoxDetector extends AbstractOsgiServerDetector {
         if (checkSystemBundleForSymbolicName("org.eclipse.osgi")) {
             String version = getSystemBundleVersion();
             version = version.replaceFirst("\\.v\\d+$","");
-            return new ServerHandle("Eclipse","equinox",version);
+            return new DefaultServerHandle("Eclipse","equinox",version);
         } else {
             return null;
         }

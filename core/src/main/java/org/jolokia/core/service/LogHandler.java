@@ -1,4 +1,4 @@
-package org.jolokia.core.util;
+package org.jolokia.core.service;
 
 /*
  * Copyright 2009-2013 Roland Huss

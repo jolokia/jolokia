@@ -1,4 +1,4 @@
-package org.jolokia.core.restrictor;
+package org.jolokia.core.service;
 
 import javax.management.ObjectName;
 

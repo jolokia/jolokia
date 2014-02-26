@@ -7,7 +7,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.request.notification.*;
 import org.jolokia.core.service.AbstractJolokiaService;

@@ -7,7 +7,8 @@ import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.util.ClassUtil;
 
@@ -109,7 +110,7 @@ public class JBossDetector extends AbstractServerDetector {
 
 
     // ========================================================================
-    private static class JBossServerHandle extends ServerHandle {
+    private static class JBossServerHandle extends DefaultServerHandle {
         /**
          * JBoss server handle
          *

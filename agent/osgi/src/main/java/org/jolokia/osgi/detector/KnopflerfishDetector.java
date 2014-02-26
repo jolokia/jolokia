@@ -16,7 +16,8 @@ package org.jolokia.osgi.detector;
  * limitations under the License.
  */
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
@@ -42,7 +43,7 @@ public class KnopflerfishDetector extends AbstractOsgiServerDetector {
         // Probably a bit unspecific, but that's kopflerfish's fault
         if (checkSystemBundleForSymbolicName("org.knopflerfish.framework")) {
             String version = getSystemBundleVersion();
-            return new ServerHandle("Knopflerfish","knopflerfish",version);
+            return new DefaultServerHandle("Knopflerfish","knopflerfish",version);
         } else {
             return null;
         }

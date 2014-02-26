@@ -23,7 +23,8 @@ import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 
 /**
@@ -70,7 +71,7 @@ public class WeblogicDetector extends AbstractServerDetector {
         }
     }
 
-    static class WeblogicServerHandle extends ServerHandle {
+    static class WeblogicServerHandle extends DefaultServerHandle {
         /**
          * Constructor
          *

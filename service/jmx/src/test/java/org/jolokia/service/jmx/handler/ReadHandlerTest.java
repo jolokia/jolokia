@@ -23,7 +23,7 @@ import javax.management.*;
 
 import org.jolokia.core.request.JolokiaReadRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.restrictor.Restrictor;
+import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.util.TestJolokiaContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

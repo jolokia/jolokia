@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.core.Version;
-import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.service.*;
 import org.jolokia.core.util.*;
 import org.json.simple.JSONObject;
 import org.testng.Assert;

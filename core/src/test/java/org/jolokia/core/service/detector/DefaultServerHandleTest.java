@@ -1,4 +1,4 @@
-package org.jolokia.core.service;
+package org.jolokia.core.service.detector;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.easymock.EasyMock;
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.*;
 import org.jolokia.core.util.TestJolokiaContext;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.json.simple.JSONObject;
@@ -36,10 +36,10 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 06.06.12
  */
-public class ServerHandleTest {
+public class DefaultServerHandleTest {
 
 
-    private ServerHandle serverHandle;
+    private DefaultServerHandle serverHandle;
     private String vendor;
     private String product;
     private String version;
@@ -52,7 +52,7 @@ public class ServerHandleTest {
         vendor = "acim";
         product = "dukeNukem";
         version = "forEver";
-        serverHandle = new ServerHandle(vendor, product, version) {
+        serverHandle = new DefaultServerHandle(vendor, product, version) {
             @Override
             public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
                 return extraInfo;
@@ -78,7 +78,7 @@ public class ServerHandleTest {
 
     @Test
     public void allNull() {
-        ServerHandle handle = ServerHandle.NULL_SERVER_HANDLE;
+        ServerHandle handle = DefaultServerHandle.NULL_SERVER_HANDLE;
         assertNull(handle.getVendor());
         assertNull(handle.toJSONObject().get("extraInfo"));
     }

@@ -18,7 +18,8 @@ package org.jolokia.service.jmx.detector;
 
 import java.lang.reflect.*;
 
-import org.jolokia.core.service.ServerHandle;
+import org.jolokia.core.service.detector.DefaultServerHandle;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.util.ClassUtil;
 
@@ -45,11 +46,11 @@ public class JettyDetector extends AbstractServerDetector {
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
         if (serverClass != null) {
-            return new ServerHandle("Mortbay", "jetty", getVersion(serverClass));
+            return new DefaultServerHandle("Mortbay", "jetty", getVersion(serverClass));
         }
         serverClass = ClassUtil.classForName("org.eclipse.jetty.server.Server",false);
         if (serverClass != null) {
-            return new ServerHandle("Eclipse", "jetty", getVersion(serverClass));
+            return new DefaultServerHandle("Eclipse", "jetty", getVersion(serverClass));
         }
         return null;
     }

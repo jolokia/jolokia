@@ -6,8 +6,7 @@ import java.util.SortedSet;
 import javax.management.*;
 
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.restrictor.Restrictor;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.detector.ServerHandle;
 
 /**
  * The context providing access to all Jolokia internal services. This context

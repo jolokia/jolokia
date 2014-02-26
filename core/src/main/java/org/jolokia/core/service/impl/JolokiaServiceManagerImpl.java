@@ -24,9 +24,9 @@ import org.jolokia.core.service.request.RequestHandler;
 import org.jolokia.core.service.detector.ServerDetector;
 import org.jolokia.core.config.Configuration;
 import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.restrictor.Restrictor;
+import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.service.*;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.LogHandler;
 
 /**
  * The service manager for handling all the service organisation stuff.
@@ -108,7 +108,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /** {@inheritDoc} */
-    public synchronized final void addService(JolokiaService pService) {
+    public final synchronized void addService(JolokiaService pService) {
         Class<? extends JolokiaService> type = pService.getType();
         SortedSet<JolokiaService> servicesOfType = (SortedSet<JolokiaService>) staticServices.get(type);
         if (servicesOfType == null) {

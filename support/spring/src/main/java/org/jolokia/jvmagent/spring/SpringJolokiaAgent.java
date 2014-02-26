@@ -23,7 +23,7 @@ import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.jolokia.jvmagent.spring.backend.SpringRequestHandler;
 import org.jolokia.core.service.JolokiaService;
-import org.jolokia.core.util.LogHandler;
+import org.jolokia.core.service.LogHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;

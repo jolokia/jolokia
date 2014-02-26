@@ -26,6 +26,7 @@ import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.restrictor.AllowAllRestrictor;
 import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.service.LogHandler;
 import org.jolokia.core.service.request.AbstractRequestHandler;
 import org.jolokia.core.service.serializer.JmxSerializer;
 import org.jolokia.core.util.*;

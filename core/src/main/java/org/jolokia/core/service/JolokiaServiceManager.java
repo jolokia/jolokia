@@ -19,8 +19,6 @@ package org.jolokia.core.service;
 import java.util.SortedSet;
 
 import org.jolokia.core.config.Configuration;
-import org.jolokia.core.restrictor.Restrictor;
-import org.jolokia.core.util.LogHandler;
 
 /**
  * The service manager is responsible for building/looking up {@link JolokiaService}s and for creating a
