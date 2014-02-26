@@ -363,10 +363,10 @@ public enum ConfigKey {
      * @return key, pefixed with "jolokia."
      */
     public String asEnvVariable() {
-        String key = getKeyValue();
+        String kevValue = getKeyValue();
         StringBuffer buf = new StringBuffer();
         boolean notFirst = false;
-        for (char c : key.toCharArray()) {
+        for (char c : kevValue.toCharArray()) {
             if (Character.isUpperCase(c) && notFirst) {
                 buf.append("_").append(c);
             } else {

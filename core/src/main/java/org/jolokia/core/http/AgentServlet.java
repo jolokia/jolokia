@@ -211,28 +211,6 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    // Try to find an URL for system props or config
-    private String findAgentUrl(JolokiaContext pContext) {
-        // System property has precedence
-        String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue());
-        if (url == null) {
-            url = System.getenv("JOLOKIA_DISCOVERY_AGENT_URL");
-            if (url == null) {
-                url = pContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
-            }
-        }
-        return url;
-    }
-
-    // For war agent needs to be switched on
-    private boolean listenForDiscoveryMcRequests(JolokiaContext pContext) {
-        // Check for system props, system env and agent config
-        boolean sysProp = System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null;
-        boolean env     = System.getenv("JOLOKIA_DISCOVERY") != null;
-        boolean config  = Boolean.parseBoolean(pContext.getConfig(ConfigKey.DISCOVERY_ENABLED));
-        return sysProp || env || config;
-    }
-
     // A loghandler using a servlets log facilities
     private final class ServletLogHandler implements LogHandler {
 
@@ -263,12 +241,6 @@ public class AgentServlet extends HttpServlet {
             return debug;
         }
 
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void destroy() {
-        super.destroy();
     }
 
     /** {@inheritDoc} */

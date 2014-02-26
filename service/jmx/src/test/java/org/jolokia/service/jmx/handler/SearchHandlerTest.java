@@ -21,7 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.request.JolokiaSearchRequest;

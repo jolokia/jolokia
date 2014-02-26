@@ -24,10 +24,9 @@ public class DiscoveryMulticastResponderImpl extends AbstractJolokiaService<Jolo
 
     /**
      * Create the responder which can be started and stopped
-     *
      */
     public DiscoveryMulticastResponderImpl() {
-        super(Init.class,0 /* no order required */);
+        super(Init.class, 0 /* no order required */);
         listenerThreads = new ArrayList<MulticastSocketListenerThread>();
     }
 
@@ -36,27 +35,25 @@ public class DiscoveryMulticastResponderImpl extends AbstractJolokiaService<Jolo
      */
     @Override
     public void init(JolokiaContext pContext) {
-        if (discoveryEnabled(pContext)) {
+        if (discoveryEnabled(pContext) && listenerThreads.size() == 0) {
+            List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
+            if (addresses.size() == 0) {
+                pContext.info("No suitable address found for listening on multicast discovery requests");
+                return;
+            }
+            for (InetAddress addr : addresses) {
+                try {
+                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr, pContext);
+                    thread.start();
+                    listenerThreads.add(thread);
+                    // One thread might be enough ?
+                    //break;
+                } catch (IOException e) {
+                    pContext.error("Cannot start multicast discovery listener thread on " + addr + ": " + e, e);
+                }
+            }
             if (listenerThreads.size() == 0) {
-                List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
-                if (addresses.size() == 0) {
-                    pContext.info("No suitable address found for listening on multicast discovery requests");
-                    return;
-                }
-                for (InetAddress addr : addresses) {
-                    try {
-                        MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr,pContext);
-                        thread.start();
-                        listenerThreads.add(thread);
-                        // One thread might be enough ?
-                        //break;
-                    } catch (IOException e) {
-                        pContext.error("Cannot start multicast discovery listener thread on " + addr + ": " + e, e);
-                    }
-                }
-                if (listenerThreads.size() == 0) {
-                    pContext.info("Cannot start a single multicast discovery listener");
-                }
+                pContext.info("Cannot start a single multicast discovery listener");
             }
         }
     }

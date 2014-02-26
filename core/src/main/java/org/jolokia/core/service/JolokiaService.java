@@ -30,7 +30,7 @@ public interface JolokiaService<T extends JolokiaService> extends Comparable<T> 
 
     // Marker interface for services which only want to take part in the
     // service's lifecycle and are never looked up.
-    public interface Init extends JolokiaService<Init> {}
+    interface Init extends JolokiaService<Init> {}
 
     /**
      * Order of the service. The higher the number, the later in the list of services this service appears.

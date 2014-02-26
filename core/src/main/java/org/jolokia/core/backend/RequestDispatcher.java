@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.management.JMException;
 
 import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.service.request.RequestHandler;
 
 /**

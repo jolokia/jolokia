@@ -6,7 +6,7 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.backend.RequestDispatcher;
 import org.jolokia.core.request.JolokiaRequest;
 

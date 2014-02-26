@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;

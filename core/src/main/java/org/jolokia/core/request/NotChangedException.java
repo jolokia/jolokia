@@ -1,6 +1,4 @@
-package org.jolokia.core.backend;
-
-import org.jolokia.core.request.JolokiaRequest;
+package org.jolokia.core.request;
 
 /**
  * Exception thrown when an <code>ifModifiedSince</code> parameter was given and

@@ -18,6 +18,9 @@ abstract class AbstractDiscoveryMessage {
     // Maximum size supported for an UDP discovery message
     public static final int MAX_MSG_SIZE = 8972;
 
+    // Key for specifying the type of a message
+    protected static final String MESSAGE_TYPE = "type";
+
     // Type of the message
     private MessageType type;
 
@@ -64,8 +67,6 @@ abstract class AbstractDiscoveryMessage {
             return pRespond.getBytes();
         }
     }
-
-    protected static String MESSAGE_TYPE = "type";
 
     /**
      * Type of message. The constant names are used as type value for the payload

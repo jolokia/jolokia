@@ -22,7 +22,7 @@ import javax.management.*;
 
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.service.ServerHandle;
 import org.jolokia.core.service.request.AbstractRequestHandler;
 import org.jolokia.core.service.request.RequestHandler;

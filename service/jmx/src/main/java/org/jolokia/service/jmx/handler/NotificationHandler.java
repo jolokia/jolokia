@@ -21,7 +21,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
 import org.jolokia.core.request.JolokiaNotificationRequest;
 import org.jolokia.core.service.JolokiaContext;

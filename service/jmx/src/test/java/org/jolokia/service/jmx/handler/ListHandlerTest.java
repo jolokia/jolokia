@@ -23,7 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.core.backend.NotChangedException;
+import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;

@@ -5,8 +5,7 @@ import java.util.List;
 
 import javax.management.JMException;
 
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.request.JolokiaRequestBuilder;
+import org.jolokia.core.request.*;
 import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.service.request.AbstractRequestHandler;
 import org.jolokia.core.service.request.RequestHandler;
