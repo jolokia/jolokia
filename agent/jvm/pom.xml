@@ -52,6 +52,12 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-history</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-pullnotif</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -116,6 +122,7 @@
                   <include>org.jolokia:jolokia-service-serializer</include>
                   <include>org.jolokia:jolokia-service-pullnotif</include>
                   <include>org.jolokia:jolokia-service-discovery</include>
+                  <include>org.jolokia:jolokia-service-history</include>
                   <include>com.googlecode.json-simple:json-simple</include>
                 </includes>
               </artifactSet>

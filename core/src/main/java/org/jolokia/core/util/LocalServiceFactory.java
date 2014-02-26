@@ -28,10 +28,10 @@ import java.util.*;
  * classloader, is a plain text file which looks like
  *
  * <pre>
- *   org.jolokia.detector.TomcatDetector,50
- *   !org.jolokia.detector.JettyDetector
- *   org.jolokia.detector.JBossDetector
- *   org.jolokia.detector.WebsphereDetector,1500
+ *   org.jolokia.service.jmx.detector.TomcatDetector,50
+ *   !org.jolokia.service.jmx.detector.JettyDetector
+ *   org.jolokia.service.jmx.detector.JBossDetector
+ *   org.jolokia.service.jmx.detector.WebsphereDetector,1500
  * </pre>
  *
  * If a line starts with <code>!</code> it is removed if it has been added previously.

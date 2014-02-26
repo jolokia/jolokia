@@ -2,7 +2,6 @@ package org.jolokia.core.backend;
 
 import javax.management.*;
 
-import org.jolokia.core.history.History;
 import org.jolokia.core.service.impl.MBeanRegistry;
 import org.testng.annotations.*;
 
@@ -28,12 +27,39 @@ public class MBeanRegistryTest {
 
     @Test
     public void registerAtMBeanServer() throws MalformedObjectNameException, MBeanRegistrationException, InstanceAlreadyExistsException, NotCompliantMBeanException {
-        History history = new History(null,"jolokia:type=Config");
-        ObjectName oName = new ObjectName("jolokia:type=Config");
+        ObjectName oName = new ObjectName("jolokia:name=Testy");
+        Testy testy = new Testy(oName);
 
-        ObjectName resName = registry.registerMBean(history, "jolokia:type=Config");
+        ObjectName resName = registry.registerMBean(testy, "jolokia:name=Testy2");
         assertEquals(resName,oName);
+    }
+
+    interface TestyMBean {
 
     }
 
+    class Testy implements TestyMBean,MBeanRegistration {
+
+        ObjectName oName;
+
+        Testy(ObjectName name) {
+            this.oName = name;
+        }
+
+        public ObjectName preRegister(MBeanServer mBeanServer, ObjectName ignored) throws Exception {
+            return oName;
+        }
+
+        public void postRegister(Boolean aBoolean) {
+
+        }
+
+        public void preDeregister() throws Exception {
+
+        }
+
+        public void postDeregister() {
+
+        }
+    }
 }

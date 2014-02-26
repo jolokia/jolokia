@@ -1,0 +1,4 @@
+# ============================================
+# History MBean interceptor
+org.jolokia.service.history.HistoryMBeanRequestInterceptor
+

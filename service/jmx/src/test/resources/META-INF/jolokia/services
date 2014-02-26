@@ -1,4 +1,4 @@
-org.jolokia.agent.service.jmx.TestDetector,1
-org.jolokia.agent.service.jmx.TestDetector,2
-org.jolokia.agent.service.jmx.TestDetector,3
-org.jolokia.agent.service.jmx.TestDetector,4
+org.jolokia.service.jmx.TestDetector,1
+org.jolokia.service.jmx.TestDetector,2
+org.jolokia.service.jmx.TestDetector,3
+org.jolokia.service.jmx.TestDetector,4

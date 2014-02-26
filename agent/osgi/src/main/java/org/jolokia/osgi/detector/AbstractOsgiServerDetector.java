@@ -18,7 +18,7 @@ package org.jolokia.osgi.detector;
 
 import java.util.Dictionary;
 
-import org.jolokia.agent.service.jmx.detector.AbstractServerDetector;
+import org.jolokia.service.jmx.detector.AbstractServerDetector;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

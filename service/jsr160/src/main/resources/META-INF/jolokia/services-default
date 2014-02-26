@@ -1,2 +1,2 @@
 # Single JSR-160 based Request handler
-org.jolokia.jsr160.Jsr160RequestHandler
+org.jolokia.service.jsr160.Jsr160RequestHandler

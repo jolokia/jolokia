@@ -1,3 +1,3 @@
 # ============================================
 # Notification backend
-org.jolokia.agent.service.pullnotif.PullNotificationBackend
+org.jolokia.service.pullnotif.PullNotificationBackend

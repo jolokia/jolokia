@@ -42,6 +42,7 @@
     <module>service/serializer</module>
     <module>service/discovery</module>
     <module>service/jsr160</module>
+    <module>service/history</module>
 
     <module>it/core</module>
     <module>it/war</module>

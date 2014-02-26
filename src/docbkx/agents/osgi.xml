@@ -189,7 +189,7 @@
           Class names (comma separated) of request dispatchers used in
           addition to the LocalRequestDispatcher. E.g using a value
           of
-          <classname>org.jolokia.jsr160.Jsr160RequestHandler</classname>
+          <classname>org.jolokia.service.jsr160.Jsr160RequestHandler</classname>
           allows the agent to play the role of a JSR-160 proxy.
         </td>
       </tr>

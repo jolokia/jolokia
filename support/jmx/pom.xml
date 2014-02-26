@@ -83,8 +83,8 @@
             </Export-Package>
             <Import-Package>
               org.jolokia.converter;version="${project.version}",
-              org.jolokia.agent.service.serializer.json;version="${project.version}",
-              org.jolokia.agent.service.serializer.object;version="${project.version}",
+              org.jolokia.service.serializer.json;version="${project.version}",
+              org.jolokia.service.serializer.object;version="${project.version}",
               *
             </Import-Package>
           </instructions>

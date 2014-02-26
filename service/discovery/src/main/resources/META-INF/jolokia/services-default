@@ -1,4 +1,4 @@
 # ============================================
 # Discovery Listener and MBean registration
-org.jolokia.agent.service.discovery.JolokiaDiscovery
-org.jolokia.agent.service.discovery.DiscoveryMulticastResponderImpl
+org.jolokia.service.discovery.JolokiaDiscovery
+org.jolokia.service.discovery.DiscoveryMulticastResponderImpl

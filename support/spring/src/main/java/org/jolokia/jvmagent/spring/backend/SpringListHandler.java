@@ -13,7 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.jolokia.agent.service.jmx.handler.list.DataKeys.*;
+import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 
 /**
  * @author roland
