@@ -108,7 +108,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /** {@inheritDoc} */
-    public synchronized void addService(JolokiaService pService) {
+    public synchronized final void addService(JolokiaService pService) {
         Class<? extends JolokiaService> type = pService.getType();
         SortedSet<JolokiaService> servicesOfType = (SortedSet<JolokiaService>) staticServices.get(type);
         if (servicesOfType == null) {
