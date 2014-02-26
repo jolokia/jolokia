@@ -1,0 +1,3 @@
+# ============================================
+# JSON Serializer
+org.jolokia.agent.service.serializer.Converters,10
