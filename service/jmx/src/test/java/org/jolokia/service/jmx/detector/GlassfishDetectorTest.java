@@ -20,13 +20,12 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.service.detector.ServerDetector;
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.service.LogHandler;
+import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -39,7 +38,6 @@ import static org.testng.AssertJUnit.assertEquals;
  */
 public class GlassfishDetectorTest extends BaseDetectorTest {
 
-    ServerDetector detector = new GlassfishDetector(1);
 
     @Test
     public void noDetect() throws MalformedObjectNameException {
@@ -62,6 +60,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
     }
 
     private void detectDeep(String property,String version) throws MalformedObjectNameException {
+        GlassfishDetector detector = createDetector();
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("com.sun.appserv:j2eeType=J2EEServer,*"), null)).
                 andReturn(Collections.<ObjectName>emptySet()).anyTimes();
@@ -82,6 +81,12 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         verify(mockServer);
     }
 
+    private GlassfishDetector createDetector() {
+        GlassfishDetector detector = new GlassfishDetector(0);
+        detector.init(new TestJolokiaContext.Builder().build());
+        return detector;
+    }
+
     @Test
     public void detectFallback() throws InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException {
         ObjectName serverMbean = new ObjectName(SERVER_MBEAN);
@@ -93,21 +98,25 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         expect(mockServer.getAttribute(serverMbean, "serverVersion")).andReturn("GlassFish 3x");
         expect(mockServer.queryNames(new ObjectName("com.sun.appserver:type=Host,*"),null)).
                 andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
+        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet());
+
         replay(mockServer);
 
+        GlassfishDetector detector = createDetector();
         ServerHandle info = detector.detect(getMBeanServerManager(mockServer));
         assertEquals(info.getVersion(), "3");
         assertEquals(info.getProduct(),"glassfish");
     }
 
-
-
     @Test
     public void detect() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        doPlainDetect();
+        doPlainDetect(false,null);
     }
 
-    private ServerHandle doPlainDetect() throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
+    private ServerHandle doPlainDetect(boolean booted, JolokiaContext ctx) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
+        GlassfishDetector detector = new GlassfishDetector(0);
+        detector.init(ctx != null ? ctx : new TestJolokiaContext.Builder().build());
+
         ObjectName serverMbean = new ObjectName(SERVER_MBEAN);
         MBeanServer mockServer = createMock(MBeanServer.class);
 
@@ -115,19 +124,29 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
                 andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
         expect(mockServer.isRegistered(serverMbean)).andStubReturn(true);
         expect(mockServer.getAttribute(serverMbean, "serverVersion")).andReturn("GlassFish v3");
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
-        expect(mockServer.getAttribute(serverMbean,"ApplicationServerFullVersion")).andReturn(" GlassFish v3.1 ");
-        replay(mockServer);
-
-        MBeanServerExecutor mbeanServers = getMBeanServerManager(mockServer);
-        ServerHandle info = detector.detect(mbeanServers);
-        assertEquals(info.getVersion(), "3.1");
-        assertEquals(info.getProduct(),"glassfish");
-        Map<String,String> extra =
-                info.getExtraInfo(mbeanServers);
-        assertEquals(extra.get("amxBooted"), "true");
-        return info;
+        if (booted) {
+            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean)));
+            expect(mockServer.getAttribute(serverMbean,"ApplicationServerFullVersion")).andReturn(" GlassFish v3.1 ");
+            replay(mockServer);
+            MBeanServerExecutor mbeanServers = getMBeanServerManager(mockServer);
+            ServerHandle info = detector.detect(mbeanServers);
+            assertEquals(info.getVersion(), "3.1");
+            assertEquals(info.getProduct(),"glassfish");
+            Map<String,String> extra =
+                    info.getExtraInfo(mbeanServers);
+            assertEquals(extra.get("amxBooted"), "true");
+            return info;
+        } else {
+            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<ObjectName>()).anyTimes();
+            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+            replay(mockServer);
+            MBeanServerExecutor mbeanServers = getMBeanServerManager(mockServer);
+            ServerHandle info = detector.detect(mbeanServers);
+            Map<String,String> extra =
+                    info.getExtraInfo(mbeanServers);
+            assertEquals(extra.get("amxBooted"), "false");
+            return info;
+        }
     }
 
 
@@ -143,17 +162,12 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
 
     @Test
     public void postDetectWithNegativConfig() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        ServerHandle handle = doPlainDetect();
-        MBeanServer mockServer = createMock(MBeanServer.class);
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(null).anyTimes();
-        replay(mockServer);
         JolokiaContext ctx = new TestJolokiaContext.Builder().config(ConfigKey.DETECTOR_OPTIONS,"{\"glassfish\": {\"bootAmx\" : false}}").build();
-        handle.postDetect(getMBeanServerManager(mockServer), ctx);
-        verify(mockServer);
+        ServerHandle handle = doPlainDetect(false, ctx);
     }
 
     private void postDetectPositive(String opts) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
-        ServerHandle handle = doPlainDetect();
+        ServerHandle handle = doPlainDetect(false,null);
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         ObjectName bootAmxName = new ObjectName("amx-support:type=boot-amx");
@@ -162,7 +176,6 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         replay(mockServer);
         JolokiaContext context = new TestJolokiaContext.Builder().config(ConfigKey.DETECTOR_OPTIONS,opts).build();
         MBeanServerExecutor servers = getMBeanServerManager(mockServer);
-        handle.postDetect(servers, context);
         handle.preDispatch(servers,null);
         verify(mockServer);
     }
@@ -178,7 +191,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
     }
 
     private void detectExceptionDuringPostProcess(String regexp,Exception exp) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
-        ServerHandle handle = doPlainDetect();
+        ServerHandle handle = doPlainDetect(false,null);
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
         ObjectName bootAmxName = new ObjectName("amx-support:type=boot-amx");
@@ -188,7 +201,6 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         log.error(matches(regexp),isA(exp.getClass()));
         replay(mockServer,log);
         MBeanServerExecutor servers = getMBeanServerManager(mockServer);
-        handle.postDetect(servers,new TestJolokiaContext());
         handle.preDispatch(servers,null);
         verify(mockServer);
     }

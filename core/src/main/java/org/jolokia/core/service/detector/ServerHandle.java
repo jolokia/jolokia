@@ -3,7 +3,6 @@ package org.jolokia.core.service.detector;
 import java.util.Map;
 
 import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.json.simple.JSONObject;
 
@@ -43,17 +42,6 @@ public interface ServerHandle {
     void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq);
 
     /**
-     * Hook called after the detection phase. This can be used by a handle to perform
-     * some specific action, possibly based on the configuration given.
-     *
-     * The default is a no-op.
-     *
-     * @param pExecutor JMX executor for allowing easy JMX accessing
-     * @param pContext the Jolokia Context
-     */
-    void postDetect(MBeanServerExecutor pExecutor, JolokiaContext pContext);
-
-    /**
      * Return this info as an JSONObject
      *
      * @return this object in JSON representation
@@ -86,10 +74,6 @@ public interface ServerHandle {
         }
 
         public void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq) {
-
-        }
-
-        public void postDetect(MBeanServerExecutor pExecutor, JolokiaContext pContext) {
 
         }
 

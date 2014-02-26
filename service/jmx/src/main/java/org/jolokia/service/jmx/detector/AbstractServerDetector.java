@@ -22,9 +22,13 @@ import java.util.Set;
 
 import javax.management.*;
 
+import org.jolokia.core.config.ConfigKey;
+import org.jolokia.core.service.AbstractJolokiaService;
+import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.service.detector.ServerDetector;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.service.AbstractJolokiaService;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  * Base class for server detectors.
@@ -33,6 +37,9 @@ import org.jolokia.core.service.AbstractJolokiaService;
  * @since 05.11.10
  */
 public abstract class AbstractServerDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
+
+    // Context used during detection. Valid except for the server handle
+    protected JolokiaContext jolokiaContext;
 
     /**
      * Create a server detector
@@ -164,5 +171,38 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
         return null;
     }
 
+    /**
+     * Get the optional options used for detectors-default. This should be a JSON string specifying all options
+     * for all detectors-default. Keys are the name of the detector's product, the values are JSON object containing
+     * specific parameters for this agent. E.g.
+     *
+     * <pre>
+     *    {
+     *        "glassfish" : { "bootAmx": true  }
+     *    }
+     * </pre>
+     *
+     *
+     * @param pProduct product for which to get the dector options
+     * @return the detector specific configuration
+     */
+    protected JSONObject getDetectorOptions(String pProduct) {
+        String optionString = jolokiaContext.getConfig(ConfigKey.DETECTOR_OPTIONS);
+        if (optionString != null) {
+            try {
+                JSONObject opts = (JSONObject) new JSONParser().parse(optionString);
+                return (JSONObject) opts.get(pProduct);
+            } catch (Exception e) {
+                jolokiaContext.error("Could not parse options '" + optionString + "' as JSON object: " + e, e);
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public void init(JolokiaContext pJolokiaContext) {
+        jolokiaContext = pJolokiaContext;
+    }
 
 }

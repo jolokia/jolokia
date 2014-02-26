@@ -20,16 +20,11 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.easymock.EasyMock;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.*;
-import org.jolokia.core.util.TestJolokiaContext;
 import org.jolokia.core.util.jmx.MBeanServerExecutor;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.*;
 import static org.testng.Assert.*;
 
 /**
@@ -81,33 +76,5 @@ public class DefaultServerHandleTest {
         ServerHandle handle = DefaultServerHandle.NULL_SERVER_HANDLE;
         assertNull(handle.getVendor());
         assertNull(handle.toJSONObject().get("extraInfo"));
-    }
-
-    @Test
-    public void detectorOptions() {
-        JolokiaContext ctx = new TestJolokiaContext.Builder().config(ConfigKey.DETECTOR_OPTIONS, "{\"dukeNukem\" : {\"doIt\" : true }}").build();
-        JSONObject config = serverHandle.getDetectorOptions(ctx);
-        assertTrue((Boolean) config.get("doIt"));
-    }
-
-    @Test
-    public void detectorOptionsEmpty() {
-        JSONObject config = serverHandle.getDetectorOptions(new TestJolokiaContext());
-        assertNull(config);
-    }
-
-    @Test
-    public void detectOptionsFail() {
-        LogHandler handler = EasyMock.createMock(LogHandler.class);
-        handler.error(matches("^.*parse options.*"),isA(Exception.class));
-        replay(handler);
-
-        JolokiaContext opts = new TestJolokiaContext.Builder()
-                .config(ConfigKey.DETECTOR_OPTIONS,"blub: bla")
-                .logHandler(handler)
-                .build();
-        JSONObject config = serverHandle.getDetectorOptions(opts);
-        assertNull(config);
-        verify(handler);
     }
 }

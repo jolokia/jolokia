@@ -60,22 +60,6 @@ public class ServerHandleFinder {
      * Initialize the server handle and update the context.
      */
     public ServerHandle detectServerHandle(MBeanServerExecutor pMBeanServerExecutor) {
-        ServerHandle handle = detectServers(pMBeanServerExecutor);
-        handle.postDetect(pMBeanServerExecutor, jolokiaContext);
-        return handle;
-    }
-
-    // =====================================================================================
-    // Look up detectors as services and add a fallback detector
-    private SortedSet<ServerDetector> getDetectors() {
-        SortedSet<ServerDetector> detectors = jolokiaContext.getServices(ServerDetector.class);
-        detectors.add(new FallbackServerDetector());
-        return detectors;
-    }
-
-    // Detect the server by delegating it to a set of predefined detectors-default. These will be created
-    // by a lookup mechanism, queried and thrown away after this method
-    private ServerHandle detectServers(MBeanServerExecutor pMBeanServerExecutor) {
         // Now detect the server
         for (ServerDetector detector : getDetectors()) {
             try {
@@ -91,6 +75,14 @@ public class ServerHandleFinder {
             }
         }
         return DefaultServerHandle.NULL_SERVER_HANDLE;
+    }
+
+    // =====================================================================================
+    // Look up detectors as services and add a fallback detector
+    private SortedSet<ServerDetector> getDetectors() {
+        SortedSet<ServerDetector> detectors = jolokiaContext.getServices(ServerDetector.class);
+        detectors.add(new FallbackServerDetector());
+        return detectors;
     }
 
     // ==================================================================================
