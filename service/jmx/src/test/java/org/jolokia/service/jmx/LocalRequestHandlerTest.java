@@ -10,7 +10,7 @@ import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.service.JolokiaContext;
@@ -101,7 +101,7 @@ public class LocalRequestHandlerTest {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request), isNull())).andReturn(result);
+        expect(commandHandler.handleRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andReturn(result);
         replay(commandHandler);
         assertEquals(requestHandler.handleRequest(request,null),result);
     }
@@ -109,7 +109,7 @@ public class LocalRequestHandlerTest {
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(commandHandler.handleRequest(isA(MBeanServerExecutor.class), eq(request), isNull())).andThrow(new IOException());
+        expect(commandHandler.handleRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andThrow(new IOException());
         replay(commandHandler);
         requestHandler.handleRequest(request,null);
     }

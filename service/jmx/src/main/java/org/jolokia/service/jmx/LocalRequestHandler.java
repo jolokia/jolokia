@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
+import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
 import org.jolokia.core.request.NotChangedException;
@@ -27,7 +28,6 @@ import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.service.request.AbstractRequestHandler;
 import org.jolokia.core.service.request.RequestHandler;
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
 import org.jolokia.core.request.JolokiaObjectNameRequest;
 import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.service.JolokiaContext;
@@ -48,7 +48,7 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
     // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
     private volatile Initializer initializer;
 
-    private LocalMBeanServerExecutor executor;
+    private DefaultMBeanServerAccess executor;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
@@ -163,7 +163,7 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
     private final class Initializer {
         void init() {
             ServerHandleFinder finder = new ServerHandleFinder(jolokiaContext);
-            executor = new LocalMBeanServerExecutor(finder.getExtraMBeanServers());
+            executor = new DefaultMBeanServerAccess(finder.getExtraMBeanServers());
             ServerHandle handle = finder.detectServerHandle(executor);
             jolokiaContext.setServerHandle(handle);
         }

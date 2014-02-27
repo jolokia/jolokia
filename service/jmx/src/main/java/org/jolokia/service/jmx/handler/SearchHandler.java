@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.request.JolokiaSearchRequest;
 import org.jolokia.core.service.JolokiaContext;
@@ -65,7 +65,7 @@ public class SearchHandler extends CommandHandler<JolokiaSearchRequest> {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaSearchRequest request, Object pPreviousResult)
+    public Object doHandleRequest(MBeanServerAccess serverManager, JolokiaSearchRequest request, Object pPreviousResult)
             throws MBeanException, IOException, NotChangedException {
         checkForModifiedSince(serverManager,request);
         Set<ObjectName> names = serverManager.queryNames(request.getObjectName());

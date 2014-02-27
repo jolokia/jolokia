@@ -12,7 +12,7 @@ import javax.management.*;
  * @author roland
  * @since 14.01.14
  */
-public class SingleMBeanServerExecutor implements MBeanServerExecutor {
+public class SingleMBeanServerAccess implements MBeanServerAccess {
 
     private MBeanServerConnection connection;
 
@@ -20,7 +20,7 @@ public class SingleMBeanServerExecutor implements MBeanServerExecutor {
      * Constructor for wrapping a remote connection
      * @param pConnection remote connection to wrap
      */
-    public SingleMBeanServerExecutor(MBeanServerConnection pConnection) {
+    public SingleMBeanServerAccess(MBeanServerConnection pConnection) {
         connection = pConnection;
     }
 

@@ -6,8 +6,8 @@ import javax.management.*;
 
 import org.easymock.IArgumentMatcher;
 import org.jolokia.core.service.notification.*;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.core.request.notification.AddCommand;
 import org.jolokia.test.util.CollectionTestUtil;
 import org.json.simple.JSONObject;
@@ -25,7 +25,7 @@ public class NotificationListenerDelegateTest {
 
     private ObjectName TEST_NAME;
     private MBeanServerConnection       connection;
-    private MBeanServerExecutor executor;
+    private MBeanServerAccess executor;
     private NotificationBackend backend;
 
     @BeforeMethod
@@ -33,7 +33,7 @@ public class NotificationListenerDelegateTest {
         TEST_NAME = new ObjectName("test:type=test");
         connection = createMock(MBeanServerConnection.class);
         backend = createMock(NotificationBackend.class);
-        executor = new SingleMBeanServerExecutor(connection);
+        executor = new SingleMBeanServerAccess(connection);
     }
 
     private ListenerRegistration createRegistration(String name,List<String> filter,Object handback, BackendCallback callback, String ... configKeyAndValue) throws MalformedObjectNameException {

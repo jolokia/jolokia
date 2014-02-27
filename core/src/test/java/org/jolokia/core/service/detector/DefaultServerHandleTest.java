@@ -20,7 +20,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -49,7 +49,7 @@ public class DefaultServerHandleTest {
         version = "forEver";
         serverHandle = new DefaultServerHandle(vendor, product, version) {
             @Override
-            public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+            public Map<String, String> getExtraInfo(MBeanServerAccess pServerManager) {
                 return extraInfo;
             }
         };

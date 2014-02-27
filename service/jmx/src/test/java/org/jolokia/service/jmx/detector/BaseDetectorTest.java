@@ -18,15 +18,15 @@ package org.jolokia.service.jmx.detector;
 
 import javax.management.MBeanServer;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
 
 /**
  * @author roland
  * @since 17.01.13
  */
 public class BaseDetectorTest {
-    protected MBeanServerExecutor getMBeanServerManager(final MBeanServer pMockServer) {
-        return new SingleMBeanServerExecutor(pMockServer);
+    protected MBeanServerAccess getMBeanServerManager(final MBeanServer pMockServer) {
+        return new SingleMBeanServerAccess(pMockServer);
     }
 }

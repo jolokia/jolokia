@@ -26,7 +26,7 @@ import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.service.AbstractJolokiaService;
 import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.service.detector.ServerDetector;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -56,14 +56,14 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
     /**
      * Check for the existence of a certain MBean. All known MBeanServers are queried
      *
-     * @param pMBeanServerExecutor mbean servers to query for
+     * @param pMBeanServerAccess mbean servers to query for
      * @param pMbeanPattern MBean name pattern for MBeans to check for
      * @return set of {@link ObjectName}s if the pattern matches, or an empty set if not mbean has been found
      */
-    protected Set<ObjectName> searchMBeans(MBeanServerExecutor pMBeanServerExecutor, String pMbeanPattern) {
+    protected Set<ObjectName> searchMBeans(MBeanServerAccess pMBeanServerAccess, String pMbeanPattern) {
         try {
             ObjectName oName = new ObjectName(pMbeanPattern);
-            return pMBeanServerExecutor.queryNames(oName);
+            return pMBeanServerAccess.queryNames(oName);
         } catch (MalformedObjectNameException e) {
             return new HashSet<ObjectName>();
         } catch (IOException e) {
@@ -79,22 +79,22 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
      *        return true if one or more MBeans of all MBeanServers match this pattern
      * @return true if at least one MBean of the given name (or pattern) exists
      */
-    protected boolean mBeanExists(MBeanServerExecutor pMBeanServerManger,String pObjectName) {
+    protected boolean mBeanExists(MBeanServerAccess pMBeanServerManger,String pObjectName) {
         return searchMBeans(pMBeanServerManger,pObjectName).size() > 0;
     }
 
     /**
      * Get the string representation of an attribute
      *
-     * @param pMBeanServerExecutor set of MBeanServers to query. The first one wins.
+     * @param pMBeanServerAccess set of MBeanServers to query. The first one wins.
      * @param pMBean object name of MBean to lookup
      * @param pAttribute attribute to lookup
      * @return string value of attribute or <code>null</code> if the attribute could not be fetched
      */
-    protected String getAttributeValue(MBeanServerExecutor pMBeanServerExecutor,String pMBean,String pAttribute) {
+    protected String getAttributeValue(MBeanServerAccess pMBeanServerAccess,String pMBean,String pAttribute) {
         try {
             ObjectName oName = new ObjectName(pMBean);
-            return getAttributeValue(pMBeanServerExecutor,oName,pAttribute);
+            return getAttributeValue(pMBeanServerAccess,oName,pAttribute);
         } catch (MalformedObjectNameException e) {
             return null;
         }
@@ -103,14 +103,14 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
     /**
      * Get the string representation of an attribute
      *
-     * @param pMBeanServerExecutor set of MBeanServers to query. The first one wins.
+     * @param pMBeanServerAccess set of MBeanServers to query. The first one wins.
      * @param pMBean name of MBean to lookup
      * @param pAttribute attribute to lookup
      * @return string value of attribute or <code>null</code> if the attribute could not be fetched
      */
-    protected String getAttributeValue(MBeanServerExecutor pMBeanServerExecutor, final ObjectName pMBean, final String pAttribute) {
+    protected String getAttributeValue(MBeanServerAccess pMBeanServerAccess, final ObjectName pMBean, final String pAttribute) {
         try {
-            return pMBeanServerExecutor.call(pMBean, GET_ATTRIBUTE_HANDLER, pAttribute);
+            return pMBeanServerAccess.call(pMBean, GET_ATTRIBUTE_HANDLER, pAttribute);
         } catch (IOException e) {
             return null;
         } catch (ReflectionException e) {
@@ -121,7 +121,7 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
     }
 
     // Handler for fetching an attribute
-    private static final MBeanServerExecutor.MBeanAction<String> GET_ATTRIBUTE_HANDLER = new MBeanServerExecutor.MBeanAction<String>() {
+    private static final MBeanServerAccess.MBeanAction<String> GET_ATTRIBUTE_HANDLER = new MBeanServerAccess.MBeanAction<String>() {
         /** {@inheritDoc} */
         public String execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
             Object attr = pConn.getAttribute(pName, (String) extraArgs[0]);
@@ -132,20 +132,20 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
     /**
      * Get a single attribute for a given MBeanName pattern.
      *
-     * @param pMBeanServerExecutor MBeanServer manager to query
+     * @param pMBeanServerAccess MBeanServer manager to query
      * @param pMBeanName a MBean name or pattern. If multiple MBeans are found, each is queried for the attribute
      * @param pAttribute the attribute to lookup
      * @return the string value of the attribute or null if either no MBeans could be found, or 0 or more than 1 attribute
      *         are found on those mbeans
      */
-    protected String getSingleStringAttribute(MBeanServerExecutor pMBeanServerExecutor, String pMBeanName, String pAttribute) {
-        Set<ObjectName> serverMBeanNames = searchMBeans(pMBeanServerExecutor, pMBeanName);
+    protected String getSingleStringAttribute(MBeanServerAccess pMBeanServerAccess, String pMBeanName, String pAttribute) {
+        Set<ObjectName> serverMBeanNames = searchMBeans(pMBeanServerAccess, pMBeanName);
         if (serverMBeanNames.size() == 0) {
             return null;
         }
         Set<String> attributeValues = new HashSet<String>();
         for (ObjectName oName : serverMBeanNames) {
-            String val = getAttributeValue(pMBeanServerExecutor, oName, pAttribute);
+            String val = getAttributeValue(pMBeanServerAccess, oName, pAttribute);
             if (val != null) {
                 attributeValues.add(val);
             }
@@ -162,7 +162,7 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
      * @param pMbeanServers servers to query
      * @return version number or null if not found.
      */
-    protected String getVersionFromJsr77(MBeanServerExecutor pMbeanServers) {
+    protected String getVersionFromJsr77(MBeanServerAccess pMbeanServers) {
         Set<ObjectName> names = searchMBeans(pMbeanServers, "*:j2eeType=J2EEServer,*");
         // Take the first one
         if (names.size() > 0) {

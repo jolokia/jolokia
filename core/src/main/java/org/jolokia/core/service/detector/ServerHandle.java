@@ -3,7 +3,7 @@ package org.jolokia.core.service.detector;
 import java.util.Map;
 
 import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 
 /**
@@ -39,7 +39,7 @@ public interface ServerHandle {
      * @param pExecutor a JMX executor for easy JMX access
      * @param pJmxReq the request to dispatch
      */
-    void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq);
+    void preDispatch(MBeanServerAccess pExecutor, JolokiaRequest pJmxReq);
 
     /**
      * Return this info as an JSONObject
@@ -56,7 +56,7 @@ public interface ServerHandle {
      * @param pServerManager server manager for allowing a query
      * @return extra information
      */
-    Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager);
+    Map<String, String> getExtraInfo(MBeanServerAccess pServerManager);
 
     // =============================================================================================
     // A "null" server handle
@@ -73,7 +73,7 @@ public interface ServerHandle {
             return null;
         }
 
-        public void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq) {
+        public void preDispatch(MBeanServerAccess pExecutor, JolokiaRequest pJmxReq) {
 
         }
 
@@ -81,7 +81,7 @@ public interface ServerHandle {
             return new JSONObject();
         }
 
-        public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+        public Map<String, String> getExtraInfo(MBeanServerAccess pServerManager) {
             return null;
         }
     };

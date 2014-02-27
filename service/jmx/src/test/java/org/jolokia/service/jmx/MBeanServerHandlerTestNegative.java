@@ -23,8 +23,8 @@ import java.util.List;
 import javax.management.*;
 
 import org.jolokia.core.service.impl.MBeanRegistry;
-import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;
@@ -44,9 +44,9 @@ public class MBeanServerHandlerTestNegative {
         init();
         try {
             ObjectName oName = new ObjectName("Bla:type=blub");
-            MBeanServerExecutor servers = new LocalMBeanServerExecutor();
+            MBeanServerAccess servers = new DefaultMBeanServerAccess();
             final List<Boolean> results = new ArrayList<Boolean>();
-            servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
+            servers.each(oName, new MBeanServerAccess.MBeanEachCallback() {
                 public void callback(MBeanServerConnection pConn, ObjectName pName)
                         throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                     results.add(pConn.isRegistered(pName));

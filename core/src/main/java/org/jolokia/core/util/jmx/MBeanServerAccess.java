@@ -31,7 +31,7 @@ import javax.management.*;
  * @author roland
  * @since 17.01.13
  */
-public interface MBeanServerExecutor {
+public interface MBeanServerAccess {
 
     /**
      * Iterate over all MBeanServers managed and call the handler via a callback.

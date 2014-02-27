@@ -7,6 +7,7 @@ import javax.management.*;
 
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
  * The context providing access to all Jolokia internal services. This context
@@ -48,19 +49,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     ServerHandle getServerHandle();
 
     /**
-     * Register an MBean which gets automatically unregistered during shutdown.
-     *
-     * @param pMBean MBean to register
-     * @param pOptionalName optional name under which the bean should be registered. If not provided,
-     * it depends on whether the MBean to register implements {@link javax.management.MBeanRegistration} or
-     * not.
-     *
-     * @return the name under which the MBean is registered.
-     */
-    ObjectName registerMBean(Object pMBean, String... pOptionalName)
-            throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException;
-
-    /**
      * Get a configuration value if set as configuration or the default
      * value if not
      *
@@ -85,7 +73,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      */
     void setServerHandle(ServerHandle pHandle);
 
-
     /**
      * Get the details which specify the current agent. The returned
      * details should not be kept but instead each time details are needed
@@ -94,4 +81,27 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return the details for this agent.
      */
     AgentDetails getAgentDetails();
+
+
+    /**
+     * Register an MBean which gets automatically unregistered during shutdown.
+     *
+     * @param pMBean MBean to register
+     * @param pOptionalName optional name under which the bean should be registered. If not provided,
+     * it depends on whether the MBean to register implements {@link javax.management.MBeanRegistration} or
+     * not.
+     *
+     * @return the name under which the MBean is registered.
+     */
+    ObjectName registerMBean(Object pMBean, String... pOptionalName)
+    throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException;
+
+    /**
+     * Get an {@link MBeanServerAccess} for easy access of the JMX subsystem
+     * even when there are multiple MBeanServers available. It uses a template mechanism
+     * with callback
+     *
+     * @return the executor to use
+     */
+    MBeanServerAccess getMBeanServerAccess();
 }

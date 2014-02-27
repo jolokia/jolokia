@@ -24,12 +24,12 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
 import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.service.request.AbstractRequestHandler;
-import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
 import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.service.JolokiaContext;
 
@@ -82,7 +82,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
-                MBeanServerExecutor manager = new SingleMBeanServerExecutor(connection);
+                MBeanServerAccess manager = new SingleMBeanServerAccess(connection);
                 return handler.handleRequest(manager,pJmxReq, pPreviousResult);
             } else {
                 return handler.handleRequest(connection,pJmxReq);

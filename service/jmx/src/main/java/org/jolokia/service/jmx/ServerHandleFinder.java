@@ -22,7 +22,7 @@ import javax.management.MBeanServerConnection;
 
 import org.jolokia.core.service.detector.*;
 import org.jolokia.service.jmx.detector.AbstractServerDetector;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.service.JolokiaContext;
 
 /**
@@ -59,11 +59,11 @@ public class ServerHandleFinder {
     /**
      * Initialize the server handle and update the context.
      */
-    public ServerHandle detectServerHandle(MBeanServerExecutor pMBeanServerExecutor) {
+    public ServerHandle detectServerHandle(MBeanServerAccess pMBeanServerAccess) {
         // Now detect the server
         for (ServerDetector detector : getDetectors()) {
             try {
-                ServerHandle info = detector.detect(pMBeanServerExecutor);
+                ServerHandle info = detector.detect(pMBeanServerAccess);
                 if (info != null) {
                     return info;
                 }
@@ -96,7 +96,7 @@ public class ServerHandleFinder {
         }
 
         /** {@inheritDoc} */
-        public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
             return ServerHandle.NULL_SERVER_HANDLE;
         }
     }

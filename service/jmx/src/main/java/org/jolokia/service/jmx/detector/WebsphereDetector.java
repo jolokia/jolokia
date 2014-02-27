@@ -28,7 +28,7 @@ import javax.management.MBeanServerConnection;
 
 import org.jolokia.core.service.detector.DefaultServerHandle;
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.util.ClassUtil;
 import org.json.simple.JSONObject;
 
@@ -60,10 +60,10 @@ public class WebsphereDetector extends AbstractServerDetector {
     }
 
     /** {@inheritDoc}
-     * @param pMBeanServerExecutor*/
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+     * @param pMBeanServerAccess*/
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
         String serverVersion =
-                getSingleStringAttribute(pMBeanServerExecutor, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
+                getSingleStringAttribute(pMBeanServerAccess, "*:j2eeType=J2EEServer,type=Server,*", "serverVersion");
         if (serverVersion != null && serverVersion.contains("WebSphere")) {
             Matcher matcher = SERVER_VERSION_PATTERN.matcher(serverVersion);
             if (matcher.find()) {
@@ -124,7 +124,7 @@ public class WebsphereDetector extends AbstractServerDetector {
         }
 
         @Override
-        public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+        public Map<String, String> getExtraInfo(MBeanServerAccess pServerManager) {
             return extraInfo;
         }
 

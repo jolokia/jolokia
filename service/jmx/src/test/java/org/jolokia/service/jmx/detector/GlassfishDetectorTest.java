@@ -25,7 +25,7 @@ import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.service.LogHandler;
 import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.TestJolokiaContext;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -128,7 +128,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
             expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean)));
             expect(mockServer.getAttribute(serverMbean,"ApplicationServerFullVersion")).andReturn(" GlassFish v3.1 ");
             replay(mockServer);
-            MBeanServerExecutor mbeanServers = getMBeanServerManager(mockServer);
+            MBeanServerAccess mbeanServers = getMBeanServerManager(mockServer);
             ServerHandle info = detector.detect(mbeanServers);
             assertEquals(info.getVersion(), "3.1");
             assertEquals(info.getProduct(),"glassfish");
@@ -140,7 +140,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
             expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<ObjectName>()).anyTimes();
             expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
             replay(mockServer);
-            MBeanServerExecutor mbeanServers = getMBeanServerManager(mockServer);
+            MBeanServerAccess mbeanServers = getMBeanServerManager(mockServer);
             ServerHandle info = detector.detect(mbeanServers);
             Map<String,String> extra =
                     info.getExtraInfo(mbeanServers);
@@ -175,7 +175,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         expect(mockServer.invoke(bootAmxName,"bootAMX",null,null)).andReturn(null);
         replay(mockServer);
         JolokiaContext context = new TestJolokiaContext.Builder().config(ConfigKey.DETECTOR_OPTIONS,opts).build();
-        MBeanServerExecutor servers = getMBeanServerManager(mockServer);
+        MBeanServerAccess servers = getMBeanServerManager(mockServer);
         handle.preDispatch(servers,null);
         verify(mockServer);
     }
@@ -200,7 +200,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         LogHandler log = createMock(LogHandler.class);
         log.error(matches(regexp),isA(exp.getClass()));
         replay(mockServer,log);
-        MBeanServerExecutor servers = getMBeanServerManager(mockServer);
+        MBeanServerAccess servers = getMBeanServerManager(mockServer);
         handle.preDispatch(servers,null);
         verify(mockServer);
     }

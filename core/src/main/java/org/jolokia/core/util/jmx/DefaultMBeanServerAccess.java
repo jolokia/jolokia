@@ -27,7 +27,7 @@ import javax.management.*;
  * @author roland
  * @since 22.01.13
  */
-public class LocalMBeanServerExecutor implements MBeanServerExecutor, NotificationListener {
+public class DefaultMBeanServerAccess implements MBeanServerAccess, NotificationListener {
 
     // Timestamp of last MBeanServer change in milliseconds
     private long lastMBeanRegistrationChange;
@@ -39,7 +39,7 @@ public class LocalMBeanServerExecutor implements MBeanServerExecutor, Notificati
     /**
      * Constructor using default MBeanServers
      */
-    public LocalMBeanServerExecutor() {
+    public DefaultMBeanServerAccess() {
         this(null);
     }
 
@@ -48,7 +48,7 @@ public class LocalMBeanServerExecutor implements MBeanServerExecutor, Notificati
      *
      * @param pServers mbean servers to wrap and call
      */
-    public LocalMBeanServerExecutor(Set<MBeanServerConnection> pServers) {
+    public DefaultMBeanServerAccess(Set<MBeanServerConnection> pServers) {
         mbeanServers = new MBeanServers(pServers,this);
 
         // Register for registers/deregister of MBean changes in order to update lastUpdateTime

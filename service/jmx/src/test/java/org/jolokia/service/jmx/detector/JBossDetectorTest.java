@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.util.RequestType;
@@ -41,7 +41,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
     private JBossDetector detector;
     private MBeanServer         server;
-    private MBeanServerExecutor servers;
+    private MBeanServerAccess servers;
 
     @BeforeMethod
     public void setup() {

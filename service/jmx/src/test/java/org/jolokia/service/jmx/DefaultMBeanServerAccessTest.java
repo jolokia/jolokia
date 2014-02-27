@@ -22,8 +22,8 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -32,13 +32,13 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 23.01.13
  */
-public class LocalMBeanServerExecutorTest {
+public class DefaultMBeanServerAccessTest {
 
-    TestExecutor executor;
+    TestAccess executor;
 
     @BeforeClass
     public void setup() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InterruptedException, InstanceNotFoundException, IOException {
-        executor = new TestExecutor(MBeanServerFactory.newMBeanServer());
+        executor = new TestAccess(MBeanServerFactory.newMBeanServer());
     }
 
     @AfterClass
@@ -48,7 +48,7 @@ public class LocalMBeanServerExecutorTest {
 
     @Test
     public void eachNull() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, IOException, ReflectionException {
-        executor.each(null, new MBeanServerExecutor.MBeanEachCallback() {
+        executor.each(null, new MBeanServerAccess.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 if (pConn != ManagementFactory.getPlatformMBeanServer()) {
                     checkHiddenMBeans(pConn, pName);
@@ -61,7 +61,7 @@ public class LocalMBeanServerExecutorTest {
     @Test
     public void eachObjectName() throws MalformedObjectNameException, MBeanException, IOException, ReflectionException, NotCompliantMBeanException, InstanceAlreadyExistsException {
         for (final ObjectName name : new ObjectName[] { new ObjectName("test:type=one"), new ObjectName("test:type=two") }) {
-            executor.each(name,new MBeanServerExecutor.MBeanEachCallback() {
+            executor.each(name,new MBeanServerAccess.MBeanEachCallback() {
                 public void callback(MBeanServerConnection pConn, ObjectName pName) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                     if (pConn != ManagementFactory.getPlatformMBeanServer()) {
                         assertEquals(pName,name);
@@ -112,8 +112,8 @@ public class LocalMBeanServerExecutorTest {
         assertEquals(name,"jolokia");
     }
 
-    private String getAttribute(LocalMBeanServerExecutor pExecutor, String name, String attribute) throws IOException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException {
-        return (String) pExecutor.call(new ObjectName(name),new MBeanServerExecutor.MBeanAction<Object>() {
+    private String getAttribute(DefaultMBeanServerAccess pExecutor, String name, String attribute) throws IOException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException {
+        return (String) pExecutor.call(new ObjectName(name),new MBeanServerAccess.MBeanAction<Object>() {
                 public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
                     return pConn.getAttribute(pName, (String) extraArgs[0]);
                 }
@@ -155,13 +155,13 @@ public class LocalMBeanServerExecutorTest {
             // Expected
         }
     }
-    class TestExecutor extends LocalMBeanServerExecutor {
+    class TestAccess extends DefaultMBeanServerAccess {
 
         private MBeanServer mbeanServer;
         private Testing jOne = new Testing(), oTwo = new Testing();
         private Hidden hidden = new Hidden();
 
-        TestExecutor(MBeanServer pMBeanServer) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InterruptedException, InstanceNotFoundException, IOException {
+        TestAccess(MBeanServer pMBeanServer) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InterruptedException, InstanceNotFoundException, IOException {
             super(new HashSet<MBeanServerConnection>(Arrays.asList(pMBeanServer)));
             mbeanServer = pMBeanServer;
 

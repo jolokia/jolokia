@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.core.service.notification.NotificationBackendManager;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.notification.*;
 import org.jolokia.core.service.JolokiaContext;
 import org.json.simple.JSONObject;
@@ -42,7 +42,7 @@ public class NotificationDispatcher {
      * @throws IOException
      * @throws ReflectionException
      */
-    public Object dispatch(MBeanServerExecutor pExecutor,NotificationCommand pCommand)
+    public Object dispatch(MBeanServerAccess pExecutor,NotificationCommand pCommand)
             throws MBeanException, IOException, ReflectionException {
 
         // Shortcut for client used later

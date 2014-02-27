@@ -13,8 +13,8 @@ import org.jolokia.core.request.notification.*;
 import org.jolokia.core.service.AbstractJolokiaService;
 import org.jolokia.core.service.notification.*;
 import org.jolokia.core.util.TestJolokiaContext;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
 
@@ -39,7 +39,7 @@ public class NotificationDispatcherTest {
 
     private NotificationDispatcher dispatcher;
     private MBeanServerConnection connection;
-    private MBeanServerExecutor executor;
+    private MBeanServerAccess executor;
 
     private TestJolokiaContext ctx;
     private NotificationBackend pullBackend;
@@ -55,7 +55,7 @@ public class NotificationDispatcherTest {
                 .build();
         dispatcher = new NotificationDispatcher(ctx);
         connection = createMock(MBeanServerConnection.class);
-        executor = new SingleMBeanServerExecutor(connection);
+        executor = new SingleMBeanServerAccess(connection);
     }
 
     @AfterMethod

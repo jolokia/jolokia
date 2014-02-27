@@ -24,7 +24,7 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.service.detector.ServerDetector;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.service.AbstractJolokiaService;
 
 import static org.easymock.EasyMock.*;
@@ -52,7 +52,7 @@ public class TestDetector extends AbstractJolokiaService<ServerDetector> impleme
         nr = instances++;
     }
 
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
         if (nr == 2) {
             throw new RuntimeException();
         } else if (nr == 3 && !fallThrough) {

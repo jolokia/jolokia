@@ -25,7 +25,7 @@ import javax.naming.NamingException;
 
 import org.jolokia.core.service.detector.DefaultServerHandle;
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
  * Detector for Weblogic Appservers
@@ -45,11 +45,11 @@ public class WeblogicDetector extends AbstractServerDetector {
     }
 
     /** {@inheritDoc}
-     * @param pMBeanServerExecutor*/
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
-        String domainConfigMBean = getSingleStringAttribute(pMBeanServerExecutor,"*:Name=RuntimeService,*","DomainConfiguration");
+     * @param pMBeanServerAccess*/
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
+        String domainConfigMBean = getSingleStringAttribute(pMBeanServerAccess,"*:Name=RuntimeService,*","DomainConfiguration");
         if (domainConfigMBean != null) {
-            String version = getSingleStringAttribute(pMBeanServerExecutor,domainConfigMBean,"ConfigurationVersion");
+            String version = getSingleStringAttribute(pMBeanServerAccess,domainConfigMBean,"ConfigurationVersion");
             return new WeblogicServerHandle(version);
         }
         return null;

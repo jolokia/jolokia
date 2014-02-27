@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.NotChangedException;
 import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
 import org.jolokia.core.request.JolokiaNotificationRequest;
@@ -76,7 +76,7 @@ public class NotificationHandler extends CommandHandler<JolokiaNotificationReque
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleRequest(MBeanServerExecutor serverManager, JolokiaNotificationRequest request, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    public Object doHandleRequest(MBeanServerAccess serverManager, JolokiaNotificationRequest request, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return dispatcher.dispatch(serverManager,request.getCommand());
     }
 

@@ -28,7 +28,7 @@ import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.service.*;
 import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.service.serializer.JmxSerializer;
-import org.jolokia.core.util.jmx.JmxUtil;
+import org.jolokia.core.util.jmx.*;
 
 /**
  * @author roland
@@ -46,6 +46,7 @@ public class TestJolokiaContext implements JolokiaContext {
     ServerHandle handle;
     private AgentDetails agentDetails;
     private Set<ObjectName> mbeans;
+    private MBeanServerAccess mBeanServerAccess;
 
     public TestJolokiaContext() {
         this(null,null,null,null,null,null);
@@ -70,6 +71,7 @@ public class TestJolokiaContext implements JolokiaContext {
             handle = ServerHandle.NULL_SERVER_HANDLE;
         }
         mbeans = new HashSet<ObjectName>();
+        mBeanServerAccess = new SingleMBeanServerAccess(ManagementFactory.getPlatformMBeanServer());
     }
 
     public void init() {
@@ -99,6 +101,10 @@ public class TestJolokiaContext implements JolokiaContext {
         ObjectInstance instance = mbeanServer.registerMBean(pMBean, pOptionalName.length > 0 ? JmxUtil.newObjectName(pOptionalName[0]) : null);
         mbeans.add(instance.getObjectName());
         return instance.getObjectName();
+    }
+
+    public MBeanServerAccess getMBeanServerAccess() {
+        return mBeanServerAccess;
     }
 
     public String getConfig(ConfigKey pKey) {

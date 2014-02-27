@@ -11,6 +11,7 @@ import org.jolokia.core.config.Configuration;
 import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.util.*;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
  * Central implementation of the {@link JolokiaContext}
@@ -47,6 +48,12 @@ public class JolokiaContextImpl implements JolokiaContext {
     public ObjectName registerMBean(Object pMBean, String... pOptionalName)
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
         return serviceManager.registerMBean(pMBean,pOptionalName);
+    }
+
+    /** {@inheritDoc} */
+    public MBeanServerAccess getMBeanServerAccess() {
+        // TODO: Get during construction, looked up and created by the server manager
+        return null;
     }
 
     /** {@inheritDoc} */

@@ -18,7 +18,7 @@ package org.jolokia.osgi.detector;
 
 import org.jolokia.core.service.detector.DefaultServerHandle;
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
  * Detector for the Apache Felix OSGi Platform
@@ -38,8 +38,8 @@ public class KnopflerfishDetector extends AbstractOsgiServerDetector {
     }
 
     /** {@inheritDoc}
-     * @param pMBeanServerExecutor*/
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+     * @param pMBeanServerAccess*/
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
         // Probably a bit unspecific, but that's kopflerfish's fault
         if (checkSystemBundleForSymbolicName("org.knopflerfish.framework")) {
             String version = getSystemBundleVersion();

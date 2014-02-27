@@ -19,7 +19,7 @@ package org.jolokia.core.service.detector;
 import java.util.Map;
 
 import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 
 /**
@@ -64,7 +64,7 @@ public class DefaultServerHandle implements ServerHandle {
         return version;
     }
 
-    public void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq) {
+    public void preDispatch(MBeanServerAccess pExecutor, JolokiaRequest pJmxReq) {
         // Do nothing
     }
 
@@ -82,7 +82,7 @@ public class DefaultServerHandle implements ServerHandle {
         }
     }
 
-    public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+    public Map<String, String> getExtraInfo(MBeanServerAccess pServerManager) {
         return null;
     }
 }

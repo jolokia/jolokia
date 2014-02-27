@@ -25,8 +25,8 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.JolokiaListRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.util.RequestType;
@@ -45,7 +45,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     private ListHandler handler;
     private ListHandler handlerWithRealm;
 
-    private MBeanServerExecutor executor;
+    private MBeanServerAccess executor;
 
     private TestJolokiaContext ctx;
 
@@ -54,7 +54,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         ctx = new TestJolokiaContext();
         handler = new ListHandler(ctx, null);
         handlerWithRealm = new ListHandler(ctx, "proxy");
-        executor = new LocalMBeanServerExecutor();
+        executor = new DefaultMBeanServerAccess();
     }
 
     @AfterMethod
@@ -329,7 +329,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .build();
         MBeanServer dummyConn = EasyMock.createMock(MBeanServer.class);
 
-        MBeanServerExecutor servers = new LocalMBeanServerExecutor(new HashSet<MBeanServerConnection>(Arrays.asList(dummyConn)));
+        MBeanServerAccess servers = new DefaultMBeanServerAccess(new HashSet<MBeanServerConnection>(Arrays.asList(dummyConn)));
 
         ObjectName name = new ObjectName("bullerbue:country=sweden");
         expect(dummyConn.getMBeanInfo(name)).andThrow(new InstanceNotFoundException());

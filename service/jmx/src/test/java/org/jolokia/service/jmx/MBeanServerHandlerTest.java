@@ -24,8 +24,8 @@ import java.util.List;
 import javax.management.*;
 
 import org.jolokia.core.service.impl.MBeanRegistry;
-import org.jolokia.core.util.jmx.LocalMBeanServerExecutor;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.util.RequestType;
@@ -75,9 +75,9 @@ public class MBeanServerHandlerTest {
     }
 
     private void checkMBeans(ObjectName oName) throws MBeanException, IOException, ReflectionException {
-        MBeanServerExecutor servers = new LocalMBeanServerExecutor();
+        MBeanServerAccess servers = new DefaultMBeanServerAccess();
         final List<Boolean> result = new ArrayList<Boolean>();
-        servers.each(oName, new MBeanServerExecutor.MBeanEachCallback() {
+        servers.each(oName, new MBeanServerAccess.MBeanEachCallback() {
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
                 // Throws an InstanceNotFoundException

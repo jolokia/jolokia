@@ -27,7 +27,7 @@ import javax.management.*;
 import org.jolokia.core.request.JolokiaRequest;
 import org.jolokia.core.service.detector.DefaultServerHandle;
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 
 /**
@@ -51,28 +51,28 @@ public class GlassfishDetector extends AbstractServerDetector {
     }
 
     /** {@inheritDoc}
-     * @param pMBeanServerExecutor*/
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
-        String version = detectVersion(pMBeanServerExecutor);
+     * @param pMBeanServerAccess*/
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
+        String version = detectVersion(pMBeanServerAccess);
         if (version!= null) {
-            return new GlassfishServerHandle(version,amxShouldBeBooted(pMBeanServerExecutor));
+            return new GlassfishServerHandle(version,amxShouldBeBooted(pMBeanServerAccess));
         } else {
             return null;
         }
     }
 
-    private String detectVersion(MBeanServerExecutor pMBeanServerExecutor) {
-        String fullVersion = getSingleStringAttribute(pMBeanServerExecutor, "com.sun.appserv:j2eeType=J2EEServer,*", "serverVersion");
+    private String detectVersion(MBeanServerAccess pMBeanServerAccess) {
+        String fullVersion = getSingleStringAttribute(pMBeanServerAccess, "com.sun.appserv:j2eeType=J2EEServer,*", "serverVersion");
         String version = extractVersionFromFullVersion(fullVersion);
         if (fullVersion == null || "3".equals(version)) {
-            String versionFromAmx = getSingleStringAttribute(pMBeanServerExecutor,"amx:type=domain-root,*","ApplicationServerFullVersion");
+            String versionFromAmx = getSingleStringAttribute(pMBeanServerAccess,"amx:type=domain-root,*","ApplicationServerFullVersion");
             version =
                     getVersionFromFullVersion(
                             version,versionFromAmx != null ?
                                      versionFromAmx :
                                      System.getProperty("glassfish.version")
                     );
-        } else if (mBeanExists(pMBeanServerExecutor,"com.sun.appserver:type=Host,*")) {
+        } else if (mBeanExists(pMBeanServerAccess,"com.sun.appserver:type=Host,*")) {
             // Last desperate try to get hold of Glassfish MBean
             version = "3";
         }
@@ -89,18 +89,18 @@ public class GlassfishDetector extends AbstractServerDetector {
         return null;
     }
 
-    private boolean amxShouldBeBooted(MBeanServerExecutor pMBeanServerExecutor) {
+    private boolean amxShouldBeBooted(MBeanServerAccess pMBeanServerAccess) {
         JSONObject opts = getDetectorOptions("glassfish");
         return (opts == null || opts.get("bootAmx") == null || (Boolean) opts.get("bootAmx"))
-               && !isAmxBooted(pMBeanServerExecutor);
+               && !isAmxBooted(pMBeanServerAccess);
     }
 
-    private boolean isAmxBooted(MBeanServerExecutor pServerManager) {
+    private boolean isAmxBooted(MBeanServerAccess pServerManager) {
         return mBeanExists(pServerManager,"amx:type=domain-root,*");
     }
 
     // Return true if AMX could be booted, false otherwise
-    private synchronized boolean bootAmx(MBeanServerExecutor pServers) {
+    private synchronized boolean bootAmx(MBeanServerAccess pServers) {
         ObjectName bootMBean = null;
         try {
             bootMBean = new ObjectName("amx-support:type=boot-amx");
@@ -108,7 +108,7 @@ public class GlassfishDetector extends AbstractServerDetector {
             // Cannot happen ....
         }
         try {
-            pServers.call(bootMBean, new MBeanServerExecutor.MBeanAction<Void>() {
+            pServers.call(bootMBean, new MBeanServerAccess.MBeanAction<Void>() {
                 /** {@inheritDoc} */
                 public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
@@ -160,7 +160,7 @@ public class GlassfishDetector extends AbstractServerDetector {
 
         @Override
         /** {@inheritDoc} */
-        public Map<String, String> getExtraInfo(MBeanServerExecutor pExecutor) {
+        public Map<String, String> getExtraInfo(MBeanServerAccess pExecutor) {
             Map<String,String> extra = new HashMap<String, String>();
             if (extra != null && getVersion().startsWith("3")) {
                 extra.put("amxBooted",Boolean.toString(isAmxBooted(pExecutor)));
@@ -170,7 +170,7 @@ public class GlassfishDetector extends AbstractServerDetector {
 
         @Override
         /** {@inheritDoc} */
-        public void preDispatch(MBeanServerExecutor pExecutor, JolokiaRequest pJmxReq) {
+        public void preDispatch(MBeanServerAccess pExecutor, JolokiaRequest pJmxReq) {
             if (amxShouldBeBooted) {
                 // Clear flag only of bootAMX succeed or fails with an unrecoverable error
                 amxShouldBeBooted = !bootAmx(pExecutor);

@@ -26,7 +26,7 @@ import org.jolokia.core.service.detector.ServerDetector;
 import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.StaticConfiguration;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.restrictor.AllowAllRestrictor;
 import org.jolokia.core.service.AbstractJolokiaService;
 import org.jolokia.test.util.HttpTestUtil;
@@ -152,7 +152,7 @@ public class JolokiaServletTest {
             super(ServerDetector.class, pOrderId);
         }
 
-        public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+        public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
             return ServerHandle.NULL_SERVER_HANDLE;
         }
 

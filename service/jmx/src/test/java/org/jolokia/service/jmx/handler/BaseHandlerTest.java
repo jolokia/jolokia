@@ -18,8 +18,8 @@ package org.jolokia.service.jmx.handler;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
-import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
 
 /**
  * @author roland
@@ -27,7 +27,7 @@ import org.jolokia.core.util.jmx.SingleMBeanServerExecutor;
  */
 public class BaseHandlerTest {
 
-    protected MBeanServerExecutor getMBeanServerManager(final MBeanServerConnection connection) {
-        return new SingleMBeanServerExecutor(connection);
+    protected MBeanServerAccess getMBeanServerManager(final MBeanServerConnection connection) {
+        return new SingleMBeanServerAccess(connection);
     }
 }

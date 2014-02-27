@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.request.JolokiaRequest;
@@ -65,7 +65,7 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @return whether you want to have
      * {@link #doHandleRequest(MBeanServerConnection, JolokiaRequest)}
      * (<code>false</code>) or
-     * {@link #doHandleRequest(MBeanServerExecutor, JolokiaRequest, Object)} (<code>true</code>) called.
+     * {@link #doHandleRequest(MBeanServerAccess, JolokiaRequest, Object)} (<code>true</code>) called.
      */
     public boolean handleAllServersAtOnce(R pRequest) {
         return false;
@@ -160,7 +160,7 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    public Object handleRequest(MBeanServerExecutor pServerManager, R request, Object pPreviousResult)
+    public Object handleRequest(MBeanServerAccess pServerManager, R request, Object pPreviousResult)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         checkForRestriction(request);
         return doHandleRequest(pServerManager,request, pPreviousResult);
@@ -180,7 +180,7 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @throws MBeanException
      * @throws ReflectionException
      */
-    protected Object doHandleRequest(MBeanServerExecutor serverManager, R request, Object pPreviousResult)
+    protected Object doHandleRequest(MBeanServerAccess serverManager, R request, Object pPreviousResult)
                 throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         return null;
     }
@@ -200,7 +200,7 @@ public abstract class CommandHandler<R extends JolokiaRequest> {
      * @param pRequest the request from where to fetch the timestamp
      * @throws NotChangedException if there has been no REGISTER/UNREGISTER notifications in the meantime
      */
-    protected void checkForModifiedSince(MBeanServerExecutor pServerManager, JolokiaRequest pRequest)
+    protected void checkForModifiedSince(MBeanServerAccess pServerManager, JolokiaRequest pRequest)
             throws NotChangedException {
         int ifModifiedSince = pRequest.getParameterAsInt(ConfigKey.IF_MODIFIED_SINCE);
         if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {

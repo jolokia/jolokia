@@ -22,7 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.core.service.notification.*;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.notification.AddCommand;
 import org.json.simple.JSONObject;
 
@@ -80,7 +80,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @throws IOException
      * @throws ReflectionException
      */
-    void unregister(MBeanServerExecutor pExecutor, String pClient)
+    void unregister(MBeanServerAccess pExecutor, String pClient)
             throws MBeanException, IOException, ReflectionException {
         Client client = getClient(pClient);
         for (String handle : client.getHandles()) {
@@ -119,7 +119,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @throws IOException
      * @throws ReflectionException
      */
-    String addListener(MBeanServerExecutor pExecutor, final AddCommand pCommand)
+    String addListener(MBeanServerAccess pExecutor, final AddCommand pCommand)
             throws MBeanException, IOException, ReflectionException {
 
         // Fetch client and backend
@@ -141,7 +141,7 @@ class NotificationListenerDelegate implements NotificationListener {
             // Register as JMX notification listener
             final boolean[] added = new boolean[] { false };
             try {
-                pExecutor.each(listenerRegistration.getMBeanName(),new MBeanServerExecutor.MBeanEachCallback() {
+                pExecutor.each(listenerRegistration.getMBeanName(),new MBeanServerAccess.MBeanEachCallback() {
                     /** {@inheritDoc} */
                     public void callback(MBeanServerConnection pConn, ObjectName pName)
                             throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
@@ -165,17 +165,17 @@ class NotificationListenerDelegate implements NotificationListener {
      *
      * @param pExecutor executor for removing JMX notifications listeners
      * @param pClient client for wich to remove the listener
-     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerExecutor, AddCommand)}
+     * @param pHandle the handle as obtained from {@link #addListener(MBeanServerAccess, AddCommand)}
      *
      * @throws MBeanException
      * @throws IOException
      * @throws ReflectionException
      */
-    void removeListener(MBeanServerExecutor pExecutor, String pClient, String pHandle)
+    void removeListener(MBeanServerAccess pExecutor, String pClient, String pHandle)
             throws MBeanException, IOException, ReflectionException {
         Client client = getClient(pClient);
         final ListenerRegistration registration = client.get(pHandle);
-        pExecutor.each(registration.getMBeanName(), new MBeanServerExecutor.MBeanEachCallback() {
+        pExecutor.each(registration.getMBeanName(), new MBeanServerAccess.MBeanEachCallback() {
             /** {@inheritDoc} */
             public void callback(MBeanServerConnection pConn, ObjectName pName)
                     throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
@@ -211,7 +211,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @param pExecutor executor used for unregistering
      * @param pOldest last refresh timestamp which should be kept
      */
-    void cleanup(MBeanServerExecutor pExecutor, long pOldest)
+    void cleanup(MBeanServerAccess pExecutor, long pOldest)
             throws MBeanException, IOException, ReflectionException {
         for (Map.Entry<String,Client> client : clients.entrySet()) {
             if (client.getValue().getLastRefresh() < pOldest) {

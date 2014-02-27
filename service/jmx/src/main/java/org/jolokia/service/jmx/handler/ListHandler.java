@@ -6,7 +6,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.request.NotChangedException;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
@@ -79,7 +79,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
     // pPreviousResult must be a Map according to the "list" data format specification
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerExecutor pServerManager, JolokiaListRequest pRequest, Object pPreviousResult)
+    public Object doHandleRequest(MBeanServerAccess pServerManager, JolokiaListRequest pRequest, Object pPreviousResult)
             throws IOException, NotChangedException {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
@@ -112,7 +112,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
         }
     }
 
-    private Object executeListAction(MBeanServerExecutor pServerManager, Map pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
+    private Object executeListAction(MBeanServerAccess pServerManager, Map pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         if (pName == null || pName.isPattern()) {
             pServerManager.each(pName, pAction);
@@ -154,7 +154,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
     }
 
     // Class for handling list queries
-    private static class ListMBeanEachAction implements MBeanServerExecutor.MBeanEachCallback, MBeanServerExecutor.MBeanAction<Void> {
+    private static class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanServerAccess.MBeanAction<Void> {
 
         // Meta data which will get collected
         private final MBeanInfoData infoData;

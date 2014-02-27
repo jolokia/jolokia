@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.jolokia.core.service.detector.DefaultServerHandle;
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
  * Detector for Eclipse Virgo
@@ -41,8 +41,8 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
     }
 
     /** {@inheritDoc}
-     * @param pMBeanServerExecutor*/
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
+     * @param pMBeanServerAccess*/
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
         String version = getBundleVersion("org.eclipse.virgo.kernel.userregion");
         if (version != null) {
             String type = "kernel";
@@ -69,7 +69,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
         }
 
         @Override
-        public Map<String, String> getExtraInfo(MBeanServerExecutor pServerManager) {
+        public Map<String, String> getExtraInfo(MBeanServerAccess pServerManager) {
             return extraInfo;
         }
     }

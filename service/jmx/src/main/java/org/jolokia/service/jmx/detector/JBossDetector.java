@@ -9,7 +9,7 @@ import javax.management.MBeanServerConnection;
 
 import org.jolokia.core.service.detector.DefaultServerHandle;
 import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerExecutor;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.jolokia.core.util.ClassUtil;
 
 /**
@@ -30,24 +30,24 @@ public class JBossDetector extends AbstractServerDetector {
     }
 
     /** {@inheritDoc} */
-    public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
-        ServerHandle handle = checkFromJSR77(pMBeanServerExecutor);
+    public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
+        ServerHandle handle = checkFromJSR77(pMBeanServerAccess);
         if (handle == null) {
-            handle = checkFor5viaJMX(pMBeanServerExecutor);
+            handle = checkFor5viaJMX(pMBeanServerAccess);
             if (handle == null) {
-                handle = checkForManagementRootServerViaJMX(pMBeanServerExecutor);
+                handle = checkForManagementRootServerViaJMX(pMBeanServerAccess);
                 if (handle == null) {
-                    handle = fallbackForVersion7Check(pMBeanServerExecutor);
+                    handle = fallbackForVersion7Check(pMBeanServerAccess);
                 }
             }
         }
         return handle;
     }
 
-    private ServerHandle checkFromJSR77(MBeanServerExecutor pMBeanServerExecutor) {
+    private ServerHandle checkFromJSR77(MBeanServerAccess pMBeanServerAccess) {
         if (ClassUtil.checkForClass("org.jboss.mx.util.MBeanServerLocator")) {
             // Get Version number from JSR77 call
-            String version = getVersionFromJsr77(pMBeanServerExecutor);
+            String version = getVersionFromJsr77(pMBeanServerAccess);
             if (version != null) {
                 int idx = version.indexOf(' ');
                 if (idx >= 0) {
@@ -60,9 +60,9 @@ public class JBossDetector extends AbstractServerDetector {
         return null;
     }
 
-    private ServerHandle checkFor5viaJMX(MBeanServerExecutor pMBeanServerExecutor) {
-        if (mBeanExists(pMBeanServerExecutor, "jboss.system:type=Server")) {
-            String versionFull = getAttributeValue(pMBeanServerExecutor, "jboss.system:type=Server", "Version");
+    private ServerHandle checkFor5viaJMX(MBeanServerAccess pMBeanServerAccess) {
+        if (mBeanExists(pMBeanServerAccess, "jboss.system:type=Server")) {
+            String versionFull = getAttributeValue(pMBeanServerAccess, "jboss.system:type=Server", "Version");
             String version = null;
             if (versionFull != null) {
                 version = versionFull.replaceAll("\\(.*", "").trim();
@@ -72,11 +72,11 @@ public class JBossDetector extends AbstractServerDetector {
         return null;
     }
 
-    private ServerHandle checkForManagementRootServerViaJMX(MBeanServerExecutor pMBeanServerExecutor) {
+    private ServerHandle checkForManagementRootServerViaJMX(MBeanServerAccess pMBeanServerAccess) {
         // Bug (or not ?) in Wildfly 8.0: Search for jboss.as:management-root=server return null but accessing this
         // MBean works. So we are looking, whether the JMX domain jboss.as exists and fetch the version directly.
-        if (searchMBeans(pMBeanServerExecutor,"jboss.as:*").size() != 0) {
-            String version = getAttributeValue(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
+        if (searchMBeans(pMBeanServerAccess,"jboss.as:*").size() != 0) {
+            String version = getAttributeValue(pMBeanServerAccess, "jboss.as:management-root=server", "releaseVersion");
             if (version != null) {
                 return new JBossServerHandle(version);
             }
@@ -84,8 +84,8 @@ public class JBossDetector extends AbstractServerDetector {
         return null;
     }
 
-    private ServerHandle fallbackForVersion7Check(MBeanServerExecutor pMBeanServerExecutor) {
-        if (mBeanExists(pMBeanServerExecutor, "jboss.modules:*")) {
+    private ServerHandle fallbackForVersion7Check(MBeanServerAccess pMBeanServerAccess) {
+        if (mBeanExists(pMBeanServerAccess, "jboss.modules:*")) {
             // It's a JBoss 7, probably a 7.0.x one ...
             return new JBossServerHandle("7");
         }
