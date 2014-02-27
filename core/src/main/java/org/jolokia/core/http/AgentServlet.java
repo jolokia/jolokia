@@ -60,14 +60,14 @@ public class AgentServlet extends HttpServlet {
     // Restrictor to use as given in the constructor
     private Restrictor initRestrictor;
     
-    // The Jolokia service manager
-    private transient JolokiaServiceManager serviceManager;
-
     // If discovery multicast is enabled and URL should be initialized by request
     private boolean initAgentUrlFromRequest = false;
 
     // context for this servlet
     private JolokiaContext jolokiaContext;
+
+    // Service manager for creating/destroying the Jolokia context
+    private JolokiaServiceManager serviceManager;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -121,6 +121,10 @@ public class AgentServlet extends HttpServlet {
         initAgentUrl();
     }
 
+    @Override
+    public void destroy() {
+        serviceManager.stop();
+    }
 
     /**
      * Initialize services and register service factories
@@ -375,7 +379,7 @@ public class AgentServlet extends HttpServlet {
         if (requestMimeType != null) {
             return requestMimeType;
         }
-        return serviceManager.getConfiguration().getConfig(ConfigKey.MIME_TYPE);
+        return jolokiaContext.getConfig(ConfigKey.MIME_TYPE);
     }
 
     private interface ServletRequestHandler {

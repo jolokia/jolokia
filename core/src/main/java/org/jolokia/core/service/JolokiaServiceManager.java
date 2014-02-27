@@ -83,7 +83,7 @@ public interface JolokiaServiceManager  {
     /**
      * Stop the service manager and all services by calling their lifecycle methods
      * {@link JolokiaService#destroy()} and {@link JolokiaServiceLookup#destroy()}
-     * on all static and dynamic services.
+     * on all static and dynamic services. The Jolokia context returned on start is not valid anymore.
      */
     void stop();
 

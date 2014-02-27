@@ -52,7 +52,7 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     /** {@inheritDoc} */
     public MBeanServerAccess getMBeanServerAccess() {
-        // TODO: Get during construction, looked up and created by the server manager
+       // return serviceManager.getMBeanServerAccess();
         return null;
     }
 

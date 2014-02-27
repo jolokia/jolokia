@@ -24,15 +24,17 @@ import java.util.concurrent.*;
 
 import javax.net.ssl.*;
 
-import com.sun.net.httpserver.Authenticator;
-import com.sun.net.httpserver.*;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.Configuration;
 import org.jolokia.core.restrictor.PolicyRestrictorFactory;
 import org.jolokia.core.service.*;
 import org.jolokia.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.core.service.impl.JolokiaServiceManagerImpl;
-import org.jolokia.core.util.*;
+import org.jolokia.core.util.ClassUtil;
+import org.jolokia.core.util.NetworkUtil;
+
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.*;
 
 /**
  * Factory for creating the HttpServer used for exporting
