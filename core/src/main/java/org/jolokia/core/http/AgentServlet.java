@@ -107,7 +107,7 @@ public class AgentServlet extends HttpServlet {
         Restrictor restrictor = createRestrictor(config, logHandler);
 
         // Create the service manager and initialize
-        serviceManager = new JolokiaServiceManagerImpl(config,logHandler,restrictor);
+        serviceManager = JolokiaServiceManagerFactory.createJolokiaServiceManager(config,logHandler,restrictor);
         initServiceManager(pServletConfig, serviceManager);
 
         // Start it up ....
