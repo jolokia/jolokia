@@ -92,17 +92,29 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * Get the overall configuration
+     *
+     * @return configuration
+     */
     public Configuration getConfiguration() {
         return configuration;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Get the loghandler used for logging
+     *
+     * @return loghandler
+     */
     public LogHandler getLogHandler() {
         return logHandler;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Get the restrictor
+     *
+     * @return restrictor
+     */
     public Restrictor getRestrictor() {
         return restrictor;
     }
@@ -195,7 +207,14 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Get all services of a certain type currently registered. Static services
+     * are returned directly, for dynamic services a lookup to the service factory is
+     * performed.
+     *
+     * @param pType service type to fetch
+     * @return list of services detected or an empty list
+     */
     public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
         SortedSet<T> services = (SortedSet<T>) staticServices.get(pType);
         SortedSet<T> ret = services != null ? new TreeSet<T>(services) : new TreeSet<T>();
@@ -205,7 +224,14 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         return ret;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Get a single service. If more than one service of the given type has been
+     * registered, return the one with the highest order. If no one has been registered
+     * return <code>null</code>
+     *
+     * @param pType requested service type
+     * @return the requested service or null if none has been registered
+     */
     public <T extends JolokiaService> T getService(Class<T> pType) {
         T ret = (T) staticLowServices.get(pType);
         int order = ret != null ? ret.getOrder() : Integer.MAX_VALUE;
