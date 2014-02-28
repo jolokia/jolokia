@@ -9,7 +9,7 @@ import org.jolokia.core.service.*;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.Configuration;
 import org.jolokia.core.service.Restrictor;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.*;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
@@ -52,15 +52,7 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     /** {@inheritDoc} */
     public MBeanServerAccess getMBeanServerAccess() {
-       // return serviceManager.getMBeanServerAccess();
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    public void setServerHandle(ServerHandle pServerHandle) {
-        serverHandle = pServerHandle;
-        AgentDetails details = getAgentDetails();
-        details.setServerInfo(pServerHandle.getVendor(),pServerHandle.getProduct(),pServerHandle.getVersion());
+        return serviceManager.getMBeanServerAccess();
     }
 
     /** {@inheritDoc} */

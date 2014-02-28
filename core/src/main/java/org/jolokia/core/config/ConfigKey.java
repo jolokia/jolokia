@@ -235,16 +235,7 @@ public enum ConfigKey {
      * this can be used by clients to provide additional information to
      * the user.
      */
-    AGENT_DESCRIPTION("agentDescription",true,false),
-
-    /**
-     * Set to true if a lazy detection is required, i.e. the detection will happen during the first request.
-     * This can be set in order to avoid a missed detection because of the start-up order of the
-     * Jolokia agent and the instrumented server. I.e. the JVM Agent when configured for attaching during startup
-     * uses this flag to delay the detection. This options is mostly of internal use and should not necessarily
-     * used otherwise.
-     */
-    LAZY_SERVER_DETECTION("lazyServerDetection", true, false, Constants.FALSE);
+    AGENT_DESCRIPTION("agentDescription",true,false);
 
     private String  key;
     private String  defaultValue;

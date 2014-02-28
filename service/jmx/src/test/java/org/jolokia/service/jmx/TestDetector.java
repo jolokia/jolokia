@@ -22,10 +22,9 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.service.AbstractJolokiaService;
+import org.jolokia.service.jmx.detector.AbstractServerDetector;
 
 import static org.easymock.EasyMock.*;
 
@@ -33,7 +32,7 @@ import static org.easymock.EasyMock.*;
  * @author roland
  * @since 02.09.11
  */
-public class TestDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
+public class TestDetector extends AbstractServerDetector {
 
     private static boolean throwAddException = false;
 
@@ -48,7 +47,7 @@ public class TestDetector extends AbstractJolokiaService<ServerDetector> impleme
     int nr;
 
     public TestDetector(int order) {
-        super(ServerDetector.class,order);
+        super("test",order);
         nr = instances++;
     }
 
@@ -63,7 +62,7 @@ public class TestDetector extends AbstractJolokiaService<ServerDetector> impleme
         }
     }
 
-    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
+    public Set<MBeanServerConnection> getMBeanServer() {
         if (throwAddException) {
             MBeanServer server = createMock(MBeanServer.class);
             try {
@@ -83,10 +82,11 @@ public class TestDetector extends AbstractJolokiaService<ServerDetector> impleme
                 server.removeNotificationListener((ObjectName) anyObject(), (NotificationListener) anyObject());
                 expectLastCall().anyTimes();
                 replay(server);
-                pMBeanServers.add(server);
+                return Collections.singleton((MBeanServerConnection) server);
             } catch (JMException e) {
             }
         }
+        return null;
     }
 
     public static void setThrowAddException(boolean b) {

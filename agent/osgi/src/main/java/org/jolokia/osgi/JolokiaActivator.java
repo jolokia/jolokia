@@ -5,8 +5,8 @@ import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
-import org.jolokia.osgi.servlet.JolokiaServletConfiguration;
-import org.jolokia.osgi.servlet.JolokiaServlet;
+import org.jolokia.osgi.servlet.OsgiServletConfiguration;
+import org.jolokia.osgi.servlet.OsgiAgentServlet;
 import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.util.NetworkUtil;
@@ -41,7 +41,7 @@ import static org.jolokia.core.config.ConfigKey.*;
  * @author roland
  * @since Dec 27, 2009
  */
-public class JolokiaActivator implements BundleActivator, JolokiaServletConfiguration {
+public class JolokiaActivator implements BundleActivator, OsgiServletConfiguration {
 
     // Base filter to use for filtering out HttpServices
     public static final String HTTP_SERVICE_FILTER_BASE =
@@ -84,7 +84,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaServletConfigur
             httpServiceTracker.open();
 
             // Register us as JolokiaContext
-            jolokiaServiceRegistration = pBundleContext.registerService(JolokiaServletConfiguration.class.getCanonicalName(), this, null);
+            jolokiaServiceRegistration = pBundleContext.registerService(OsgiServletConfiguration.class.getCanonicalName(), this, null);
         }
     }
 
@@ -191,7 +191,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaServletConfigur
             HttpService service = (HttpService) context.getService(reference);
             try {
                 service.registerServlet(getServletAlias(),
-                                        new JolokiaServlet(context,restrictor),
+                                        new OsgiAgentServlet(context,restrictor),
                                         getConfiguration(),
                                         getHttpContext());
             } catch (ServletException e) {

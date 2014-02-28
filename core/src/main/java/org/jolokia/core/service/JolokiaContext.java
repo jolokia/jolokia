@@ -6,7 +6,7 @@ import java.util.SortedSet;
 import javax.management.*;
 
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -64,16 +64,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     Set<ConfigKey> getConfigKeys();
 
     /**
-     * Method to set the server handle. This can be called only once after which this
-     * method is sealed. The setter is given so that a lazy initialization is easily possible
-     * It MUST not be used by any custom code. So, I'm still looking for a cleaner solution here (probably
-     * letting the handle return from the request handler service).
-     *
-     * @param pHandle handle to use.
-     */
-    void setServerHandle(ServerHandle pHandle);
-
-    /**
      * Get the details which specify the current agent. The returned
      * details should not be kept but instead each time details are needed
      * this interface should be queried again.
@@ -81,7 +71,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return the details for this agent.
      */
     AgentDetails getAgentDetails();
-
 
     /**
      * Register an MBean which gets automatically unregistered during shutdown.

@@ -50,4 +50,9 @@ public class SingleMBeanServerAccess implements MBeanServerAccess {
         return true;
     }
 
+    /** {@inheritDoc} */
+    public Set<MBeanServerConnection> getMBeanServers() {
+        return Collections.singleton(connection);
+    }
+
 }

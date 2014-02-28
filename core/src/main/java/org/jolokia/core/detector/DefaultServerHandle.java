@@ -1,4 +1,4 @@
-package org.jolokia.core.service.detector;
+package org.jolokia.core.detector;
 
 /*
  * Copyright 2009-2013 Roland Huss

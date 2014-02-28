@@ -20,10 +20,9 @@ import javax.servlet.*;
 
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.Configuration;
+import org.jolokia.core.detector.ServerDetectorLookup;
 import org.jolokia.core.http.AgentServlet;
-import org.jolokia.core.service.Restrictor;
-import org.jolokia.core.service.JolokiaServiceManager;
-import org.jolokia.core.service.LogHandler;
+import org.jolokia.core.service.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -41,7 +40,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author roland
  * @since 10.02.11
  */
-public class JolokiaServlet extends AgentServlet {
+public class OsgiAgentServlet extends AgentServlet {
 
     private static final long serialVersionUID = 23L;
 
@@ -55,10 +54,13 @@ public class JolokiaServlet extends AgentServlet {
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
 
+    // A lookup which checks for OSGi detector services
+    private ServerDetectorLookup serverDetectorLookup;
+
     /**
      * Constructor with an empty context
      */
-    public JolokiaServlet() {
+    public OsgiAgentServlet() {
         this(null);
     }
 
@@ -67,7 +69,7 @@ public class JolokiaServlet extends AgentServlet {
      *
      * @param pContext bundle context to associate with
      */
-    public JolokiaServlet(BundleContext pContext) {
+    public OsgiAgentServlet(BundleContext pContext) {
         this (pContext,null);
     }
 
@@ -78,7 +80,7 @@ public class JolokiaServlet extends AgentServlet {
      * @param pRestrictor restrictor to use or <code>null</code> if the default
      *        lookup mechanism should be used
      */
-    public JolokiaServlet(BundleContext pContext,Restrictor pRestrictor) {
+    public OsgiAgentServlet(BundleContext pContext, Restrictor pRestrictor) {
         super(pRestrictor);
         bundleContextGiven = pContext;
     }
@@ -89,12 +91,23 @@ public class JolokiaServlet extends AgentServlet {
         // We are making the bundle context available here as a thread local
         // so that the server detector has access to the bundle in order to detect
         // the Osgi-Environment
-        BUNDLE_CONTEXT_THREAD_LOCAL.set(getBundleContext(pServletConfig));
+        BundleContext ctx = getBundleContext(pServletConfig);
+        serverDetectorLookup = new OsgiServerDetectorLookup(ctx);
+        BUNDLE_CONTEXT_THREAD_LOCAL.set(ctx);
         try {
             super.init(pServletConfig);
         } finally {
             BUNDLE_CONTEXT_THREAD_LOCAL.remove();
         }
+    }
+
+    /**
+     * Get an OSGi based lookup mechanism for finding all detectors available during
+     * @return
+     */
+    @Override
+    protected ServerDetectorLookup getServerDetectorLookup() {
+        return serverDetectorLookup;
     }
 
     /**
@@ -128,8 +141,8 @@ public class JolokiaServlet extends AgentServlet {
      * @param pServiceManager service manager to which to add services
      */
     @Override
-    protected void initServiceManager(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
-        super.initServiceManager(pServletConfig, pServiceManager);
+    protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
+        super.initServices(pServletConfig, pServiceManager);
         BundleContext ctx = getBundleContext(pServletConfig);
         if (ctx != null) {
             pServiceManager.addServiceLookup(new OsgiJolokiaServiceFactory(ctx));

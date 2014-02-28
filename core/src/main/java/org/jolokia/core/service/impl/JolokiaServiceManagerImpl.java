@@ -20,13 +20,15 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.service.request.RequestHandler;
-import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.Configuration;
-import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.service.Restrictor;
+import org.jolokia.core.detector.*;
 import org.jolokia.core.service.*;
-import org.jolokia.core.service.LogHandler;
+import org.jolokia.core.service.request.RequestHandler;
+import org.jolokia.core.service.request.RequestInterceptor;
+import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.json.simple.parser.JSONParser;
 
 /**
  * The service manager for handling all the service organisation stuff.
@@ -37,7 +39,10 @@ import org.jolokia.core.service.LogHandler;
 public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     // Details of this agent
-    private final AgentDetails agentDetails;
+    private AgentDetails agentDetails;
+
+    // Lookup for finding detectors
+    private final ServerDetectorLookup detectorLookup;
 
     // Overall configuration
     private Configuration configuration;
@@ -70,23 +75,31 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // MBean registry for holding MBeans
     private MBeanRegistry mbeanRegistry;
 
+    // Access for JMX MBeanServers
+    private MBeanServerAccess mbeanServerAccess;
+
     /**
      * Create the implementation of a service manager
      *
      * @param pConfig configuration to use
      * @param pLogHandler the logger
      * @param pRestrictor restrictor to apply
+     * @param pDetectorLookup additional lookup server detectors when the services start
+     *                        (in addition to the classpath based lookup) These detectors while have a higher
+     *                        precedence than the classpath based lookup. Might be null.
      */
-    public JolokiaServiceManagerImpl(Configuration pConfig,LogHandler pLogHandler, Restrictor pRestrictor) {
+    public JolokiaServiceManagerImpl(Configuration pConfig,
+                                     LogHandler pLogHandler,
+                                     Restrictor pRestrictor,
+                                     ServerDetectorLookup pDetectorLookup) {
         configuration = pConfig;
         logHandler = pLogHandler;
         restrictor = pRestrictor;
         isInitialized = false;
-        agentDetails = new AgentDetails(pConfig);
         serviceLookups = new ArrayList<JolokiaServiceLookup>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
         staticLowServices = new HashMap<Class<? extends JolokiaService>, JolokiaService>();
-
+        detectorLookup = new ClasspathServerDetectorLookup(pDetectorLookup);
         // The version request handler must be always present and always be first
         addService(new VersionRequestHandler());
     }
@@ -149,6 +162,11 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     /** {@inheritDoc} */
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
+
+            List<ServerDetector> detectors = detectorLookup.lookup();
+            mbeanServerAccess = createMBeanServerAccess(detectors);
+            ServerHandle handle = detect(getDetectorOptions(),detectors,mbeanServerAccess);
+            agentDetails = new AgentDetails(configuration,handle);
 
             // Create context and remember
             jolokiaContext = new JolokiaContextImpl(this);
@@ -246,8 +264,79 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         return ret;
     }
 
+    // Access to merged MBean servers
+    MBeanServerAccess getMBeanServerAccess() {
+        return mbeanServerAccess;
+    }
 
-    // =======================================================================================================
+
+    // =============================================================================================================
+
+
+    private ServerHandle detect(Map<String,Object> pConfig, List<ServerDetector> detectors, MBeanServerAccess pMBeanServerAccess) {
+        for (ServerDetector detector : detectorLookup.lookup()) {
+            try {
+                detector.init((Map<String, Object>) pConfig.get(detector.getName()));
+                ServerHandle info = detector.detect(pMBeanServerAccess);
+                if (info != null) {
+                    addInterceptor(detector,pMBeanServerAccess);
+                    return info;
+                }
+            } catch (Exception exp) {
+                // We are defensive here and wont stop the agent because
+                // there is a problem with the server detection. A error will be logged
+                // nevertheless, though.
+                logHandler.error("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp,exp);
+            }
+        }
+        return DefaultServerHandle.NULL_SERVER_HANDLE;
+    }
+
+    // Add an interceptor if available
+    private void addInterceptor(ServerDetector detector,MBeanServerAccess pServerAccess) {
+        RequestInterceptor interceptor = detector.getRequestInterceptor(pServerAccess);
+        if (interceptor  != null) {
+            addService(interceptor);
+        }
+    }
+
+    private MBeanServerAccess createMBeanServerAccess(List<ServerDetector> pDetectors) {
+        Set<MBeanServerConnection> mbeanServers = new HashSet<MBeanServerConnection>();
+        for (ServerDetector detector : pDetectors) {
+            Set<MBeanServerConnection> found = detector.getMBeanServers();
+            if (found != null) {
+                mbeanServers.addAll(found);
+            }
+        }
+        return new DefaultMBeanServerAccess(mbeanServers);
+    }
+    /**
+     * Get the optional options used for detectors-default. This should be a JSON string specifying all options
+     * for all detectors-default. Keys are the name of the detector's product, the values are JSON object containing
+     * specific parameters for this agent. E.g.
+     *
+     * <pre>
+     *    {
+     *        "glassfish" : { "bootAmx": true  }
+     *    }
+     * </pre>
+     *
+     * @return the detector specific configuration
+     */
+    private Map<String,Object> getDetectorOptions() {
+        String optionString = configuration.getConfig(ConfigKey.DETECTOR_OPTIONS);
+        if (optionString != null) {
+            try {
+                return (Map<String, Object>) new JSONParser().parse(optionString);
+            } catch (Exception e) {
+                logHandler.error("Could not parse detetctor options '" + optionString + "' as JSON object: " + e, e);
+            }
+        } else {
+            return Collections.emptyMap();
+        }
+        return null;
+    }
+
 
     // Extract the order in which services should be initialized
     private List<Class<? extends JolokiaService>> getServiceTypes() {
@@ -287,4 +376,6 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
         return mbeanRegistry.registerMBean(pMBean, pOptionalName);
     }
+
+
 }

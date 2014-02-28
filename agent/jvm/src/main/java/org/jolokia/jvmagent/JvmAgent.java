@@ -66,7 +66,7 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        startAgent(new JvmAgentConfig(agentArgs,true));
+        startAgent(new JvmAgentConfig(agentArgs),true /* lazy */);
     }
 
     /**
@@ -78,17 +78,17 @@ public final class JvmAgent {
     public static void agentmain(String agentArgs) {
         JvmAgentConfig config = new JvmAgentConfig(agentArgs);
         if (!config.isModeStop()) {
-            startAgent(config);
+            startAgent(config,false);
         } else {
             stopAgent();
         }
     }
 
-    private static void startAgent(JvmAgentConfig pConfig)  {
+    private static void startAgent(JvmAgentConfig pConfig,boolean pLazy)  {
         try {
             server = new JolokiaServer(pConfig);
 
-            server.start();
+            server.start(pLazy);
             setStateMarker();
 
             System.out.println("Jolokia: Agent started with URL " + server.getUrl());

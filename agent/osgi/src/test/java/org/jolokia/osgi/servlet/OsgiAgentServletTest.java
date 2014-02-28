@@ -16,21 +16,18 @@ package org.jolokia.osgi.servlet;
  *  limitations under the License.
  */
 
-import java.util.Set;
-
-import javax.management.MBeanServerConnection;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.core.service.detector.ServerDetector;
-import org.jolokia.core.service.detector.ServerHandle;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.StaticConfiguration;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.detector.ServerDetector;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.restrictor.AllowAllRestrictor;
-import org.jolokia.core.service.AbstractJolokiaService;
-import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.core.service.LogHandler;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.service.jmx.detector.AbstractServerDetector;
+import org.jolokia.test.util.HttpTestUtil;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;
 import org.osgi.service.log.LogService;
@@ -44,12 +41,12 @@ import static org.testng.Assert.assertNull;
  * @author roland
  * @since 02.09.11
  */
-public class JolokiaServletTest {
+public class OsgiAgentServletTest {
 
     private ServletConfig config;
     private ServletContext servletContext;
     private BundleContext bundleContext;
-    private JolokiaServlet servlet;
+    private OsgiAgentServlet servlet;
 
 
     @BeforeMethod
@@ -65,20 +62,20 @@ public class JolokiaServletTest {
 
     @Test
     public void simpleInit() throws ServletException, InvalidSyntaxException {
-        servlet = new JolokiaServlet();
+        servlet = new OsgiAgentServlet();
         initWithLogService();
     }
 
     @Test
     public void simpleInitWithGivenBundleContext() throws InvalidSyntaxException, ServletException {
-        servlet = new JolokiaServlet(bundleContext,new AllowAllRestrictor());
+        servlet = new OsgiAgentServlet(bundleContext,new AllowAllRestrictor());
         initWithLogService();
     }
 
 
     @Test
     public void initWithoutBundleContext() throws ServletException {
-        servlet = new JolokiaServlet();
+        servlet = new OsgiAgentServlet();
 
         expect(servletContext.getAttribute("osgi-bundlecontext")).andReturn(null).anyTimes();
         HttpTestUtil.prepareServletConfigMock(config);
@@ -99,7 +96,7 @@ public class JolokiaServletTest {
         replay(config, servletContext, bundleContext);
 
         servlet.init(config);
-        assertNull(JolokiaServlet.getCurrentBundleContext());
+        assertNull(OsgiAgentServlet.getCurrentBundleContext());
 
         LogHandler handler = servlet.createLogHandler(config, new StaticConfiguration(ConfigKey.DEBUG,"true"));
         handler.debug("Debug");
@@ -146,17 +143,14 @@ public class JolokiaServletTest {
     // ===========================================================================
     // Detector to avoid checkup with every detector
 
-    public static class CatchAllDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
+    public static class CatchAllDetector extends AbstractServerDetector {
 
         public CatchAllDetector(int pOrderId) {
-            super(ServerDetector.class, pOrderId);
+            super("catch-all", pOrderId);
         }
 
         public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
             return ServerHandle.NULL_SERVER_HANDLE;
-        }
-
-        public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
         }
     }
 

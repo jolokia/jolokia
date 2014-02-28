@@ -16,15 +16,15 @@ package org.jolokia.service.jmx.detector;
  * limitations under the License.
  */
 
-import java.util.Set;
+import java.util.*;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -41,7 +41,7 @@ public class WeblogicDetector extends AbstractServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public WeblogicDetector(int pOrder) {
-        super(pOrder);
+        super("weblogic",pOrder);
     }
 
     /** {@inheritDoc}
@@ -55,20 +55,20 @@ public class WeblogicDetector extends AbstractServerDetector {
         return null;
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void addMBeanServers(Set<MBeanServerConnection> servers) {
+    public Set<MBeanServerConnection> getMBeanServers() {
         // Weblogic stores the MBeanServer in a JNDI context
         InitialContext ctx;
         try {
             ctx = new InitialContext();
             MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
             if (server != null) {
-                servers.add(server);
+                Collections.singleton(server);
             }
         } catch (NamingException e) {
             // expected and can happen on non-Weblogic platforms
         }
+        return null;
     }
 
     static class WeblogicServerHandle extends DefaultServerHandle {

@@ -37,17 +37,17 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
 
     private String protocolVersion;
 
-    private JSONObject server;
+    private JSONObject details;
 
     J4pVersionResponse(J4pVersionRequest pRequest, JSONObject pResponse) {
         super(pRequest,pResponse);
         JSONObject value = (JSONObject) getValue();
         agentVersion = (String) value.get("agent");
         protocolVersion = (String) value.get("protocol");
-        server = (JSONObject) value.get("server");
+        details = (JSONObject) value.get("details");
         jolokiaId = (String) value.get("id");
-        if (server == null) {
-            server = new JSONObject();
+        if (details == null) {
+            details = new JSONObject();
         }
         info = (JSONObject) value.get("info");
         if (info == null) {
@@ -81,7 +81,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      *         could not detect it.
      */
     public String getProduct() {
-        return (String) server.get("product");
+        return (String) details.get("server_product");
     }
 
     /**
@@ -91,7 +91,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @return venor name or <code>null</code>
      */
     public String getVendor() {
-        return (String) server.get("vendor");
+        return (String) details.get("server_vendor");
     }
 
     /**

@@ -17,9 +17,9 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.util.EscapeUtil;
 
 /**
@@ -37,23 +37,12 @@ public class JvmAgentConfig extends JolokiaServerConfig {
     private boolean isStopMode;
 
     /**
-     * Constructor which parser an agent argument string
-     *
-     * @param pArgs arguments glued together as provided on the commandline
-     *        for an agent parameter
-     */
-    public JvmAgentConfig(String pArgs) {
-        this(pArgs,false);
-    }
-
-    /**
      * Constructor which also specifies whether initialization should be done lazy or not
      *
      * @param pArgs arguments as given on the command line
-     * @param pLazy whether to initialize lazily or not
      */
-    public JvmAgentConfig(String pArgs, boolean pLazy) {
-        this(split(pArgs), pLazy);
+    public JvmAgentConfig(String pArgs) {
+        this(split(pArgs));
     }
 
     /**
@@ -62,25 +51,11 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      * @param pConfig config map with key value pairs
      */
     public JvmAgentConfig(Map<String,String> pConfig) {
-        this(pConfig, false);
-    }
-
-    /**
-     * Constructor with a preparsed configuration
-     *
-     * @param pConfig config map with key value pairs
-     * @param pLazy whether to initialize lazily or not
-     */
-    public JvmAgentConfig(Map<String,String> pConfig, boolean pLazy) {
         Map<String,String> defaultConfig = getDefaultConfig();
 
         // If the key 'config' in the configuration file point to another properties file, read this in, too.
         if (pConfig.containsKey("config")) {
             defaultConfig.putAll(readConfig(pConfig.get("config")));
-        }
-        if (pLazy) {
-            // Marker used later when doing the initialization.
-            defaultConfig.put(ConfigKey.LAZY_SERVER_DETECTION.getKeyValue(), "true");
         }
         init(pConfig,defaultConfig);
 

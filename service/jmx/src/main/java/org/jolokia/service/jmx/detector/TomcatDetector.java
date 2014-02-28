@@ -19,8 +19,8 @@ package org.jolokia.service.jmx.detector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -41,7 +41,7 @@ public class TomcatDetector extends AbstractServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public TomcatDetector(int pOrder) {
-        super(pOrder);
+        super("tomcat",pOrder);
     }
 
 
@@ -58,7 +58,7 @@ public class TomcatDetector extends AbstractServerDetector {
             String version = matcher.group(2);
             // TODO: Extract access URL
             if (product.toLowerCase().contains("tomcat")) {
-                return new DefaultServerHandle("Apache","tomcat",version);
+                return new DefaultServerHandle("Apache",getName(),version);
             }
         }
         return null;

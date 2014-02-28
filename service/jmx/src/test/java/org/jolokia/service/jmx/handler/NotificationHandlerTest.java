@@ -20,7 +20,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.request.JolokiaNotificationRequest;
 import org.jolokia.core.request.JolokiaRequestBuilder;
 import org.jolokia.core.request.notification.NotificationCommandType;

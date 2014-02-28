@@ -6,13 +6,11 @@ import java.util.Set;
 import javax.management.JMException;
 
 import org.jolokia.core.Version;
-import org.jolokia.core.request.NotChangedException;
-import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.service.request.RequestHandler;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.AbstractJolokiaService;
-import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.request.NotChangedException;
+import org.jolokia.core.service.*;
+import org.jolokia.core.service.request.RequestHandler;
 import org.jolokia.core.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -62,9 +60,9 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         ret.put("agent", Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
         ret.put("id",context.getConfig(ConfigKey.AGENT_ID));
-        ServerHandle serverHandle = context.getServerHandle();
-        if (serverHandle != null) {
-            ret.put("server", serverHandle.toJSONObject());
+        AgentDetails agentDetails = context.getAgentDetails();
+        if (agentDetails != null) {
+            ret.put("details", agentDetails.toJSONObject());
         }
 
         // Each request handler adds an extra information
@@ -89,11 +87,6 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         return pJolokiaRequest.getType() == RequestType.VERSION;
     }
 
-    /** {@inheritDoc} */
-    public boolean useReturnValueWithPath(JolokiaRequest pJolokiaRequest) {
-        return true;
-    }
-
     // ========================================================================
 
     private JSONObject configToJSONObject() {
@@ -106,8 +99,6 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         }
         return info;
     }
-
-
 
     // Not used here
     public String getRealm() {

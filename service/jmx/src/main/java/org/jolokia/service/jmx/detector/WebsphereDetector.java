@@ -18,18 +18,16 @@ package org.jolokia.service.jmx.detector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.ClassUtil;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 
 /**
@@ -56,7 +54,7 @@ public class WebsphereDetector extends AbstractServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public WebsphereDetector(int pOrder) {
-        super(pOrder);
+        super("websphere",pOrder);
     }
 
     /** {@inheritDoc}
@@ -84,7 +82,7 @@ public class WebsphereDetector extends AbstractServerDetector {
 
     @Override
     /** {@inheritDoc} */
-    public void addMBeanServers(Set<MBeanServerConnection> servers) {
+    public Set<MBeanServerConnection> getMBeanServers() {
         try {
             /*
 			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
@@ -93,7 +91,7 @@ public class WebsphereDetector extends AbstractServerDetector {
             Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
             Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
             Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
-            servers.add((MBeanServer) getMBeanServerMethod.invoke(mbeanFactory));
+            return Collections.singleton((MBeanServerConnection) getMBeanServerMethod.invoke(mbeanFactory));
         }
         catch (ClassNotFoundException ex) {
             // Expected if not running under WAS
@@ -106,6 +104,7 @@ public class WebsphereDetector extends AbstractServerDetector {
         } catch (NoSuchMethodException ex) {
             throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
         }
+        return null;
     }
 
     // ==================================================================================

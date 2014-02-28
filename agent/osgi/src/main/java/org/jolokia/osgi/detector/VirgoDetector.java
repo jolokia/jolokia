@@ -19,8 +19,8 @@ package org.jolokia.osgi.detector;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -37,7 +37,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public VirgoDetector(int pOrder) {
-        super(pOrder);
+        super("virgo",pOrder);
     }
 
     /** {@inheritDoc}
@@ -64,7 +64,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
         private final Map<String, String> extraInfo;
 
         public VirgoServerHandle(String pVersion, Map<String, String> pExtraInfo) {
-            super("Eclipse","Virgo",pVersion);
+            super("Eclipse","virgo",pVersion);
             extraInfo = pExtraInfo;
         }
 

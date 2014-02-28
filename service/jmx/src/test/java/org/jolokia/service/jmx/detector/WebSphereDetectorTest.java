@@ -21,13 +21,12 @@ import java.util.HashSet;
 
 import javax.management.*;
 
-import org.jolokia.core.service.detector.ServerDetector;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.ServerDetector;
+import org.jolokia.core.detector.ServerHandle;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * @author roland
@@ -50,8 +49,6 @@ public class WebSphereDetectorTest extends BaseDetectorTest {
         ServerHandle info = detector.detect(getMBeanServerManager(mockServer));
         assertEquals(info.getVendor(),"IBM");
         assertEquals(info.getProduct(),"websphere");
-        assertNotNull(info.getExtraInfo(null));
-        assertEquals(info.getExtraInfo(null).get("buildDate"),"8/14/10");
     }
 
 

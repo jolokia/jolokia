@@ -2,15 +2,15 @@ package org.jolokia.service.jmx.detector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Set;
 
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.ClassUtil;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
  * Detector for JBoss
@@ -26,7 +26,7 @@ public class JBossDetector extends AbstractServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public JBossDetector(int pOrder) {
-        super(pOrder);
+        super("jboss",pOrder);
     }
 
     /** {@inheritDoc} */
@@ -92,18 +92,17 @@ public class JBossDetector extends AbstractServerDetector {
         return null;
     }
 
-    // Special handling for JBoss
-
     @Override
-    public void addMBeanServers(Set<MBeanServerConnection> servers) {
+    public Set<MBeanServerConnection> getMBeanServers() {
         try {
             Class locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
             Method method = locatorClass.getMethod("locateJBoss");
-            servers.add((MBeanServer) method.invoke(null));
+            return Collections.singleton((MBeanServerConnection) method.invoke(null));
         } catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ } catch (NoSuchMethodException e) {
         } catch (IllegalAccessException e) {
         } catch (InvocationTargetException e) {
         }
+        return null;
     }
 
     // Special handling for JBoss

@@ -26,7 +26,7 @@ import org.jolokia.core.service.AgentDetails;
 import org.jolokia.core.restrictor.AllowAllRestrictor;
 import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.service.*;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.service.serializer.JmxSerializer;
 import org.jolokia.core.util.jmx.*;
 

@@ -1,4 +1,4 @@
-package org.jolokia.core.service.detector;
+package org.jolokia.core.detector;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -75,6 +75,7 @@ public class DefaultServerHandleTest {
     public void allNull() {
         ServerHandle handle = DefaultServerHandle.NULL_SERVER_HANDLE;
         assertNull(handle.getVendor());
-        assertNull(handle.toJSONObject().get("extraInfo"));
+        assertNull(handle.getProduct());
+        assertNull(handle.getVersion());
     }
 }

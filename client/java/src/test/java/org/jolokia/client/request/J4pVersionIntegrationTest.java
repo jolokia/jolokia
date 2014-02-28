@@ -43,7 +43,7 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
             J4pVersionRequest req = new J4pVersionRequest(cfg);
             req.setPreferredHttpMethod(HttpPost.METHOD_NAME);
-            J4pVersionResponse resp = (J4pVersionResponse) j4pClient.execute(req);
+            J4pVersionResponse resp = j4pClient.execute(req);
             verifyResponse(resp);
         }
     }

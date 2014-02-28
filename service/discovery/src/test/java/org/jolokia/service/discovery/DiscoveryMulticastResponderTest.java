@@ -34,18 +34,24 @@ public class DiscoveryMulticastResponderTest {
         if (!NetworkUtil.isMulticastSupported()) {
             throw new SkipException("No multicast interface found, skipping test ");
         }
+        String id = UUID.randomUUID().toString();
         JolokiaContext context = new TestJolokiaContext.Builder()
                 .config(ConfigKey.DISCOVERY_ENABLED,Boolean.toString(enabled))
-                .agentDetails(new AgentDetails(UUID.randomUUID().toString()))
+                .agentDetails(new AgentDetails(id))
                 .build();
-        DiscoveryMulticastResponder responder =
-                new DiscoveryMulticastResponder();
+        DiscoveryMulticastResponder responder = new DiscoveryMulticastResponder();
         responder.init(context);
         // Warming up
         Thread.sleep(enabled ? 300 : 100);
         JolokiaDiscovery discovery = new JolokiaDiscovery("test");
         List<JSONObject> msgs = discovery.lookupAgents();
-        Assert.assertTrue(enabled ? msgs.size() > 0 : msgs.size() == 0);
+        if (enabled) {
+            Assert.assertTrue(msgs.size() > 0);
+        } else {
+            for (JSONObject resp : msgs) {
+                Assert.assertNotEquals(resp.get("agent_id"),id);
+            }
+        }
         responder.destroy();
     }
 

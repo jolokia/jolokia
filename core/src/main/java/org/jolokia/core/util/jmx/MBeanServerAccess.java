@@ -102,6 +102,13 @@ public interface MBeanServerAccess {
     boolean hasMBeansListChangedSince(long pTimestamp);
 
     /**
+     * Get all MBeanServers which are handled by this manager
+     *
+     * @return list of MBeanServers to handle (in the proper merge order)
+     */
+    Set<MBeanServerConnection> getMBeanServers();
+
+    /**
      * This callback is used together with {@link #each(ObjectName, MBeanEachCallback)} for iterating over all
      * active MBeanServers. The callback is responsible on its own to collect the information queried.
      */

@@ -1,4 +1,4 @@
-package org.jolokia.core.service.detector;
+package org.jolokia.core.detector;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -16,11 +16,12 @@ package org.jolokia.core.service.detector;
  * limitations under the License.
  */
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.service.JolokiaService;
+import org.jolokia.core.service.request.RequestInterceptor;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -31,7 +32,21 @@ import org.jolokia.core.util.jmx.MBeanServerAccess;
  * @author roland
  * @since 05.11.10
  */
-public interface ServerDetector extends JolokiaService<ServerDetector> {
+public interface ServerDetector extends Comparable<ServerDetector> {
+
+    /**
+     * Name of the detector which should reflect the server to be detected
+     * @return server name
+     */
+    String getName();
+
+    /**
+     * Initialize with detector specific configuration.
+     *
+     * @param pConfig configuration which is key based map. Can be null if there is no configuration at all.
+     */
+    void init(Map<String,Object> pConfig);
+
     /**
      * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.
@@ -45,7 +60,23 @@ public interface ServerDetector extends JolokiaService<ServerDetector> {
      * Add MBeanServers dedicated specifically on the identified platform. This method must be overridden
      * by any platform wanting to add MBeanServers. By default this method does nothing.
      *
-     * @param pMBeanServers set of MBeanServers to add to.
+     * @return mbean servers which are specific for this server or null if none apply
      */
-    void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
+    Set<MBeanServerConnection> getMBeanServers();
+
+    /**
+     * Get an request interceptor to add for dealing with server specific workarounds or behaviour
+     *
+     * @param pMBeanServerAccess  for accessing the JMX subsystem
+     * @return a request interceptor to apply for this server or <code>null</code> if none is necessary.
+     */
+    RequestInterceptor getRequestInterceptor(MBeanServerAccess pMBeanServerAccess);
+
+    /**
+     * Order of the service. The higher the number, the later in the list of services this service appears.
+     * Default order is 100.
+     *
+     * @return the order of this service
+     */
+    int getOrder();
 }

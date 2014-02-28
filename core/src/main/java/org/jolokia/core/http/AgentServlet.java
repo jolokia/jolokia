@@ -9,12 +9,12 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import org.jolokia.core.config.*;
+import org.jolokia.core.detector.ServerDetectorLookup;
 import org.jolokia.core.restrictor.PolicyRestrictorFactory;
-import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.service.*;
 import org.jolokia.core.service.impl.ClasspathServiceCreator;
-import org.jolokia.core.service.impl.JolokiaServiceManagerImpl;
-import org.jolokia.core.util.*;
+import org.jolokia.core.util.ClassUtil;
+import org.jolokia.core.util.NetworkUtil;
 import org.json.simple.JSONAware;
 
 /*
@@ -89,7 +89,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
-     * Initialize the backend systems by creating a {@link JolokiaServiceManagerImpl}
+     * Initialize the backend systems by creating a {@link JolokiaServiceManager}
      *
      * A subclass can tune this step by overriding
      * {@link #createLogHandler}, {@link #createRestrictor} and {@link #createConfig}
@@ -107,8 +107,9 @@ public class AgentServlet extends HttpServlet {
         Restrictor restrictor = createRestrictor(config, logHandler);
 
         // Create the service manager and initialize
-        serviceManager = JolokiaServiceManagerFactory.createJolokiaServiceManager(config,logHandler,restrictor);
-        initServiceManager(pServletConfig, serviceManager);
+        serviceManager =
+                JolokiaServiceManagerFactory.createJolokiaServiceManager(config, logHandler, restrictor, getServerDetectorLookup());
+        initServices(pServletConfig, serviceManager);
 
         // Start it up ....
         jolokiaContext = serviceManager.start();
@@ -131,8 +132,18 @@ public class AgentServlet extends HttpServlet {
      * @param pServletConfig servlet configuration
      * @param pServiceManager service manager to which to add services
      */
-    protected void initServiceManager(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
+    protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
         pServiceManager.addServices(new ClasspathServiceCreator("services"));
+    }
+
+    /**
+     * Hook for allowing a custome detector lookup
+     *
+     * @return detector lookup class to use in addition to the standard classpath scanning or null if this is not
+     * needed
+     */
+    protected ServerDetectorLookup getServerDetectorLookup() {
+        return null;
     }
 
     /**

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jolokia.core.Version;
 import org.jolokia.core.config.ConfigKey;
 import org.jolokia.core.config.Configuration;
+import org.jolokia.core.detector.ServerHandle;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.core.service.AgentDetails.AgentDetailProperty.*;
@@ -47,9 +48,12 @@ public class AgentDetails {
         }
     }
 
-    public AgentDetails(Configuration pConfig) {
+    public AgentDetails(Configuration pConfig,ServerHandle pServerHandle) {
         this(pConfig.getConfig(ConfigKey.AGENT_ID));
         agentDescription = pConfig.getConfig(ConfigKey.AGENT_DESCRIPTION);
+        serverVendor = pServerHandle.getVendor();
+        serverProduct = pServerHandle.getProduct();
+        serverVersion = pServerHandle.getVersion();
     }
 
     /**
@@ -74,18 +78,10 @@ public class AgentDetails {
     }
 
     /**
-     * Single method for updating the server information when the server has been detected
-     *
-     * @param pVendor vendor of the deteted container
-     * @param pProduct name of the contained
-     * @param pVersion server version (not Jolokia's version!)
+     * Update agent connection data
+     * @param pUrl connection URL
+     * @param pSecured whether the connection is secured or not
      */
-    public void setServerInfo(String pVendor, String pProduct, String pVersion) {
-        serverVendor = pVendor;
-        serverProduct = pProduct;
-        serverVersion = pVersion;
-    }
-
     public void updateAgentParameters(String pUrl, Boolean pSecured) {
         url = pUrl;
         secured = pSecured;

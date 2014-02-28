@@ -18,8 +18,8 @@ package org.jolokia.osgi.detector;
 
 import java.util.Dictionary;
 
+import org.jolokia.osgi.servlet.OsgiAgentServlet;
 import org.jolokia.service.jmx.detector.AbstractServerDetector;
-import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -34,8 +34,8 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
      *
      * @param pOrder of the detector (within the list of detectors)
      */
-    public AbstractOsgiServerDetector(int pOrder) {
-        super(pOrder);
+    public AbstractOsgiServerDetector(String pName,int pOrder) {
+        super(pName,pOrder);
     }
 
     protected String getSystemBundleVersion() {
@@ -44,7 +44,7 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
     }
 
     protected String getBundleVersion(String pSymbolicName) {
-        BundleContext context = JolokiaServlet.getCurrentBundleContext();
+        BundleContext context = OsgiAgentServlet.getCurrentBundleContext();
         if (context != null) {
             for (Bundle bundle: context.getBundles()) {
                 if (pSymbolicName.equalsIgnoreCase(bundle.getSymbolicName())) {
@@ -68,7 +68,7 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
     }
 
     private Dictionary getSystemBundleHeaders() {
-        BundleContext context = JolokiaServlet.getCurrentBundleContext();
+        BundleContext context = OsgiAgentServlet.getCurrentBundleContext();
         if (context != null) {
             Bundle systemBundle = context.getBundle(0);
             return systemBundle.getHeaders();

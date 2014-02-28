@@ -20,17 +20,13 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.util.RequestType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -85,7 +81,6 @@ public class JBossDetectorTest extends BaseDetectorTest {
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
         expect(server.isRegistered(memoryBean)).andStubReturn(true);
         replay(server);
-        handle.preDispatch(servers, new JolokiaRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JolokiaRequest>build());
         verify(server);
     }
 
@@ -111,7 +106,6 @@ public class JBossDetectorTest extends BaseDetectorTest {
         reset(server);
         ObjectName memoryBean = new ObjectName("java.lang:type=Memory");
         replay(server);
-        pHandle.preDispatch(servers, new JolokiaRequestBuilder(RequestType.READ, memoryBean).attribute("HeapMemoryUsage").<JolokiaRequest>build());
         verify(server);
     }
 

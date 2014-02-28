@@ -74,7 +74,6 @@ public class DiscoveryMessageTest {
 
     private AgentDetails getAgentDetailsLargerThan(int size) {
         AgentDetails details = new AgentDetails("test-id");
-        details.setServerInfo("test","test","test");
         StringBuffer large = new StringBuffer();
         for (int i = 0; i < size; i++) {
             large.append("Y");

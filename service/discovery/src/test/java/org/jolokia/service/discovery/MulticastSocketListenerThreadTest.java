@@ -2,13 +2,13 @@ package org.jolokia.service.discovery;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.core.Version;
 import org.jolokia.core.service.*;
-import org.jolokia.core.util.*;
+import org.jolokia.core.util.NetworkUtil;
+import org.jolokia.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.SkipException;
@@ -25,16 +25,12 @@ import static org.jolokia.service.discovery.MulticastUtil.sendQueryAndCollectAns
 public class MulticastSocketListenerThreadTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
-    private URL url;
-    private String id;
 
 
-    private MulticastSocketListenerThread startSocketListener() throws IOException, InterruptedException {
-        url = new URL(JOLOKIA_URL);
-        id = UUID.randomUUID().toString();
-        final AgentDetails details = new AgentDetails(id);
+    private MulticastSocketListenerThread startSocketListener(String pId) throws IOException, InterruptedException {
+        final AgentDetails details = new AgentDetails(pId);
         details.updateAgentParameters(JOLOKIA_URL, false);
-        details.setServerInfo("jolokia", "jolokia-test", "1.0");
+        //details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
         JolokiaContext context = new TestJolokiaContext.Builder().agentDetails(details).build();
         MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread(null,context);
@@ -47,12 +43,13 @@ public class MulticastSocketListenerThreadTest {
     public void simple() throws IOException, InterruptedException {
         checkForMulticastSupport();
 
-        MulticastSocketListenerThread listenerThread = startSocketListener();
+        String id = UUID.randomUUID().toString();
+        MulticastSocketListenerThread listenerThread = startSocketListener(id);
 
         try {
             DiscoveryOutgoingMessage out =
                     new DiscoveryOutgoingMessage.Builder(QUERY)
-                            .agentId(UUID.randomUUID().toString())
+                            .agentId(id)
                             .build();
             List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
             int idCount = 0;
@@ -67,7 +64,7 @@ public class MulticastSocketListenerThreadTest {
                 }
                 Assert.assertFalse(in.isQuery());
                 JSONObject details = agentDetails.toJSONObject();
-                if (details.get("server_vendor") != null && details.get("server_vendor").equals("jolokia")) {
+                if (id.equals(details.get("agent_id"))) {
                     Assert.assertEquals(details.get("url"), JOLOKIA_URL);
                     Assert.assertEquals(details.get("agent_version"), Version.getAgentVersion());
                     return;

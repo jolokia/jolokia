@@ -20,17 +20,13 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
-import org.jolokia.service.jmx.handler.CommandHandler;
-import org.jolokia.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.core.request.NotChangedException;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.request.*;
+import org.jolokia.core.service.JolokiaContext;
 import org.jolokia.core.service.request.AbstractRequestHandler;
 import org.jolokia.core.service.request.RequestHandler;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.request.JolokiaObjectNameRequest;
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.service.jmx.handler.CommandHandler;
+import org.jolokia.service.jmx.handler.CommandHandlerManager;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -41,14 +37,9 @@ import org.jolokia.core.service.JolokiaContext;
 public class LocalRequestHandler extends AbstractRequestHandler implements RequestHandler {
 
     private CommandHandlerManager commandHandlerManager;
+
+    // Context to use
     private JolokiaContext jolokiaContext;
-
-    // Initialize used for late initialization
-    // ("volatile: because we use double-checked locking later on
-    // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
-    private volatile Initializer initializer;
-
-    private DefaultMBeanServerAccess executor;
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
@@ -63,14 +54,6 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
     public void init(JolokiaContext pCtx) {
         commandHandlerManager =  new CommandHandlerManager(pCtx,true);
         jolokiaContext = pCtx;
-
-        // where Detectors have to be initialized.
-        if (Boolean.parseBoolean(pCtx.getConfig(ConfigKey.LAZY_SERVER_DETECTION))) {
-            initializer = new Initializer();
-        } else {
-            new Initializer().init();
-            initializer = null;
-        }
     }
 
     // Can handle all request starting with "jmx" or with a null realm
@@ -87,13 +70,12 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
     /** {@inheritDoc} */
     public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
-        lazyInitIfNeeded();
 
         CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
-        jolokiaContext.getServerHandle().preDispatch(executor,pJmxReq);
+
         if (handler.handleAllServersAtOnce(pJmxReq)) {
             try {
-                return handler.handleRequest(executor, pJmxReq, pPreviousResult);
+                return handler.handleRequest(jolokiaContext.getMBeanServerAccess(), pJmxReq, pPreviousResult);
             } catch (IOException e) {
                 throw new IllegalStateException("Internal: IOException " + e + ". Shouldn't happen.",e);
             }
@@ -109,14 +91,6 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
      */
     public void destroy() throws JMException {
         commandHandlerManager.destroy();
-        executor.destroy();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Object getRuntimeInfo() {
-        ServerHandle handle = jolokiaContext.getServerHandle();
-        return handle.getExtraInfo(executor);
     }
 
     // =====================================================================================================
@@ -127,6 +101,7 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
 
+        MBeanServerAccess executor = jolokiaContext.getMBeanServerAccess();
         for (MBeanServerConnection conn : executor.getMBeanServers()) {
             try {
                 return pRequestHandler.handleRequest(conn, pJmxReq);
@@ -145,28 +120,4 @@ public class LocalRequestHandler extends AbstractRequestHandler implements Reque
         // Must be there, otherwise we would not have left the loop
         throw objNotFoundException;
     }
-
-    // Run initialized if not already done
-    private void lazyInitIfNeeded() {
-        if (initializer != null) {
-            synchronized (this) {
-                if (initializer != null) {
-                    initializer.init();
-                    initializer = null;
-                }
-            }
-        }
-    }
-
-    // Initialized used for late initialisation as it is required for the agent when used
-    // as startup options
-    private final class Initializer {
-        void init() {
-            ServerHandleFinder finder = new ServerHandleFinder(jolokiaContext);
-            executor = new DefaultMBeanServerAccess(finder.getExtraMBeanServers());
-            ServerHandle handle = finder.detectServerHandle(executor);
-            jolokiaContext.setServerHandle(handle);
-        }
-    }
-
 }

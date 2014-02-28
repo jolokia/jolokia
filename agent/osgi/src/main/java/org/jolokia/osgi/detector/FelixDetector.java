@@ -17,8 +17,8 @@ package org.jolokia.osgi.detector;
  */
 
 
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -35,7 +35,7 @@ public class FelixDetector extends AbstractOsgiServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public FelixDetector(int pOrder) {
-        super(pOrder);
+        super("felix",pOrder);
     }
 
     /** {@inheritDoc}
@@ -43,7 +43,7 @@ public class FelixDetector extends AbstractOsgiServerDetector {
     public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
         if (checkSystemBundleForSymbolicName("org.apache.felix.framework")) {
             String version = getSystemBundleVersion();
-            return new DefaultServerHandle("Apache","felix",version);
+            return new DefaultServerHandle("Apache",getName(),version);
         } else {
             return null;
         }

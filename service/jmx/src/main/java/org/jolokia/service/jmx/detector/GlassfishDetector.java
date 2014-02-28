@@ -24,9 +24,13 @@ import java.util.regex.Pattern;
 
 import javax.management.*;
 
+import org.jolokia.core.detector.DefaultServerHandle;
+import org.jolokia.core.detector.ServerHandle;
 import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.detector.DefaultServerHandle;
-import org.jolokia.core.service.detector.ServerHandle;
+import org.jolokia.core.service.AbstractJolokiaService;
+import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.core.service.request.RequestInterceptor;
+import org.jolokia.core.util.jmx.JmxUtil;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 
@@ -47,7 +51,7 @@ public class GlassfishDetector extends AbstractServerDetector {
      * @param pOrder of the detector (within the list of detectors)
      */
     public GlassfishDetector(int pOrder) {
-        super(pOrder);
+        super("glassfish",pOrder);
     }
 
     /** {@inheritDoc}
@@ -55,7 +59,17 @@ public class GlassfishDetector extends AbstractServerDetector {
     public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
         String version = detectVersion(pMBeanServerAccess);
         if (version!= null) {
-            return new GlassfishServerHandle(version,amxShouldBeBooted(pMBeanServerAccess));
+            return new GlassfishServerHandle(version);
+        } else {
+            return null;
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public RequestInterceptor getRequestInterceptor(MBeanServerAccess pMBeanServerAccess) {
+        if (amxShouldBeBooted(pMBeanServerAccess)) {
+            return new AmxBootInterceptor(pMBeanServerAccess);
         } else {
             return null;
         }
@@ -90,8 +104,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     }
 
     private boolean amxShouldBeBooted(MBeanServerAccess pMBeanServerAccess) {
-        JSONObject opts = getDetectorOptions("glassfish");
-        return (opts == null || opts.get("bootAmx") == null || (Boolean) opts.get("bootAmx"))
+        return (config == null || config.get("bootAmx") == null || (Boolean) config.get("bootAmx"))
                && !isAmxBooted(pMBeanServerAccess);
     }
 
@@ -99,39 +112,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         return mBeanExists(pServerManager,"amx:type=domain-root,*");
     }
 
-    // Return true if AMX could be booted, false otherwise
-    private synchronized boolean bootAmx(MBeanServerAccess pServers) {
-        ObjectName bootMBean = null;
-        try {
-            bootMBean = new ObjectName("amx-support:type=boot-amx");
-        } catch (MalformedObjectNameException e) {
-            // Cannot happen ....
-        }
-        try {
-            pServers.call(bootMBean, new MBeanServerAccess.MBeanAction<Void>() {
-                /** {@inheritDoc} */
-                public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... extraArgs)
-                        throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                    pConn.invoke(pName, "bootAMX", null, null);
-                    return null;
-                }
-            });
-            return true;
-        } catch (InstanceNotFoundException e) {
-            jolokiaContext.error("No bootAmx MBean found: " + e, e);
-            // Can happen, when a call to bootAmx comes to early before the bean
-            // is registered
-            return false;
-        } catch (IllegalArgumentException e) {
-            jolokiaContext.error("Exception while booting AMX: " + e, e);
-            // We dont try it again
-            return true;
-        } catch (Exception e) {
-            jolokiaContext.error("Exception while executing bootAmx: " + e, e);
-            // dito
-            return true;
-        }
-    }
+
 
     private String getVersionFromFullVersion(String pOriginalVersion,String pFullVersion) {
         if (pFullVersion == null) {
@@ -145,17 +126,12 @@ public class GlassfishDetector extends AbstractServerDetector {
         }
     }
 
-    private class GlassfishServerHandle extends DefaultServerHandle {
-        private boolean amxShouldBeBooted;
+    // ====================================================================================================
 
-        /**
-         * Server handle for a glassfish server
-         *
-         * @param version Glassfish version
-         */
-        public GlassfishServerHandle(String version,boolean pAmxShouldBeBooted) {
+    private class GlassfishServerHandle extends DefaultServerHandle {
+
+        public GlassfishServerHandle(String version) {
             super("Oracle", "glassfish", version);
-            amxShouldBeBooted = pAmxShouldBeBooted;
         }
 
         @Override
@@ -167,15 +143,60 @@ public class GlassfishDetector extends AbstractServerDetector {
             }
             return extra;
         }
+    }
 
-        @Override
-        /** {@inheritDoc} */
-        public void preDispatch(MBeanServerAccess pExecutor, JolokiaRequest pJmxReq) {
-            if (amxShouldBeBooted) {
+    private static class AmxBootInterceptor extends AbstractJolokiaService<RequestInterceptor> implements RequestInterceptor {
+
+        private MBeanServerAccess serverAccess;
+        private boolean isBooted;
+        private JolokiaContext jolokiaContext;
+
+        private AmxBootInterceptor(MBeanServerAccess pServerAccess) {
+            super(RequestInterceptor.class,0);
+            serverAccess = pServerAccess;
+        }
+
+        public void intercept(JolokiaRequest pRequest, JSONObject pRetValue) {
+            if (!isBooted) {
                 // Clear flag only of bootAMX succeed or fails with an unrecoverable error
-                amxShouldBeBooted = !bootAmx(pExecutor);
+                isBooted = bootAmx(serverAccess);
             }
         }
+
+        @Override
+        public void init(JolokiaContext pJolokiaContext) {
+            super.init(pJolokiaContext);
+            jolokiaContext = pJolokiaContext;
+        }
+
+        // Return true if AMX could be booted, false otherwise
+        private synchronized boolean bootAmx(MBeanServerAccess pServers) {
+             ObjectName bootMBean = JmxUtil.newObjectName("amx-support:type=boot-amx");
+             try {
+                 pServers.call(bootMBean, new MBeanServerAccess.MBeanAction<Void>() {
+                     /** {@inheritDoc} */
+                     public Void execute(MBeanServerConnection pConn, ObjectName pName, Object ... extraArgs)
+                             throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+                         pConn.invoke(pName, "bootAMX", null, null);
+                         return null;
+                     }
+                 });
+                 return true;
+             } catch (InstanceNotFoundException e) {
+                 jolokiaContext.error("No bootAmx MBean found: " + e, e);
+                 // Can happen, when a call to bootAmx comes to early before the bean
+                 // is registered
+                 return false;
+             } catch (IllegalArgumentException e) {
+                 jolokiaContext.error("Exception while booting AMX: " + e, e);
+                 // We dont try it again
+                 return true;
+             } catch (Exception e) {
+                 jolokiaContext.error("Exception while executing bootAmx: " + e, e);
+            // dito
+                 return true;
+             }
+         }
     }
 
 

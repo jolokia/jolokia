@@ -17,18 +17,13 @@ package org.jolokia.service.jmx.detector;
  */
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.AbstractJolokiaService;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.service.detector.ServerDetector;
+import org.jolokia.core.detector.ServerDetector;
+import org.jolokia.core.service.request.RequestInterceptor;
 import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /**
  * Base class for server detectors.
@@ -36,22 +31,35 @@ import org.json.simple.parser.JSONParser;
  * @author roland
  * @since 05.11.10
  */
-public abstract class AbstractServerDetector extends AbstractJolokiaService<ServerDetector> implements ServerDetector {
+public abstract class AbstractServerDetector implements ServerDetector {
 
-    // Context used during detection. Valid except for the server handle
-    protected JolokiaContext jolokiaContext;
+    // order number for this service
+    private int order;
+
+    // detector configuration
+    protected Map<String,Object> config;
+
+    // Detector name
+    private String name;
 
     /**
-     * Create a server detector
-     *
-     * @param pOrder of the detector (within the list of detectors)
+     * The order of this detector
+     * @param pOrder detector's order
      */
-    public AbstractServerDetector(int pOrder) {
-        super(ServerDetector.class,pOrder);
+    protected AbstractServerDetector(String pName, int pOrder) {
+        order = pOrder;
+        name = pName;
     }
 
     /** {@inheritDoc} */
-    public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) { }
+    public String getName() {
+        return name;
+    }
+
+    /** {@inheritDoc} */
+    public void init (Map<String,Object> pConfig) {
+        config = pConfig;
+    }
 
     /**
      * Check for the existence of a certain MBean. All known MBeanServers are queried
@@ -171,38 +179,27 @@ public abstract class AbstractServerDetector extends AbstractJolokiaService<Serv
         return null;
     }
 
-    /**
-     * Get the optional options used for detectors-default. This should be a JSON string specifying all options
-     * for all detectors-default. Keys are the name of the detector's product, the values are JSON object containing
-     * specific parameters for this agent. E.g.
-     *
-     * <pre>
-     *    {
-     *        "glassfish" : { "bootAmx": true  }
-     *    }
-     * </pre>
-     *
-     *
-     * @param pProduct product for which to get the dector options
-     * @return the detector specific configuration
-     */
-    protected JSONObject getDetectorOptions(String pProduct) {
-        String optionString = jolokiaContext.getConfig(ConfigKey.DETECTOR_OPTIONS);
-        if (optionString != null) {
-            try {
-                JSONObject opts = (JSONObject) new JSONParser().parse(optionString);
-                return (JSONObject) opts.get(pProduct);
-            } catch (Exception e) {
-                jolokiaContext.error("Could not parse options '" + optionString + "' as JSON object: " + e, e);
-            }
-        }
+    /** {@inheritDoc} */
+    public Set<MBeanServerConnection> getMBeanServers() {
+        // Nothing by default
         return null;
     }
 
-
-    @Override
-    public void init(JolokiaContext pJolokiaContext) {
-        jolokiaContext = pJolokiaContext;
+    /** {@inheritDoc} */
+    public RequestInterceptor getRequestInterceptor(MBeanServerAccess pMBeanServerAccess) {
+        // No interceptor required by default
+        return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public int compareTo(ServerDetector pDetector) {
+        return getOrder() - pDetector.getOrder();
+    }
+
+    /** {@inheritDoc} */
+    public int getOrder() {
+        return order;
+    }
 }
