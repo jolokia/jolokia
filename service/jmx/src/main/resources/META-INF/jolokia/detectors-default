@@ -1,0 +1,9 @@
+# ===========================================
+# Server Detectors
+org.jolokia.service.jmx.detector.GeronimoDetector
+org.jolokia.service.jmx.detector.JBossDetector
+org.jolokia.service.jmx.detector.TomcatDetector
+org.jolokia.service.jmx.detector.JettyDetector
+org.jolokia.service.jmx.detector.GlassfishDetector
+org.jolokia.service.jmx.detector.WeblogicDetector
+org.jolokia.service.jmx.detector.WebsphereDetector
