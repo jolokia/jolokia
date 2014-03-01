@@ -21,6 +21,7 @@ import java.io.InputStream;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.core.util.HttpMethod;
 import org.jolokia.core.util.RequestType;
 import org.testng.annotations.Test;

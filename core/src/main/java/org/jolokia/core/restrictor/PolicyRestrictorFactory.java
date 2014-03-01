@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.jolokia.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.core.service.LogHandler;
 import org.jolokia.core.service.Restrictor;
 

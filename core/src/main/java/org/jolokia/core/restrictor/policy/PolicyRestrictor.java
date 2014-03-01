@@ -1,4 +1,4 @@
-package org.jolokia.core.restrictor;
+package org.jolokia.core.restrictor.policy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,6 @@ import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jolokia.core.restrictor.policy.*;
 import org.jolokia.core.service.Restrictor;
 import org.jolokia.core.util.HttpMethod;
 import org.jolokia.core.util.RequestType;
@@ -60,7 +59,7 @@ public class PolicyRestrictor implements Restrictor {
      *
      * @param pInput stream from where to fetch the policy data
      */
-    public PolicyRestrictor(InputStream pInput) {
+    PolicyRestrictor(InputStream pInput) {
         Exception exp = null;
         if (pInput == null) {
             throw new SecurityException("No policy file given");
