@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright 2009-2013 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!--
+  Sample definitions for restricting the access to the jolokia-agent. Adapt this
+  file and copy it over to 'restrict_access.xml', which get's evaluated during
+  runtime (if included in the war).
+
+  You can restrict the available methods in principale as well as the accessible
+  attributes and operations in detail.
+-->
+
+<restrict>
+
+  <!-- Hosts allowed -->
+  <remote>
+    <host>planck</host>
+    <host>10.0.11.125</host>
+    <host>11.0.0.0/16</host>
+    <host>192.168.15.3/255.255.255.0</host>
+  </remote>
+
+  Text is ignored
+
+  <http>
+      <method>post</method>
+  </http>
+
+  <commands>
+    <command>list</command>
+    <command>version</command>
+    <command>search</command>
+  </commands>
+
+  <allow>
+
+    Text is ignored
+
+    <mbean>
+
+      Text is ignored
+
+      <name>java.lang:type=Memory</name>
+      <attribute>HeapMemoryUsage</attribute>
+      <attribute mode="read"> Verbose </attribute>
+      <operation>gc</operation>
+    </mbean>
+    <mbean>
+      <name>java.lang:type=Threading</name>
+      <attribute>ThreadCount</attribute>
+    </mbean>
+  </allow>
+</restrict>
