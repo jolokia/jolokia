@@ -3,10 +3,10 @@ package org.jolokia.jvmagent.spring.backend;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 
-import org.jolokia.core.request.JolokiaListRequest;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.ClassUtil;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.request.JolokiaListRequest;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.server.core.util.RequestType;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;

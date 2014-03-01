@@ -3,7 +3,7 @@ package org.jolokia.jvmagent.spring;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.jolokia.core.service.LogHandler;
+import org.jolokia.server.core.service.LogHandler;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.StringUtils;
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.JolokiaRequest;
 import org.json.simple.JSONObject;
 
 /**

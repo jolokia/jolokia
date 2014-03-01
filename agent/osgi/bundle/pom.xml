@@ -43,7 +43,7 @@
         </exclusion>
         <exclusion>
           <groupId>org.jolokia</groupId>
-          <artifactId>jolokia-core</artifactId>
+          <artifactId>jolokia-server-core</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.jolokia</groupId>

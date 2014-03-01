@@ -22,9 +22,10 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.jolokia.core.detector.ServerHandle;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.service.jmx.detector.AbstractServerDetector;
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.service.request.RequestInterceptor;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 import static org.easymock.EasyMock.*;
 
@@ -32,7 +33,7 @@ import static org.easymock.EasyMock.*;
  * @author roland
  * @since 02.09.11
  */
-public class TestDetector extends AbstractServerDetector {
+public class TestDetector implements ServerDetector {
 
     private static boolean throwAddException = false;
 
@@ -44,11 +45,20 @@ public class TestDetector extends AbstractServerDetector {
     };
 
     static int instances = 0;
+    private final int order;
     int nr;
 
-    public TestDetector(int order) {
-        super("test",order);
+    public TestDetector(int pOrder) {
+        order = pOrder;
         nr = instances++;
+    }
+
+    public String getName() {
+        return "test";
+    }
+
+    public void init(Map<String, Object> pConfig) {
+
     }
 
     public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
@@ -62,7 +72,15 @@ public class TestDetector extends AbstractServerDetector {
         }
     }
 
-    public Set<MBeanServerConnection> getMBeanServer() {
+    public RequestInterceptor getRequestInterceptor(MBeanServerAccess pMBeanServerAccess) {
+        return null;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public Set<MBeanServerConnection> getMBeanServers() {
         if (throwAddException) {
             MBeanServer server = createMock(MBeanServer.class);
             try {
@@ -99,5 +117,9 @@ public class TestDetector extends AbstractServerDetector {
 
     public static void setFallThrough(boolean b) {
         fallThrough = b;
+    }
+
+    public int compareTo(ServerDetector o) {
+        return getOrder() - o.getOrder();
     }
 }

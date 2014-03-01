@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.service.notification.NotificationBackendManager;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.request.notification.*;
-import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.server.core.request.notification.*;
+import org.jolokia.server.core.service.notification.NotificationBackendManager;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.service.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**
@@ -46,7 +46,7 @@ public class NotificationDispatcher {
             throws MBeanException, IOException, ReflectionException {
 
         // Shortcut for client used later
-        String client = pCommand instanceof  ClientCommand ? ((ClientCommand) pCommand).getClient() : null;
+        String client = pCommand instanceof ClientCommand ? ((ClientCommand) pCommand).getClient() : null;
 
         switch (pCommand.getType()) {
             case REGISTER:

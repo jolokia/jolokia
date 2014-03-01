@@ -34,7 +34,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-server-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-detector</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -82,7 +88,7 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-server-core</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
@@ -117,7 +123,8 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <artifactSet>
                 <includes>
-                  <include>org.jolokia:jolokia-core</include>
+                  <include>org.jolokia:jolokia-server-core</include>
+                  <include>org.jolokia:jolokia-server-detector</include>
                   <include>org.jolokia:jolokia-service-jmx</include>
                   <include>org.jolokia:jolokia-service-serializer</include>
                   <include>org.jolokia:jolokia-service-pullnotif</include>

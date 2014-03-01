@@ -2,8 +2,8 @@ package org.jolokia.osgi.servlet;
 
 import java.util.*;
 
-import org.jolokia.core.detector.ServerDetector;
-import org.jolokia.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.osgi.framework.*;
 
 /**

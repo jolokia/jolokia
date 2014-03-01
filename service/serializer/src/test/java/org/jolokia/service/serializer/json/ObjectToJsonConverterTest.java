@@ -8,7 +8,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.jolokia.core.service.serializer.SerializeOptions;
+import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.testng.annotations.*;
 
 import static org.testng.AssertJUnit.*;

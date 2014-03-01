@@ -2,7 +2,7 @@ package org.jolokia.osgi.restrictor;
 
 import javax.management.ObjectName;
 
-import org.jolokia.core.restrictor.AllowAllRestrictor;
+import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 
 /*
  * Copyright 2009-2013 Roland Huss

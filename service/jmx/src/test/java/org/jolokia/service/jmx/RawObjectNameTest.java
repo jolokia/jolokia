@@ -23,14 +23,14 @@ import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.core.backend.BackendManager;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.service.request.RequestHandler;
-import org.jolokia.core.service.serializer.JmxSerializer;
-import org.jolokia.core.util.RequestType;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.server.core.backend.BackendManager;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.service.request.RequestHandler;
+import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.service.serializer.Converters;
 import org.json.simple.*;
 import org.testng.annotations.BeforeMethod;

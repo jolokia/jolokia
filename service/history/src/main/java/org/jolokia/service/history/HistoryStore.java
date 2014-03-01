@@ -6,8 +6,8 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.core.request.*;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.request.*;
+import org.jolokia.server.core.util.RequestType;
 import org.json.simple.JSONObject;
 
 /*

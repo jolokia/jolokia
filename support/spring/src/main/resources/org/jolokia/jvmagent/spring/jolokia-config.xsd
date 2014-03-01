@@ -57,7 +57,7 @@
           <xs:documentation>
             If set to true, externally defined Jolokia-services are looked up
             and added to the set of services to use. Please refer to the documentation
-            of org.jolokia.core.service.JolokiaService for details.
+            of org.jolokia.server.core.service.JolokiaService for details.
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
@@ -127,7 +127,7 @@
     <xs:attribute name="log-ref" type="xs:IDREF">
       <xs:annotation>
         <xs:documentation>
-          Referencd to a Sring Bean implementing org.jolokia.core.service.LogHandler which then is used
+          Referencd to a Sring Bean implementing org.jolokia.server.core.service.LogHandler which then is used
           for logging.
         </xs:documentation>
       </xs:annotation>

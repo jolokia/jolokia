@@ -24,14 +24,14 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.core.request.NotChangedException;
-import org.jolokia.core.service.request.AbstractRequestHandler;
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.JolokiaContext;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.service.request.AbstractRequestHandler;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.service.JolokiaContext;
 
 /**
  * Dispatcher for calling JSR-160 connectors

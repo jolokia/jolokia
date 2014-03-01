@@ -25,10 +25,10 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.core.service.serializer.JmxSerializer;
-import org.jolokia.core.request.JolokiaExecRequest;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.request.JolokiaExecRequest;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 
 
 /**

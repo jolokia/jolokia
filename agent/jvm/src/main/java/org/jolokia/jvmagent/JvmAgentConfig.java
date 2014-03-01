@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.core.util.EscapeUtil;
+import org.jolokia.server.core.util.EscapeUtil;
 
 /**
  * Holds all Http-Server and Jolokia configuration.

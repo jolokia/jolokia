@@ -2,7 +2,7 @@ package org.jolokia.service.history;
 
 import javax.management.*;
 
-import org.jolokia.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.JolokiaRequest;
 import org.json.simple.JSONObject;
 
 /*

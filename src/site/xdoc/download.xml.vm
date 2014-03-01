@@ -120,7 +120,7 @@
         <pre class="prettyprint"><![CDATA[
  <dependency>
    <groupId>org.jolokia</groupId>
-   <artifactId>jolokia-core</artifactId>
+   <artifactId>jolokia-server-core</artifactId>
    <version>${currentStableVersion}</version>
  </dependency>]]></pre>
         <p>and</p>

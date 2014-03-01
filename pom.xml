@@ -29,7 +29,8 @@
   <url>http://www.jolokia.org</url>
   
   <modules>
-    <module>core</module>
+    <module>server/core</module>
+    <module>server/detector</module>
 
     <module>agent/war</module>
     <module>agent/mule</module>

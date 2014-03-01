@@ -16,7 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.jolokia.core.http.AgentServlet;
+import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.client.J4pClient;
 import org.jolokia.it.ItSetup;
 import org.mortbay.jetty.Server;

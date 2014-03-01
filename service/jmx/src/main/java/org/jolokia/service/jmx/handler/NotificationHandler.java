@@ -20,12 +20,12 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.request.NotChangedException;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
-import org.jolokia.core.request.JolokiaNotificationRequest;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.request.JolokiaNotificationRequest;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 
 /**
  * A request handler which is responsible for managing notification

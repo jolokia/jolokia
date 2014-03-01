@@ -25,7 +25,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import com.sun.net.httpserver.Authenticator;
-import org.jolokia.core.config.*;
+import org.jolokia.server.core.config.*;
 
 /**
  * Configuration required for the JolokiaServer

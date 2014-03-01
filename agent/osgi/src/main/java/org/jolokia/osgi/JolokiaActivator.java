@@ -7,16 +7,16 @@ import javax.servlet.ServletException;
 
 import org.jolokia.osgi.servlet.OsgiServletConfiguration;
 import org.jolokia.osgi.servlet.OsgiAgentServlet;
-import org.jolokia.core.service.Restrictor;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.util.NetworkUtil;
+import org.jolokia.server.core.service.Restrictor;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import static org.jolokia.core.config.ConfigKey.*;
+import static org.jolokia.server.core.config.ConfigKey.*;
 
 /*
  * Copyright 2009-2013 Roland Huss

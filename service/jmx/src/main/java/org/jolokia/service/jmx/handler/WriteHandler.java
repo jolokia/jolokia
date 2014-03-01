@@ -8,10 +8,10 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.core.service.serializer.JmxSerializer;
-import org.jolokia.core.request.JolokiaWriteRequest;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.request.JolokiaWriteRequest;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 
 /*
  * Copyright 2009-2013 Roland Huss

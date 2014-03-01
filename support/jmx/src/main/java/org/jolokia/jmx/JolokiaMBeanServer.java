@@ -25,8 +25,8 @@ import javax.management.*;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
+import org.jolokia.server.core.service.serializer.*;
 import org.jolokia.service.serializer.Converters;
-import org.jolokia.core.service.serializer.*;
 
 /**
  * Dedicate MBeanServer for registering Jolokia-only MBeans

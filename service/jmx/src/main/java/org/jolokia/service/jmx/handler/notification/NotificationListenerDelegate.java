@@ -21,9 +21,9 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.service.notification.*;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.request.notification.AddCommand;
+import org.jolokia.server.core.service.notification.*;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.request.notification.AddCommand;
 import org.json.simple.JSONObject;
 
 /**

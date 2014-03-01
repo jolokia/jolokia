@@ -21,8 +21,8 @@ import java.util.Map;
 
 import javax.management.JMException;
 
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 
 /**
  * A request handler manager is responsible for managing so called "request handlers" which

@@ -1,6 +1,6 @@
 package org.jolokia.service.jmx.handler.notification;
 
-import org.jolokia.core.service.notification.Client;
+import org.jolokia.server.core.service.notification.Client;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

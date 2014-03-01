@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.management.ObjectName;
 
-import org.jolokia.core.service.notification.NotificationSubscription;
-import org.jolokia.core.request.notification.AddCommand;
+import org.jolokia.server.core.service.notification.NotificationSubscription;
+import org.jolokia.server.core.request.notification.AddCommand;
 
 /**
  * Class holding registration information

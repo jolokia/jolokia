@@ -8,8 +8,8 @@ import javax.management.JMException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.jolokia.core.restrictor.DenyAllRestrictor;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.server.core.restrictor.DenyAllRestrictor;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;

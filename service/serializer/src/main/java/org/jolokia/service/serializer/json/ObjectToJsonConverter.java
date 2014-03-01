@@ -7,10 +7,10 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.jolokia.core.service.serializer.SerializeOptions;
-import org.jolokia.core.service.serializer.ValueFaultHandler;
-import org.jolokia.core.util.LocalServiceFactory;
-import org.jolokia.core.util.EscapeUtil;
+import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.server.core.util.LocalServiceFactory;
+import org.jolokia.server.core.util.EscapeUtil;
 
 /*
  * Copyright 2009-2013 Roland Huss

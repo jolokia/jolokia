@@ -4,12 +4,12 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.request.NotChangedException;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 
 /*
  * Copyright 2009-2013 Roland Huss

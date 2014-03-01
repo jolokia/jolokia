@@ -34,7 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-server-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -95,7 +95,7 @@
             <Embed-Directory>lib</Embed-Directory>
             <Embed-Dependency>
               json-simple;inline=false,
-              jolokia-core;inline=true,
+              jolokia-server-core;inline=true,
             </Embed-Dependency>
             <Export-Package>
               org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",

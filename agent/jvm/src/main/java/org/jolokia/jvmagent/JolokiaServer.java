@@ -26,13 +26,13 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.config.Configuration;
-import org.jolokia.core.restrictor.PolicyRestrictorFactory;
-import org.jolokia.core.service.*;
-import org.jolokia.core.service.impl.ClasspathServiceCreator;
-import org.jolokia.core.util.ClassUtil;
-import org.jolokia.core.util.NetworkUtil;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.restrictor.PolicyRestrictorFactory;
+import org.jolokia.server.core.service.*;
+import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.server.core.util.NetworkUtil;
 
 /**
  * Factory for creating the HttpServer used for exporting

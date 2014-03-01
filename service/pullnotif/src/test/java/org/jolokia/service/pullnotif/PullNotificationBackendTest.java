@@ -22,10 +22,10 @@ import java.util.UUID;
 
 import javax.management.*;
 
-import org.jolokia.core.detector.ServerHandle;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.service.notification.BackendCallback;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.service.notification.BackendCallback;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.*;

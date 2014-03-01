@@ -5,9 +5,9 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.jolokia.core.service.AgentDetails;
-import org.jolokia.core.service.LogHandler;
-import org.jolokia.core.util.NetworkUtil;
+import org.jolokia.server.core.service.AgentDetails;
+import org.jolokia.server.core.service.LogHandler;
+import org.jolokia.server.core.util.NetworkUtil;
 
 /**
  * Utility class for handling multicast stuff

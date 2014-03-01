@@ -19,8 +19,8 @@ package org.jolokia.mule;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.core.http.AgentServlet;
-import org.jolokia.core.util.NetworkUtil;
+import org.jolokia.server.core.http.AgentServlet;
+import org.jolokia.server.core.util.NetworkUtil;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.*;

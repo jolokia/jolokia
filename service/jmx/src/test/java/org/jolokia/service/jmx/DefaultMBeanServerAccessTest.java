@@ -22,8 +22,8 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.util.jmx.DefaultMBeanServerAccess;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;

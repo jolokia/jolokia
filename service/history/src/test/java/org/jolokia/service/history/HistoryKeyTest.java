@@ -18,10 +18,10 @@ package org.jolokia.service.history;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.core.request.*;
+import org.jolokia.server.core.request.*;
 import org.testng.annotations.Test;
 
-import static org.jolokia.core.util.RequestType.*;
+import static org.jolokia.server.core.util.RequestType.*;
 import static org.testng.Assert.*;
 
 /**

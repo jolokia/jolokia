@@ -18,7 +18,7 @@ package org.jolokia.jvmagent.client.command;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.jolokia.core.Version;
+import org.jolokia.server.core.Version;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 

@@ -20,11 +20,11 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.core.request.*;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.service.request.AbstractRequestHandler;
-import org.jolokia.core.service.request.RequestHandler;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.request.*;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.request.AbstractRequestHandler;
+import org.jolokia.server.core.service.request.RequestHandler;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
 

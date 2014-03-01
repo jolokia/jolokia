@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.core.request.*;
+import org.jolokia.server.core.request.*;
 
 /*
  * Copyright 2009-2013 Roland Huss

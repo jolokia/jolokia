@@ -5,10 +5,10 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.IArgumentMatcher;
-import org.jolokia.core.service.notification.*;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
-import org.jolokia.core.request.notification.AddCommand;
+import org.jolokia.server.core.service.notification.*;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
+import org.jolokia.server.core.request.notification.AddCommand;
 import org.jolokia.test.util.CollectionTestUtil;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;

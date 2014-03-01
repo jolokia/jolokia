@@ -6,16 +6,16 @@ import java.lang.reflect.Field;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.core.request.NotChangedException;
-import org.jolokia.core.config.ConfigKey;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.service.jmx.handler.CommandHandler;
 import org.jolokia.service.jmx.handler.CommandHandlerManager;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;

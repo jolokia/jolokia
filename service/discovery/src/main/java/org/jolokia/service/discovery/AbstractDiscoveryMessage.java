@@ -3,7 +3,7 @@ package org.jolokia.service.discovery;
 
 import java.io.UnsupportedEncodingException;
 
-import org.jolokia.core.service.AgentDetails;
+import org.jolokia.server.core.service.AgentDetails;
 import org.json.simple.JSONObject;
 
 /**

@@ -18,7 +18,7 @@ package org.jolokia.jvmagent.spring;
 
 import java.net.URL;
 
-import org.jolokia.core.Version;
+import org.jolokia.server.core.Version;
 import org.jolokia.test.util.EnvTestUtil;
 
 import static org.testng.Assert.assertTrue;

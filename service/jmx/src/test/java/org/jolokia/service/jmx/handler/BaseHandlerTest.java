@@ -18,8 +18,8 @@ package org.jolokia.service.jmx.handler;
 
 import javax.management.MBeanServerConnection;
 
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.core.util.jmx.SingleMBeanServerAccess;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
 
 /**
  * @author roland

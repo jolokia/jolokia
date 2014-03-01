@@ -3,9 +3,9 @@ package org.jolokia.jvmagent.spring.backend;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 
-import org.jolokia.core.request.JolokiaRequest;
-import org.jolokia.core.service.JolokiaContext;
-import org.jolokia.core.util.RequestType;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 import org.springframework.context.ApplicationContext;
 
 /**

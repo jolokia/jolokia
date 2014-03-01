@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sun.net.httpserver.HttpServer;
-import org.jolokia.core.Version;
+import org.jolokia.server.core.Version;
 import org.jolokia.test.util.EnvTestUtil;
-import org.jolokia.core.service.LogHandler;
+import org.jolokia.server.core.service.LogHandler;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

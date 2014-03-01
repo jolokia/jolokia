@@ -19,14 +19,11 @@ package org.jolokia.osgi.servlet;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.core.config.ConfigKey;
-import org.jolokia.core.config.StaticConfiguration;
-import org.jolokia.core.detector.ServerDetector;
-import org.jolokia.core.detector.ServerHandle;
-import org.jolokia.core.restrictor.AllowAllRestrictor;
-import org.jolokia.core.service.LogHandler;
-import org.jolokia.core.util.jmx.MBeanServerAccess;
-import org.jolokia.service.jmx.detector.AbstractServerDetector;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.StaticConfiguration;
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.restrictor.AllowAllRestrictor;
+import org.jolokia.server.core.service.LogHandler;
 import org.jolokia.test.util.HttpTestUtil;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;
@@ -139,19 +136,4 @@ public class OsgiAgentServletTest {
         servletContext.log(eq("jolokia: Error"),isA(Exception.class));
         expectLastCall().anyTimes();
     }
-
-    // ===========================================================================
-    // Detector to avoid checkup with every detector
-
-    public static class CatchAllDetector extends AbstractServerDetector {
-
-        public CatchAllDetector(int pOrderId) {
-            super("catch-all", pOrderId);
-        }
-
-        public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
-            return ServerHandle.NULL_SERVER_HANDLE;
-        }
-    }
-
 }

@@ -400,9 +400,9 @@
     </para>
     <para>
       In order for this servlet definition to find the referenced
-      Java class, the JAR <filename>jolokia-core.jar</filename> must
+      Java class, the JAR <filename>jolokia-server-core.jar</filename> must
       be included. This jar can be found in <ulink
-      url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core">Jolokia's maven
+      url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-server-core">Jolokia's maven
       resository</ulink>. Maven users will can declare a
       dependency on this jar artifact:
     </para>
@@ -412,7 +412,7 @@
       <dependencies>
         <dependency>
           <groupId>org.jolokia</groupId>
-          <artifactId>jolokia-core</artifactId>
+          <artifactId>jolokia-server-core</artifactId>
           <version>${jolokia.version}</version>
         </dependency>
       </dependencies>

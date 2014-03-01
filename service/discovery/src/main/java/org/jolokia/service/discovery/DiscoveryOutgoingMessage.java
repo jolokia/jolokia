@@ -3,7 +3,7 @@ package org.jolokia.service.discovery;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 
-import org.jolokia.core.service.AgentDetails;
+import org.jolokia.server.core.service.AgentDetails;
 
 /**
  * Class representing an outgoing message

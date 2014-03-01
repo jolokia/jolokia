@@ -35,7 +35,13 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-server-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-detector</artifactId>
       <version>${project.version}</version>
     </dependency>
 

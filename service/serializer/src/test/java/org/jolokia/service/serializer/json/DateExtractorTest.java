@@ -22,7 +22,7 @@ import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.core.util.DateUtil;
+import org.jolokia.server.core.util.DateUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

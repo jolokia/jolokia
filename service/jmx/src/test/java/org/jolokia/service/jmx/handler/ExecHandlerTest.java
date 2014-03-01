@@ -22,13 +22,13 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.core.request.NotChangedException;
-import org.jolokia.core.request.JolokiaExecRequest;
-import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.JolokiaExecRequest;
+import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
-import static org.jolokia.core.util.RequestType.EXEC;
+import static org.jolokia.server.core.util.RequestType.EXEC;
 import static org.testng.Assert.*;
 
 /**

@@ -24,13 +24,13 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.service.serializer.Converters;
-import org.jolokia.core.request.JolokiaRequestBuilder;
-import org.jolokia.core.request.JolokiaWriteRequest;
-import org.jolokia.core.service.serializer.JmxSerializer;
-import org.jolokia.core.util.TestJolokiaContext;
+import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.request.JolokiaWriteRequest;
+import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
-import static org.jolokia.core.util.RequestType.WRITE;
+import static org.jolokia.server.core.util.RequestType.WRITE;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 
