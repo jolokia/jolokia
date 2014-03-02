@@ -21,7 +21,7 @@
 
   <artifactId>jolokia-service-serializer</artifactId>
   <version>1.2.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <description>Jolokia :: Service :: JSON Serializer</description>
 
@@ -51,9 +51,31 @@
       <classifier>tests</classifier>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
-  <build/>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+
+        <configuration>
+          <instructions>
+            <Bundle-Activator>org.jolokia.service.serializer.osgi.SerializerServiceActivator</Bundle-Activator>
+            <Bundle-SymbolicName>org.jolokia.service.serializer</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia object serializer</Bundle-Description>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <reporting>
     <plugins>

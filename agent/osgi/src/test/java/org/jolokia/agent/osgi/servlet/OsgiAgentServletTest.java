@@ -1,4 +1,4 @@
-package org.jolokia.osgi.servlet;
+package org.jolokia.agent.osgi.servlet;
 
 /*
  * Copyright 2009-2011 Roland Huss

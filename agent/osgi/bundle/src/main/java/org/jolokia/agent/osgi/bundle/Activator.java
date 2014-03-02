@@ -1,4 +1,4 @@
-package org.jolokia.osgi.bundle;
+package org.jolokia.agent.osgi.bundle;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -17,7 +17,7 @@ package org.jolokia.osgi.bundle;
  */
 
 import org.apache.felix.http.jetty.internal.JettyActivator;
-import org.jolokia.osgi.JolokiaActivator;
+import org.jolokia.agent.osgi.JolokiaActivator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

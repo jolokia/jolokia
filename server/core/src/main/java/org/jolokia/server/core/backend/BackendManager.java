@@ -136,7 +136,7 @@ public class BackendManager {
     public Object convertExceptionToJson(Throwable pExp, JolokiaRequest pJmxReq)  {
         SerializeOptions opts = getSerializeOptions(pJmxReq);
         try {
-            return jolokiaCtx.getService(JmxSerializer.class).serialize(pExp, null, opts);
+            return jolokiaCtx.getMandatoryService(JmxSerializer.class).serialize(pExp, null, opts);
         } catch (AttributeNotFoundException e) {
             // Cannot happen, since we dont use a path
             return null;
@@ -181,7 +181,7 @@ public class BackendManager {
         SerializeOptions opts = getSerializeOptions(pJmxReq);
 
         Object jsonResult =
-                jolokiaCtx.getService(JmxSerializer.class).serialize(
+                jolokiaCtx.getMandatoryService(JmxSerializer.class).serialize(
                         result,
                         pJmxReq.useReturnValueWithPath() ? pJmxReq.getPathParts() : null,
                         opts);

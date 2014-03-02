@@ -20,7 +20,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.request.JolokiaNotificationRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.notification.NotificationCommandType;
@@ -43,9 +42,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        ServerHandle serverHandle = ServerHandle.NULL_SERVER_HANDLE;
-        ctx = new TestJolokiaContext.Builder().serverHandle(serverHandle)
-                                              .config(ConfigKey.AGENT_ID,"test")
+        ctx = new TestJolokiaContext.Builder().config(ConfigKey.AGENT_ID,"test")
                                               .build();
 
         handler = new NotificationHandler(ctx);

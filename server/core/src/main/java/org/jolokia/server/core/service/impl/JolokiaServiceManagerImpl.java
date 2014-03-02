@@ -254,7 +254,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         T ret = (T) staticLowServices.get(pType);
         int order = ret != null ? ret.getOrder() : Integer.MAX_VALUE;
         for (JolokiaServiceLookup factory : serviceLookups) {
-            for (T service : (SortedSet<T>) factory.getServices(pType)) {
+            for (T service : factory.getServices(pType)) {
                 if (service.getOrder() < order) {
                     ret = service;
                     order = ret.getOrder();

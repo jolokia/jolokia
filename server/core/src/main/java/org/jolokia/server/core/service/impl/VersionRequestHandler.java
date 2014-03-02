@@ -47,7 +47,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
      */
     VersionRequestHandler() {
         // Must be always first
-        super(RequestHandler.class,0);
+        super(RequestHandler.class,-1);
     }
 
     @Override

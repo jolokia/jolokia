@@ -1,6 +1,7 @@
 package org.jolokia.server.core.backend;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.management.JMException;
 
@@ -37,7 +38,8 @@ class RequestDispatcherImpl implements RequestDispatcher {
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
         boolean found = false;
         Object result = null;
-        for (RequestHandler requestHandler : jolokiaContext.getServices(RequestHandler.class)) {
+        Set<RequestHandler> handlers = jolokiaContext.getServices(RequestHandler.class);
+        for (RequestHandler requestHandler : handlers) {
             if (requestHandler.canHandle(pJolokiaRequest)) {
                 if (pJolokiaRequest.isExclusive()) {
                     return requestHandler.handleRequest(pJolokiaRequest,null);

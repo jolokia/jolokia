@@ -68,7 +68,10 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
     public void init(JolokiaContext pJolokiaContext) { }
 
     /** {@inheritDoc} */
-    public int compareTo(T o) {
-        return getOrder() - o.getOrder();
+    public int compareTo(T pOtherService) {
+        int ret = getOrder() - pOtherService.getOrder();
+        // 0 is returned if really equals. Otherwise, if the order is the same we use a random, albeit
+        // deterministic order based on the hashcode
+        return ret != 0 ? ret : equals(pOtherService) ? 0 : hashCode() - pOtherService.hashCode();
     }
 }

@@ -1,12 +1,12 @@
-package org.jolokia.osgi;
+package org.jolokia.agent.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
-import org.jolokia.osgi.servlet.OsgiServletConfiguration;
-import org.jolokia.osgi.servlet.OsgiAgentServlet;
+import org.jolokia.agent.osgi.servlet.OsgiServletConfiguration;
+import org.jolokia.agent.osgi.servlet.OsgiAgentServlet;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.NetworkUtil;
@@ -136,7 +136,6 @@ public class JolokiaActivator implements BundleActivator, OsgiServletConfigurati
     }
 
     // ==================================================================================
-
 
     // Customizer for registering servlet at a HttpService
     private Dictionary<String,String> getConfiguration() {

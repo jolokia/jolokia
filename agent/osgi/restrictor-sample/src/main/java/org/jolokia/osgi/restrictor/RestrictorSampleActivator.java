@@ -1,4 +1,4 @@
-package org.jolokia.osgi.restrictor;
+package org.jolokia.agent.osgi.restrictor;
 
 import org.jolokia.server.core.service.api.Restrictor;
 

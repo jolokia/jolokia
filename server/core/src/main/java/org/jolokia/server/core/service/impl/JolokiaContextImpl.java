@@ -8,10 +8,9 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.service.api.*;
-import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.HttpMethod;
-import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
  * Central implementation of the {@link JolokiaContext}
@@ -20,9 +19,6 @@ import org.jolokia.server.core.util.RequestType;
  * @since 09.04.13
  */
 public class JolokiaContextImpl implements JolokiaContext {
-
-    // Server handle
-    private ServerHandle serverHandle;
 
     // Service manager associated with the context
     private JolokiaServiceManagerImpl serviceManager;
@@ -34,14 +30,6 @@ public class JolokiaContextImpl implements JolokiaContext {
      */
     JolokiaContextImpl(JolokiaServiceManagerImpl pServiceManager) {
         serviceManager = pServiceManager;
-
-        // Initially the server handle is a fallback server handle
-        serverHandle = ServerHandle.NULL_SERVER_HANDLE;
-    }
-
-    /** {@inheritDoc} */
-    public ServerHandle getServerHandle() {
-        return serverHandle;
     }
 
     /** {@inheritDoc} */
@@ -78,6 +66,17 @@ public class JolokiaContextImpl implements JolokiaContext {
     /** {@inheritDoc} */
     public <T extends JolokiaService> T getService(Class<T> pType) {
         return serviceManager.getService(pType);
+    }
+
+    /** {@inheritDoc} */
+    public <T extends JolokiaService> T getMandatoryService(Class<T> pType) {
+        SortedSet<T> services = serviceManager.getServices(pType);
+        if (services.size() > 1) {
+            throw new IllegalStateException("More than one service of type " + pType + " found: " + services);
+        } else if (services.size() == 0) {
+            throw new IllegalStateException("No service of type " + pType + " found");
+        }
+        return services.first();
     }
 
     /** {@inheritDoc} */

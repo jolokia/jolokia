@@ -147,13 +147,13 @@ public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
             // it later back via JMX
             return new Object[] {
                     pCurrentValue,
-                    context.getService(JmxSerializer.class).setInnerValue(pCurrentValue, newValue, pathParts)
+                    context.getMandatoryService(JmxSerializer.class).setInnerValue(pCurrentValue, newValue, pathParts)
             };
 
         } else {
             // Return the objectified value
             return new Object[] {
-                    context.getService(JmxSerializer.class).deserialize(pType, newValue),
+                    context.getMandatoryService(JmxSerializer.class).deserialize(pType, newValue),
                     pCurrentValue
             };
         }
@@ -169,7 +169,7 @@ public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
                                                pRequest.getPath() + " since OpenTypes are immutable");
         }
         return new Object[] {
-                context.getService(JmxSerializer.class).deserializeOpenType(pOpenType, pRequest.getValue()),
+                context.getMandatoryService(JmxSerializer.class).deserializeOpenType(pOpenType, pRequest.getValue()),
                 pCurrentValue
         };
     }

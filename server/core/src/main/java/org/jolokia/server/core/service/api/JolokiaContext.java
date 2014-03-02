@@ -40,12 +40,14 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     <T extends JolokiaService> T getService(Class<T> pType);
 
     /**
-     * Access to the server handle holding the server side information
-     * of the detected server.
+     * Get a single, mandatory, service. If not present, then an exception is thrown. Also
+     * an exception is raised if more than one service exist
      *
-     * @return the server handle
+     * @param pType requested service type
+     * @return the requested service
+     * @throws IllegalStateException if no service is present
      */
-    ServerHandle getServerHandle();
+    <T extends JolokiaService> T getMandatoryService(Class<T> pType);
 
     /**
      * Get a configuration value if set as configuration or the default

@@ -195,7 +195,7 @@ public final class LocalServiceFactory {
         /**
          * Parse an entry in the service definition. This should be the full qualified classname
          * of a service, optional prefixed with "<code>!</code>" in which case the service is removed
-         * from the defaul list. An order value can be appened after the classname with a comma for give a
+         * from the default list. An order value can be appended after the classname with a comma for give a
          * indication for the ordering of services. If not given, 100 is taken for the first entry, counting up.
          *
          * @param pLine line to parse

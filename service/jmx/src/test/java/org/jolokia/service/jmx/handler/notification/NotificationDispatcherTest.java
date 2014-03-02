@@ -7,7 +7,6 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
@@ -46,10 +45,8 @@ public class NotificationDispatcherTest {
 
     @BeforeMethod
     public void setup() {
-        ServerHandle serverHandle = ServerHandle.NULL_SERVER_HANDLE;
         pullBackend = new TestNotificationBackend();
         ctx = new TestJolokiaContext.Builder()
-                .serverHandle(serverHandle)
                 .config(ConfigKey.AGENT_ID,"test")
                 .services(NotificationBackend.class,pullBackend)
                 .build();

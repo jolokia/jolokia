@@ -84,9 +84,9 @@ public class ExecHandler extends CommandHandler<JolokiaExecRequest> {
         verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = context.getService(JmxSerializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
+        		params[i] = context.getMandatoryService(JmxSerializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
         	} else { 
-        		params[i] = context.getService(JmxSerializer.class).deserialize(types.paramClasses[i], args.get(i));
+        		params[i] = context.getMandatoryService(JmxSerializer.class).deserialize(types.paramClasses[i], args.get(i));
         	}
         }
 

@@ -61,11 +61,11 @@
 
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia.osgi.restrictor.sample</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.jolokia.agent.osgi.restrictor.sample</Bundle-SymbolicName>
             <Bundle-Description>Jolokia restrictor service (sample)</Bundle-Description>
 
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.osgi.restrictor.RestrictorSampleActivator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.agent.osgi.restrictor.RestrictorSampleActivator</Bundle-Activator>
             <Bundle-Name>Jolokia restrictor service (sample)</Bundle-Name>
           </instructions>
         </configuration>

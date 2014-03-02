@@ -20,9 +20,9 @@
 
   <artifactId>jolokia-server-core</artifactId>
   <version>1.2.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
-  <description>Jolokia :: Agent :: Core API and utility classes</description>
+  <description>Jolokia :: Server :: Core</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
@@ -77,6 +77,34 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>org.jolokia.server.core</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia API and core classes</Bundle-Description>
+
+            <Export-Package>
+              org.jolokia.server.core.config,
+              org.jolokia.server.core.detector,
+              org.jolokia.server.core.http,
+              org.jolokia.server.core.request,
+              org.jolokia.server.core.request.notification,
+              org.jolokia.server.core.restrictor,
+              !org.jolokia.server.core.service.impl,org.jolokia.server.core.service.*,org.jolokia.server.core.service,
+              org.jolokia.server.core.util.*,
+              org.jolokia.server.core
+            </Export-Package>
+            <Import-Package>
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>

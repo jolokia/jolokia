@@ -47,14 +47,13 @@ public class TestJolokiaContext implements JolokiaContext {
     private MBeanServerAccess mBeanServerAccess;
 
     public TestJolokiaContext() {
-        this(null,null,null,null,null,null);
+        this(null,null,null,null,null);
         services.put(JmxSerializer.class,new TreeSet<JmxSerializer>(Arrays.asList(new TestJmxSerializer())));
     }
 
     private TestJolokiaContext(Configuration pConfig,
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
-                               ServerHandle pHandle,
                                Map<Class, SortedSet> pServices,
                                AgentDetails pAgentDetails) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
@@ -63,11 +62,6 @@ public class TestJolokiaContext implements JolokiaContext {
         this.services = pServices != null ? pServices : new HashMap();
         String agentId = pConfig != null ? pConfig.getConfig(ConfigKey.AGENT_ID) : null;
         this.agentDetails = pAgentDetails != null ? pAgentDetails : new AgentDetails(agentId != null ? agentId : UUID.randomUUID().toString());
-        if (pHandle != null) {
-            handle = pHandle;
-        } else {
-            handle = ServerHandle.NULL_SERVER_HANDLE;
-        }
         mbeans = new HashSet<ObjectName>();
         mBeanServerAccess = new SingleMBeanServerAccess(ManagementFactory.getPlatformMBeanServer());
     }
@@ -89,8 +83,14 @@ public class TestJolokiaContext implements JolokiaContext {
         return services.size() > 0 ? services.first() : null;
     }
 
-    public ServerHandle getServerHandle() {
-        return handle;
+    public <T extends JolokiaService> T getMandatoryService(Class<T> pType) {
+        SortedSet<T> services = getServices(pType);
+        if (services.size() > 1) {
+            throw new IllegalStateException("More than one service of type " + pType + ": " + services);
+        } else if (services.size() == 0) {
+            throw new IllegalStateException("No service of type " + pType);
+        }
+        return services.first();
     }
 
     public ObjectName registerMBean(Object pMBean, String... pOptionalName)
@@ -111,10 +111,6 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public Set<ConfigKey> getConfigKeys() {
         return config.getConfigKeys();
-    }
-
-    public void setServerHandle(ServerHandle pHandle) {
-        handle = pHandle;
     }
 
     public AgentDetails getAgentDetails() {
@@ -180,7 +176,6 @@ public class TestJolokiaContext implements JolokiaContext {
         private LogHandler logHandler;
         private Restrictor restrictor;
         private Configuration config;
-        private ServerHandle handle;
         private Map<Class,SortedSet> services = new HashMap<Class, SortedSet>();
         private AgentDetails agentDetails;
 
@@ -196,11 +191,6 @@ public class TestJolokiaContext implements JolokiaContext {
 
         public Builder restrictor(Restrictor pRestrictor) {
             this.restrictor = pRestrictor;
-            return this;
-        }
-
-        public Builder serverHandle(ServerHandle pServerHandle) {
-            this.handle = pServerHandle;
             return this;
         }
 
@@ -229,7 +219,6 @@ public class TestJolokiaContext implements JolokiaContext {
                     config,
                     restrictor,
                     logHandler,
-                    handle,
                     services,
                     agentDetails
             );

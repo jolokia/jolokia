@@ -86,35 +86,10 @@
 
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia.osgi</Bundle-SymbolicName>
-            <Bundle-Description>Jolokia agent exposing JMX via HTTP/JSON</Bundle-Description>
+            <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia OSGi Agent</Bundle-Description>
 
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.osgi.JolokiaActivator</Bundle-Activator>
-            <Bundle-Name>Jolokia Agent</Bundle-Name>
-            <Embed-Directory>lib</Embed-Directory>
-            <Embed-Dependency>
-              json-simple;inline=false,
-              jolokia-server-core;inline=true,
-            </Embed-Dependency>
-            <Export-Package>
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
-              org.jolokia.core.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
-              org.jolokia.core.util;version="${project.version}",
-              org.jolokia.converter;version="${project.version}",
-              org.jolokia.service.serializer.json;version="${project.version}",
-              org.jolokia.service.serializer.object;version="${project.version}",
-            </Export-Package>
-            <Import-Package>
-              org.jolokia.osgi.servlet;version="${project.version}",
-              org.jolokia.core.restrictor;version="${project.version}",
-              org.jolokia.core.util;version="${project.version}",
-              org.osgi.framework;version="[1.0.0,2.0.0)",
-              org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
-              org.osgi.service.log;version="[1.0.0,2.0.0)",
-              org.osgi.util.tracker;version="[1.0.0,2.0.0)",
-              *
-            </Import-Package>
+            <Bundle-Activator>org.jolokia.agent.osgi.JolokiaActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

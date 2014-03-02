@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import javax.management.*;
 
-import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.notification.BackendCallback;
 import org.jolokia.server.core.util.TestJolokiaContext;
@@ -43,9 +42,7 @@ public class PullNotificationBackendTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        ServerHandle handle = ServerHandle.NULL_SERVER_HANDLE;
         context = new TestJolokiaContext.Builder()
-                .serverHandle(handle)
                 .config(ConfigKey.AGENT_ID,"test")
                 .build();
         backend = new PullNotificationBackend(0);

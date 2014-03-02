@@ -176,6 +176,10 @@
             <artifactId>${project.artifactId}</artifactId>
             <version>${project.version}</version>
             <packaging>${project.packaging}</packaging>
+            <instructions>
+              <Bundle-Version>${project.version}</Bundle-Version>
+              <Bundle-Name>${project.description}</Bundle-Name>
+            </instructions>
           </configuration>
         </plugin>
 

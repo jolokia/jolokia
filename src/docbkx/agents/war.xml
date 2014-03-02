@@ -433,7 +433,7 @@
       for details.<footnote>
       <para>
         Replace
-        <classname>org.jolokia.osgi.http.AgentServlet</classname> with
+        <classname>org.jolokia.agent.osgi.http.AgentServlet</classname> with
         <classname>org.jolokia.core.http.AgentServlet</classname> to use
         the servlet in a non-OSGi environment.
       </para>

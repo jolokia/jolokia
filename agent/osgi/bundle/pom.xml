@@ -94,12 +94,12 @@
 
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia.osgi.bundle</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.jolokia.agent.osgi.bundle</Bundle-SymbolicName>
             <Bundle-Description>
               Jolokia agent for exposing JMX via HTTP/JSON, bundled with a
               Apache Felix's HttpService (based on Jetty)</Bundle-Description>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.osgi.bundle.Activator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.agent.osgi.bundle.Activator</Bundle-Activator>
             <Bundle-Name>Jolokia Agent bundled with an HttpService (Jetty)</Bundle-Name>
             <DynamicImport-Package>org.osgi.service.cm;version=1.2</DynamicImport-Package>
             <Embed-Dependency>
@@ -108,7 +108,7 @@
               org.apache.felix.http.jetty;inline=true,
             </Embed-Dependency>
             <Export-Package>
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
+              org.jolokia.agent.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
               org.jolokia.core.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.converter;version="${project.version}",
               org.jolokia.service.serializer.json;version="${project.version}",
@@ -123,7 +123,7 @@
             </Export-Package>
             <Import-Package>
               !javax.microedition.io,
-              org.jolokia.osgi.servlet;version="${project.version}",
+              org.jolokia.agent.osgi.servlet;version="${project.version}",
               org.jolokia.core.restrictor;version="${project.version}",
               org.jolokia.core.util;version="${project.version}",
               javax.net.ssl;resolution:=optional,

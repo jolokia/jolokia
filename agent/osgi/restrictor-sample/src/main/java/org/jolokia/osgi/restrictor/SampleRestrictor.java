@@ -1,4 +1,4 @@
-package org.jolokia.osgi.restrictor;
+package org.jolokia.agent.osgi.restrictor;
 
 import javax.management.ObjectName;
 

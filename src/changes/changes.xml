@@ -511,7 +511,7 @@
         Added PGP signing for the deployed artifacts
       </action>
       <action dev="roland" type="add" date="2011-02-11">
-        Introduced org.jolokia.osgi.servlet.JolokiaServlet which gets exported by the jolokia-osgi
+        Introduced org.jolokia.agent.osgi.servlet.JolokiaServlet which gets exported by the jolokia-osgi
         bundle and allows for programmatic registration of the servlet without the use of an
         OSGi HttpService.
       </action>

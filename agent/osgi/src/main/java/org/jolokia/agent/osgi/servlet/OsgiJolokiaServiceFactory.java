@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.osgi.servlet;
+package org.jolokia.agent.osgi.servlet;
 
 import java.util.*;
 

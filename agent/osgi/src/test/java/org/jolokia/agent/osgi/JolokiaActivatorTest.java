@@ -1,4 +1,4 @@
-package org.jolokia.osgi;
+package org.jolokia.agent.osgi;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -25,8 +25,8 @@ import javax.servlet.ServletException;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.osgi.servlet.OsgiServletConfiguration;
-import org.jolokia.osgi.servlet.OsgiAgentServlet;
+import org.jolokia.agent.osgi.servlet.OsgiServletConfiguration;
+import org.jolokia.agent.osgi.servlet.OsgiAgentServlet;
 import org.jolokia.server.core.config.ConfigKey;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;

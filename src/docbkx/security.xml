@@ -376,7 +376,7 @@ public class RestrictedAgentServlet extends AgentServlet {
       </para>
       <para>
         For an OSGi agent (<xref linkend="agents-osgi"/>),
-        <classname>org.jolokia.osgi.servlet.JolokiaServlet</classname>
+        <classname>org.jolokia.agent.osgi.servlet.JolokiaServlet</classname>
         is the proper extension point. It can be subclassed the same
         way as shown above and allows a restrictor implementation as
         constructor parameter, too. In contrast to

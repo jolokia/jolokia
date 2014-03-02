@@ -109,8 +109,8 @@ public class RequestDispatcherImplTest {
         public void init(JolokiaContext pJolokiaContext) {
         }
 
-        public int compareTo(RequestHandler o) {
-            return id - ((TestRequestHandler) o).id;
+        public int compareTo(RequestHandler pOtherService) {
+            return id - ((TestRequestHandler) pOtherService).id;
         }
     }
 }
