@@ -29,7 +29,7 @@ public interface ServerHandle {
     // =============================================================================================
 
     // A "null" server handle
-    final ServerHandle NULL_SERVER_HANDLE = new ServerHandle() {
+    ServerHandle NULL_SERVER_HANDLE = new ServerHandle() {
         public String getVendor() {
             return null;
         }

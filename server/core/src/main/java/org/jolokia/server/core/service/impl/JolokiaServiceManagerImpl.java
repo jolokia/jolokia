@@ -274,7 +274,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
 
     private ServerHandle detect(Map<String,Object> pConfig, List<ServerDetector> detectors, MBeanServerAccess pMBeanServerAccess) {
-        for (ServerDetector detector : detectorLookup.lookup()) {
+        for (ServerDetector detector : detectors) {
             try {
                 detector.init((Map<String, Object>) pConfig.get(detector.getName()));
                 ServerHandle info = detector.detect(pMBeanServerAccess);

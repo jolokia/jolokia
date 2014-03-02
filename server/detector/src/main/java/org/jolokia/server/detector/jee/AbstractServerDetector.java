@@ -37,7 +37,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
     private int order;
 
     // detector configuration
-    protected Map<String,Object> config;
+    private Map<String,Object> config;
 
     // Detector name
     private String name;
@@ -59,6 +59,14 @@ public abstract class AbstractServerDetector implements ServerDetector {
     /** {@inheritDoc} */
     public void init (Map<String,Object> pConfig) {
         config = pConfig;
+    }
+
+    protected Object getConfig(String pKey) {
+        if (config == null) {
+            return null;
+        } else {
+            return config.get(pKey);
+        }
     }
 
     /**

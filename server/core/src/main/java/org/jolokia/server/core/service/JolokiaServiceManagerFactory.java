@@ -12,7 +12,7 @@ import org.jolokia.server.core.service.impl.JolokiaServiceManagerImpl;
  * @author roland
  * @since 27.02.14
  */
-public class JolokiaServiceManagerFactory {
+public final class JolokiaServiceManagerFactory {
 
     private JolokiaServiceManagerFactory() {}
 

@@ -76,5 +76,10 @@ public class ClasspathServerDetectorLookup implements ServerDetectorLookup {
         public int compareTo(ServerDetector pDetector) {
             return getOrder() - pDetector.getOrder();
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            return this == obj;
+        }
     }
 }

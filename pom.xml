@@ -22,7 +22,7 @@
   <artifactId>jolokia-parent</artifactId>
   <version>1.2.1-SNAPSHOT</version>
 
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   <description>Jolokia :: Parent :: POM</description>
   <packaging>pom</packaging>
 

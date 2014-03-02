@@ -104,7 +104,8 @@ public class GlassfishDetector extends AbstractServerDetector {
     }
 
     private boolean amxShouldBeBooted(MBeanServerAccess pMBeanServerAccess) {
-        return (config == null || config.get("bootAmx") == null || (Boolean) config.get("bootAmx"))
+        Boolean bootAmx = (Boolean) getConfig("bootAmx");
+        return (bootAmx == null || bootAmx)
                && !isAmxBooted(pMBeanServerAccess);
     }
 
@@ -145,7 +146,7 @@ public class GlassfishDetector extends AbstractServerDetector {
         }
     }
 
-    private static class AmxBootInterceptor extends AbstractJolokiaService<RequestInterceptor> implements RequestInterceptor {
+    private static final class AmxBootInterceptor extends AbstractJolokiaService<RequestInterceptor> implements RequestInterceptor {
 
         private MBeanServerAccess serverAccess;
         private boolean isBooted;
