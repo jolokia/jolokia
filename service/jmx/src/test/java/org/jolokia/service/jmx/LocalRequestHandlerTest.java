@@ -13,7 +13,7 @@ import org.jolokia.service.jmx.handler.CommandHandlerManager;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;

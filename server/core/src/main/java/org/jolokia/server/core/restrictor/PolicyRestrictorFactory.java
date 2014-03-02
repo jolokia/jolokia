@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
-import org.jolokia.server.core.service.LogHandler;
-import org.jolokia.server.core.service.Restrictor;
+import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.config.ConfigKey;
 
 /*

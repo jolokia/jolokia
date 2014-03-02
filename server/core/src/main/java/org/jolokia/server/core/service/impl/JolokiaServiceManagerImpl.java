@@ -23,11 +23,11 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.detector.*;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.service.*;
 import org.json.simple.parser.JSONParser;
 
 /**

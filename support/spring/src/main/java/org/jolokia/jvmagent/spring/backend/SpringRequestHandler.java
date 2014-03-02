@@ -10,7 +10,7 @@ import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 import org.springframework.context.ApplicationContext;
 

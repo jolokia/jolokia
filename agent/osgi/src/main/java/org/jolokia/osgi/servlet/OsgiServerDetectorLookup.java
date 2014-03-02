@@ -1,5 +1,6 @@
 package org.jolokia.osgi.servlet;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.jolokia.server.core.detector.ServerDetector;
@@ -11,7 +12,9 @@ import org.osgi.framework.*;
  * @author roland
  * @since 28.02.14
  */
-public class OsgiServerDetectorLookup implements ServerDetectorLookup {
+public class OsgiServerDetectorLookup implements ServerDetectorLookup, Serializable {
+
+    private static final long serialVersionUID = 24L;
 
     private final BundleContext context;
 

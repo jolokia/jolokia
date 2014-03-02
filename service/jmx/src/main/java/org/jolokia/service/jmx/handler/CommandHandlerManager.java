@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.management.JMException;
 
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 
 /**

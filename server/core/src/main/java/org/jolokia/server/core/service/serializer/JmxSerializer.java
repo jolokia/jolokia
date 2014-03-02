@@ -6,7 +6,7 @@ import java.util.List;
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.server.core.service.JolokiaService;
+import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
  * Interface defining a Jolokia serializer which is also a plugable service. This interface

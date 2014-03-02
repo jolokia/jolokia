@@ -19,7 +19,7 @@ package org.jolokia.server.detector.jee;
 import java.lang.reflect.*;
 
 import org.jolokia.server.core.detector.DefaultServerHandle;
-import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.ClassUtil;
 

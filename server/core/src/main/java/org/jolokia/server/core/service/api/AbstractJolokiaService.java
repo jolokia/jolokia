@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 /**
  * Abstract base class for {@link JolokiaService}s.

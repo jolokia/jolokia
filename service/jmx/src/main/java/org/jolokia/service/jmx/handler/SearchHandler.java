@@ -8,7 +8,7 @@ import javax.management.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.request.JolokiaSearchRequest;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 
 /*

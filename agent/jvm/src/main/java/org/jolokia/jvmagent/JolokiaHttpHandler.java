@@ -30,7 +30,7 @@ import javax.management.RuntimeMBeanException;
 import com.sun.net.httpserver.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.HttpRequestHandler;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.json.simple.JSONAware;
 
 /**

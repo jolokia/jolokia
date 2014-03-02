@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.server.core.Version;
-import org.jolokia.server.core.service.*;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;

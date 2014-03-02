@@ -9,7 +9,7 @@ import javax.management.JMException;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.service.serializer.JmxSerializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;

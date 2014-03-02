@@ -8,7 +8,7 @@ import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jolokia.server.core.service.Restrictor;
+import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
 import org.w3c.dom.Document;

@@ -22,7 +22,7 @@ import java.util.HashSet;
 import javax.management.*;
 
 import org.jolokia.server.core.detector.ServerDetector;
-import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;

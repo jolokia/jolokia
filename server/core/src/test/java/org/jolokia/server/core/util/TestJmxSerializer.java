@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.*;
 
-import org.jolokia.server.core.service.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.serializer.JmxSerializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.json.simple.JSONAware;

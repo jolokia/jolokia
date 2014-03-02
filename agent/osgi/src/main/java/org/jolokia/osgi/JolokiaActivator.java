@@ -7,7 +7,7 @@ import javax.servlet.ServletException;
 
 import org.jolokia.osgi.servlet.OsgiServletConfiguration;
 import org.jolokia.osgi.servlet.OsgiAgentServlet;
-import org.jolokia.server.core.service.Restrictor;
+import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.osgi.framework.*;

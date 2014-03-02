@@ -2,7 +2,7 @@ package org.jolokia.server.core.service.notification;
 
 import java.util.Map;
 
-import org.jolokia.server.core.service.JolokiaService;
+import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
  * A notification backend which is responsible for the final delivery. This final

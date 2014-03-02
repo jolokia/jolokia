@@ -5,7 +5,7 @@ import java.util.Set;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.server.core.service.request.RequestHandler;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.osgi.framework.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

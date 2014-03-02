@@ -1,4 +1,4 @@
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 /*
  * Copyright 2009-2013 Roland Huss

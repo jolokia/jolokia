@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;

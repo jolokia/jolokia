@@ -1,4 +1,4 @@
-package org.jolokia.server.core.detector;
+package org.jolokia.server.core.service.api;
 
 /**
  * Information about the the server product the agent is running in.

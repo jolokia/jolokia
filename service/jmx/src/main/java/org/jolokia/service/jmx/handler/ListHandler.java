@@ -12,7 +12,7 @@ import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
 import org.jolokia.server.core.request.JolokiaListRequest;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /*

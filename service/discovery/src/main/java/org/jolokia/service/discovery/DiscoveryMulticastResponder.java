@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.*;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.util.NetworkUtil;
 
 /**

@@ -31,7 +31,7 @@ import org.jolokia.service.jmx.handler.CommandHandlerManager;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 
 /**
  * Dispatcher for calling JSR-160 connectors

@@ -22,7 +22,7 @@ import java.util.UUID;
 
 import javax.management.*;
 
-import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.notification.BackendCallback;
 import org.jolokia.server.core.util.TestJolokiaContext;

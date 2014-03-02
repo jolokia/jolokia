@@ -21,7 +21,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.server.core.request.*;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;

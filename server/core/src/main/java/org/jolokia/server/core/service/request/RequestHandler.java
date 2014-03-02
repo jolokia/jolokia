@@ -6,7 +6,7 @@ import javax.management.JMException;
 
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.service.JolokiaService;
+import org.jolokia.server.core.service.api.JolokiaService;
 
 /*
  * Copyright 2009-2013 Roland Huss

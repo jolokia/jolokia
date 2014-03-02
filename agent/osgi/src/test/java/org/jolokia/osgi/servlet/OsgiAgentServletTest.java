@@ -23,7 +23,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
-import org.jolokia.server.core.service.LogHandler;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.test.util.HttpTestUtil;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;

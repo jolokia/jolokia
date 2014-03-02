@@ -2,6 +2,7 @@ package org.jolokia.server.core.service;
 
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.JolokiaServiceManagerImpl;
 
 /**

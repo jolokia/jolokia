@@ -1,4 +1,4 @@
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 import javax.management.ObjectName;
 

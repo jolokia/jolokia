@@ -7,7 +7,7 @@ import javax.management.*;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.notification.NotificationBackendManager;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /**

@@ -18,7 +18,7 @@ package org.jolokia.server.core.detector;
 
 import java.util.Map;
 
-import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.json.simple.JSONObject;
 
@@ -62,10 +62,6 @@ public class DefaultServerHandle implements ServerHandle {
 
     public String getVersion() {
         return version;
-    }
-
-    public void preDispatch(MBeanServerAccess pExecutor, JolokiaRequest pJmxReq) {
-        // Do nothing
     }
 
     public JSONObject toJSONObject() {

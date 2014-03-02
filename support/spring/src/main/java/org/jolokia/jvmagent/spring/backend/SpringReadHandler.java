@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import javax.management.*;
 
 import org.jolokia.server.core.request.JolokiaReadRequest;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;

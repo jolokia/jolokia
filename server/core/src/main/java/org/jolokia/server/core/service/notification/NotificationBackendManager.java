@@ -19,7 +19,7 @@ package org.jolokia.server.core.service.notification;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 
 /**
  * The notification backend managed is responsible for looking up

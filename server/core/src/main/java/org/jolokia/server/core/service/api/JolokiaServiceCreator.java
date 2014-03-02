@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 import java.util.Set;
 

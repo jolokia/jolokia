@@ -9,7 +9,7 @@ import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.*;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.json.simple.JSONObject;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 /**
  * Interface describing a Jolokia Service. Jolokia Services are used within Jolokia

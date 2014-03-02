@@ -2,7 +2,7 @@ package org.jolokia.server.core.service.request;
 
 import org.jolokia.server.core.request.JolokiaObjectNameRequest;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.service.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
 
 /**
  * Base class for request handlers which provides some utilities methods like deciding on

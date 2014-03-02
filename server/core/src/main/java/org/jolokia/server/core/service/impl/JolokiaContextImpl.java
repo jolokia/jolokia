@@ -7,11 +7,10 @@ import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
-import org.jolokia.server.core.service.Restrictor;
-import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.service.*;
 import org.jolokia.server.core.util.RequestType;
 
 /**

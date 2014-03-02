@@ -2,8 +2,8 @@ package org.jolokia.server.core.service.impl;
 
 import java.util.Set;
 
-import org.jolokia.server.core.service.JolokiaService;
-import org.jolokia.server.core.service.JolokiaServiceCreator;
+import org.jolokia.server.core.service.api.JolokiaService;
+import org.jolokia.server.core.service.api.JolokiaServiceCreator;
 import org.jolokia.server.core.util.LocalServiceFactory;
 
 /**

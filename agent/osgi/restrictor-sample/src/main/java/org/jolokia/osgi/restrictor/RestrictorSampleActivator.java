@@ -1,6 +1,6 @@
 package org.jolokia.osgi.restrictor;
 
-import org.jolokia.server.core.service.Restrictor;
+import org.jolokia.server.core.service.api.Restrictor;
 
 /*
  * Copyright 2009-2013 Roland Huss

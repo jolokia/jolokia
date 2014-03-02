@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.management.MBeanServerConnection;
 
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.LocalServiceFactory;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -80,6 +81,11 @@ public class ClasspathServerDetectorLookup implements ServerDetectorLookup {
         @Override
         public boolean equals(Object obj) {
             return this == obj;
+        }
+
+        @Override
+        public int hashCode() {
+            return 42;
         }
     }
 }

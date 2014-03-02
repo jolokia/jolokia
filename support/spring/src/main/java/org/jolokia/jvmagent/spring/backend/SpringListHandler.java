@@ -4,7 +4,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 
 import org.jolokia.server.core.request.JolokiaListRequest;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.json.simple.JSONObject;

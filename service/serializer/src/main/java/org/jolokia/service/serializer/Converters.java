@@ -10,7 +10,7 @@ import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.service.serializer.object.OpenTypeDeserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.jolokia.server.core.service.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.serializer.JmxSerializer;
 
 /*

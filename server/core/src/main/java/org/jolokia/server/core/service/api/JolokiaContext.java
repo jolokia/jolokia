@@ -1,4 +1,4 @@
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 import java.util.Set;
 import java.util.SortedSet;
@@ -6,7 +6,6 @@ import java.util.SortedSet;
 import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.detector.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**

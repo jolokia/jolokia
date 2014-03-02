@@ -10,7 +10,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.request.*;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;

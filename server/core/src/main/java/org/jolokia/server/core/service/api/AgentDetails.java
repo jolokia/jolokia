@@ -1,14 +1,13 @@
-package org.jolokia.server.core.service;
+package org.jolokia.server.core.service.api;
 
 import java.util.Map;
 
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
-import org.jolokia.server.core.detector.ServerHandle;
 import org.json.simple.JSONObject;
 
-import static org.jolokia.server.core.service.AgentDetails.AgentDetailProperty.*;
+import static org.jolokia.server.core.service.api.AgentDetails.AgentDetailProperty.*;
 
 /**
  * Agent details describing this agent. This information during

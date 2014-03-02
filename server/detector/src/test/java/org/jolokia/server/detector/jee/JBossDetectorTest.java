@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.server.core.detector.ServerHandle;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
