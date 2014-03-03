@@ -62,7 +62,9 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
      * Override for hooking into the lifecycle
      */
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    public void destroy() throws Exception { }
+    public void destroy() throws Exception {
+        jolokiaContext = null;
+    }
 
     /**
      * Override if access to the JolokiaContext is

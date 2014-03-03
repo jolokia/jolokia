@@ -120,7 +120,7 @@ public class OsgiAgentServletTest {
         expect(servletContext.getAttribute("osgi-bundlecontext")).andStubReturn(bundleContext);
         addServiceLookup(LogService.class);
         addServiceLookup(ServerDetector.class);
-        addServiceLookup(JolokiaService.Init.class);
+        addServiceLookup(JolokiaService.class);
     }
 
     private void addServiceLookup(Class pLogServiceClass) throws InvalidSyntaxException {

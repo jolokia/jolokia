@@ -89,7 +89,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
     public void init(JolokiaContext pJolokiaContext) {
         jolokiaContext = pJolokiaContext;
         // The Init Tracker are initialized here so that they get initialized as soon as they kick in
-        initTracker(JolokiaService.Init.class);
+        initTracker(JolokiaService.class);
     }
 
     /**

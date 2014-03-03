@@ -16,8 +16,8 @@ public class DiscoveryServiceActivator implements BundleActivator {
 
     /** {@inheritDoc} */
     public void start(BundleContext context) throws Exception {
-        context.registerService(JolokiaService.Init.class.getName(),new JolokiaDiscovery(0),null);
-        context.registerService(JolokiaService.Init.class.getName(),new DiscoveryMulticastResponder(),null);
+        context.registerService(JolokiaService.class.getName(),new JolokiaDiscovery(0),null);
+        context.registerService(JolokiaService.class.getName(),new DiscoveryMulticastResponder(),null);
     }
 
     /** {@inheritDoc} */

@@ -28,7 +28,7 @@ public class OsgiJolokiaServiceFactoryTest {
         factory = new OsgiJolokiaServiceFactory(bundleContext);
 
         addServiceLookup(RequestHandler.class);
-        addServiceLookup(JolokiaService.Init.class);
+        addServiceLookup(JolokiaService.class);
     }
 
     private void addServiceLookup(Class pServiceClass) throws InvalidSyntaxException {

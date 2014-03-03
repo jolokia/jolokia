@@ -6,8 +6,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.service.api.AbstractJolokiaService;
-import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.json.simple.JSONObject;
 
@@ -21,11 +20,9 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
     private ObjectName historyObjectName;
 
     /**
-     * Consruction of a base service for a given type and order
+     * Construction of a base service for a given type and order
      *
-     * @param pOrderId order id. A user of JolokiaService <em>must ensure</em> that the given
-     *                 order id is unique for the given type. It used for ordering the services but is also
-     *                 used as an id when storing it in  aset.
+     * @param pOrderId order id used for ordering of services with a certain type
      */
     public HistoryMBeanRequestInterceptor(int pOrderId) {
         super(RequestInterceptor.class, pOrderId);
@@ -33,21 +30,26 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
 
     /** {@inheritDoc} */
     public void init(JolokiaContext pCtx) {
-        super.init(pCtx);
+        // Init can be called twice in OSGi env, since we are registered as two services there.
+        if (getJolokiaContext() == null) {
+            super.init(pCtx);
 
-        int maxEntries = getMaxEntries(pCtx);
-        HistoryStore historyStore = new HistoryStore(maxEntries);
-        History history = new History(historyStore);
-        historyObjectName = registerJolokiaMBean(History.OBJECT_NAME,history);
+            int maxEntries = getMaxEntries(pCtx);
+            HistoryStore historyStore = new HistoryStore(maxEntries);
+            History history = new History(historyStore);
+            historyObjectName = registerJolokiaMBean(History.OBJECT_NAME,history);
 
-        //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
-        //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
+            //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
+            //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
+        }
     }
 
     @Override
     public void destroy() throws Exception {
+        if (getJolokiaContext() != null) {
+            unregisterJolokiaMBean(historyObjectName);
+        }
         super.destroy();
-        unregisterJolokiaMBean(historyObjectName);
     }
 
     /**
