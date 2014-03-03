@@ -51,12 +51,8 @@ public class OsgiAgentServlet extends AgentServlet {
     // Tracker to be used for the LogService
     private ServiceTracker logTracker;
 
-    // Thread-Locals which will be used for holding the bundle context and
-    // the https service during initialization
-    private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
-
     // A lookup which checks for OSGi detector services
-    private ServerDetectorLookup serverDetectorLookup;
+    private ServerDetectorLookup osgiDetectorLookup;
 
     /**
      * Constructor with an empty context
@@ -93,13 +89,8 @@ public class OsgiAgentServlet extends AgentServlet {
         // so that the server detector has access to the bundle in order to detect
         // the Osgi-Environment
         BundleContext ctx = getBundleContext(pServletConfig);
-        serverDetectorLookup = new OsgiServerDetectorLookup(ctx);
-        BUNDLE_CONTEXT_THREAD_LOCAL.set(ctx);
-        try {
-            super.init(pServletConfig);
-        } finally {
-            BUNDLE_CONTEXT_THREAD_LOCAL.remove();
-        }
+        osgiDetectorLookup = new DelegatingServerDetectorLookup(ctx);
+        super.init(pServletConfig);
     }
 
     /**
@@ -108,7 +99,7 @@ public class OsgiAgentServlet extends AgentServlet {
      */
     @Override
     protected ServerDetectorLookup getServerDetectorLookup() {
-        return serverDetectorLookup;
+        return osgiDetectorLookup;
     }
 
     /**
@@ -160,18 +151,6 @@ public class OsgiAgentServlet extends AgentServlet {
         bundleContextGiven = null;
         super.destroy();
     }
-
-    /**
-     * Get the current bundle context. This static method can be used during startup
-     * of the agent servlet. At other times, this method will return null
-     *
-     * @return the current bundle context during adding of a HttpService, null at other
-     *         times
-     */
-    public static BundleContext getCurrentBundleContext() {
-        return BUNDLE_CONTEXT_THREAD_LOCAL.get();
-    }
-
 
     private BundleContext getBundleContext(ServletConfig pServletConfig) {
         // If no bundle context was provided, we are looking up the servlet context

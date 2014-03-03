@@ -50,6 +50,7 @@ public class DelegatingRestrictorTest {
             ServiceReference ref = createMock(ServiceReference.class);
             refs = new ServiceReference[] { ref };
             expect(context.getService(ref)).andReturn(pRestrictor).anyTimes();
+            expect(context.ungetService(ref)).andReturn(true).anyTimes();
             replay(refs);
         } else {
             refs = null;

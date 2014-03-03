@@ -21,7 +21,7 @@ import javax.servlet.*;
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.StaticConfiguration;
-import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.LogHandler;
@@ -33,7 +33,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.testng.Assert.assertNull;
 
 /**
  * @author roland
@@ -94,7 +93,6 @@ public class OsgiAgentServletTest {
         replay(config, servletContext, bundleContext);
 
         servlet.init(config);
-        assertNull(OsgiAgentServlet.getCurrentBundleContext());
 
         LogHandler handler = servlet.createLogHandler(config, new StaticConfiguration(ConfigKey.DEBUG,"true"));
         handler.debug("Debug");
@@ -119,8 +117,8 @@ public class OsgiAgentServletTest {
     private void prepareServiceLookup() throws InvalidSyntaxException {
         expect(servletContext.getAttribute("osgi-bundlecontext")).andStubReturn(bundleContext);
         addServiceLookup(LogService.class);
-        addServiceLookup(ServerDetector.class);
         addServiceLookup(JolokiaService.class);
+        addServiceLookup(ServerDetectorLookup.class);
     }
 
     private void addServiceLookup(Class pLogServiceClass) throws InvalidSyntaxException {

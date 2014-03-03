@@ -41,16 +41,20 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
 
     /** {@inheritDoc} */
     public void init(JolokiaContext pContext) {
-        super.init(pContext);
-        // TODO: Get configuration parameter for maxEntries
-        store = new PullNotificationStore(maxEntries);
-        objectName = registerJolokiaMBean(OBJECT_NAME,store);
+        if (getJolokiaContext() == null) {
+            super.init(pContext);
+            // TODO: Get configuration parameter for maxEntries
+            store = new PullNotificationStore(maxEntries);
+            objectName = registerJolokiaMBean(OBJECT_NAME,store);
+        }
     }
 
     @Override
     public void destroy() throws Exception {
-        super.destroy();
-        unregisterJolokiaMBean(objectName);
+        if (getJolokiaContext() != null) {
+            unregisterJolokiaMBean(objectName);
+            super.destroy();
+        }
     }
 
     /** {@inheritDoc} */

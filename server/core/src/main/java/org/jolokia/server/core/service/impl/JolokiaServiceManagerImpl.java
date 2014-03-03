@@ -99,7 +99,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         serviceLookups = new ArrayList<JolokiaServiceLookup>();
         staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
         staticLowServices = new HashMap<Class<? extends JolokiaService>, JolokiaService>();
-        detectorLookup = new ClasspathServerDetectorLookup(pDetectorLookup);
+        detectorLookup = pDetectorLookup != null ? pDetectorLookup : new ClasspathServerDetectorLookup();
         // The version request handler must be always present and always be first
         addService(new VersionRequestHandler());
     }
@@ -163,7 +163,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
 
-            List<ServerDetector> detectors = detectorLookup.lookup();
+            SortedSet<ServerDetector> detectors = detectorLookup.lookup();
             mbeanServerAccess = createMBeanServerAccess(detectors);
             ServerHandle handle = detect(getDetectorOptions(),detectors,mbeanServerAccess);
             agentDetails = new AgentDetails(configuration,handle);
@@ -273,7 +273,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // =============================================================================================================
 
 
-    private ServerHandle detect(Map<String,Object> pConfig, List<ServerDetector> detectors, MBeanServerAccess pMBeanServerAccess) {
+    private ServerHandle detect(Map<String,Object> pConfig, SortedSet<ServerDetector> detectors, MBeanServerAccess pMBeanServerAccess) {
         for (ServerDetector detector : detectors) {
             try {
                 detector.init((Map<String, Object>) pConfig.get(detector.getName()));
@@ -300,7 +300,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         }
     }
 
-    private MBeanServerAccess createMBeanServerAccess(List<ServerDetector> pDetectors) {
+    private MBeanServerAccess createMBeanServerAccess(SortedSet<ServerDetector> pDetectors) {
         Set<MBeanServerConnection> mbeanServers = new HashSet<MBeanServerConnection>();
         for (ServerDetector detector : pDetectors) {
             Set<MBeanServerConnection> found = detector.getMBeanServers();

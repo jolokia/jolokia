@@ -203,11 +203,30 @@ public abstract class AbstractServerDetector implements ServerDetector {
      * {@inheritDoc}
      */
     public int compareTo(ServerDetector pDetector) {
-        return getOrder() - pDetector.getOrder();
+        int ret = getOrder() - pDetector.getOrder();
+        // 0 is returned if really equals. Otherwise, if the order is the same we use a random, albeit
+        // deterministic order based on the hashcode
+        return ret != 0 ? ret : equals(pDetector) ? 0 : hashCode() - pDetector.hashCode();
     }
 
     /** {@inheritDoc} */
     public int getOrder() {
         return order;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractServerDetector that = (AbstractServerDetector) o;
+        if (!name.equals(that.name)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }

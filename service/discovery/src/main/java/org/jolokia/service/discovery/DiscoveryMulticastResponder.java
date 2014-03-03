@@ -59,7 +59,7 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
     }
 
     /**
-     * Stop the responder (if not already stopped). Can be restarted aftewards.
+     * Stop the responder (if not already stopped). Can be restarted afterwards.
      */
     @Override
     public synchronized void destroy() {

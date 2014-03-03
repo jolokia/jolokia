@@ -1,6 +1,6 @@
 package org.jolokia.server.core.detector;
 
-import java.util.List;
+import java.util.SortedSet;
 
 /**
  * Interface for a lookup mechanism to find server detector
@@ -15,5 +15,5 @@ public interface ServerDetectorLookup {
      *
      * @return list of server detectors
      */
-    List<ServerDetector> lookup();
+    SortedSet<ServerDetector> lookup();
 }

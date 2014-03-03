@@ -46,8 +46,8 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
 
     @Override
     public void destroy() throws Exception {
-        super.destroy();
         unregisterJolokiaMBean(objectName);
+        super.destroy(); // Important, must be after any method using a JolokiaContext
     }
 
     /** {@inheritDoc} */
