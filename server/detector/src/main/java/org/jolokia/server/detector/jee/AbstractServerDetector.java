@@ -216,13 +216,12 @@ public abstract class AbstractServerDetector implements ServerDetector {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return  true; }
+        if (o == null || getClass() != o.getClass()) { return false; };
 
         AbstractServerDetector that = (AbstractServerDetector) o;
-        if (!name.equals(that.name)) return false;
+        return name.equals(that.name);
 
-        return true;
     }
 
     @Override

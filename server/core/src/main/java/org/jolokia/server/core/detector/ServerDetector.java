@@ -84,45 +84,5 @@ public interface ServerDetector extends Comparable<ServerDetector> {
     // ==================================================================================
 
     // Fallback server detector which matches always and comes last
-    final ServerDetector FALLBACK = new ServerDetector() {
-
-        public String getName() {
-            return "fallback";
-        }
-
-        public void init(Map<String, Object> pConfig) {
-
-        }
-
-        /** {@inheritDoc} */
-        public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
-            return ServerHandle.NULL_SERVER_HANDLE;
-        }
-
-        public Set<MBeanServerConnection> getMBeanServers() {
-            return null;
-        }
-
-        public RequestInterceptor getRequestInterceptor(MBeanServerAccess pMBeanServerAccess) {
-            return null;
-        }
-
-        public int getOrder() {
-            return Integer.MAX_VALUE;
-        }
-
-        public int compareTo(ServerDetector pDetector) {
-            return getOrder() - pDetector.getOrder();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return this == obj;
-        }
-
-        @Override
-        public int hashCode() {
-            return 42;
-        }
-    };
+    ServerDetector FALLBACK = new FallbackServerDetector();
 }
