@@ -63,7 +63,7 @@ public class MBeanRegistry {
     /**
      * Register a MBean at the dedicated server. This method can be overridden if
      * something special registration procedure is required, like for using the
-     * specific name for the registration or deligating the namin to MBean to register.
+     * specific name for the registration or deligating the naming to MBean to register.
      *
      * @param pServer server an MBean should be registered
      * @param pMBean the MBean to register
@@ -80,6 +80,35 @@ public class MBeanRegistry {
         return pServer.registerMBean(pMBean,oName).getObjectName();
     }
 
+
+    /**
+     * Unregister a formerly registered MBean. If the MBean was <em>not</em> registered, the call
+     * will be simply ignored
+     *
+     * @param pObjectName objectname to unregister
+     *
+     * @throws MBeanRegistrationException if something fails during unregistration
+     */
+    public void unregisterMBean(ObjectName pObjectName) throws MBeanRegistrationException {
+        synchronized(mBeanHandles) {
+            MBeanHandle toRemove = null;
+            for (MBeanHandle handle : mBeanHandles) {
+                if (handle.objectName.equals(pObjectName)) {
+                    try {
+                        handle.server.unregisterMBean(pObjectName);
+                        toRemove = handle;
+                        break;
+                    } catch (InstanceNotFoundException e) {
+                        // Should not occur since we already checked that it exists
+                        throw new IllegalStateException("No MBean " + pObjectName + " registered (although still in this registry)",e);
+                    }
+                }
+            }
+            if (toRemove != null) {
+                mBeanHandles.remove(toRemove);
+            }
+        }
+    }
 
     /**
      * Unregister all previously registered MBean. This is tried for all previously
@@ -104,7 +133,7 @@ public class MBeanRegistry {
             // Remove all successfully unregistered handles
             mBeanHandles.removeAll(unregistered);
 
-            // Throw error if any exception ocured during unregistration
+            // Throw error if any exception occurred during unregistration
             if (exceptions.size() == 1) {
                 throw exceptions.get(0);
             } else if (exceptions.size() > 1) {

@@ -377,5 +377,14 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         return mbeanRegistry.registerMBean(pMBean, pOptionalName);
     }
 
+    /**
+     * Unregister an MBean which has been registered formerly via the registry
+     *
+     * @param pObjectName MBean to unregister
+     */
+    public final void unregisterMBean(ObjectName pObjectName) throws MBeanRegistrationException {
+        mbeanRegistry.unregisterMBean(pObjectName);
+    }
+
 
 }

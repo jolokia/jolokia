@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.agent.osgi.servlet;
+package org.jolokia.server.core.service.impl;
 
 import java.util.*;
 
@@ -52,16 +52,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
 
     /** {@inheritDoc} */
     public <T extends JolokiaService> Set<T> getServices(Class<T> pType) {
-        ServiceTracker tracker = serviceTrackerMap.get(pType);
-        if (tracker == null) {
-            // Tracker are initialized lazily because the JolokiaServiceManager must be initialized
-            // before a service is looked up via the tracker because of the customizer calling
-            // service lifecycle methods. getServices() is guaranteed to be called
-            // only after the JolokiaService has been setup.
-            tracker = new ServiceTracker(context,pType.getName(), new JolokiaServiceTrackerCustomizer());
-            serviceTrackerMap.put(pType,tracker);
-            tracker.open();
-        }
+        ServiceTracker tracker = getServiceTracker(pType);
 
         Object services[] = tracker.getServices();
         if (services != null) {
@@ -75,9 +66,30 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
         }
     }
 
+    private <T extends JolokiaService> ServiceTracker getServiceTracker(Class<T> pType) {
+        ServiceTracker tracker = serviceTrackerMap.get(pType);
+        if (tracker == null) {
+            tracker = initTracker(pType);
+        }
+        return tracker;
+    }
+
+    private <T extends JolokiaService> ServiceTracker initTracker(Class<T> pType) {
+        ServiceTracker tracker;// Tracker are initialized lazily because the JolokiaServiceManager must be initialized
+        // before a service is looked up via the tracker because of the customizer calling
+        // service lifecycle methods. getServices() is guaranteed to be called
+        // only after the JolokiaContext has been setup.
+        tracker = new ServiceTracker(context,pType.getName(), new JolokiaServiceTrackerCustomizer());
+        serviceTrackerMap.put(pType,tracker);
+        tracker.open();
+        return tracker;
+    }
+
     /** {@inheritDoc} */
     public void init(JolokiaContext pJolokiaContext) {
         jolokiaContext = pJolokiaContext;
+        // The Init Tracker are initialized here so that they get initialized as soon as they kick in
+        initTracker(JolokiaService.Init.class);
     }
 
     /**

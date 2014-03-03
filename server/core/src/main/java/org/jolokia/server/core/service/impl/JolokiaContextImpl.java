@@ -39,6 +39,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
+    public void unregisterMBean(ObjectName pObjectName) throws MBeanRegistrationException {
+        serviceManager.unregisterMBean(pObjectName);
+    }
+
+    /** {@inheritDoc} */
     public MBeanServerAccess getMBeanServerAccess() {
         return serviceManager.getMBeanServerAccess();
     }

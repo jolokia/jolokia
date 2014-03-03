@@ -1,4 +1,4 @@
-package org.jolokia.agent.osgi.servlet;
+package org.jolokia.server.core.osgi;
 
 import java.io.Serializable;
 import java.util.*;

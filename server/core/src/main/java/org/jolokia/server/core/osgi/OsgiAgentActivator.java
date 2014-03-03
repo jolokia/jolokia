@@ -1,16 +1,15 @@
-package org.jolokia.agent.osgi;
+package org.jolokia.server.core.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
-import org.jolokia.agent.osgi.servlet.OsgiServletConfiguration;
-import org.jolokia.agent.osgi.servlet.OsgiAgentServlet;
-import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.osgi.framework.*;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -41,7 +40,7 @@ import static org.jolokia.server.core.config.ConfigKey.*;
  * @author roland
  * @since Dec 27, 2009
  */
-public class JolokiaActivator implements BundleActivator, OsgiServletConfiguration {
+public class OsgiAgentActivator implements BundleActivator {
 
     // Base filter to use for filtering out HttpServices
     public static final String HTTP_SERVICE_FILTER_BASE =
@@ -58,9 +57,6 @@ public class JolokiaActivator implements BundleActivator, OsgiServletConfigurati
 
     // HttpContext used for authorization
     private HttpContext jolokiaHttpContext;
-
-    // Registration object for this JolokiaContext
-    private ServiceRegistration jolokiaServiceRegistration;
 
     // Restrictor and associated service tracker when tracking restrictor
     // services
@@ -82,9 +78,6 @@ public class JolokiaActivator implements BundleActivator, OsgiServletConfigurati
                                                     buildHttpServiceFilter(pBundleContext),
                                                     new HttpServiceCustomizer(pBundleContext));
             httpServiceTracker.open();
-
-            // Register us as JolokiaContext
-            jolokiaServiceRegistration = pBundleContext.registerService(OsgiServletConfiguration.class.getCanonicalName(), this, null);
         }
     }
 
@@ -97,11 +90,6 @@ public class JolokiaActivator implements BundleActivator, OsgiServletConfigurati
             // for every active service which in turn unregisters the servlet
             httpServiceTracker.close();
             httpServiceTracker = null;
-        }
-
-        if (jolokiaServiceRegistration != null) {
-            jolokiaServiceRegistration.unregister();
-            jolokiaServiceRegistration = null;
         }
 
         restrictor = null;

@@ -2,12 +2,12 @@ package org.jolokia.service.pullnotif;
 
 import java.util.Map;
 
-import javax.management.*;
+import javax.management.Notification;
+import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.*;
-import org.jolokia.server.core.util.jmx.JmxUtil;
 import org.json.simple.JSONObject;
 
 /**
@@ -18,14 +18,16 @@ import org.json.simple.JSONObject;
  */
 public class PullNotificationBackend extends AbstractJolokiaService<NotificationBackend> implements NotificationBackend {
 
+    public static final String OBJECT_NAME = "jolokia:type=NotificationStore";
+
     // Store for holding the notification
     private PullNotificationStore store;
 
     // maximal number of entries *per* notification subscription
     private int maxEntries = 100;
 
-    // MBean name of this stored
-    private ObjectName mbeanName;
+    // name as the MBean has been registered
+    private ObjectName objectName;
 
     /**
      * Create a pull notification backend which will register an MBean allowing
@@ -39,15 +41,16 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
 
     /** {@inheritDoc} */
     public void init(JolokiaContext pContext) {
-        String jolokiaId = pContext.getAgentDetails().getAgentId();
+        super.init(pContext);
         // TODO: Get configuration parameter for maxEntries
         store = new PullNotificationStore(maxEntries);
-        mbeanName = JmxUtil.newObjectName("jolokia:type=NotificationStore,agent=" + jolokiaId);
-        try {
-            pContext.registerMBean(store, mbeanName.getCanonicalName());
-        } catch (JMException e) {
-            throw new IllegalArgumentException("Cannot register MBean " + mbeanName + " as notification pull store: " + e,e);
-        }
+        objectName = registerJolokiaMBean(OBJECT_NAME,store);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        super.destroy();
+        unregisterJolokiaMBean(objectName);
     }
 
     /** {@inheritDoc} */
@@ -78,7 +81,7 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     /** {@inheritDoc} */
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
-        ret.put("store",mbeanName.toString());
+        ret.put("store",objectName.toString());
         ret.put("maxEntries",maxEntries);
         return ret;
     }

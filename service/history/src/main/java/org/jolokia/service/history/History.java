@@ -29,27 +29,18 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jun 12, 2009
  */
-public class History implements HistoryMBean,MBeanRegistration {
+public class History implements HistoryMBean {
 
     // Stores for various information
     private HistoryStore store;
-
-    // MBean Objectname under which this bean should be registered
-    private String objectName;
 
     /**
      * Constructor with the configurable objects as parameters.
      *
      * @param pStore history store where to hold historical values
-     * @param pOName object name under which to register this MBean
      */
-    public History(HistoryStore pStore, String pOName) {
+    public History(HistoryStore pStore) {
         store = pStore;
-        if (pOName == null) {
-            throw new IllegalArgumentException("ObjectName for history must not be null");
-        }
-        objectName = pOName;
-
     }
 
     /** {@inheritDoc} */
@@ -103,25 +94,5 @@ public class History implements HistoryMBean,MBeanRegistration {
     // The limit or null if the entry should be disabled in the history store
     private HistoryLimit limitOrNull(int pMaxEntries, long pMaxDuration) {
         return pMaxEntries != 0 || pMaxDuration != 0 ? new HistoryLimit(pMaxEntries, pMaxDuration) : null;
-    }
-
-    // ========================================================================
-
-    // Provide our own name on registration
-    /** {@inheritDoc} */
-    public ObjectName preRegister(MBeanServer server, ObjectName name) throws MalformedObjectNameException {
-        return new ObjectName(objectName);
-    }
-
-    /** {@inheritDoc} */
-    public void postRegister(Boolean registrationDone) {
-    }
-
-    /** {@inheritDoc} */
-    public void preDeregister() {
-    }
-
-    /** {@inheritDoc} */
-    public void postDeregister() {
     }
 }

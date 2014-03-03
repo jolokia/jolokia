@@ -1,4 +1,4 @@
-package org.jolokia.agent.osgi;
+package org.jolokia.server.core.osgi;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -16,17 +16,13 @@ package org.jolokia.agent.osgi;
  *  limitations under the License.
  */
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.Dictionary;
 
 import javax.servlet.ServletException;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.agent.osgi.servlet.OsgiServletConfiguration;
-import org.jolokia.agent.osgi.servlet.OsgiAgentServlet;
 import org.jolokia.server.core.config.ConfigKey;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
@@ -41,12 +37,12 @@ import static org.testng.Assert.assertNotNull;
  * @author roland
  * @since 01.09.11
  */
-public class JolokiaActivatorTest {
+public class OsgiAgentActivatorTest {
 
     public static final String SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
 
     private BundleContext context;
-    private JolokiaActivator activator;
+    private OsgiAgentActivator activator;
 
     // Listener registered by the ServiceTracker
     private ServiceListener listener;
@@ -57,7 +53,7 @@ public class JolokiaActivatorTest {
 
     @BeforeMethod
     public void setup() {
-        activator = new JolokiaActivator();
+        activator = new OsgiAgentActivator();
         context = createMock(BundleContext.class);
     }
 
@@ -256,8 +252,6 @@ public class JolokiaActivatorTest {
             context.addServiceListener(rememberListener(), eq(filter.toString()));
             expect(context.getServiceReferences(null, filter.toString())).andReturn(null);
             registration = createMock(ServiceRegistration.class);
-            expect(context.registerService(OsgiServletConfiguration.class.getName(), activator, null)).andReturn(registration);
-
         }
         expect(context.getProperty("org.jolokia.useRestrictorService")).andReturn("" + doRestrictor);
     }

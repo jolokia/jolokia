@@ -4,12 +4,11 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.*;
 
-import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.util.jmx.JmxUtil;
+import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.json.simple.JSONObject;
 
 /**
@@ -34,32 +33,21 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
 
     /** {@inheritDoc} */
     public void init(JolokiaContext pCtx) {
-        int maxEntries;
-        try {
-            maxEntries = Integer.parseInt(pCtx.getConfig(ConfigKey.HISTORY_MAX_ENTRIES));
-        } catch (NumberFormatException exp) {
-            maxEntries = Integer.parseInt(ConfigKey.HISTORY_MAX_ENTRIES.getDefaultValue());
-        }
+        super.init(pCtx);
+
+        int maxEntries = getMaxEntries(pCtx);
         HistoryStore historyStore = new HistoryStore(maxEntries);
-        try {
-            // Register the Config MBean
+        History history = new History(historyStore);
+        historyObjectName = registerJolokiaMBean(History.OBJECT_NAME,history);
 
-            String oname = History.OBJECT_NAME + ",agent=" + pCtx.getAgentDetails().getAgentId();
-            History history = new History(historyStore,oname);
-            pCtx.registerMBean(history, oname);
-
-            historyObjectName = JmxUtil.newObjectName(oname);
-        } catch (InstanceAlreadyExistsException exp) {
-            // That's ok, we are reusing it.
-        } catch (NotCompliantMBeanException e) {
-            pCtx.error("Error registering config MBean: " + e, e);
-        } catch (MalformedObjectNameException e) {
-            pCtx.error("Invalid name for config MBean: " + e, e);
-        } catch (MBeanRegistrationException e) {
-            pCtx.error("MBean Registration Error: " + e,e);
-        }
         //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
         //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        super.destroy();
+        unregisterJolokiaMBean(historyObjectName);
     }
 
     /**
@@ -83,5 +71,15 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
         } catch (ReflectionException e) {
             throw new IllegalStateException("Internal: Cannot call History MBean via reflection",e);
         }
+    }
+
+    private int getMaxEntries(JolokiaContext pCtx) {
+        int maxEntries;
+        try {
+            maxEntries = Integer.parseInt(pCtx.getConfig(ConfigKey.HISTORY_MAX_ENTRIES));
+        } catch (NumberFormatException exp) {
+            maxEntries = Integer.parseInt(ConfigKey.HISTORY_MAX_ENTRIES.getDefaultValue());
+        }
+        return maxEntries;
     }
 }

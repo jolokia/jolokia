@@ -3,7 +3,7 @@ package org.jolokia.service.discovery;
 import java.io.IOException;
 import java.util.List;
 
-import javax.management.JMException;
+import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.api.*;
 import org.json.simple.JSONArray;
@@ -19,11 +19,8 @@ import static org.jolokia.service.discovery.AbstractDiscoveryMessage.MessageType
 public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init>
         implements JolokiaDiscoveryMBean, JolokiaService.Init {
 
-    // Agent id used for use in the query
-    private String agentId = null;
-
-    // Used for logging when doing lookups
-    private LogHandler logHandler = LogHandler.QUIET;
+    // Name has we have been registered
+    private ObjectName objectName;
 
     /**
      * Constructor to be called when called as a service
@@ -36,26 +33,21 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
     /**
      * Constructor called for programmatic lookup of the agent
      *
-     * @param pAgentId agent id to be used for correlating messages
      */
-    public JolokiaDiscovery(String pAgentId) {
+    public JolokiaDiscovery() {
         super(JolokiaService.Init.class, 0);
-        agentId = pAgentId;
     }
 
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         super.init(pJolokiaContext);
-        logHandler = pJolokiaContext;
-        AgentDetails details = pJolokiaContext.getAgentDetails();
-        agentId = details.getAgentId();
-        String objectName = JolokiaDiscoveryMBean.OBJECT_NAME + ",agent=" + agentId;
-        try {
-            pJolokiaContext.registerMBean(this,objectName);
-        } catch (JMException e) {
-            throw new IllegalArgumentException("Cannot register MBean " + objectName + " as discovery MBean: " + e,e);
-        }
-        logHandler = pJolokiaContext;
+        objectName = registerJolokiaMBean(JolokiaDiscovery.OBJECT_NAME,this);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        super.destroy();
+        unregisterJolokiaMBean(objectName);
     }
 
     /** {@inheritDoc} */
@@ -65,11 +57,12 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
 
     /** {@inheritDoc} */
     public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
+        JolokiaContext ctx = getJolokiaContext();
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
-                        .agentId(agentId)
+                        .agentId(ctx.getAgentDetails().getAgentId())
                         .build();
-        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, logHandler);
+        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, ctx);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
             ret.add(in.getAgentDetails().toJSONObject());

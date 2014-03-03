@@ -89,7 +89,7 @@
             <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
             <Bundle-Description>Jolokia OSGi Agent</Bundle-Description>
 
-            <Bundle-Activator>org.jolokia.agent.osgi.JolokiaActivator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.server.core.osgi.OsgiAgentActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

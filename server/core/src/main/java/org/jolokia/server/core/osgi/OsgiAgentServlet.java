@@ -1,4 +1,4 @@
-package org.jolokia.agent.osgi.servlet;
+package org.jolokia.server.core.osgi;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -23,6 +23,7 @@ import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.impl.OsgiJolokiaServiceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;

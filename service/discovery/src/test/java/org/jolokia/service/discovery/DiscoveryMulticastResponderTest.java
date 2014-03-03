@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.api.AgentDetails;
-import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
@@ -43,7 +42,13 @@ public class DiscoveryMulticastResponderTest {
         responder.init(context);
         // Warming up
         Thread.sleep(enabled ? 300 : 100);
-        JolokiaDiscovery discovery = new JolokiaDiscovery("test");
+        TestJolokiaContext ctx =
+                new TestJolokiaContext.Builder()
+                        .agentDetails(new AgentDetails("test"))
+                        .logHandler(LogHandler.QUIET)
+                        .build();
+        JolokiaDiscovery discovery = new JolokiaDiscovery();
+        discovery.init(ctx);
         List<JSONObject> msgs = discovery.lookupAgents();
         if (enabled) {
             Assert.assertTrue(msgs.size() > 0);

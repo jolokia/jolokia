@@ -16,6 +16,8 @@
 
 package org.jolokia.server.core.service.api;
 
+import javax.management.*;
+
 /**
  * Abstract base class for {@link JolokiaService}s.
  *
@@ -29,6 +31,9 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
 
     // order number for this service
     private int order;
+
+    // context, valid after init
+    private JolokiaContext jolokiaContext;
 
     /**
      * Construction of a base service for a given type and order
@@ -65,7 +70,9 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
      *
      * @param pJolokiaContext JolokiaContext used
      */
-    public void init(JolokiaContext pJolokiaContext) { }
+    public void init(JolokiaContext pJolokiaContext) {
+        jolokiaContext = pJolokiaContext;
+    }
 
     /** {@inheritDoc} */
     public int compareTo(T pOtherService) {
@@ -73,5 +80,49 @@ public abstract class AbstractJolokiaService<T extends JolokiaService> implement
         // 0 is returned if really equals. Otherwise, if the order is the same we use a random, albeit
         // deterministic order based on the hashcode
         return ret != 0 ? ret : equals(pOtherService) ? 0 : hashCode() - pOtherService.hashCode();
+    }
+
+    // =========================================================================================
+
+    /**
+     * Register an MBean with a unique qualifier for this agent.
+     *
+     * @param pName name of the MBean to register
+     * @param pMBean the MBean to register
+     */
+    protected ObjectName registerJolokiaMBean(String pName, Object pMBean) {
+        String objectNameS = getMBeanNameWithAgentId(pName);
+        try {
+            return jolokiaContext.registerMBean(pMBean,objectNameS);
+        } catch (JMException e) {
+            jolokiaContext.error("Cannot register MBean " + objectNameS + ": " + e,e);
+            return null;
+        }
+    }
+
+    /**
+     * Unregister MBean with the given name. If it hasn't been registered before with {@link #registerJolokiaMBean(String, Object)}
+     * then this is a no-op. Also, any error is logged but wont result in any exception
+     *
+     * @param oName name as returned during registration. If null, nothing happens
+     */
+    protected void unregisterJolokiaMBean(ObjectName oName) {
+        if (jolokiaContext != null && oName != null) {
+            try {
+                jolokiaContext.unregisterMBean(oName);
+            } catch (MBeanRegistrationException e) {
+                jolokiaContext.error("Cannot unregister MBean " + oName + ": " + e,e);
+            }
+        }
+    }
+
+    protected JolokiaContext getJolokiaContext() {
+        return jolokiaContext;
+    }
+
+    private String getMBeanNameWithAgentId(String pName) {
+        AgentDetails details = jolokiaContext.getAgentDetails();
+        String agentId = details.getAgentId();
+        return pName + ",agent=" + agentId;
     }
 }

@@ -1,4 +1,4 @@
-package org.jolokia.agent.osgi;
+package org.jolokia.server.core.osgi;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -16,12 +16,13 @@ package org.jolokia.agent.osgi;
  * limitations under the License.
  */
 
-import org.osgi.service.http.HttpContext;
+import java.io.IOException;
+import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URL;
+
+import org.osgi.service.http.HttpContext;
 
 /**
  * Basic JolokiaHttpContextContext, which does no authentication.

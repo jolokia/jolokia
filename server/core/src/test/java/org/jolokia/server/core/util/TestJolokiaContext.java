@@ -101,6 +101,19 @@ public class TestJolokiaContext implements JolokiaContext {
         return instance.getObjectName();
     }
 
+    public void unregisterMBean(ObjectName pObjectName) throws MBeanRegistrationException {
+        if (mbeans.contains(pObjectName)) {
+            MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+            try {
+                mbeanServer.unregisterMBean(pObjectName);
+                mbeans.remove(pObjectName);
+            } catch (InstanceNotFoundException e) {
+                throw new IllegalStateException("No MBean " + pObjectName + " registered",e);
+            }
+        }
+    }
+
+
     public MBeanServerAccess getMBeanServerAccess() {
         return mBeanServerAccess;
     }

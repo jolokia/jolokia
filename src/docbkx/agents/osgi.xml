@@ -360,7 +360,7 @@
     </table>
     <para>
       This bundle also exports the service
-      <classname>org.jolokia.agent.osgi.servlet.JolokiaContext</classname>
+      <classname>org.jolokia.server.core.osgi.servlet.JolokiaContext</classname>
       which can be used to obtain context information of the
       registered agent like the context path under which this
       servlet can be reached. Additionally, it exports
@@ -453,7 +453,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       comes with the agents. For this use case
       <filename>jolokia-osgi.jar</filename> should be used. This
       bundle exports the package
-      <classname>org.jolokia.agent.osgi.servlet</classname> which includes
+      <classname>org.jolokia.server.core.osgi.servlet</classname> which includes
       the servlet class <classname>JolokiaServlet</classname>. This
       class has three constructors: A default constructor without
       arguments, one with a single

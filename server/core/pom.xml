@@ -45,6 +45,18 @@
     </dependency>
 
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-tools-test</artifactId>
       <version>${project.version}</version>
@@ -88,6 +100,7 @@
           <instructions>
             <Bundle-SymbolicName>org.jolokia.server.core</Bundle-SymbolicName>
             <Bundle-Description>Jolokia API and core classes</Bundle-Description>
+            <Bundle-Activator>org.jolokia.server.core.osgi.OsgiAgentActivator</Bundle-Activator>
 
             <Export-Package>
               org.jolokia.server.core.config,

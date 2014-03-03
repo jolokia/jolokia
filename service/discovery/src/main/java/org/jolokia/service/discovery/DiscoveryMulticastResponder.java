@@ -16,7 +16,7 @@ import org.jolokia.server.core.util.NetworkUtil;
  * @author roland
  * @since 24.01.14
  */
-public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaService.Init> {
+public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaService.Init> implements JolokiaService.Init {
 
     // Listener threads responsible for creating the response as soon as a discovery request
     // arrives.
@@ -61,7 +61,6 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
     /**
      * Stop the responder (if not already stopped). Can be restarted aftewards.
      */
-
     @Override
     public synchronized void destroy() {
         if (listenerThreads.size() > 0) {

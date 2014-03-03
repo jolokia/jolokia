@@ -108,7 +108,7 @@
               org.apache.felix.http.jetty;inline=true,
             </Embed-Dependency>
             <Export-Package>
-              org.jolokia.agent.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
+              org.jolokia.server.core.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
               org.jolokia.core.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.converter;version="${project.version}",
               org.jolokia.service.serializer.json;version="${project.version}",
@@ -123,7 +123,7 @@
             </Export-Package>
             <Import-Package>
               !javax.microedition.io,
-              org.jolokia.agent.osgi.servlet;version="${project.version}",
+              org.jolokia.server.core.osgi.servlet;version="${project.version}",
               org.jolokia.core.restrictor;version="${project.version}",
               org.jolokia.core.util;version="${project.version}",
               javax.net.ssl;resolution:=optional,

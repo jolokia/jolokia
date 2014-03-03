@@ -87,6 +87,14 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException;
 
     /**
+     * Unregister an MBean explicitly. This is typically not necessary but becomes necessary
+     * if a module goes down without shutting down the agen
+     *
+     * @param pObjectName name of the mbean to unregister
+     */
+    void unregisterMBean(ObjectName pObjectName) throws MBeanRegistrationException;
+
+    /**
      * Get an {@link MBeanServerAccess} for easy access of the JMX subsystem
      * even when there are multiple MBeanServers available. It uses a template mechanism
      * with callback

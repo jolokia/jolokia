@@ -1,4 +1,4 @@
-package org.jolokia.agent.osgi;
+package org.jolokia.server.core.osgi;
 
 import javax.management.ObjectName;
 

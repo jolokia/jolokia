@@ -1,4 +1,4 @@
-package org.jolokia.agent.osgi.servlet;
+package org.jolokia.server.core.osgi;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -23,6 +23,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
+import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.test.util.HttpTestUtil;
 import org.osgi.framework.*;
@@ -119,6 +120,7 @@ public class OsgiAgentServletTest {
         expect(servletContext.getAttribute("osgi-bundlecontext")).andStubReturn(bundleContext);
         addServiceLookup(LogService.class);
         addServiceLookup(ServerDetector.class);
+        addServiceLookup(JolokiaService.Init.class);
     }
 
     private void addServiceLookup(Class pLogServiceClass) throws InvalidSyntaxException {
