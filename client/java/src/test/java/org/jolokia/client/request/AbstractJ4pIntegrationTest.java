@@ -18,7 +18,7 @@ package org.jolokia.client.request;
 
 import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.client.J4pClient;
-import org.jolokia.it.ItSetup;
+import org.jolokia.it.core.ItSetup;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;

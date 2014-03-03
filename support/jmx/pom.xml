@@ -73,20 +73,11 @@
 
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia.jmx</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.jolokia.support.jmx</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX Addons</Bundle-Description>
-
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Name>Jolokia JMX</Bundle-Name>
             <Export-Package>
-              org.jolokia.jmx;uses:="org.jolokia.converter,java.lang.management,javax.management,java.lang.annotation";version="${project.version}"
+              org.jolokia.support.jmx
             </Export-Package>
-            <Import-Package>
-              org.jolokia.converter;version="${project.version}",
-              org.jolokia.service.serializer.json;version="${project.version}",
-              org.jolokia.service.serializer.object;version="${project.version}",
-              *
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

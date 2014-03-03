@@ -29,7 +29,7 @@ import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
 import org.jolokia.test.util.HttpTestUtil;
 import org.json.simple.*;
@@ -212,7 +212,7 @@ public class HttpRequestHandlerTest {
                 .restrictor(pRestrictor)
                 .logHandler(pLogHandler)
                 .services(RequestHandler.class,services)
-                .services(JmxSerializer.class,new TestJmxSerializer())
+                .services(Serializer.class,new TestSerializer())
                 .build();
         handler = new HttpRequestHandler(ctx);
     }

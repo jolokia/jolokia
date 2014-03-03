@@ -22,7 +22,7 @@
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <description>Core classes for integration tests</description>
+  <description>Jolokia :: IT :: Core Tests</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
@@ -41,7 +41,6 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>4.2.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -64,14 +63,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.it</Bundle-SymbolicName>
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.it.Activator</Bundle-Activator>
-            <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>
-            <!-- Needed because we export an embedded package only -->
-            <Import-Package>
-              org.osgi.framework;version="[1.0.0,2.0.0)",
-              *
-            </Import-Package>
+            <Bundle-Activator>org.jolokia.it.core.Activator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
@@ -81,7 +73,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Premain-Class>org.jolokia.it.ItSetup</Premain-Class>
+              <Premain-Class>org.jolokia.it.core.ItSetup</Premain-Class>
             </manifestEntries>
           </archive>
         </configuration>

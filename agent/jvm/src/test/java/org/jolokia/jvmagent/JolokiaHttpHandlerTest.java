@@ -33,7 +33,7 @@ import org.jolokia.server.core.backend.RequestDispatcher;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -236,7 +236,7 @@ public class JolokiaHttpHandlerTest {
         debugToggle = !debugToggle;
         return new TestJolokiaContext.Builder()
                 .config(list.toArray())
-                .services(JmxSerializer.class,new TestJmxSerializer())
+                .services(Serializer.class,new TestSerializer())
                 .build();
     }
 }

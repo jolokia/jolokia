@@ -1,2 +1,2 @@
 # Serializer for unit tests
-org.jolokia.server.core.util.TestJmxSerializer,100
+org.jolokia.server.core.util.TestSerializer,100

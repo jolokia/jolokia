@@ -8,7 +8,7 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
@@ -147,13 +147,13 @@ public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
             // it later back via JMX
             return new Object[] {
                     pCurrentValue,
-                    context.getMandatoryService(JmxSerializer.class).setInnerValue(pCurrentValue, newValue, pathParts)
+                    context.getMandatoryService(Serializer.class).setInnerValue(pCurrentValue, newValue, pathParts)
             };
 
         } else {
             // Return the objectified value
             return new Object[] {
-                    context.getMandatoryService(JmxSerializer.class).deserialize(pType, newValue),
+                    context.getMandatoryService(Serializer.class).deserialize(pType, newValue),
                     pCurrentValue
             };
         }
@@ -169,7 +169,7 @@ public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
                                                pRequest.getPath() + " since OpenTypes are immutable");
         }
         return new Object[] {
-                context.getMandatoryService(JmxSerializer.class).deserializeOpenType(pOpenType, pRequest.getValue()),
+                context.getMandatoryService(Serializer.class).deserializeOpenType(pOpenType, pRequest.getValue()),
                 pCurrentValue
         };
     }

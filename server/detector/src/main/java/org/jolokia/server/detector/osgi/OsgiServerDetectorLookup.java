@@ -41,7 +41,8 @@ public class OsgiServerDetectorLookup implements ServerDetectorLookup {
     }
 
     private List<ServerDetector> classpathDetectors() {
-        return LocalServiceFactory.createServices("META-INF/jolokia/detectors-default",
+        return LocalServiceFactory.createServices(this.getClass().getClassLoader(),
+                                                  "META-INF/jolokia/detectors-default",
                                                   "META-INF/jolokia/detectors");
     }
 }

@@ -28,10 +28,10 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.request.RequestHandler;
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.jolokia.service.serializer.Converters;
+import org.jolokia.service.serializer.JolokiaSerializer;
 import org.json.simple.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -52,7 +52,7 @@ public class RawObjectNameTest {
         LocalRequestHandler requestHandler = new LocalRequestHandler(0);
         TestJolokiaContext ctx = new TestJolokiaContext.Builder()
                 .services(RequestHandler.class,requestHandler)
-                .services(JmxSerializer.class,new Converters())
+                .services(Serializer.class,new JolokiaSerializer())
                 .build();
         ctx.init();
         backendManager = new BackendManager(ctx);

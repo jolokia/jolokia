@@ -25,7 +25,7 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.request.JolokiaExecRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
@@ -84,9 +84,9 @@ public class ExecHandler extends CommandHandler<JolokiaExecRequest> {
         verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = context.getMandatoryService(JmxSerializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
+        		params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
         	} else { 
-        		params[i] = context.getMandatoryService(JmxSerializer.class).deserialize(types.paramClasses[i], args.get(i));
+        		params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
         	}
         }
 

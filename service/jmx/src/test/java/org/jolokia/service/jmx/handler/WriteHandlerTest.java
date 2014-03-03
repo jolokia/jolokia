@@ -23,10 +23,10 @@ import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.service.serializer.Converters;
+import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
-import org.jolokia.server.core.service.serializer.JmxSerializer;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
@@ -55,7 +55,7 @@ public class WriteHandlerTest {
 
     @BeforeMethod
     public void createHandler() {
-        ctx = new TestJolokiaContext.Builder().services(JmxSerializer.class,new Converters()).build();
+        ctx = new TestJolokiaContext.Builder().services(Serializer.class,new JolokiaSerializer()).build();
         handler = new WriteHandler(ctx);
     }
 

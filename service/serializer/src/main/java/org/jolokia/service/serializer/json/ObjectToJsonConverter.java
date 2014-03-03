@@ -63,8 +63,7 @@ public final class ObjectToJsonConverter {
      * @param pStringToObjectConverter used when setting values
      * @param pSimplifyHandlers a bunch of simplifiers-default used for mangling the conversion result
      */
-    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter,
-                                 Extractor... pSimplifyHandlers) {
+    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter) {
 
         handlers = new ArrayList<Extractor>();
 
@@ -79,7 +78,7 @@ public final class ObjectToJsonConverter {
         handlers.add(new CollectionExtractor());
 
         // Special, well known objects
-        addSimplifiers(handlers, pSimplifyHandlers);
+        addSimplifiers(handlers);
 
         // Enum handling
         handlers.add(new EnumExtractor());
@@ -337,12 +336,9 @@ public final class ObjectToJsonConverter {
     }
 
     // Simplifiers are added either explicitely or by reflection from a subpackage
-    private void addSimplifiers(List<Extractor> pHandlers, Extractor[] pSimplifyHandlers) {
-        if (pSimplifyHandlers != null && pSimplifyHandlers.length > 0) {
-            pHandlers.addAll(Arrays.asList(pSimplifyHandlers));
-        } else {
-            // Add all
-            pHandlers.addAll(LocalServiceFactory.<Extractor>createServices(SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
-        }
+    private void addSimplifiers(List<Extractor> pHandlers) {
+        // Add all
+        pHandlers.addAll(LocalServiceFactory.<Extractor>createServices(this.getClass().getClassLoader(),
+                                                                       SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
     }
 }

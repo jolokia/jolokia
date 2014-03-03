@@ -1,7 +1,7 @@
 package org.jolokia.service.serializer.osgi;
 
-import org.jolokia.server.core.service.serializer.JmxSerializer;
-import org.jolokia.service.serializer.Converters;
+import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.service.serializer.JolokiaSerializer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -15,7 +15,8 @@ public class SerializerServiceActivator implements BundleActivator {
 
     /** {@inheritDoc} */
     public void start(BundleContext context) throws Exception {
-        context.registerService(JmxSerializer.class.getName(),new Converters(),null);
+
+        context.registerService(Serializer.class.getName(),new JolokiaSerializer(),null);
     }
 
     /** {@inheritDoc} */

@@ -18,7 +18,7 @@ package org.jolokia.jvmagent.spring;
 
 import javax.management.MBeanServer;
 
-import org.jolokia.jmx.JolokiaMBeanServerUtil;
+import org.jolokia.support.jmx.JolokiaMBeanServerUtil;
 import org.springframework.beans.factory.FactoryBean;
 
 /**

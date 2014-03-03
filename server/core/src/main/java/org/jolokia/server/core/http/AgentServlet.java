@@ -373,7 +373,11 @@ public class AgentServlet extends HttpServlet {
 
     // Check the proper servlet path
     private String extractServletPath(HttpServletRequest pReq) {
-        return pReq.getRequestURI().substring(0,pReq.getContextPath().length());
+        int len = pReq.getContextPath().length();
+        if (len == 0) {
+            len = pReq.getServletPath().length();
+        }
+        return pReq.getRequestURI().substring(0,len);
     }
 
     // Set an appropriate CORS header if requested and if allowed

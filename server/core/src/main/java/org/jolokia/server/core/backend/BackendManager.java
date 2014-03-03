@@ -11,7 +11,7 @@ import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.json.simple.JSONObject;
 
@@ -136,7 +136,7 @@ public class BackendManager {
     public Object convertExceptionToJson(Throwable pExp, JolokiaRequest pJmxReq)  {
         SerializeOptions opts = getSerializeOptions(pJmxReq);
         try {
-            return jolokiaCtx.getMandatoryService(JmxSerializer.class).serialize(pExp, null, opts);
+            return jolokiaCtx.getMandatoryService(Serializer.class).serialize(pExp, null, opts);
         } catch (AttributeNotFoundException e) {
             // Cannot happen, since we dont use a path
             return null;
@@ -181,7 +181,7 @@ public class BackendManager {
         SerializeOptions opts = getSerializeOptions(pJmxReq);
 
         Object jsonResult =
-                jolokiaCtx.getMandatoryService(JmxSerializer.class).serialize(
+                jolokiaCtx.getMandatoryService(Serializer.class).serialize(
                         result,
                         pJmxReq.useReturnValueWithPath() ? pJmxReq.getPathParts() : null,
                         opts);

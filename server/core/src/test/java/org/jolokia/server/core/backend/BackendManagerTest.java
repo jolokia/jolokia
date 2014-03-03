@@ -28,7 +28,7 @@ import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
-import org.jolokia.server.core.service.serializer.JmxSerializer;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -46,7 +46,7 @@ public class BackendManagerTest {
     private LogHandler log = new LogHandler.StdoutLogHandler(false);
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
-        TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder().services(JmxSerializer.class,new TestJmxSerializer());
+        TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder().services(Serializer.class,new TestSerializer());
         if (configKeysAndValues.length > 0) {
             builder.config(ConfigKey.DEBUG, "true");
         }

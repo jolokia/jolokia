@@ -39,7 +39,7 @@ public class CollectionExtractorTest {
     @BeforeClass
     public void setup() {
         extractor = new CollectionExtractor();
-        converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
+        converter = new ObjectToJsonConverter(new StringToObjectConverter());
         converter.setupContext();
     }
 

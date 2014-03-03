@@ -19,7 +19,7 @@ package org.jolokia.client.request;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.client.exception.J4pException;
-import org.jolokia.it.ItSetup;
+import org.jolokia.it.core.ItSetup;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

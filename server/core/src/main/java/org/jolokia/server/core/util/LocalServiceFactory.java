@@ -57,18 +57,19 @@ public final class LocalServiceFactory {
      * descriptors with a single path. Note, that the reading order for multiple
      * resources with the same  name is not defined.
      *
+     * @param pClassLoader classloader to use for looking up the services
      * @param pDescriptorPaths a list of resource paths which are handle in the given order.
      *        Normally, default service should be given as first parameter so that custom
      *        descriptors have a chance to remove a default service.
      * @param <T> type of the service objects to create
      * @return a ordered list of created services.
      */
-    public static <T> List<T> createServices(String... pDescriptorPaths) {
+    public static <T> List<T> createServices(ClassLoader pClassLoader, String ... pDescriptorPaths) {
         try {
             ServiceEntry.initDefaultOrder();
             TreeMap<ServiceEntry,T> extractorMap = new TreeMap<ServiceEntry,T>();
             for (String descriptor : pDescriptorPaths) {
-                readServiceDefinitions(extractorMap, descriptor);
+                readServiceDefinitions(pClassLoader, extractorMap, descriptor);
             }
             List<T> ret = new ArrayList<T>();
             for (T service : extractorMap.values()) {
@@ -80,35 +81,39 @@ public final class LocalServiceFactory {
         }
     }
 
-
     /**
-     * Create services as a set. This set is sorted and hence the created services should
-     * implement {@link Comparable}.
+     * Create a list of services ordered according to the ordering given in the
+     * service descriptor files. Note, that the descriptor will be looked up
+     * in the whole classpath space, which can result in reading in multiple
+     * descriptors with a single path. Note, that the reading order for multiple
+     * resources with the same  name is not defined. The class loader of the current class
+     * is used for looking up the resources.
      *
      * @param pDescriptorPaths a list of resource paths which are handle in the given order.
      *        Normally, default service should be given as first parameter so that custom
      *        descriptors have a chance to remove a default service.
      * @param <T> type of the service objects to create
-     * @return a sorted list of created services.
+     * @return a ordered list of created services.
      */
-    public static <T> SortedSet<T> createServicesAsSet(String... pDescriptorPaths) {
-        return new TreeSet<T>((List<T>) createServices(pDescriptorPaths));
+    public static <T> List<T> createServices(String ... pDescriptorPaths) {
+        return createServices(LocalServiceFactory.class.getClassLoader(),pDescriptorPaths);
     }
 
     // ==================================================================================
 
-    private static <T> void readServiceDefinitions(Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
+    private static <T> void readServiceDefinitions(ClassLoader pClassLoader,
+                                                   Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            Enumeration<URL> resUrls = LocalServiceFactory.class.getClassLoader().getResources(pDefPath);
+            Enumeration<URL> resUrls = pClassLoader.getResources(pDefPath);
             while (resUrls.hasMoreElements()) {
-                readServiceDefinitionFromUrl(pExtractorMap, resUrls.nextElement());
+                readServiceDefinitionFromUrl(pClassLoader,pExtractorMap, resUrls.nextElement());
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e,e);
         }
     }
 
-    private static <T> void readServiceDefinitionFromUrl(Map<ServiceEntry, T> pExtractorMap,URL pUrl) {
+    private static <T> void readServiceDefinitionFromUrl(ClassLoader pClassLoader, Map<ServiceEntry, T> pExtractorMap,URL pUrl) {
         String line = null;
         Exception error = null;
         LineNumberReader reader = null;
@@ -117,7 +122,7 @@ public final class LocalServiceFactory {
             while ( (line = reader.readLine()) != null) {
                 // Skip empty lines and comments
                 if (line.trim().length() > 0 && !line.matches("^\\s*#.*$")) {
-                    createOrRemoveService(pExtractorMap, line);
+                    createOrRemoveService(pClassLoader, pExtractorMap, line);
                 }
             }
         } catch (Exception e) {
@@ -131,7 +136,7 @@ public final class LocalServiceFactory {
         }
     }
 
-    private static <T> void createOrRemoveService(Map<ServiceEntry, T> pExtractorMap, String pLine)
+    private static <T> void createOrRemoveService(ClassLoader pClassLoader, Map<ServiceEntry, T> pExtractorMap, String pLine)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (pLine.length() > 0) {
             ServiceEntry entry = new ServiceEntry(pLine);
@@ -153,7 +158,7 @@ public final class LocalServiceFactory {
                 // argument is given, this constructor is used and feed with
                 // the order. This is typically used in combination with implementing
                 // and {@link Comparable} interface to get a sorted set
-                Class<T> clazz = (Class<T>) LocalServiceFactory.class.getClassLoader().loadClass(entry.getClassName());
+                Class<T> clazz = (Class<T>) pClassLoader.loadClass(entry.getClassName());
                 T ext;
                 try {
                     Constructor ctr = clazz.getConstructor(int.class);
