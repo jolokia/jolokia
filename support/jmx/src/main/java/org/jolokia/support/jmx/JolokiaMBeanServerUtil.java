@@ -21,7 +21,6 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.support.jmx.impl.JolokiaMBeanServerHolder;
 
 /**
@@ -43,7 +42,7 @@ public final class JolokiaMBeanServerUtil {
      */
     public static MBeanServer getJolokiaMBeanServer() {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        MBeanServer jolokiaMBeanServer;
+        MBeanServer jolokiaMBeanServer = null;
         try {
             jolokiaMBeanServer =
                     (MBeanServer) server.getAttribute(JolokiaMBeanServerHolder.MBEAN_SERVER_HOLDER_OBJECTNAME,
@@ -52,7 +51,10 @@ public final class JolokiaMBeanServerUtil {
             // should be probably locked, but for simplicity reasons and because
             // the probability of a clash is fairly low (can happen only once), it's omitted
             // here. Note, that server.getAttribute() itself is threadsafe.
-            jolokiaMBeanServer = JolokiaMBeanServerHolder.registerJolokiaMBeanServerHolderMBean(server, lookupSerializer());
+            Serializer serializer = lookupSerializer();
+            if (serializer != null) {
+                jolokiaMBeanServer = JolokiaMBeanServerHolder.registerJolokiaMBeanServerHolderMBean(server, serializer);
+            }
         } catch (JMException e) {
             throw new IllegalStateException("Internal: Cannot get JolokiaMBean server via JMX lookup: " + e,e);
         }
@@ -74,7 +76,6 @@ public final class JolokiaMBeanServerUtil {
         return getJolokiaMBeanServer().registerMBean(object, name);
     }
 
-
     /**
      * Unregister an MBean at the JolokiaMBeanServer. This call is directly delegated
      * to the JolokiaMBeanServer
@@ -87,10 +88,22 @@ public final class JolokiaMBeanServerUtil {
         getJolokiaMBeanServer().unregisterMBean(name);
     }
 
-
     // If used via this method, only the Jolokia serializer is used. If used via OSGi, any serializer registered
     // as a servie is used.
     private static Serializer lookupSerializer() {
-        return new JolokiaSerializer();
+        Class clazz = null;
+        try {
+            clazz = Class.forName("org.jolokia.service.serializer.JolokiaSerializer");
+            return (Serializer) clazz.newInstance();
+        } catch (ClassNotFoundException e) {
+            // No serializer available
+            return null;
+        } catch (InstantiationException e) {
+            // No serializer available
+            return null;
+        } catch (IllegalAccessException e) {
+            // No serializer available
+            return null;
+        }
     }
 }

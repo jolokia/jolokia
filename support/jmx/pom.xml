@@ -38,6 +38,9 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- This dependency is currently accorded. In principle, any
+         serializer could be used (but the lookup would have to be adapted
+         accordingly) -->
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-serializer</artifactId>
@@ -92,6 +95,7 @@
             <Export-Package>
               org.jolokia.support.jmx
             </Export-Package>
+            <!-- Don't declare an import on sth not exported -->
             <Import-Package>
               !org.jolokia.service.serializer,
               *

@@ -63,7 +63,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.it</Bundle-SymbolicName>
-            <Bundle-Activator>org.jolokia.it.core.Activator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.it.core.ItActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

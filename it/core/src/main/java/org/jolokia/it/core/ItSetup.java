@@ -17,8 +17,7 @@ package org.jolokia.it.core;
  */
 
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.management.*;
 
@@ -73,17 +72,18 @@ public class ItSetup {
 
 
     private List<ObjectName> registeredMBeans;
-    private List<ObjectName> registeredJolokiaMBeans;
-
-    public ItSetup() {
-    }
+    private List<ObjectName> registeredJolokiaMBeans = Collections.emptyList();
 
     public void start() {
         registeredMBeans = registerMBeans(ManagementFactory.getPlatformMBeanServer(), JOLOKIA_IT_DOMAIN);
         MBeanServer jolokiaServer = getJolokiaMBeanServer();
         if (jolokiaServer != null) {
             registeredJolokiaMBeans = registerMBeans(jolokiaServer, JOLOKIA_IT_DOMAIN_HIDDEN);
-            registeredJolokiaMBeans.addAll(registerJsonMBeans(jolokiaServer, JOLOKIA_IT_JSONMBEAN_DOMAIN));
+            try {
+                registeredJolokiaMBeans.addAll(registerJsonMBeans(jolokiaServer, JOLOKIA_IT_JSONMBEAN_DOMAIN));
+            } catch (RuntimeException exp) {
+                System.err.println("Error: Cannot register JSON MBeans: " + exp);
+            }
         }
     }
 
