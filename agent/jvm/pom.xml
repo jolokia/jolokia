@@ -133,6 +133,50 @@
                   <include>com.googlecode.json-simple:json-simple</include>
                 </includes>
               </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>org.jolokia:jolokia-server-core</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/server/core/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-server-detector</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/server/detector/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-jmx</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/jmx/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-serializer</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/serializer/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-history</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/history/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-pullnotif</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/pullnotif/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-discovery</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/discovery/osgi/**</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                   <resource>META-INF/jolokia/services-default</resource>

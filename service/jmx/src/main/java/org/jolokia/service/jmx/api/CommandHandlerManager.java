@@ -1,4 +1,4 @@
-package org.jolokia.service.jmx.handler;
+package org.jolokia.service.jmx.api;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -23,6 +23,7 @@ import javax.management.JMException;
 
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.service.jmx.handler.*;
 
 /**
  * A request handler manager is responsible for managing so called "request handlers" which

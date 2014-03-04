@@ -10,6 +10,7 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.service.jmx.api.CommandHandler;
 
 /*
  * Copyright 2009-2013 Roland Huss

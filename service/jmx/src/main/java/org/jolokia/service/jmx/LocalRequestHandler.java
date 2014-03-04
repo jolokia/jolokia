@@ -24,8 +24,8 @@ import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.service.jmx.handler.CommandHandler;
-import org.jolokia.service.jmx.handler.CommandHandlerManager;
+import org.jolokia.service.jmx.api.CommandHandler;
+import org.jolokia.service.jmx.api.CommandHandlerManager;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.

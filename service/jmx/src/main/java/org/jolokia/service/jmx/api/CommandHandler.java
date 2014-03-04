@@ -1,4 +1,4 @@
-package org.jolokia.service.jmx.handler;
+package org.jolokia.service.jmx.api;
 
 import java.io.IOException;
 

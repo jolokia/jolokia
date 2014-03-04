@@ -78,6 +78,7 @@
             <Bundle-Activator>org.jolokia.service.jsr160.osgi.Jsr160ProxyActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.jsr160</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JSR160 Proxy</Bundle-Description>
+            <Export-Package/>
           </instructions>
         </configuration>
       </plugin>

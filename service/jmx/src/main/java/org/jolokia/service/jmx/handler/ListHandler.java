@@ -10,6 +10,7 @@ import org.jolokia.server.core.util.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.service.jmx.api.CommandHandler;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;

@@ -12,6 +12,7 @@ import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.service.jmx.api.CommandHandler;
 
 /*
  * Copyright 2009-2013 Roland Huss

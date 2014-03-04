@@ -86,6 +86,9 @@
             <Bundle-Activator>org.jolokia.service.jmx.osgi.JmxServiceActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.jmx</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX request handler</Bundle-Description>
+            <Export-Package>
+              org.jolokia.service.jmx.api
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

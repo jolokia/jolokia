@@ -22,6 +22,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.service.jmx.api.CommandHandler;
 import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
 import org.jolokia.server.core.request.JolokiaNotificationRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;

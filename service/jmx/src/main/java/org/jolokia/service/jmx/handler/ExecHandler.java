@@ -29,6 +29,7 @@ import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.request.JolokiaExecRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.service.jmx.api.CommandHandler;
 
 
 /**

@@ -71,6 +71,7 @@
             <Bundle-Activator>org.jolokia.service.serializer.osgi.SerializerServiceActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.serializer</Bundle-SymbolicName>
             <Bundle-Description>Jolokia object serializer</Bundle-Description>
+            <Export-Package/>
           </instructions>
         </configuration>
       </plugin>

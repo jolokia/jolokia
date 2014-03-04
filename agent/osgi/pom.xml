@@ -22,7 +22,7 @@
   <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <description>Jolokia :: Agent :: OSGi</description>
+  <description>Jolokia :: Agent :: OSGi Bundle</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
@@ -40,7 +40,37 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-detector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-jmx</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-discovery</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-history</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-pullnotif</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -55,16 +85,9 @@
       <scope>provided</scope>
     </dependency>
 
-
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -79,7 +102,8 @@
 
   <build>
     <plugins>
-      <plugin>
+
+       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
@@ -87,9 +111,20 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
-            <Bundle-Description>Jolokia OSGi Agent</Bundle-Description>
+            <Bundle-Description>Jolokia OSGi Agent Bundle</Bundle-Description>
 
-            <Bundle-Activator>org.jolokia.server.core.osgi.OsgiAgentActivator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.agent.osgi.bundle.Activator</Bundle-Activator>
+            <DynamicImport-Package>org.osgi.service.cm;version=1.2</DynamicImport-Package>
+            <Embed-Dependency>
+              jolokia-server-core;inline=true,
+              jolokia-server-dectector;inline=true,
+              jolokia-service-jmx;inline=true,
+              jolokia-service-serializer;inline=true,
+              jolokia-service-discovery;inline=true,
+              jolokia-service-history;inline=true,
+              jolokia-service-pullnotif;inline=true,
+              json-simple;inline=true
+            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

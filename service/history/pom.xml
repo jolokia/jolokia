@@ -72,6 +72,7 @@
             <Bundle-Activator>org.jolokia.service.history.osgi.HistoryStoreActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.history</Bundle-SymbolicName>
             <Bundle-Description>Jolokia History MBean</Bundle-Description>
+            <Export-Package/>
           </instructions>
         </configuration>
       </plugin>
