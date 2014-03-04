@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-parent</artifactId>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>Jolokia :: Parent :: POM</description>
