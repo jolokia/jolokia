@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx;
+package org.jolokia.support.jmx.impl;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -29,7 +29,7 @@ import javax.management.loading.ClassLoaderRepository;
  * @author roland
  * @since 13.01.13
  */
-class MBeanServerProxy implements MBeanServer {
+public class MBeanServerProxy implements MBeanServer {
 
     private MBeanServer delegate;
 

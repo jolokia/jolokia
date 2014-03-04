@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx;
+package org.jolokia.support.jmx.impl;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -21,6 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.service.serializer.JolokiaSerializer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -43,7 +44,7 @@ public class JsonDymamicMBeanImplTest {
 
     @BeforeClass
     public void setup() {
-        server = new JolokiaMBeanServer();
+        server = new JolokiaMBeanServer(new JolokiaSerializer());
         platformServer = ManagementFactory.getPlatformMBeanServer();
     }
 

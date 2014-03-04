@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx;
+package org.jolokia.support.jmx.impl;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -24,6 +24,8 @@ import javax.management.*;
 import javax.management.modelmbean.*;
 import javax.management.openmbean.CompositeData;
 
+import org.jolokia.service.serializer.JolokiaSerializer;
+import org.jolokia.support.jmx.JsonMBean;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -40,7 +42,7 @@ public class JolokiaMBeanServerTest {
 
     @Test
     public void simple() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
-        JolokiaMBeanServer server = new JolokiaMBeanServer();
+        JolokiaMBeanServer server = new JolokiaMBeanServer(new JolokiaSerializer());
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
             server.registerMBean(new JsonAnnoTest(),oName);
@@ -62,7 +64,7 @@ public class JolokiaMBeanServerTest {
 
     @Test
     public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
-        JolokiaMBeanServer server = new JolokiaMBeanServer();
+        JolokiaMBeanServer server = new JolokiaMBeanServer(new JolokiaSerializer());
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
 
@@ -99,7 +101,7 @@ public class JolokiaMBeanServerTest {
         modelMBean.setModelMBeanInfo(mbi);
         modelMBean.setManagedResource(new JsonAnnoPlainTest(), "ObjectReference");
 
-        JolokiaMBeanServer server = new JolokiaMBeanServer();
+        JolokiaMBeanServer server = new JolokiaMBeanServer(new JolokiaSerializer());
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
 

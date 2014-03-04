@@ -33,9 +33,7 @@
     <module>server/detector</module>
 
     <module>agent/war</module>
-    <module>agent/mule</module>
     <module>agent/osgi</module>
-    <!--<module>agent/osgi/bundle</module>-->
     <module>agent/jvm</module>
 
     <module>service/jmx</module>

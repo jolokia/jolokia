@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx;
+package org.jolokia.support.jmx.impl;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -26,7 +26,7 @@ import javax.management.modelmbean.ModelMBean;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.server.core.service.serializer.*;
-import org.jolokia.service.serializer.JolokiaSerializer;
+import org.jolokia.support.jmx.JsonMBean;
 
 /**
  * Dedicate MBeanServer for registering Jolokia-only MBeans
@@ -45,11 +45,11 @@ class JolokiaMBeanServer extends MBeanServerProxy {
     /**
      * Create a private MBean server
      */
-    public JolokiaMBeanServer() {
+    public JolokiaMBeanServer(Serializer pSerializer) {
         MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
         delegatedMBeans = new HashSet<ObjectName>();
         delegateServer = ManagementFactory.getPlatformMBeanServer();
-        serializer = createSerializer();
+        serializer = pSerializer;
         init(mBeanServer);
     }
 
@@ -84,11 +84,6 @@ class JolokiaMBeanServer extends MBeanServerProxy {
             }
         }
         return ret;
-    }
-
-    private Serializer createSerializer() {
-        // TODO: Hardcoded for now
-        return new JolokiaSerializer();
     }
 
     // Lookup a JsonMBean annotation

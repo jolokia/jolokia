@@ -50,6 +50,18 @@
     </dependency>
 
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
       <scope>test</scope>
@@ -75,9 +87,15 @@
           <instructions>
             <Bundle-SymbolicName>org.jolokia.support.jmx</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX Addons</Bundle-Description>
+            <Bundle-Activator>org.jolokia.support.jmx.osgi.JmxSupportActivator</Bundle-Activator>
+
             <Export-Package>
               org.jolokia.support.jmx
             </Export-Package>
+            <Import-Package>
+              !org.jolokia.service.serializer,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx;
+package org.jolokia.support.jmx.impl;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -25,11 +25,6 @@ import javax.management.MBeanServer;
  * @since 13.01.13
  */
 public interface JolokiaMBeanServerHolderMBean {
-
-    /**
-     * Name of MBean used for registration
-     */
-    String OBJECT_NAME = "jolokia:type=MBeanServer";
 
     /**
      * Get the Jolokia MBeanServer
