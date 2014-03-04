@@ -92,6 +92,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-tools-test</artifactId>
       <version>${project.version}</version>
@@ -113,11 +119,11 @@
             <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
             <Bundle-Description>Jolokia OSGi Agent Bundle</Bundle-Description>
 
-            <Bundle-Activator>org.jolokia.agent.osgi.bundle.Activator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.agent.osgi.JolokiaBundleActivator</Bundle-Activator>
             <DynamicImport-Package>org.osgi.service.cm;version=1.2</DynamicImport-Package>
             <Embed-Dependency>
               jolokia-server-core;inline=true,
-              jolokia-server-dectector;inline=true,
+              jolokia-server-detector;inline=true,
               jolokia-service-jmx;inline=true,
               jolokia-service-serializer;inline=true,
               jolokia-service-discovery;inline=true,
@@ -125,6 +131,21 @@
               jolokia-service-pullnotif;inline=true,
               json-simple;inline=true
             </Embed-Dependency>
+            <Export-Package>
+              org.jolokia.server.core.config,
+              org.jolokia.server.core.detector,
+              org.jolokia.server.core.http,
+              org.jolokia.server.core.request,
+              org.jolokia.server.core.request.notification,
+              org.jolokia.server.core.restrictor,
+              !org.jolokia.server.core.service.impl,
+              org.jolokia.server.core.service.*,
+              org.jolokia.server.core.service,
+              org.jolokia.server.core.util.*,
+              org.jolokia.server.core,
+              org.jolokia.service.jmx.api
+            </Export-Package>
+
           </instructions>
         </configuration>
       </plugin>

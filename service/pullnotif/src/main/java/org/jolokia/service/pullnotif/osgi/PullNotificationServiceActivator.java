@@ -12,7 +12,7 @@ import org.osgi.framework.BundleContext;
  * @author roland
  * @since 02.03.14
  */
-public class PullNotificationActivator implements BundleActivator {
+public class PullNotificationServiceActivator implements BundleActivator {
 
     /** {@inheritDoc} */
     public void start(BundleContext context) throws Exception {

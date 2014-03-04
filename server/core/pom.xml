@@ -113,9 +113,6 @@
               org.jolokia.server.core.util.*,
               org.jolokia.server.core
             </Export-Package>
-            <Import-Package>
-              *
-            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

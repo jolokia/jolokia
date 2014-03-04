@@ -134,7 +134,7 @@ public class OsgiAgentServlet extends AgentServlet {
      */
     @Override
     protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
-        super.initServices(pServletConfig, pServiceManager);
+        //super.initServices(pServletConfig, pServiceManager);
         BundleContext ctx = getBundleContext(pServletConfig);
         if (ctx != null) {
             pServiceManager.addServiceLookup(new OsgiJolokiaServiceFactory(ctx));

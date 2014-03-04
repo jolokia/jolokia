@@ -12,7 +12,7 @@ import org.osgi.framework.BundleContext;
  * @author roland
  * @since 02.03.14
  */
-public class HistoryStoreActivator implements BundleActivator {
+public class HistoryServiceActivator implements BundleActivator {
 
     /** {@inheritDoc} */
     public void start(BundleContext context) throws Exception {

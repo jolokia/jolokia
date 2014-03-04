@@ -36,7 +36,15 @@ public final class JolokiaMBeanServerUtil {
     }
 
     /**
-     * Lookup the JolokiaMBean server via a JMX lookup to the Jolokia-internal MBean exposing this MBeanServer
+     * Lookup the JolokiaMBean server via a JMX lookup to the Jolokia-internal MBean exposing this MBeanServer.
+     * Note if this method is used in an OSGi environment, it will only return non-null if a Jolokia {@link Serializer}
+     * is registered as a service. So, it can return <code>null</code> e.g. during startup of an OSGi container. The
+     * client must deal with a null-return value and wait until this bundle
+     * has been started. After this, a service tracker is used as a proxy for the serializer service, which, when called
+     * without an registered serializer service will throw an exception.
+     *
+     * If used in a non-OSGi environment and the class "org.jolokia.service.serailizer.JolokiaSerializer" is on the classpath,
+     * this method will return the requested MBeanServer, (always) null otherwise .
      *
      * @return the Jolokia MBeanServer or null if not yet available present
      */
