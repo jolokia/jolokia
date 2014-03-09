@@ -51,7 +51,7 @@ public class LocalRequestHandler extends AbstractRequestHandler {
     // This service must be initialized after the detectors, since detectors will be
     // looked up in this init
     public void init(JolokiaContext pCtx) {
-        commandHandlerManager =  new CommandHandlerManager(pCtx,true);
+        commandHandlerManager =  new CommandHandlerManager(pCtx);
         jolokiaContext = pCtx;
     }
 
@@ -67,14 +67,14 @@ public class LocalRequestHandler extends AbstractRequestHandler {
     }
 
     /** {@inheritDoc} */
-    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
+    public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
 
-        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
+        CommandHandler<R> handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
 
         if (handler.handleAllServersAtOnce(pJmxReq)) {
             try {
-                return handler.handleRequest(jolokiaContext.getMBeanServerAccess(), pJmxReq, pPreviousResult);
+                return handler.handleAllServerRequest(jolokiaContext.getMBeanServerAccess(), pJmxReq, pPreviousResult);
             } catch (IOException e) {
                 throw new IllegalStateException("Internal: IOException " + e + ". Shouldn't happen.",e);
             }
@@ -103,7 +103,7 @@ public class LocalRequestHandler extends AbstractRequestHandler {
         MBeanServerAccess executor = jolokiaContext.getMBeanServerAccess();
         for (MBeanServerConnection conn : executor.getMBeanServers()) {
             try {
-                return pRequestHandler.handleRequest(conn, pJmxReq);
+                return pRequestHandler.handleSingleServerRequest(conn, pJmxReq);
             } catch (InstanceNotFoundException exp) {
                 // Remember exceptions for later use
                 objNotFoundException = exp;

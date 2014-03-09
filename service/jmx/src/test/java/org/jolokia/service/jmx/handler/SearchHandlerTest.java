@@ -49,15 +49,17 @@ public class SearchHandlerTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext();
-        handler = new SearchHandler(ctx, null);
-        handlerWithRealm = new SearchHandler(ctx,"proxy");
+        handler = new SearchHandler();
+        handler.init(ctx, null);
+        handlerWithRealm = new SearchHandler();
+        handlerWithRealm.init(ctx,"proxy");
     }
 
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
-        handler.handleRequest(null,
-                              new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build());
+        handler.handleSingleServerRequest(null,
+                                          new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build());
     }
 
     @Test
@@ -130,6 +132,6 @@ public class SearchHandlerTest extends BaseHandlerTest {
         }
         expect(server.queryNames(oName,null)).andReturn(names);
         replay(server);
-        return (List<String>) pHandler.handleRequest(getMBeanServerManager(server),request, previousResult);
+        return (List<String>) pHandler.handleAllServerRequest(getMBeanServerManager(server), request, previousResult);
     }
 }

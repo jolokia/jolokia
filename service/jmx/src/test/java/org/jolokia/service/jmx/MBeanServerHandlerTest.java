@@ -113,7 +113,7 @@ public class MBeanServerHandlerTest {
     // ===================================================================================================
 
 
-    interface DummyMBean {
+    public interface DummyMBean {
 
     }
     private class Dummy implements DummyMBean,MBeanRegistration {

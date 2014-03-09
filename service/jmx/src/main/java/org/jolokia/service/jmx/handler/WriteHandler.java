@@ -8,11 +8,9 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
-import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.RequestType;
-import org.jolokia.service.jmx.api.CommandHandler;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -37,20 +35,9 @@ import org.jolokia.service.jmx.api.CommandHandler;
  * @author roland
  * @since Jun 12, 2009
  */
-public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
-
-    /**
-     * Constructor
-     *
-     * @param pContext access restriction to apply
-     *
-     */
-    public WriteHandler(JolokiaContext pContext) {
-        super(pContext);
-    }
+public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
 
     /** {@inheritDoc} */
-    @Override
     public RequestType getType() {
         return RequestType.WRITE;
     }
@@ -66,7 +53,7 @@ public class WriteHandler extends CommandHandler<JolokiaWriteRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JolokiaWriteRequest request)
+    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaWriteRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
 
         try {

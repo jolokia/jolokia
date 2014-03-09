@@ -52,8 +52,11 @@ public class ListHandlerTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext();
-        handler = new ListHandler(ctx, null);
-        handlerWithRealm = new ListHandler(ctx, "proxy");
+        handler = new ListHandler();
+        handler.init(ctx, null);
+        handlerWithRealm = new ListHandler();
+        handlerWithRealm.init(ctx, "proxy");
+
         executor = new DefaultMBeanServerAccess();
     }
 
@@ -140,7 +143,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void descPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory","desc").build();
-        String res = (String) handler.handleRequest(executor, request, null);
+        String res = (String) handler.handleAllServerRequest(executor, request, null);
         assertNotNull(res);
     }
 
@@ -150,7 +153,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .pathParts("java.lang","type=Memory","desc")
                 .option(ConfigKey.MAX_DEPTH,"4")
                 .build();
-        String res = (String) handler.handleRequest(executor, request, null);
+        String res = (String) handler.handleAllServerRequest(executor, request, null);
         assertNotNull(res);
     }
 
@@ -200,10 +203,10 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void leafValue() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory", "desc").build();
-        String value = (String) handler.handleRequest(executor, request, null);
+        String value = (String) handler.handleAllServerRequest(executor, request, null);
         assertNotNull(value);
 
-        String newValue = (String) handler.handleRequest(executor, request, createMap("first","second"));
+        String newValue = (String) handler.handleAllServerRequest(executor, request, createMap("first", "second"));
         assertEquals(newValue,value);
     }
 
@@ -286,8 +289,8 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     private Map execute(ListHandler pHandler, JolokiaListRequest pRequest, Map ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
-        return (Map) pHandler.handleRequest(executor, pRequest,
-                                            pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
+        return (Map) pHandler.handleAllServerRequest(executor, pRequest,
+                                                     pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
     }
 
 
@@ -296,13 +299,13 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "op")
                 .build();
-        Map res = (Map) handler.handleRequest(executor,request, null);
+        Map res = (Map) handler.handleAllServerRequest(executor, request, null);
         assertEquals(res.size(),0);
 
         request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", "not")
                 .build();
-        res = (Map) handler.handleRequest(executor,request, null);
+        res = (Map) handler.handleAllServerRequest(executor, request, null);
         assertEquals(res.size(),0);
     }
 
@@ -318,7 +321,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        Map res = (Map) handler.handleRequest(executor,request, null);
+        Map res = (Map) handler.handleAllServerRequest(executor, request, null);
         assertEquals(((Map) res.get("Verbose")).get("type"),"boolean");
     }
 
@@ -335,7 +338,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         expect(dummyConn.getMBeanInfo(name)).andThrow(new InstanceNotFoundException());
         expect(dummyConn.isRegistered(name)).andReturn(false);
         replay(dummyConn);
-        handler.handleRequest(servers,request, null);
+        handler.handleAllServerRequest(servers, request, null);
     }
 
 

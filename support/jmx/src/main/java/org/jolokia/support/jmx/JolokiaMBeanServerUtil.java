@@ -22,6 +22,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.support.jmx.impl.JolokiaMBeanServerHolder;
+import org.jolokia.support.jmx.impl.JolokiaMBeanServerHolderMBean;
 
 /**
  * Utility class for looking up the Jolokia-internal MBeanServer which never gets exposed via JSR-160
@@ -54,7 +55,7 @@ public final class JolokiaMBeanServerUtil {
         try {
             jolokiaMBeanServer =
                     (MBeanServer) server.getAttribute(JolokiaMBeanServerHolder.MBEAN_SERVER_HOLDER_OBJECTNAME,
-                                                      JolokiaMBeanServerHolder.JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
+                                                      JolokiaMBeanServerHolderMBean.JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
         } catch (InstanceNotFoundException exp) {
             // should be probably locked, but for simplicity reasons and because
             // the probability of a clash is fairly low (can happen only once), it's omitted
@@ -97,7 +98,7 @@ public final class JolokiaMBeanServerUtil {
     }
 
     // If used via this method, only the Jolokia serializer is used. If used via OSGi, any serializer registered
-    // as a servie is used.
+    // as a service is used.
     private static Serializer lookupSerializer() {
         Class clazz = null;
         try {

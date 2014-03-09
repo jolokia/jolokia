@@ -45,7 +45,8 @@ public class NotificationHandlerTest extends BaseHandlerTest {
         ctx = new TestJolokiaContext.Builder().config(ConfigKey.AGENT_ID,"test")
                                               .build();
 
-        handler = new NotificationHandler(ctx);
+        handler = new NotificationHandler();
+        handler.init(ctx,null);
     }
 
     @AfterMethod
@@ -60,7 +61,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
         // No exception for now
         handler.checkForRestriction(request);
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        handler.doHandleRequest(getMBeanServerManager(connection),request, null);
+        handler.doHandleAllServerRequest(getMBeanServerManager(connection), request, null);
     }
 
     private JolokiaNotificationRequest createRequest() throws MalformedObjectNameException {
@@ -73,6 +74,6 @@ public class NotificationHandlerTest extends BaseHandlerTest {
         JolokiaNotificationRequest request = createRequest();
         assertTrue(handler.handleAllServersAtOnce(request));
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        handler.doHandleRequest(connection,request);
+        handler.doHandleSingleServerRequest(connection, request);
     }
 }

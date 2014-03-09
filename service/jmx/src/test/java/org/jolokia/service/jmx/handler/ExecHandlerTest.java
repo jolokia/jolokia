@@ -46,7 +46,8 @@ public class ExecHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext();
-        handler = new ExecHandler(ctx);
+        handler = new ExecHandler();
+        handler.init(ctx,null);
     }
 
     @BeforeClass
@@ -69,7 +70,7 @@ public class ExecHandlerTest {
                 operation("simple").
                 build();
         assertEquals(handler.getType(), EXEC);
-        Object res = handler.handleRequest(getMBeanServer(),request);
+        Object res = handler.handleSingleServerRequest(getMBeanServer(), request);
         assertNull(res);
     }
 
@@ -79,19 +80,19 @@ public class ExecHandlerTest {
                 operation("simple").
                 arguments("blub","bla").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).operation("koan titel").build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
 
@@ -104,7 +105,7 @@ public class ExecHandlerTest {
                 operation("withArgs").
                 arguments(10L,list,Boolean.TRUE)
                 .build();
-        Map result = (Map) handler.handleRequest(getMBeanServer(),request);
+        Map result = (Map) handler.handleSingleServerRequest(getMBeanServer(), request);
         assertEquals(result.get("long"),10L);
         assertTrue(result.get("list") instanceof List);
         assertEquals(((List) result.get("list")).get(0), "wollscheid");
@@ -116,7 +117,7 @@ public class ExecHandlerTest {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("overloaded").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     @Test
@@ -125,21 +126,21 @@ public class ExecHandlerTest {
                 operation("overloaded(int)").
                 arguments(10).
                 build();
-        Integer res = (Integer) handler.handleRequest(getMBeanServer(),request);
+        Integer res = (Integer) handler.handleSingleServerRequest(getMBeanServer(), request);
         assertEquals(res,Integer.valueOf(1));
 
         request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("overloaded(int,java.lang.String)").
                 arguments(10,"bla").
                 build();
-        res = (Integer) handler.handleRequest(getMBeanServer(),request);
+        res = (Integer) handler.handleSingleServerRequest(getMBeanServer(), request);
         assertEquals(res,Integer.valueOf(2));
 
         request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("overloaded(boolean)").
                 arguments(true).
                 build();
-        res = (Integer) handler.handleRequest(getMBeanServer(),request);
+        res = (Integer) handler.handleSingleServerRequest(getMBeanServer(), request);
         assertEquals(res,Integer.valueOf(3));
     }
 
@@ -149,7 +150,7 @@ public class ExecHandlerTest {
                 operation("overloaded(java.lang.Integer)").
                 arguments(1).
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     private MBeanServerConnection getMBeanServer() {

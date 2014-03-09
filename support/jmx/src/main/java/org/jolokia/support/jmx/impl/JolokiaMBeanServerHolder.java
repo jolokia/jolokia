@@ -28,18 +28,10 @@ import org.jolokia.server.core.service.serializer.Serializer;
  */
 public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
-    /**
-     * Name of MBean used for registration
-     */
-    public static final String OBJECT_NAME = "jolokia:type=MBeanServer";
     private MBeanServer jolokiaMBeanServer;
 
+    //
     public static final ObjectName MBEAN_SERVER_HOLDER_OBJECTNAME;
-
-    /**
-     * Attribute name for getting the server
-     */
-    public static final String JOLOKIA_MBEAN_SERVER_ATTRIBUTE = "JolokiaMBeanServer";
 
 
     static {

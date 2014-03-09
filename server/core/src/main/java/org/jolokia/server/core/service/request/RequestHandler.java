@@ -57,7 +57,7 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * For exclusive requests, the given object is null
      *
      * @param pJmxReq the request to dispatch
-     * @param pPreviousResult a result object from a previous {@link #handleRequest(JolokiaRequest, Object)} call when
+     * @param pPreviousResult a result object from a previous {@link #handleRequest(R, Object)} call when
      *                {@link JolokiaRequest#isExclusive()} is <code>false</code>. This argument can be <code>null</code>
      * @return result object
      * @throws JMException if performing of the actions failes
@@ -65,7 +65,7 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
      *         has been set).
      */
-    Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
+    <R extends JolokiaRequest>  Object handleRequest(R pJmxReq, Object pPreviousResult)
             throws JMException, IOException, NotChangedException;
 
     /**

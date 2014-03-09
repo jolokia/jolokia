@@ -16,14 +16,14 @@ package org.jolokia.service.jmx.api;
  * limitations under the License.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.JMException;
 
+import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.util.LocalServiceFactory;
 import org.jolokia.server.core.util.RequestType;
-import org.jolokia.service.jmx.handler.*;
 
 /**
  * A request handler manager is responsible for managing so called "request handlers" which
@@ -43,10 +43,9 @@ public class CommandHandlerManager {
      * Manager and dispatcher for incoming requests
      *
      * @param pCtx jolokia context
-     * @param pUseNotifications whether notifications should be enabled
      */
-    public CommandHandlerManager(JolokiaContext pCtx, boolean pUseNotifications) {
-        this(pCtx, pUseNotifications,null);
+    public CommandHandlerManager(JolokiaContext pCtx) {
+        this(pCtx,null);
     }
 
 
@@ -55,23 +54,15 @@ public class CommandHandlerManager {
      * since it doesnt keep a reference to a request being processed
      *
      * @param pCtx jolokia context for retrieving various services
-     * @param pUseNotifications whether notifications should be enabled
      * @param pRealm realm to use for returned names. Certain handlers need this information for returning meta
      *               data with the proper realm prefixed.
      */
-    public CommandHandlerManager(JolokiaContext pCtx, boolean pUseNotifications, String pRealm) {
-        CommandHandler handlers[] = {
-                new ReadHandler(pCtx),
-                new WriteHandler(pCtx),
-                new ExecHandler(pCtx),
-                new ListHandler(pCtx, pRealm),
-                new SearchHandler(pCtx, pRealm),
-                pUseNotifications ? new NotificationHandler(pCtx) : null
-        };
+    public CommandHandlerManager(JolokiaContext pCtx, String pRealm) {
+        List<CommandHandler> handlers =
+                LocalServiceFactory.createServices (this.getClass().getClassLoader(),"META-INF/jolokia/command-handlers");
         for (CommandHandler handler : handlers) {
-            if (handler != null) {
-                requestHandlerMap.put(handler.getType(),handler);
-            }
+            handler.init(pCtx,pRealm);
+            requestHandlerMap.put(handler.getType(),handler);
         }
     }
 
@@ -81,7 +72,7 @@ public class CommandHandlerManager {
      * @param pType type of request
      * @return handler which can handle requests of the given type
      */
-    public CommandHandler getCommandHandler(RequestType pType) {
+    public <R extends JolokiaRequest> CommandHandler<R> getCommandHandler(RequestType pType) {
         CommandHandler handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");

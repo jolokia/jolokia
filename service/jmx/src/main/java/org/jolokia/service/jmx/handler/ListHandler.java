@@ -6,14 +6,12 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.JolokiaListRequest;
+import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.util.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.service.jmx.api.CommandHandler;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
-import org.jolokia.server.core.request.JolokiaListRequest;
-import org.jolokia.server.core.service.api.JolokiaContext;
 import org.json.simple.JSONObject;
 
 /*
@@ -40,25 +38,11 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ListHandler extends CommandHandler<JolokiaListRequest> {
-
-    // Realm used as a prefix
-    private String realm;
+public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
 
     /** {@inheritDoc} */
     public RequestType getType() {
         return RequestType.LIST;
-    }
-
-    /**
-     * Constructor
-     *
-     * @param pContext jolokia context
-     * @param pRealm realm to prepend to all objects names in the returned meta data
-     */
-    public ListHandler(JolokiaContext pContext, String pRealm) {
-        super(pContext);
-        this.realm = pRealm;
     }
 
     /**
@@ -80,7 +64,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
     // pPreviousResult must be a Map according to the "list" data format specification
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerAccess pServerManager, JolokiaListRequest pRequest, Object pPreviousResult)
+    public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaListRequest pRequest, Object pPreviousResult)
             throws IOException, NotChangedException {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
@@ -125,7 +109,7 @@ public class ListHandler extends CommandHandler<JolokiaListRequest> {
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JolokiaListRequest request)
+    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaListRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }

@@ -133,7 +133,7 @@ public class BackendManagerTest {
             super("test", 1);
         }
 
-        public Object handleRequest(JolokiaRequest pJmxReq,Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public <R extends JolokiaRequest> Object handleRequest(R pJmxReq,Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
             called = true;
             if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();

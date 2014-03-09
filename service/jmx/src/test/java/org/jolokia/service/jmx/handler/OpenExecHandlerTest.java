@@ -43,7 +43,8 @@ public class OpenExecHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext.Builder().services(Serializer.class,new JolokiaSerializer()).build();
-        handler = new ExecHandler(ctx);
+        handler = new ExecHandler();
+        handler.init(ctx,null);
     }
 
     @BeforeClass
@@ -70,7 +71,7 @@ public class OpenExecHandlerTest {
                 operation("compositeData").
                 arguments("{ \"stringField\":\"aString\" }").
                 build();
-        CompositeData data  = (CompositeData) handler.handleRequest(getMBeanServer(),request);
+        CompositeData data  = (CompositeData) handler.handleSingleServerRequest(getMBeanServer(), request);
         assertEquals(data.get("stringField"),"aString");
         assertNull(data.get("map"));
         assertEquals(data.get("intField"), 0);
@@ -86,7 +87,7 @@ public class OpenExecHandlerTest {
                 operation("compositeData").
                 arguments("{ \"nonExistentField\":\"aString\" }").
                 build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }    
     
     /**
@@ -98,7 +99,7 @@ public class OpenExecHandlerTest {
         		operation("compositeData").
         		arguments("{ \"intField\":\"aString\" }").
         		build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     /**
@@ -110,7 +111,7 @@ public class OpenExecHandlerTest {
                 operation("arrayData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     /**
@@ -122,7 +123,7 @@ public class OpenExecHandlerTest {
                 operation("listData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
     
     /**
@@ -134,7 +135,7 @@ public class OpenExecHandlerTest {
                 operation("opSetData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
     
     /**
@@ -146,7 +147,7 @@ public class OpenExecHandlerTest {
                 operation("mapData").
                 arguments("{ \"aKey\":{ \"stringField\":\"aString\" } }").
                 build();
-        handler.handleRequest(getMBeanServer(),request);
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
     
     /**
@@ -158,7 +159,7 @@ public class OpenExecHandlerTest {
 				operation("compositeData").
 				arguments("{ \"nestedClass\":{\"nestedField\":\"aString\"} }").
 				build();
-        handler.handleRequest(getMBeanServer(),request);    	    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
     
     /**
@@ -170,7 +171,7 @@ public class OpenExecHandlerTest {
         		operation("compositeData").
         		arguments("{ \"array\":[\"one\", \"two\"] }").
         		build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
     
     /**
@@ -183,7 +184,7 @@ public class OpenExecHandlerTest {
         		operation("compositeData").
         		arguments("{ \"list\":[\"one\", \"two\"] }").
         		build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     /**
@@ -195,7 +196,7 @@ public class OpenExecHandlerTest {
         		operation("compositeData").
         		arguments("{ \"list\":[\"1\", \"2\"] }").
         		build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }    
     
     /**
@@ -207,7 +208,7 @@ public class OpenExecHandlerTest {
         		operation("compositeData").
         		arguments("{ \"map\":{ \"5\":{\"nestedField\":\"value1\"}, \"7\":{\"nestedField\":\"value2\"} } }").
         		build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     /**
@@ -219,7 +220,7 @@ public class OpenExecHandlerTest {
         		operation("compositeData").
         		arguments("{ \"set\": [\"value1\",\"value2\"] }").
         		build();
-        handler.handleRequest(getMBeanServer(),request);    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
     
     
@@ -229,7 +230,7 @@ public class OpenExecHandlerTest {
 				operation("overloaded(javax.management.openmbean.CompositeData)").
 				arguments("{ \"stringField\": \"aString\" }").
 				build();
-        handler.handleRequest(getMBeanServer(),request);    	    	
+        handler.handleSingleServerRequest(getMBeanServer(), request);
     }
         
 

@@ -44,7 +44,8 @@ public class ListHandlerMockTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
         ctx = new TestJolokiaContext();
-        handler = new ListHandler(ctx, null);
+        handler = new ListHandler();
+        handler.init(ctx, null);
     }
 
     @Test(expectedExceptions = { UnsupportedOperationException.class })
@@ -56,7 +57,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
         replay(connection);
-        handler.handleRequest(connection,request);
+        handler.handleSingleServerRequest(connection, request);
     }
 
     @Test
@@ -75,7 +76,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         expect(connection.queryNames(null,null)).andReturn(nameSet);
         replay(connection);
 
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request, null);
+        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
         assertTrue(res.containsKey("java.lang"));
         Map inner = (Map) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
@@ -98,7 +99,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         MBeanServerConnection connection = prepareForIOException(false);
 
 
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(connection),request, null);
+        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
         verify(connection);
         assertEquals(res.size(),1);
         Map jl = (Map) res.get("java.lang");
@@ -113,7 +114,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Runtime","attr").build();
 
         MBeanServerConnection server = prepareForIOException(true);
-        handler.handleRequest(getMBeanServerManager(server),request,null);
+        handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
     }
 
     private MBeanServerConnection prepareForIOException(boolean registerCheck) throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {

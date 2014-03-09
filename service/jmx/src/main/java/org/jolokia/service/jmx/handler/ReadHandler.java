@@ -6,11 +6,9 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.server.core.request.JolokiaReadRequest;
-import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.service.jmx.api.CommandHandler;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -35,7 +33,7 @@ import org.jolokia.service.jmx.api.CommandHandler;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ReadHandler extends CommandHandler<JolokiaReadRequest> {
+public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
 
     // MBean Handler used for extracting MBean Meta data
     private static final MBeanServerAccess.MBeanAction<MBeanInfo> MBEAN_INFO_HANDLER =
@@ -62,16 +60,7 @@ public class ReadHandler extends CommandHandler<JolokiaReadRequest> {
                 }
             };
 
-    /**
-     * Read handler constructor
-     *
-     * @param pContext access restriction to apply
-     */
-    public ReadHandler(JolokiaContext pContext) {
-        super(pContext);
-    }
 
-    @Override
     /** {@inheritDoc} */
     public RequestType getType() {
         return RequestType.READ;
@@ -102,7 +91,7 @@ public class ReadHandler extends CommandHandler<JolokiaReadRequest> {
      * @return the attribute's value
      */
     @Override
-    public Object doHandleRequest(MBeanServerConnection pServer, JolokiaReadRequest pRequest)
+    public Object doHandleSingleServerRequest(MBeanServerConnection pServer, JolokiaReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         checkRestriction(pRequest.getObjectName(), pRequest.getAttributeName());
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
@@ -110,7 +99,7 @@ public class ReadHandler extends CommandHandler<JolokiaReadRequest> {
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleRequest(MBeanServerAccess pServerManager, JolokiaReadRequest pRequest, Object pPreviousResult)
+    public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaReadRequest pRequest, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         // Read command is still exclusive yet (no merging of bulk read requests). If a non-exclusive usage
         // is going to be implemented, then pPreviousResult must taken care of that it might hold bulk read results

@@ -5,12 +5,10 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.request.JolokiaSearchRequest;
-import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.util.RequestType;
-import org.jolokia.service.jmx.api.CommandHandler;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -34,24 +32,9 @@ import org.jolokia.service.jmx.api.CommandHandler;
  * @author roland
  * @since Jun 18, 2009
  */
-public class SearchHandler extends CommandHandler<JolokiaSearchRequest> {
-
-    // A realm which is prefixed to the search result if given
-    private String realm;
-
-    /**
-     * Create search handler
-     *
-     * @param pContext jolokia context to use
-     * @param pRealm
-     */
-    public SearchHandler(JolokiaContext pContext, String pRealm) {
-        super(pContext);
-        this.realm = pRealm;
-    }
+public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> {
 
     /** {@inheritDoc} */
-    @Override
     public RequestType getType() {
         return RequestType.SEARCH;
     }
@@ -66,7 +49,7 @@ public class SearchHandler extends CommandHandler<JolokiaSearchRequest> {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
-    public Object doHandleRequest(MBeanServerAccess serverManager, JolokiaSearchRequest request, Object pPreviousResult)
+    public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaSearchRequest request, Object pPreviousResult)
             throws MBeanException, IOException, NotChangedException {
         checkForModifiedSince(serverManager,request);
         Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
@@ -87,7 +70,7 @@ public class SearchHandler extends CommandHandler<JolokiaSearchRequest> {
 
     /** {@inheritDoc} */
     @Override
-    protected Object doHandleRequest(MBeanServerConnection server, JolokiaSearchRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaSearchRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 }

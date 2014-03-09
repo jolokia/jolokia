@@ -25,11 +25,9 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.request.JolokiaExecRequest;
-import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.RequestType;
-import org.jolokia.service.jmx.api.CommandHandler;
 
 
 /**
@@ -38,18 +36,10 @@ import org.jolokia.service.jmx.api.CommandHandler;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ExecHandler extends CommandHandler<JolokiaExecRequest> {
+public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
 
-    /**
-     * Constructor
-     * @param pContext the jolokia context
-     */
-    public ExecHandler(JolokiaContext pContext) {
-        super(pContext);
-    }
 
     /** {@inheritDoc} */
-    @Override
     public RequestType getType() {
         return RequestType.EXEC;
     }
@@ -76,7 +66,7 @@ public class ExecHandler extends CommandHandler<JolokiaExecRequest> {
      * @return the return value of the operation call
      */
     @Override
-    public Object doHandleRequest(MBeanServerConnection server, JolokiaExecRequest request)
+    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaExecRequest request)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         OperationAndParamType types = extractOperationTypes(server,request);
         int nrParams = types.paramClasses.length;

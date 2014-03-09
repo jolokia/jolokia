@@ -56,7 +56,8 @@ public class WriteHandlerTest {
     @BeforeMethod
     public void createHandler() {
         ctx = new TestJolokiaContext.Builder().services(Serializer.class,new JolokiaSerializer()).build();
-        handler = new WriteHandler(ctx);
+        handler = new WriteHandler();
+        handler.init(ctx,null);
     }
 
     @AfterTest
@@ -73,9 +74,9 @@ public class WriteHandlerTest {
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("10").build();
-        handler.doHandleRequest(getMBeanServer(),req);
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("20").build();
-        Integer ret = (Integer) handler.doHandleRequest(getMBeanServer(),req);
+        Integer ret = (Integer) handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertEquals(ret,new Integer(10));
         assertEquals(handler.getType(),WRITE);
     }
@@ -85,9 +86,9 @@ public class WriteHandlerTest {
         Map map = new HashMap<String,Integer>();
         map.put("answer",42);
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Map").value(map).build();
-        handler.doHandleRequest(getMBeanServer(),req);
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Map").value(null).build();
-        Map ret = (Map) handler.doHandleRequest(getMBeanServer(),req);
+        Map ret = (Map) handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertTrue(ret instanceof Map);
         assertEquals(((Map) ret).get("answer"),42);
 
@@ -96,12 +97,12 @@ public class WriteHandlerTest {
     @Test(expectedExceptions = {AttributeNotFoundException.class})
     public void invalidAttribute() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("ReadOnly").value("Sommer").build();
-        handler.doHandleRequest(getMBeanServer(),req);
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 
     @Test
     public void invalidValue() throws Exception {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Boolean").value(10).build();
-        handler.doHandleRequest(getMBeanServer(),req);
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 }

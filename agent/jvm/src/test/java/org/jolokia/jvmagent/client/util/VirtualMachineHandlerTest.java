@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.sun.tools.attach.AttachNotSupportedException;
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -120,7 +119,7 @@ public class VirtualMachineHandlerTest {
             return true;
         } catch (ProcessingException exp) {
             if (exp.getCause() instanceof InvocationTargetException &&
-                exp.getCause().getCause() instanceof AttachNotSupportedException &&
+                exp.getCause().getCause().getClass().toString().contains("AttachNotSupportedException") &&
                 exp.getCause().getCause().getMessage().matches("^.*Unable to open socket file.*$")) {
                 // This is weird. Happens from time to time but I still need to figure out, why.
                 // For now, we consider this a 'gotcha'

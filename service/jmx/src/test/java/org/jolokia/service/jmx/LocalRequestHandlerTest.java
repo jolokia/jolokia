@@ -6,16 +6,14 @@ import java.lang.reflect.Field;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.service.jmx.api.CommandHandler;
-import org.jolokia.service.jmx.api.CommandHandlerManager;
-import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.service.jmx.api.CommandHandler;
+import org.jolokia.service.jmx.api.CommandHandlerManager;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -67,7 +65,7 @@ public class LocalRequestHandlerTest {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
-        expect(commandHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
+        expect(commandHandler.handleSingleServerRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
         replay(commandHandler);
         assertEquals(requestHandler.handleRequest(request,null),result);
     }
@@ -91,7 +89,7 @@ public class LocalRequestHandlerTest {
 
     private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
-        expect(commandHandler.handleRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
+        expect(commandHandler.handleSingleServerRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(commandHandler);
         requestHandler.handleRequest(request,null);
     }
@@ -101,7 +99,7 @@ public class LocalRequestHandlerTest {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(commandHandler.handleRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andReturn(result);
+        expect(commandHandler.handleAllServerRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andReturn(result);
         replay(commandHandler);
         assertEquals(requestHandler.handleRequest(request,null),result);
     }
@@ -109,7 +107,7 @@ public class LocalRequestHandlerTest {
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
-        expect(commandHandler.handleRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andThrow(new IOException());
+        expect(commandHandler.handleAllServerRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andThrow(new IOException());
         replay(commandHandler);
         requestHandler.handleRequest(request,null);
     }

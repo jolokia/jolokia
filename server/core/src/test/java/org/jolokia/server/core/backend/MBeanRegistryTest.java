@@ -34,7 +34,7 @@ public class MBeanRegistryTest {
         assertEquals(resName,oName);
     }
 
-    interface TestyMBean {
+    public interface TestyMBean {
 
     }
 

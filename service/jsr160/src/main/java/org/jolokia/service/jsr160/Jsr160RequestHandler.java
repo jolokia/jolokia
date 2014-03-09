@@ -24,14 +24,14 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.service.jmx.api.CommandHandler;
 import org.jolokia.service.jmx.api.CommandHandlerManager;
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.request.AbstractRequestHandler;
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.service.api.JolokiaContext;
 
 /**
  * Dispatcher for calling JSR-160 connectors
@@ -59,7 +59,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @param pContext the jolokia context
      */
     public void init(JolokiaContext pContext) {
-        commandHandlerManager = new CommandHandlerManager(pContext,false,getRealm());
+        commandHandlerManager = new CommandHandlerManager(pContext,getRealm());
     }
 
     /**
@@ -74,18 +74,18 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @throws MBeanException
      * @throws IOException
      */
-    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult)
+    public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
-        CommandHandler handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
+        CommandHandler<R> handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
         JMXConnector connector = getConnector(pJmxReq);
         try {
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
                 MBeanServerAccess manager = new SingleMBeanServerAccess(connection);
-                return handler.handleRequest(manager,pJmxReq, pPreviousResult);
+                return handler.handleAllServerRequest(manager, pJmxReq, pPreviousResult);
             } else {
-                return handler.handleRequest(connection,pJmxReq);
+                return handler.handleSingleServerRequest(connection, pJmxReq);
             }
         } finally {
             releaseConnector(connector);
