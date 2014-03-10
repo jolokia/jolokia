@@ -4,7 +4,7 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.MBeanServer;
 
-import org.jolokia.support.jmx.impl.JolokiaMBeanServerHolder;
+import org.jolokia.support.jmx.JolokiaMBeanServerHolder;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

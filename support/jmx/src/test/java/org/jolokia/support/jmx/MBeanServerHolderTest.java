@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx.impl;
+package org.jolokia.support.jmx;
 
 import javax.management.*;
 
@@ -7,8 +7,7 @@ import org.jolokia.service.serializer.JolokiaSerializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author roland
@@ -25,7 +24,7 @@ public class MBeanServerHolderTest {
         EasyMock.expect(server.getAttribute(eq(oName), eq(JolokiaMBeanServerHolderMBean.JOLOKIA_MBEAN_SERVER_ATTRIBUTE))).andReturn(ret);
         EasyMock.replay(server);
 
-        MBeanServer m = JolokiaMBeanServerHolder.registerJolokiaMBeanServerHolderMBean(server,new JolokiaSerializer());
+        MBeanServer m = JolokiaMBeanServerHolder.registerJolokiaMBeanServerHolderMBean(server, new JolokiaSerializer());
         Assert.assertEquals(ret, m);
     }
 

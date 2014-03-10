@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx.impl;
+package org.jolokia.support.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -23,6 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.service.serializer.JolokiaSerializer;
+import org.jolokia.support.jmx.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

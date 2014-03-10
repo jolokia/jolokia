@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx.impl;
+package org.jolokia.support.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss

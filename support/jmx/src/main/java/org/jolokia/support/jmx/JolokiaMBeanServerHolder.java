@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx.impl;
+package org.jolokia.support.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -66,7 +66,7 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
      * @param pSerializer serializer to use
      * @return the JolokiaMBeanServer created
      */
-    public static MBeanServer registerJolokiaMBeanServerHolderMBean(MBeanServer pServer,Serializer pSerializer) {
+    public static MBeanServer registerJolokiaMBeanServerHolderMBean(MBeanServer pServer, Serializer pSerializer) {
         MBeanServer jolokiaMBeanServer;
         ObjectName holderName;
         holderName = MBEAN_SERVER_HOLDER_OBJECTNAME;

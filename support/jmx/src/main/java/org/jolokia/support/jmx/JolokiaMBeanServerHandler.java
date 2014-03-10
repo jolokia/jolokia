@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx.impl;
+package org.jolokia.support.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -25,7 +25,6 @@ import javax.management.*;
 import javax.management.modelmbean.ModelMBean;
 
 import org.jolokia.server.core.service.serializer.*;
-import org.jolokia.support.jmx.JsonMBean;
 
 /**
  * Dedicate MBeanServer for registering Jolokia-only MBeans

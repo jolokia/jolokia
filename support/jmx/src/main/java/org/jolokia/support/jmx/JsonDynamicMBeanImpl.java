@@ -1,4 +1,4 @@
-package org.jolokia.support.jmx.impl;
+package org.jolokia.support.jmx;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -31,7 +31,7 @@ import org.jolokia.server.core.service.serializer.Serializer;
  * @author roland
  * @since 24.01.13
  */
-public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
+class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     // String type used for announcing registration infos
     public static final String STRING_TYPE = String.class.getName();
@@ -68,8 +68,8 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
      * @param pInfo               the original MBeanInfo
      * @param pConvertOptions     options used for converting return values to JSON
      */
-    public JsonDynamicMBeanImpl(MBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo,
-                                Serializer pSerializer, SerializeOptions pConvertOptions) {
+    JsonDynamicMBeanImpl(MBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo,
+                         Serializer pSerializer, SerializeOptions pConvertOptions) {
         jolokiaMBeanServer = pJolokiaMBeanServer;
         serializer = pSerializer;
         objectName = pObjectName;

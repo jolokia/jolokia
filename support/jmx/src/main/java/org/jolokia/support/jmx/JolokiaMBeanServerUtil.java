@@ -21,8 +21,6 @@ import java.lang.management.ManagementFactory;
 import javax.management.*;
 
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.support.jmx.impl.JolokiaMBeanServerHolder;
-import org.jolokia.support.jmx.impl.JolokiaMBeanServerHolderMBean;
 
 /**
  * Utility class for looking up the Jolokia-internal MBeanServer which never gets exposed via JSR-160
