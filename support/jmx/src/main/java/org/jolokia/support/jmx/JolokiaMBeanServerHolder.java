@@ -40,7 +40,7 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
         try {
             MBEAN_SERVER_HOLDER_OBJECTNAME = new ObjectName(OBJECT_NAME);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid object name " +  OBJECT_NAME);
+            throw new IllegalArgumentException("Invalid object name " +  OBJECT_NAME,e);
         }
     }
     /**

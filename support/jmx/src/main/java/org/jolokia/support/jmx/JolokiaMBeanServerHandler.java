@@ -51,6 +51,7 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
         serializer = pSerializer;
     }
 
+    /** {@inheritDoc} */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String name = method.getName();
         if ("registerMBean".equals(name)) {
