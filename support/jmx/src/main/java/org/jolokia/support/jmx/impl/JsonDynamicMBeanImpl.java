@@ -22,6 +22,7 @@ import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.server.core.service.serializer.Serializer;
 
 /**
  * A {@link DynamicMBean} used to wrap an MBean registered at the Jolokia MBeanServer and translated
@@ -38,11 +39,14 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     // Set containing all types which are directly supported and are not converted
     private static final Set<String> DIRECT_TYPES = new HashSet<String>();
 
+    // Serializer to use
+    private final Serializer serializer;
+
     // MBeanInfo for the MBean registered at the delegate server, where complex types are replaced with strings
     private MBeanInfo wrappedMBeanInfo;
 
     // The hosting Jolokia MBean Server for accessing the serializers
-    private JolokiaMBeanServer jolokiaMBeanServer;
+    private MBeanServer jolokiaMBeanServer;
 
     // Name of this MBean
     private ObjectName objectName;
@@ -64,8 +68,10 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
      * @param pInfo               the original MBeanInfo
      * @param pConvertOptions     options used for converting return values to JSON
      */
-    public JsonDynamicMBeanImpl(JolokiaMBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo, SerializeOptions pConvertOptions) {
+    public JsonDynamicMBeanImpl(MBeanServer pJolokiaMBeanServer, ObjectName pObjectName, MBeanInfo pInfo,
+                                Serializer pSerializer, SerializeOptions pConvertOptions) {
         jolokiaMBeanServer = pJolokiaMBeanServer;
+        serializer = pSerializer;
         objectName = pObjectName;
         serializeOptions = pConvertOptions != null ? pConvertOptions : SerializeOptions.DEFAULT;
         attributeInfoMap = new HashMap<String, MBeanAttributeInfo>();
@@ -172,15 +178,21 @@ public class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     // Delegate serialization/deserialization the Jolokia MBeanServer
     private Object toJson(Object pValue) {
-        return jolokiaMBeanServer.toJson(pValue, serializeOptions);
+        try {
+            Object ret = serializer.serialize(pValue, null, serializeOptions);
+            return ret.toString();
+        } catch (AttributeNotFoundException exp) {
+            // Cannot happen, since we dont use a path
+            return "";
+        }
     }
 
     private Object fromJson(String pType, String pValue) {
-        return jolokiaMBeanServer.fromJson(pType, pValue);
+        return serializer.deserialize(pType, pValue);
     }
 
     private Object fromJson(OpenType<?> pType, String pValue) {
-        return jolokiaMBeanServer.fromJson(pType, pValue);
+        return serializer.deserializeOpenType(pType, pValue);
     }
 
     // Map the parameters and the return value if required

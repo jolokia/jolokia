@@ -17,6 +17,7 @@ package org.jolokia.support.jmx.impl;
  */
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Proxy;
 import java.util.*;
 
 import javax.management.*;
@@ -37,14 +38,15 @@ import static org.testng.Assert.assertEquals;
  */
 public class JsonDymamicMBeanImplTest {
 
-    private JolokiaMBeanServer server;
+    private MBeanServer server;
     private MBeanServer        platformServer;
     private ObjectName         testName;
     private ObjectName         userManagerName;
 
     @BeforeClass
     public void setup() {
-        server = new JolokiaMBeanServer(new JolokiaSerializer());
+        server = (MBeanServer) Proxy.newProxyInstance(JolokiaMBeanServerHolder.class.getClassLoader(), new Class[]{MBeanServer.class},
+                                                      new JolokiaMBeanServerHandler(new JolokiaSerializer()));
         platformServer = ManagementFactory.getPlatformMBeanServer();
     }
 
@@ -198,7 +200,8 @@ public class JsonDymamicMBeanImplTest {
     private JsonDynamicMBeanImpl register(ObjectName oName, Object bean) throws Exception {
         server.registerMBean(bean, oName);
 
-        JsonDynamicMBeanImpl jsonMBean = new JsonDynamicMBeanImpl(server,oName,server.getMBeanInfo(oName),null);
+        JsonDynamicMBeanImpl jsonMBean = new JsonDynamicMBeanImpl(server,oName,server.getMBeanInfo(oName),
+                                                                  new JolokiaSerializer(),null);
         platformServer.registerMBean(jsonMBean,oName);
 
         return jsonMBean;

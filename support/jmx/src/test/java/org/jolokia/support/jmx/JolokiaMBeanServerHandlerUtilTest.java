@@ -30,7 +30,7 @@ import static org.testng.Assert.assertTrue;
  * @author roland
  * @since 13.01.13
  */
-public class JolokiaMBeanServerUtilTest {
+public class JolokiaMBeanServerHandlerUtilTest {
 
     MBeanRegistry handler;
 

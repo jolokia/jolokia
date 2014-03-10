@@ -17,13 +17,12 @@ package org.jolokia.support.jmx.impl;
  */
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.management.*;
 import javax.management.modelmbean.ModelMBean;
-import javax.management.openmbean.OpenType;
 
 import org.jolokia.server.core.service.serializer.*;
 import org.jolokia.support.jmx.JsonMBean;
@@ -34,8 +33,9 @@ import org.jolokia.support.jmx.JsonMBean;
  * @author roland
  * @since 11.01.13
  */
-class JolokiaMBeanServer extends MBeanServerProxy {
+class JolokiaMBeanServerHandler implements InvocationHandler {
 
+    private final MBeanServer mBeanServer;
     // MBeanServer to delegate to for JsonMBeans
     private MBeanServer     delegateServer;
     private Set<ObjectName> delegatedMBeans;
@@ -45,19 +45,33 @@ class JolokiaMBeanServer extends MBeanServerProxy {
     /**
      * Create a private MBean server
      */
-    public JolokiaMBeanServer(Serializer pSerializer) {
-        MBeanServer mBeanServer = MBeanServerFactory.newMBeanServer();
+    public JolokiaMBeanServerHandler(Serializer pSerializer) {
+        mBeanServer = MBeanServerFactory.newMBeanServer();
         delegatedMBeans = new HashSet<ObjectName>();
         delegateServer = ManagementFactory.getPlatformMBeanServer();
         serializer = pSerializer;
-        init(mBeanServer);
     }
 
-    @Override
-    public ObjectInstance registerMBean(Object object, ObjectName name)
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        String name = method.getName();
+        if ("registerMBean".equals(name)) {
+            return registerMBean(args[0], (ObjectName) args[1]);
+        } else if ("unregisterMBean".equals(name)) {
+            unregisterMBean((ObjectName) args[0]);
+            return null;
+        } else {
+            try {
+                return method.invoke(mBeanServer,args);
+            } catch (InvocationTargetException exp) {
+                throw exp.getCause();
+            }
+        }
+    }
+
+    private ObjectInstance registerMBean(Object object, ObjectName name)
             throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
         // Register MBean first on this MBean Server
-        ObjectInstance ret = super.registerMBean(object, name);
+        ObjectInstance ret = mBeanServer.registerMBean(object, name);
 
         // Check, whether it is annotated with @JsonMBean. Only the outermost class of an inheritance chain is
         // considered.
@@ -69,8 +83,9 @@ class JolokiaMBeanServer extends MBeanServerProxy {
 
             try {
                 // Fetch real MBeanInfo and create a dynamic MBean with modified signature
-                MBeanInfo info = super.getMBeanInfo(realName);
-                JsonDynamicMBeanImpl mbean = new JsonDynamicMBeanImpl(this,realName,info,getJsonConverterOptions(anno));
+                MBeanInfo info = mBeanServer.getMBeanInfo(realName);
+                JsonDynamicMBeanImpl mbean = new JsonDynamicMBeanImpl(mBeanServer,realName,info,serializer,
+                                                                      getJsonConverterOptions(anno));
 
                 // Register MBean on delegate MBeanServer
                 delegatedMBeans.add(realName);
@@ -84,6 +99,14 @@ class JolokiaMBeanServer extends MBeanServerProxy {
             }
         }
         return ret;
+    }
+
+    private void unregisterMBean(ObjectName name) throws InstanceNotFoundException, MBeanRegistrationException {
+        mBeanServer.unregisterMBean(name);
+        if (delegatedMBeans.contains(name)) {
+            delegatedMBeans.remove(name);
+            delegateServer.unregisterMBean(name);
+        }
     }
 
     // Lookup a JsonMBean annotation
@@ -129,55 +152,6 @@ class JolokiaMBeanServer extends MBeanServerProxy {
         return null;
     }
 
-    @Override
-    public void unregisterMBean(ObjectName name) throws InstanceNotFoundException, MBeanRegistrationException {
-        super.unregisterMBean(name);
-        if (delegatedMBeans.contains(name)) {
-            delegatedMBeans.remove(name);
-            delegateServer.unregisterMBean(name);
-        }
-    }
-
-    /**
-     * Converter used by JsonMBean for converting from Object to JSON representation
-     *
-     * @param object object to serialize
-     * @param pConvertOptions options used for conversion
-     * @return serialized object
-     */
-    String toJson(Object object, SerializeOptions pConvertOptions) {
-        try {
-            Object ret = serializer.serialize(object, null, pConvertOptions);
-            return ret.toString();
-        } catch (AttributeNotFoundException exp) {
-            // Cannot happen, since we dont use a path
-            return "";
-        }
-    }
-
-    /**
-     * Convert from a JSON or other string representation to real object. Used when preparing operation
-     * argument. If the JSON structure cannot be converted, an {@link IllegalArgumentException} is thrown.
-     *
-     * @param type type to convert to
-     * @param json string to deserialize
-     * @return the deserialized object
-     */
-    Object fromJson(String type, String json) {
-        return serializer.deserialize(type, json);
-    }
-
-    /**
-     * Convert from JSON for OpenType objects. Throws an {@link IllegalArgumentException} if
-     *
-     * @param type open type
-     * @param json JSON representation to convert from
-     * @return the converted object
-     */
-    Object fromJson(OpenType type, String json) {
-        return serializer.deserializeOpenType(type, json);
-    }
-
     // Extract convert options from annotation
     private SerializeOptions getJsonConverterOptions(JsonMBean pAnno) {
         // Extract conversion options from the annotation
@@ -196,6 +170,4 @@ class JolokiaMBeanServer extends MBeanServerProxy {
                     .build();
         }
     }
-
-
 }

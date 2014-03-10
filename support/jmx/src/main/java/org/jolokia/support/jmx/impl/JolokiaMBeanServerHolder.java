@@ -16,6 +16,8 @@ package org.jolokia.support.jmx.impl;
  * limitations under the License.
  */
 
+import java.lang.reflect.Proxy;
+
 import javax.management.*;
 
 import org.jolokia.server.core.service.serializer.Serializer;
@@ -28,11 +30,11 @@ import org.jolokia.server.core.service.serializer.Serializer;
  */
 public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
+    // The privat Jolokia MBeanServer
     private MBeanServer jolokiaMBeanServer;
 
     //
     public static final ObjectName MBEAN_SERVER_HOLDER_OBJECTNAME;
-
 
     static {
         try {
@@ -70,7 +72,7 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
         holderName = MBEAN_SERVER_HOLDER_OBJECTNAME;
 
         try {
-            jolokiaMBeanServer = new JolokiaMBeanServer(pSerializer);
+            jolokiaMBeanServer = createJolokiaMBeanServer(pSerializer);
             JolokiaMBeanServerHolder holder = new JolokiaMBeanServerHolder(jolokiaMBeanServer);
             pServer.registerMBean(holder,holderName);
         } catch (InstanceAlreadyExistsException e) {
@@ -86,6 +88,11 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
             throw new IllegalStateException("Internal: JolokiaMBeanHolder cannot be registered to JMX: " + e,e);
         }
         return jolokiaMBeanServer;
+    }
+
+    // Create a proxy for the MBeanServer
+    private static MBeanServer createJolokiaMBeanServer(Serializer pSerializer) {
+        return (MBeanServer) Proxy.newProxyInstance(JolokiaMBeanServerHolder.class.getClassLoader(), new Class[]{MBeanServer.class},                                                    new JolokiaMBeanServerHandler(pSerializer));
     }
 
     /**

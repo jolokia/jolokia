@@ -100,9 +100,8 @@ public final class JolokiaMBeanServerUtil {
     // If used via this method, only the Jolokia serializer is used. If used via OSGi, any serializer registered
     // as a service is used.
     private static Serializer lookupSerializer() {
-        Class clazz = null;
         try {
-            clazz = Class.forName("org.jolokia.service.serializer.JolokiaSerializer");
+            Class clazz = Class.forName("org.jolokia.service.serializer.JolokiaSerializer");
             return (Serializer) clazz.newInstance();
         } catch (ClassNotFoundException e) {
             // No serializer available

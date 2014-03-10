@@ -17,6 +17,7 @@ package org.jolokia.support.jmx.impl;
  */
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,14 +39,15 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 27.01.13
  */
-public class JolokiaMBeanServerTest {
+public class JolokiaMBeanServerHandlerTest {
 
     @Test
     public void simple() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
-        JolokiaMBeanServer server = new JolokiaMBeanServer(new JolokiaSerializer());
+
+        MBeanServer server = createJolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
-            server.registerMBean(new JsonAnnoTest(),oName);
+        server.registerMBean(new JsonAnnoTest(),oName);
 
             CompositeData chiliCD = (CompositeData) server.getAttribute(oName,"Chili");
             assertEquals((String) chiliCD.get("name"), "Bhut Jolokia");
@@ -64,7 +66,7 @@ public class JolokiaMBeanServerTest {
 
     @Test
     public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
-        JolokiaMBeanServer server = new JolokiaMBeanServer(new JolokiaSerializer());
+        MBeanServer server = createJolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
 
@@ -101,7 +103,7 @@ public class JolokiaMBeanServerTest {
         modelMBean.setModelMBeanInfo(mbi);
         modelMBean.setManagedResource(new JsonAnnoPlainTest(), "ObjectReference");
 
-        JolokiaMBeanServer server = new JolokiaMBeanServer(new JolokiaSerializer());
+        MBeanServer server = createJolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
 
@@ -118,6 +120,11 @@ public class JolokiaMBeanServerTest {
     }
 
     // ============================================================================================
+
+    private MBeanServer createJolokiaMBeanServer() {
+        return (MBeanServer) Proxy.newProxyInstance(JolokiaMBeanServerHolder.class.getClassLoader(), new Class[]{MBeanServer.class},
+                                                    new JolokiaMBeanServerHandler(new JolokiaSerializer()));
+    }
 
     @JsonMBean(maxDepth = 1)
     public static class JsonAnnoPlainTest implements JsonAnnoPlainTestMBean {
