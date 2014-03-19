@@ -1220,7 +1220,7 @@
     "type": "query"
   }]]></programlisting>
       <para>
-        Any agent enabled for disovery will respond to requestor on the same socket with an answer which looks like 
+        Any agent enabled for discovery will respond to requester on the same socket with an answer which looks like
       </para>
       <programlisting><![CDATA[
   {
@@ -1236,7 +1236,7 @@
         The response itself is a JSON object and is restricted to 8192
         bytes maximum. The request type is either
         <constant>query</constant> or <constant>response</constant>. A
-        <constant>query</constant> request is sent via multicast by an
+        <constant>query</constant> request is sent via multicast by any
         interested client and each agent responds with a response of
         type <constant>response</constant>.  Query requests contain
         only the type as property. Responses are sent back to the
