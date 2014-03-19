@@ -16,9 +16,10 @@ package org.jolokia.jvmagent.client.util;
  * limitations under the License.
  */
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
 import org.testng.annotations.Test;
 
@@ -51,7 +52,20 @@ public class OptionsAndArgsTest {
         assertFalse(o.isVerbose());
         assertEquals(o.getPid(),"12");
         assertNull(o.getProcessPattern());
-        assertEquals(o.toAgentArg(),"host=localhost,user=roland,password=bla");
+        String args = o.toAgentArg();
+        assertTrue(args.matches(".*host=localhost.*"));
+        assertTrue(args.matches(".*user=roland.*"));
+        assertTrue(args.matches(".*password=bla.*"));
+        Map<String,String> opts = new HashMap<String, String>();
+        for (String s : args.split(",")) {
+            String[] p = s.split("=");
+            assertEquals(p.length,2);
+            opts.put(p[0],p[1]);
+        }
+        assertEquals(opts.size(),3);
+        assertEquals(opts.get("host"),"localhost");
+        assertEquals(opts.get("user"),"roland");
+        assertEquals(opts.get("password"),"bla");
     }
 
     @Test

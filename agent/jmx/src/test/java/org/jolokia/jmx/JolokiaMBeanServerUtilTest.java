@@ -123,7 +123,7 @@ public class JolokiaMBeanServerUtilTest implements LogHandler {
     public void error(String message, Throwable t) {
     }
 
-    interface DummyMBean {
+    public interface DummyMBean {
 
     }
     private class Dummy implements DummyMBean {
