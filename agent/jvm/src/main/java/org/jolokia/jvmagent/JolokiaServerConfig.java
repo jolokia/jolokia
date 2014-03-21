@@ -55,7 +55,7 @@ public class JolokiaServerConfig {
      * Constructor which prepares the server configuration from a map
      * of given config options (key: option name, value: option value).
      * Also, default values are used for any
-     * parameter not provided ({@link #getDefaultConfig(Map)}).
+     * parameter not provided ({@link #getDefaultConfig()}).
      *
      * The given configuration consist of two parts: Any global options
      * as defined in {@link ConfigKey} are used for setting up the agent.

@@ -65,8 +65,6 @@
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
-          <meminitial>128m</meminitial>
-          <maxmem>512m</maxmem>
         </configuration>
       </plugin>
 
