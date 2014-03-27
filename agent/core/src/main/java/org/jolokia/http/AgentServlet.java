@@ -190,7 +190,7 @@ public class AgentServlet extends HttpServlet {
                 url = pConfig.get(ConfigKey.DISCOVERY_AGENT_URL);
             }
         }
-        return url;
+        return NetworkUtil.replaceExpression(url);
     }
 
     // For war agent needs to be switched on

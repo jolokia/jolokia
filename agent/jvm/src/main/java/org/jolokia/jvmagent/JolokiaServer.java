@@ -102,7 +102,7 @@ public class JolokiaServer {
      */
     public void start() {
         // URL as configured takes precedence
-        String configUrl = config.getJolokiaConfig().get(ConfigKey.DISCOVERY_AGENT_URL);
+        String configUrl = NetworkUtil.replaceExpression(config.getJolokiaConfig().get(ConfigKey.DISCOVERY_AGENT_URL));
         jolokiaHttpHandler.start(lazy,configUrl != null ? configUrl : url, config.getAuthenticator() != null);
 
         if (httpServer != null) {

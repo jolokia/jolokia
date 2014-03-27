@@ -10,6 +10,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
  */
 public class ActiveMQDetector extends AbstractServerDetector {
 
+    /** {@inheritDoc} */
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         String version = getSingleStringAttribute(pMBeanServerExecutor, "org.apache.activemq:type=Broker,*", "BrokerVersion");
         if (version == null) {

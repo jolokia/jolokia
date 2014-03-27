@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for network related stuff
@@ -31,7 +33,8 @@ public final class NetworkUtil {
     }
 
     // Utility class
-    private NetworkUtil() {}
+    private NetworkUtil() {
+    }
 
     // Debug info
     public static void main(String[] args) throws UnknownHostException, SocketException {
@@ -40,6 +43,7 @@ public final class NetworkUtil {
 
     /**
      * Get a local, IP4 Address, preferable a non-loopback address which is bound to an interface.
+     *
      * @return
      * @throws UnknownHostException
      * @throws SocketException
@@ -62,7 +66,6 @@ public final class NetworkUtil {
      * another is available
      *
      * @return a multicast enabled address of null if none could be found
-     *
      * @throws UnknownHostException
      * @throws SocketException
      */
@@ -97,7 +100,7 @@ public final class NetworkUtil {
 
         while (networkInterfaces.hasMoreElements()) {
             NetworkInterface nif = networkInterfaces.nextElement();
-            for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements();) {
+            for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements(); ) {
                 InetAddress interfaceAddress = addrEnum.nextElement();
                 if (useInetAddress(nif, interfaceAddress)) {
                     return interfaceAddress;
@@ -124,7 +127,7 @@ public final class NetworkUtil {
      * @return true if multicast is supported and the interface is up
      */
     public static boolean isMulticastSupported(NetworkInterface pNif) {
-        return pNif != null && checkMethod(pNif, isUp) && checkMethod(pNif,supportsMulticast);
+        return pNif != null && checkMethod(pNif, isUp) && checkMethod(pNif, supportsMulticast);
     }
 
     /**
@@ -140,6 +143,7 @@ public final class NetworkUtil {
 
     /**
      * Get all local addresses on which a multicast can be send
+     *
      * @return list of all multi cast capable addresses
      */
     public static List<InetAddress> getMulticastAddresses() throws SocketException {
@@ -147,7 +151,7 @@ public final class NetworkUtil {
         List<InetAddress> ret = new ArrayList<InetAddress>();
         while (nifs.hasMoreElements()) {
             NetworkInterface nif = nifs.nextElement();
-            if (checkMethod(nif, supportsMulticast) && checkMethod(nif,isUp)) {
+            if (checkMethod(nif, supportsMulticast) && checkMethod(nif, isUp)) {
                 Enumeration<InetAddress> addresses = nif.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
@@ -174,7 +178,7 @@ public final class NetworkUtil {
     /**
      * Examine the given URL and replace the host with a non-loopback host if possible. It is checked,
      * whether the port is open as well.
-     *
+     * <p/>
      * A replaced host uses the  IP address instead of a (possibly non resolvable) name.
      *
      * @param pRequestURL url to examine and to update
@@ -184,8 +188,8 @@ public final class NetworkUtil {
         try {
             URL url = new URL(pRequestURL);
             String host = url.getHost();
-            InetAddress address = findLocalAddressListeningOnPort(host,url.getPort());
-            return new URL(url.getProtocol(),address.getHostAddress(),url.getPort(),url.getFile()).toExternalForm();
+            InetAddress address = findLocalAddressListeningOnPort(host, url.getPort());
+            return new URL(url.getProtocol(), address.getHostAddress(), url.getPort(), url.getFile()).toExternalForm();
         } catch (IOException e) {
             // Best effort, we at least tried it
             return pRequestURL;
@@ -199,7 +203,7 @@ public final class NetworkUtil {
         return checkMethod(networkInterface, isUp) &&
                checkMethod(networkInterface, supportsMulticast) &&
                // TODO: IpV6 support
-               ! (interfaceAddress instanceof Inet6Address) &&
+               !(interfaceAddress instanceof Inet6Address) &&
                !interfaceAddress.isLoopbackAddress();
     }
 
@@ -243,7 +247,7 @@ public final class NetworkUtil {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface nif = networkInterfaces.nextElement();
-                for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements();) {
+                for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements(); ) {
                     InetAddress interfaceAddress = addrEnum.nextElement();
                     if (!interfaceAddress.isLoopbackAddress() && checkMethod(nif, isUp) && isPortOpen(interfaceAddress, pPort)) {
                         return interfaceAddress;
@@ -290,7 +294,6 @@ public final class NetworkUtil {
      * Get the local network info as a string
      *
      * @return return a description of the current network setup of the local host.
-     *
      * @throws UnknownHostException
      * @throws SocketException
      */
@@ -310,6 +313,64 @@ public final class NetworkUtil {
             }
         }
         return buffer.toString();
+    }
+
+    private static final Pattern EXPRESSION_EXTRACTOR = Pattern.compile("\\$\\{?\\s*([\\w:-_.]+)\\s*}?");
+
+    /**
+     * Replace expression ${host} and ${ip} with the localhost name or IP in the given string.
+     * In addition the notation ${env:ENV_VAR} and ${prop:sysprop} can be used to refer to environment
+     * and system properties respectively.
+     *
+     * @param pValue value to examine
+     * @return the value with the variables replaced.
+     * @throws IllegalArgumentException when the expression is unknown or an error occurs when extracting the host name
+     */
+    public static String replaceExpression(String pValue) {
+        if (pValue == null) {
+            return null;
+        }
+        Matcher matcher = EXPRESSION_EXTRACTOR.matcher(pValue);
+        StringBuffer ret = new StringBuffer();
+        try {
+            while (matcher.find()) {
+                String var = matcher.group(1);
+                String value;
+                if (var.equalsIgnoreCase("host")) {
+                    value = getLocalAddress().getHostName();
+                } else if (var.equalsIgnoreCase("ip")) {
+                    value = getLocalAddress().getHostAddress();
+                } else {
+                    String key = extractKey(var,"env");
+                    if (key != null)  {
+                        value = System.getenv(key).trim();
+                    } else {
+                        key = extractKey(var,"prop");
+                        if (key != null) {
+                            value = System.getProperty(key).trim();
+                        } else {
+                            throw new IllegalArgumentException("Unknown expression " + var + " in " + pValue);
+                        }
+                    }
+                }
+                matcher.appendReplacement(ret, value);
+            }
+            matcher.appendTail(ret);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot lookup host" + e, e);
+        }
+        return ret.toString();
+    }
+
+    private static String extractKey(String pVar, String pPrefix) {
+        if (pVar.toLowerCase().startsWith(pPrefix + ":")) {
+            String ret = pVar.substring(pPrefix.length() + 1);
+            if (ret.length() == 0) {
+                throw new IllegalArgumentException("Expression with " + pPrefix + ": must not contain spaces");
+            }
+            return ret;
+        }
+        return null;
     }
 
     // ==============================================================================================================================================
