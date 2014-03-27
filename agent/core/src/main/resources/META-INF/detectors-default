@@ -1,5 +1,6 @@
 org.jolokia.detector.GeronimoDetector
 org.jolokia.detector.JBossDetector
+org.jolokia.detector.ActiveMQDetector
 org.jolokia.detector.TomcatDetector
 org.jolokia.detector.JettyDetector
 org.jolokia.detector.GlassfishDetector

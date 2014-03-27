@@ -36,9 +36,6 @@ public interface ServerDetector {
      * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.
      *
-     *
-     *
-     *
      * @param pMBeanServerExecutor a set of MBeanServers which can be used for detecting server informations
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
