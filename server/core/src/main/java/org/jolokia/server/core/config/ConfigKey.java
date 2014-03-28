@@ -148,6 +148,13 @@ public enum ConfigKey {
     /**
      * Specify the agent URL to return for an discovery multicast request. If this option
      * is given {@link #DISCOVERY_ENABLED} is set to <code>true</code> automatically.
+     * The URL given can contain placeholders:
+     * <ul>
+     *    <li>$host or ${host} : Host name (if possible), otherwise address</li>
+     *    <li>$ip or ${ip} : IP Address</li>
+     *    <li>${prop:foo} : System property foo</li>
+     *    <li>${env:FOO} : Environment variable FOO</li>
+     * </ul>
      */
     DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
 
@@ -325,7 +332,6 @@ public enum ConfigKey {
     public boolean isGlobalConfig() {
         return globalConfig;
     }
-
 
     /**
      * Whether this key is a request configuration key

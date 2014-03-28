@@ -217,7 +217,8 @@ public class AgentServlet extends HttpServlet {
     // ==============================================================================================
 
     private void initAgentUrl() {
-        String url = jolokiaContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
+        String url = NetworkUtil.replaceExpression(
+                jolokiaContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL));
         if (url == null) {
             initAgentUrlFromRequest = true;
         } else {

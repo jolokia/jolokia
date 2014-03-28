@@ -1,5 +1,6 @@
 # ===========================================
 # Server Detectors
+org.jolokia.server.detector.misc.ActiveMQDetector
 org.jolokia.server.detector.jee.GeronimoDetector
 org.jolokia.server.detector.jee.JBossDetector
 org.jolokia.server.detector.jee.TomcatDetector
