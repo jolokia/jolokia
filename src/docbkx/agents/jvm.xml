@@ -291,7 +291,10 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td>
             Sets the URL to respond for multicast discovery requests. If
             given, <constant>discoveryEnabled</constant> is set
-            implicetly to true. 
+            implicetly to true. Within the value you can use the
+            placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
+            by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
+            <literal>${sys:property}</literal> envirnoment and system properties can be referenced, respectively.
           </td>
           <td>          
             <constant>http://10.9.11.87:8778/jolokia</constant>
