@@ -44,8 +44,8 @@ class MulticastSocketListenerThread extends Thread {
         // For debugging, uncomment:
         //logHandler = new LogHandler.StdoutLogHandler(true);
 
-        context.debug(address + "<-- Listening for queries");
-        socket = MulticastUtil.newMulticastSocket(address);
+        socket = MulticastUtil.newMulticastSocket(address,pContext);
+        pContext.debug(address + "<-- Listening for queries");
     }
 
     /** {@inheritDoc} */
@@ -113,8 +113,9 @@ class MulticastSocketListenerThread extends Thread {
         if (socket.isClosed()) {
             context.info(address + "<-- Socket closed, reopening it");
             try {
-                socket = MulticastUtil.newMulticastSocket(address);
+                socket = MulticastUtil.newMulticastSocket(address, context);
             } catch (IOException exp) {
+                context.error("Cannot reopen socket. Exiting multicast listener thread ...",exp);
                 throw new SocketVerificationFailedException(exp);
             }
         }

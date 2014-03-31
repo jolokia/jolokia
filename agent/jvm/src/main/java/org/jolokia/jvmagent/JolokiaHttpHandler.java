@@ -209,5 +209,4 @@ public class JolokiaHttpHandler implements HttpHandler {
             return mimeType != null ? mimeType : ConfigKey.MIME_TYPE.getDefaultValue();
         }
     }
-
 }

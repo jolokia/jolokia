@@ -94,7 +94,9 @@ public interface LogHandler {
 
         public void error(String message, Throwable t) {
             log("E> " + message);
-            t.printStackTrace();
+            if (t != null) {
+                t.printStackTrace();
+            }
         }
 
         public boolean isDebug() {

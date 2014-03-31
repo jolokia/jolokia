@@ -27,7 +27,7 @@ public final class MulticastUtil {
     private MulticastUtil() {
     }
 
-    static MulticastSocket newMulticastSocket(InetAddress pAddress) throws IOException {
+    static MulticastSocket newMulticastSocket(InetAddress pAddress, LogHandler pLogHandler) throws IOException {
         // TODO: IpV6 (not supported yet)
         InetSocketAddress socketAddress =
                 new InetSocketAddress(JOLOKIA_MULTICAST_GROUP, JOLOKIA_MULTICAST_PORT);
@@ -36,7 +36,9 @@ public final class MulticastUtil {
         socket.setReuseAddress(true);
         setOutgoingInterfaceForMulticastRequest(pAddress, socket);
         socket.setTimeToLive(255);
-        joinMcGroupsOnAllNetworkInterfaces(socket, socketAddress);
+        if (joinMcGroupsOnAllNetworkInterfaces(socket, socketAddress, pLogHandler) == 0) {
+            throw new IOException("Couldn't join multicast group " + socketAddress + " on any network interfaces");
+        }
         return socket;
     }
 
@@ -128,15 +130,22 @@ public final class MulticastUtil {
     }
 
     // We are using all interfaces available and try to join them
-    private static void joinMcGroupsOnAllNetworkInterfaces(MulticastSocket pSocket, InetSocketAddress pSocketAddress) throws IOException {
+    private static int joinMcGroupsOnAllNetworkInterfaces(MulticastSocket pSocket, InetSocketAddress pSocketAddress, LogHandler pLogHandler) throws IOException {
         // V6: ffx8::/16
         Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
+        int interfacesJoined = 0;
         while (nifs.hasMoreElements()) {
             NetworkInterface n = nifs.nextElement();
             if (NetworkUtil.isMulticastSupported(n)) {
-                pSocket.joinGroup(pSocketAddress, n);
+                try {
+                    pSocket.joinGroup(pSocketAddress, n);
+                    interfacesJoined++;
+                } catch (IOException exp) {
+                    pLogHandler.info("Can not join multicast group on NIF " + n.getDisplayName() + ": " + exp.getMessage());
+                }
             }
         }
+        return interfacesJoined;
     }
 
     private static void setOutgoingInterfaceForMulticastRequest(InetAddress pAddress, MulticastSocket pSocket) throws SocketException, UnknownHostException {
