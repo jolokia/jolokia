@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 
+import org.jolokia.util.LogHandler;
 import org.testng.annotations.Test;
 
 /**
@@ -15,7 +16,7 @@ public class MulticastUtilTest {
     @Test
     public void createSocketNoAddress() throws IOException {
         InetAddress address = Inet6Address.getByName("fe80::e2f8:47ff:fe42:d872");
-        MulticastUtil.newMulticastSocket(address);
+        MulticastUtil.newMulticastSocket(address, LogHandler.QUIET);
     }
 
 }

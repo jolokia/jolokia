@@ -71,15 +71,18 @@ public class DiscoveryMulticastResponder {
                 logHandler.info("No suitable address found for listening on multicast discovery requests");
                 return;
             }
+            // We start a thread for every address found
             for (InetAddress addr : addresses) {
-                MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr,
-                                                                                         detailsHolder,
-                                                                                         restrictor,
-                                                                                         logHandler);
-                thread.start();
-                listenerThreads.add(thread);
-                // One thread is enough for now.
-                //break;
+                try {
+                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr,
+                                                                                             detailsHolder,
+                                                                                             restrictor,
+                                                                                             logHandler);
+                    thread.start();
+                    listenerThreads.add(thread);
+                } catch (IOException exp) {
+                    logHandler.info("Couldn't start discovery thread for " + addr + ": " + exp);
+                }
             }
         }
     }
