@@ -141,7 +141,7 @@ public final class MulticastUtil {
                     pSocket.joinGroup(pSocketAddress, n);
                     interfacesJoined++;
                 } catch (IOException exp) {
-                    pLogHandler.info("Can not join multicast group on NIF " + n.getDisplayName() + ": " + exp.getMessage());
+                    pLogHandler.info("Cannot join multicast group on NIF " + n.getDisplayName() + ": " + exp.getMessage());
                 }
             }
         }
