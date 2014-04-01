@@ -256,9 +256,9 @@ public class JolokiaHttpHandler implements HttpHandler {
         Calendar cal = Calendar.getInstance();
         headers.set("Date",rfc1123Format.format(cal.getTime()));
         // 1h  in the past since it seems, that some servlet set the date header on their
-        // own so that it cannot be guaranteed that these heades are really equals.
-        // It happend on Tomcat that Date: was finally set *before* Expires: in the final
-        // answers some times which seems to be an implementation percularity from Tomcat
+        // own so that it cannot be guaranteed that these headers are really equals.
+        // It happened on Tomcat that "Date:" was finally set *before* "Expires:" in the final
+        // answers sometimes which seems to be an implementation peculiarity from Tomcat
         cal.add(Calendar.HOUR, -1);
         headers.set("Expires",rfc1123Format.format(cal.getTime()));
     }
