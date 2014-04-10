@@ -16,20 +16,36 @@ package org.jolokia.client;
  * limitations under the License.
  */
 
-import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.scheme.*;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.*;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.HttpConnectionFactory;
+import org.apache.http.conn.ManagedHttpClientConnection;
+import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.ManagedHttpClientConnectionFactory;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
+import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.VersionInfo;
 import org.jolokia.client.request.J4pTargetConfig;
+
+import javax.net.ssl.SSLContext;
 
 /**
  * A builder for a {@link org.jolokia.client.J4pClient}.
@@ -39,8 +55,15 @@ import org.jolokia.client.request.J4pTargetConfig;
  */
 public class J4pClientBuilder {
 
-    // parameters to build up
-    private HttpParams params;
+    HttpClientBuilder builder;
+    private int connnectionTimeout;
+    private int socketTimeout;
+    private int maxTotalConnections;
+    private int maxConnectionPoolTimeout;
+    private String contentCharset;
+    private boolean expectContinue;
+    private boolean tcpNoDelay;
+    private int socketBufferSize;
 
     // whether to use thread safe, pooled connections
     private boolean pooledConnections;
@@ -68,7 +91,7 @@ public class J4pClientBuilder {
      * the builder.
      */
     public J4pClientBuilder() {
-        params = new BasicHttpParams();
+        builder = HttpClientBuilder.create();
         connectionTimeout(20 * 1000);
         maxTotalConnections(20);
         maxConnectionPoolTimeout(500);
@@ -80,12 +103,10 @@ public class J4pClientBuilder {
         user = null;
         password = null;
 
-        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-
         // determine the release version from packaged version info
         final VersionInfo vi = VersionInfo.loadVersionInfo("org.apache.http.client", getClass().getClassLoader());
         final String release = (vi != null) ? vi.getRelease() : VersionInfo.UNAVAILABLE;
-        HttpProtocolParams.setUserAgent(params,"Jolokia JMX-Client (using Apache-HttpClient/" + release +")");
+        builder.setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + release + ")");
     }
 
 
@@ -175,7 +196,7 @@ public class J4pClientBuilder {
      * @param pTimeOut timeout in milliseconds
      */
     public final J4pClientBuilder connectionTimeout(int pTimeOut) {
-        HttpConnectionParams.setConnectionTimeout(params,pTimeOut);
+        connnectionTimeout = pTimeOut;
         return this;
     }
 
@@ -188,7 +209,7 @@ public class J4pClientBuilder {
      * @param pTimeOut SO_TIMEOUT value in milliseconds, 0 mean no timeout at all.
      */
     public final J4pClientBuilder socketTimeout(int pTimeOut) {
-        HttpConnectionParams.setSoTimeout(params,pTimeOut);
+        socketTimeout = pTimeOut;
         return this;
     }
 
@@ -197,7 +218,7 @@ public class J4pClientBuilder {
      * @param pConnections number of max. simultaneous connections
      */
     public final J4pClientBuilder maxTotalConnections(int pConnections) {
-        ConnManagerParams.setMaxTotalConnections(params, pConnections);
+        maxTotalConnections = pConnections;
         return this;
     }
 
@@ -208,7 +229,7 @@ public class J4pClientBuilder {
      * @param pConnectionPoolTimeout timeout in milliseconds
      */
     public final J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
-        ConnManagerParams.setTimeout(params,pConnectionPoolTimeout);
+        maxConnectionPoolTimeout = pConnectionPoolTimeout;
         return this;
     }
 
@@ -217,7 +238,7 @@ public class J4pClientBuilder {
      * @param pContentCharset the charset to use
      */
     public final J4pClientBuilder contentCharset(String pContentCharset) {
-        HttpProtocolParams.setContentCharset(params, pContentCharset);
+        contentCharset = pContentCharset;
         return this;
     }
 
@@ -233,7 +254,7 @@ public class J4pClientBuilder {
      * @param pUse whether to use this algorithm or not
      */
     public final J4pClientBuilder expectContinue(boolean pUse) {
-        HttpProtocolParams.setUseExpectContinue(params,pUse);
+        expectContinue = pUse;
         return this;
     }
 
@@ -246,7 +267,7 @@ public class J4pClientBuilder {
      * @param pUse whether to use NO_DELAY or not
      */
     public final J4pClientBuilder tcpNoDelay(boolean pUse) {
-        HttpConnectionParams.setTcpNoDelay(params,pUse);
+        tcpNoDelay = pUse;
         return this;
     }
 
@@ -256,7 +277,7 @@ public class J4pClientBuilder {
      * @param pSize size of socket buffer
      */
     public final J4pClientBuilder socketBufferSize(int pSize) {
-        HttpConnectionParams.setSocketBufferSize(params,pSize);
+        socketBufferSize = pSize;
         return this;
     }
 
@@ -268,31 +289,61 @@ public class J4pClientBuilder {
      * @return a new J4pClient
      */
     public J4pClient build() {
-        ClientConnectionManager cm = createClientConnectionManager();
-        DefaultHttpClient httpClient = new DefaultHttpClient(cm, getHttpParams());
+        return new J4pClient(url,createHttpClient(),targetUrl != null ? new J4pTargetConfig(targetUrl,targetUser,targetPassword) : null);
+    }
+
+    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
+        SSLContext sslcontext = SSLContexts.createSystemDefault();
+        X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
+
+        return RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.INSTANCE)
+                .register("https", new SSLConnectionSocketFactory(sslcontext, hostnameVerifier))
+                .build();
+    }
+
+    public HttpClient createHttpClient() {
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setExpectContinueEnabled(expectContinue)
+                .setSocketTimeout(socketTimeout)
+                .setConnectionRequestTimeout(connnectionTimeout)
+                .build();
+
+        HttpClientConnectionManager connManager = createHttpClientConnectionManager();
+
+        HttpClientBuilder builder = HttpClients.custom()
+                .setConnectionManager(connManager)
+                .setDefaultRequestConfig(requestConfig);
+
+
         if (user != null) {
-            httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
-                                                               new UsernamePasswordCredentials(user,password));
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(
+                    new AuthScope(AuthScope.ANY),
+                    new UsernamePasswordCredentials(user, password));
+            builder.setDefaultCredentialsProvider(credentialsProvider);
         }
-        return new J4pClient(url,httpClient,targetUrl != null ? new J4pTargetConfig(targetUrl,targetUser,targetPassword) : null);
-    }
 
-    ClientConnectionManager createClientConnectionManager() {
-        return pooledConnections ?
-                new ThreadSafeClientConnManager(getHttpParams(), getSchemeRegistry()) :
-                new SingleClientConnManager(getSchemeRegistry());
+        return builder.build();
     }
 
 
-    HttpParams getHttpParams() {
-        return params;
+    private HttpClientConnectionManager createHttpClientConnectionManager() {
+        SocketConfig socketConfig = SocketConfig.custom()
+                .setTcpNoDelay(tcpNoDelay)
+                .build();
+
+        if (pooledConnections) {
+            PoolingHttpClientConnectionManager connManager =
+                new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+            connManager.setDefaultSocketConfig(socketConfig);
+            return connManager;
+        }
+        return null; //TODO!!
     }
 
-    private SchemeRegistry getSchemeRegistry() {
-        // Create and initialize scheme registry
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-        return schemeRegistry;
+    public HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {
+        return new ManagedHttpClientConnectionFactory(new DefaultHttpRequestWriterFactory(), new DefaultHttpResponseParserFactory());
     }
 }
