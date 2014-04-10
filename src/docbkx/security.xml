@@ -202,6 +202,7 @@
           url="http://caniuse.com/#search=CORS">contemporary
           browsers</ulink> support CORS.
         </para>
+
         <para>
           By default Jolokia allows cross origin access from any
           host. This can be limited to certain hosts by using

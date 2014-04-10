@@ -16,27 +16,20 @@ package org.jolokia.client;
  * limitations under the License.
  */
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.HttpConnectionFactory;
-import org.apache.http.conn.ManagedHttpClientConnection;
+import org.apache.http.config.*;
+import org.apache.http.conn.*;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.conn.ssl.*;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.ManagedHttpClientConnectionFactory;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
@@ -44,8 +37,6 @@ import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.VersionInfo;
 import org.jolokia.client.request.J4pTargetConfig;
-
-import javax.net.ssl.SSLContext;
 
 /**
  * A builder for a {@link org.jolokia.client.J4pClient}.
@@ -95,7 +86,7 @@ public class J4pClientBuilder {
         connectionTimeout(20 * 1000);
         maxTotalConnections(20);
         maxConnectionPoolTimeout(500);
-        contentCharset(HTTP.DEFAULT_CONTENT_CHARSET);
+        contentCharset(HTTP.DEF_CONTENT_CHARSET.name());
         expectContinue(true);
         tcpNoDelay(true);
         socketBufferSize(8192);
