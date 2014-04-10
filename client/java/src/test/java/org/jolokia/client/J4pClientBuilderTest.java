@@ -16,12 +16,10 @@ package org.jolokia.client;
  *  limitations under the License.
  */
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.HttpClient;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.*;
+import static org.testng.AssertJUnit.assertNotNull;
 
 /**
  * @author roland
@@ -46,12 +44,7 @@ public class J4pClientBuilderTest {
                         .socketBufferSize(8192)
                         .socketTimeout(5000)
                         .build();
-        DefaultHttpClient hc = (DefaultHttpClient) client.getHttpClient();
-        assertNotNull(hc.getCredentialsProvider());
-        UsernamePasswordCredentials credentials =
-                (UsernamePasswordCredentials) hc.getCredentialsProvider().getCredentials(AuthScope.ANY);
-        assertEquals(credentials.getUserName(), "roland");
-        assertEquals(credentials.getPassword(),"s!c!r!t");
+        HttpClient hc = client.getHttpClient();
     }
 
     @Test
