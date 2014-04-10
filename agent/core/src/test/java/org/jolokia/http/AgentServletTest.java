@@ -125,8 +125,8 @@ public class AgentServletTest {
         HttpTestUtil.prepareServletConfigMock(config, new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
         HttpTestUtil.prepareServletContextMock(context,null);
 
-        expect(config.getServletContext()).andReturn(context).anyTimes();
-        expect(config.getServletName()).andReturn("jolokia").anyTimes();
+        expect(config.getServletContext()).andStubReturn(context);
+        expect(config.getServletName()).andStubReturn("jolokia");
         replay(config, context);
 
         servlet.init(config);
@@ -191,7 +191,7 @@ public class AgentServletTest {
             StringWriter sw = initRequestResponseMocks();
             expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
             expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
-            String url = "http://pirx:9876/jolokia";
+            String url = "http://10.9.11.1:9876/jolokia";
             StringBuffer buf = new StringBuffer();
             buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
             expect(request.getRequestURL()).andReturn(buf);
@@ -259,7 +259,8 @@ public class AgentServletTest {
         StringWriter sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
-                        expect(request.getHeader("Origin")).andReturn(null);
+                        expect(request.getHeader("Origin")).andStubReturn(null);
+                        expect(request.getHeader("Referer")).andStubReturn(null);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
@@ -368,7 +369,7 @@ public class AgentServletTest {
         StringWriter sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
-                        expect(request.getHeader("Origin")).andReturn(in);
+                        expect(request.getHeader("Origin")).andStubReturn(in);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
@@ -464,8 +465,9 @@ public class AgentServletTest {
         context.log(find("time:"));
         context.log(find("Response:"));
         context.log(find("TestDetector"),isA(RuntimeException.class));
-        expectLastCall().anyTimes();
+        expectLastCall().asStub();
         replay(config, context);
+
         servlet.init(config);
 
         StringWriter sw = initRequestResponseMocks();
@@ -503,8 +505,8 @@ public class AgentServletTest {
         HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
 
-        expect(config.getServletContext()).andReturn(context).anyTimes();
-        expect(config.getServletName()).andReturn("jolokia").anyTimes();
+        expect(config.getServletContext()).andStubReturn(context);
+        expect(config.getServletName()).andStubReturn("jolokia");
         if (pExceptionClass != null) {
             context.log(find(pLogRegexp),isA(pExceptionClass));
         } else {
@@ -515,7 +517,7 @@ public class AgentServletTest {
             }
         }
         context.log((String) anyObject());
-        expectLastCall().anyTimes();
+        expectLastCall().asStub();
         context.log(find("TestDetector"),isA(RuntimeException.class));
     }
 
@@ -569,7 +571,8 @@ public class AgentServletTest {
     private Runnable getStandardRequestSetup() {
         return new Runnable() {
             public void run() {
-                expect(request.getHeader("Origin")).andReturn(null);
+                expect(request.getHeader("Origin")).andStubReturn(null);
+                expect(request.getHeader("Referer")).andStubReturn(null);
                 expect(request.getRemoteHost()).andReturn("localhost");
                 expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                 expect(request.getRequestURI()).andReturn("/jolokia/");

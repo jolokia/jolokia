@@ -278,7 +278,8 @@ public class AgentServlet extends HttpServlet {
         JSONAware json = null;
         try {
             // Check access policy
-            requestHandler.checkClientIPAccess(pReq.getRemoteHost(),pReq.getRemoteAddr());
+            requestHandler.checkAccess(pReq.getRemoteHost(), pReq.getRemoteAddr(),
+                                       getOriginOrReferer(pReq));
 
             // Remember the agent URL upon the first request. Needed for discovery
             updateAgentUrlIfNeeded(pReq);
@@ -303,6 +304,15 @@ public class AgentServlet extends HttpServlet {
             }
         }
     }
+
+    private String getOriginOrReferer(HttpServletRequest pReq) {
+        String origin = pReq.getHeader("Origin");
+        if (origin == null) {
+            origin = pReq.getHeader("Referer");
+        }
+        return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
+    }
+
 
     // Update the agent URL in the agent details if not already done
     private void updateAgentUrlIfNeeded(HttpServletRequest pReq) {

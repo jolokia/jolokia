@@ -150,7 +150,7 @@ public class BackendManagerTest {
     @Test
     public void corsAccessCheck() {
         BackendManager backendManager = new BackendManager(config,log);
-        assertTrue(backendManager.isCorsAccessAllowed("http://bla.com"));
+        assertTrue(backendManager.isOriginAllowed("http://bla.com",false));
         backendManager.destroy();
     }
 

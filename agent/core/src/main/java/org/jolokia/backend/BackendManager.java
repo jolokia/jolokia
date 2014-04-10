@@ -223,10 +223,11 @@ public class BackendManager implements AgentDetailsHolder {
      * Check whether CORS access is allowed for the given origin.
      *
      * @param pOrigin origin URL which needs to be checked
-     * @return true if icors access is allowed
+     * @param pStrictChecking whether to a strict check (i.e. server side check)
+     * @return true if if cors access is allowed
      */
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return restrictor.isCorsAccessAllowed(pOrigin);
+    public boolean isOriginAllowed(String pOrigin,boolean pStrictChecking) {
+        return restrictor.isOriginAllowed(pOrigin, pStrictChecking);
     }
 
     /**

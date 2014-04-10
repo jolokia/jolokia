@@ -153,7 +153,7 @@ public class HttpRequestHandler {
      */
     public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
         Map<String,String> ret = new HashMap<String, String>();
-        if (pOrigin != null && backendManager.isCorsAccessAllowed(pOrigin)) {
+        if (pOrigin != null && backendManager.isOriginAllowed(pOrigin,false)) {
             // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
             ret.put("Access-Control-Allow-Origin","null".equals(pOrigin) ? "*" : pOrigin);
             if (pRequestHeaders != null) {
@@ -277,15 +277,19 @@ public class HttpRequestHandler {
      *
      * @param pHost host to check
      * @param pAddress address to check
+     * @param pOrigin (optional) origin header to check also.
      */
-    public void checkClientIPAccess(String pHost, String pAddress) {
+    public void checkAccess(String pHost, String pAddress, String pOrigin) {
         if (!backendManager.isRemoteAccessAllowed(pHost,pAddress)) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
+        }
+        if (pOrigin != null && !backendManager.isOriginAllowed(pOrigin,true)) {
+            throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
         }
     }
 
     /**
-     * Check whether for the given host is a cross-browser request allowed. This check is deligated to the
+     * Check whether for the given host is a cross-browser request allowed. This check is delegated to the
      * backendmanager which is responsible for the security configuration.
      * Also, some sanity checks are applied.
      *
@@ -296,7 +300,7 @@ public class HttpRequestHandler {
         if (pOrigin != null) {
             // Prevent HTTP response splitting attacks
             String origin  = pOrigin.replaceAll("[\\n\\r]*","");
-            if (backendManager.isCorsAccessAllowed(origin)) {
+            if (backendManager.isOriginAllowed(origin,false)) {
                 return "null".equals(origin) ? "*" : origin;
             } else {
                 return null;

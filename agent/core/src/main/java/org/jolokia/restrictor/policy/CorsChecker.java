@@ -30,6 +30,8 @@ import org.w3c.dom.*;
  */
 public class CorsChecker extends AbstractChecker<String> {
 
+    private boolean strictChecking = false;
+
     private List<Pattern> patterns;
 
     /**
@@ -39,6 +41,8 @@ public class CorsChecker extends AbstractChecker<String> {
      *     &lt;cors&gt;
      *       &lt;allow-origin&gt;http://jolokia.org&lt;allow-origin&gt;
      *       &lt;allow-origin&gt;*://*.jmx4perl.org&gt;
+     *
+     *       &lt;strict-checking/&gt;
      *     &lt;/cors&gt;
      * </pre>
      *
@@ -56,10 +60,14 @@ public class CorsChecker extends AbstractChecker<String> {
                     if (node.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
-                    assertNodeName(node,"allow-origin");
-                    String p = node.getTextContent().trim().toLowerCase();
-                    p = Pattern.quote(p).replace("*","\\E.*\\Q");
-                    patterns.add(Pattern.compile("^" + p + "$"));
+                    assertNodeName(node,"allow-origin","strict-checking");
+                    if (node.getNodeName().equals("allow-origin")) {
+                        String p = node.getTextContent().trim().toLowerCase();
+                        p = Pattern.quote(p).replace("*", "\\E.*\\Q");
+                        patterns.add(Pattern.compile("^" + p + "$"));
+                    } else if (node.getNodeName().equals("strict-checking")) {
+                        strictChecking = true;
+                    }
                 }
             }
         }
@@ -68,11 +76,21 @@ public class CorsChecker extends AbstractChecker<String> {
     /** {@inheritDoc} */
     @Override
     public boolean check(String pArg) {
+        return check(pArg,false);
+    }
+
+    public boolean check(String pOrigin, boolean pIsStrictCheck) {
+        // Method called during strict checking but we have not configured that
+        // So the check passes always.
+        if (pIsStrictCheck && !strictChecking) {
+            return true;
+        }
+
         if (patterns == null || patterns.size() == 0) {
             return true;
         }
         for (Pattern pattern : patterns) {
-            if (pattern.matcher(pArg).matches()) {
+            if (pattern.matcher(pOrigin).matches()) {
                 return true;
             }
         }

@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.2.1" description="Release 1.2.1" date="2014-02-24">
+      <action dev="roland" type="add" date="2014-04-24">
+        Added "strict-checking" for jolokia-access.xml in the CORS
+        section in order to enable server side origin checking, too.
+      </action>
       <action dev="roland" type="fix" date="2014-04-10" issue="123">
         Fixed issue with JBoss 4.2.3 and JNDI lookups
       </action>

@@ -99,8 +99,8 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return corsChecker.check(pOrigin);
+    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
+        return corsChecker.check(pOrigin,pIsStrictCheck);
     }
 
     /** {@inheritDoc} */

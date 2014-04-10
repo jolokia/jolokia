@@ -165,7 +165,8 @@ public class JolokiaHttpHandler implements HttpHandler {
         try {
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
-            requestHandler.checkClientIPAccess(address.getHostName(),address.getAddress().getHostAddress());
+            requestHandler.checkAccess(address.getHostName(), address.getAddress().getHostAddress(),
+                                       extractOriginOrReferer(pExchange));
             String method = pExchange.getRequestMethod();
 
             // Dispatch for the proper HTTP request method
@@ -190,7 +191,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // ========================================================================
 
-
     private Restrictor createRestrictor(Configuration pConfig) {
         String location = pConfig.get(ConfigKey.POLICY_LOCATION);
         try {
@@ -207,6 +207,17 @@ public class JolokiaHttpHandler implements HttpHandler {
                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
+    }
+
+
+    // Used for checking origin or referer is an origin policy is enabled
+    private String extractOriginOrReferer(HttpExchange pExchange) {
+        Headers headers = pExchange.getRequestHeaders();
+        String origin = headers.getFirst("Origin");
+        if (origin == null) {
+            origin = headers.getFirst("Referer");
+        }
+        return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
     }
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) {

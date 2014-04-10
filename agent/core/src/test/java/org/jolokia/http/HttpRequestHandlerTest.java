@@ -65,7 +65,7 @@ public class HttpRequestHandlerTest {
         expect(backend.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
         replay(backend);
 
-        handler.checkClientIPAccess("localhost","127.0.0.1");
+        handler.checkAccess("localhost", "127.0.0.1",null);
     }
 
     @Test(expectedExceptions = { SecurityException.class })
@@ -73,8 +73,18 @@ public class HttpRequestHandlerTest {
         expect(backend.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(false);
         replay(backend);
 
-        handler.checkClientIPAccess("localhost","127.0.0.1");
+        handler.checkAccess("localhost", "127.0.0.1",null);
     }
+
+    @Test(expectedExceptions = { SecurityException.class })
+    public void accessDeniedViaOrigin() {
+        expect(backend.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
+        expect(backend.isOriginAllowed("www.jolokia.org",true)).andReturn(false);
+        replay(backend);
+
+        handler.checkAccess("localhost", "127.0.0.1","www.jolokia.org");
+    }
+
 
     @Test
     public void get() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
@@ -152,7 +162,7 @@ public class HttpRequestHandlerTest {
     public void preflightCheck() {
         String origin = "http://bla.com";
         String headers ="X-Data: Test";
-        expect(backend.isCorsAccessAllowed(origin)).andReturn(true);
+        expect(backend.isOriginAllowed(origin,false)).andReturn(true);
         replay(backend);
 
         Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);
@@ -163,7 +173,7 @@ public class HttpRequestHandlerTest {
     public void preflightCheckNegative() {
         String origin = "http://bla.com";
         String headers ="X-Data: Test";
-        expect(backend.isCorsAccessAllowed(origin)).andReturn(false);
+        expect(backend.isOriginAllowed(origin,false)).andReturn(false);
         replay(backend);
 
         Map<String,String> ret =  handler.handleCorsPreflightRequest(origin, headers);

@@ -222,12 +222,25 @@ public class PolicyBasedRestrictorTest {
 
     @Test
     public void cors() {
+        InputStream is = getClass().getResourceAsStream("/allow-origin4.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        for (boolean strict : new boolean[] {true, false}) {
+            assertTrue(restrictor.isOriginAllowed("http://bla.com", strict));
+            assertFalse(restrictor.isOriginAllowed("http://www.jolokia.org", strict));
+            assertTrue(restrictor.isOriginAllowed("https://www.consol.de", strict));
+        }
+    }
+
+    @Test
+    public void corsStrictCheckingOff() {
         InputStream is = getClass().getResourceAsStream("/allow-origin1.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
-        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
-        assertFalse(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
-        assertTrue(restrictor.isCorsAccessAllowed("https://www.consol.de"));
+        // Allways true since we want a strict check but strict checking is off.
+        assertTrue(restrictor.isOriginAllowed("http://bla.com", true));
+        assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", true));
+        assertTrue(restrictor.isOriginAllowed("https://www.consol.de", true));
     }
 
     @Test
@@ -235,9 +248,9 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/allow-origin2.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
-        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+        assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
+        assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
+        assertTrue(restrictor.isOriginAllowed("http://www.consol.de", false));
     }
 
     @Test
@@ -245,9 +258,9 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/allow-origin3.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
-        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.consol.de"));
+        assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
+        assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
+        assertTrue(restrictor.isOriginAllowed("http://www.consol.de", false));
     }
 
     @Test
@@ -255,9 +268,9 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/access-sample1.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
-        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://www.jolokia.org"));
-        assertTrue(restrictor.isCorsAccessAllowed("https://www.consol.de"));
+        assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
+        assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
+        assertTrue(restrictor.isOriginAllowed("https://www.consol.de", false));
     }
 
 

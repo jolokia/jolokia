@@ -73,7 +73,7 @@ public abstract class AbstractConstantRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
-    public boolean isCorsAccessAllowed(String pOrigin) {
+    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
         return isAllowed;
     }
 }
