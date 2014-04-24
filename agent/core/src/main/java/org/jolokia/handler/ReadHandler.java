@@ -81,7 +81,6 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
      * done by the upper level. If the request is for an MBean pattern or multiple attributes
      * are required, we try multiple requests for multiple server.
      *
-     *
      * @param pRequest request to decide on whether to handle all request at once
      * @return true if this is a multi attribute request, has an MBean pattern to look for or is a request for
      *         all attributes.
@@ -144,7 +143,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
                 }
             } catch (InstanceNotFoundException exp) {
                 // Since MBean can be registered/deregistered dynamically, it can happen here, that
-                // an MBean has been already unregistered in the meantim. We simply ignore an InstanceNotFoundException
+                // an MBean has been already unregistered in the meantime. We simply ignore an InstanceNotFoundException
                 // here and go on ....
             }
         }
@@ -219,11 +218,7 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
     }
 
     private boolean shouldAllAttributesBeFetched(List<String> pAttributeNames) {
-       if (pAttributeNames == null || pAttributeNames.size() == 0) {
-           return true;
-       } else {
-           return pAttributeNames.size() == 1 && pAttributeNames.get(0) == null;
-       }
+        return pAttributeNames == null || pAttributeNames.size() == 0 || pAttributeNames.size() == 1 && pAttributeNames.get(0) == null;
     }
 
     // Get the MBeanInfo from one of the provided MBeanServers

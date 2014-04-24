@@ -104,7 +104,7 @@ public abstract class JmxObjectNameRequest extends JmxRequest {
 
     /**
      * Name prepared according to requested formatting note. The key ordering can be influenced by the
-     * proccesing parameter {@link ConfigKey#CANONICAL_NAMING}. If not given or set to "true",
+     * processing parameter {@link ConfigKey#CANONICAL_NAMING}. If not given or set to "true",
      * then the canonical order is used, if set to "initial" the name is given to construction time
      * is used.
      *

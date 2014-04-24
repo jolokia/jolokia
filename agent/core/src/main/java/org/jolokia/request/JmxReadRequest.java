@@ -104,8 +104,8 @@ public class JmxReadRequest extends JmxObjectNameRequest {
     }
 
     /**
-     * Whether this request has no attribute names associated  (which normally means, that all attributes should be fetched).
-     * @return true if no attribute name is stored.
+     * Whether this request has not multiple attribute names associated  (which normally means, that all attributes should be fetched).
+     * @return true if not multiple attribute names are contained.
      */
     public boolean hasAttribute() {
         return isMultiAttributeMode() || getAttributeName() != null;
