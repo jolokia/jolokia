@@ -54,7 +54,7 @@ public class HttpRequestHandlerTest {
         expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
         replay(restrictor);
         init(restrictor);
-        handler.checkClientIPAccess("localhost", "127.0.0.1");
+        handler.checkAccess("localhost", "127.0.0.1", null);
         verify(restrictor);
     }
 
@@ -65,9 +65,21 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkClientIPAccess("localhost","127.0.0.1");
+        handler.checkAccess("localhost", "127.0.0.1", null);
         verify(restrictor);
     }
+
+    @Test(expectedExceptions = { SecurityException.class })
+    public void accessDeniedViaOrigin() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed("www.jolokia.org",true)).andReturn(false);
+        replay(restrictor);
+        init(restrictor);
+
+        handler.checkAccess("localhost", "127.0.0.1","www.jolokia.org");
+    }
+
 
     @Test
     public void get() throws Exception {
@@ -118,7 +130,7 @@ public class HttpRequestHandlerTest {
         String origin = "http://bla.com";
         String headers ="X-Data: Test";
         Restrictor restrictor = createMock(Restrictor.class);
-        expect(restrictor.isCorsAccessAllowed(origin)).andReturn(false);
+        expect(restrictor.isOriginAllowed(origin, false)).andReturn(false);
         replay(restrictor);
         init(restrictor);
 

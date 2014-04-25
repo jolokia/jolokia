@@ -84,7 +84,7 @@ public class DelegatingRestrictorTest {
         assertFalse(restrictor.isAttributeWriteAllowed(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage"));
         assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Memory"), "gc"));
         assertFalse(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1"));
-        assertTrue(restrictor.isCorsAccessAllowed("http://bla.com"));
+        assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Impossible.*")
@@ -133,7 +133,7 @@ public class DelegatingRestrictorTest {
             return remote;
         }
 
-        public boolean isCorsAccessAllowed(String pOrigin) {
+        public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
             return cors;
         }
     }

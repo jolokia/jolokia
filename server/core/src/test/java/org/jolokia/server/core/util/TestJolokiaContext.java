@@ -170,8 +170,8 @@ public class TestJolokiaContext implements JolokiaContext {
         return restrictor.isRemoteAccessAllowed(pHostOrAddress);
     }
 
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return restrictor.isCorsAccessAllowed(pOrigin);
+    public boolean isOriginAllowed(String pOrigin,boolean pIsStrictCheck) {
+        return restrictor.isOriginAllowed(pOrigin,pIsStrictCheck);
     }
 
     // Should be called when MBeans were registered for the test. Not part of the JolokiaContext interface

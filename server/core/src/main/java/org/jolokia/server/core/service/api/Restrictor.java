@@ -90,8 +90,9 @@ public interface Restrictor {
      * <a href="https://developer.mozilla.org/en/http_access_control">CORS</a> specification
      * for details
      *
-     * @param pOrigin the "Origin:" URL provided within the request
+     * @param pOrigin the "Origin:" header provided within the request
+     * @param pIsStrictCheck whether doing a strict check
      * @return true if this cross browser request allowed, false otherwise
      */
-    boolean isCorsAccessAllowed(String pOrigin);
+    boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck);
 }

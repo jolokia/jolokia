@@ -171,13 +171,13 @@ class DelegatingRestrictor implements Restrictor {
     private static final RestrictorCheck CORS_CHECK = new RestrictorCheck() {
         /** {@inheritDoc} */
         public boolean check(Restrictor restrictor, Object... args) {
-            return restrictor.isCorsAccessAllowed((String) args[0]);
+            return restrictor.isOriginAllowed((String) args[0], (Boolean) args[1]);
         }
     };
 
     /** {@inheritDoc} */
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return checkRestrictorService(CORS_CHECK,pOrigin);
+    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
+        return checkRestrictorService(CORS_CHECK,pOrigin,pIsStrictCheck);
     }
 
     // =======================================================================================================

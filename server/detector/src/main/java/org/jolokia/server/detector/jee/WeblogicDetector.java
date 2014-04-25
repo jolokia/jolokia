@@ -57,18 +57,31 @@ public class WeblogicDetector extends AbstractServerDetector {
 
     @Override
     public Set<MBeanServerConnection> getMBeanServers() {
-        // Weblogic stores the MBeanServer in a JNDI context
-        InitialContext ctx;
-        try {
-            ctx = new InitialContext();
-            MBeanServer server = (MBeanServer) ctx.lookup("java:comp/env/jmx/runtime");
-            if (server != null) {
-                Collections.singleton(server);
+
+        // Workaround for broken JBoss 4.2.3 which doesn't like JNDI lookups. See #123 for details.
+        if (!isJBoss()) {
+            InitialContext ctx;
+            try {
+                // Weblogic stores the MBeanServer in a JNDI context
+                ctx = new InitialContext();
+                MBeanServerConnection server = (MBeanServerConnection) ctx.lookup("java:comp/env/jmx/runtime");
+                if (server != null) {
+                    return Collections.singleton(server);
+                }
+            } catch (NamingException e) {
+                // expected and can happen on non-Weblogic platforms
             }
-        } catch (NamingException e) {
-            // expected and can happen on non-Weblogic platforms
         }
         return null;
+    }
+
+    // Workaround for old JBosses.
+    private boolean isJBoss() {
+        try {
+            return Class.forName("org.jboss.mx.util.MBeanServerLocator") != null;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     static class WeblogicServerHandle extends DefaultServerHandle {

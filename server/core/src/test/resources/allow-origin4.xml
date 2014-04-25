@@ -19,8 +19,9 @@
 <restrict>
 
   <cors>
-    <allow-origin>*</allow-origin>
-
+    <allow-origin>http://bla.com</allow-origin>
+    <allow-origin>http://blub.com</allow-origin>
+    <allow-origin>*://*.consol.de</allow-origin>
+    <strict-checking/>
   </cors>
-
 </restrict>

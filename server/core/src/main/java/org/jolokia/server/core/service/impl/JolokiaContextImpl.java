@@ -135,8 +135,8 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
-    public boolean isCorsAccessAllowed(String pOrigin) {
-        return getRestrictor().isCorsAccessAllowed(pOrigin);
+    public boolean isOriginAllowed(String pOrigin,boolean pStrictCheck) {
+        return getRestrictor().isOriginAllowed(pOrigin,pStrictCheck);
     }
 
     /** {@inheritDoc} */
