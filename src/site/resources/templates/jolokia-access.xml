@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  Sample definitions for restricting the access to the j4p-agent. Adapt this
-  file and copy it over to 'j4p-access.xml', which get's evaluated during
+  Sample definitions for restricting the access to the Jolokia agent. Adapt this
+  file and copy it over to 'jolokia-access.xml', which get's evaluated during
   runtime (if included in the war).
 
   You can restrict the available methods in principale as well as the accessible
@@ -61,6 +61,36 @@
     <command>search</command>
   </commands>
 
+
+  <!-- 
+  Restrict access only via the specified methods
+  
+  Example which allows only POST requests:
+  <http>
+    <method>post</method>
+  </http>   
+  -->
+
+  <!-- 
+  Cross origin protection (CORS). 
+
+  You can configure which cross origins are given allowance by the browser. 
+  With strict-checking, the Origin: header can be also be checked on the server side, 
+  which results in an error if it doesn't match any specified pattern.
+  --> 
+  
+  <!-- 
+      Example which allows access from www.jolokia.org and the domain jmx4perl.org for CORS
+      but does also server side check to prevent CSRF attacks:
+
+  <cors>
+      <allow-origin>http://www.jolokia.org</allow-origin>
+      <allow-origin>*://*.jmx4perl.org</allow-origin>
+
+      <strict-checking/>
+  </cors>
+  -->
+
   <!-- For each command type missing in a given <commands> section, for certain MBeans (which
        can be a pattern, too) an command be alloed. Note that an <allow> entry e.g. for reading
        an attribute of an certain MBean has no influence if reading is enabled globally anyway -->
@@ -109,7 +139,7 @@
 </restrict>
 
 <!--
-  ~ Copyright 2009-2011 Roland Huss
+  ~ Copyright 2009-2014 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
