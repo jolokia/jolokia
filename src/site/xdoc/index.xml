@@ -98,21 +98,21 @@
         </ul>
         <p>
           And finally there is an important addition to the configuration of Jolokia's access policy. You might know,
-          that you can configure CORS so the agent allows access only from certain origins. CORS is used by browser for
-          cross origin sharing and is pure client side check. I.e. the browser asks the server and if the server
+          that you can configure CORS so the agent allows access only from certain origins. CORS is used by browsers for
+          cross origin sharing and is a pure client side check. I.e. the browser asks the server and if the server
           says "no" the browser forbids any Ajax request to this server from any script. However, this still allows
           non-Ajax requests from any origin. To restrict this, too, a new configuration directive <code>&lt;strict-checking&gt;</code>
           has been added to the <code>&lt;cors&gt;</code> section which, if given, will do also a server-side check of
           a <code>Origin:</code> header when provided by the browser. If a security policy is used, it is highly recommended to
-          set this flag to true (which for compatibility reason is switched off by default). And yes, it is of course highly
+          set this flag (which for compatibility reason is switched off by default). And yes, it is of course highly
           recommended to use a <a href="reference/html/security.html#security-policy">jolokia-access.xml</a> policy in production
           (and not only for servers exposed to the bad internet directly). This is especially important if you can access
-          Jolokia agents directly via a browser which you use also for accessing in the internet
-          (hint: <a href="http://en.wikipedia.org/wiki/Cross-site_request_forgery">CSRF</a>). But you of course already do, or ?
+          Jolokia agents directly via a browser which is also used for internet access
+          (hint: <a href="http://en.wikipedia.org/wiki/Cross-site_request_forgery">CSRF</a>).
         </p>
         <p>
           No news about 2.0 ? Yes, indeed. The giant is still sleeping, "Jolokia forever", you know. But the
-          pressures rises, for some conferences I have some CFPs out which hopefully will lead to some nice CDD sessions
+          pressure rises, for some conferences I have some CFPs out which hopefully will lead to some nice CDD sessions
           ("conference driven development", yeah).
         </p>
       </subsection>
