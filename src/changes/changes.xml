@@ -23,29 +23,30 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.2.1" description="Release 1.2.1" date="2014-02-24">
+    <release version="1.2.1" description="Release 1.2.1" date="2014-04-29">
       <action dev="roland" type="add" date="2014-04-24">
         Added "strict-checking" for jolokia-access.xml in the CORS
         section in order to enable server side origin checking, too.
       </action>
       <action dev="roland" type="fix" date="2014-04-10" issue="123">
-        Fixed issue with JBoss 4.2.3 and JNDI lookups
+        Fixed issue with JBoss 4.2.3 and JNDI lookups.
       </action>
       <action dev="cymantic" type="update" date="2014-04-10" issue="122">
-        Update Java client for usage with Apache Http Components >= 4.3
+        Update Java client for usage with Apache Http Components >= 4.3. Please stick to Jolokia &gt;= 1.2.0 for the
+        Java client if you need to use Apache Http Client libraries &lt; 4.3. These will also work with the 1.2.1 agent.
       </action>
       <action dev="roland" type="add" date="2014-04-04" issue="133">
-        Added a server detector for ActiveMQ
+        Added a server detector for ActiveMQ.
       </action>
       <action dev="roland" type="fix" date="2014-03-30" issue="135">
-        Cleaned up warnings for multicast discovery request failures
+        Cleaned up warnings for multicast discovery request failures.
       </action>
       <action dev="roland" type="add" date="2014-03-30" issue="134">
         Allow for placeholders in "discoveryAgentUrl" configuration to be filled with environment
         variables and system properties.
       </action>
       <action dev="roland" type="fix" date="2014-03-29" issue="132">
-        Fixed typo in Spring configuration for automatic agent startup
+        Fixed typo in Spring configuration for automatic agent startup.
       </action>
     </release>
     <release version="1.2.0" description="Release 1.2.0" date="2014-02-24">

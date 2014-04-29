@@ -77,6 +77,36 @@
     <command>search</command>
   </commands>
 
+
+  <!-- 
+  Restrict access only via the specified methods
+  
+  Example which allows only POST requests:
+  <http>
+    <method>post</method>
+  </http>   
+  -->
+
+  <!-- 
+  Cross origin protection (CORS). 
+
+  You can configure which cross origins are given allowance by the browser. 
+  With strict-checking, the Origin: header can be also be checked on the server side, 
+  which results in an error if it doesn't match any specified pattern.
+  --> 
+  
+  <!-- 
+      Example which allows access from www.jolokia.org and the domain jmx4perl.org for CORS
+      but does also server side check to prevent CSRF attacks:
+
+  <cors>
+      <allow-origin>http://www.jolokia.org</allow-origin>
+      <allow-origin>*://*.jmx4perl.org</allow-origin>
+
+      <strict-checking/>
+  </cors>
+  -->
+
   <!-- For each command type missing in a given <commands> section, for certain MBeans (which
        can be a pattern, too) an command be alloed. Note that an <allow> entry e.g. for reading
        an attribute of an certain MBean has no influence if reading is enabled globally anyway -->

@@ -79,6 +79,43 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="1.2.1 is in the house">
+        <div class="news-date">2014-02-24</div>
+        <p>
+          This minor release fixes some bugs and brings some <a href="changes-report.html">smaller features</a>:
+        </p>
+        <ul>
+          <li>An ActiveMQ server detector has been added</li>
+          <li>
+            The Java client library has been updated to the latest Apache HTTP components 4.x.
+            If you are forced to still use Apache HTTP Client 3.x, you still can use the Java Client Lib from
+            Jolokia 1.2.0 which will work with a Jolokia agent 1.2.1 nicely.</li>
+          <li>Bug fix for JBoss 4.2.3 (yeah, seems still to be used)</li>
+          <li>Cleaned up logging for discovery requests</li>
+          <li>Placeholders can be used when specifying the agent URL which will be used in discovery responses.
+            That way you can configure the URL flexibly from you server configuration.
+          </li>
+        </ul>
+        <p>
+          And finally there is an important addition to the configuration of Jolokia's access policy. You might know,
+          that you can configure CORS so the agent allows access only from certain origins. CORS is used by browsers for
+          cross origin sharing and is a pure client side check. I.e. the browser asks the server and if the server
+          says "no" the browser forbids any Ajax request to this server from any script. However, this still allows
+          non-Ajax requests from any origin. To restrict this, too, a new configuration directive <code>&lt;strict-checking&gt;</code>
+          has been added to the <code>&lt;cors&gt;</code> section which, if given, will do also a server-side check of
+          a <code>Origin:</code> header when provided by the browser. If a security policy is used, it is highly recommended to
+          set this flag (which for compatibility reason is switched off by default). And yes, it is of course highly
+          recommended to use a <a href="reference/html/security.html#security-policy">jolokia-access.xml</a> policy in production
+          (and not only for servers exposed to the bad internet directly). This is especially important if you can access
+          Jolokia agents directly via a browser which is also used for internet access
+          (hint: <a href="http://en.wikipedia.org/wiki/Cross-site_request_forgery">CSRF</a>).
+        </p>
+        <p>
+          No news about 2.0 ? Yes, indeed. The giant is still sleeping, "Jolokia forever", you know. But the
+          pressure rises, for some conferences I have some CFPs out which hopefully will lead to some nice CDD sessions
+          ("conference driven development", yeah).
+        </p>
+      </subsection>
       <subsection name="Find your agents with 1.2.0">
         <div class="news-date">2014-02-24</div>
         <p>
@@ -390,66 +427,6 @@
           href="https://github.com/rhuss/aji">Ají</a>, Jolokia's new
           fancy sister. Sorry for pushing thinks like notifications
           down the Jonlokia back-log, but it's not forgotten.
-        </p>
-      </subsection>
-      <subsection name="1.0.4 introduces a Javascript request scheduler">
-        <div class="news-date">2012-06-07</div>
-        <p>
-          Beside some <a href="changes-report.html">bug fixes</a> two
-          new features are included in this new release:
-        </p>
-        <p>
-          Jolokia's Javascript library has now a scheduler for
-          periodically querying the agent. Requests can be registered
-          at the agent and all registered requests are sent at once in
-          a single bulk request periodically. This is especially
-          useful when building up dashboard like web pages with
-          multiple charts.
-        </p>
-        <p>
-          The folowing example registers two requests which are called
-          every second. The <a
-          href="reference/html/clients.html#js-poller">reference
-          documentation</a> has all the details.
-        </p>
-        <pre class="prettyprint lang-javascript">var jolokia = new Jolokia("http://localhost:8080/jolokia");
-
-          // Register request along with callback printing out
-// the heap memory usage
-jolokia.register(function(resp) {
-   console.log("Memory: " + resp.value);
-},{ 
-    type:"read", 
-    mbean:"java.lang:type=Memory", 
-    attribute:"HeapMemoryUsage", 
-    path:"used"
-});
-
-// Start the scheduler for calling the request every second
-jolokia.start(1000);</pre>
-        <p>
-          The scheduler is used by the new Jolokia-<a
-          href="http://square.github.com/cubism/">Cubism</a>
-          integration for plotting real time JMX data. Please have a
-          look at the <a href="client/javascript-cubism.html">demo
-          page</a> for more information about using Jolokia together
-          with Cubism.
-        </p>
-        <p>
-          On the agent side detectors now support custom options. The
-          first option available is for the Glassfish detector to
-          prevent booting of the AMX subsystem, which registers the
-          most interesting MBeans. AMX is booted now by default on the
-          first request when running in Glassfish. For more
-          information, please refer to the <a
-          href="reference/html/agents.html#war-agent-installation">WAR
-          configuration options</a> in the reference documentation.
-        </p>
-        <p>
-          <a href="https://github.com/rhuss/aji">Ají</a> moves on,
-          too, although slower than expected. The main focus of the
-          next months will to be bring that Javascript JMX application
-          on and out. Stay tuned ...
         </p>
       </subsection>
   </section>
