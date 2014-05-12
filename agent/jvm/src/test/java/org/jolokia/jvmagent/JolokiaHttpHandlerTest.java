@@ -65,7 +65,7 @@ public class JolokiaHttpHandlerTest {
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
 
-        handler.handle(exchange);
+        handler.doHandle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
         String result = out.toString("utf-8");
@@ -85,7 +85,7 @@ public class JolokiaHttpHandlerTest {
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
 
-        handler.handle(exchange);
+        handler.doHandle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
         String result = out.toString("utf-8");
@@ -116,7 +116,7 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("PUT");
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-        handler.handle(exchange);
+        handler.doHandle(exchange);
 
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
         assertTrue(resp.containsKey("error"));
@@ -127,7 +127,7 @@ public class JolokiaHttpHandlerTest {
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
     public void handlerNotStarted() throws URISyntaxException, IOException {
         JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getConfig());
-        newHandler.handle(prepareExchange("http://localhost:8080/"));
+        newHandler.doHandle(prepareExchange("http://localhost:8080/"));
 
     }
 
@@ -143,7 +143,7 @@ public class JolokiaHttpHandlerTest {
             ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
             newHandler.start(false);
             try {
-                newHandler.handle(exchange);
+                newHandler.doHandle(exchange);
             } finally {
                 newHandler.stop();
             }
@@ -186,7 +186,7 @@ public class JolokiaHttpHandlerTest {
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
 
-        handler.handle(exchange);
+        handler.doHandle(exchange);
 
         assertEquals(header.getFirst("content-type"), "text/plain; charset=utf-8");
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
@@ -209,7 +209,7 @@ public class JolokiaHttpHandlerTest {
 
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-        handler.handle(exchange);
+        handler.doHandle(exchange);
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
         assertEquals(header.getFirst("Access-Control-Allow-Headers"),"X-Bla, X-Blub");
         assertNotNull(header.getFirst("Access-Control-Allow-Max-Age"));

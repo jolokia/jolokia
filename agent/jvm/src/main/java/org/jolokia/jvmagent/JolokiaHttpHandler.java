@@ -17,7 +17,10 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.*;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -25,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
+import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
@@ -58,7 +62,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Configuration of this handler
-    private Configuration    configuration;
+    private Configuration configuration;
 
     // Formatted for formatting Date response headers
     private final SimpleDateFormat rfc1123Format;
@@ -81,7 +85,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     /**
      * Create a new HttpHandler for processing HTTP request
      *
-     * @param pConfig jolokia specific config tuning the processing behaviour
+     * @param pConfig     jolokia specific config tuning the processing behaviour
      * @param pLogHandler log-handler the log handler to use for jolokia
      */
     public JolokiaHttpHandler(Configuration pConfig, LogHandler pLogHandler) {
@@ -92,11 +96,12 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
-        logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS),pConfig.get(ConfigKey.DEBUG));
+        logHandler = pLogHandler != null ? pLogHandler : createLogHandler(pConfig.get(ConfigKey.LOGHANDLER_CLASS), pConfig.get(ConfigKey.DEBUG));
     }
 
     /**
      * Start the handler
+     *
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
@@ -105,10 +110,10 @@ public class JolokiaHttpHandler implements HttpHandler {
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
         if (listenForDiscoveryMcRequests(configuration)) {
             try {
-                discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager, restrictor, logHandler);
                 discoveryMulticastResponder.start();
             } catch (IOException e) {
-                logHandler.error("Cannot start discovery multicast handler: " + e,e);
+                logHandler.error("Cannot start discovery multicast handler: " + e, e);
             }
         }
     }
@@ -122,8 +127,8 @@ public class JolokiaHttpHandler implements HttpHandler {
     /**
      * Start the handler and remember connection details which are useful for discovery messages
      *
-     * @param pLazy whether initialisation should be done lazy.
-     * @param pUrl agent URL
+     * @param pLazy    whether initialisation should be done lazy.
+     * @param pUrl     agent URL
      * @param pSecured whether the communication is secured or not
      */
     public void start(boolean pLazy, String pUrl, boolean pSecured) {
@@ -146,15 +151,33 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     /**
-     * Handler a request. If the handler is not yet started, an exception is thrown
+     * Handle a request. If the handler is not yet started, an exception is thrown. If running with JAAS
+     * security enabled it will run as the given subject.
      *
-     * @param pExchange the request/response object
+     * @param pHttpExchange the request/response object
      * @throws IOException if something fails during handling
      * @throws IllegalStateException if the handler has not yet been started
      */
-    @Override
+    public void handle(final HttpExchange pHttpExchange) throws IOException {
+        Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
+        if (subject!=null)  {
+            try {
+                Subject.doAs(subject, new PrivilegedExceptionAction<Void>() {
+                    public Void run() throws Exception {
+                        doHandle(pHttpExchange);
+                        return null;
+                    }
+                });
+            } catch (PrivilegedActionException e) {
+                throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
+            }
+        }  else {
+            doHandle(pHttpExchange);
+        }
+    }
+
     @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
-    public void handle(HttpExchange pExchange) throws IOException {
+    public void doHandle(HttpExchange pExchange) throws IOException {
         if (requestHandler == null) {
             throw new IllegalStateException("Handler not yet started");
         }

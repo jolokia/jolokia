@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.jvmagent.security.UserPasswordAuthenticator;
 import org.jolokia.util.EscapeUtil;
 import org.testng.annotations.Test;
 

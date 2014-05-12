@@ -198,6 +198,7 @@ public class AgentServletTest {
             expect(request.getRequestURI()).andReturn(buf.toString());
             expect(request.getContextPath()).andReturn("/jolokia");
             expect(request.getAuthType()).andReturn("BASIC");
+            expect(request.getAttribute("subject")).andReturn(null);
             replay(request, response);
 
             servlet.doGet(request, response);
@@ -245,6 +246,7 @@ public class AgentServletTest {
         StringWriter sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
         replay(request, response);
 
         servlet.doGet(request, response);
@@ -266,10 +268,12 @@ public class AgentServletTest {
                         expect(request.getRequestURI()).andReturn("/jolokia/");
                         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
                         expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
+                        expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
                         Vector params = new Vector();
                         params.add("debug");
                         expect(request.getParameterNames()).andReturn(params.elements());
                         expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
+                        expect(request.getAttribute("subject")).andReturn(null);
                     }
                 },
                 getStandardResponseSetup());
@@ -288,6 +292,7 @@ public class AgentServletTest {
         StringWriter responseWriter = initRequestResponseMocks();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
 
         preparePostRequest(HttpTestUtil.HEAP_MEMORY_POST_REQUEST);
 
@@ -315,6 +320,7 @@ public class AgentServletTest {
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
+        expect(request.getAttribute("subject")).andReturn(null);
 
         replay(request, response);
 
@@ -374,6 +380,8 @@ public class AgentServletTest {
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
                         expect(request.getParameterMap()).andReturn(null);
+                        expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                        expect(request.getAttribute("subject")).andReturn(null);
                     }
                 },
                 new Runnable() {
@@ -418,6 +426,7 @@ public class AgentServletTest {
                     }
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getAttribute("subject")).andReturn(null);
 
         replay(request, response);
 
@@ -473,6 +482,7 @@ public class AgentServletTest {
         StringWriter sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
+        expect(request.getAttribute("subject")).andReturn(null);
         replay(request, response);
 
         servlet.doGet(request, response);
@@ -577,6 +587,7 @@ public class AgentServletTest {
                 expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                 expect(request.getRequestURI()).andReturn("/jolokia/");
                 expect(request.getParameterMap()).andReturn(null);
+                expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
             }
         };
     }

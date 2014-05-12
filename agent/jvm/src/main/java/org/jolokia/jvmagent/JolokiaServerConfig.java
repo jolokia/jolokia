@@ -27,6 +27,8 @@ import java.util.*;
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.jvmagent.security.JaasAuthenticator;
+import org.jolokia.jvmagent.security.UserPasswordAuthenticator;
 import org.jolokia.util.NetworkUtil;
 
 /**
@@ -290,9 +292,20 @@ public class JolokiaServerConfig {
         String user = jolokiaConfig.get(ConfigKey.USER);
         String password = jolokiaConfig.get(ConfigKey.PASSWORD);
 
-        authenticator = (user != null && password != null) ?
-                new UserPasswordAuthenticator(user,password) :
-                null;
+        if (user != null) {
+            String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
+            String realm = jolokiaConfig.get(ConfigKey.REALM);
+            if ("basic".equalsIgnoreCase(authMode)) {
+                authenticator = new UserPasswordAuthenticator(realm,user,password);
+            } else if ("jaas".equalsIgnoreCase(authMode)) {
+                authenticator = new JaasAuthenticator(realm);
+            } else {
+                throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
+                                                   "Must be either 'basic' or 'jaas'");
+            }
+        } else {
+            authenticator = null;
+        }
     }
 
     private void initProtocol(Map<String, String> agentConfig) {

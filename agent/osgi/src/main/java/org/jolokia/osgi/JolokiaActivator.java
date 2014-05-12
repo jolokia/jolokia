@@ -5,10 +5,11 @@ import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
+import org.jolokia.config.ConfigKey;
+import org.jolokia.osgi.security.*;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
@@ -119,11 +120,11 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     public synchronized HttpContext getHttpContext() {
         if (jolokiaHttpContext == null) {
             final String user = getConfiguration(USER);
-            final String password = getConfiguration(PASSWORD);
             if (user == null) {
-                jolokiaHttpContext = new JolokiaHttpContext();
+                jolokiaHttpContext = new DefaultHttpContext();
             } else {
-                jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
+                jolokiaHttpContext = new BasicAuthenticationHttpContext(getConfiguration(REALM),
+                                                                        createAuthenticator());
             }
         }
         return jolokiaHttpContext;
@@ -138,7 +139,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     }
 
     // ==================================================================================
-
 
     // Customizer for registering servlet at a HttpService
     private Dictionary<String,String> getConfiguration() {
@@ -157,6 +157,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         config.put(ConfigKey.AGENT_TYPE.getKeyValue(),"osgi");
         return config;
     }
+
 
     private String getConfiguration(ConfigKey pKey) {
         // TODO: Use fragments and/or configuration service if available.
@@ -177,6 +178,19 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException("Unable to parse filter " + filter,e);
         }
+    }
+
+    private Authenticator createAuthenticator() {
+        Authenticator authenticator;
+        String authMode = getConfiguration(AUTH_MODE);
+        if ("basic".equalsIgnoreCase(authMode)) {
+            authenticator = new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
+        } else if ("jaas".equalsIgnoreCase(authMode)) {
+            authenticator = new JaasAuthenticator(getConfiguration(REALM));
+        } else {
+            throw new IllegalArgumentException("Unknown authentication method '" + authMode + "' configured");
+        }
+        return authenticator;
     }
 
     // =============================================================================

@@ -37,8 +37,6 @@
   <build>
 
     <plugins>
-      
-
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -418,6 +416,13 @@
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>3.0</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jmockit</groupId>
+        <artifactId>jmockit</artifactId>
+        <version>1.8</version>
         <scope>test</scope>
       </dependency>
 
