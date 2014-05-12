@@ -1,4 +1,4 @@
-package org.jolokia.osgi;
+package org.jolokia.osgi.security;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -16,12 +16,13 @@ package org.jolokia.osgi;
  * limitations under the License.
  */
 
-import org.osgi.service.http.HttpContext;
+import java.io.IOException;
+import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URL;
+
+import org.osgi.service.http.HttpContext;
 
 /**
  * Basic JolokiaHttpContextContext, which does no authentication.
@@ -29,10 +30,10 @@ import java.net.URL;
  * @author roland
  * @since Jan 7, 2010
  */
-class JolokiaHttpContext implements HttpContext {
+public class DefaultHttpContext implements HttpContext {
 
     /**
-     * This metod always returns true and does not handle security
+     * This method always returns true and does not handle security
      *
      * {@inheritDoc}
      */

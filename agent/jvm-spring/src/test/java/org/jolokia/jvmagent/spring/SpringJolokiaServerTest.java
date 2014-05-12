@@ -67,7 +67,8 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         assertEquals(server.getServerConfig().getContextPath(), expectContext);
         System.getProperties().remove("jolokia.agentContext");
         server.stop();
-        Thread.sleep(10000);
+        // Allow to shutdown server ...
+        Thread.sleep(500);
     }
 
     @Test

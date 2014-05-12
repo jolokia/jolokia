@@ -1,4 +1,4 @@
-package org.jolokia.osgi;
+package org.jolokia.osgi.security;
 
 import javax.management.ObjectName;
 
@@ -29,7 +29,7 @@ import org.osgi.framework.*;
  * if none is available. If multiple services are available, it will grant access
  * only if all restrictors allow
  */
-class DelegatingRestrictor implements Restrictor {
+public class DelegatingRestrictor implements Restrictor {
 
     private BundleContext bundleContext;
 
@@ -38,7 +38,7 @@ class DelegatingRestrictor implements Restrictor {
      *
      * @param pBundleContext bundle context to remember
      */
-    DelegatingRestrictor(BundleContext pBundleContext) {
+    public DelegatingRestrictor(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
     }
 

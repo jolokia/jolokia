@@ -54,6 +54,7 @@ public enum ConfigKey {
      * If not set, then a default logging mechanism is used.
      */
     LOGHANDLER_CLASS("logHandlerClass", true, false),
+
     /**
      * Maximum traversal depth for serialization of complex objects.
      */
@@ -164,6 +165,17 @@ public enum ConfigKey {
      *  Password for authentication purposes. Used by OSGi and JDK agent
      */
     PASSWORD("password", true, false),
+
+    /**
+     * The security realm used for login
+     */
+    REALM("realm", true, false, "jolokia"),
+
+    /**
+     * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
+     * JaaS authentication.
+     */
+    AUTH_METHOD("authMethod", true, false, "basic"),
 
     /**
      * Custom authenticator to be used instead of default user/password one

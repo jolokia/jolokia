@@ -1,4 +1,4 @@
-package org.jolokia.osgi;
+package org.jolokia.osgi.security;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
+import org.jolokia.config.ConfigKey;
 import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,24 +34,25 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 13.08.11
  */
-public class JolokiaAuthenticatedHttpContextTest {
+public class BasicAuthenticationHttpContextTest {
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    protected HttpServletRequest request;
+    protected HttpServletResponse response;
 
-    JolokiaAuthenticatedHttpContext context;
+    DefaultHttpContext context;
 
     @BeforeMethod
     public void setup() {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
-        context = new JolokiaAuthenticatedHttpContext("roland","s!cr!t");
+        context = new BasicAuthenticationHttpContext(ConfigKey.REALM.getDefaultValue(),
+                                                     new BasicAuthenticator("roland","s!cr!t"));
     }
 
     @Test
     public void correctAuth() throws IOException {
         expect(request.getHeader("Authorization")).andReturn("basic cm9sYW5kOnMhY3IhdA==");
-        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,"Basic");
+        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
         request.setAttribute(HttpContext.REMOTE_USER, "roland");
         replay(request,response);
 
@@ -62,7 +64,7 @@ public class JolokiaAuthenticatedHttpContextTest {
 
         expect(request.getHeader("Authorization")).andReturn(null);
         response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
-        response.sendError(401);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         replay(request, response);
 
         assertFalse(context.handleSecurity(request, response));
@@ -90,22 +92,22 @@ public class JolokiaAuthenticatedHttpContextTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void decodeNull() {
-        context.decode(null);
+        Base64.decode(null);
     }
 
     @Test
     public void decodeEmpty() {
-        assertEquals(context.decode("").length,0);
+        assertEquals(Base64.decode("").length,0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void decodeToSmall() {
-        assertEquals(context.decode("abc").length,0);
+        assertEquals(Base64.decode("abc").length,0);
     }
 
     @Test
     public void decodeBig() {
-        byte[] res = context.decode("TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNldGV0dXIgc2FkaXBzY2luZyBlbGl0ciwg\n" +
+        byte[] res = Base64.decode("TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNldGV0dXIgc2FkaXBzY2luZyBlbGl0ciwg\n" +
                                     "c2VkIGRpYW0gbm9udW15IGVpcm1vZCB0ZW1wb3IgaW52aWR1bnQgdXQgbGFib3JlIGV0IGRvbG9y\n" +
                                     "ZSBtYWduYSBhbGlxdXlhbSBlcmF0LCBzZWQgZGlhbSB2b2x1cHR1YS4gQXQgdmVybyBlb3MgZXQg\n" +
                                     "YWNjdXNhbSBldCBqdXN0byBkdW8gZG9sb3JlcyBldCBlYSByZWJ1bS4gU3RldCBjbGl0YSBrYXNk\n" +
