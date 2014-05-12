@@ -31,6 +31,10 @@ import java.net.URL;
  */
 class JolokiaHttpContext implements HttpContext {
 
+    public static final String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+    public static final String REQUEST_SUBJECT = "subject";
+
     /**
      * This metod always returns true and does not handle security
      *

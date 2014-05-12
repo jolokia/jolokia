@@ -9,6 +9,8 @@ import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.util.LogHandler;
+import org.jolokia.util.LogHandlerFactory;
 import org.jolokia.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.http.*;
@@ -118,12 +120,20 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
      */
     public synchronized HttpContext getHttpContext() {
         if (jolokiaHttpContext == null) {
-            final String user = getConfiguration(USER);
-            final String password = getConfiguration(PASSWORD);
-            if (user == null) {
-                jolokiaHttpContext = new JolokiaHttpContext();
+            final String realm = getConfiguration(REALM);
+            final String role = getConfiguration(ROLE);
+            if (role == null) {
+                final String user = getConfiguration(USER);
+                if (user == null) {
+                    jolokiaHttpContext = new JolokiaHttpContext();
+                } else {
+                    final String password = getConfiguration(PASSWORD);
+                    jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password, realm);
+                }
             } else {
-                jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
+                LoginContextFactory lcf = new SecureLoginContextFactory();
+                LogHandler logHandler = LogHandlerFactory.createLogHandler(getConfiguration(ConfigKey.LOGHANDLER_CLASS),getConfiguration(ConfigKey.DEBUG));
+                jolokiaHttpContext = new JolokiaSecureHttpContext(realm,role,lcf,logHandler);
             }
         }
         return jolokiaHttpContext;

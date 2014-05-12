@@ -143,6 +143,15 @@ public class JolokiaActivatorTest {
         verify(httpService);
     }
 
+    @Test
+    public void authenticationSecure() throws InvalidSyntaxException, ServletException, NamespaceException {
+        startActivator(true, null);
+        startupHttpService("roland","s!cr!t","admin");
+        unregisterJolokiaServlet();
+        stopActivator(true);
+        verify(httpService);
+    }
+
     // ========================================================================================================
 
     private void prepareErrorLog(Exception exp,String msg) {
@@ -171,7 +180,7 @@ public class JolokiaActivatorTest {
     }
 
     private void startupHttpService(Object ... args) throws ServletException, NamespaceException {
-        String auth[] = new String[] { null, null };
+        String auth[] = new String[] { null, null,null };
         Exception exp = null;
         int i = 0;
         for (Object arg : args) {
@@ -193,6 +202,8 @@ public class JolokiaActivatorTest {
                 expect(context.getProperty("org.jolokia." + ConfigKey.USER.getKeyValue())).andReturn(auth[0]).times(2);
             } else if (auth[1] != null && key == ConfigKey.PASSWORD) {
                 expect(context.getProperty("org.jolokia." + ConfigKey.PASSWORD.getKeyValue())).andReturn(auth[1]).times(2);
+            } else if (auth[2] != null && key == ConfigKey.ROLE) {
+                expect(context.getProperty("org.jolokia." + ConfigKey.ROLE.getKeyValue())).andReturn(auth[2]).times(2);
             } else {
                 expect(context.getProperty("org.jolokia." + key.getKeyValue())).andReturn(
                         i++ % 2 == 0 ? key.getDefaultValue() : null).anyTimes();
