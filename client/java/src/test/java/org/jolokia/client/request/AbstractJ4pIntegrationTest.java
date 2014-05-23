@@ -16,13 +16,18 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.jolokia.server.core.http.AgentServlet;
+
+import org.jolokia.client.BasicAuthenticator;
 import org.jolokia.client.J4pClient;
 import org.jolokia.it.core.ItSetup;
+import org.jolokia.server.core.http.AgentServlet;
+import org.jolokia.test.util.EnvTestUtil;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.security.*;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 /**
  * @author roland
@@ -34,11 +39,6 @@ abstract public class AbstractJ4pIntegrationTest {
 
     protected ItSetup itSetup;
 
-    private static final int JETTY_DEFAULT_PORT = 8234;
-    private static final String SERVER_BASE_URL = "http://localhost:" + JETTY_DEFAULT_PORT;
-    private static final String J4P_CONTEXT = "/j4p";
-
-    protected static final String J4P_DEFAULT_URL = SERVER_BASE_URL + J4P_CONTEXT;
 
     private String j4pUrl;
 
@@ -50,13 +50,19 @@ abstract public class AbstractJ4pIntegrationTest {
         String testUrl = System.getProperty("j4p.url");
         itSetup = new ItSetup();
         if (testUrl == null) {
-            jettyServer = new Server(JETTY_DEFAULT_PORT);
+
+            int port = EnvTestUtil.getFreePort();
+            jettyServer = new Server(port);
             Context jettyContext = new Context(jettyServer, "/");
             ServletHolder holder = new ServletHolder(new AgentServlet());
-            holder.setInitParameter("dispatcherClasses","org.jolokia.service.jsr160.Jsr160RequestHandler");
-            jettyContext.addServlet(holder, J4P_CONTEXT + "/*");
+            holder.setInitParameter("dispatcherClasses", "org.jolokia.jsr160.Jsr160RequestDispatcher");
+            jettyContext.addServlet(holder, "/j4p/*");
+
+            SecurityHandler securityHandler = createSecurityHandler();
+            jettyContext.addHandler(securityHandler);
+
             jettyServer.start();
-            j4pUrl = J4P_DEFAULT_URL;
+            j4pUrl = "http://localhost:" + port + "/j4p";
             // Start the integration MBeans
             itSetup.start();
         } else {
@@ -65,8 +71,32 @@ abstract public class AbstractJ4pIntegrationTest {
         j4pClient = createJ4pClient(j4pUrl);
 	}
 
+    private SecurityHandler createSecurityHandler() {
+        Constraint constraint = new Constraint();
+        constraint.setName(Constraint.__BASIC_AUTH);
+        constraint.setRoles(new String[]{"jolokia"});
+        constraint.setAuthenticate(true);
+
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint(constraint);
+        cm.setPathSpec("/*");
+
+        SecurityHandler securityHandler = new SecurityHandler();
+        HashUserRealm realm = new HashUserRealm("Jolokia");
+        realm.put("jolokia","jolokia");
+        realm.addUserToRole("jolokia", "jolokia");
+        securityHandler.setUserRealm(realm);
+        securityHandler.setConstraintMappings(new ConstraintMapping[]{cm});
+        return securityHandler;
+    }
+
     protected J4pClient createJ4pClient(String url) {
-        return J4pClient.url(url).pooledConnections().build();
+        return J4pClient.url(url)
+                .user("jolokia")
+                .password("jolokia")
+                .authenticator(new BasicAuthenticator().preemptive())
+                .pooledConnections()
+                .build();
     }
 
 
@@ -74,9 +104,10 @@ abstract public class AbstractJ4pIntegrationTest {
         String testUrl = System.getProperty("j4p.url");
         itSetup = new ItSetup();
         if (testUrl == null) {
-            jettyServer = new Server(JETTY_DEFAULT_PORT);
+            int port = EnvTestUtil.getFreePort();
+            jettyServer = new Server(port);
             jettyServer.start();
-            j4pUrl = J4P_DEFAULT_URL;
+            j4pUrl = "http://localhost:" + port + "/j4p";
             // Start the integration MBeans
             itSetup.start();
         } else {
@@ -84,9 +115,6 @@ abstract public class AbstractJ4pIntegrationTest {
         }
         j4pClient = new J4pClient(j4pUrl);
 	}
-
-
-
 
     @AfterClass
 	public void stop() throws Exception {

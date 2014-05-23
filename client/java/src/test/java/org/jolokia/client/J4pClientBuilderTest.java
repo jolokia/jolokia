@@ -17,6 +17,7 @@ package org.jolokia.client;
  */
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertNotNull;
@@ -43,6 +44,7 @@ public class J4pClientBuilderTest {
                         .pooledConnections()
                         .socketBufferSize(8192)
                         .socketTimeout(5000)
+                        .cookieStore(new BasicCookieStore())
                         .build();
         HttpClient hc = client.getHttpClient();
     }
@@ -61,6 +63,7 @@ public class J4pClientBuilderTest {
         assertNotNull(J4pClient.pooledConnections());
         assertNotNull(J4pClient.socketBufferSize(8192));
         assertNotNull(J4pClient.socketTimeout(5000));
+        assertNotNull(J4pClient.cookieStore(new BasicCookieStore()));
     }
 
 }

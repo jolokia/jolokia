@@ -16,23 +16,14 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.exception.J4pBulkRemoteException;
-import org.jolokia.client.exception.J4pConnectException;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
-import org.json.simple.JSONObject;
-import org.testng.annotations.Test;
+import java.util.List;
 
 import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.*;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CyclicBarrier;
+
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.exception.*;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
@@ -78,6 +69,8 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
         J4pTargetConfig config = getTargetProxyConfig();
         return new J4pClientBuilder()
                 .url(url)
+                .user("jolokia")
+                .password("jolokia")
                 .pooledConnections()
                 .target(config.getUrl())
                 .build();
