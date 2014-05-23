@@ -20,9 +20,7 @@ import java.nio.charset.Charset;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.*;
@@ -77,6 +75,12 @@ public class J4pClientBuilder {
     // Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
     private String targetPassword;
 
+    // Cookie store to use, might contain already prepared cookies used for a login
+    private CookieStore cookieStore;
+
+    // Authenticator to use for performing a login
+    private J4pAuthenticator authenticator;
+
     /**
      * Package access constructor, use static method on J4pClient for creating
      * the builder.
@@ -91,8 +95,10 @@ public class J4pClientBuilder {
         tcpNoDelay(true);
         socketBufferSize(8192);
         pooledConnections();
-        user = null;
-        password = null;
+        user(null);
+        password(null);
+        cookieStore(new BasicCookieStore());
+        authenticator(new BasicAuthenticator());
     }
 
     /**
@@ -276,6 +282,26 @@ public class J4pClientBuilder {
         return this;
     }
 
+    /**
+     * Use the given cookie store. This useful is some form baed authentication had to be performed.
+     *
+     * @param pCookieStore cookiestore containing the cookies to send for requests.
+     */
+    public final J4pClientBuilder cookieStore(CookieStore pCookieStore) {
+        cookieStore = pCookieStore;
+        return this;
+    }
+
+    /**
+     * Set the authenticator for this client
+     *
+     * @param pAuthenticator authenticator used for checking the given user and password (if any).
+     */
+    public final J4pClientBuilder authenticator(J4pAuthenticator pAuthenticator) {
+        authenticator = pAuthenticator;
+        return this;
+    }
+
     // =====================================================================================
 
     /**
@@ -284,27 +310,25 @@ public class J4pClientBuilder {
      * @return a new J4pClient
      */
     public J4pClient build() {
-        return new J4pClient(url,createHttpClient(),targetUrl != null ? new J4pTargetConfig(targetUrl,targetUser,targetPassword) : null);
+        return new J4pClient(url,createHttpClient(),
+                                         targetUrl != null ?
+                                                 new J4pTargetConfig(targetUrl,targetUser,targetPassword) :
+                                                 null);
     }
 
     public HttpClient createHttpClient() {
-
         HttpClientConnectionManager connManager =
                 pooledConnections ? createPoolingConnectionManager() : createBasicConnectionManager();
 
         HttpClientBuilder builder = HttpClients.custom()
                 .setConnectionManager(connManager)
+                .setDefaultCookieStore(cookieStore)
                 .setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + getVersionInfo() + ")")
                 .setDefaultRequestConfig(createRequestConfig());
 
-        if (user != null) {
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(
-                    new AuthScope(AuthScope.ANY),
-                    new UsernamePasswordCredentials(user, password));
-            builder.setDefaultCredentialsProvider(credentialsProvider);
+        if (user != null && authenticator != null) {
+            authenticator.authenticate(builder, user, password);
         }
-
         return builder.build();
     }
 

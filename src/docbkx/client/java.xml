@@ -59,7 +59,7 @@
   </para>
   <sidebar>
     <title>What the heck is this 'J4p' ?</title>
-    That's a reminescence to Jolokia's roots which lies in <ulink
+    That's a reminiscence to Jolokia's roots which lies in <ulink
     url="http://www.jmx4perl.org">Jmx4Perl</ulink>. It is always good
     to remember where one comes from ;-)
   </sidebar>
@@ -105,7 +105,7 @@ public class MemoryDemo {
       <listitem>
         Apache <ulink
         url="http://hc.apache.org/httpcomponents-client-ga/index.html">HttpClient</ulink>, 
-        4.1 (<ulink url="http://hc.apache.org/downloads.cgi">Download</ulink>)
+        4.3.3 (<ulink url="http://hc.apache.org/downloads.cgi">Download</ulink>)
       </listitem>
       <listitem>
         <ulink
@@ -114,14 +114,14 @@ public class MemoryDemo {
       </listitem>
     </itemizedlist>
     <para>
-      For maven users, the following dependency is sufficient (it will inlcude
-      the other two as transcentive depdendencies):
+      For maven users, the following dependency is sufficient (it will include
+      the other two as transitive dependencies):
     </para>
     <programlisting language="xml"><![CDATA[
  <dependency>
    <groupId>org.jolokia</groupId>
    <artifactId>jolokia-client-java</artifactId>
-   <version>1.0.0</version>
+   <version>1.2.2</version>
  </dependency>    
 ]]></programlisting>
   </section>
@@ -141,6 +141,7 @@ public class MemoryDemo {
 J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
                          .user("roland")
                          .password("s!cr!t")
+                         .authenticator(new BasicAuthenticator().preemptive())
                          .connectionTimeout(3000)
                          .build();
 ]]></programlisting>
@@ -173,6 +174,15 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <td><constant>password</constant></td>
         <td>Password used for authentication. Only used when
         <constant>user</constant> is set.</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><constant>authenticator</constant></td>
+        <td>Implementation of <classname>J4pAuthenticator</classname>. The Java client comes with
+          one implementation <classname>BasicAuthenticator</classname> for using basic authentication.
+          This class supports also <emphasis>preemptive</emphasis> authentication. Call <methodname>preemptive()</methodname> to
+          switch this on (see above for an example). Basic authentication is the default if no other
+          authenticator is set.Only used when <constant>user</constant> is set, too.</td>
         <td></td>
       </tr>
       <tr>

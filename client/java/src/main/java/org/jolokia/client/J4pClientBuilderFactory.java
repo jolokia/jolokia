@@ -16,6 +16,8 @@ package org.jolokia.client;
  *  limitations under the License.
  */
 
+import org.apache.http.client.CookieStore;
+
 /**
  * Hook class for easily creating J4pClient with the a builder.
  *
@@ -89,5 +91,15 @@ public abstract class J4pClientBuilderFactory {
     /** See {@link J4pClientBuilder#socketBufferSize(int)} */
     public static J4pClientBuilder socketBufferSize(int pSize) {
         return new J4pClientBuilder().socketBufferSize(pSize);
+    }
+
+    /** See {@link J4pClientBuilder#cookieStore(CookieStore)} */
+    public static J4pClientBuilder cookieStore(CookieStore pStore) {
+        return new J4pClientBuilder().cookieStore(pStore);
+    }
+
+    /** See {@link J4pClientBuilder#authenticator(J4pAuthenticator)} */
+    public static J4pClientBuilder authenticator(J4pAuthenticator pAuthenticator) {
+        return new J4pClientBuilder().authenticator(pAuthenticator);
     }
 }

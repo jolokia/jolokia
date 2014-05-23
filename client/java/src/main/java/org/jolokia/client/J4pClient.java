@@ -16,25 +16,17 @@ package org.jolokia.client;
  * limitations under the License.
  */
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -347,4 +339,15 @@ public class J4pClient extends J4pClientBuilderFactory {
     public HttpClient getHttpClient() {
         return httpClient;
     }
+
+
+    /**
+     * Get base URL for Jolokia requests
+     *
+     * @return the Jolokia URL
+     */
+    public URI getUri() {
+        return requestHandler.getJ4pServerUrl();
+    }
+
 }

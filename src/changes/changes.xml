@@ -24,9 +24,13 @@
   </properties>
   <body>
     <release version="1.2.2" description="Release 1.2.2" date="">
-      <action dev="roland" type="update" date="2014-05-21">
+      <action dev="roland" type="update" date="2014-05-21" issue="137">
         Updated json-simple to version 1.1.1. Although it has a bogus dependency declaration on junit, it comes
         with a proper OSGi Manifest. The jUnit dependency is excluded by us, so this should be safe.
+      </action>
+      <action dev="roland" type="add" date="2014-05-23" issue="141">
+        Added possibility to add a custom authenticator for the Java client. The standard implementation uses
+        Basic Authentication and allows also to us preemptive authentication.
       </action>
     </release>
     <release version="1.2.1" description="Release 1.2.1" date="2014-04-29">
