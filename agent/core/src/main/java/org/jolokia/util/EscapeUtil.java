@@ -142,7 +142,7 @@ public final class EscapeUtil {
      * @param pDelimiter delimiter to use
      * @return the splitted string as list or an empty array if the argument was null
      */
-    public static ArrayList<String> split(String pArg,String pEscape, String pDelimiter) {
+    public static List<String> split(String pArg,String pEscape, String pDelimiter) {
         if (pArg != null) {
             ArrayList<String> ret = new ArrayList<String>();
             Pattern[] pattern = SPLIT_PATTERNS.get(pEscape + pDelimiter);
