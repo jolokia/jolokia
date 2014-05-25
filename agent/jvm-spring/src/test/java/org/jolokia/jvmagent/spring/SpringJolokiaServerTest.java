@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jolokia.jvmagent.JolokiaServerConfig;
+import org.jolokia.test.util.EnvTestUtil;
 import org.springframework.context.ApplicationContext;
 import org.testng.annotations.Test;
 
@@ -102,7 +103,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         cfg.setOrder(order);
         Map<String, String> map = new HashMap<String, String>();
         map.put("autoStart","" + autoStart);
-        map.put("port", "0");
+        map.put("port", EnvTestUtil.getFreePort() + "");
         map.put("host","127.0.0.1");
         for (int i = 0; i < extraArgs.length; i+=2) {
             if (extraArgs[i+1] != null) {
