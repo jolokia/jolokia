@@ -357,6 +357,24 @@
           property <literal>jolokia.discoveryUrl</literal>
         </td>
       </tr>
+      <tr>
+        <td>org.jolokia.realm</td>
+        <td>jolokia</td>
+        <td>
+          Sets the security realm used to login into JAAS. Use <literal>karaf</literal> value if installed on Karaf 3.x.y
+            where by default all JMX MBeans are guarded using this realm.
+        </td>
+      </tr>
+       <tr>
+         <td>org.jolokia.role</td>
+         <td></td>
+         <td>
+           Sets the user role required to login to access JMX MBeans.  If
+             given then JMX will be accessed using JAAS security Subject.
+             Use <literal>admin</literal> value if installed on Karaf 3.x.y
+             where by default all JMX MBeans are guarded using this role.
+         </td>
+        </tr>
     </table>
     <para>
       This bundle also exports the service

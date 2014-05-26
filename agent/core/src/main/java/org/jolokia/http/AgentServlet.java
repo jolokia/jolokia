@@ -2,9 +2,12 @@ package org.jolokia.http;
 
 import java.io.*;
 import java.net.*;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
+import javax.security.auth.Subject;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -285,7 +288,12 @@ public class AgentServlet extends HttpServlet {
             updateAgentUrlIfNeeded(pReq);
 
             // Dispatch for the proper HTTP request method
-            json = pReqHandler.handleRequest(pReq,pResp);
+            Subject subject = (Subject) pReq.getAttribute("subject");
+            if (subject != null) {
+                json = executeAs(pReqHandler,pReq, pResp,subject);
+            } else {
+                json = handleJSON(pReqHandler,pReq,pResp);
+            }
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
@@ -303,6 +311,24 @@ public class AgentServlet extends HttpServlet {
                 sendResponse(pResp, getMimeType(pReq),answer);
             }
         }
+    }
+
+    private JSONAware executeAs(final ServletRequestHandler pReqHandler,final HttpServletRequest pReq, final HttpServletResponse pResp, Subject pSubject) {
+        JSONAware json = null;
+        try {
+            json = Subject.doAs(pSubject, new PrivilegedExceptionAction<JSONAware>() {
+                public JSONAware run() throws Exception {
+                    return handleJSON(pReqHandler, pReq, pResp);
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            logHandler.error("Failed to invoke action " + pReq.getPathInfo() + " due to:", e);
+        }
+        return json;
+    }
+
+    private JSONAware handleJSON(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
+        return pReqHandler.handleRequest(pReq,pResp);
     }
 
     private String getOriginOrReferer(HttpServletRequest pReq) {

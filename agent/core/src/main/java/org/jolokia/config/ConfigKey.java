@@ -236,7 +236,17 @@ public enum ConfigKey {
      * this can be used by clients to provide additional information to
      * the user.
      */
-    AGENT_DESCRIPTION("agentDescription",true,false);
+    AGENT_DESCRIPTION("agentDescription",true,false),
+
+    /**
+     * The security realm used to login
+     */
+    REALM("realm",true,false,"jolokia"),
+
+    /**
+     * The user role required to login to access JMX MBeans
+     */
+    ROLE("role",true,false);
 
     private String key;
     private String defaultValue;
