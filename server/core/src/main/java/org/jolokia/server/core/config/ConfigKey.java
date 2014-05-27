@@ -54,6 +54,7 @@ public enum ConfigKey {
      * If not set, then a default logging mechanism is used.
      */
     LOGHANDLER_CLASS("logHandlerClass", true, false),
+
     /**
      * Maximum traversal depth for serialization of complex objects.
      */
@@ -172,6 +173,17 @@ public enum ConfigKey {
     PASSWORD("password", true, false),
 
     /**
+     * The security realm used for login
+     */
+    REALM("realm", true, false, "jolokia"),
+
+    /**
+     * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
+     * JaaS authentication.
+     */
+    AUTH_MODE("authMode", true, false, "basic"),
+
+    /**
      * Custom authenticator to be used instead of default user/password one
      */
     AUTHENTICATOR_CLASS("authenticatorClass", true, false),
@@ -243,6 +255,12 @@ public enum ConfigKey {
      * the user.
      */
     AGENT_DESCRIPTION("agentDescription",true,false);
+
+    /**
+     * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.
+     * This constant can only be used programtically
+     */
+    public static final String JAAS_SUBJECT_REQUEST_ATTRIBUTE = "org.jolokia.jaasSubject";
 
     private String  key;
     private String  defaultValue;

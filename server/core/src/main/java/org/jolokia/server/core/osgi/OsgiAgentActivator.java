@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import javax.servlet.ServletException;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.osgi.security.*;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.osgi.framework.*;
@@ -105,11 +106,11 @@ public class OsgiAgentActivator implements BundleActivator {
     public synchronized HttpContext getHttpContext() {
         if (jolokiaHttpContext == null) {
             final String user = getConfiguration(USER);
-            final String password = getConfiguration(PASSWORD);
             if (user == null) {
-                jolokiaHttpContext = new JolokiaHttpContext();
+                jolokiaHttpContext = new DefaultHttpContext();
             } else {
-                jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
+                jolokiaHttpContext = new BasicAuthenticationHttpContext(getConfiguration(REALM),
+                                                                        createAuthenticator());
             }
         }
         return jolokiaHttpContext;
@@ -143,6 +144,7 @@ public class OsgiAgentActivator implements BundleActivator {
         return config;
     }
 
+
     private String getConfiguration(ConfigKey pKey) {
         // TODO: Use fragments and/or configuration service if available.
         String value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey.getKeyValue());
@@ -162,6 +164,19 @@ public class OsgiAgentActivator implements BundleActivator {
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException("Unable to parse filter " + filter,e);
         }
+    }
+
+    private Authenticator createAuthenticator() {
+        Authenticator authenticator;
+        String authMode = getConfiguration(AUTH_MODE);
+        if ("basic".equalsIgnoreCase(authMode)) {
+            authenticator = new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
+        } else if ("jaas".equalsIgnoreCase(authMode)) {
+            authenticator = new JaasAuthenticator(getConfiguration(REALM));
+        } else {
+            throw new IllegalArgumentException("Unknown authentication method '" + authMode + "' configured");
+        }
+        return authenticator;
     }
 
     // =============================================================================

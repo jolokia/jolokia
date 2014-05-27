@@ -1,4 +1,4 @@
-package org.jolokia.server.core.osgi;
+package org.jolokia.server.core.osgi.security;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
+import org.jolokia.server.core.config.ConfigKey;
 import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,24 +34,25 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 13.08.11
  */
-public class JolokiaAuthenticatedHttpContextTest {
+public class BasicAuthenticationHttpContextTest {
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    protected HttpServletRequest request;
+    protected HttpServletResponse response;
 
-    JolokiaAuthenticatedHttpContext context;
+    BasicAuthenticationHttpContext context;
 
     @BeforeMethod
     public void setup() {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
-        context = new JolokiaAuthenticatedHttpContext("roland","s!cr!t");
+        context = new BasicAuthenticationHttpContext(ConfigKey.REALM.getDefaultValue(),
+                                                     new BasicAuthenticator("roland","s!cr!t"));
     }
 
     @Test
     public void correctAuth() throws IOException {
-        expect(request.getHeader("Authorization")).andReturn("basic cm9sYW5kOnMhY3IhdA==");
-        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,"Basic");
+        expect(request.getHeader("Authorization")).andReturn("Basic cm9sYW5kOnMhY3IhdA==");
+        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
         request.setAttribute(HttpContext.REMOTE_USER, "roland");
         replay(request,response);
 
@@ -62,7 +64,7 @@ public class JolokiaAuthenticatedHttpContextTest {
 
         expect(request.getHeader("Authorization")).andReturn(null);
         response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
-        response.sendError(401);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         replay(request, response);
 
         assertFalse(context.handleSecurity(request, response));
@@ -71,13 +73,18 @@ public class JolokiaAuthenticatedHttpContextTest {
     @Test
     public void wrongAuth() throws IOException {
 
-        expect(request.getHeader("Authorization")).andReturn("basic Blub");
-        response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
-        response.sendError(401);
-        replay(request, response);
+        for (String val : new String[] { "cm9sYW5kOmJsdWI=", "Blub"}) {
+            expect(request.getHeader("Authorization")).andReturn("Basic " + val);
+            response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
+            response.sendError(401);
+            replay(request, response);
 
-        assertFalse(context.handleSecurity(request,response));
+            assertFalse(context.handleSecurity(request, response));
+
+            reset(request,response);
+        }
     }
+
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*BasicAuthentication.*")
     public void invalidMethod() throws IOException {
@@ -86,6 +93,4 @@ public class JolokiaAuthenticatedHttpContextTest {
 
         context.handleSecurity(request,response);
     }
-
-
 }

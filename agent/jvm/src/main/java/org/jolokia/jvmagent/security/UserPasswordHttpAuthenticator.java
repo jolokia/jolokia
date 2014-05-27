@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent;
+package org.jolokia.jvmagent.security;
 
 import com.sun.net.httpserver.BasicAuthenticator;
 
@@ -8,18 +8,19 @@ import com.sun.net.httpserver.BasicAuthenticator;
  * @author roland
  * @since 07.06.13
 */
-class UserPasswordAuthenticator extends BasicAuthenticator {
+public class UserPasswordHttpAuthenticator extends BasicAuthenticator {
     private String user;
     private String password;
 
     /**
      * Authenticator which checks against a given user and password
      *
+     * @param pRealm realm for this authentication
      * @param pUser user to check again
      * @param pPassword her password
      */
-    UserPasswordAuthenticator(String pUser, String pPassword) {
-        super("jolokia");
+    public UserPasswordHttpAuthenticator(String pRealm, String pUser, String pPassword) {
+        super(pRealm);
         user = pUser;
         password = pPassword;
     }

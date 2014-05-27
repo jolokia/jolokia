@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 
 import com.sun.net.httpserver.Authenticator;
+import org.jolokia.jvmagent.security.UserPasswordHttpAuthenticator;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.util.EscapeUtil;
@@ -94,8 +95,8 @@ public class JvmAgentConfigTest {
         assertEquals(config.getProtocol(), "https");
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
-        assertTrue(authenticator instanceof UserPasswordAuthenticator);
-        assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
+        assertTrue(authenticator instanceof UserPasswordHttpAuthenticator);
+        assertTrue(((UserPasswordHttpAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
     }
 
     @Test

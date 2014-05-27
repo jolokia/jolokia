@@ -66,6 +66,8 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         assertEquals(server.getServerConfig().getContextPath(), expectContext);
         System.getProperties().remove("jolokia.agentContext");
         checkServerAndStop(server);
+        // Allow to shutdown server ...
+        Thread.sleep(500);
     }
 
     @Test
@@ -103,7 +105,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         Map<String, String> map = new HashMap<String, String>();
         map.put("autoStart","" + autoStart);
         map.put("port", "0");
-        map.put("host", "127.0.0.1");
+        map.put("host","127.0.0.1");
         for (int i = 0; i < extraArgs.length; i+=2) {
             if (extraArgs[i+1] != null) {
                 map.put(extraArgs[i],extraArgs[i+1]);

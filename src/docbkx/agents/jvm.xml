@@ -138,8 +138,32 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>password</constant></td>
           <td>
             Password used for authentication (<constant>user</constant> is then required, too)
-          </td>        
+          </td>
           <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>realm</constant></td>
+          <td>
+            Sets the security realm to use. If the <constant>authMode</constant> is set to
+            <literal>jaas</literal> this is also used as value for the security domain.
+            E.g. for Karaf 3 and later, this realm should be <literal>karaf</literal> since
+            all JMX MBeans are guarded by this security domain.
+          </td>
+          <td>
+            jolokia
+          </td>
+        </tr>
+        <tr>
+          <td><constant>authMode</constant></td>
+          <td>
+            Can be either <literal>basic</literal> (the default) or <literal>jaas</literal>. If
+            <literal>jaas</literal> is used, the user and password given in the <literal>Authorization:</literal>
+            header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+            This has only an effect, if user is set.
+          </td>
+          <td>
+            basic
           </td>
         </tr>
         <tr>

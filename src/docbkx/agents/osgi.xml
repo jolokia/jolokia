@@ -357,6 +357,26 @@
           property <literal>jolokia.discoveryUrl</literal>
         </td>
       </tr>
+      <tr>
+        <td>org.jolokia.realm</td>
+        <td>jolokia</td>
+        <td>
+          Sets the security realm to use. If the <constant>authMode</constant> is set to
+          <literal>jaas</literal> this is also used as value for the security domain.
+          E.g. for Karaf 3 and later, this realm should be <literal>karaf</literal> since
+          all JMX MBeans are guarded by this security domain.
+        </td>
+      </tr>
+       <tr>
+         <td>org.jolokia.authMode</td>
+         <td>basic</td>
+         <td>
+           Can be either <literal>basic</literal> (the default) or <literal>jaas</literal>. If
+           <literal>jaas</literal> is used, the user and password given in the <literal>Authorization:</literal>
+           header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+           This has only an effect, if user is set.
+         </td>
+        </tr>
     </table>
     <para>
       This bundle also exports the service

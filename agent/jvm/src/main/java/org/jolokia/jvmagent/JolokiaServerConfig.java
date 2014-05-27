@@ -25,6 +25,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import com.sun.net.httpserver.Authenticator;
+import org.jolokia.jvmagent.security.JaasHttpAuthenticator;
+import org.jolokia.jvmagent.security.UserPasswordHttpAuthenticator;
 import org.jolokia.server.core.config.*;
 
 /**
@@ -311,9 +313,20 @@ public class JolokiaServerConfig {
         String user = jolokiaConfig.getConfig(ConfigKey.USER);
         String password = jolokiaConfig.getConfig(ConfigKey.PASSWORD);
 
-        authenticator = (user != null && password != null) ?
-                new UserPasswordAuthenticator(user,password) :
-                null;
+        if (user != null) {
+            String authMode = jolokiaConfig.getConfig(ConfigKey.AUTH_MODE);
+            String realm = jolokiaConfig.getConfig(ConfigKey.REALM);
+            if ("basic".equalsIgnoreCase(authMode)) {
+                authenticator = new UserPasswordHttpAuthenticator(realm,user,password);
+            } else if ("jaas".equalsIgnoreCase(authMode)) {
+                authenticator = new JaasHttpAuthenticator(realm);
+            } else {
+                throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
+                                                   "Must be either 'basic' or 'jaas'");
+            }
+        } else {
+            authenticator = null;
+        }
     }
 
     private void initProtocol(Map<String, String> agentConfig) {

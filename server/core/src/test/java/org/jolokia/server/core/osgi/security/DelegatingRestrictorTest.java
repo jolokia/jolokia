@@ -1,4 +1,4 @@
-package org.jolokia.server.core.osgi;
+package org.jolokia.server.core.osgi.security;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -49,8 +49,8 @@ public class DelegatingRestrictorTest {
         if (pRestrictor != null) {
             ServiceReference ref = createMock(ServiceReference.class);
             refs = new ServiceReference[] { ref };
-            expect(context.getService(ref)).andReturn(pRestrictor).anyTimes();
-            expect(context.ungetService(ref)).andReturn(true).anyTimes();
+            expect(context.getService(ref)).andStubReturn(pRestrictor);
+            expect(context.ungetService(ref)).andStubReturn(true);
             replay(refs);
         } else {
             refs = null;

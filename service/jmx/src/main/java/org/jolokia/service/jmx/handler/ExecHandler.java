@@ -164,7 +164,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             }
             return paramInfos;
         }  catch (IntrospectionException e) {
-            throw new IllegalStateException("Cannot extract MBeanInfo for " + pRequest.getObjectNameAsString());
+            throw new IllegalStateException("Cannot extract MBeanInfo for " + pRequest.getObjectNameAsString(),e);
         }
     }
 

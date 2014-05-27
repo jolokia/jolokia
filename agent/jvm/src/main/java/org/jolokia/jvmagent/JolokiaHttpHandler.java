@@ -19,6 +19,8 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
+import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.server.core.config.ConfigKey;
@@ -74,6 +77,31 @@ public class JolokiaHttpHandler implements HttpHandler {
         requestHandler = new HttpRequestHandler(jolokiaContext);
     }
 
+     /**
+     * Handler a request. If the handler is not yet started, an exception is thrown
+     *
+     * @param pHttpExchange the request/response object
+     * @throws IOException if something fails during handling
+     * @throws IllegalStateException if the handler has not yet been started
+     */
+    public void handle(final HttpExchange pHttpExchange) throws IOException {
+        Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
+        if (subject!=null)  {
+            try {
+                Subject.doAs(subject, new PrivilegedExceptionAction<Void>() {
+                    public Void run() throws Exception {
+                        doHandle(pHttpExchange);
+                        return null;
+                    }
+                });
+            } catch (PrivilegedActionException e) {
+                throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
+            }
+        }  else {
+            doHandle(pHttpExchange);
+        }
+    }
+
     /**
      * Handler a request. If the handler is not yet started, an exception is thrown
      *
@@ -81,9 +109,8 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @throws IOException if something fails during handling
      * @throws IllegalStateException if the handler has not yet been started
      */
-    @Override
     @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
-    public void handle(HttpExchange pExchange) throws IOException {
+    public void doHandle(HttpExchange pExchange) throws IOException {
         JSONAware json = null;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);

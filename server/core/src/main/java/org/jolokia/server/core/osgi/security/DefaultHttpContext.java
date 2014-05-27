@@ -1,4 +1,4 @@
-package org.jolokia.server.core.osgi;
+package org.jolokia.server.core.osgi.security;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -30,10 +30,10 @@ import org.osgi.service.http.HttpContext;
  * @author roland
  * @since Jan 7, 2010
  */
-class JolokiaHttpContext implements HttpContext {
+public class DefaultHttpContext implements HttpContext {
 
     /**
-     * This metod always returns true and does not handle security
+     * This method always returns true and does not handle security
      *
      * {@inheritDoc}
      */

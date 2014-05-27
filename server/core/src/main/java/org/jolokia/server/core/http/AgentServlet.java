@@ -2,9 +2,12 @@ package org.jolokia.server.core.http;
 
 import java.io.*;
 import java.net.*;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
+import javax.security.auth.Subject;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -270,7 +273,7 @@ public class AgentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(httpPostHandler,req,resp);
+        handle(httpPostHandler, req, resp);
     }
 
     /**
@@ -302,7 +305,7 @@ public class AgentServlet extends HttpServlet {
             updateAgentUrlIfNeeded(pReq);
 
             // Dispatch for the proper HTTP request method
-            json = pReqHandler.handleRequest(pReq,pResp);
+            json = handleSecurely(pReqHandler, pReq, pResp);
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
@@ -319,6 +322,19 @@ public class AgentServlet extends HttpServlet {
             } else {
                 sendResponse(pResp, getMimeType(pReq),answer);
             }
+        }
+    }
+
+    private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp) throws IOException, PrivilegedActionException {
+        Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
+        if (subject != null) {
+            return Subject.doAs(subject, new PrivilegedExceptionAction<JSONAware>() {
+                    public JSONAware run() throws Exception {
+                        return pReqHandler.handleRequest(pReq, pResp);
+                    }
+            });
+        } else {
+            return pReqHandler.handleRequest(pReq, pResp);
         }
     }
 

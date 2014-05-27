@@ -203,6 +203,7 @@ public class JolokiaHttpHandlerTest {
         URI uri = new URI(pUri);
         expect(exchange.getRequestURI()).andReturn(uri);
         expect(exchange.getRemoteAddress()).andReturn(new InetSocketAddress(8080));
+        expect(exchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andStubReturn(null);
         Headers headers = new Headers();
         expect(exchange.getRequestHeaders()).andReturn(headers).anyTimes();
         for (int i = 0; i < pHeaders.length; i += 2) {
