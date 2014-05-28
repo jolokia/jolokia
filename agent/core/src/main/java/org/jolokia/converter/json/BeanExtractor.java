@@ -72,18 +72,18 @@ public class BeanExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pExtraArgs, boolean jsonify)
+                                Stack<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
-        if (!pExtraArgs.isEmpty()) {
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
             // Still some path elements available, so dive deeper
-            String attribute = pExtraArgs.pop();
-            Object attributeValue = extractBeanPropertyValue(pValue, attribute, faultHandler);
-            return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
+            Object attributeValue = extractBeanPropertyValue(pValue, pathPart, faultHandler);
+            return pConverter.extractObject(attributeValue, pPathParts, jsonify);
         } else {
             if (jsonify) {
                 // We need the jsonfied value from here on.
-                return exctractJsonifiedValue(pValue, pExtraArgs, pConverter, faultHandler);
+                return exctractJsonifiedValue(pValue, pPathParts, pConverter, faultHandler);
             } else {
                 // No jsonification requested, hence we are returning the object itself
                 return pValue;
@@ -140,7 +140,7 @@ public class BeanExtractor implements Extractor {
 
     // =====================================================================================================
 
-    private Object exctractJsonifiedValue(Object pValue, Stack<String> pExtraArgs,
+    private Object exctractJsonifiedValue(Object pValue, Stack<String> pPathParts,
                                           ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
@@ -152,7 +152,7 @@ public class BeanExtractor implements Extractor {
             if (attributes != null && attributes.size() > 0) {
                 Map ret = new JSONObject();
                 for (String attribute : attributes) {
-                    ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, pExtraArgs, pConverter, pFaultHandler));
+                    ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, pPathParts, pConverter, pFaultHandler));
                 }
                 return ret;
             } else {
@@ -163,7 +163,7 @@ public class BeanExtractor implements Extractor {
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    private Object extractJsonifiedPropertyValue(Object pValue, String pAttribute, Stack<String> pExtraArgs,
+    private Object extractJsonifiedPropertyValue(Object pValue, String pAttribute, Stack<String> pPathParts,
                                                   ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         Object value = extractBeanPropertyValue(pValue, pAttribute, pFaultHandler);
@@ -174,7 +174,7 @@ public class BeanExtractor implements Extractor {
             return "[this]";
         } else {
             // Call into the converted recursively for any object known.
-            return pConverter.extractObject(value, pExtraArgs, true /* jsonify */);
+            return pConverter.extractObject(value, pPathParts, true /* jsonify */);
         }
     }
 

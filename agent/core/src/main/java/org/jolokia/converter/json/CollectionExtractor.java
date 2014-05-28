@@ -46,12 +46,12 @@ public class CollectionExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert
-     * @param pExtraArgs extra arguments which contain e.g. a path. The path is ignore here
+     * @param pPathParts extra arguments which contain e.g. a path. The path is ignored here.
      * @param jsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
      * @return the extracted object
      */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         Collection collection = (Collection) pValue;
         int length = pConverter.getCollectionLength(collection.size());
         List ret;

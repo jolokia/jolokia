@@ -151,16 +151,16 @@ public final class ObjectToJsonConverter {
      * {@link #setInnerValue(Object, Object, List)} instead.
      *
      * @param pValue value to extract from
-     * @param pExtraArgs stack for diving into the object
+     * @param pPathParts stack for diving into the object
      * @param pJsonify whether a JSON representation {@link org.json.simple.JSONObject}
      * @return extracted object either in native format or as {@link org.json.simple.JSONObject}
      * @throws AttributeNotFoundException if an attribute is not found during traversal
      */
-    public Object extractObject(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
+    public Object extractObject(Object pValue, Stack<String> pPathParts, boolean pJsonify)
             throws AttributeNotFoundException {
         ObjectSerializationContext stackContext = stackContextLocal.get();
         String limitReached = checkForLimits(pValue, stackContext);
-        Stack<String> pathStack = pExtraArgs != null ? pExtraArgs : new Stack<String>();
+        Stack<String> pathStack = pPathParts != null ? pPathParts : new Stack<String>();
         if (limitReached != null) {
             return limitReached;
         }
@@ -317,17 +317,17 @@ public final class ObjectToJsonConverter {
 
 
 
-    private Object callHandler(Object pValue, Stack<String> pExtraArgs, boolean pJsonify)
+    private Object callHandler(Object pValue, Stack<String> pPathParts, boolean pJsonify)
             throws AttributeNotFoundException {
         Class pClazz = pValue.getClass();
         for (Extractor handler : handlers) {
             if (handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
-                return handler.extractObject(this,pValue,pExtraArgs,pJsonify);
+                return handler.extractObject(this,pValue,pPathParts,pJsonify);
             }
         }
         throw new IllegalStateException(
                 "Internal error: No handler found for class " + pClazz +
-                    " (object: " + pValue + ", extraArgs: " + pExtraArgs + ")");
+                    " (object: " + pValue + ", extraArgs: " + pPathParts + ")");
     }
 
 

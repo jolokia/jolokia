@@ -55,21 +55,23 @@ public class MapExtractor implements Extractor {
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+                                Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
         Map<Object,Object> map = (Map<Object,Object>) pValue;
         int length = pConverter.getCollectionLength(map.size());
-        if (!pExtraArgs.isEmpty()) {
-            String decodedKey = pExtraArgs.pop();
+        String pathParth = pExtraArgs.isEmpty() ? null : pExtraArgs.pop();
+        if (pathParth != null) {
             for (Map.Entry entry : map.entrySet()) {
                 // We dont access the map via a lookup since the key
                 // are potentially object but we have to deal with string
                 // representations
-                if(decodedKey.equals(entry.getKey().toString())) {
+                if(pathParth.equals(entry.getKey().toString())) {
                     return pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify);
                 }
             }
-            throw new IllegalArgumentException("Map key '" + decodedKey +
-                    "' is unknown for map " + trimString(pValue.toString()));
+            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+            return faultHandler.handleException(
+                    new IllegalArgumentException("Map key '" + pathParth +
+                                                 "' is unknown for map " + trimString(pValue.toString())));
         } else {
             if (jsonify && !(map instanceof JSONObject)) {
                 JSONObject ret = new JSONObject();

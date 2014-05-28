@@ -1,14 +1,15 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
+import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.InvalidKeyException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
-import java.util.Stack;
+
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -43,21 +44,21 @@ public class CompositeDataExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.PreserveStackTrace")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+                         Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         CompositeData cd = (CompositeData) pValue;
 
-        if (!pExtraArgs.isEmpty()) {
-            String key = pExtraArgs.pop();
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
             try {
-                return pConverter.extractObject(cd.get(key), pExtraArgs, jsonify);
+                return pConverter.extractObject(cd.get(pathPart), pPathParts, jsonify);
             }  catch (InvalidKeyException exp) {
-                throw new AttributeNotFoundException("Invalid path '" + key + "'");
+                throw new AttributeNotFoundException("Invalid path '" + pathPart + "'");
             }
         } else {
             if (jsonify) {
                 JSONObject ret = new JSONObject();
                 for (String key : (Set<String>) cd.getCompositeType().keySet()) {
-                    ret.put(key,pConverter.extractObject(cd.get(key), pExtraArgs, jsonify));
+                    ret.put(key,pConverter.extractObject(cd.get(key), pPathParts, jsonify));
                 }
                 return ret;
             } else {

@@ -1,13 +1,12 @@
 package org.jolokia.converter.json;
 
-import org.jolokia.converter.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import javax.management.AttributeNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
+
+import org.jolokia.converter.object.StringToObjectConverter;
+import org.json.simple.JSONArray;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -46,7 +45,7 @@ public class ListExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert (must be a {@link List})
-     * @param pExtraArgs extra arguments stack, which is popped to get an index for extracting a single element
+     * @param pPathParts extra arguments stack, which is popped to get an index for extracting a single element
      *                   of the list
      * @param jsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
@@ -54,21 +53,22 @@ public class ListExtractor implements Extractor {
      * @throws AttributeNotFoundException
      * @throws IndexOutOfBoundsException if an index is used which points outside the given list
      */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs,boolean jsonify)
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts,boolean jsonify)
             throws AttributeNotFoundException {
         List list = (List) pValue;
         int length = pConverter.getCollectionLength(list.size());
         List ret;
         Iterator it = list.iterator();
-        if (!pExtraArgs.isEmpty()) {
-            int idx = Integer.parseInt(pExtraArgs.pop());
-            return pConverter.extractObject(list.get(idx), pExtraArgs, jsonify);
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
+            int idx = Integer.parseInt(pathPart);
+            return pConverter.extractObject(list.get(idx), pPathParts, jsonify);
         } else {
             if (jsonify && !(list instanceof JSONArray)) {
                 ret = new JSONArray();
                 for (int i = 0;i < length; i++) {
                     Object val = it.next();
-                    ret.add(pConverter.extractObject(val, pExtraArgs, jsonify));
+                    ret.add(pConverter.extractObject(val, pPathParts, jsonify));
                 }
                 return ret;
             } else {

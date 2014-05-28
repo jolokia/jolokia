@@ -101,25 +101,26 @@ public class TabularDataExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert
-     * @param pExtraArgs extra arguments which contain e.g. a path
+     * @param pPathParts extra arguments which contain e.g. a path
      * @param pJsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
      * @return the extracted object
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pExtraArgs,boolean pJsonify) throws AttributeNotFoundException {
+                                Stack<String> pPathParts,boolean pJsonify) throws AttributeNotFoundException {
         TabularData td = (TabularData) pValue;
-        if (!pExtraArgs.isEmpty()) {
-            CompositeData cd = extractCompositeDataFromPath(td, pExtraArgs);
+        String tdPath = pPathParts.isEmpty() ? null : pPathParts.peek();
+        if (tdPath != null) {
+            CompositeData cd = extractCompositeDataFromPath(td, pPathParts);
             return pConverter.extractObject(
                             cd != null && checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
-                            pExtraArgs, pJsonify);
+                            pPathParts, pJsonify);
         } else {
             if (pJsonify) {
                 return checkForMxBeanMap(td.getTabularType()) ?
-                        convertMxBeanMapToJson(td,pExtraArgs,pConverter) :
-                        convertTabularDataToJson(td, pExtraArgs, pConverter);
+                        convertMxBeanMapToJson(td,pPathParts,pConverter) :
+                        convertTabularDataToJson(td, pPathParts, pConverter);
             } else {
                 return td;
             }
@@ -223,23 +224,28 @@ public class TabularDataExtractor implements Extractor {
         // We first try it as a key
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
-        if (indexNames.size() > pPathStack.size()) {
-            StringBuilder buf = new StringBuilder();
-            for (int i = 0; i < indexNames.size(); i++) {
-                buf.append(indexNames.get(i));
-                if (i < indexNames.size() - 1) {
-                    buf.append(",");
-                }
-            }
-            throw new IllegalArgumentException("No enough keys on path stack provided for accessing tabular data with index names "
-                                               + buf.toString());
-        }
+        checPathFitsIndexNames(pPathStack, indexNames);
+
         Object keys[] = new Object[indexNames.size()];
         CompositeType rowType = type.getRowType();
         for (int i = 0; i < indexNames.size(); i++) {
             keys[i] = getKey(rowType, indexNames.get(i), pPathStack.pop());
         }
         return pTd.get(keys);
+    }
+
+    private void checPathFitsIndexNames(Stack<String> pPathStack, List<String> pIndexNames) {
+        if (pIndexNames.size() > pPathStack.size()) {
+            StringBuilder buf = new StringBuilder();
+            for (int i = 0; i < pIndexNames.size(); i++) {
+                buf.append(pIndexNames.get(i));
+                if (i < pIndexNames.size() - 1) {
+                    buf.append(",");
+                }
+            }
+            throw new IllegalArgumentException("No enough keys on path stack provided for accessing tabular data with index names "
+                                               + buf.toString());
+        }
     }
 
     // The key is tried to convert to the proper type. These checks are
