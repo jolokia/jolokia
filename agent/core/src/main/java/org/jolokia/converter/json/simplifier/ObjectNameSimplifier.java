@@ -1,7 +1,5 @@
 package org.jolokia.converter.json.simplifier;
 
-import java.util.Map;
-
 import javax.management.ObjectName;
 
 /*
@@ -36,19 +34,10 @@ public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
      */
     public ObjectNameSimplifier() {
         super(ObjectName.class);
+        addExtractor("objectName", new ObjectNameAttributeExtractor());
     }
 
     // ==================================================================================
-
-    /**
-     * Prepare for maps with the single key <code>objectName</code>
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    void init(Map<String, AttributeExtractor<ObjectName>> pExtractorMap) {
-        addExtractors(new Object[][] {{ "objectName", new ObjectNameAttributeExtractor() }});
-    }
 
     /** {@inheritDoc} */
     private static class ObjectNameAttributeExtractor implements AttributeExtractor<ObjectName> {

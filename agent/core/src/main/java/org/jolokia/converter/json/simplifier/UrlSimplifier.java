@@ -1,6 +1,5 @@
 package org.jolokia.converter.json.simplifier;
 
-import java.util.Map;
 import java.net.URL;
 
 /*
@@ -33,12 +32,7 @@ public class UrlSimplifier extends SimplifierExtractor<URL> {
      */
     public UrlSimplifier() {
         super(URL.class);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    void init(Map<String, AttributeExtractor<URL>> pStringExtractorMap) {
-        addExtractors(new Object[][] {{ "url", new UrlAttributeExtractor() }});
+        addExtractor("url", new UrlAttributeExtractor());
     }
 
     private static class UrlAttributeExtractor implements AttributeExtractor<URL> {

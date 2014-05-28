@@ -39,9 +39,9 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jul 27, 2009
  */
-abstract class SimplifierExtractor<T> implements Extractor {
+public abstract class SimplifierExtractor<T> implements Extractor {
 
-    private Map<String, AttributeExtractor<T>> extractorMap;
+    private final Map<String, AttributeExtractor<T>> extractorMap;
 
     private Class<T> type;
 
@@ -50,9 +50,10 @@ abstract class SimplifierExtractor<T> implements Extractor {
      *
      * @param pType type for which this extractor is responsible
      */
-    SimplifierExtractor(Class<T> pType) {
+    protected SimplifierExtractor(Class<T> pType) {
         extractorMap = new HashMap<String, AttributeExtractor<T>>();
         type = pType;
+        // Old method, here only for backwards compatibility. Please initialize in the constructor instead
         init(extractorMap);
     }
 
@@ -119,13 +120,21 @@ abstract class SimplifierExtractor<T> implements Extractor {
      * @param pAttrExtractors extractors
      */
     @SuppressWarnings("unchecked")
-    protected void addExtractors(Object[][] pAttrExtractors) {
-        for (int i = 0;i< pAttrExtractors.length; i++) {
-            extractorMap.put((String) pAttrExtractors[i][0],
-                             (AttributeExtractor<T>) pAttrExtractors[i][1]);
+    final protected void addExtractors(Object[][] pAttrExtractors) {
+        for (Object[] pAttrExtractor : pAttrExtractors) {
+            extractorMap.put((String) pAttrExtractor[0],
+                             (AttributeExtractor<T>) pAttrExtractor[1]);
         }
     }
 
+    /**
+     * Add a single extractor
+     * @param pName name of the extractor
+     * @param pExtractor the extractor itself
+     */
+    final protected void addExtractor(String pName, AttributeExtractor<T> pExtractor) {
+        extractorMap.put(pName,pExtractor);
+    }
 
     // ============================================================================
 
@@ -134,7 +143,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
      *
      * @param <T> type to extract
      */
-    interface AttributeExtractor<T> {
+    public interface AttributeExtractor<T> {
         /**
          * Exception to be thrown when the result of this extractor should be omitted in the response
          */
@@ -153,7 +162,9 @@ abstract class SimplifierExtractor<T> implements Extractor {
 
     /**
      * Add extractors to map
+     *
+     * @deprecated Initialize in the constructor instead.
      * @param pExtractorMap the map to add the extractors used within this simplifier
      */
-    abstract void init(Map<String, AttributeExtractor<T>> pExtractorMap);
+     void init(Map<String, AttributeExtractor<T>> pExtractorMap) {}
 }
