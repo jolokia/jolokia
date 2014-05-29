@@ -67,13 +67,4 @@ public interface ValueFaultHandler {
             throw exception;
         }
     };
-
-    /**
-     * Fault handler always returning null
-     */
-    ValueFaultHandler NULL_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
-        public <T extends Throwable> Object handleException(T exception) throws T {
-            return null;
-        }
-    };
 }

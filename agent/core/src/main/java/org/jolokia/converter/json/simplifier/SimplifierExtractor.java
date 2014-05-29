@@ -63,9 +63,9 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify)
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
-        String element = pExtraArgs.isEmpty() ? null : pExtraArgs.pop();
+        String element = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (element != null) {
             AttributeExtractor<T> extractor = extractorMap.get(element);
             if (extractor == null) {
@@ -74,7 +74,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
 
             try {
                 Object attributeValue = extractor.extract((T) pValue);
-                return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
+                return pConverter.extractObject(attributeValue, pPathParts, jsonify);
             } catch (AttributeExtractor.SkipAttributeException e) {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue,e);
             }
@@ -84,7 +84,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
                 for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
                     try {
                         Object value = entry.getValue().extract((T) pValue);
-                        ret.put(entry.getKey(),pConverter.extractObject(value, pExtraArgs, jsonify));
+                        ret.put(entry.getKey(),pConverter.extractObject(value, pPathParts, jsonify));
                     } catch (AttributeExtractor.SkipAttributeException e) {
                         // Skip this one ...
                         continue;
