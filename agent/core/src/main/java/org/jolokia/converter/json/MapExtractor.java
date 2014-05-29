@@ -48,24 +48,24 @@ public class MapExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert which must be a {@link Map}
-     * @param pExtraArgs extra argument stack which on top must be a key into the map
+     * @param pPathParts extra argument stack which on top must be a key into the map
      * @param jsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
      * @return the extracted object
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+                                Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         Map<Object,Object> map = (Map<Object,Object>) pValue;
         int length = pConverter.getCollectionLength(map.size());
-        String pathParth = pExtraArgs.isEmpty() ? null : pExtraArgs.pop();
+        String pathParth = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathParth != null) {
             for (Map.Entry entry : map.entrySet()) {
                 // We dont access the map via a lookup since the key
                 // are potentially object but we have to deal with string
                 // representations
                 if(pathParth.equals(entry.getKey().toString())) {
-                    return pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify);
+                    return pConverter.extractObject(entry.getValue(), pPathParts, jsonify);
                 }
             }
             ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
@@ -78,7 +78,7 @@ public class MapExtractor implements Extractor {
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
                     ret.put(entry.getKey(),
-                            pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify));
+                            pConverter.extractObject(entry.getValue(), (Stack<String>) pPathParts.clone(), jsonify));
                     i++;
                     if (i > length) {
                         break;

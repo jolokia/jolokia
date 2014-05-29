@@ -68,7 +68,7 @@ public final class EscapeUtil {
             Iterator<String> it = pParts.iterator();
             while (it.hasNext()) {
                 String part = it.next();
-                buf.append(escapePart(part));
+                buf.append(escapePart(part != null ? part : "*"));
                 if (it.hasNext()) {
                     buf.append("/");
                 }
@@ -90,7 +90,7 @@ public final class EscapeUtil {
         if (pPath == null || pPath.equals("") || pPath.equals("/")) {
             return null;
         }
-        return split(pPath, PATH_ESCAPE, "/");
+        return replaceWildcardsWithNull(split(pPath, PATH_ESCAPE, "/"));
     }
 
     /**
@@ -193,11 +193,21 @@ public final class EscapeUtil {
 
     // Escape a single part
     private static final Pattern ESCAPE_PATTERN = Pattern.compile(PATH_ESCAPE);
+
     private static final Pattern SLASH_PATTERN = Pattern.compile("/");
     private static String escapePart(String pPart) {
         return SLASH_PATTERN.matcher(
                 ESCAPE_PATTERN.matcher(pPart).replaceAll(PATH_ESCAPE + PATH_ESCAPE)).replaceAll(PATH_ESCAPE + "/");
     }
 
-
+    private static List<String> replaceWildcardsWithNull(List<String> pParts) {
+        if (pParts  == null) {
+            return null;
+        }
+        List<String> ret = new ArrayList<String>(pParts.size());
+        for (String part : pParts) {
+            ret.add("*".equals(part) ? null : part);
+        }
+        return ret;
+    }
 }

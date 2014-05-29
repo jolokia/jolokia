@@ -70,7 +70,8 @@ abstract class RequestCreator<R extends JmxRequest> {
         }
         List<String> ret = new ArrayList<String>();
         while (!pElements.isEmpty()) {
-            ret.add(pElements.pop());
+            String element = pElements.pop();
+            ret.add("*".equals(element) ? null : element);
         }
         return ret;
     }

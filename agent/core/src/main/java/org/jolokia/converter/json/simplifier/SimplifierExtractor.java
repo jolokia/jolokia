@@ -65,8 +65,8 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify)
             throws AttributeNotFoundException {
-        if (pExtraArgs.size() > 0) {
-            String element = pExtraArgs.pop();
+        String element = pExtraArgs.isEmpty() ? null : pExtraArgs.pop();
+        if (element != null) {
             AttributeExtractor<T> extractor = extractorMap.get(element);
             if (extractor == null) {
                 throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue);
