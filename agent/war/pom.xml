@@ -43,6 +43,11 @@
       <artifactId>jolokia-jsr160</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-jsr77</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
