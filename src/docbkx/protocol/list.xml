@@ -211,7 +211,7 @@
       <literal>maxDepth</literal> of 2 truncates the map returned to
       the domain names (first level) and the MBean's properties
       (second level). The final values of the maps don't have any
-      meaning ander are dummy values.
+      meaning and are dummy values.
     </para>
   </section>
 </section>
