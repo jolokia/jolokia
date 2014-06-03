@@ -98,7 +98,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
 
     }
 
-    @Test(expectedExceptions = AttributeNotFoundException.class,expectedExceptionsMessageRegExp = ".*blablub.*")
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     public void unknownMethod() throws Exception {
         extractJson(this,"blablub");
     }

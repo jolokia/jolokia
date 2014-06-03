@@ -41,7 +41,7 @@ public class CollectionExtractorTest {
     public void setup() {
         extractor = new CollectionExtractor();
         converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
-        converter.setupContext(true);
+        converter.setupContext();
     }
 
     @Test

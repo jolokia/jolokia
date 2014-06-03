@@ -24,7 +24,7 @@ public class EnumExtractorTest {
     public void setup() {
         enumExtractor = new EnumExtractor();
         converter = new ObjectToJsonConverter(new StringToObjectConverter(), null);
-        converter.setupContext(true);
+        converter.setupContext();
     }
 
     @Test

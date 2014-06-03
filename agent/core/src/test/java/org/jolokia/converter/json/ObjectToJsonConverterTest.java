@@ -43,7 +43,7 @@ public class ObjectToJsonConverterTest {
     @BeforeMethod
     public void setup() {
         converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
-        converter.setupContext(true);
+        converter.setupContext();
     }
 
     @AfterMethod
