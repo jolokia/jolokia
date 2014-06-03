@@ -271,9 +271,11 @@ public final class ObjectToJsonConverter {
 
     /**
      * Setup the context with hard limits
+     *
+     * @boolean whether to filter attributes which are missing or whether to throw an exception
      */
-    void setupContext() {
-        setupContext(new JsonConvertOptions.Builder().build());
+    void setupContext(boolean pFilterAttributes) {
+        setupContext(new JsonConvertOptions.Builder().useAttributeFilter(pFilterAttributes).build());
     }
 
     /**

@@ -39,7 +39,7 @@ abstract public class AbstractExtractorTest {
         extractor = createExtractor();
         stringToObjectConverter = new StringToObjectConverter();
         converter = new ObjectToJsonConverter(stringToObjectConverter,null);
-        converter.setupContext();
+        converter.setupContext(true);
     }
 
     @AfterMethod

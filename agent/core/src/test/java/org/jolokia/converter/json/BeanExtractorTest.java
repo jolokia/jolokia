@@ -79,6 +79,10 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         JSONObject inner = (JSONObject) extractJson(this,"inner");
         assertEquals(inner.get("innerText"),"innerValue");
 
+        JSONObject innerWithWildcardPath = (JSONObject) extractJson(this,null,"innerDate");
+        assertEquals(innerWithWildcardPath.size(),1);
+        assertTrue((Long) ((JSONObject) innerWithWildcardPath.get("inner")).get("millis") <= new Date().getTime());
+
         BeanExtractorTest test = (BeanExtractorTest) extractObject(this);
         assertEquals(test,this);
 

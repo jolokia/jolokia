@@ -44,7 +44,7 @@ public class TabularDataExtractorTest {
     @BeforeMethod
     public void setup() {
         converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
-        converter.setupContext();
+        converter.setupContext(true);
     }
 
     @AfterMethod

@@ -17,7 +17,7 @@ package org.jolokia.converter.json;
  */
 
 /**
- *  Interface in order to deal with value exception
+ *  Interface in order to deal with value exceptions
  *
  * @author roland
  * @since 15.03.11
@@ -67,4 +67,9 @@ public interface ValueFaultHandler {
             throw exception;
         }
     };
+
+    /**
+     * Exception used to indicate that an attribute should be skipped
+     */
+    class AttributeFilteredException extends RuntimeException { }
 }

@@ -70,7 +70,7 @@ public class MapExtractor implements Extractor {
             }
             ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
             return faultHandler.handleException(
-                    new IllegalArgumentException("Map key '" + pathParth +
+                    new AttributeNotFoundException("Map key '" + pathParth +
                                                  "' is unknown for map " + trimString(pValue.toString())));
         } else {
             if (jsonify && !(map instanceof JSONObject)) {

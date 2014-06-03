@@ -10,6 +10,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.StringToObjectConverter;
+import org.jolokia.util.EscapeUtil;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
@@ -74,6 +75,7 @@ public class BeanExtractor implements Extractor {
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Stack<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
+        // Wrap fault handler if a wildcard path pattern is present
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
@@ -151,8 +153,20 @@ public class BeanExtractor implements Extractor {
             List<String> attributes = extractBeanAttributes(pValue);
             if (attributes != null && attributes.size() > 0) {
                 Map ret = new JSONObject();
+                boolean found = false;
                 for (String attribute : attributes) {
-                    ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, pPathParts, pConverter, pFaultHandler));
+                    Stack path = (Stack) pPathParts.clone();
+                    try {
+                        ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, path, pConverter, pFaultHandler));
+                        found = true;
+                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                        // Skip it since we are doing a path with wildcards, filtering out non-matchin attrs.
+                        continue;
+                    }
+                    if (!found) {
+                        // Ok, everything was filtered. Bubbling upwards ...
+                        throw new ValueFaultHandler.AttributeFilteredException();
+                    }
                 }
                 return ret;
             } else {
@@ -168,8 +182,16 @@ public class BeanExtractor implements Extractor {
             throws AttributeNotFoundException {
         Object value = extractBeanPropertyValue(pValue, pAttribute, pFaultHandler);
         if (value == null) {
+            if (!pPathParts.isEmpty()) {
+                pFaultHandler.handleException(new AttributeNotFoundException(
+                        "Cannot apply remaining path " + EscapeUtil.combineToPath(pPathParts) + " on value null"));
+            }
             return null;
         } else if (value == pValue) {
+            if (!pPathParts.isEmpty()) {
+                pFaultHandler.handleException(new AttributeNotFoundException(
+                        "Cannot apply remaining path " + EscapeUtil.combineToPath(pPathParts) + " on a cycle"));
+            }
             // Break Cycle
             return "[this]";
         } else {

@@ -417,7 +417,7 @@ public class BackendManager implements AgentDetailsHolder {
             throw new IllegalStateException("Internal error: No dispatcher found for handling " + pJmxReq);
         }
 
-        JsonConvertOptions opts = getJsonConvertOptions(pJmxReq);
+        JsonConvertOptions opts =  getJsonConvertOptions(pJmxReq);
 
         Object jsonResult =
                 converters.getToJsonConverter()
@@ -435,6 +435,7 @@ public class BackendManager implements AgentDetailsHolder {
                     maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).
                     maxObjects(pJmxReq.getParameterAsInt(ConfigKey.MAX_OBJECTS)).
                     faultHandler(pJmxReq.getValueFaultHandler()).
+                    useAttributeFilter(pJmxReq.getPathParts() != null).
                     build();
     }
 

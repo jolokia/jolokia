@@ -16,8 +16,6 @@ package org.jolokia.converter.json;
  * limitations under the License.
  */
 
-import org.jolokia.converter.json.ValueFaultHandler;
-
 /**
  * Options object influencing the serializing of JSON objects.
  * E.g. the max serialization depth when serializing a complex object.
@@ -118,6 +116,7 @@ public final class JsonConvertOptions {
         private int maxObjects;
 
         private ValueFaultHandler faultHandler;
+        private boolean useAttributeFilter;
 
         /**
          * Default constructor using default hard limits
@@ -195,12 +194,26 @@ public final class JsonConvertOptions {
         }
 
         /**
+         * Whether an attribute filter should be used to ignore missing attributes when a path is
+         * applied
+         *
+         * @param pUseFilter if a filter should be used or not
+         * @return this builder
+         */
+        public Builder useAttributeFilter(boolean pUseFilter) {
+            useAttributeFilter = pUseFilter;
+            return this;
+        }
+        /**
          * Build the convert options and reset this builder
          *
          * @return the options created.
          */
         public JsonConvertOptions build() {
-            JsonConvertOptions opts = new JsonConvertOptions(maxDepth,maxCollectionSize,maxObjects,faultHandler);
+            ValueFaultHandler handler = useAttributeFilter ?
+                    new PathAttributeFilterValueFaultHandler(faultHandler) :
+                    faultHandler;
+            JsonConvertOptions opts = new JsonConvertOptions(maxDepth,maxCollectionSize,maxObjects,handler);
             maxDepth = 0;
             maxCollectionSize = 0;
             maxObjects = 0;
