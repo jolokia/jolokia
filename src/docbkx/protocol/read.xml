@@ -46,10 +46,33 @@
     linkend="escape-rules"/>). If no attribute is provided, then all
     attributes are fetched.  The MBean name can be given as a pattern
     in which case the attributes are read on all matching MBeans. If a
-    MBean pattern and multiple attributes are requestes, then only the
+    MBean pattern and multiple attributes are requested, then only the
     value of attributes which matches both are returned, the others
-    are ignored. Paths cannot be used with multi value reads, though.
+    are ignored.
   </para>
+  <para>
+    Paths can be used with pattern and multiple attribute read as well. In order to
+    skip the extra value levels introduced by a pattern read, the wildcard
+    <constant>*</constant> can be used. For example, a read request for the MBean Pattern
+    <literal>java.lang:type=GarbageCollector,*</literal> for the Attribute <literal>LastGcInfo</literal>
+    returns a complext structure holding information about the last garbage collection. If one is
+    interested only for the duration of the garbage collection, a path <literal>used</literal> could be used if
+    this request wouldn't be a pattern request (i.e. refers a specific, single MBean). But in this case since a
+    nested map with MBean and Attribute names is returned, the path <literal>*/*/used</literal> has to be used
+    in order to skip the two extra levels for applying the path. The two levels are returned nevertheless, though.
+    Note that in the following example the final value is <emphasis>not</emphasis> the full GC-Info but only the
+    value of its <literal>used</literal> entry:
+  </para>
+  <programlisting><![CDATA[
+value: {
+   "java.lang:name=PS MarkSweep,type=GarbageCollector": {
+        LastGcInfo: null
+   },
+   "java.lang:name=PS Scavenge,type=GarbageCollector": {
+        LastGcInfo: 7
+   }
+}]]></programlisting>
+
   <section id="get-read">
     <title>GET read request</title>
     <para>
@@ -149,7 +172,7 @@
       The following request fetches the number of active threads:      
     </para>
     <programlisting><![CDATA[
-{ 
+{
    "type":"read",
    "mbean":"java.lang:type=Threading",
    "attribute":"ThreadCount"
