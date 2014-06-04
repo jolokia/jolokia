@@ -37,14 +37,16 @@ import static org.testng.Assert.*;
 @Test
 public class TabularDataExtractorTest {
 
+    private static final String TEST_VALUE = "value1";
+
     TabularDataExtractor extractor = new TabularDataExtractor();
 
     ObjectToJsonConverter converter;
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
-        converter.setupContext();
+        converter = new ObjectToJsonConverter(new StringToObjectConverter(), null);
+        converter.setupContext(new JsonConvertOptions.Builder().useAttributeFilter(true).build());
     }
 
     @AfterMethod
@@ -53,30 +55,74 @@ public class TabularDataExtractorTest {
             converter.clearContext();
         }
     }
+
     @Test
     public void typeInfo() {
         assertEquals(extractor.getType(), TabularData.class);
         assertFalse(extractor.canSetValue());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*written to.*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*written to.*")
     public void setValue() throws InvocationTargetException, IllegalAccessException {
-        extractor.setObjectValue(new StringToObjectConverter(),new Object(), "bla","blub");
+        extractor.setObjectValue(new StringToObjectConverter(), new Object(), "bla", "blub");
     }
 
     @Test
     public void extractMapAsJson() throws OpenDataException, AttributeNotFoundException {
-        TabularData data = getMapTabularData(STRING,"key1");
-        JSONObject result = (JSONObject) extract(true,data);
+        TabularData data = getMapTabularData(STRING, "key1", TEST_VALUE);
+        JSONObject result = (JSONObject) extract(true, data);
         assertNull(result.get("key2"));
-        assertEquals(result.get("key1"),"value1");
-        assertEquals(result.size(),1);
+        assertEquals(result.get("key1"), TEST_VALUE);
+        assertEquals(result.size(), 1);
     }
+
+    @Test
+    public void extractMapAsJsonWithPath() throws OpenDataException, AttributeNotFoundException {
+        TabularData data = getMapTabularData(STRING, "key1", TEST_VALUE);
+        assertEquals(extract(true, data, "key1"),TEST_VALUE);
+    }
+
+    @Test
+    public void extractMapAsJsonWithWildcardPath() throws OpenDataException, AttributeNotFoundException, MalformedObjectNameException {
+        TabularData data = prepareMxMBeanMapData();
+
+        JSONObject result = (JSONObject) extract(true, data, null, "domain");
+        assertEquals(result.size(), 2);
+        assertEquals(result.get("key1"),"test");
+        assertEquals(result.get("key2"),"java.lang");
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void extractMapAsJsonWithWildcardPathButFiltered() throws OpenDataException, AttributeNotFoundException, MalformedObjectNameException {
+        TabularData data = prepareMxMBeanMapData();
+        extract(true, data, null, "noKnownAttribute");
+    }
+
+
+    private TabularData prepareMxMBeanMapData() throws OpenDataException, MalformedObjectNameException {
+        CompositeTypeAndJson ctj = new CompositeTypeAndJson(
+                STRING, "key", null,
+                OBJECTNAME, "value", null
+        );
+
+        TabularTypeAndJson taj = new TabularTypeAndJson(new String[]{"key"}, ctj);
+        TabularData data = new TabularDataSupport(taj.getType());
+
+        CompositeData cd = new CompositeDataSupport(ctj.getType(), new String[]{"key", "value"},
+                                                    new Object[]{"key1", new ObjectName("test:type=bla")});
+        data.put(cd);
+        cd = new CompositeDataSupport(ctj.getType(), new String[]{"key", "value"},
+                                                    new Object[]{"key2", new ObjectName("java.lang:type=Memory")});
+        data.put(cd);
+        return data;
+    }
+
 
     @Test
     public void extractMapWithComplexType() throws OpenDataException, AttributeNotFoundException {
         CompositeTypeAndJson cdj = new CompositeTypeAndJson(STRING, "name", "roland", INTEGER, "date", 1968);
-        TabularData data = getMapTabularData(cdj.getType(),cdj.getCompositeData());
+        TabularData data = getMapTabularData(cdj.getType(),cdj.getCompositeData(),TEST_VALUE);
+
         JSONObject result = (JSONObject) extract(true,data);
         assertEquals(result.size(), 2);
         assertTrue(result.containsKey("indexNames"));
@@ -92,26 +138,26 @@ public class TabularDataExtractorTest {
         assertEquals(key.get("date"),1968);
         assertEquals(key.size(), 2);
 
-        assertEquals(value.get("value"), "value1");
+        assertEquals(value.get("value"), TEST_VALUE);
         assertEquals(key.size(),2);
     }
 
     @Test
     void extractMapDirect() throws OpenDataException, AttributeNotFoundException {
-        TabularData data = getMapTabularData(STRING,"key1");
+        TabularData data = getMapTabularData(STRING,"key1",TEST_VALUE);
         TabularData data2 = (TabularData) extract(false,data);
         assertEquals(data2,data);
     }
 
     @Test
     void extractMapWithPath() throws OpenDataException, AttributeNotFoundException {
-        TabularData data = getMapTabularData(STRING,"key1");
+        TabularData data = getMapTabularData(STRING,"key1",TEST_VALUE);
         Object result = extract(true,data,"key1");
-        assertEquals(result,"value1");
+        assertEquals(result,TEST_VALUE);
     }
     @Test
     void extractGenericTabularDataWithJson() throws OpenDataException, AttributeNotFoundException {
-        TabularData data = getComplextTabularData();
+        TabularData data = getComplexTabularData();
         JSONObject result = (JSONObject) extract(true, data);
         assertEquals(result.size(),2);
         assertTrue(result.containsKey("meyer"));
@@ -130,7 +176,7 @@ public class TabularDataExtractorTest {
 
     @Test
     void extractGenericTabularData() throws OpenDataException, AttributeNotFoundException {
-        TabularData data = getComplextTabularData();
+        TabularData data = getComplexTabularData();
         TabularData data2 = (TabularData) extract(false, data);
         assertEquals(data2,data);
 
@@ -138,7 +184,7 @@ public class TabularDataExtractorTest {
 
     @Test
     void extractGenericTabularDataWithPath() throws OpenDataException, AttributeNotFoundException {
-        TabularData data = getComplextTabularData();
+        TabularData data = getComplexTabularData();
         JSONObject result = (JSONObject) extract(true,data,"meyer","xaver");
         assertEquals(result.size(),4);
         assertEquals(result.get("age"),12);
@@ -166,9 +212,71 @@ public class TabularDataExtractorTest {
         assertEquals(result.get("active"),false);
     }
 
+    @Test
+    public void extractWithWildCardPath() throws OpenDataException, MalformedObjectNameException, AttributeNotFoundException {
+        TabularTypeAndJson taj = new TabularTypeAndJson(
+                new String[] { "id"},
+                new CompositeTypeAndJson(
+                        LONG,"id",null,
+                        OBJECTNAME,"oName",null,
+                        BOOLEAN,"flag",null
+                ));
+
+        TabularData data = new TabularDataSupport(taj.getType());
+        data.put(new CompositeDataSupport(
+                taj.getType().getRowType(),
+                new String[]{"id","oName","flag" },
+                new Object[]{10L,new ObjectName("test:type=bundle"), false}
+        ));
+
+        data.put(new CompositeDataSupport(
+                taj.getType().getRowType(),
+                new String[]{"id","oName","flag" },
+                new Object[]{20L,new ObjectName("java.lang:type=Memory"), true}
+        ));
+
+        // Path: */*/domain --> 1. Level: 10, 20 -- 2. Level: CD key-value (e.g {id: 10, oName: test=type...}), -- 3. level: Objects
+        // Here: Only ObjetNames should be picked
+        JSONObject result = (JSONObject) extract(true, data, null, null,"domain");
+        assertEquals(result.size(),2); // 10 & 20
+        JSONObject inner = (JSONObject) result.get(10L);
+        assertEquals(inner.size(),1);
+        assertEquals(inner.get("oName"),"test");
+        inner = (JSONObject) result.get(20L);
+        assertEquals(inner.size(),1);
+        assertEquals(inner.get("oName"),"java.lang");
+
+        // Path: */oName --> 1. Level: 10,20 -- 2. Level: { oName : { 10 vals}}
+        result = (JSONObject) extract(true, data, null, "oName");
+        assertEquals(result.size(),2);
+        inner = (JSONObject) result.get(10L);
+        assertEquals(inner.get("domain"),"test");
+        inner = (JSONObject) result.get(20L);
+        assertEquals(inner.get("domain"),"java.lang");
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void noMatchWithWildcardPattern() throws OpenDataException, MalformedObjectNameException, AttributeNotFoundException {
+        TabularTypeAndJson taj = new TabularTypeAndJson(
+                new String[] { "oName"},
+                new CompositeTypeAndJson(
+                        OBJECTNAME,"oName",null
+                ));
+
+        TabularData data = new TabularDataSupport(taj.getType());
+        data.put(new CompositeDataSupport(
+                taj.getType().getRowType(),
+                new String[]{"oName" },
+                new Object[]{new ObjectName("test:type=bundle")}
+        ));
+
+        extract(true, data, null, "oName2");
+    }
+
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*name.*firstname.*")
     void extractGenericTabularDataWithToShortPath() throws OpenDataException, AttributeNotFoundException {
-        extract(true, getComplextTabularData(), "meyer");
+        extract(true, getComplexTabularData(), "meyer");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Boolean.*")
@@ -191,7 +299,7 @@ public class TabularDataExtractorTest {
 
 
 
-    private TabularData getComplextTabularData() throws OpenDataException {
+    private TabularData getComplexTabularData() throws OpenDataException {
         CompositeTypeAndJson ctj = new CompositeTypeAndJson(
                 STRING,"name",null,
                 STRING,"firstname",null,
@@ -213,7 +321,7 @@ public class TabularDataExtractorTest {
     }
 
 
-    private TabularData getMapTabularData(OpenType keyType, Object keyValue) throws OpenDataException {
+    private TabularData getMapTabularData(OpenType keyType, Object ... keyAndValues) throws OpenDataException {
         CompositeTypeAndJson ctj = new CompositeTypeAndJson(
                 keyType,"key",null,
                 STRING,"value",null
@@ -221,9 +329,12 @@ public class TabularDataExtractorTest {
 
         TabularTypeAndJson taj = new TabularTypeAndJson(new String[] { "key" },ctj);
         TabularData data = new TabularDataSupport(taj.getType());
-        CompositeData cd = new CompositeDataSupport(ctj.getType(),new String[] { "key", "value" },
-                                                    new Object[] { keyValue, "value1" });
-        data.put(cd);
+
+        for (int i = 0; i < keyAndValues.length; i+=2) {
+            CompositeData cd = new CompositeDataSupport(ctj.getType(), new String[]{"key", "value"},
+                                                        new Object[]{keyAndValues[i], keyAndValues[i+1]});
+            data.put(cd);
+        }
         return data;
     }
 

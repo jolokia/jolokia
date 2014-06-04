@@ -77,12 +77,20 @@ public class MapExtractor implements Extractor {
                 JSONObject ret = new JSONObject();
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
-                    ret.put(entry.getKey(),
-                            pConverter.extractObject(entry.getValue(), (Stack<String>) pPathParts.clone(), jsonify));
-                    i++;
-                    if (i > length) {
-                        break;
+                    Stack<String> paths = (Stack<String>) pPathParts.clone();
+                    try {
+                        ret.put(entry.getKey(),
+                                pConverter.extractObject(entry.getValue(), paths, jsonify));
+                        if (++i > length) {
+                            break;
+                        }
+                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                        // Filtered out ...
                     }
+                }
+                if (ret.isEmpty() && length > 0) {
+                    // Not a single value passed the filter
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {

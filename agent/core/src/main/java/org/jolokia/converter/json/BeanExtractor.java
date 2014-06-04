@@ -153,20 +153,17 @@ public class BeanExtractor implements Extractor {
             List<String> attributes = extractBeanAttributes(pValue);
             if (attributes != null && attributes.size() > 0) {
                 Map ret = new JSONObject();
-                boolean found = false;
                 for (String attribute : attributes) {
                     Stack path = (Stack) pPathParts.clone();
                     try {
                         ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, path, pConverter, pFaultHandler));
-                        found = true;
                     } catch (ValueFaultHandler.AttributeFilteredException exp) {
                         // Skip it since we are doing a path with wildcards, filtering out non-matchin attrs.
-                        continue;
-                    }
-                    if (!found) {
-                        // Ok, everything was filtered. Bubbling upwards ...
-                        throw new ValueFaultHandler.AttributeFilteredException();
-                    }
+                   }
+                }
+                if (ret.isEmpty() && attributes.size() > 0) {
+                    // Ok, everything was filtered. Bubbling upwards ...
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {

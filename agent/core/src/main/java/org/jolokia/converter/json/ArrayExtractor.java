@@ -41,7 +41,6 @@ public class ArrayExtractor implements Extractor {
         return null;
     }
 
-
     /**
      * Extract an array and, if to be jsonified, put it into an {@link JSONArray}. An index can be used (on top of
      * the extra args stack) in order to specify a single value within the array.
@@ -66,9 +65,17 @@ public class ArrayExtractor implements Extractor {
         } else {
             if (jsonify) {
                 List<Object> ret = new JSONArray();
-                for (int i=0;i<length;i++) {
-                    Object obj = Array.get(pValue, i);
-                    ret.add(pConverter.extractObject(obj, pPathParts, jsonify));
+                for (int i = 0; i < length; i++) {
+                    Stack<String> path = (Stack<String>) pPathParts.clone();
+                    try {
+                        Object obj = Array.get(pValue, i);
+                        ret.add(pConverter.extractObject(obj, path, jsonify));
+                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                        // Filtered ...
+                    }
+                }
+                if (ret.isEmpty() && length > 0) {
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {

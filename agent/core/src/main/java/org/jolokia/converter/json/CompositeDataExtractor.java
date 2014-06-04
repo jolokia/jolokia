@@ -44,27 +44,36 @@ public class CompositeDataExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.PreserveStackTrace")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
+                                Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         CompositeData cd = (CompositeData) pValue;
 
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
             try {
                 return pConverter.extractObject(cd.get(pathPart), pPathParts, jsonify);
-            }  catch (InvalidKeyException exp) {
-                throw new AttributeNotFoundException("Invalid path '" + pathPart + "'");
+            } catch (InvalidKeyException exp) {
+                return pConverter.getValueFaultHandler().handleException(new AttributeNotFoundException("Invalid path '" + pathPart + "'"));
             }
         } else {
-            if (jsonify) {
-                JSONObject ret = new JSONObject();
-                for (String key : (Set<String>) cd.getCompositeType().keySet()) {
-                    ret.put(key,pConverter.extractObject(cd.get(key), pPathParts, jsonify));
-                }
-                return ret;
-            } else {
-                return cd;
+            return jsonify ? extractCompleteCdAsJson(pConverter, cd, pPathParts) : cd;
+        }
+    }
+
+    private Object extractCompleteCdAsJson(ObjectToJsonConverter pConverter, CompositeData pData, Stack<String> pPath) throws AttributeNotFoundException {
+        JSONObject ret = new JSONObject();
+        for (String key : (Set<String>) pData.getCompositeType().keySet()) {
+            Stack<String> path = (Stack<String>) pPath.clone();
+            try {
+                ret.put(key, pConverter.extractObject(pData.get(key), path, true));
+            } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                // Ignore this key;
             }
         }
+        if (ret.isEmpty()) {
+            // If every key was filtered, this composite data should be skipped completely
+            throw new ValueFaultHandler.AttributeFilteredException();
+        }
+        return ret;
     }
 
     /** {@inheritDoc} */

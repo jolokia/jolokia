@@ -1,7 +1,8 @@
 package org.jolokia.converter.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
@@ -58,7 +59,6 @@ public class ListExtractor implements Extractor {
         List list = (List) pValue;
         int length = pConverter.getCollectionLength(list.size());
         List ret;
-        Iterator it = list.iterator();
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
             int idx = Integer.parseInt(pathPart);
@@ -67,8 +67,15 @@ public class ListExtractor implements Extractor {
             if (jsonify && !(list instanceof JSONArray)) {
                 ret = new JSONArray();
                 for (int i = 0;i < length; i++) {
-                    Object val = it.next();
-                    ret.add(pConverter.extractObject(val, pPathParts, jsonify));
+                    Stack<String> path = (Stack<String>) pPathParts.clone();
+                    try {
+                        ret.add(pConverter.extractObject(list.get(i), path, jsonify));
+                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                        // This element is filtered out, next one ...
+                    }
+                }
+                if (ret.isEmpty() && length > 0) {
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {

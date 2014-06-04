@@ -168,7 +168,10 @@ public final class ObjectToJsonConverter {
             stackContext.push(pValue);
 
             if (pValue == null) {
-                return null;
+                return pathStack.isEmpty() ?
+                        null :
+                        stackContext.getValueFaultHandler().handleException(
+                                new AttributeNotFoundException("Cannot apply a path to an null value"));
             }
 
             if (pValue.getClass().isArray()) {
@@ -202,6 +205,8 @@ public final class ObjectToJsonConverter {
         setupContext(pOpts);
         try {
             jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
+        } catch (ValueFaultHandler.AttributeFilteredException exp) {
+            throw new AttributeNotFoundException("Path matches not attribute or property");
         } finally {
             clearContext();
         }

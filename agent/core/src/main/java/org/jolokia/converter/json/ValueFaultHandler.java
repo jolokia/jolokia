@@ -71,5 +71,9 @@ public interface ValueFaultHandler {
     /**
      * Exception used to indicate that an attribute should be skipped
      */
-    class AttributeFilteredException extends RuntimeException { }
+    class AttributeFilteredException extends RuntimeException {
+        public AttributeFilteredException() {
+            int i = 0;
+        }
+    }
 }
