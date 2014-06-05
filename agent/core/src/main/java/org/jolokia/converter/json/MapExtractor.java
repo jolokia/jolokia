@@ -60,43 +60,47 @@ public class MapExtractor implements Extractor {
         int length = pConverter.getCollectionLength(map.size());
         String pathParth = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathParth != null) {
-            for (Map.Entry entry : map.entrySet()) {
-                // We dont access the map via a lookup since the key
-                // are potentially object but we have to deal with string
-                // representations
-                if(pathParth.equals(entry.getKey().toString())) {
-                    return pConverter.extractObject(entry.getValue(), pPathParts, jsonify);
-                }
-            }
-            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
-            return faultHandler.handleException(
-                    new AttributeNotFoundException("Map key '" + pathParth +
-                                                 "' is unknown for map " + trimString(pValue.toString())));
+            return extractMapValueWithPath(pConverter, pValue, pPathParts, jsonify, map, pathParth);
         } else {
-            if (jsonify) {
-                JSONObject ret = new JSONObject();
-                int i = 0;
-                for(Map.Entry entry : map.entrySet()) {
-                    Stack<String> paths = (Stack<String>) pPathParts.clone();
-                    try {
-                        ret.put(entry.getKey(),
-                                pConverter.extractObject(entry.getValue(), paths, jsonify));
-                        if (++i > length) {
-                            break;
-                        }
-                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
-                        // Filtered out ...
-                    }
+            return jsonify ? extractMapValues(pConverter, pPathParts, jsonify, map, length) : map;
+        }
+    }
+
+    private JSONObject extractMapValues(ObjectToJsonConverter pConverter, Stack<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, int pLength) throws AttributeNotFoundException {
+        JSONObject ret = new JSONObject();
+        int i = 0;
+        for(Map.Entry entry : pMap.entrySet()) {
+            Stack<String> paths = (Stack<String>) pPathParts.clone();
+            try {
+                ret.put(entry.getKey(),
+                        pConverter.extractObject(entry.getValue(), paths, jsonify));
+                if (++i > pLength) {
+                    break;
                 }
-                if (ret.isEmpty() && length > 0) {
-                    // Not a single value passed the filter
-                    throw new ValueFaultHandler.AttributeFilteredException();
-                }
-                return ret;
-            } else {
-                return map;
+            } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                // Filtered out ...
             }
         }
+        if (ret.isEmpty() && pLength > 0) {
+            // Not a single value passed the filter
+            throw new ValueFaultHandler.AttributeFilteredException();
+        }
+        return ret;
+    }
+
+    private Object extractMapValueWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, String pPathParth) throws AttributeNotFoundException {
+        for (Map.Entry entry : pMap.entrySet()) {
+            // We dont access the map via a lookup since the key
+            // are potentially object but we have to deal with string
+            // representations
+            if(pPathParth.equals(entry.getKey().toString())) {
+                return pConverter.extractObject(entry.getValue(), pPathParts, jsonify);
+            }
+        }
+        ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+        return faultHandler.handleException(
+                new AttributeNotFoundException("Map key '" + pPathParth +
+                                             "' is unknown for map " + trimString(pValue.toString())));
     }
 
     /**

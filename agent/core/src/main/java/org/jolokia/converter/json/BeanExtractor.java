@@ -152,20 +152,7 @@ public class BeanExtractor implements Extractor {
             // For the rest we build up a JSON map with the attributes as keys and the value are
             List<String> attributes = extractBeanAttributes(pValue);
             if (attributes != null && attributes.size() > 0) {
-                Map ret = new JSONObject();
-                for (String attribute : attributes) {
-                    Stack path = (Stack) pPathParts.clone();
-                    try {
-                        ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, path, pConverter, pFaultHandler));
-                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
-                        // Skip it since we are doing a path with wildcards, filtering out non-matchin attrs.
-                   }
-                }
-                if (ret.isEmpty() && attributes.size() > 0) {
-                    // Ok, everything was filtered. Bubbling upwards ...
-                    throw new ValueFaultHandler.AttributeFilteredException();
-                }
-                return ret;
+                return extractBeanValues(pConverter, pValue, pPathParts, attributes);
             } else {
                 // No further attributes, return string representation
                 return pValue.toString();
@@ -173,20 +160,37 @@ public class BeanExtractor implements Extractor {
         }
     }
 
+    private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
+        Map ret = new JSONObject();
+        for (String attribute : pAttributes) {
+            Stack path = (Stack) pPathParts.clone();
+            try {
+                ret.put(attribute, extractJsonifiedPropertyValue(pConverter, pValue, attribute, path));
+            } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                // Skip it since we are doing a path with wildcards, filtering out non-matchin attrs.
+           }
+        }
+        if (ret.isEmpty() && pAttributes.size() > 0) {
+            // Ok, everything was filtered. Bubbling upwards ...
+            throw new ValueFaultHandler.AttributeFilteredException();
+        }
+        return ret;
+    }
+
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    private Object extractJsonifiedPropertyValue(Object pValue, String pAttribute, Stack<String> pPathParts,
-                                                  ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
+    private Object extractJsonifiedPropertyValue(ObjectToJsonConverter pConverter, Object pValue, String pAttribute, Stack<String> pPathParts)
             throws AttributeNotFoundException {
-        Object value = extractBeanPropertyValue(pValue, pAttribute, pFaultHandler);
+        ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+        Object value = extractBeanPropertyValue(pValue, pAttribute, faultHandler);
         if (value == null) {
             if (!pPathParts.isEmpty()) {
-                pFaultHandler.handleException(new AttributeNotFoundException(
+                faultHandler.handleException(new AttributeNotFoundException(
                         "Cannot apply remaining path " + EscapeUtil.combineToPath(pPathParts) + " on value null"));
             }
             return null;
         } else if (value == pValue) {
             if (!pPathParts.isEmpty()) {
-                pFaultHandler.handleException(new AttributeNotFoundException(
+                faultHandler.handleException(new AttributeNotFoundException(
                         "Cannot apply remaining path " + EscapeUtil.combineToPath(pPathParts) + " on a cycle"));
             }
             // Break Cycle

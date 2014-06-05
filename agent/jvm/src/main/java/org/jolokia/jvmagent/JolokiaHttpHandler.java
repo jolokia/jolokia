@@ -163,7 +163,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         if (subject!=null)  {
             try {
                 Subject.doAs(subject, new PrivilegedExceptionAction<Void>() {
-                    public Void run() throws Exception {
+                    public Void run() throws IOException {
                         doHandle(pHttpExchange);
                         return null;
                     }

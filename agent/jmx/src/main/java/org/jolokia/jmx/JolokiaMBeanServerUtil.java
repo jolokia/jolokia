@@ -102,7 +102,7 @@ public final class JolokiaMBeanServerUtil {
                 jolokiaMBeanServer = (MBeanServer) pServer.getAttribute(holderName,JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
             } catch (JMException e1) {
                 throw new IllegalStateException("Internal: Cannot get JolokiaMBean server in fallback JMX lookup " +
-                                                "while trying to register the holder MBean: " + e,e);
+                                                "while trying to register the holder MBean: " + e1,e1);
             }
         } catch (JMException e) {
             throw new IllegalStateException("Internal: JolokiaMBeanHolder cannot be registered to JMX: " + e,e);
