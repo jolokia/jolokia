@@ -2,7 +2,6 @@ package org.jolokia.service.serializer.json.simplifier;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -34,11 +33,6 @@ public class FileSimplifier extends SimplifierExtractor<File> {
      */
     public FileSimplifier() {
         super(File.class);
-    }
-
-    // ==================================================================================
-    @Override
-    void init(Map<String, AttributeExtractor<File>> pExtractorMap) {
 
         Object[][] attrExtractors = {
                 { "name", new NameAttributeExtractor() },

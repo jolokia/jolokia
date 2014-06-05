@@ -1,7 +1,5 @@
 package org.jolokia.service.serializer.json.simplifier;
 
-import java.util.Map;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -33,11 +31,7 @@ public class ClassSimplifier extends SimplifierExtractor<Class> {
      */
     public ClassSimplifier() {
         super(Class.class);
-    }
 
-    /** {@inheritDoc} */
-    @Override
-    void init(Map<String, AttributeExtractor<Class>> pStringExtractorMap) {
         Object[][] pAttrs = {
                 { "name", new NameAttributeExtractor() },
                 { "interfaces", new InterfaceAttributeExtractor() }

@@ -21,12 +21,12 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.client.exception.*;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.*;
 
 /**
  * @author roland
@@ -53,12 +53,13 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
         J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
         J4pVersionRequest req2 = new J4pVersionRequest();
         Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-        params.put(J4pQueryParameter.MAX_DEPTH,"1");
+        params.put(J4pQueryParameter.MAX_DEPTH,"2");
         List resps = j4pClient.execute(Arrays.asList(req1,req2),params);
         assertEquals(resps.size(),2);
         J4pReadResponse resp = (J4pReadResponse) resps.get(0);
         JSONObject value = resp.getValue();
-        assertTrue(value.get("Blub") instanceof String);
+        JSONArray inner = (JSONArray) value.get("Blub");
+        assertTrue(inner.get(1) instanceof String);
     }
 
     @Test

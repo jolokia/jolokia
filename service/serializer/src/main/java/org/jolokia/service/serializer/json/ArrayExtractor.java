@@ -1,13 +1,16 @@
 package org.jolokia.service.serializer.json;
 
-import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
-
-import javax.management.AttributeNotFoundException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Stack;
+
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.json.simple.JSONArray;
+
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -40,7 +43,6 @@ public class ArrayExtractor implements Extractor {
         return null;
     }
 
-
     /**
      * Extract an array and, if to be jsonified, put it into an {@link JSONArray}. An index can be used (on top of
      * the extra args stack) in order to specify a single value within the array.
@@ -48,7 +50,7 @@ public class ArrayExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert (must be an aary)
-     * @param pExtraArgs extra arguments stack, which is popped to get an index for extracting a single element
+     * @param pPathParts extra arguments stack, which is popped to get an index for extracting a single element
      *                   of the array
      * @param jsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
@@ -56,22 +58,13 @@ public class ArrayExtractor implements Extractor {
      * @throws AttributeNotFoundException
      * @throws IndexOutOfBoundsException if an index is used which points outside the given list
      */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         int length = pConverter.getCollectionLength(Array.getLength(pValue));
-        if (!pExtraArgs.isEmpty()) {
-            Object obj = Array.get(pValue, Integer.parseInt(pExtraArgs.pop()));
-            return pConverter.extractObject(obj, pExtraArgs, jsonify);
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
+            return extractWithPath(pConverter, pValue, pPathParts, jsonify, pathPart);
         } else {
-            if (jsonify) {
-                List<Object> ret = new JSONArray();
-                for (int i=0;i<length;i++) {
-                    Object obj = Array.get(pValue, i);
-                    ret.add(pConverter.extractObject(obj, pExtraArgs, jsonify));
-                }
-                return ret;
-            } else {
-                return pValue;
-            }
+            return jsonify ? extractArray(pConverter, pValue, pPathParts, jsonify, length) : pValue;
         }
     }
 
@@ -113,4 +106,38 @@ public class ArrayExtractor implements Extractor {
     public boolean canSetValue() {
         return true;
     }
+
+    private List<Object> extractArray(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPath, boolean jsonify, int pLength) throws AttributeNotFoundException {
+        List<Object> ret = new JSONArray();
+        for (int i = 0; i < pLength; i++) {
+            Stack<String> path = (Stack<String>) pPath.clone();
+            try {
+                Object obj = Array.get(pValue, i);
+                ret.add(pConverter.extractObject(obj, path, jsonify));
+            } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                // Filtered ...
+            }
+        }
+        if (ret.isEmpty() && pLength > 0) {
+            throw new ValueFaultHandler.AttributeFilteredException();
+        }
+        return ret;
+    }
+
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPath, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
+        try {
+            Object obj = Array.get(pValue, Integer.parseInt(pPathPart));
+            return pConverter.extractObject(obj, pPath, jsonify);
+        } catch (NumberFormatException exp) {
+            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+            return faultHandler.handleException(
+                    new AttributeNotFoundException("Index '" + pPathPart +  "' is not numeric for accessing array"));
+        } catch (ArrayIndexOutOfBoundsException exp) {
+            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+            return faultHandler.handleException(
+                    new AttributeNotFoundException("Index '" + pPathPart +  "' is out-of-bound for array of size " + Array.getLength(pValue)));
+        }
+    }
+
+
 }

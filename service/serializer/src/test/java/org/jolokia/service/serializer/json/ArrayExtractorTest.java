@@ -19,7 +19,9 @@ package org.jolokia.service.serializer.json;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.management.AttributeNotFoundException;
+import javax.management.ObjectName;
 
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.json.simple.JSONArray;
 import org.testng.annotations.Test;
 
@@ -51,6 +53,31 @@ public class ArrayExtractorTest extends AbstractExtractorTest {
     public void withPath() throws AttributeNotFoundException {
         String res = (String) extractJson(new String[]{"eins", "zwei", "drei"},"1");
         assertEquals(res,"zwei");
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void testWithNonNumericPath() throws Exception {
+        String res = (String) extractJson(new String[]{"eins", "zwei", "drei"},"blub");
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void testOutOfBoundsPath() throws Exception {
+        String res = (String) extractJson(new String[]{"eins", "zwei", "drei"},"4");
+    }
+
+    @Test
+    public void testWithWildcardPath() throws Exception {
+        ObjectName[] names = {new ObjectName("test:type=blub"),null,new ObjectName("java.lang:type=Memory")};
+        JSONArray result = (JSONArray) extractJson(names,null,"domain");
+        assertEquals(result.size(),2);
+        assertEquals(result.get(0),"test");
+        assertEquals(result.get(1),"java.lang");
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void testWithInvalidWildcardPath() throws Exception {
+        ObjectName[] names = {new ObjectName("test:type=blub"),null,new ObjectName("java.lang:type=Memory")};
+        extractJson(names,null,"NotInMyHouse");
     }
 
     @Test

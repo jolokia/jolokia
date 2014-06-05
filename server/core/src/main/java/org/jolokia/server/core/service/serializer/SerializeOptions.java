@@ -116,6 +116,7 @@ public final class SerializeOptions {
         private int maxObjects;
 
         private ValueFaultHandler faultHandler;
+        private boolean useAttributeFilter;
 
         /**
          * Default constructor using default hard limits
@@ -193,12 +194,26 @@ public final class SerializeOptions {
         }
 
         /**
+         * Whether an attribute filter should be used to ignore missing attributes when a path is
+         * applied
+         *
+         * @param pUseFilter if a filter should be used or not
+         * @return this builder
+         */
+        public Builder useAttributeFilter(boolean pUseFilter) {
+            useAttributeFilter = pUseFilter;
+            return this;
+        }
+        /**
          * Build the convert options and reset this builder
          *
          * @return the options created.
          */
         public SerializeOptions build() {
-            SerializeOptions opts = new SerializeOptions(maxDepth,maxCollectionSize,maxObjects,faultHandler);
+            ValueFaultHandler handler = useAttributeFilter ?
+                    new PathAttributeFilterValueFaultHandler(faultHandler) :
+                    faultHandler;
+            SerializeOptions opts = new SerializeOptions(maxDepth,maxCollectionSize,maxObjects,handler);
             maxDepth = 0;
             maxCollectionSize = 0;
             maxObjects = 0;

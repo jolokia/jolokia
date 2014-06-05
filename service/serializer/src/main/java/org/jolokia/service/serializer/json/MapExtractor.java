@@ -6,6 +6,7 @@ import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.json.simple.JSONObject;
 
@@ -48,39 +49,49 @@ public class MapExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert which must be a {@link Map}
-     * @param pExtraArgs extra argument stack which on top must be a key into the map
+     * @param pPathParts extra argument stack which on top must be a key into the map
      * @param jsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
      * @return the extracted object
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+                                Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         Map<Object,Object> map = (Map<Object,Object>) pValue;
         int length = pConverter.getCollectionLength(map.size());
-        if (!pExtraArgs.isEmpty()) {
-            String decodedKey = pExtraArgs.pop();
+        String pathParth = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathParth != null) {
             for (Map.Entry entry : map.entrySet()) {
                 // We dont access the map via a lookup since the key
                 // are potentially object but we have to deal with string
                 // representations
-                if(decodedKey.equals(entry.getKey().toString())) {
-                    return pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify);
+                if(pathParth.equals(entry.getKey().toString())) {
+                    return pConverter.extractObject(entry.getValue(), pPathParts, jsonify);
                 }
             }
-            throw new IllegalArgumentException("Map key '" + decodedKey +
-                    "' is unknown for map " + trimString(pValue.toString()));
+            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+            return faultHandler.handleException(
+                    new AttributeNotFoundException("Map key '" + pathParth +
+                                                 "' is unknown for map " + trimString(pValue.toString())));
         } else {
-            if (jsonify && !(map instanceof JSONObject)) {
+            if (jsonify) {
                 JSONObject ret = new JSONObject();
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
-                    ret.put(entry.getKey(),
-                            pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify));
-                    i++;
-                    if (i > length) {
-                        break;
+                    Stack<String> paths = (Stack<String>) pPathParts.clone();
+                    try {
+                        ret.put(entry.getKey(),
+                                pConverter.extractObject(entry.getValue(), paths, jsonify));
+                        if (++i > length) {
+                            break;
+                        }
+                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                        // Filtered out ...
                     }
+                }
+                if (ret.isEmpty() && length > 0) {
+                    // Not a single value passed the filter
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {

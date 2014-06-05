@@ -23,6 +23,7 @@ import java.util.Date;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -79,6 +80,10 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         JSONObject inner = (JSONObject) extractJson(this,"inner");
         assertEquals(inner.get("innerText"),"innerValue");
 
+        JSONObject innerWithWildcardPath = (JSONObject) extractJson(this,null,"innerDate");
+        assertEquals(innerWithWildcardPath.size(),1);
+        assertTrue((Long) ((JSONObject) innerWithWildcardPath.get("inner")).get("millis") <= new Date().getTime());
+
         BeanExtractorTest test = (BeanExtractorTest) extractObject(this);
         assertEquals(test,this);
 
@@ -94,7 +99,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
 
     }
 
-    @Test(expectedExceptions = AttributeNotFoundException.class,expectedExceptionsMessageRegExp = ".*blablub.*")
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     public void unknownMethod() throws Exception {
         extractJson(this,"blablub");
     }

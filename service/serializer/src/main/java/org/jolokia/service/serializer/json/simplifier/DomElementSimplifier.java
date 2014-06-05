@@ -2,8 +2,6 @@ package org.jolokia.service.serializer.json.simplifier;
 
 import org.w3c.dom.Element;
 
-import java.util.Map;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -34,12 +32,7 @@ public class DomElementSimplifier extends SimplifierExtractor<Element> {
      */
     public DomElementSimplifier() {
         super(Element.class);
-    }
 
-    // ==================================================================================
-    @Override
-    /** {@inheritDoc} */
-    void init(Map<String, AttributeExtractor<Element>> pExtractorMap) {
         Object[][] pAttrs = {
                 { "name", new NameAttributeExtractor() },
                 { "value", new ValueAttributeExtractor() },

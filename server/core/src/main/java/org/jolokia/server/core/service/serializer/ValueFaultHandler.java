@@ -17,7 +17,7 @@ package org.jolokia.server.core.service.serializer;
  */
 
 /**
- *  Interface in order to deal with value exception
+ *  Interface in order to deal with value exceptions
  *
  * @author roland
  * @since 15.03.11
@@ -68,4 +68,15 @@ public interface ValueFaultHandler {
         }
     };
 
+    /**
+     * Exception used to indicate that an attribute should be skipped
+     */
+    class AttributeFilteredException extends RuntimeException {
+
+        public AttributeFilteredException(String pMessage) {
+            super(pMessage);
+        }
+
+        public AttributeFilteredException() {}
+    }
 }

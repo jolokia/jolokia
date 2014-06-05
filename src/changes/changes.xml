@@ -24,10 +24,11 @@
   </properties>
   <body>
     <release version="1.2.2" description="Release 1.2.2" date="">
-      <action dev="roland" type="add" date="2014-05-27" issue="139">
-        Support for JAAS login added for the OSGi and JVM agent. The configuration option "authMode" can be used
-        for switching between Basic and JAAS authentication when security is enabled. Useful for Karaf users where
-        JMX access is secured by JAAS.
+      <action dev="roland" type="fix" date="2014-06-04" issue="142">
+        Fixed endless loop when using debugInfo
+      </action>
+      <action dev="roland" type="add" date="2014-06-03" issue="106">
+        Added wildcard ("*") support for pathes in order to skip 'levels'
       </action>
       <action dev="roland" type="add" date="2014-05-23" issue="141">
         Added possibility to add a custom authenticator for the Java client. The standard implementation uses

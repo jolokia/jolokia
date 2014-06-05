@@ -21,6 +21,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -39,7 +40,7 @@ abstract public class AbstractExtractorTest {
         extractor = createExtractor();
         stringToObjectConverter = new StringToObjectConverter();
         converter = new ObjectToJsonConverter(stringToObjectConverter);
-        converter.setupContext();
+        converter.setupContext(new SerializeOptions.Builder().useAttributeFilter(true).build());
     }
 
     @AfterMethod

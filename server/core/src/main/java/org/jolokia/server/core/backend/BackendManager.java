@@ -198,6 +198,7 @@ public class BackendManager {
                     maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).
                     maxObjects(pJmxReq.getParameterAsInt(ConfigKey.MAX_OBJECTS)).
                     faultHandler(pJmxReq.getValueFaultHandler()).
+                                            useAttributeFilter(pJmxReq.getPathParts() != null).
                     build();
     }
 }

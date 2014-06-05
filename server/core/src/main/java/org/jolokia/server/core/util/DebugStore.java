@@ -75,7 +75,7 @@ public class DebugStore {
      * @return debug string
      */
     public String debugInfo() {
-        if (!isDebug) {
+        if (!isDebug || debugEntries.size() == 0) {
             return "";
         }
         StringBuffer ret = new StringBuffer();

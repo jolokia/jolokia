@@ -6,6 +6,7 @@ import java.util.*;
 import javax.management.*;
 import javax.management.openmbean.*;
 
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -101,25 +102,32 @@ public class TabularDataExtractor implements Extractor {
      * @param pConverter the global converter in order to be able do dispatch for
      *        serializing inner data types
      * @param pValue the value to convert
-     * @param pExtraArgs extra arguments which contain e.g. a path
+     * @param pPathParts extra arguments which contain e.g. a path
      * @param pJsonify whether to convert to a JSON object/list or whether the plain object
      *        should be returned. The later is required for writing an inner value
      * @return the extracted object
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pExtraArgs,boolean pJsonify) throws AttributeNotFoundException {
+                                Stack<String> pPathParts,boolean pJsonify) throws AttributeNotFoundException {
         TabularData td = (TabularData) pValue;
-        if (!pExtraArgs.isEmpty()) {
-            CompositeData cd = extractCompositeDataFromPath(td, pExtraArgs);
-            return pConverter.extractObject(
-                            cd != null && checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
-                            pExtraArgs, pJsonify);
+        String tdPath = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (tdPath != null) {
+            try {
+                pPathParts.push(tdPath); // Need it later on for the index
+                CompositeData cd = extractCompositeDataFromPath(td, pPathParts);
+                return pConverter.extractObject(
+                        cd != null && checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
+                        pPathParts, pJsonify);
+            } catch (AttributeNotFoundException exp) {
+                ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+                return faultHandler.handleException(exp);
+            }
         } else {
             if (pJsonify) {
                 return checkForMxBeanMap(td.getTabularType()) ?
-                        convertMxBeanMapToJson(td,pExtraArgs,pConverter) :
-                        convertTabularDataToJson(td, pExtraArgs, pConverter);
+                        convertMxBeanMapToJson(td,pPathParts,pConverter) :
+                        convertTabularDataToJson(td, pPathParts, pConverter);
             } else {
                 return td;
             }
@@ -170,18 +178,28 @@ public class TabularDataExtractor implements Extractor {
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
         JSONObject ret = new JSONObject();
+        boolean found = false;
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
-            JSONObject targetJSONObject = ret;
-            // TODO: Check whether all keys can be represented as simple types. If not, well
-            // we dont do any magic and return the tabular data as an array.
-            for (int i = 0; i < indexNames.size() - 1; i++) {
-                Object indexValue = pConverter.extractObject(cd.get(indexNames.get(i)), null, true);
-                targetJSONObject = getNextMap(targetJSONObject,indexValue);
+            Stack<String> path = (Stack<String>) pExtraArgs.clone();
+            try {
+                JSONObject targetJSONObject = ret;
+                // TODO: Check whether all keys can be represented as simple types. If not, well
+                // we dont do any magic and return the tabular data as an array.
+                for (int i = 0; i < indexNames.size() - 1; i++) {
+                    Object indexValue = pConverter.extractObject(cd.get(indexNames.get(i)), null, true);
+                    targetJSONObject = getNextMap(targetJSONObject, indexValue);
+                }
+                Object row = pConverter.extractObject(cd, path, true);
+                String finalIndex = indexNames.get(indexNames.size() - 1);
+                Object finalIndexValue = pConverter.extractObject(cd.get(finalIndex), null, true);
+                targetJSONObject.put(finalIndexValue, row);
+                found = true;
+            } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                // Ignoring filtered attributes
             }
-            Object row = pConverter.extractObject(cd, pExtraArgs, true);
-            String finalIndex = indexNames.get(indexNames.size() - 1);
-            Object finalIndexValue = pConverter.extractObject(cd.get(finalIndex), null, true);
-            targetJSONObject.put(finalIndexValue,row);
+        }
+        if (!found) {
+            throw new ValueFaultHandler.AttributeFilteredException();
         }
         return ret;
     }
@@ -202,6 +220,7 @@ public class TabularDataExtractor implements Extractor {
         ret.put("indexNames",indexNames);
 
         JSONArray values = new JSONArray();
+        // Here no special handling for wildcard pathes since pathes are not supported for this use case (yet)
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
             values.add(pConverter.extractObject(cd, pExtraArgs, true));
         }
@@ -219,27 +238,40 @@ public class TabularDataExtractor implements Extractor {
         return ret;
     }
 
-    private CompositeData extractCompositeDataFromPath(TabularData pTd, Stack<String> pPathStack) {
+    private CompositeData extractCompositeDataFromPath(TabularData pTd, Stack<String> pPathStack)
+            throws AttributeNotFoundException {
         // We first try it as a key
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
-        if (indexNames.size() > pPathStack.size()) {
+        checkPathFitsIndexNames(pPathStack, indexNames);
+
+        Object keys[] = new Object[indexNames.size()];
+        CompositeType rowType = type.getRowType();
+        List<String> pathPartsUsed = new ArrayList<String>();
+        for (int i = 0; i < indexNames.size(); i++) {
+            String path = pPathStack.pop();
+            pathPartsUsed.add(path);
+            keys[i] = getKey(rowType, indexNames.get(i), path);
+        }
+        if (pTd.containsKey(keys)) {
+            return pTd.get(keys);
+        } else {
+            throw new AttributeNotFoundException("No entry with " + pathPartsUsed + " found");
+        }
+    }
+
+    private void checkPathFitsIndexNames(Stack<String> pPathStack, List<String> pIndexNames) throws AttributeNotFoundException {
+        if (pIndexNames.size() > pPathStack.size()) {
             StringBuilder buf = new StringBuilder();
-            for (int i = 0; i < indexNames.size(); i++) {
-                buf.append(indexNames.get(i));
-                if (i < indexNames.size() - 1) {
+            for (int i = 0; i < pIndexNames.size(); i++) {
+                buf.append(pIndexNames.get(i));
+                if (i < pIndexNames.size() - 1) {
                     buf.append(",");
                 }
             }
-            throw new IllegalArgumentException("No enough keys on path stack provided for accessing tabular data with index names "
-                                               + buf.toString());
+            throw new AttributeNotFoundException("No enough keys on path stack provided for accessing tabular data with index names "
+                                                 + buf.toString());
         }
-        Object keys[] = new Object[indexNames.size()];
-        CompositeType rowType = type.getRowType();
-        for (int i = 0; i < indexNames.size(); i++) {
-            keys[i] = getKey(rowType, indexNames.get(i), pPathStack.pop());
-        }
-        return pTd.get(keys);
     }
 
     // The key is tried to convert to the proper type. These checks are
@@ -278,11 +310,20 @@ public class TabularDataExtractor implements Extractor {
         JSONObject ret = new JSONObject();
         for (Object rowObject : pTd.values()) {
             CompositeData row = (CompositeData) rowObject;
+            Stack<String> path = (Stack<String>) pExtraArgs.clone();
             Object keyObject = row.get("key");
             if (keyObject != null) {
-                Object value = pConverter.extractObject(row.get("value"),pExtraArgs,true);
-                ret.put(keyObject.toString(),value);
+                try {
+                    Object value = pConverter.extractObject(row.get("value"), path, true);
+                    ret.put(keyObject.toString(), value);
+                } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                    // Skip to next object since attribute was filtered
+                }
             }
+        }
+        if (ret.isEmpty()) {
+            // Bubble up if not a single thingy has been found
+            throw new ValueFaultHandler.AttributeFilteredException();
         }
         return ret;
     }

@@ -11,6 +11,8 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.server.core.util.EscapeUtil;
+
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 
@@ -73,18 +75,19 @@ public class BeanExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pExtraArgs, boolean jsonify)
+                                Stack<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
+        // Wrap fault handler if a wildcard path pattern is present
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
-        if (!pExtraArgs.isEmpty()) {
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
             // Still some path elements available, so dive deeper
-            String attribute = pExtraArgs.pop();
-            Object attributeValue = extractBeanPropertyValue(pValue, attribute, faultHandler);
-            return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
+            Object attributeValue = extractBeanPropertyValue(pValue, pathPart, faultHandler);
+            return pConverter.extractObject(attributeValue, pPathParts, jsonify);
         } else {
             if (jsonify) {
                 // We need the jsonfied value from here on.
-                return exctractJsonifiedValue(pValue, pExtraArgs, pConverter, faultHandler);
+                return exctractJsonifiedValue(pValue, pPathParts, pConverter, faultHandler);
             } else {
                 // No jsonification requested, hence we are returning the object itself
                 return pValue;
@@ -141,7 +144,7 @@ public class BeanExtractor implements Extractor {
 
     // =====================================================================================================
 
-    private Object exctractJsonifiedValue(Object pValue, Stack<String> pExtraArgs,
+    private Object exctractJsonifiedValue(Object pValue, Stack<String> pPathParts,
                                           ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
@@ -153,7 +156,16 @@ public class BeanExtractor implements Extractor {
             if (attributes != null && attributes.size() > 0) {
                 Map ret = new JSONObject();
                 for (String attribute : attributes) {
-                    ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, pExtraArgs, pConverter, pFaultHandler));
+                    Stack path = (Stack) pPathParts.clone();
+                    try {
+                        ret.put(attribute, extractJsonifiedPropertyValue(pValue, attribute, path, pConverter, pFaultHandler));
+                    } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                        // Skip it since we are doing a path with wildcards, filtering out non-matchin attrs.
+                   }
+                }
+                if (ret.isEmpty() && attributes.size() > 0) {
+                    // Ok, everything was filtered. Bubbling upwards ...
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {
@@ -164,18 +176,26 @@ public class BeanExtractor implements Extractor {
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    private Object extractJsonifiedPropertyValue(Object pValue, String pAttribute, Stack<String> pExtraArgs,
+    private Object extractJsonifiedPropertyValue(Object pValue, String pAttribute, Stack<String> pPathParts,
                                                   ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
         Object value = extractBeanPropertyValue(pValue, pAttribute, pFaultHandler);
         if (value == null) {
+            if (!pPathParts.isEmpty()) {
+                pFaultHandler.handleException(new AttributeNotFoundException(
+                        "Cannot apply remaining path " + EscapeUtil.combineToPath(pPathParts) + " on value null"));
+            }
             return null;
         } else if (value == pValue) {
+            if (!pPathParts.isEmpty()) {
+                pFaultHandler.handleException(new AttributeNotFoundException(
+                        "Cannot apply remaining path " + EscapeUtil.combineToPath(pPathParts) + " on a cycle"));
+            }
             // Break Cycle
             return "[this]";
         } else {
             // Call into the converted recursively for any object known.
-            return pConverter.extractObject(value, pExtraArgs, true /* jsonify */);
+            return pConverter.extractObject(value, pPathParts, true /* jsonify */);
         }
     }
 

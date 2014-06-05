@@ -41,16 +41,16 @@ public class DateExtractor implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         if (!jsonify) {
             return pValue;
         }
         Date date = (Date) pValue;
-        if (!pExtraArgs.isEmpty()) {
-            String attribute = pExtraArgs.pop();
-            if (!"time".equals(attribute)) {
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
+            if (!"time".equals(pathPart)) {
                 throw new IllegalArgumentException("A date accepts only a single inner path element " +
-                                                   "of value 'time' (and not '" + attribute + "'");
+                                                   "of value 'time' (and not '" + pathPart + "'");
             }
             return date.getTime();
         } else {

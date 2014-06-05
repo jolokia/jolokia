@@ -21,7 +21,7 @@ public class EnumExtractor implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathPart, boolean jsonify) throws AttributeNotFoundException {
         if (!jsonify) {
             return pValue;
         }

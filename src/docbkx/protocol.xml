@@ -431,6 +431,12 @@
           contain slashes (<literal>/</literal>) or exclamation marks
           (<literal>!</literal>).
         </para>
+        <para>
+          Paths support wildcards <literal>*</literal> in a simple form. If given as a path part exclusively, it
+          matches any entry and path matching continues on the next level. This feature is especially
+          useful when using pattern read request together with paths. See <xref linkend="read"/> for details. A
+          <constant>*</constant> mixed with other characters in a path part has no special meaning and is used literally.
+        </para>
       </section>
     </section>
     
@@ -1357,6 +1363,16 @@
       </para>
       <variablelist>
         <varlistentry>
+          <term><emphasis role="bold">7.2</emphasis> (since 1.2.2)</term>
+          <listitem>
+            <para>
+              Pathes can now be used with wildcards
+              (<literal>*</literal>) which match everything in the
+              selected level. They are especially useful with pattern
+              read requests.
+            </para>
+          </listitem>
+        </varlistentry>
           <term><emphasis role="bold">7.1</emphasis> (since 1.2.0)</term>
           <listitem>
             <para>

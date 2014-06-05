@@ -1,14 +1,16 @@
 package org.jolokia.service.serializer.json;
 
-import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
+import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.InvalidKeyException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
-import java.util.Stack;
+
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.json.simple.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -43,27 +45,36 @@ public class CompositeDataExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.PreserveStackTrace")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                         Stack<String> pExtraArgs,boolean jsonify) throws AttributeNotFoundException {
+                                Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         CompositeData cd = (CompositeData) pValue;
 
-        if (!pExtraArgs.isEmpty()) {
-            String key = pExtraArgs.pop();
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
+        if (pathPart != null) {
             try {
-                return pConverter.extractObject(cd.get(key), pExtraArgs, jsonify);
-            }  catch (InvalidKeyException exp) {
-                throw new AttributeNotFoundException("Invalid path '" + key + "'");
+                return pConverter.extractObject(cd.get(pathPart), pPathParts, jsonify);
+            } catch (InvalidKeyException exp) {
+                return pConverter.getValueFaultHandler().handleException(new AttributeNotFoundException("Invalid path '" + pathPart + "'"));
             }
         } else {
-            if (jsonify) {
-                JSONObject ret = new JSONObject();
-                for (String key : (Set<String>) cd.getCompositeType().keySet()) {
-                    ret.put(key,pConverter.extractObject(cd.get(key), pExtraArgs, jsonify));
-                }
-                return ret;
-            } else {
-                return cd;
+            return jsonify ? extractCompleteCdAsJson(pConverter, cd, pPathParts) : cd;
+        }
+    }
+
+    private Object extractCompleteCdAsJson(ObjectToJsonConverter pConverter, CompositeData pData, Stack<String> pPath) throws AttributeNotFoundException {
+        JSONObject ret = new JSONObject();
+        for (String key : (Set<String>) pData.getCompositeType().keySet()) {
+            Stack<String> path = (Stack<String>) pPath.clone();
+            try {
+                ret.put(key, pConverter.extractObject(pData.get(key), path, true));
+            } catch (ValueFaultHandler.AttributeFilteredException exp) {
+                // Ignore this key;
             }
         }
+        if (ret.isEmpty()) {
+            // If every key was filtered, this composite data should be skipped completely
+            throw new ValueFaultHandler.AttributeFilteredException();
+        }
+        return ret;
     }
 
     /** {@inheritDoc} */

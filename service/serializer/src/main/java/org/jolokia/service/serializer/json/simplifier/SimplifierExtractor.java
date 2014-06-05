@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.Extractor;
 import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
@@ -39,9 +40,9 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jul 27, 2009
  */
-abstract class SimplifierExtractor<T> implements Extractor {
+public abstract class SimplifierExtractor<T> implements Extractor {
 
-    private Map<String, AttributeExtractor<T>> extractorMap;
+    private final Map<String, AttributeExtractor<T>> extractorMap;
 
     private Class<T> type;
 
@@ -50,9 +51,10 @@ abstract class SimplifierExtractor<T> implements Extractor {
      *
      * @param pType type for which this extractor is responsible
      */
-    SimplifierExtractor(Class<T> pType) {
+    protected SimplifierExtractor(Class<T> pType) {
         extractorMap = new HashMap<String, AttributeExtractor<T>>();
         type = pType;
+        // Old method, here only for backwards compatibility. Please initialize in the constructor instead
         init(extractorMap);
     }
 
@@ -62,32 +64,41 @@ abstract class SimplifierExtractor<T> implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pExtraArgs, boolean jsonify)
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
-        if (pExtraArgs.size() > 0) {
-            String element = pExtraArgs.pop();
+        String element = pPathParts.isEmpty() ? null : pPathParts.pop();
+        ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+        if (element != null) {
             AttributeExtractor<T> extractor = extractorMap.get(element);
             if (extractor == null) {
-                throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue);
+                return faultHandler.handleException(new AttributeNotFoundException("Illegal path element " + element + " for object " + pValue));
             }
 
             try {
                 Object attributeValue = extractor.extract((T) pValue);
-                return pConverter.extractObject(attributeValue, pExtraArgs, jsonify);
+                return pConverter.extractObject(attributeValue, pPathParts, jsonify);
             } catch (AttributeExtractor.SkipAttributeException e) {
-                throw new IllegalArgumentException("Illegal path element " + element + " for object " + pValue,e);
+                return faultHandler.handleException(new AttributeNotFoundException("Illegal path element " + element + " for object " + pValue));
             }
         } else {
             if (jsonify) {
                 JSONObject ret = new JSONObject();
                 for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
+                    Stack<String> paths = (Stack<String>) pPathParts.clone();
                     try {
                         Object value = entry.getValue().extract((T) pValue);
-                        ret.put(entry.getKey(),pConverter.extractObject(value, pExtraArgs, jsonify));
+                        ret.put(entry.getKey(),pConverter.extractObject(value, paths, jsonify));
                     } catch (AttributeExtractor.SkipAttributeException e) {
                         // Skip this one ...
                         continue;
+                    } catch (ValueFaultHandler.AttributeFilteredException e) {
+                        // ... and this, too
+                        continue;
                     }
+                }
+                if (ret.isEmpty()) {
+                    // Everything filtered, bubble up ...
+                    throw new ValueFaultHandler.AttributeFilteredException();
                 }
                 return ret;
             } else {
@@ -119,13 +130,21 @@ abstract class SimplifierExtractor<T> implements Extractor {
      * @param pAttrExtractors extractors
      */
     @SuppressWarnings("unchecked")
-    protected void addExtractors(Object[][] pAttrExtractors) {
-        for (int i = 0;i< pAttrExtractors.length; i++) {
-            extractorMap.put((String) pAttrExtractors[i][0],
-                             (AttributeExtractor<T>) pAttrExtractors[i][1]);
+    final protected void addExtractors(Object[][] pAttrExtractors) {
+        for (Object[] pAttrExtractor : pAttrExtractors) {
+            extractorMap.put((String) pAttrExtractor[0],
+                             (AttributeExtractor<T>) pAttrExtractor[1]);
         }
     }
 
+    /**
+     * Add a single extractor
+     * @param pName name of the extractor
+     * @param pExtractor the extractor itself
+     */
+    final protected void addExtractor(String pName, AttributeExtractor<T> pExtractor) {
+        extractorMap.put(pName,pExtractor);
+    }
 
     // ============================================================================
 
@@ -134,7 +153,7 @@ abstract class SimplifierExtractor<T> implements Extractor {
      *
      * @param <T> type to extract
      */
-    interface AttributeExtractor<T> {
+    public interface AttributeExtractor<T> {
         /**
          * Exception to be thrown when the result of this extractor should be omitted in the response
          */
@@ -153,7 +172,9 @@ abstract class SimplifierExtractor<T> implements Extractor {
 
     /**
      * Add extractors to map
+     *
+     * @deprecated Initialize in the constructor instead.
      * @param pExtractorMap the map to add the extractors used within this simplifier
      */
-    abstract void init(Map<String, AttributeExtractor<T>> pExtractorMap);
+     void init(Map<String, AttributeExtractor<T>> pExtractorMap) {}
 }

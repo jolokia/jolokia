@@ -17,7 +17,6 @@ package org.jolokia.service.serializer.json.simplifier;
  */
 
 import java.util.Date;
-import java.util.Map;
 
 import org.testng.annotations.Test;
 
@@ -30,10 +29,7 @@ import org.testng.annotations.Test;
 public class TestSimplifier extends SimplifierExtractor<Date> {
     public TestSimplifier() {
         super(Date.class);
-    }
 
-    @Override
-    void init(Map<String, AttributeExtractor<Date>> pStringAttributeExtractorMap) {
         Object[][] pAttrs = {
                 { "millis", new AttributeExtractor<Date>() {
                     public Object extract(Date value) throws SkipAttributeException {
