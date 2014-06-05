@@ -329,7 +329,7 @@ public class AgentServlet extends HttpServlet {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
         if (subject != null) {
             return Subject.doAs(subject, new PrivilegedExceptionAction<JSONAware>() {
-                    public JSONAware run() throws Exception {
+                    public JSONAware run() throws IOException {
                         return pReqHandler.handleRequest(pReq, pResp);
                     }
             });

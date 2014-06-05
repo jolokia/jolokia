@@ -130,7 +130,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
      * @param pAttrExtractors extractors
      */
     @SuppressWarnings("unchecked")
-    final protected void addExtractors(Object[][] pAttrExtractors) {
+    protected final void addExtractors(Object[][] pAttrExtractors) {
         for (Object[] pAttrExtractor : pAttrExtractors) {
             extractorMap.put((String) pAttrExtractor[0],
                              (AttributeExtractor<T>) pAttrExtractor[1]);
@@ -142,7 +142,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
      * @param pName name of the extractor
      * @param pExtractor the extractor itself
      */
-    final protected void addExtractor(String pName, AttributeExtractor<T> pExtractor) {
+    protected final void addExtractor(String pName, AttributeExtractor<T> pExtractor) {
         extractorMap.put(pName,pExtractor);
     }
 
