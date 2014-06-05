@@ -20,7 +20,7 @@ class PathAttributeFilterValueFaultHandler implements ValueFaultHandler {
     /** {@inheritDoc} */
     public <T extends Throwable> Object handleException(T exception) throws T {
         if (exception instanceof AttributeNotFoundException) {
-            throw new AttributeFilteredException();
+            throw new AttributeFilteredException(exception.getMessage());
         } else {
             return origHandler.handleException(exception);
         }

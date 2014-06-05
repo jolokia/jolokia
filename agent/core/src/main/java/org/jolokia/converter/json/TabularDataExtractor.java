@@ -112,11 +112,16 @@ public class TabularDataExtractor implements Extractor {
         TabularData td = (TabularData) pValue;
         String tdPath = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (tdPath != null) {
-            pPathParts.push(tdPath); // Need it later on for the index
-            CompositeData cd = extractCompositeDataFromPath(td, pPathParts);
-            return pConverter.extractObject(
-                            cd != null && checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
-                            pPathParts, pJsonify);
+            try {
+                pPathParts.push(tdPath); // Need it later on for the index
+                CompositeData cd = extractCompositeDataFromPath(td, pPathParts);
+                return pConverter.extractObject(
+                        cd != null && checkForMxBeanMap(td.getTabularType()) ? cd.get("value") : cd,
+                        pPathParts, pJsonify);
+            } catch (AttributeNotFoundException exp) {
+                ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+                return faultHandler.handleException(exp);
+            }
         } else {
             if (pJsonify) {
                 return checkForMxBeanMap(td.getTabularType()) ?
@@ -232,7 +237,8 @@ public class TabularDataExtractor implements Extractor {
         return ret;
     }
 
-    private CompositeData extractCompositeDataFromPath(TabularData pTd, Stack<String> pPathStack) {
+    private CompositeData extractCompositeDataFromPath(TabularData pTd, Stack<String> pPathStack)
+            throws AttributeNotFoundException {
         // We first try it as a key
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
@@ -240,13 +246,20 @@ public class TabularDataExtractor implements Extractor {
 
         Object keys[] = new Object[indexNames.size()];
         CompositeType rowType = type.getRowType();
+        List<String> pathPartsUsed = new ArrayList<String>();
         for (int i = 0; i < indexNames.size(); i++) {
-            keys[i] = getKey(rowType, indexNames.get(i), pPathStack.pop());
+            String path = pPathStack.pop();
+            pathPartsUsed.add(path);
+            keys[i] = getKey(rowType, indexNames.get(i), path);
         }
-        return pTd.get(keys);
+        if (pTd.containsKey(keys)) {
+            return pTd.get(keys);
+        } else {
+            throw new AttributeNotFoundException("No entry with " + pathPartsUsed + " found");
+        }
     }
 
-    private void checkPathFitsIndexNames(Stack<String> pPathStack, List<String> pIndexNames) {
+    private void checkPathFitsIndexNames(Stack<String> pPathStack, List<String> pIndexNames) throws AttributeNotFoundException {
         if (pIndexNames.size() > pPathStack.size()) {
             StringBuilder buf = new StringBuilder();
             for (int i = 0; i < pIndexNames.size(); i++) {
@@ -255,8 +268,8 @@ public class TabularDataExtractor implements Extractor {
                     buf.append(",");
                 }
             }
-            throw new IllegalArgumentException("No enough keys on path stack provided for accessing tabular data with index names "
-                                               + buf.toString());
+            throw new AttributeNotFoundException("No enough keys on path stack provided for accessing tabular data with index names "
+                                                 + buf.toString());
         }
     }
 

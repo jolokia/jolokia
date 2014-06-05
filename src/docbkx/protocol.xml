@@ -1363,6 +1363,16 @@
       </para>
       <variablelist>
         <varlistentry>
+          <term><emphasis role="bold">7.2</emphasis> (since 1.2.2)</term>
+          <listitem>
+            <para>
+              Pathes can now be used with wildcards
+              (<literal>*</literal>) which match everything in the
+              selected level. They are especially useful with pattern
+              read requests.
+            </para>
+          </listitem>
+        </varlistentry>
           <term><emphasis role="bold">7.1</emphasis> (since 1.2.0)</term>
           <listitem>
             <para>

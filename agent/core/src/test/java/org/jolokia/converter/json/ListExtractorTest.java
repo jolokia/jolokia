@@ -37,12 +37,17 @@ public class ListExtractorTest extends AbstractExtractorTest {
         extractJson(names, "1", "Yippie!");
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     public void testWithInvalidPath() throws Exception {
         List<ObjectName> names = getObjectNameList();
         extractJson(names, "4", "domain");
     }
 
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void testWithNoNumericPath() throws Exception {
+        List<ObjectName> names = getObjectNameList();
+        extractJson(names, "bla");
+    }
 
 
     private List<ObjectName> getObjectNameList() throws MalformedObjectNameException {

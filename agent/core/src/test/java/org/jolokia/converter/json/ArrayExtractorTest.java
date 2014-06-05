@@ -54,6 +54,16 @@ public class ArrayExtractorTest extends AbstractExtractorTest {
         assertEquals(res,"zwei");
     }
 
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void testWithNonNumericPath() throws Exception {
+        String res = (String) extractJson(new String[]{"eins", "zwei", "drei"},"blub");
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void testOutOfBoundsPath() throws Exception {
+        String res = (String) extractJson(new String[]{"eins", "zwei", "drei"},"4");
+    }
+
     @Test
     public void testWithWildcardPath() throws Exception {
         ObjectName[] names = {new ObjectName("test:type=blub"),null,new ObjectName("java.lang:type=Memory")};

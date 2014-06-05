@@ -72,7 +72,30 @@ value: {
         LastGcInfo: 7
    }
 }]]></programlisting>
-
+  <para>
+    The following rule of thumb applies:
+  </para>
+  <itemizedlist>
+    <listitem>
+      If a wildcard is used, everything at that point in the path is
+      matched. The next path parts are used to match from there
+      on. All the values on this level are included.
+    </listitem>
+    <listitem>
+      Every other path part is litterally compared against the values
+      on that level. If there is a match, this value is
+      <emphasis>removed</emphasis> in the answer so that at the end
+      you get back a structure with the values on the wildcard levels
+      and the leaves of the matched parts. 
+    </listitem>
+    <listitem>
+      If used with wildcards, pathes behave also like
+      filters. E.g. you can use a path <literal>*/*/used</literal> on
+      the MBean pattern <literal>java.lang:*</literal> and get back
+      only that portions which contains "used" as key, all others are
+      ignored. 
+    </listitem>
+  </itemizedlist>
   <section id="get-read">
     <title>GET read request</title>
     <para>

@@ -274,7 +274,7 @@ public class TabularDataExtractorTest {
     }
 
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*name.*firstname.*")
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     void extractGenericTabularDataWithToShortPath() throws OpenDataException, AttributeNotFoundException {
         extract(true, getComplexTabularData(), "meyer");
     }

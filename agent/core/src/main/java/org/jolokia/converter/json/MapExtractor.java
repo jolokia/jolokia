@@ -73,7 +73,7 @@ public class MapExtractor implements Extractor {
                     new AttributeNotFoundException("Map key '" + pathParth +
                                                  "' is unknown for map " + trimString(pValue.toString())));
         } else {
-            if (jsonify && !(map instanceof JSONObject)) {
+            if (jsonify) {
                 JSONObject ret = new JSONObject();
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
