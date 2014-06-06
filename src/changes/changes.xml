@@ -23,7 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.2.2" description="Release 1.2.2" date="">
+    <release version="1.2.2" description="Release 1.2.2" date="2014-06-06">
+      <action dev="roland" type="fix" date="2014-06-06" issue="138">
+        Added missing configuration options to the configuration XSD for the
+        spring config name space.
+      </action>
       <action dev="roland" type="fix" date="2014-06-04" issue="142">
         Fixed endless loop when using debugInfo
       </action>

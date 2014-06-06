@@ -111,7 +111,7 @@ public enum ConfigKey {
     MBEAN_QUALIFIER("mbeanQualifier", true, false),
 
     /**
-     * Option which can be given to a request to speficy a JSONP callback.
+     * Option which can be given to a request to specify a JSONP callback.
      * The generated answer will be of type text/javascript and it will
      * contain a Javascript function to be called.
      */

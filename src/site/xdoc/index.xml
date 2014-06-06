@@ -83,7 +83,7 @@
         <div class="news-date">2014-06-07</div>
         <p>
           Let's welcome Jolokia's next minor release which is not <em>so</em>
-          minor as it might seem. 
+          minor as it might seems. 
         </p>
         <ul>
           <li>
@@ -96,7 +96,7 @@
           </li>
           <li>
             Finally an update to json-simple-1.1.1 which is mavenized,
-            but still has it's issues and not much traction to fix
+            but still has its issues and not much traction to fix
             it. No problem we have a good workaround and it is still
             rock solid. 
           </li>
@@ -105,48 +105,51 @@
           </li>
         </ul>
         <p>
-          The biggest new thingy with the most impact is support for
-          wildcards when using pathes. You probably know <a
-          href="">pattern read request</a> which allow for fetching
-          multiple patterns by using patterns for MBean names and
-          attributes (not to be confused with <a href="">bulk
-          requests</a>). When using pattern read requests, the
-          value in the returned JSON structure is not a single return
-          value for an attribute but a more complex structure
-          containing the fulle MBean names and attributes which are
-          matched by the pattern. Of course, it is not easy to use a
-          path to filter out this structure, the path has needed to know
-          the full MBean name (well, why using a path then ?). That's
-          the main reason why path access was not supported for
-          pattern read requests up to release 1.2.1
+          The biggest new feature with the most impact is path
+          wildcard support. You probably know <a
+          href="reference/html/protocol.html#read">pattern read
+          requests</a> which allow for fetching multiple patterns by
+          using patterns for MBean names and attributes (not to be
+          confused with <a
+          href="reference/html/protocol.html#post-request">bulk
+          requests</a>). When using pattern read requests, the value
+          in the returned JSON structure is not a single return value
+          for an attribute but a more complex structure containing the
+          full MBean names and attributes which are matched by the
+          pattern. Of course, it is not easy to use a path to navigate
+          on this structure, the path has to know the full
+          MBean name (well, why using a pattern then ?). That's the main
+          reason why path access was not supported for pattern read
+          requests up to release 1.2.1
         </p>
         <p>
           Starting with 1.2.2 it is possible to use "*" wildcards in
-          patterns, which matches a complete 'level' in the JSON
+          patterns, which match a complete 'level' in the JSON
           object. This makes it easy to fetch all same-named
-          attributes on arbitrary MBeans and extract only parts on
+          attributes on arbitrary MBeans and extract only parts of
           their values. In fact, it is not so easy explain wildcard
           pathes, but here is a try (another try can be found in the <a
-          href="">reference manual</a>):
+          href="reference/html/protocol.html#read">reference manual</a>):
         </p>
         <ul>
           <li>
             If using a literal path, then everything works as expected:
-            The value the path points is returned. Mostly this is a
-            scalar value because that is paths was introduced for.
+            The value the path points to is returned. Mostly this is a
+            scalar value because that is what paths was introduced for.
           </li>
           <li>
             If the path contains a single "*" as a part, then when
             coming to <em>this level</em> everything is included. A
-            path containing a path cannot be a scalar, but is a JSON
-            object or array. The remaining path parts are included as
-            described above.
+            path containing a wildcard cannot be a scalar anymore, but
+            is a JSON object or array. The remaining path parts are
+            included as described above to each element at this level.
           </li>
           <li>
             A path can contain multiple wildcards, but wildcards can
-            be used only a single values. If a "*" is used as addition
-            to a path part, it's taken literally (which most of the
-            case doesn't make much sense). 
+            be used only on its own. If a "*" is used as part of a
+            path part (like 'current*'), it's taken literally (which
+            most of the time doesn't make much sense). This might
+            change in the future.            
           </li>
           <li>
             The net effect is, that literal path parts are "squeezed"
@@ -155,49 +158,60 @@
           </li>
         </ul>
         <p>
-          I know, wildcard path handling is somewhat complex, so my
-          recommendation is to avoid it. For pattern read request they
-          make quite some sense, for all other request, I doubt there
-          is any good use case. Please open an issue if any suspicious
-          behaviour during path-wildcard using occurs. 
+          You see, wildcard path handling is somewhat complex. For
+          pattern read request they make quite some sense, for all
+          other requests, I couldn't find good use cases yet. Please
+          open an issue if any suspicious behaviour during
+          path-wildcard using occurs.
         </p>
         <p>
-          Finally, I would also like to mention a new github project <a
-          href="">jolokia-extra</a> which holds additional goodies. As
-          you might now, one design goal of Jolokia is to keep it
-          focused. That's not so easy as there are tons of ideas out
-          there, all backed by a particular use case. And they all
-          want to get into the game. Beside that someone has to
-          implement that (hint: still looking for contribs ;-), I
+          Finally, I would also like to mention a new github project
+          <a
+          href="https://github.com/rhuss/jolokia-extra">jolokia-extra</a>
+          which holds additional goodies. One design goal of Jolokia
+          is to keep it focused. That's not so easy as there are tons
+          of ideas out there, all backed by a particular use case. And
+          they all want to get into the game. Beside that someone has
+          to implement that (hint: still looking for contribs ;-), I
           opened a new playground for all that stuff which might not
           be of general interest but are still pearls. That's what
-          <code>jolokia-extra</code> is for.           
+          <code>jolokia-extra</code> is for.
         </p>
         <p>
-          The beginning makes a 1.5 year old pull request from Marcin
-          Plonka. Thanks a lot and sorry for the long, long
-          delay. It's all about simplifing access to JSR-77 enabled
-          JEE-Servers. You should know that <a href="">JSR-77</a> was
-          a cool attempt to standardize naming and JMX exposed metrics
-          for JEE. Unfortunately it was <a href="">abandonned</a>, but
-          still lives in quite a bunch of JEE serves. Not at its full
-          beauty, but still valuable enough to be
+          The beginning makes a 1.5 year old <a
+          href="https://github.com/rhuss/jolokia/pull/50">pull
+          request</a> from <a href="https://github.com/mplonka">Marcin
+          Płonka</a> (Thanks a lot and sorry for the long, long delay,
+          BTW). It's all about simplifing access to JSR-77 enabled
+          JEE-Servers. You should know that <a
+          href="https://jcp.org/en/jsr/detail?id=77">JSR 77: J2EE
+          Management</a> was a cool attempt to standardize naming and
+          JMX exposed metrics for JEE. Unfortunately it was abandoned,
+          but still lives in quite a bunch of JEE servers. Not at its
+          full beauty, but still valuable enough to be
           supported. Astongishly, WebSphere, even the latest 8.5
-          versions, has the best support for it. Using JSR-77
-          conform MBeans with Jolokia returns unnecessarily complex
-          JSON structures which hard to parse and
+          versions, has the best support for it. Using JSR-77 conform
+          MBeans with plain Jolokia returns unnecessarily complex JSON
+          structures which are hard to parse and
           understand. <code>jolokia-extra</code> adds a set of
-          simplifiers for make the usage with JSR-77 simpler. I
-          recommend a look at it, especially if you are running with
-          WebSphere. In the future, it might be the case, that some
-          lesser used additions (Spring and Spring Roo integration,
-          JBoss Forge support, ...) will go in there as well. 
+          simplifiers for make the usage with JSR-77 simpler (but add
+          an extra of 50k to the agent). I recommend to have a look at it,
+          especially if you are running with WebSphere.
         </p>
         <p>
-          Enough blubber. Enjoy the release. And just in case, anybody
-          wondering about 2.0 (BTW, is there <strong>anyone</strong>
-          out there carrying about the next generation) ?. Just leave
-          me a note <a href="">@jolokia_jmx</a>. 
+          In the future, it might be the case, that some lesser used
+          additions (Spring and Spring Roo integration, JBoss Forge
+          support, ...) will go into <code>jolokia-extra</code> as well. 
+        </p>
+        <p>
+          Enough blubber, enjoy this release. And just in case, if
+          anybody is wondering about 2.0 (BTW, is there
+          <strong>anyone</strong> out there carrying about this next
+          generation JMX transcended super-hero ?), just drop a note
+          with twitter (<a
+          href="https://twitter.com/jolokia_jmx">@jolokia_jmx</a>) or
+          mail (<a
+          href="mailto:2.0@jolokia.org">2.0@jolokia.org</a>).
         </p>
 
 
