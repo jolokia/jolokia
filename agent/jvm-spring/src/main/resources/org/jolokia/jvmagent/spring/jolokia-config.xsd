@@ -228,10 +228,42 @@
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
+
     <xs:attribute name="password" type="xs:string">
       <xs:annotation>
         <xs:documentation>
           Password for authenticating the user.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="realm" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Security realm to use
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="authMode">
+      <xs:annotation>
+        <xs:documentation>
+          What authentication to use. Support values: "basic" for basic authentication, "jaas" for
+          JaaS authentication.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="basic"/>
+          <xs:enumeration value="jaas"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+
+    <xs:attribute name="authenticatorClass" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Custom authenticator to be used instead of default user/password one.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
@@ -241,6 +273,26 @@
         <xs:documentation>
           Context under which the agent is deployed. The full URL
           will be protocol://host:port/context
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="agentId" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          The ID to uniquely identify this agent within a JVM. There
+          can be multiple agents registered a JVM. This id is e.g. used to
+          uniquely create MBean names.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="agentDescription" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          A description which can be used to describe the agent further. Typically
+          this can be used by clients to provide additional information to
+          the user.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
@@ -383,5 +435,38 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
+
+    <xs:attribute name="logHandlerClass" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Class specifying a loghandler to use. This class requires a now argument
+          constructor.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="discoveryEnabled" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          Whether to enable listening and responding to discovery multicast requests
+          for discovering agent details.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="discoveryAgentUrl" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Specify the agent URL to return for an discovery multicast request. If this option
+          is given "discoveryEnabled" is set to 'true' automatically. The URL given can contain placeholders:
+          "$host" or "${host}" : Host name (if possible), otherwise address --
+          "$ip" or "${ip}" : IP Address --
+          "${prop:foo}" : System property foo --
+          "${env:FOO}" : Environment variable FOO --
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+
   </xs:complexType>
   </xs:schema>
