@@ -20,7 +20,7 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class AuthorizationHeaderParser {
+public final class AuthorizationHeaderParser {
 
     private AuthorizationHeaderParser() { }
 
