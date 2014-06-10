@@ -358,6 +358,22 @@ $(document).ready(function() {
                 }
             });
         });
+        asyncTest("Pattern Attribute Read Request with path", function() {
+            j4p.request(
+            { type: "READ", mbean: "java.lang:type=*", path: "*/*/used"},
+            {
+                success: function(response) {
+                    equals(response.request.type, "read", "Type must be read");
+                    ok(response.value != null, "Value must be returned: " + JSON.stringify(response.value));
+                    ok($.isPlainObject(response.value), "Hash returned");
+                    ok(response.value["java.lang:type=Memory"]);
+                    ok(response.value["java.lang:type=Memory"].HeapMemoryUsage);
+                    console.log(response);
+                    ok(!response.value["java.lang:type=Memory"].HeapMemoryUsage.max);
+                    start();
+                }
+            });
+        });
 
         asyncTest("Complex name with GET", function() {
             j4p.request(
