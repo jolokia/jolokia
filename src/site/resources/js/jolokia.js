@@ -65,7 +65,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.1.1";
+            this.CLIENT_VERSION = "1.2.2";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -612,12 +612,7 @@
         // each part gets escaped and a 'path' which is appended literally
         var GET_URL_EXTRACTORS = {
             "read":function (request) {
-                if (request.attribute == null) {
-                    // Path gets ignored for multiple attribute fetch
-                    return { parts:[ request.mbean ] };
-                } else {
-                    return { parts:[ request.mbean, request.attribute ], path:request.path };
-                }
+                return { parts:[ request.mbean, request.attribute ], path:request.path };
             },
             "write":function (request) {
                 return { parts:[request.mbean, request.attribute, valueToString(request.value)], path:request.path};

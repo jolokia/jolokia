@@ -66,7 +66,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.2.1";
+            this.CLIENT_VERSION = "1.2.2";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -609,7 +609,7 @@
             var extractor = GET_URL_EXTRACTORS[type];
             assertNotNull(extractor, "Unknown request type " + type);
             var result = extractor(request);
-            var parts = result.parts || {};
+            var parts = result.parts || [];
             var url = type;
             $.each(parts, function (i, v) {
                 url += "/" + Jolokia.escape(v)
@@ -617,6 +617,7 @@
             if (result.path) {
                 url += (result.path[0] == '/' ? "" : "/") + result.path;
             }
+            console.log(url);
             return url;
         }
 
@@ -638,7 +639,7 @@
             "read":function (request) {
                 if (request.attribute == null) {
                     // Path gets ignored for multiple attribute fetch
-                    return { parts:[ request.mbean ] };
+                    return { parts:[ request.mbean, '*' ], path:request.path };
                 } else {
                     return { parts:[ request.mbean, request.attribute ], path:request.path };
                 }
