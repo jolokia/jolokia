@@ -206,7 +206,7 @@ public final class ObjectToJsonConverter {
         try {
             jsonResult = extractObject(pValue, pExtraArgs, pJsonify);
         } catch (ValueFaultHandler.AttributeFilteredException exp) {
-            throw new AttributeNotFoundException("Path matches no attribute or property");
+            jsonResult = null;
         } finally {
             clearContext();
         }
