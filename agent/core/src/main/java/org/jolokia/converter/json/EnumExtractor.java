@@ -22,11 +22,18 @@ public class EnumExtractor implements Extractor {
 
     /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathPart, boolean jsonify) throws AttributeNotFoundException {
-        if (!jsonify) {
-            return pValue;
-        }
+        String pathPart = pPathPart.isEmpty() ? null : pPathPart.pop();
         Enum en = (Enum) pValue;
-        return en.name();
+        String name = en.name();
+        if (pathPart != null) {
+            if (name.equals(pathPart)) {
+                return name;
+            } else {
+                return pConverter.getValueFaultHandler().handleException(
+                        new AttributeNotFoundException("Enum value '" + name + "' doesn't match path '" + pathPart + "'" ));
+            }
+        }
+        return jsonify ? name : en;
     }
 
     /** {@inheritDoc} */

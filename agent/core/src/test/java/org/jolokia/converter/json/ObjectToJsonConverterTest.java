@@ -48,9 +48,7 @@ public class ObjectToJsonConverterTest {
 
     @AfterMethod
     public void tearDown() {
-        if (converter != null) {
-            converter.clearContext();
-        }
+        converter.clearContext();
     }
 
     @Test

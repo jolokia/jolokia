@@ -22,12 +22,13 @@ import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
+import mockit.Mock;
+import mockit.MockUp;
 import org.jolokia.util.DateUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author roland
@@ -36,10 +37,21 @@ import static org.testng.Assert.assertTrue;
 public class DateExtractorTest {
 
     private DateExtractor extractor;
+    private ObjectToJsonConverter converter;
+
 
     @BeforeMethod
     public void setup() {
         extractor = new DateExtractor();
+
+        new MockUp<ObjectToJsonConverter>() {
+            @Mock
+            public ValueFaultHandler getValueFaultHandler() {
+                return new PathAttributeFilterValueFaultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER);
+            }
+        };
+        // Needed for subclassing final object
+        converter = new ObjectToJsonConverter(null, null);
     }
 
     @Test
@@ -74,12 +86,13 @@ public class DateExtractorTest {
         assertEquals(result,date.getTime());
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class })
+    @Test(enabled = true, expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     public void simpleJsonExtractWithWrongPath() throws AttributeNotFoundException {
         Date date = new Date();
         Stack stack = new Stack();
         stack.add("blablub");
-        extractor.extractObject(null, date, stack, true);
+
+        extractor.extractObject(converter, date, stack, true);
     }
 
     @Test
@@ -108,5 +121,4 @@ public class DateExtractorTest {
     public void invalidSet() throws InvocationTargetException, IllegalAccessException {
         Object oldVal = extractor.setObjectValue(null,new Date(),"blubbla",0L);
     }
-
 }

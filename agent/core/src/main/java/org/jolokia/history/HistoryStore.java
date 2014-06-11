@@ -264,9 +264,9 @@ public class HistoryStore {
             // Multiple attributes, but a single bean.
             // Value has the following structure:
             // attribute_key -> attribute_value
-            JSONObject history = addAttributesFromComplexValue(
+            JSONObject history = addMultipleAttributeValues(
                     pJmxReq,
-                    ((Map<String,Object>) pJson.get(KEY_VALUE)),
+                    ((Map<String, Object>) pJson.get(KEY_VALUE)),
                     pJmxReq.getObjectNameAsString(),
                     pTimestamp);
             if (history.size() > 0) {
@@ -276,8 +276,7 @@ public class HistoryStore {
             // Single attribute, single bean. Value is the attribute_value
             // itself.
             addAttributeFromSingleValue(pJson,
-                                        KEY_HISTORY,
-                                        new HistoryKey(pJmxReq),
+                                        new HistoryKey(pJmxReq), KEY_HISTORY,
                                         pJson.get(KEY_VALUE),
                                         pTimestamp);
         }
@@ -285,55 +284,108 @@ public class HistoryStore {
 
     private JSONObject updateHistoryForPatternRead(JmxReadRequest pJmxReq, long pTimestamp, Map<String, Object> pValues) {
         JSONObject history = new JSONObject();
+        List<String> pathParts = pJmxReq.getPathParts();
+        if (pathParts != null && pathParts.size() == 1) {
+            return updateHistoryForPatternReadWithMBeanAsPath(pJmxReq, pTimestamp, pValues);
+        }
         for (Map.Entry<String,Object> beanEntry : pValues.entrySet()) {
+            JSONObject beanHistory = null;
             String beanName = beanEntry.getKey();
-            JSONObject beanHistory =
-                    addAttributesFromComplexValue(
-                            pJmxReq,
-                            ((Map<String,Object>) beanEntry.getValue()),
-                            beanName,
-                            pTimestamp);
-            if (beanHistory.size() > 0) {
-                history.put(beanName,beanHistory);
+            Object value = beanEntry.getValue();
+            if (pathParts != null && pathParts.size() == 2) {
+                beanHistory = addPathFilteredAttributeValue(pJmxReq, pTimestamp, beanName, value);
+            }
+            if (value instanceof Map) {
+                beanHistory =
+                        addMultipleAttributeValues(
+                                pJmxReq,
+                                ((Map<String, Object>) beanEntry.getValue()),
+                                beanName,
+                                pTimestamp);
+            }
+            if (beanHistory != null && beanHistory.size() > 0) {
+                history.put(beanName, beanHistory);
             }
         }
         return history;
     }
 
-    private JSONObject addAttributesFromComplexValue(JmxRequest pJmxReq,Map<String,Object> pAttributesMap,
-                                                     String pBeanName,long pTimestamp) {
+    private JSONObject addPathFilteredAttributeValue(JmxReadRequest pJmxReq, long pTimestamp, String pBeanName, Object pValue) {
+        // value
+        String attribute = pJmxReq.getPathParts().get(1);
+        HistoryKey key = createHistoryKey(pJmxReq, pBeanName,attribute,pJmxReq.getPath());
+        return addAttributeFromSingleValue(key,attribute,pValue,pTimestamp);
+    }
+
+    private JSONObject updateHistoryForPatternReadWithMBeanAsPath(JmxReadRequest pJmxReq, long pTimestamp, Map<String, Object> pValues) {
+        // It the content of the MBean itself. MBean name is the first the single path part
+        String beanName = pJmxReq.getPathParts().get(0);
+        JSONObject ret = new JSONObject();
+        JSONObject beanHistory = addMultipleAttributeValues(
+                pJmxReq,
+                pValues,
+                beanName,
+                pTimestamp);
+        if (beanHistory.size() > 0) {
+            ret.put(beanName, beanHistory);
+        }
+        return ret;
+    }
+
+    private JSONObject addMultipleAttributeValues(JmxRequest pJmxReq, Map<String, Object> pAttributesMap,
+                                                  String pBeanName, long pTimestamp) {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,Object> attrEntry : pAttributesMap.entrySet()) {
             String attrName = attrEntry.getKey();
             Object value = attrEntry.getValue();
             String path = pJmxReq.getPath();
-            HistoryKey key;
-            try {
-                String target = pJmxReq.getTargetConfig() != null ? pJmxReq.getTargetConfig().getUrl() : null;
-                key = new HistoryKey(pBeanName,attrName,path,target);
-            } catch (MalformedObjectNameException e) {
-                // Shouldn't occur since we get the MBeanName from a JMX operation's result. However,
-                // we will rethrow it just in case
-                throw new IllegalArgumentException("Can not parse MBean name " + pBeanName,e);
-            }
+            HistoryKey key = createHistoryKey(pJmxReq, pBeanName, attrName, path);
             addAttributeFromSingleValue(ret,
-                                        attrName,
                                         key,
+                                        attrName,
                                         value,
                                         pTimestamp);
         }
         return ret;
     }
 
-    private void addAttributeFromSingleValue(JSONObject pHistMap, String pAttrName, HistoryKey pKey,
-                                             Object pValue, long pTimestamp) {
-        HistoryEntry entry = getEntry(pKey,pValue,pTimestamp);
-        if (entry != null) {
-            synchronized (entry) {
-                pHistMap.put(pAttrName,entry.jsonifyValues());
-                entry.add(pValue,pTimestamp);
-            }
+    private HistoryKey createHistoryKey(JmxRequest pJmxReq, String pBeanName, String pAttrName, String pPath) {
+        HistoryKey key;
+        try {
+            String target = pJmxReq.getTargetConfig() != null ? pJmxReq.getTargetConfig().getUrl() : null;
+            key = new HistoryKey(pBeanName, pAttrName, pPath,target);
+        } catch (MalformedObjectNameException e) {
+            // Shouldn't occur since we get the MBeanName from a JMX operation's result. However,
+            // we will rethrow it just in case
+            throw new IllegalArgumentException("Can not parse MBean name " + pBeanName,e);
         }
+        return key;
+    }
+
+    // Return a fresh map
+    private JSONObject addAttributeFromSingleValue(HistoryKey pKey, String pAttrName, Object pValue, long pTimestamp) {
+        HistoryEntry entry = getEntry(pKey,pValue,pTimestamp);
+        return entry != null ?
+                addToHistoryEntryAndGetCurrentHistory(new JSONObject(), entry, pAttrName, pValue, pTimestamp) :
+                null;
+    }
+
+    // Use an existing map
+    private void addAttributeFromSingleValue(JSONObject pHistMap, HistoryKey pKey, String pAttrName,
+                                             Object pValue, long pTimestamp) {
+        HistoryEntry entry = getEntry(pKey, pValue, pTimestamp);
+        if (entry != null) {
+            addToHistoryEntryAndGetCurrentHistory(pHistMap, entry, pAttrName, pValue, pTimestamp);
+        }
+    }
+
+    private JSONObject addToHistoryEntryAndGetCurrentHistory(JSONObject pHistMap, HistoryEntry pEntry, String pAttrName,
+                                                             Object pValue, long pTimestamp) {
+        synchronized (pEntry) {
+                pHistMap.put(pAttrName, pEntry.jsonifyValues());
+                pEntry.add(pValue, pTimestamp);
+        }
+        return pHistMap;
     }
 
     private synchronized HistoryEntry getEntry(HistoryKey pKey,Object pValue,long pTimestamp) {

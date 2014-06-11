@@ -63,6 +63,7 @@ public class JmxRequestTest {
         assertEquals(path,"hello!/world/second");
     }
 
+
     // =================================================================================
 
     @Test
@@ -85,6 +86,23 @@ public class JmxRequestTest {
             verify(req,"path","used");
         }
     }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testInvalidPathEndingWithWildcardGet() {
+        JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/*",procParams);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testInvalidPathEndingWithWildcardPost() {
+        JmxRequestFactory.createPostRequest(
+                createMap(
+                        "type", "read",
+                        "mbean", "java.lang:type=Memory",
+                        "attribute", "HeapMemoryUsage",
+                        "path", "used/*"), procParams);
+    }
+
+
 
     @Test
     public void readRequestMultiAttributes() {

@@ -44,9 +44,7 @@ abstract public class AbstractExtractorTest {
 
     @AfterMethod
     public void teardown() {
-        if (converter != null) {
-            converter.clearContext();
-        }
+        converter.clearContext();
     }
 
     protected Object extractJson(Object pValue,String ... extraArgs) throws AttributeNotFoundException {

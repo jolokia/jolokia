@@ -87,6 +87,7 @@ public abstract class JmxRequest {
     private JmxRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams) {
         method = pMethod;
         type = pType;
+        verifyPath(pPathParts);
         pathParts = pPathParts;
 
         initParameters(pProcessingParams);
@@ -147,7 +148,6 @@ public abstract class JmxRequest {
         return targetConfig;
     }
 
-
     /**
      * HTTP method used for creating this request
      *
@@ -156,6 +156,7 @@ public abstract class JmxRequest {
     public HttpMethod getHttpMethod() {
         return method;
     }
+
 
     /**
      * Get tha value fault handler, which can be passwed around.
@@ -230,6 +231,13 @@ public abstract class JmxRequest {
             valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;
         } else {
             valueFaultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
+        }
+    }
+
+    private void verifyPath(List<String> pPathParts) {
+        if (pPathParts != null && !pPathParts.isEmpty() && pPathParts.get(pPathParts.size() - 1) == null) {
+            String path = EscapeUtil.combineToPath(pPathParts);
+            throw new IllegalArgumentException("Path '" + path + "' must not end with a wildcard");
         }
     }
 
