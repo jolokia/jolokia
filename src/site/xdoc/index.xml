@@ -153,7 +153,7 @@
           </li>
           <li>
             The net effect is, that literal path parts are "squeezed"
-            (i.e. removed) in the resulting anser, whereas wildcard
+            (i.e. removed) in the resulting answer, whereas wildcard
             parts stay as extra levels. 
           </li>
         </ul>
@@ -165,14 +165,14 @@
           path-wildcard using occurs.
         </p>
         <p>
-          Finally, I would also like to mention a new github project
+          Finally, I would also like to mention a new GitHub project
           <a
           href="https://github.com/rhuss/jolokia-extra">jolokia-extra</a>
           which holds additional goodies. One design goal of Jolokia
           is to keep it focused. That's not so easy as there are tons
           of ideas out there, all backed by a particular use case. And
           they all want to get into the game. Beside that someone has
-          to implement that (hint: still looking for contribs ;-), I
+          to implement that (hint: still looking for contributions ;-), I
           opened a new playground for all that stuff which might not
           be of general interest but are still pearls. That's what
           <code>jolokia-extra</code> is for.
@@ -182,21 +182,21 @@
           href="https://github.com/rhuss/jolokia/pull/50">pull
           request</a> from <a href="https://github.com/mplonka">Marcin
           Płonka</a> (Thanks a lot and sorry for the long, long delay,
-          BTW). It's all about simplifing access to JSR-77 enabled
+          BTW). It's all about simplifying access to JSR-77 enabled
           JEE-Servers. You should know that <a
           href="https://jcp.org/en/jsr/detail?id=77">JSR 77: J2EE
           Management</a> was a cool attempt to standardize naming and
           JMX exposed metrics for JEE. Unfortunately it was abandoned,
           but still lives in quite a bunch of JEE servers. Not at its
           full beauty, but still valuable enough to be
-          supported. Astongishly, WebSphere, even the latest 8.5
+          supported. Astonishingly, WebSphere, even the latest 8.5
           versions, has the best support for it. Using JSR-77 conform
           MBeans with plain Jolokia returns unnecessarily complex JSON
           structures which are hard to parse and
           understand. <code>jolokia-extra</code> adds a set of
-          simplifiers for make the usage with JSR-77 simpler (but add
+          simplifier for make the usage with JSR-77 simpler (but add
           an extra of 50k to the agent). I recommend to have a look at it,
-          especially if you are running with WebSphere.
+          especially if you are working with WebSphere.
         </p>
         <p>
           In the future, it might be the case, that some lesser used
