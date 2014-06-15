@@ -58,6 +58,24 @@ public class ClassUtilTest {
         }
     }
 
+    @Test
+    public void resourceAsStream() {
+        checkResources();
+        Thread current = Thread.currentThread();
+        ClassLoader origLoader = current.getContextClassLoader();
+        current.setContextClassLoader(null);
+        try {
+            checkResources();
+        } finally {
+            current.setContextClassLoader(origLoader);
+        }
+    }
+
+    private void checkResources() {
+        assertNotNull(ClassUtil.getResourceAsStream("access-sample1.xml"));
+        assertNull(ClassUtil.getResourceAsStream("plumperquatsch"));
+    }
+
     public static class MyCl extends ClassLoader {
         protected MyCl(ClassLoader cl) {
             super(cl);

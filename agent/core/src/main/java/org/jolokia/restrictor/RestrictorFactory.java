@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import org.jolokia.util.ClassUtil;
+
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -43,7 +45,7 @@ public final class RestrictorFactory {
         InputStream is = null;
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
-            is =  Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+            is = ClassUtil.getResourceAsStream(path);
             if (is == null) {
                 is = RestrictorFactory.class.getResourceAsStream(path);
             }

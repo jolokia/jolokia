@@ -16,6 +16,7 @@ package org.jolokia.util;
  * limitations under the License.
  */
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,6 +55,27 @@ public final class ClassUtil {
                 } catch (ClassNotFoundException e) {}
                 tried.add(loader);
                 loader = loader.getParent();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the given path as an input stream or return <code>null</code> if not found
+     *
+     * @param pPath path to lookup
+     * @return input stream or null if not found.
+     */
+    public static InputStream getResourceAsStream(String pPath) {
+        for (ClassLoader loader : new ClassLoader[] {
+                Thread.currentThread().getContextClassLoader(),
+                ClassUtil.class.getClassLoader()
+        } ) {
+            if (loader != null) {
+                InputStream is = loader.getResourceAsStream(pPath);
+                if (is != null) {
+                    return is;
+                }
             }
         }
         return null;
@@ -102,7 +124,6 @@ public final class ClassUtil {
                 throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
             }
     }
-
 
 
 }
