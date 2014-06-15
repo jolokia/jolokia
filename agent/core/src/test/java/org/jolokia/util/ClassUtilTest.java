@@ -46,6 +46,17 @@ public class ClassUtilTest {
         Thread.currentThread().setContextClassLoader(oldCl);
     }
 
+    @Test
+    public void classForNameWithoutContextClassLoader() {
+        Thread current = Thread.currentThread();
+        ClassLoader origLoader = current.getContextClassLoader();
+        current.setContextClassLoader(null);
+        try {
+            classForName();
+        } finally {
+            current.setContextClassLoader(origLoader);
+        }
+    }
 
     public static class MyCl extends ClassLoader {
         protected MyCl(ClassLoader cl) {

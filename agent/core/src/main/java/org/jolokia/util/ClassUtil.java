@@ -46,7 +46,7 @@ public final class ClassUtil {
         } ) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
             // hide the server classes loaded by the parent class loader.
-            do {
+            while (loader != null) {
                 try {
                     if (!tried.contains(loader)) {
                         return Class.forName(pClassName,pInitialize, loader);
@@ -54,7 +54,7 @@ public final class ClassUtil {
                 } catch (ClassNotFoundException e) {}
                 tried.add(loader);
                 loader = loader.getParent();
-            } while (loader != null);
+            }
         }
         return null;
     }
