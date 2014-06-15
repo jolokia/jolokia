@@ -32,6 +32,14 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <groupId>org.jolokia</groupId>
+  <artifactId>jolokia-site-skin</artifactId>
+  <version>1.2.2</version>
+  <packaging>jar</packaging>
+
+  <name>jolokia-site-skin</name>
+  <description>jolokia site skin</description>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

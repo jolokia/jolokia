@@ -45,7 +45,7 @@ Agents
 
   * Glassfish 2.1.1, 3.0.1, 3.1.2, 4.0.0
 
-  * IBM Websphere 6.1.0.33, 7.0.0.11, 8.0.0.1
+  * IBM Websphere 6.1.0.33, 7.0.0.11, 8.0.0.1, 8.5
 
   * Apache Tomcat 5.5.35, 6.0.37, 7.0.52, 8.0.3
 
@@ -94,6 +94,9 @@ Agents
 
   []
 
+  Read more about the
+  {{{./agent/osgi.html}OSGi agent}} and its installation.
+
 * JVM Agent
 
   Since Java 5 it is possible to start so called <JVM agents> in
@@ -121,8 +124,8 @@ Agents
 
   [] 
 
-  Please note that the embedded HTTP-Server is not the fastest one,
-  but for simple monitoring use cases it should be performant enough.
+  Read more about the
+  {{{./agent/jvm.html}JVM agent}} and its installation.
 
 * Mule Agent
 

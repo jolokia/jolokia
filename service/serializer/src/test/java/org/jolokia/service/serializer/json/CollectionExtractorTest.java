@@ -36,27 +36,54 @@ public class CollectionExtractorTest {
     CollectionExtractor extractor;
     private ObjectToJsonConverter converter;
 
-    @BeforeClass
+    @BeforeMethod
     public void setup() {
         extractor = new CollectionExtractor();
         converter = new ObjectToJsonConverter(new StringToObjectConverter());
         converter.setupContext();
     }
 
+    @AfterMethod
+    public void tearDown() throws Exception {
+        converter.clearContext();
+    }
+
     @Test
     public void json() throws AttributeNotFoundException {
         assertFalse(extractor.canSetValue());
         Set set = new HashSet(Arrays.asList("jolokia","habanero"));
+        List ret = (List) extractor.extractObject(converter,set,new Stack<String>(),true);
+        assertEquals(ret.size(),2);
+        assertTrue(ret.contains("jolokia"));
+        assertTrue(ret.contains("habanero"));
+        assertTrue(ret instanceof JSONArray);
+    }
+
+    @Test
+    public void jsonAndPath() throws AttributeNotFoundException {
+        Collection collection = Arrays.asList("jolokia","habanero");
+
         Stack paths = new Stack();
         paths.add("1");
-        for (List ret : new List[] {
-                (List) extractor.extractObject(converter,set,null,true),
-                (List) extractor.extractObject(converter,set,paths,true),
-        }) {
-            assertEquals(ret.size(),2);
-            assertTrue(ret.contains("jolokia"));
-            assertTrue(ret.contains("habanero"));
-            assertTrue(ret instanceof JSONArray);
+
+        String val = (String) extractor.extractObject(converter,collection,paths,true);
+        assertEquals(val, "habanero");
+    }
+
+    @Test
+    public void jsonAndInvalidPaths() throws AttributeNotFoundException {
+        Collection collection = Arrays.asList("jolokia","habanero");
+
+
+        for (String path : new String[] { "bla", "2"}) {
+            Stack<String> paths = new Stack();
+            paths.add(path);
+            try {
+                extractor.extractObject(converter, collection, paths, true);
+                fail();
+            } catch (AttributeNotFoundException exp) {
+
+            }
         }
     }
 
@@ -64,7 +91,7 @@ public class CollectionExtractorTest {
     @Test
     public void noJson() throws AttributeNotFoundException {
         Set set = new HashSet(Arrays.asList("jolokia","habanero"));
-        Set ret = (Set) extractor.extractObject(converter,set,null,false);
+        Set ret = (Set) extractor.extractObject(converter,set,new Stack<String>(),false);
         assertEquals(ret,set);
     }
 

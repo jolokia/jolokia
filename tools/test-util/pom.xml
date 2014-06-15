@@ -38,7 +38,6 @@
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <scope>compile</scope>
-      <version>3.2</version>
     </dependency>
 
     <dependency>

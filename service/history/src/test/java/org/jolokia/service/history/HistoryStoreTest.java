@@ -204,7 +204,7 @@ public class HistoryStoreTest {
         store.configure(new HistoryKey("java.lang:type=Memory","HeapMemoryUsage",null,null), new HistoryLimit(10, 0L));
         store.configure(new HistoryKey("java.lang:*", "HeapMemoryUsage", null, null), null);
 
-                JolokiaReadRequest req =
+        JolokiaReadRequest req =
                 new JolokiaRequestBuilder(READ,"java.lang:type=Memory")
                         .attribute("HeapMemoryUsage")
                         .build();
@@ -238,7 +238,6 @@ public class HistoryStoreTest {
     public void patternAttributeRead() throws Exception {
         JolokiaReadRequest req =
                 new JolokiaRequestBuilder(READ,"test:type=*")
-                        .attributes("attr1","attr2")
                         .build();
         store.configure(new HistoryKey("test:type=read","attr1",null,null), new HistoryLimit(3, 0L));
         store.configure(new HistoryKey("test:type=write","attr2",null,null), new HistoryLimit(5, 0L));
@@ -261,7 +260,6 @@ public class HistoryStoreTest {
     private JSONArray updateNTimesAsListWithSleep(JolokiaReadRequest pReq, int pNr, long pSleep,Object ... pValue) {
         return (JSONArray) updateNTimes(pReq,pNr,pSleep,pValue);    
     }
-
 
     private JSONArray updateNTimesAsList(JolokiaRequest pReq, int pNr,Object ... pValue) {
         return (JSONArray) updateNTimes(pReq, pNr,0L,pValue);

@@ -49,8 +49,9 @@ public class DateExtractor implements Extractor {
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
             if (!"time".equals(pathPart)) {
-                throw new IllegalArgumentException("A date accepts only a single inner path element " +
-                                                   "of value 'time' (and not '" + pathPart + "'");
+                return pConverter.getValueFaultHandler().handleException(
+                        new AttributeNotFoundException("A date accepts only a single inner path element " +
+                                                       "of value 'time' (and not '" + pathPart + "')"));
             }
             return date.getTime();
         } else {

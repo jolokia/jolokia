@@ -112,6 +112,7 @@ public abstract class JolokiaRequest {
     private JolokiaRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive) {
         method = pMethod;
         type = pType;
+        verifyPath(pPathParts);
         pathParts = pPathParts;
         exclusive = pExclusive;
 
@@ -175,7 +176,6 @@ public abstract class JolokiaRequest {
         return options != null ? (T) options.get(pKey) : null;
     }
 
-
     /**
      * Whether this request is an exclusive request or not. See {@link #JolokiaRequest(RequestType, List, ProcessingParameters, boolean)}
      * for details
@@ -194,6 +194,7 @@ public abstract class JolokiaRequest {
     public HttpMethod getHttpMethod() {
         return method;
     }
+
 
     /**
      * Get tha value fault handler, which can be passed around.
@@ -283,6 +284,13 @@ public abstract class JolokiaRequest {
             valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;
         } else {
             valueFaultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
+        }
+    }
+
+    private void verifyPath(List<String> pPathParts) {
+        if (pPathParts != null && !pPathParts.isEmpty() && pPathParts.get(pPathParts.size() - 1) == null) {
+            String path = EscapeUtil.combineToPath(pPathParts);
+            throw new IllegalArgumentException("Path '" + path + "' must not end with a wildcard");
         }
     }
 

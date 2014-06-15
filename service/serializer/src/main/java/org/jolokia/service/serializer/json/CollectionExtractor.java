@@ -21,6 +21,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.json.simple.JSONArray;
 
@@ -53,17 +54,50 @@ public class CollectionExtractor implements Extractor {
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         Collection collection = (Collection) pValue;
+        String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         int length = pConverter.getCollectionLength(collection.size());
-        List ret;
-        Iterator it = collection.iterator();
-        if (!jsonify) {
-            return collection;
+        if (pathPart != null) {
+            return extractWithPath(pConverter, collection, pPathParts, jsonify, pathPart, length);
+        } else {
+            return jsonify ? extractListAsJson(pConverter, collection, pPathParts, length) : collection;
         }
+    }
 
-        ret = new JSONArray();
-        for (int i = 0;i < length; i++) {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Collection pCollection, Stack<String> pPathParts, boolean pJsonify, String pPathPart,int pLength) throws AttributeNotFoundException {
+        try {
+            int idx = Integer.parseInt(pPathPart);
+            return pConverter.extractObject(getElement(pCollection,idx,pLength), pPathParts, pJsonify);
+        } catch (NumberFormatException exp) {
+            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+            return faultHandler.handleException(
+                    new AttributeNotFoundException("Index '" + pPathPart +  "' is not numeric for accessing list"));
+        } catch (IndexOutOfBoundsException exp) {
+            ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
+            return faultHandler.handleException(
+                    new AttributeNotFoundException("Index '" + pPathPart +  "' is out-of-bound for a list of size " + pLength));
+        }
+    }
+
+    private Object getElement(Collection pCollection, int pIdx, int pLength) {
+        int i = 0;
+        Iterator it = pCollection.iterator();
+        while (it.hasNext() && i < pLength) {
             Object val = it.next();
-            ret.add(pConverter.extractObject(val, null, jsonify));
+            if (i == pIdx) {
+                return val;
+            }
+            i++;
+        }
+        throw new IndexOutOfBoundsException("Collection index " + pIdx + " larger than size " + pLength);
+    }
+
+    private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection pCollection, Stack<String> pPathParts, int pLength) throws AttributeNotFoundException {
+        List ret = new JSONArray();
+        Iterator it = pCollection.iterator();
+        for (int i = 0;i < pLength; i++) {
+            Object val = it.next();
+            Stack<String> path = (Stack<String>) pPathParts.clone();
+            ret.add(pConverter.extractObject(val, path, true));
         }
         return ret;
     }

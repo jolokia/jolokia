@@ -408,9 +408,15 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>3.0</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jmockit</groupId>
+      <artifactId>jmockit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <!-- Overall version management -->
@@ -454,7 +460,7 @@
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
-        <version>6.1.1</version>
+        <version>6.8.8</version>
         <scope>test</scope>
       </dependency>
 
@@ -492,7 +498,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <currentStableVersion>1.2.0</currentStableVersion>
-    <currentSnapshotVersion>1.2.1-SNAPSHOT</currentSnapshotVersion>
+    <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
 

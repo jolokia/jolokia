@@ -24,7 +24,6 @@
   <packaging>bundle</packaging>
 
   <description>Jolokia :: Service :: JMX Request Handler</description>
-
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>

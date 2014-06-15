@@ -8,6 +8,7 @@ import javax.management.AttributeNotFoundException;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
 
@@ -27,6 +28,11 @@ public class EnumExtractorTest {
         converter.setupContext();
     }
 
+    @AfterMethod
+    public void tearDown() throws Exception {
+        converter.clearContext();
+    }
+
     @Test
     public void basics() {
         assertEquals(enumExtractor.getType(), Enum.class);
@@ -36,8 +42,16 @@ public class EnumExtractorTest {
     @Test
     public void jsonExtract() throws AttributeNotFoundException {
         Stack stack = new Stack();
-        String result = (String) enumExtractor.extractObject(converter, TestEnum.EINS,stack,true);
-        assertEquals(result,"EINS");
+        assertEquals(enumExtractor.extractObject(converter, TestEnum.EINS,stack,true),"EINS");
+        stack.add("EINS");
+        assertEquals(enumExtractor.extractObject(converter, TestEnum.EINS,stack,true),"EINS");
+    }
+
+    @Test(expectedExceptions = AttributeNotFoundException.class)
+    public void jsonExtractWithWrongPath() throws AttributeNotFoundException {
+        Stack stack = new Stack();
+        stack.add("ZWEI");
+        enumExtractor.extractObject(converter,TestEnum.EINS,stack,true);
     }
 
     @Test

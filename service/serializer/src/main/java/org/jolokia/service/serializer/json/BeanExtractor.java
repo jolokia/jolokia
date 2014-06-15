@@ -87,7 +87,7 @@ public class BeanExtractor implements Extractor {
         } else {
             if (jsonify) {
                 // We need the jsonfied value from here on.
-                return exctractJsonifiedValue(pValue, pPathParts, pConverter, faultHandler);
+                return exctractJsonifiedValue(pConverter, pValue, pPathParts);
             } else {
                 // No jsonification requested, hence we are returning the object itself
                 return pValue;
@@ -144,8 +144,7 @@ public class BeanExtractor implements Extractor {
 
     // =====================================================================================================
 
-    private Object exctractJsonifiedValue(Object pValue, Stack<String> pPathParts,
-                                          ObjectToJsonConverter pConverter, ValueFaultHandler pFaultHandler)
+    private Object exctractJsonifiedValue(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts)
             throws AttributeNotFoundException {
         if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
             // No further diving, use these directly

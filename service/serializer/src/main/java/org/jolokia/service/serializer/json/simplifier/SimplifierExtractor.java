@@ -66,44 +66,48 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
-        String element = pPathParts.isEmpty() ? null : pPathParts.pop();
+        String path = pPathParts.isEmpty() ? null : pPathParts.pop();
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
-        if (element != null) {
-            AttributeExtractor<T> extractor = extractorMap.get(element);
-            if (extractor == null) {
-                return faultHandler.handleException(new AttributeNotFoundException("Illegal path element " + element + " for object " + pValue));
-            }
-
-            try {
-                Object attributeValue = extractor.extract((T) pValue);
-                return pConverter.extractObject(attributeValue, pPathParts, jsonify);
-            } catch (AttributeExtractor.SkipAttributeException e) {
-                return faultHandler.handleException(new AttributeNotFoundException("Illegal path element " + element + " for object " + pValue));
-            }
+        if (path != null) {
+            return extractWithPath(pConverter, pValue, pPathParts, jsonify, path, faultHandler);
         } else {
-            if (jsonify) {
-                JSONObject ret = new JSONObject();
-                for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
-                    Stack<String> paths = (Stack<String>) pPathParts.clone();
-                    try {
-                        Object value = entry.getValue().extract((T) pValue);
-                        ret.put(entry.getKey(),pConverter.extractObject(value, paths, jsonify));
-                    } catch (AttributeExtractor.SkipAttributeException e) {
-                        // Skip this one ...
-                        continue;
-                    } catch (ValueFaultHandler.AttributeFilteredException e) {
-                        // ... and this, too
-                        continue;
-                    }
-                }
-                if (ret.isEmpty()) {
-                    // Everything filtered, bubble up ...
-                    throw new ValueFaultHandler.AttributeFilteredException();
-                }
-                return ret;
-            } else {
-                return pValue;
+            return jsonify ? extractAll(pConverter, (T) pValue, pPathParts, jsonify) : pValue;
+        }
+    }
+
+    private Object extractAll(ObjectToJsonConverter pConverter, T pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
+        JSONObject ret = new JSONObject();
+        for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
+            Stack<String> paths = (Stack<String>) pPathParts.clone();
+            try {
+                Object value = entry.getValue().extract(pValue);
+                ret.put(entry.getKey(),pConverter.extractObject(value, paths, jsonify));
+            } catch (AttributeExtractor.SkipAttributeException e) {
+                // Skip this one ...
+                continue;
+            } catch (ValueFaultHandler.AttributeFilteredException e) {
+                // ... and this, too
+                continue;
             }
+        }
+        if (ret.isEmpty()) {
+            // Everything filtered, bubble up ...
+            throw new ValueFaultHandler.AttributeFilteredException();
+        }
+        return ret;
+    }
+
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify, String pPath, ValueFaultHandler pFaultHandler) throws AttributeNotFoundException {
+        AttributeExtractor<T> extractor = extractorMap.get(pPath);
+        if (extractor == null) {
+            return pFaultHandler.handleException(new AttributeNotFoundException("Illegal path element " + pPath + " for object " + pValue));
+        }
+
+        try {
+            Object attributeValue = extractor.extract((T) pValue);
+            return pConverter.extractObject(attributeValue, pPathParts, jsonify);
+        } catch (AttributeExtractor.SkipAttributeException e) {
+            return pFaultHandler.handleException(new AttributeNotFoundException("Illegal path element " + pPath + " for object " + pValue));
         }
     }
 

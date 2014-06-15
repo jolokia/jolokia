@@ -1347,7 +1347,7 @@
           7.0.50
         </td>
       </tr>
-           </table>
+      </table>
 
     </section>
 
@@ -1373,6 +1373,7 @@
             </para>
           </listitem>
         </varlistentry>
+        <varlistentry>
           <term><emphasis role="bold">7.1</emphasis> (since 1.2.0)</term>
           <listitem>
             <para>
