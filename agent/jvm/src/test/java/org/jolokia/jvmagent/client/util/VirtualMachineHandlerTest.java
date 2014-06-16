@@ -74,10 +74,16 @@ public class VirtualMachineHandlerTest {
     public void findProcess() throws Exception, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> procs = filterOwnProcess(vmHandler.listProcesses());
         for (ProcessDescription desc : procs) {
-            if (desc.getDisplay() != null && desc.getDisplay().length() > 0) {
-                Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(desc.getDisplay()) + "$");
-                assertTrue(tryAttach(singleHitPattern.pattern()));
-                break;
+            try {
+                if (desc.getDisplay() != null && desc.getDisplay().length() > 0) {
+                    Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(desc.getDisplay()) + "$");
+                    assertTrue(tryAttach(singleHitPattern.pattern()));
+                    break;
+                }
+            } catch (Exception exp) {
+                // We ignore error which happen spuriously
+                System.out.println("Cannot attach to " + desc.getDisplay() + " (" + desc.getId() + "): " + exp);
+                exp.printStackTrace();
             }
         }
 
