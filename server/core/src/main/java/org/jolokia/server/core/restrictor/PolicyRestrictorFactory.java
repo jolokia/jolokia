@@ -8,6 +8,7 @@ import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.util.ClassUtil;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -76,7 +77,7 @@ public final class PolicyRestrictorFactory {
         InputStream is;
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
-            is =  Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+            is = ClassUtil.getResourceAsStream(path);
             if (is == null) {
                 is = PolicyRestrictorFactory.class.getResourceAsStream(path);
             }

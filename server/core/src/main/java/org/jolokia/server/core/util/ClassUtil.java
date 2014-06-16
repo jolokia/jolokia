@@ -16,6 +16,7 @@ package org.jolokia.server.core.util;
  * limitations under the License.
  */
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,7 +47,7 @@ public final class ClassUtil {
         } ) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
             // hide the server classes loaded by the parent class loader.
-            do {
+            while (loader != null) {
                 try {
                     if (!tried.contains(loader)) {
                         return Class.forName(pClassName,pInitialize, loader);
@@ -54,7 +55,28 @@ public final class ClassUtil {
                 } catch (ClassNotFoundException e) {}
                 tried.add(loader);
                 loader = loader.getParent();
-            } while (loader != null);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the given path as an input stream or return <code>null</code> if not found
+     *
+     * @param pPath path to lookup
+     * @return input stream or null if not found.
+     */
+    public static InputStream getResourceAsStream(String pPath) {
+        for (ClassLoader loader : new ClassLoader[] {
+                Thread.currentThread().getContextClassLoader(),
+                ClassUtil.class.getClassLoader()
+        } ) {
+            if (loader != null) {
+                InputStream is = loader.getResourceAsStream(pPath);
+                if (is != null) {
+                    return is;
+                }
+            }
         }
         return null;
     }
@@ -102,7 +124,6 @@ public final class ClassUtil {
                 throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
             }
     }
-
 
 
 }

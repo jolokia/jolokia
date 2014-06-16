@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-agent-osgi</artifactId>
@@ -193,5 +194,85 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <profiles>
+    <profile>
+      <!-- Distribution profile adaption for get also the embedded classes into the sources jar-->
+      <id>dist</id>
+      <build>
+        <plugins>
+          <!-- Unpack dependencies in target/sources -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>src-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-core</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-jsr160</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>com.googlecode.json-simple</groupId>
+                      <artifactId>json-simple</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${project.build.directory}/sources</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.9</version>
+            <executions>
+              <execution>
+                <id>add-source</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>${project.build.directory}/sources</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Has to be mentioned again for the proper calling order of the plugins -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
