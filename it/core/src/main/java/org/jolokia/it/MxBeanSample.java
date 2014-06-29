@@ -28,11 +28,12 @@ public class MxBeanSample implements MxBeanSampleMXBean {
     private ComplexTestData complex;
     private Map<String, Long> map;
     private Map<ComplexMapKey,String> mapWithComplexKey;
-
+    private PojoBean bean;
     public MxBeanSample() {
         map = new HashMap<String, Long>();
         map.put("magic",42L);
         complex = new ComplexTestData();
+        bean = new PojoBean("fcn","42");
     }
 
     public int[] getNumbers() {
@@ -76,5 +77,21 @@ public class MxBeanSample implements MxBeanSampleMXBean {
 
     public int exec(ComplexTestData arg) {
         return 1;
+    }
+
+    public String echo(String message) {
+        return message;
+    }
+
+    public PojoBean getPojoBean() {
+        return bean;
+    }
+
+    public void setPojoBean(PojoBean pBean) {
+        bean = pBean;
+    }
+
+    public PojoBean echoBean(PojoBean pBean) {
+        return pBean;
     }
 }
