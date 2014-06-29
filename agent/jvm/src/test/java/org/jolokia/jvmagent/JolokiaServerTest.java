@@ -57,6 +57,7 @@ public class JolokiaServerTest {
         Map config = new HashMap();
         config.put("user","roland");
         config.put("password","s!cr!t");
+        config.put("port","0");
         roundtrip(config,true);
     }
 
