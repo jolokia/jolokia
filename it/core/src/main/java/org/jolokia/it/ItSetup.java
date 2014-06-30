@@ -164,6 +164,10 @@ public class ItSetup {
         return JOLOKIA_IT_DOMAIN + ":type=operation";
     }
 
+    public String getMxBean() {
+        return JOLOKIA_IT_DOMAIN + ":type=mxbean";
+    }
+
     @SuppressWarnings("PMD.SystemPrintln")
     private void unregisterMBeans(List<ObjectName> pMBeanNames,MBeanServer pServer) {
         for (ObjectName name : pMBeanNames) {
