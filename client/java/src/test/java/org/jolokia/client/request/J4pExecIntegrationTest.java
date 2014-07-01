@@ -24,6 +24,7 @@ import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -47,6 +48,17 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
             resp = j4pClient.execute(request);
             assertEquals(1L,resp.getValue());
         }
+    }
+
+    @Test
+    public void beanSerialization() throws MalformedObjectNameException, J4pException {
+        J4pExecRequest request = new J4pExecRequest(itSetup.getMxBean(),
+                                                    "echoBean",
+                                                    "{\"name\": \"hello\", \"value\": \"world\"}");
+        J4pExecResponse resp = j4pClient.execute(request);
+        JSONObject bean = resp.getValue();
+        Assert.assertEquals(bean.get("name"),"hello");
+        Assert.assertEquals(bean.get("value"),"world");
     }
 
     @Test

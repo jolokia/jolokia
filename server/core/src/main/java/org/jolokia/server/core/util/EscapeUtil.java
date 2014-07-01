@@ -153,8 +153,9 @@ public final class EscapeUtil {
 
             final Matcher m = pattern[0].matcher(pArg);
             while (m.find() && m.start(1) != pArg.length()) {
-                // Finally unescape all escaped parts
-                ret.add(pattern[1].matcher(m.group(1)).replaceAll("$1"));
+                // Finally unescape all escaped parts. Trailing escapes are captured before the delimiter applies
+                String trailingEscapes = m.group(2);
+                ret.add(pattern[1].matcher(m.group(1) + (trailingEscapes != null ? trailingEscapes : "")).replaceAll("$1"));
             }
             return ret;
         } else {
@@ -184,8 +185,16 @@ public final class EscapeUtil {
     // Create a split pattern for a given delimiter
     private static Pattern[] createSplitPatterns(String pEscape, String pDel) {
         return new Pattern[] {
-                // Escape
-                Pattern.compile("((?:[^" + pEscape + pDel + "]|" + pEscape + ".)*)(?:" + pDel + "|$)"),
+                // Escape ($1: Everything before the delimiter, $2: Trailing escaped values (optional)
+                Pattern.compile("(.*?)" + // Any chars
+                                "(?:" +
+                                   // The delimiter not preceded by an escape (but pairs of escape & value can be in
+                                   // are allowed before nevertheless). I negative-look-before (?<!) is used for this
+                                   // purpose
+                                   "(?<!" + pEscape  + ")((?:" + pEscape + ".)*)" + pDel + "|" +
+                                   "$" +    // or end-of-line
+                                 ")"),
+
                 // Unescape, group must match unescaped value
                 Pattern.compile(pEscape + "(.)")
         };

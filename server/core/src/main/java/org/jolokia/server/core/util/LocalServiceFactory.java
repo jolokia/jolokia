@@ -41,7 +41,7 @@ import java.util.*;
  * argument. If a constructor with an integer value exists than it is fed with
  * the determined order. This feature is typically used in combination with
  * {@link Comparable} to obtain a {@link SortedSet} which can merged with other sets
- * and keeping the order intact. To get the services as set, use {@link #createServicesAsSet(String...)}
+ * and keeping the order intact.
  *
  * @author roland
  * @since 05.11.10
@@ -104,9 +104,8 @@ public final class LocalServiceFactory {
     private static <T> void readServiceDefinitions(ClassLoader pClassLoader,
                                                    Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            Enumeration<URL> resUrls = pClassLoader.getResources(pDefPath);
-            while (resUrls.hasMoreElements()) {
-                readServiceDefinitionFromUrl(pClassLoader,pExtractorMap, resUrls.nextElement());
+            for (URL url : ClassUtil.getResources(pDefPath)) {
+                readServiceDefinitionFromUrl(pClassLoader,pExtractorMap, url);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e,e);
@@ -158,7 +157,10 @@ public final class LocalServiceFactory {
                 // argument is given, this constructor is used and feed with
                 // the order. This is typically used in combination with implementing
                 // and {@link Comparable} interface to get a sorted set
-                Class<T> clazz = (Class<T>) pClassLoader.loadClass(entry.getClassName());
+                Class<T> clazz = ClassUtil.classForName(entry.getClassName(),pClassLoader);
+                if (clazz == null) {
+                    throw new ClassNotFoundException("Class " + entry.getClassName() + " could not be found");
+                }
                 T ext;
                 try {
                     Constructor ctr = clazz.getConstructor(int.class);

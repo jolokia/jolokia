@@ -40,4 +40,9 @@ public interface MxBeanSampleMXBean {
 
     int exec(long arg);
     int exec(ComplexTestData arg);
+
+    String echo(String message);
+    PojoBean getPojoBean();
+    void setPojoBean(PojoBean bean);
+    PojoBean echoBean(PojoBean bean);
 }

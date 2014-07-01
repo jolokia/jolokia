@@ -99,14 +99,19 @@ public final class ToolsClassFinder {
     private static ClassLoader createClassLoader(File toolsJar) throws MalformedURLException {
         final URL urls[] = new URL[] {toolsJar.toURI().toURL() };
         if (System.getSecurityManager() == null) {
-            return new URLClassLoader(urls,ToolsClassFinder.class.getClassLoader());
+            return new URLClassLoader(urls, getParentClassLoader());
         } else {
             return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
                 /** {@inheritDoc} */
                 public ClassLoader run() {
-                    return new URLClassLoader(urls,ToolsClassFinder.class.getClassLoader());
+                    return new URLClassLoader(urls, getParentClassLoader());
                 }
             });
         }
+    }
+
+    private static ClassLoader getParentClassLoader() {
+        ClassLoader loader = ToolsClassFinder.class.getClassLoader();
+        return loader == null ? ClassLoader.getSystemClassLoader() : loader;
     }
 }
