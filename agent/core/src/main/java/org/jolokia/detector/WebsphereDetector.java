@@ -78,14 +78,13 @@ public class WebsphereDetector extends AbstractServerDetector {
             /*
 			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
 			 */
-            Class adminServiceClass = getClass().getClassLoader().loadClass("com.ibm.websphere.management.AdminServiceFactory");
-            Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
-            Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
-            Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
-            servers.add((MBeanServer) getMBeanServerMethod.invoke(mbeanFactory));
-        }
-        catch (ClassNotFoundException ex) {
-            // Expected if not running under WAS
+            Class adminServiceClass = ClassUtil.classForName("com.ibm.websphere.management.AdminServiceFactory",getClass().getClassLoader());
+            if (adminServiceClass != null) {
+                Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
+                Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
+                Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
+                servers.add((MBeanServer) getMBeanServerMethod.invoke(mbeanFactory));
+            }
         }
         catch (InvocationTargetException ex) {
             // CNFE should be earlier

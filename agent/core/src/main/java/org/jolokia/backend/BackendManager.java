@@ -378,7 +378,10 @@ public class BackendManager implements AgentDetailsHolder {
                                                Converters pConverters,
                                                ServerHandle pServerHandle, Restrictor pRestrictor) {
         try {
-            Class clazz = this.getClass().getClassLoader().loadClass(pDispatcherClass);
+            Class clazz = ClassUtil.classForName(pDispatcherClass, getClass().getClassLoader());
+            if (clazz == null) {
+                throw new IllegalArgumentException("Couldn't lookup dispatcher " + pDispatcherClass);
+            }
             Constructor constructor = clazz.getConstructor(Converters.class,
                                                            ServerHandle.class,
                                                            Restrictor.class);
@@ -386,8 +389,6 @@ public class BackendManager implements AgentDetailsHolder {
                     constructor.newInstance(pConverters,
                                             pServerHandle,
                                             pRestrictor);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Couldn't load class " + pDispatcherClass + ": " + e,e);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " + pDispatcherClass + " has invalid constructor: " + e,e);
         } catch (IllegalAccessException e) {

@@ -76,9 +76,8 @@ public final class ServiceObjectFactory {
 
     private static <T> void readServiceDefinitions(Map<ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            Enumeration<URL> resUrls = ServiceObjectFactory.class.getClassLoader().getResources(pDefPath);
-            while (resUrls.hasMoreElements()) {
-                readServiceDefinitionFromUrl(pExtractorMap, resUrls.nextElement());
+            for (URL url : ClassUtil.getResources(pDefPath)) {
+                readServiceDefinitionFromUrl(pExtractorMap, url);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e,e);
@@ -133,9 +132,12 @@ public final class ServiceObjectFactory {
                     pExtractorMap.remove(key);
                 }
             } else {
-                Class<T> clazz = (Class<T>) ServiceObjectFactory.class.getClassLoader().loadClass(entry.getClassName());
+                Class<T> clazz = ClassUtil.classForName(entry.getClassName(),ServiceObjectFactory.class.getClassLoader());
+                if (clazz == null) {
+                    throw new ClassNotFoundException("Class " + entry.getClassName() + " could not be found");
+                }
                 T ext = (T) clazz.newInstance();
-                pExtractorMap.put(entry,ext);
+                pExtractorMap.put(entry, ext);
             }
         }
     }

@@ -16,6 +16,10 @@ package org.jolokia.util;
  * limitations under the License.
  */
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Set;
+
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -69,6 +73,24 @@ public class ClassUtilTest {
         } finally {
             current.setContextClassLoader(origLoader);
         }
+    }
+
+    @Test
+    public void testGetResources() throws IOException {
+        Set<URL> urls = ClassUtil.getResources("META-INF/detectors");
+        assertNotNull(urls);
+        assertEquals(urls.size(),1);
+    }
+
+    @Test
+    public void testNewInstance() {
+        ClassUtilTest test = ClassUtil.newInstance(getClass().getCanonicalName());
+        assertEquals(test.getClass(),getClass());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Blub.*")
+    public void testNewInstanceNotFound() {
+        ClassUtil.newInstance(getClass().getCanonicalName() + "$Blub");
     }
 
     private void checkResources() {

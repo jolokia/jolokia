@@ -16,9 +16,10 @@ package org.jolokia.util;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Utility for class lookup.
@@ -31,20 +32,29 @@ public final class ClassUtil {
     private ClassUtil() {}
 
     /**
+     * Lookup a class. See {@link ClassUtil#classForName(String, boolean,ClassLoader[])} for details. The class
+     * gets initialized during lookup.
+     *
+     * @param pClassName name to lookup.
+     * @return the class found or null if no class could be found.
+     */
+    public static Class classForName(String pClassName, ClassLoader ... pClassLoaders) {
+        return classForName(pClassName,true,pClassLoaders);
+    }
+
+    /**
      * Load a certain class. Several class loader are tried: Fires the current thread's context
      * class loader, then its parents. If this doesn't work, the class loader which
      * loaded this class is used (and its parents)
      *
      * @param pClassName class name to load
      * @param pInitialize whether the class must be initialized
+     * @param pClassLoaders optional class loaders which are tried as well
      * @return the class class found or null if no class could be loaded
      */
-    public static Class classForName(String pClassName,boolean pInitialize) {
+    public static Class classForName(String pClassName,boolean pInitialize,ClassLoader ... pClassLoaders) {
         Set<ClassLoader> tried = new HashSet<ClassLoader>();
-        for (ClassLoader loader : new ClassLoader[] {
-                Thread.currentThread().getContextClassLoader(),
-                ClassUtil.class.getClassLoader()
-        } ) {
+        for (ClassLoader loader : findClassLoaders(pClassLoaders)) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
             // hide the server classes loaded by the parent class loader.
             while (loader != null) {
@@ -58,6 +68,22 @@ public final class ClassUtil {
             }
         }
         return null;
+    }
+
+    private static List<ClassLoader> findClassLoaders(ClassLoader... pClassLoaders) {
+        List<ClassLoader> classLoadersToTry = new ArrayList<ClassLoader>(Arrays.asList(pClassLoaders));
+        classLoadersToTry.add(Thread.currentThread().getContextClassLoader());
+        classLoadersToTry.add(ClassUtil.class.getClassLoader());
+
+        List<ClassLoader> ret = new ArrayList<ClassLoader>();
+        Set<ClassLoader> visited = new HashSet<ClassLoader>();
+        for (ClassLoader cll : classLoadersToTry) {
+            if (cll != null && !visited.contains(cll)) {
+                ret.add(cll);
+                visited.add(cll);
+            }
+        }
+        return ret;
     }
 
     /**
@@ -79,17 +105,6 @@ public final class ClassUtil {
             }
         }
         return null;
-    }
-
-    /**
-     * Lookup a class. See {@link ClassUtil#classForName(String, boolean)} for details. The class
-     * gets initialized during lookup.
-     *
-     * @param pClassName name to lookup.
-     * @return the class found or null if no class could be found.
-     */
-    public static Class classForName(String pClassName) {
-        return classForName(pClassName,true);
     }
 
     /**
@@ -118,12 +133,30 @@ public final class ClassUtil {
             } else {
                 throw new IllegalArgumentException("Cannot find " + pClass);
             }
-            } catch (InstantiationException e) {
-                throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
-            }
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+        }
     }
 
 
+    /**
+     * Get all resources from the classpath which are specified by the given path.
+     *
+     * @param pResource resource specification to use for lookup
+     * @return the list or URLs to loookup
+     */
+    public static Set<URL> getResources(String pResource) throws IOException {
+        List<ClassLoader> clls = findClassLoaders();
+        if (clls.size() != 0) {
+            Set<URL> ret = new HashSet<URL>();
+            for (ClassLoader cll : clls) {
+                ret.addAll(Collections.list(cll.getResources(pResource)));
+            }
+            return ret;
+        } else {
+            return new HashSet<URL>(Collections.list(ClassLoader.getSystemResources(pResource)));
+        }
+    }
 }
