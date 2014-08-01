@@ -147,16 +147,25 @@ public final class ClassUtil {
      * @param pResource resource specification to use for lookup
      * @return the list or URLs to loookup
      */
-    public static Set<URL> getResources(String pResource) throws IOException {
+    public static Set<String> getResources(String pResource) throws IOException {
         List<ClassLoader> clls = findClassLoaders();
         if (clls.size() != 0) {
-            Set<URL> ret = new HashSet<URL>();
+            Set<String> ret = new HashSet<String>();
             for (ClassLoader cll : clls) {
-                ret.addAll(Collections.list(cll.getResources(pResource)));
+                Enumeration<URL> urlEnum = cll.getResources(pResource);
+                ret.addAll(extractUrlAsStringsFromEnumeration(urlEnum));
             }
             return ret;
         } else {
-            return new HashSet<URL>(Collections.list(ClassLoader.getSystemResources(pResource)));
+            return extractUrlAsStringsFromEnumeration(ClassLoader.getSystemResources(pResource));
         }
+    }
+
+    private static Set<String> extractUrlAsStringsFromEnumeration(Enumeration<URL> urlEnum) {
+        Set<String> ret = new HashSet<String>();
+        while (urlEnum.hasMoreElements()) {
+            ret.add(urlEnum.nextElement().toExternalForm());
+        }
+        return ret;
     }
 }

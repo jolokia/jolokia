@@ -210,7 +210,7 @@
           requests. POST requests uses a fixed URL and put their payload
           within the HTTP request's body. This payload is represented
           in <ulink url="http://www.json.org">JSON</ulink>, a
-          data serialization format originating from JavaScript
+          data serialization format originating from the JavaScript
           world.
         </para>
         <para>

@@ -77,7 +77,7 @@ public class ClassUtilTest {
 
     @Test
     public void testGetResources() throws IOException {
-        Set<URL> urls = ClassUtil.getResources("META-INF/detectors");
+        Set<String> urls = ClassUtil.getResources("META-INF/detectors");
         assertNotNull(urls);
         assertEquals(urls.size(),1);
     }

@@ -94,7 +94,7 @@ public final class MulticastUtil {
     private static List<InetAddress> getMulticastAddresses() throws SocketException, UnknownHostException {
         List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
         if (addresses.size() == 0) {
-            throw new UnknownHostException("Cannot find address of local host which can be used for sending discover package");
+            throw new UnknownHostException("Cannot find address of local host which can be used for sending discovery request");
         }
         return addresses;
     }
