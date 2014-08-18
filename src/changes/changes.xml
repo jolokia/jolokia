@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="1.2.3-SNAPSHOT" description="Release 1.2.3">
+      <action dev="roland" types="add" date="2014-08-18" issue="156">
+        Allow system property and environment expansion of the value specified with "policyLocation".
+      </action>
       <action dev="roland" types="fix" date="2014-08-18" issue="155">
         Fixed MulticastSocketListenerThread to be a daemon thread so that it doesn't
         prevent the shutdown of the JVM

@@ -37,8 +37,7 @@ import org.jolokia.config.Configuration;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.LogHandler;
+import org.jolokia.util.*;
 import org.json.simple.JSONAware;
 
 /**
@@ -215,7 +214,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     // ========================================================================
 
     private Restrictor createRestrictor(Configuration pConfig) {
-        String location = pConfig.get(ConfigKey.POLICY_LOCATION);
+        String location = NetworkUtil.replaceExpression(pConfig.get(ConfigKey.POLICY_LOCATION));
         try {
             Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
             if (ret != null) {

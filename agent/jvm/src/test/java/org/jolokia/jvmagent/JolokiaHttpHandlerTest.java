@@ -133,7 +133,14 @@ public class JolokiaHttpHandlerTest {
 
     @Test
     public void customRestrictor() throws URISyntaxException, IOException, ParseException {
-        for (String[] params : new String[][] {  { "classpath:/access-restrictor.xml","not allowed"},{"file:///not-existing.xml","No access"}}) {
+        System.setProperty("jolokia.test1.policy.location","access-restrictor.xml");
+        System.setProperty("jolokia.test2.policy.location","access-restrictor");
+        for (String[] params : new String[][] {
+                {"classpath:/access-restrictor.xml","not allowed"},
+                {"file:///not-existing.xml","No access"},
+                {"classpath:/${prop:jolokia.test1.policy.location}", "not allowed"},
+                {"classpath:/${prop:jolokia.test2.policy.location}.xml", "not allowed"}
+        }) {
             Configuration config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
             JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
             HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");

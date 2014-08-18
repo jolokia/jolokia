@@ -154,7 +154,7 @@ public class AgentServlet extends HttpServlet {
         httpPostHandler = newPostHttpRequestHandler();
 
         if (restrictor == null) {
-            restrictor = createRestrictor(config.get(ConfigKey.POLICY_LOCATION));
+            restrictor = createRestrictor(NetworkUtil.replaceExpression(config.get(ConfigKey.POLICY_LOCATION)));
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
