@@ -52,7 +52,7 @@
           it is mandatory to provide a method signature as
           well. A signature consist the fully qualified argument class
           names or native types, separated by columns and enclosed with
-          parentheses. For calling non-argument overloaded method use <literal>()</literal>
+          parentheses. For calling a non-argument overloaded method use <literal>()</literal>
           as signature.
         </td>
         <td>
