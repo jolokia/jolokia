@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.2.3-SNAPSHOT" description="Release 1.2.3">
+      <action dev="roland" types="fix" date="2014-09-03" issue="158">
+        Missing attributes in multi attribute read won't croak with an error anymore when "ignoreErrors"
+        is used.
+      </action>
       <action dev="roland" types="add" date="2014-08-18" issue="156">
         Allow system property and environment expansion of the value specified with "policyLocation".
       </action>
