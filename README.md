@@ -18,6 +18,7 @@ Multiple agents are provided for different environments:
 
 Features
 --------
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The agent approach as several advantages:
 
