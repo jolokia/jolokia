@@ -321,9 +321,9 @@ public class JolokiaServer {
     private static final class JolokiaHttpsConfigurator extends HttpsConfigurator {
         private boolean useClientAuthentication;
 
-        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthenication) {
+        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthentication) {
             super(pSSLContext);
-            useClientAuthentication = pUseClientAuthenication;
+            useClientAuthentication = pUseClientAuthentication;
         }
 
         /** {@inheritDoc} */
@@ -337,7 +337,9 @@ public class JolokiaServer {
                 params.setProtocols(engine.getEnabledProtocols());
 
                 // get the default parameters
-                params.setSSLParameters(context.getDefaultSSLParameters());
+                SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
+                defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
+                params.setSSLParameters(defaultSSLParameters);
             } catch (NoSuchAlgorithmException e) {
                 throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
             }

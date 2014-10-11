@@ -225,7 +225,7 @@ public class JolokiaServerConfig {
         initKeystore(agentConfig);
 
         String auth = agentConfig.get("useSslClientAuthentication");
-        useSslClientAuthentication = auth != null && Boolean.getBoolean(auth);
+        useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
 
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
