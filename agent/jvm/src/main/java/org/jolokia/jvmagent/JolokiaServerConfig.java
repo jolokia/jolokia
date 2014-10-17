@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent;
 
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.jolokia.util.NetworkUtil;
  * Configuration required for the JolokiaServer
  *
  * @author roland
+ * @author nevenr
  * @since 28.12.12
  */
 public class JolokiaServerConfig {
@@ -54,6 +55,10 @@ public class JolokiaServerConfig {
     private boolean       useSslClientAuthentication;
     private char[]        keystorePassword;
     private Authenticator authenticator;
+    private String secureSocketProtocol;
+    private String keyManagerAlgorithm;
+    private String trustManagerAlgorithm;
+    private String keyStoreType;
 
     /**
      * Constructor which prepares the server configuration from a map
@@ -222,13 +227,7 @@ public class JolokiaServerConfig {
         backlog = Integer.parseInt(agentConfig.get("backlog"));
         initExecutor(agentConfig);
         initThreadNr(agentConfig);
-        initKeystore(agentConfig);
-
-        String auth = agentConfig.get("useSslClientAuthentication");
-        useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
-
-        String password = agentConfig.get("keystorePassword");
-        keystorePassword =  password != null ? password.toCharArray() : new char[0];
+        initHttpsRelatedSettings(agentConfig);
     }
 
     private void initAuthenticator() {
@@ -325,13 +324,25 @@ public class JolokiaServerConfig {
         }
     }
 
-    private void initKeystore(Map<String, String> agentConfig) {
+    private void initHttpsRelatedSettings(Map<String, String> agentConfig) {
         // keystore
         keystore = agentConfig.get("keystore");
         if (protocol.equals("https") && keystore == null) {
             throw new IllegalArgumentException("No keystore defined for HTTPS protocol. " +
                                                "Please use the 'keystore' option to point to a valid keystore");
         }
+
+        secureSocketProtocol = agentConfig.get("secureSocketProtocol");
+        keyStoreType = agentConfig.get("keyStoreType");
+        keyManagerAlgorithm = agentConfig.get("keyManagerAlgorithm");
+        trustManagerAlgorithm = agentConfig.get("trustManagerAlgorithm");
+
+        String auth = agentConfig.get("useSslClientAuthentication");
+        useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
+
+        String password = agentConfig.get("keystorePassword");
+        keystorePassword =  password != null ? password.toCharArray() : new char[0];
+
     }
 
     private void initThreadNr(Map<String, String> agentConfig) {
@@ -391,5 +402,21 @@ public class JolokiaServerConfig {
             detectorOpts.append("}");
             pConfig.put(ConfigKey.DETECTOR_OPTIONS.getKeyValue(),detectorOpts.toString());
         }
+    }
+
+    public String getSecureSocketProtocol() {
+        return secureSocketProtocol;
+    }
+
+    public String getKeyManagerAlgorithm() {
+        return keyManagerAlgorithm;
+    }
+
+    public String getTrustManagerAlgorithm() {
+        return trustManagerAlgorithm;
+    }
+
+    public String getKeyStoreType() {
+        return keyStoreType;
     }
 }
