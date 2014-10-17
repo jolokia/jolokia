@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent;
 
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
+ * @author nevenr
  * @since 31.08.11
  */
 public class JolokiaServerTest {
@@ -80,6 +81,20 @@ public class JolokiaServerTest {
                   false);
     }
 
+    @Test
+    public void sslWithAdditionalHttpsSettings() throws IOException {
+        int port = EnvTestUtil.getFreePort();
+        String keystorePath = getKeystorePath();
+        String keystorePassword = "jetty7";
+        roundtrip("host=localhost,port=" + port +
+                        ",keystore=" + keystorePath +
+                        ",keystorePassword=" + keystorePassword +
+                        ",protocol=https" +
+                        ",config=" + getResourcePath("/agent-test-additionalHttpsConf.properties") +
+                        ",user=roland,password=s!cr!t",
+                false);
+    }
+
     //@Test(expectedExceptions = SecurityException.class,expectedExceptionsMessageRegExp = ".*No password.*")
     public void invalidConfig() throws IOException, InterruptedException {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
@@ -102,7 +117,11 @@ public class JolokiaServerTest {
     // ==================================================================
 
     private String getKeystorePath() {
-        URL ksURL = this.getClass().getResource("/keystore");
+        return getResourcePath("/keystore");
+    }
+
+    private String getResourcePath(String relativeResourcePath) {
+        URL ksURL = this.getClass().getResource(relativeResourcePath);
         if (ksURL != null && "file".equalsIgnoreCase(ksURL.getProtocol())) {
             return URLDecoder.decode(ksURL.getPath());
         }
