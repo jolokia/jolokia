@@ -34,7 +34,7 @@ import org.mule.api.lifecycle.*;
 public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
 
     // Internal HTTP-Server
-    private MuleAgentHttpServer server;
+    protected MuleAgentHttpServer server;
 
     protected JolokiaMuleAgent() {
         super("jolokia-agent");
@@ -113,7 +113,7 @@ public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
      * @throws InitialisationException
      */
     public void initialise() throws InitialisationException {
-        server = new MuleAgentHttpServer(this,this);
+        server = MuleAgentHttpServerFactory.create(this, this);
     }
 
     // ===============================================================================
