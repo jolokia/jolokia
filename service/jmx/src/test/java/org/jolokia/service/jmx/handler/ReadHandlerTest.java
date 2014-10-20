@@ -21,6 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.Restrictor;
@@ -108,8 +109,45 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
         Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
-        assertEquals("val0",res.get("attr0"));
+        assertEquals("val0", res.get("attr0"));
         assertEquals("val1",res.get("attr1"));
+    }
+
+    @Test(expectedExceptions = AttributeNotFoundException.class)
+    public void singleBeanMultiAttributesWithAWrongAttributeNameThrowingException() throws Exception {
+        JolokiaReadRequest request = new JolokiaRequestBuilder(READ, testBeanName.getCanonicalName()).
+                attributes(Arrays.asList("attr0", "attr1")).
+                option(ConfigKey.IGNORE_ERRORS, "false").
+                build();
+
+        MBeanServer server = createMock(MBeanServer.class);
+        expect(server.isRegistered(testBeanName)).andStubReturn(true);
+        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
+        expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
+        replay(server);
+
+        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
+    }
+
+    @Test
+    public void singleBeanMultiAttributesWithAWrongAttributeNameHandlingException() throws Exception {
+        JolokiaReadRequest request = new JolokiaRequestBuilder(READ, testBeanName.getCanonicalName()).
+                attributes(Arrays.asList("attr0", "attr1")).
+                option(ConfigKey.IGNORE_ERRORS, "true").
+                build();
+
+        MBeanServer server = createMock(MBeanServer.class);
+        expect(server.isRegistered(testBeanName)).andStubReturn(true);
+        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
+        expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
+        replay(server);
+
+
+        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
+        verify(server);
+        assertEquals("val0",res.get("attr0"));
+        String err = (String) res.get("attr1");
+        assertTrue(err != null && err.contains("ERROR"));
     }
 
     // ======================================================================================================

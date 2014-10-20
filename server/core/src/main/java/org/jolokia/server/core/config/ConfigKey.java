@@ -72,7 +72,16 @@ public enum ConfigKey {
     MAX_OBJECTS("maxObjects",true, true),
 
     /**
-     * Init parameter for the location of the policy file
+     * Init parameter for the location of the policy file. This should be an URL pointing to
+     * the policy file. If this URL uses a scheme <code>classpath</code> then do a class lookup.
+     *
+     * The URL given can contain also placeholders which gets replaced:
+     * <ul>
+     *    <li>$host or ${host} : Host name (if possible), otherwise address</li>
+     *    <li>$ip or ${ip} : IP Address</li>
+     *    <li>${prop:foo} : System property foo</li>
+     *    <li>${env:FOO} : Environment variable FOO</li>
+     * </ul>
      */
     POLICY_LOCATION("policyLocation",true,false,"classpath:/jolokia-access.xml"),
 

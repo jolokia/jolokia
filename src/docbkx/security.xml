@@ -333,8 +333,24 @@
           is globally granted and a warning is given on standard
           output.
         </para>
+        <para>
+          The parameter specified with <literal>policyLocation</literal> can contain placeholders:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para><literal>$ip</literal>: IP - Address</para>
+          </listitem>
+          <listitem>
+            <para><literal>$host</literal> : Host - Address</para>
+          </listitem>
+          <listitem>
+            <para><literal>${prop:foo}</literal> : System property <emphasis>foo</emphasis></para>
+          </listitem>
+          <listitem>
+            <para><literal>${env:FOO}</literal> : Environment variable <emphasis>FOO</emphasis></para>
+          </listitem>
+        </itemizedlist>
       </section>
-
     </section>
 
     <section id="security-restrictor">

@@ -221,11 +221,12 @@ public class JolokiaServer {
                 createLogHandler(jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_CLASS),
                                  Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
 
+        String policyLocation = NetworkUtil.replaceExpression(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION));
         serviceManager =
                 JolokiaServiceManagerFactory.createJolokiaServiceManager(
                         jolokiaCfg,
                         log,
-                        PolicyRestrictorFactory.createRestrictor(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION), log));
+                        PolicyRestrictorFactory.createRestrictor(policyLocation, log));
         serviceManager.addServices(new ClasspathServiceCreator("services"));
 
         // Get own URL for later reference

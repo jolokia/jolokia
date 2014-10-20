@@ -104,7 +104,7 @@ public final class LocalServiceFactory {
     private static <T> void readServiceDefinitions(ClassLoader pClassLoader,
                                                    Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            for (URL url : ClassUtil.getResources(pDefPath)) {
+            for (String url : ClassUtil.getResources(pDefPath)) {
                 readServiceDefinitionFromUrl(pClassLoader,pExtractorMap, url);
             }
         } catch (IOException e) {
@@ -112,12 +112,12 @@ public final class LocalServiceFactory {
         }
     }
 
-    private static <T> void readServiceDefinitionFromUrl(ClassLoader pClassLoader, Map<ServiceEntry, T> pExtractorMap,URL pUrl) {
+    private static <T> void readServiceDefinitionFromUrl(ClassLoader pClassLoader, Map<ServiceEntry, T> pExtractorMap,String pUrl) {
         String line = null;
         Exception error = null;
         LineNumberReader reader = null;
         try {
-            reader = new LineNumberReader(new InputStreamReader(pUrl.openStream()));
+            reader = new LineNumberReader(new InputStreamReader(new URL(pUrl).openStream(),"UTF8"));
             while ( (line = reader.readLine()) != null) {
                 // Skip empty lines and comments
                 if (line.trim().length() > 0 && !line.matches("^\\s*#.*$")) {

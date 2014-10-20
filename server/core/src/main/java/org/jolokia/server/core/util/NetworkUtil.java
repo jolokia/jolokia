@@ -348,17 +348,17 @@ public final class NetworkUtil {
                 } else {
                     String key = extractKey(var,"env");
                     if (key != null)  {
-                        value = System.getenv(key).trim();
+                        value = System.getenv(key);
                     } else {
                         key = extractKey(var,"prop");
                         if (key != null) {
-                            value = System.getProperty(key).trim();
+                            value = System.getProperty(key);
                         } else {
                             throw new IllegalArgumentException("Unknown expression " + var + " in " + pValue);
                         }
                     }
                 }
-                matcher.appendReplacement(ret, value);
+                matcher.appendReplacement(ret, value != null ? value.trim() : null);
             }
             matcher.appendTail(ret);
         } catch (IOException e) {

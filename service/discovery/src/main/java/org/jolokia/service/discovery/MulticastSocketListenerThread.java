@@ -46,6 +46,7 @@ class MulticastSocketListenerThread extends Thread {
 
         socket = MulticastUtil.newMulticastSocket(address,pContext);
         pContext.debug(address + "<-- Listening for queries");
+        setDaemon(true);
     }
 
     /** {@inheritDoc} */

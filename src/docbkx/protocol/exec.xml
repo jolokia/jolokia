@@ -48,11 +48,12 @@
       <tr>
         <td><literal>&lt;operation name&gt;</literal></td>
         <td>  
-          Name of the operation to execute. If an overloaded method,
+          Name of the operation to execute. If this is an overloaded method,
           it is mandatory to provide a method signature as
           well. A signature consist the fully qualified argument class
           names or native types, separated by columns and enclosed with
-          parentheses.  
+          parentheses. For calling a non-argument overloaded method use <literal>()</literal>
+          as signature.
         </td>
         <td>
           <literal>loadUsers(java.lang.String,int)</literal>

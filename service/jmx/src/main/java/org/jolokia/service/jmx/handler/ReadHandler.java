@@ -194,6 +194,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                 ret.put(attribute, pFaultHandler.handleException(e));
             } catch (RuntimeException e) {
                 ret.put(attribute, pFaultHandler.handleException(e));
+            } catch (AttributeNotFoundException e) {
+                ret.put(attribute, pFaultHandler.handleException(e));
             }
         }
         return ret;
