@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent;
 
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.jolokia.util.NetworkUtil;
  * the Jolokia protocol
  *
  * @author roland
+ * @author nevenr
  * @since 12.08.11
  */
 public class JolokiaServer {
@@ -262,11 +263,11 @@ public class JolokiaServer {
         // initialise the HTTPS server
         try {
             HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
-            SSLContext sslContext = SSLContext.getInstance("TLS");
+            SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
             // initialise the keystore
             char[] password = pConfig.getKeystorePassword();
-            KeyStore ks = KeyStore.getInstance("JKS");
+            KeyStore ks = KeyStore.getInstance(pConfig.getKeyStoreType());
             FileInputStream fis = null;
             try {
                 fis = new FileInputStream(pConfig.getKeystore());
@@ -277,11 +278,11 @@ public class JolokiaServer {
                 }
             }
             // setup the key manager factory
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(pConfig.getKeyManagerAlgorithm());
             kmf.init(ks, password);
 
             // setup the trust manager factory
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(pConfig.getTrustManagerAlgorithm());
             tmf.init(ks);
 
             // setup the HTTPS context and parameters
@@ -320,27 +321,28 @@ public class JolokiaServer {
     // HTTPS configurator
     private static final class JolokiaHttpsConfigurator extends HttpsConfigurator {
         private boolean useClientAuthentication;
+        private SSLContext context;
 
-        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthenication) {
+        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthentication) {
             super(pSSLContext);
-            useClientAuthentication = pUseClientAuthenication;
+            this.context = pSSLContext;
+            useClientAuthentication = pUseClientAuthentication;
         }
 
         /** {@inheritDoc} */
         public void configure(HttpsParameters params) {
-            try {
-                // initialise the SSL context
-                SSLContext context = SSLContext.getDefault();
-                SSLEngine engine = context.createSSLEngine();
-                params.setNeedClientAuth(useClientAuthentication);
-                params.setCipherSuites(engine.getEnabledCipherSuites());
-                params.setProtocols(engine.getEnabledProtocols());
 
-                // get the default parameters
-                params.setSSLParameters(context.getDefaultSSLParameters());
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
-            }
+            // initialise the SSL context
+            SSLEngine engine = context.createSSLEngine();
+            params.setNeedClientAuth(useClientAuthentication);
+            params.setCipherSuites(engine.getEnabledCipherSuites());
+            params.setProtocols(engine.getEnabledProtocols());
+
+            // get the default parameters
+            SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
+            defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
+            params.setSSLParameters(defaultSSLParameters);
+
         }
     }
 }
