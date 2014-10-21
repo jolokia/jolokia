@@ -321,29 +321,28 @@ public class JolokiaServer {
     // HTTPS configurator
     private static final class JolokiaHttpsConfigurator extends HttpsConfigurator {
         private boolean useClientAuthentication;
+        private SSLContext context;
 
         private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthentication) {
             super(pSSLContext);
+            this.context = pSSLContext;
             useClientAuthentication = pUseClientAuthentication;
         }
 
         /** {@inheritDoc} */
         public void configure(HttpsParameters params) {
-            try {
-                // initialise the SSL context
-                SSLContext context = SSLContext.getDefault();
-                SSLEngine engine = context.createSSLEngine();
-                params.setNeedClientAuth(useClientAuthentication);
-                params.setCipherSuites(engine.getEnabledCipherSuites());
-                params.setProtocols(engine.getEnabledProtocols());
 
-                // get the default parameters
-                SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
-                defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
-                params.setSSLParameters(defaultSSLParameters);
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
-            }
+            // initialise the SSL context
+            SSLEngine engine = context.createSSLEngine();
+            params.setNeedClientAuth(useClientAuthentication);
+            params.setCipherSuites(engine.getEnabledCipherSuites());
+            params.setProtocols(engine.getEnabledProtocols());
+
+            // get the default parameters
+            SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
+            defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
+            params.setSSLParameters(defaultSSLParameters);
+
         }
     }
 }
