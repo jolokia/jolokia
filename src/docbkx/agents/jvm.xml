@@ -275,6 +275,26 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>secureSocketProtocol</constant></td>
+          <td>Secure protocol that will be used for establishing HTTPS connection (https only)</td>
+          <td><constant>TLS</constant></td>
+        </tr>
+        <tr>
+          <td><constant>keyStoreType</constant></td>
+          <td>SSL keystore type to use (https only)</td>
+          <td><constant>JKS</constant></td>
+        </tr>
+        <tr>
+          <td><constant>keyManagerAlgorithm</constant></td>
+          <td>Key manager algorithm (https only)</td>
+          <td><constant>SunX509</constant></td>
+        </tr>
+        <tr>
+          <td><constant>trustManagerAlgorithm</constant></td>
+          <td>Trust manager algorithm (https only)</td>
+          <td><constant>SunX509</constant></td>
+        </tr>
+        <tr>
           <td><constant>bootAmx</constant></td>
           <td>
             If set to <constant>true</constant> and if the agent is
@@ -388,6 +408,10 @@ where <command> is one of
     --keystore <keystore>          Path to keystore (https only)
     --keystorePassword <pwd>       Password to the keystore (https only)
     --useSslClientAuthentication   Use client certificate authentication (https only)
+    --secureSocketProtocol <name>  Secure protocol (https only, default: TLS)
+    --keyStoreType <name>          Keystore type (https only, default: JKS)
+    --keyManagerAlgorithm <name>   Key manager algorithm (https only, default: SunX509)
+    --trustManagerAlgorithm <name> Trust manager algorithm (https only, default: SunX509)
     --discoveryEnabled <t|f>       Enable/Disable discovery multicast responses (default: true)
     --discoveryAgentUrl <url>      The URL to use for answering discovery requests. Will be autodetected 
                                    if not given.
