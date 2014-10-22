@@ -16,14 +16,8 @@ package org.jolokia.mule;
  *  limitations under the License.
  */
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -128,7 +122,6 @@ public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/jolokia");
 		server.setHandler(context);
-		context.addServlet(new ServletHolder(new HelloServlet()), "/*");
         if (pConfig.getUser() != null && pConfig.getPassword() != null) {
         	context.setSecurityHandler(
         			getSecurityHandler(pConfig.getUser(), pConfig.getPassword(), "jolokia-role"));
@@ -176,17 +169,5 @@ public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer {
         ret.put("agentType", "mule");
         ret.put("agentId", NetworkUtil.getAgentId(hashCode(), "mule"));
         return ret;
-    }
-    
-    class HelloServlet extends HttpServlet {
-		private static final long serialVersionUID = 1L;
-
-		protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        		throws ServletException, IOException {
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello Servlet</h1>");
-            response.getWriter().println("session=" + request.getSession(true).getId());
-        }
     }
 }
