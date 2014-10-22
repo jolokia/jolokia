@@ -31,13 +31,14 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 30.08.11
  */
-public class JolokiaMuleAgentTest {
+public abstract class JolokiaMuleAgentTestCase {
 
-    private JolokiaMuleAgent agent = new JolokiaMuleAgent();
+    private JolokiaMuleAgent agent = null;
+    protected abstract JolokiaMuleAgent createJolokiaMuleAgent();
 
     @BeforeMethod
     public void setup() {
-        agent = new JolokiaMuleAgent();
+        agent = createJolokiaMuleAgent();
     }
 
     @Test
