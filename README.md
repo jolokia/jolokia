@@ -1,4 +1,4 @@
-![Jolokia - JMX on Capsaicin][1]
+![Jolokia - JMX on Capsaicin][1] 
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
 different from JSR-160 connectors in that it is an agent-based
@@ -150,6 +150,8 @@ if you forgot it the first time.
 [![endorse](http://api.coderwall.com/rhuss/endorsecount.png)](http://coderwall.com/rhuss)
 [![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
 [![Flattr](http://api.flattr.com/button/flattr-badge-large.png)](http://flattr.com/thing/73919/Jolokia-JMX-on-Capsaicin)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 
  [1]: http://labs.consol.de/wp-content/uploads/2010/10/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
