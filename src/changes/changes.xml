@@ -30,6 +30,9 @@
       <action dev="nevenr" types="add" date="2014-10-21" issue="167">
         Enabling additional configuration parameters for HTTPS
       </action>
+      <action dev="ogis-nakagawa" types="add" date="2014-10-18" issue="165">
+        Added support for Mule ESB 3.5
+      </action>
       <action dev="roland" types="fix" date="2014-09-03" issue="158">
         Missing attributes in multi attribute read won't croak with an error anymore when "ignoreErrors"
         is used.
