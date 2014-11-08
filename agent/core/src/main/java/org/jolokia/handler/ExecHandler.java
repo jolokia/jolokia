@@ -189,7 +189,6 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
      * @param pParamInfos list of parameter infos
      * @return the matched signature MBeanParamaterInfo[]
      */
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings("PZLA_PREFER_ZERO_LENGTH_ARRAYS")
     private MBeanParameterInfo[] getMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
         OUTER:
         for (MBeanParameterInfo[]  infos : pParamInfos) {

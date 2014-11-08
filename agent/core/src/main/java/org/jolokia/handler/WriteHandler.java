@@ -86,7 +86,6 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
         }
     }
 
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_NULL_ON_SOME_PATH", justification = "aInfo below cant be null. See comment inline.")
     private Object setAttribute(JmxWriteRequest request, MBeanServerConnection server)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
             ReflectionException, IntrospectionException, InvalidAttributeValueException, IllegalAccessException, InvocationTargetException, IOException {
