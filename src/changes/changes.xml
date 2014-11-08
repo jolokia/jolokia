@@ -30,8 +30,6 @@
       <action dev="nevenr" types="add" date="2014-10-21" issue="167">
         Enabling additional configuration parameters for HTTPS
       </action>
-    </release>
-    <release version="1.2.3-SNAPSHOT" description="Release 1.2.3">
       <action dev="roland" types="fix" date="2014-09-03" issue="158">
         Missing attributes in multi attribute read won't croak with an error anymore when "ignoreErrors"
         is used.
@@ -47,7 +45,7 @@
         Lookup system resources when no class loader is available (e.g. because
         Jolokia is on the bootstrap classpath)
       </action>
-      </release>
+    </release>
     <release version="1.2.2" description="Release 1.2.2" date="2014-06-14">
       <action dev="roland" type="fix" date="2014-06-06" issue="138">
         Added missing configuration options to the configuration XSD for the
