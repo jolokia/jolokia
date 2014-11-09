@@ -79,6 +79,54 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Autumn edition 1.2.3">
+        <div class="news-date">2014-11-08</div>
+        <p>
+          Meh, that was a busy summer. Apologies for the delay and
+          breaking the usual one-release-per-month cycle.
+        </p>
+        <p>
+          Nevertheless there are some nice goodies in this release:
+        </p>
+        <ul>
+          <li>
+            SSL handling of the JVM agent has been fixed and
+            improved. Authentication with client certificates works
+            now and you have much more influence of the SSL
+            setup. Kudos to <a
+            href="https://github.com/nevenr">Neven Radovanović</a> for
+            providing a patch.
+          </li>
+          <li>
+            The Mule agent has been updated to support Mule
+            3.5. Thanks to <a
+            href="https://github.com/FeiWongReed">Fei Wong Reed</a>
+            for the pull request.
+          </li>
+          <li>
+            The configuration option "policyLocation" has now system
+            property and environment expansions. 
+          </li>
+          <li>
+            Quite a bunch of bugs has been fixed. Please refer to the
+            <a href="changes-report.html">changes report</a> for all
+            changes. 
+          </li>
+        </ul>
+        <p>
+          If you want to get a quick introduction into Jolokia and a
+          peek preview to Jolokia 2.0 come to my "Tools in Action"
+          session at <a
+          href="http://cfp.devoxx.be/2014/talk/LVC-7834/Spicing_up_JMX_with_Jolokia">Devoxx</a>
+          2014 in Antwerp.
+        </p>
+        <p>
+          Last announcement for now: I started a blog at <a
+          href="https://ro14nd.de">https://ro14nd.de</a> about
+          various technical topics like Jolokia, Docker or other
+          stuff.
+        </p>
+      </subsection>
       <subsection name="Knock, knock: Let's welcome 1.2.2">
         <div class="news-date">2014-06-14</div>
         <p>

@@ -36,19 +36,21 @@ public final class OptionsAndArgs {
 
     private static final Map<String,String> SHORT_OPTS = new HashMap<String, String>();
     private static final Set<String> OPTIONS = new HashSet<String>(Arrays.asList(
-                // JVM Agent options:
-                "host", "port", "agentContext", "user", "password",
-                "quiet!", "verbose!", "version!", "executor", "threadNr",
-                "backlog", "protocol", "keystore", "keystorePassword",
-                "useSslClientAuthentication!","hide!",
-                // Jolokia options:
-                "historyMaxEntries","debug!","debugMaxEntries",
-                "dispatcherClasses", "maxDepth", "maxCollectionSize",
-                "maxObjects", "policyLocation", "mbeanQualifier",
-                "canonicalNaming","includeStackTrace","serializeException",
-                "discoveryEnabled","discoveryAgentUrl","agentId","agentDescription",
-                // Others:
-                "config", "help!"));
+            // JVM Agent options:
+            "host", "port", "agentContext", "user", "password",
+            "quiet!", "verbose!", "version!", "executor", "threadNr",
+            "backlog", "hide!", "protocol",
+            //https options:
+            "keystore", "keystorePassword", "useSslClientAuthentication!",
+            "secureSocketProtocol", "keyStoreType", "keyManagerAlgorithm", "trustManagerAlgorithm",
+            // Jolokia options:
+            "historyMaxEntries", "debug!", "debugMaxEntries",
+            "dispatcherClasses", "maxDepth", "maxCollectionSize",
+            "maxObjects", "policyLocation", "mbeanQualifier",
+            "canonicalNaming", "includeStackTrace", "serializeException",
+            "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
+            // Others:
+            "config", "help!"));
 
     static {
         String shortOptsDef[] = {

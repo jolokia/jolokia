@@ -94,8 +94,11 @@
             (use "Fork" from the menu). 
           </li>
           <li>
-            Leave a short note, on what you are working (so that we
-            can update the status of the feature request or bug). 
+            Your contribution must be donated under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Public License</a> and you
+            should sign-off your commits that you conform to the <a href="http://developercertificate.org/">Developer Certificate of Origin</a>
+            (i.e. that you have written the code on your own). To do so, add a line <literal>Signed-off-by: Your Name
+            &lt;your.name@example.com&gt;</literal> to your commit message. (<literal>git -s</literal> will do this for you).
+            Only real names are allowed here.
           </li>
           <li>
             After finishing your implementation, send a <a
@@ -109,8 +112,7 @@
         </ul>
         <p>
           Please note, that all the contributed code must be
-          licensable under <a href="license.html">Apache License</a>,
-          Version 2.
+          licensed under <a href="license.html">Apache License</a> Version 2 and you must sign-off the contribution (see above).
         </p>
       </subsection>
       <subsection name="Blog">

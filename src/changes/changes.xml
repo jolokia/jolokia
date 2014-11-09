@@ -23,15 +23,24 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.2.3-SNAPSHOT" description="Release 1.2.3">
-      <action dev="roland" types="fix" date="2014-09-03" issue="158">
+    <release version="1.2.3" description="Release 1.2.3" date="2014-11-08">
+      <action dev="nevenr" type="fix" date="2014-10-21" issue="166">
+        JVM Agent and SSL client authentication does not work
+      </action>
+      <action dev="nevenr" type="add" date="2014-10-21" issue="167">
+        Enabling additional configuration parameters for HTTPS
+      </action>
+      <action dev="ogis-nakagawa" type="add" date="2014-10-18" issue="165">
+        Added support for Mule ESB 3.5
+      </action>
+      <action dev="roland" type="fix" date="2014-09-03" issue="158">
         Missing attributes in multi attribute read won't croak with an error anymore when "ignoreErrors"
         is used.
       </action>
-      <action dev="roland" types="add" date="2014-08-18" issue="156">
+      <action dev="roland" type="add" date="2014-08-18" issue="156">
         Allow system property and environment expansion of the value specified with "policyLocation".
       </action>
-      <action dev="roland" types="fix" date="2014-08-18" issue="155">
+      <action dev="roland" type="fix" date="2014-08-18" issue="155">
         Fixed MulticastSocketListenerThread to be a daemon thread so that it doesn't
         prevent the shutdown of the JVM
       </action>
@@ -39,7 +48,7 @@
         Lookup system resources when no class loader is available (e.g. because
         Jolokia is on the bootstrap classpath)
       </action>
-      </release>
+    </release>
     <release version="1.2.2" description="Release 1.2.2" date="2014-06-14">
       <action dev="roland" type="fix" date="2014-06-06" issue="138">
         Added missing configuration options to the configuration XSD for the

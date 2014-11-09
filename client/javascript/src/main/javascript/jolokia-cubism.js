@@ -23,7 +23,7 @@
 (function () {
     var builder = function (cubism,Jolokia) {
         
-        var VERSION = "1.2.2";
+        var VERSION = "1.2.3";
         
         var ctx_jolokia = function (url, opts) {
             var source = {},

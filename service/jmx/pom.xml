@@ -31,6 +31,10 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <properties>
+    <jetty.mortbay.version>6.1.26</jetty.mortbay.version>
+    <jetty.eclipse.version>8.1.13.v20130916</jetty.eclipse.version>
+  </properties>
   <dependencies>
 
     <dependency>

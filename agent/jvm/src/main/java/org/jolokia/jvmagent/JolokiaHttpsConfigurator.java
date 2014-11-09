@@ -2,8 +2,7 @@ package org.jolokia.jvmagent;
 
 import java.security.NoSuchAlgorithmException;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.*;
 
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
@@ -33,7 +32,9 @@ final class JolokiaHttpsConfigurator extends HttpsConfigurator {
             params.setProtocols(engine.getEnabledProtocols());
 
             // get the default parameters
-            params.setSSLParameters(context.getDefaultSSLParameters());
+            SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
+            defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
+            params.setSSLParameters(defaultSSLParameters);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
         }
