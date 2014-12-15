@@ -322,9 +322,9 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>discoveryEnabled</constant></td>
           <td>
-            Is set to <literal>fakse</literal> then this agent will
+            Is set to <literal>false</literal> then this agent will
             not listen for multicast request (multicastgroup 239.192.48.84,
-            port 24884). By default this option is enabled
+            port 24884). By default this option is enabled.
           </td>
           <td>
             Default: <constant>true</constant>
