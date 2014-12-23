@@ -117,7 +117,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
                                .responseExtractor(ValidatingResponseExtractor.OPTIONAL)
                                .build();
 
-        List<J4pReadResponse> resp = j4pClient.execute(createBulkRequests(),null, ValidatingResponseExtractor.OPTIONAL);
+        List<J4pReadResponse> resp = c.execute(createBulkRequests());
 
         verifyOptionalBulkResponses(resp);
     }
