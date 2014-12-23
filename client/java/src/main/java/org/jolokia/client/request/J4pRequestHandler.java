@@ -167,19 +167,6 @@ public class J4pRequestHandler {
     }
 
     /**
-     * Extract a {@link J4pResponse} out of a JSON object
-     *
-     * @param pRequest request which lead to the response
-     * @param pJsonResponse JSON response
-     * @param <T> request type.
-     * @param <R> response type
-     * @return the J4p response
-     */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R extractResponse(T pRequest,JSONObject pJsonResponse) {
-        return pRequest.<R>createResponse(pJsonResponse);
-    }
-
-    /**
      * Get the J4p Server URL
      * @return the URL to the Jolokia agent on the server side
      */

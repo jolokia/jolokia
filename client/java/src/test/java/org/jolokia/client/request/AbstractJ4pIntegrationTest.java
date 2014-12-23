@@ -39,7 +39,7 @@ abstract public class AbstractJ4pIntegrationTest {
     protected ItSetup itSetup;
 
 
-    private String j4pUrl;
+    protected String j4pUrl;
 
     // Client which can be used by subclasses for testing
     protected J4pClient j4pClient;

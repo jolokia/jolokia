@@ -46,7 +46,7 @@ public class J4pRemoteException extends J4pException {
      * Constructor for a remote exception
      *
      * @param pMessage error message of the exception occurred remotely
-     * @param pErrorType
+     * @param pErrorType kind of error used
      * @param pStatus status code
      * @param pStacktrace stacktrace of the remote exception
      */
@@ -57,6 +57,19 @@ public class J4pRemoteException extends J4pException {
         remoteStacktrace = pStacktrace;
         request = pJ4pRequest;
         errorValue = pErrorValue;
+    }
+
+    public J4pRemoteException(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
+        super(pJsonRespObject.get("error") != null ?
+                      (String) pJsonRespObject.get("error") :
+                      "Invalid response received: " + pJsonRespObject.toJSONString()
+             );
+        Long statusL = (Long) pJsonRespObject.get("status");
+        status = statusL != null ? statusL.intValue() : 500;
+        request = pJ4pRequest;
+        errorType = (String) pJsonRespObject.get("error_type");
+        remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
+        errorValue = (JSONObject) pJsonRespObject.get("error_value");
     }
 
     /**

@@ -17,6 +17,7 @@ package org.jolokia.client;
  */
 
 import org.apache.http.client.CookieStore;
+import org.jolokia.client.request.J4pResponseExtractor;
 
 /**
  * Hook class for easily creating J4pClient with the a builder.
@@ -101,5 +102,9 @@ public abstract class J4pClientBuilderFactory {
     /** See {@link J4pClientBuilder#authenticator(J4pAuthenticator)} */
     public static J4pClientBuilder authenticator(J4pAuthenticator pAuthenticator) {
         return new J4pClientBuilder().authenticator(pAuthenticator);
+    }
+
+    public static J4pClientBuilder responseExtractor(J4pResponseExtractor pExtractor) {
+        return new J4pClientBuilder().responseExtractor(pExtractor);
     }
 }
