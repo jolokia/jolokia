@@ -77,7 +77,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         JMXConnector connector = null;
         try {
             connector = createConnector(pJmxReq);
-            connect(connector,pJmxReq);
+            connector.connect();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
@@ -91,12 +91,6 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         }
     }
 
-    private void connect(JMXConnector connector, JmxRequest pJmxReq) throws IOException {
-        ProxyTargetConfig targetConfig = pJmxReq.getTargetConfig();
-        Map<String,Object> env = prepareEnv(targetConfig.getEnv());
-        connector.connect(env);
-    }
-
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
     private JMXConnector createConnector(JmxRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = pJmxReq.getTargetConfig();
@@ -105,7 +99,9 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         }
         String urlS = targetConfig.getUrl();
         JMXServiceURL url = new JMXServiceURL(urlS);
-        return JMXConnectorFactory.newJMXConnector(url,null);
+
+        Map<String,Object> env = prepareEnv(targetConfig.getEnv());
+        return JMXConnectorFactory.newJMXConnector(url,env);
     }
 
     private void releaseConnector(JMXConnector pConnector) throws IOException {
