@@ -33,7 +33,7 @@
       </p>
       <pre class="prettyprint lang-java">
   J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
-  J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage")
+  J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
   req.setPath("used");
   J4pReadResponse resp = j4pClient.execute(req);
   System.out.println(resp.getValue());
