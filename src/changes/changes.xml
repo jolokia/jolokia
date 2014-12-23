@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.2.4-SNAPSHOT" description="Release 1.2.4-SNAPSHOT">
+      <action dev="nevenr" type="add" date="2014-12-11" issue="169">
+        Use system properties on the HttpClient that's used in J4pClientBuilder
+      </action>
+    </release>
     <release version="1.2.3" description="Release 1.2.3" date="2014-11-08">
       <action dev="nevenr" type="fix" date="2014-10-21" issue="166">
         JVM Agent and SSL client authentication does not work

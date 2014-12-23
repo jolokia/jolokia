@@ -16,11 +16,18 @@ package org.jolokia.client;
  * limitations under the License.
  */
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.*;
@@ -80,6 +87,9 @@ public class J4pClientBuilder {
 
     // Authenticator to use for performing a login
     private J4pAuthenticator authenticator;
+
+    // HTTP proxy settings
+    private Proxy httpProxy;
 
     /**
      * Package access constructor, use static method on J4pClient for creating
@@ -302,6 +312,91 @@ public class J4pClientBuilder {
         return this;
     }
 
+    /**
+     * Set the proxy for this client
+     *
+     * @param pProxy proxy definition in format: http://user:pass@host:port or http://host:port
+     *               Example:   http://tom:sEcReT@my.proxy.com:8080
+     */
+    public final J4pClientBuilder proxy(String pProxy) {
+        httpProxy = parseProxySettings(pProxy);
+        return this;
+    }
+
+    /**
+     * Set the proxy for this client
+     *
+     * @param pProxyHost proxy hostname
+     * @param pProxyPort proxy port number
+     */
+    public final J4pClientBuilder proxy(String pProxyHost, int pProxyPort) {
+        httpProxy = new Proxy(pProxyHost,pProxyPort);
+        return this;
+    }
+
+    /**
+     * Set the proxy for this client
+     *
+     * @param pProxyHost  proxy hostname
+     * @param pProxyPort  proxy port number
+     * @param pProxyUser  proxy authentication username
+     * @param pProxyPass  proxy authentication password
+     */
+    public final J4pClientBuilder proxy(String pProxyHost, int pProxyPort, String pProxyUser, String pProxyPass) {
+        httpProxy = new Proxy(pProxyHost,pProxyPort, pProxyUser,pProxyPass);
+        return this;
+    }
+
+    /**
+     * Set the proxy for this client based on http_proxy system environment variable
+     */
+    public final J4pClientBuilder useProxyFromEnvironment(){
+        Map<String, String> env = System.getenv();
+        for (String key : env.keySet()) {
+            if (key.equalsIgnoreCase("http_proxy")){
+                httpProxy = parseProxySettings(env.get(key));
+                break;
+            }
+        }
+        return this;
+    }
+
+    public static Proxy parseProxySettings(String env) {
+        if (env == null || env.isEmpty()) return null;
+        String colon = ":";
+
+
+        String pHost;
+        int pPort;
+        String pUser = null;
+        String pPass = null;
+
+        try {
+            URI uri = new URI(env);
+            pHost = uri.getHost();
+            pPort = uri.getPort();
+
+            if ( pHost == null || pHost.isEmpty() || pPort < 0 || pPort > 65535) return null;
+
+            String userInfo = uri.getUserInfo();
+            if (userInfo != null && !userInfo.isEmpty()){
+                if(userInfo.contains(colon)){
+                    pUser = userInfo.substring(0,userInfo.indexOf(colon));
+                    pPass = userInfo.substring(userInfo.indexOf(colon)+1);
+                } else {
+                    pUser = userInfo;
+                }
+            }
+
+        } catch (URISyntaxException e) {
+            return null;
+        }
+
+
+        return new Proxy(pHost, pPort, pUser, pPass);
+
+    }
+
     // =====================================================================================
 
     /**
@@ -329,7 +424,23 @@ public class J4pClientBuilder {
         if (user != null && authenticator != null) {
             authenticator.authenticate(builder, user, password);
         }
+
+        setupProxyIfNeeded(builder);
+
         return builder.build();
+    }
+
+    private void setupProxyIfNeeded(HttpClientBuilder builder) {
+        if (httpProxy != null) {
+            builder.setProxy(new HttpHost(httpProxy.getHost(),httpProxy.getPort()));
+            if (httpProxy.getUser() != null) {
+                AuthScope proxyAuthScope = new AuthScope(httpProxy.getHost(),httpProxy.getPort());
+                UsernamePasswordCredentials proxyCredentials = new UsernamePasswordCredentials(httpProxy.getUser(),httpProxy.getPass());
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(proxyAuthScope,proxyCredentials);
+                builder.setDefaultCredentialsProvider(credentialsProvider);
+            }
+        }
     }
 
     private String getVersionInfo() {
@@ -402,5 +513,43 @@ public class J4pClientBuilder {
     private HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {
         return new ManagedHttpClientConnectionFactory(new DefaultHttpRequestWriterFactory(),
                                                       new DefaultHttpResponseParserFactory());
+    }
+
+    /**
+     * Internal representation of proxy server
+     */
+    public static class Proxy {
+        private String host;
+        private int port;
+        private String user;
+        private String pass;
+
+        public Proxy(String host, int port) {
+            this.host = host;
+            this.port = port;
+        }
+
+        public Proxy(String host, int port, String user, String pass) {
+            this.host = host;
+            this.port = port;
+            this.user = user;
+            this.pass = pass;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public String getPass() {
+            return pass;
+        }
     }
 }
