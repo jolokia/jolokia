@@ -17,14 +17,15 @@ package org.jolokia.jsr160;
  */
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.RequestDispatcher;
+import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
@@ -73,37 +74,44 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
         JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
-        JMXConnector connector = getConnector(pJmxReq);
+        JMXConnector connector = null;
         try {
+            connector = createConnector(pJmxReq);
+            connect(connector,pJmxReq);
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
                 MBeanServerExecutor manager = new MBeanServerExecutorRemote(connection);
-                return handler.handleRequest(manager,pJmxReq);
+                return handler.handleRequest(manager, pJmxReq);
             } else {
-                return handler.handleRequest(connection,pJmxReq);
+                return handler.handleRequest(connection, pJmxReq);
             }
         } finally {
             releaseConnector(connector);
         }
     }
 
+    private void connect(JMXConnector connector, JmxRequest pJmxReq) throws IOException {
+        ProxyTargetConfig targetConfig = pJmxReq.getTargetConfig();
+        Map<String,Object> env = prepareEnv(targetConfig.getEnv());
+        connector.connect(env);
+    }
+
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
-    private JMXConnector getConnector(JmxRequest pJmxReq) throws IOException {
+    private JMXConnector createConnector(JmxRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = pJmxReq.getTargetConfig();
         if (targetConfig == null) {
             throw new IllegalArgumentException("No proxy configuration in request " + pJmxReq);
         }
         String urlS = targetConfig.getUrl();
         JMXServiceURL url = new JMXServiceURL(urlS);
-        Map<String,Object> env = prepareEnv(targetConfig.getEnv());
-        JMXConnector ret = JMXConnectorFactory.newJMXConnector(url,env);
-        ret.connect();
-        return ret;
+        return JMXConnectorFactory.newJMXConnector(url,null);
     }
 
     private void releaseConnector(JMXConnector pConnector) throws IOException {
-        pConnector.close();
+        if (pConnector != null) {
+            pConnector.close();
+        }
     }
 
     /**
