@@ -322,19 +322,18 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
       <tr>
         <td><constant>proxy</constant></td>
         <td>
-          Determines http proxy server. It can be defined as:
-          host, port
-          host, port, user, pass
-          http://user:pass@host:port
+          Determines http proxy server. It can be defined as
+          <constant>http://user:password@host:port</constant>. <emphasis>user</emphasis> and
+          <emphasis>password</emphasis> are optional.
         </td>
         <td></td>
       </tr>
       <tr>
         <td><constant>useProxyFromEnvironment</constant></td>
         <td>
-          Set the proxy for this client based on http_proxy system environment variable.
-          Expect formats: http://user:pass@host:port or http://host:port
-          Example:   http://tom:sEcReT@my.proxy.com:8080
+          Set the proxy for this client based on <constant>http_proxy</constant> system environment variable.
+          Expect formats are <constant>http://user:pass@host:port</constant> or <constant>http://host:port</constant>
+          Example: <constant>http://tom:sEcReT@my.proxy.com:8080</constant>
         </td>
         <td></td>
       </tr>

@@ -16,17 +16,15 @@ package org.jolokia.client;
  *  limitations under the License.
  */
 
+import javax.management.MalformedObjectNameException;
+
 import org.apache.http.impl.client.BasicCookieStore;
 import org.jolokia.client.exception.J4pConnectException;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.J4pReadRequest;
 import org.testng.annotations.Test;
 
-import javax.management.MalformedObjectNameException;
-
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertNull;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.*;
 
 /**
  * @author roland
@@ -75,65 +73,6 @@ public class J4pClientBuilderTest {
     @Test
     public void testParseProxySettings_null() throws Exception {
         assertNull(J4pClientBuilder.parseProxySettings(null));
-    }
-
-    @Test
-    public void testParseProxySettings_emptyString() throws Exception {
-        assertNull(J4pClientBuilder.parseProxySettings(""));
-    }
-
-    @Test
-    public void testParseProxySettings_word() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("host");
-        assertNull(proxy);
-    }
-
-    @Test
-    public void testParseProxySettings_wordSpaceWord() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("host port");
-        assertNull(proxy);
-    }
-
-    @Test
-    public void testParseProxySettings_wordColonWord() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("host:port");
-        assertNull(proxy);
-    }
-
-    @Test
-    public void testParseProxySettings_hostColonPost() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("host:8080");
-        assertNull(proxy);
-    }
-
-    @Test
-    public void testParseProxySettings_schemaHostColonPost() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("http://host:8080");
-        assertNotNull(proxy);
-        assertEquals("host", proxy.getHost());
-        assertEquals(8080,proxy.getPort());
-        assertNull(proxy.getUser());
-        assertNull(proxy.getPass());
-    }
-
-    @Test
-    public void testParseProxySettings_schemaUserHostColonPost() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("http://user@host:8080");
-        assertNotNull(proxy);
-        assertEquals("host", proxy.getHost());
-        assertEquals(8080,proxy.getPort());
-        assertEquals("user", proxy.getUser());
-        assertNull(proxy.getPass());
-    }
-
-    @Test
-    public void testParseProxySettings_schemaUserPassHostColonPost() throws Exception {
-        J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings("http://user:pass@host:8080");
-        assertNotNull(proxy);
-        assertEquals("host", proxy.getHost());
-        assertEquals(8080,proxy.getPort());
-        assertEquals("user", proxy.getUser());
-        assertEquals("pass", proxy.getPass());
     }
 
     @Test

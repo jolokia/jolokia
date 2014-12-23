@@ -315,8 +315,8 @@ public class J4pClientBuilder {
     /**
      * Set the proxy for this client
      *
-     * @param pProxy proxy definition in format: http://user:pass@host:port or http://host:port
-     *               Example:   http://tom:sEcReT@my.proxy.com:8080
+     * @param pProxy proxy definition in the format <code>http://user:pass@host:port</code> or <code>http://host:port</code>
+     *               Example:   <code>http://tom:sEcReT@my.proxy.com:8080</code>
      */
     public final J4pClientBuilder proxy(String pProxy) {
         httpProxy = parseProxySettings(pProxy);
@@ -361,40 +361,21 @@ public class J4pClientBuilder {
         return this;
     }
 
-    public static Proxy parseProxySettings(String env) {
-        if (env == null || env.isEmpty()) return null;
-        String colon = ":";
-
-
-        String pHost;
-        int pPort;
-        String pUser = null;
-        String pPass = null;
+    /**
+     * Parse proxy specification and return a proxy object representing the proxy configuration.
+     * @param spec specification of for a proxy
+     * @return proxy object or null if none is set
+     */
+    static Proxy parseProxySettings(String spec) {
 
         try {
-            URI uri = new URI(env);
-            pHost = uri.getHost();
-            pPort = uri.getPort();
-
-            if ( pHost == null || pHost.isEmpty() || pPort < 0 || pPort > 65535) return null;
-
-            String userInfo = uri.getUserInfo();
-            if (userInfo != null && !userInfo.isEmpty()){
-                if(userInfo.contains(colon)){
-                    pUser = userInfo.substring(0,userInfo.indexOf(colon));
-                    pPass = userInfo.substring(userInfo.indexOf(colon)+1);
-                } else {
-                    pUser = userInfo;
-                }
+            if (spec == null || spec.length() == 0) {
+                return null;
             }
-
+            return new Proxy(spec);
         } catch (URISyntaxException e) {
             return null;
         }
-
-
-        return new Proxy(pHost, pPort, pUser, pPass);
-
     }
 
     // =====================================================================================
@@ -516,17 +497,16 @@ public class J4pClientBuilder {
     }
 
     /**
-     * Internal representation of proxy server
+     * Internal representation of proxy server. Package protected so that it can be accessed by tests.
      */
-    public static class Proxy {
+    static class Proxy {
         private String host;
         private int port;
         private String user;
         private String pass;
 
         public Proxy(String host, int port) {
-            this.host = host;
-            this.port = port;
+            this(host,port,null,null);
         }
 
         public Proxy(String host, int port, String user, String pass) {
@@ -534,6 +514,34 @@ public class J4pClientBuilder {
             this.port = port;
             this.user = user;
             this.pass = pass;
+        }
+
+        /**
+         * Create a proxy object from the environment
+         *
+         * @param env environment variable to parse
+         * @throws URISyntaxException if the given env var is not a valid proxy specification
+         */
+        public Proxy(String env) throws URISyntaxException {
+            String colon = ":";
+
+            URI uri = new URI(env);
+            this.host = uri.getHost();
+            this.port = uri.getPort();
+
+            if (host == null || host.isEmpty() || port < 0 || port > 65535) {
+                throw new URISyntaxException(env, "Invalid host '" + host + "' or port " + port);
+            }
+
+            String userInfo = uri.getUserInfo();
+            if (userInfo != null && !userInfo.isEmpty()){
+                if(userInfo.contains(colon)){
+                    this.user = userInfo.substring(0,userInfo.indexOf(colon));
+                    this.pass = userInfo.substring(userInfo.indexOf(colon)+1);
+                } else {
+                    this.user = userInfo;
+                }
+            }
         }
 
         public String getHost() {
