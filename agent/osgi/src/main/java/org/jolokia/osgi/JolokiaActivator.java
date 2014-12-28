@@ -1,5 +1,6 @@
 package org.jolokia.osgi;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -12,6 +13,8 @@ import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.NetworkUtil;
 import org.osgi.framework.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -54,8 +57,14 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     // Tracker for HttpService
     private ServiceTracker httpServiceTracker;
 
+    // Tracker for ConfigAdmin Service
+    private ServiceTracker configAdminTracker;
+
     // Prefix used for configuration values
     private static final String CONFIG_PREFIX = "org.jolokia";
+
+    // Prefix used for ConfigurationAdmin pid
+    private static final String CONFIG_ADMIN_PID = "org.jolokia.osgi";
 
     // HttpContext used for authorization
     private HttpContext jolokiaHttpContext;
@@ -70,6 +79,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     /** {@inheritDoc} */
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
+
+        //Track ConfigurationAdmin service
+        configAdminTracker = new ServiceTracker(pBundleContext,
+                                                ConfigurationAdmin.class.getCanonicalName(),
+                                                null);
+        configAdminTracker.open();
 
         if (Boolean.parseBoolean(getConfiguration(USE_RESTRICTOR_SERVICE))) {
             // If no restrictor is set in the constructor and we are enabled to listen for a restrictor
@@ -105,6 +120,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         if (jolokiaServiceRegistration != null) {
             jolokiaServiceRegistration.unregister();
             jolokiaServiceRegistration = null;
+        }
+
+        //Shut this down last to make sure nobody calls for a property after this is shutdown
+        if (configAdminTracker != null) {
+            configAdminTracker.close();
+            configAdminTracker = null;
         }
 
         restrictor = null;
@@ -160,12 +181,35 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
 
     private String getConfiguration(ConfigKey pKey) {
-        // TODO: Use fragments and/or configuration service if available.
-        String value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey.getKeyValue());
+        // TODO: Use fragments if available.
+        String value = getConfigurationFromConfigAdmin(pKey);
+        if (value == null) {
+            value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey.getKeyValue());
+        }
         if (value == null) {
             value = pKey.getDefaultValue();
         }
         return value;
+    }
+
+    private String getConfigurationFromConfigAdmin(ConfigKey pkey) {
+        ConfigurationAdmin configAdmin = (ConfigurationAdmin) configAdminTracker.getService();
+        if (configAdmin == null) {
+            return null;
+        }
+        try {
+            Configuration config = configAdmin.getConfiguration(CONFIG_ADMIN_PID);
+            if (config == null) {
+                return null;
+            }
+            Dictionary props = config.getProperties();
+            if (props == null) {
+                return null;
+            }
+            return (String) props.get(CONFIG_PREFIX + "." + pkey.getKeyValue());
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private Filter buildHttpServiceFilter(BundleContext pBundleContext) {
