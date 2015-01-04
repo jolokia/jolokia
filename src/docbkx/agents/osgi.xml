@@ -129,8 +129,11 @@
       logging needs.
     </para>
     <para>
-      The Jolokia OSGi bundle can be configured via the properties which
-      typically can be configured in a global configuration file of
+      The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
+      service using the PID <literal>org.jolokia.osgi</literal>
+      (e.g. if using Apache Karaf, place properties in
+      <literal>etc/org.jolokia.osgi.cfg</literal>), or alternatively via global
+      properties which typically can be configured in a configuration file of
       the OSGi container. All properties start with the prefix
       <literal>org.jolokia</literal> and are listed in <xref
       linkend="table-agents-osgi-properties"/>. They are mostly the

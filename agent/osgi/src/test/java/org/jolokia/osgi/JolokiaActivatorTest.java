@@ -16,10 +16,13 @@ package org.jolokia.osgi;
  *  limitations under the License.
  */
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
@@ -29,6 +32,8 @@ import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.config.ConfigKey;
 import org.osgi.framework.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.*;
 import org.osgi.service.log.LogService;
 import org.testng.annotations.BeforeMethod;
@@ -43,17 +48,21 @@ import static org.testng.Assert.assertNotNull;
  */
 public class JolokiaActivatorTest {
 
-    public static final String SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
+    public static final String HTTP_SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
+    public static final String CONFIG_SERVICE_FILTER = "(objectClass=org.osgi.service.cm.ConfigurationAdmin)";
 
     private BundleContext context;
     private JolokiaActivator activator;
 
     // Listener registered by the ServiceTracker
-    private ServiceListener listener;
-
+    private ServiceListener httpServiceListener;
     private ServiceRegistration registration;
+
     private HttpService httpService;
     private ServiceReference httpServiceReference;
+
+    private ServiceReference configAdminRef;
+    private ServiceListener configAdminServiceListener;
 
     @BeforeMethod
     public void setup() {
@@ -62,8 +71,8 @@ public class JolokiaActivatorTest {
     }
 
     @Test
-    public void withHttpService() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void withHttpService() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         startupHttpService();
         unregisterJolokiaServlet();
         stopActivator(true);
@@ -71,8 +80,8 @@ public class JolokiaActivatorTest {
     }
 
     @Test
-    public void withHttpServiceAndExplicitServiceShutdown() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void withHttpServiceAndExplicitServiceShutdown() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         startupHttpService();
 
         // Expect that servlet gets unregistered
@@ -85,8 +94,8 @@ public class JolokiaActivatorTest {
     }
 
     @Test
-    public void withHttpServiceAndAdditionalFilter() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException {
-        startActivator(true, "(Wibble=Wobble)");
+    public void withHttpServiceAndAdditionalFilter() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException, IOException {
+        startActivator(true, "(Wibble=Wobble)", null);
         startupHttpService();
         unregisterJolokiaServlet();
         stopActivator(true);
@@ -94,8 +103,8 @@ public class JolokiaActivatorTest {
     }
 
     @Test
-    public void modifiedService() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void modifiedService() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         startupHttpService();
 
         // Expect that servlet gets unregistered
@@ -106,37 +115,37 @@ public class JolokiaActivatorTest {
     }
 
     @Test
-    public void withoutServices() throws InvalidSyntaxException {
-        startActivator(false, null);
+    public void withoutServices() throws InvalidSyntaxException, IOException {
+        startActivator(false, null, null);
         stopActivator(false);
     }
 
     @Test
-    public void exceptionDuringRegistration() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void exceptionDuringRegistration() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         ServletException exp = new ServletException();
         prepareErrorLog(exp,"Servlet");
         startupHttpService(exp);
     }
 
     @Test
-    public void exceptionDuringRegistration2() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void exceptionDuringRegistration2() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         NamespaceException exp = new NamespaceException("Error");
         prepareErrorLog(exp,"Namespace");
         startupHttpService(exp);
     }
 
     @Test
-    public void exceptionWithoutLogService() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void exceptionWithoutLogService() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         expect(context.getServiceReference(LogService.class.getName())).andReturn(null);
         startupHttpService(new ServletException());
     }
 
     @Test
-    public void authentication() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void authentication() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         startupHttpService("roland","s!cr!t");
         unregisterJolokiaServlet();
         stopActivator(true);
@@ -144,9 +153,36 @@ public class JolokiaActivatorTest {
     }
 
     @Test
-    public void authenticationSecure() throws InvalidSyntaxException, ServletException, NamespaceException {
-        startActivator(true, null);
+    public void authenticationSecure() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
+        startActivator(true, null, null);
         startupHttpService("roland","s!cr!t","jaas");
+        unregisterJolokiaServlet();
+        stopActivator(true);
+        verify(httpService);
+    }
+
+    @Test
+    public void testConfigAdminEmptyDictionary() throws Exception {
+        Dictionary dict = new Hashtable();
+        startActivator(false, null, dict);
+        stopActivator(false);
+    }
+
+    @Test
+    public void testConfigAdminEmptyDictionaryNoHttpListener() throws Exception {
+        Dictionary dict = new Hashtable();
+        startActivator(false, null, dict);
+        stopActivator(false);
+    }
+
+    @Test
+    public void testSomePropsFromConfigAdmin() throws Exception {
+        Dictionary<String, String> dict = new Hashtable<String, String>();
+        dict.put("org.jolokia.user", "roland");
+        dict.put("org.jolokia.password", "s!cr!t");
+        dict.put("org.jolokia.authMode", "jaas");
+        startActivator(true, null, dict);
+        startupHttpServiceWithConfigAdminProps();
         unregisterJolokiaServlet();
         stopActivator(true);
         verify(httpService);
@@ -165,11 +201,11 @@ public class JolokiaActivatorTest {
     }
 
     private void shutdownHttpService() {
-        listener.serviceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING,httpServiceReference));
+        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, httpServiceReference));
     }
 
     private void modifiedHttpService() {
-        listener.serviceChanged(new ServiceEvent(ServiceEvent.MODIFIED,httpServiceReference));
+        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.MODIFIED, httpServiceReference));
     }
 
     private void unregisterJolokiaServlet() {
@@ -219,7 +255,32 @@ public class JolokiaActivatorTest {
         replay(context, httpServiceReference, httpService);
 
         // Attach service
-        listener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, httpServiceReference));
+        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, httpServiceReference));
+    }
+
+    private void startupHttpServiceWithConfigAdminProps() throws ServletException, NamespaceException {
+        httpServiceReference = createMock(ServiceReference.class);
+        httpService = createMock(HttpService.class);
+
+        expect(context.getService(httpServiceReference)).andReturn(httpService);
+        int i = 0;
+        for (ConfigKey key : ConfigKey.values()) {
+            if (key == ConfigKey.USER || key == ConfigKey.PASSWORD || key == ConfigKey.AUTH_MODE) {
+                //ignore these, they will be provided from config admin service
+            } else {
+                expect(context.getProperty("org.jolokia." + key.getKeyValue())).andStubReturn(
+                        i++ % 2 == 0 ? key.getDefaultValue() : null);
+            }
+        }
+        httpService.registerServlet(eq(ConfigKey.AGENT_CONTEXT.getDefaultValue()),
+                isA(JolokiaServlet.class),
+                EasyMock.<Dictionary>anyObject(),
+                EasyMock.<HttpContext>anyObject());
+
+        replay(context, httpServiceReference, httpService);
+
+        // Attach service
+        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, httpServiceReference));
     }
 
     private void stopActivator(boolean withHttpListener) {
@@ -228,11 +289,15 @@ public class JolokiaActivatorTest {
             reset(registration);
         }
         if (withHttpListener) {
-            context.removeServiceListener(listener);
+            context.removeServiceListener(httpServiceListener);
             expect(context.getProperty("org.jolokia." + ConfigKey.AGENT_CONTEXT.getKeyValue()))
                     .andReturn(ConfigKey.AGENT_CONTEXT.getDefaultValue());
             registration.unregister();
         }
+
+        expect(context.ungetService(anyObject(ServiceReference.class))).andReturn(true).anyTimes();
+        context.removeServiceListener(configAdminServiceListener);
+
         replay(context);
         if (withHttpListener) {
             replay(registration);
@@ -240,9 +305,9 @@ public class JolokiaActivatorTest {
         activator.stop(context);
     }
 
-    private void startActivator(boolean withHttpListener, String httpFilter) throws InvalidSyntaxException {
+    private void startActivator(boolean withHttpListener, String httpFilter, Dictionary configAdminProps) throws InvalidSyntaxException, IOException {
         reset(context);
-        prepareStart(withHttpListener, true, httpFilter);
+        prepareStart(withHttpListener, true, httpFilter, configAdminProps);
 
         replay(context);
         if (withHttpListener) {
@@ -251,25 +316,41 @@ public class JolokiaActivatorTest {
 
         activator.start(context);
         if (withHttpListener) {
-            assertNotNull(listener);
+            assertNotNull(httpServiceListener);
         }
+        assertNotNull(configAdminServiceListener);
+
         reset(context);
     }
 
-    private void prepareStart(boolean doHttpService, boolean doRestrictor, String httpFilter) throws InvalidSyntaxException {
+    private void prepareStart(boolean doHttpService, boolean doRestrictor, String httpFilter, Dictionary configAdminProps) throws InvalidSyntaxException, IOException {
         expect(context.getProperty("org.jolokia.listenForHttpService")).andReturn("" + doHttpService);
         if (doHttpService) {
             expect(context.getProperty("org.jolokia.httpServiceFilter")).andReturn(httpFilter);
 
-            Filter filter = createFilterMockWithToString(SERVICE_FILTER, httpFilter);
+            Filter filter = createFilterMockWithToString(HTTP_SERVICE_FILTER, httpFilter);
             expect(context.createFilter(filter.toString())).andReturn(filter);
             expect(context.getProperty("org.osgi.framework.version")).andReturn("4.5.0");
-            context.addServiceListener(rememberListener(), eq(filter.toString()));
+            context.addServiceListener(httpRememberListener(), eq(filter.toString()));
             expect(context.getServiceReferences(null, filter.toString())).andReturn(null);
             registration = createMock(ServiceRegistration.class);
             expect(context.registerService(JolokiaContext.class.getName(), activator, null)).andReturn(registration);
 
         }
+
+        //Setup ConfigurationAdmin service
+        Filter configFilter = createFilterMockWithToString(CONFIG_SERVICE_FILTER, null);
+        expect(context.createFilter(configFilter.toString())).andReturn(configFilter);
+        context.addServiceListener(configAdminRememberListener(), eq(configFilter.toString()));
+        configAdminRef = createMock(ServiceReference.class);
+        expect(context.getServiceReferences(ConfigurationAdmin.class.getCanonicalName(), null)).andReturn(new ServiceReference[]{configAdminRef}).anyTimes();
+        ConfigurationAdmin configAdmin = createMock(ConfigurationAdmin.class);
+        Configuration config = createMock(Configuration.class);
+        expect(config.getProperties()).andReturn(configAdminProps).anyTimes();
+        expect(configAdmin.getConfiguration("org.jolokia.osgi")).andReturn(config).anyTimes();
+        expect(context.getService(configAdminRef)).andReturn(configAdmin).anyTimes();
+        replay(configAdminRef, configAdmin, config);
+
         expect(context.getProperty("org.jolokia.useRestrictorService")).andReturn("" + doRestrictor);
     }
 
@@ -290,10 +371,23 @@ public class JolokiaActivatorTest {
         });
     }
 
-    private ServiceListener rememberListener() {
+    private ServiceListener httpRememberListener() {
         reportMatcher(new IArgumentMatcher() {
             public boolean matches(Object argument) {
-                listener = (ServiceListener) argument;
+                httpServiceListener = (ServiceListener) argument;
+                return true;
+            }
+
+            public void appendTo(StringBuffer buffer) {
+            }
+        });
+        return null;
+    }
+
+    private ServiceListener configAdminRememberListener() {
+        reportMatcher(new IArgumentMatcher() {
+            public boolean matches(Object argument) {
+                configAdminServiceListener = (ServiceListener) argument;
                 return true;
             }
 

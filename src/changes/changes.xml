@@ -27,6 +27,9 @@
       <action dev="nevenr" type="add" date="2014-12-11" issue="169">
         Use system properties on the HttpClient that's used in J4pClientBuilder
       </action>
+      <action dev="erwelch" type="add" date="2015-01-03">
+        OSGi agent can read properties from Configuration Admin service with PID org.jolokia.osgi
+      </action>
     </release>
     <release version="1.2.3" description="Release 1.2.3" date="2014-11-08">
       <action dev="nevenr" type="fix" date="2014-10-21" issue="166">
