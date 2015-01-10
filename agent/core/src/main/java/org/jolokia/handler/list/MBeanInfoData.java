@@ -226,6 +226,23 @@ public class MBeanInfoData {
         }
     }
 
+    /**
+     * Add an exception which occurred during extraction of an {@link MBeanInfo} for
+     * a certain {@link ObjectName} to this map.
+     *
+     * @param pName MBean name for which the error occurred
+     * @param pExp exception occurred
+     * @throws IllegalStateException if this method decides to rethrow the exception
+     */
+    public void handleException(ObjectName pName, InstanceNotFoundException pExp) throws InstanceNotFoundException {
+        // This happen happens for JBoss 7.1 in some cases (i.e. ResourceAdapterModule)
+        if (pathStack.size() == 0) {
+           addException(pName, pExp);
+        } else {
+           throw new InstanceNotFoundException("InstanceNotFoundException for MBean " + pName + " (" + pExp.getMessage() + ")");
+        }
+    }
+ 
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
         JSONObject mBeansMap = getOrCreateJSONObject(infoMap, pName.getDomain());

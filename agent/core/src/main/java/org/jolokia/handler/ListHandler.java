@@ -208,6 +208,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
                     infoMap.addMBeanInfo(mBeanInfo, pName);
                 } catch (IOException exp) {
                     infoMap.handleException(pName, exp);
+                } catch (InstanceNotFoundException exp) {
+                    infoMap.handleException(pName, exp);
                 } catch (IllegalStateException exp) {
                     infoMap.handleException(pName, exp);
                 } catch (IntrospectionException exp) {
