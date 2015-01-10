@@ -337,6 +337,26 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         </td>
         <td></td>
       </tr>
+      <tr>
+        <td><constant>responseExtractor</constant></td>
+        <td>
+          A response extractor can be used for hooking into the JSON
+          deserialization process when a JSON response is converted
+          into a <classname>J4pResponse</classname> object. By
+          default, the received JSON object is examined for a status
+          code of 200 and only then creates a response
+          object. Otherwise an exception is thrown. An extractor is
+          specified by the interface
+          <classname>J4pResponseExtractor</classname>. Beside the
+          default extractor, an alternate extractor
+          <classname>ValidatingResponseExtractor</classname> can be
+          used, which instead of throwing an exception returns a
+          <code>null</code> object when the response has a status of
+          404. An extractor can be speficied as extra argument to the
+          execute method, too.
+        </td>
+        <td></td>
+      </tr>
     </table>
     <para>
       The <classname>J4pClient</classname> provides various variants

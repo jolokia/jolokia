@@ -27,8 +27,12 @@
       <action dev="jcordes73" type="fix" date="2015-01-10" issue="178">
        Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list" 
       </action>
+      <action dev="roland" type="add" date="2014-12-23" issue="173">
+        Added the possibility to hook into the deserialization process
+        for responses.
+      </action>
       <action dev="nevenr" type="add" date="2014-12-11" issue="169">
-        Use system properties on the HttpClient that's used in J4pClientBuilder
+        Allow a proxy to be specified in J4pClientBuilder
       </action>
       <action dev="erwelch" type="add" date="2015-01-03">
         OSGi agent can read properties from Configuration Admin service with PID org.jolokia.osgi
@@ -36,7 +40,7 @@
     </release>
     <release version="1.2.3" description="Release 1.2.3" date="2014-11-08">
       <action dev="nevenr" type="fix" date="2014-10-21" issue="166">
-        JVM Agent and SSL client authentication does not work
+        JVM Agent and SSL client authentication fixed
       </action>
       <action dev="nevenr" type="add" date="2014-10-21" issue="167">
         Enabling additional configuration parameters for HTTPS
