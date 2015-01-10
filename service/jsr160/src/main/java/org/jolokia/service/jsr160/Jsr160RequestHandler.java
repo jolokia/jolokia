@@ -76,9 +76,12 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      */
     public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+
         CommandHandler<R> handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
-        JMXConnector connector = getConnector(pJmxReq);
+        JMXConnector connector = null;
         try {
+            connector = createConnector(pJmxReq);
+            connector.connect();
             MBeanServerConnection connection = connector.getMBeanServerConnection();
             if (handler.handleAllServersAtOnce(pJmxReq)) {
                 // There is no way to get remotely all MBeanServers ...
@@ -93,18 +96,19 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     }
 
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
-    private JMXConnector getConnector(JolokiaRequest pJmxReq) throws IOException {
+    private JMXConnector createConnector(JolokiaRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = new ProxyTargetConfig((Map<String, String>) pJmxReq.getOption("target"));
         String urlS = targetConfig.getUrl();
         JMXServiceURL url = new JMXServiceURL(urlS);
+
         Map<String,Object> env = prepareEnv(targetConfig.getEnv());
-        JMXConnector ret = JMXConnectorFactory.newJMXConnector(url,env);
-        ret.connect();
-        return ret;
+        return JMXConnectorFactory.newJMXConnector(url,env);
     }
 
     private void releaseConnector(JMXConnector pConnector) throws IOException {
-        pConnector.close();
+        if (pConnector != null) {
+            pConnector.close();
+        }
     }
 
     /**

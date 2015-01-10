@@ -16,11 +16,15 @@ package org.jolokia.client;
  *  limitations under the License.
  */
 
-import org.apache.http.client.HttpClient;
+import javax.management.MalformedObjectNameException;
+
 import org.apache.http.impl.client.BasicCookieStore;
+import org.jolokia.client.exception.J4pConnectException;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.request.J4pReadRequest;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.*;
 
 /**
  * @author roland
@@ -46,7 +50,7 @@ public class J4pClientBuilderTest {
                         .socketTimeout(5000)
                         .cookieStore(new BasicCookieStore())
                         .build();
-        HttpClient hc = client.getHttpClient();
+        client.getHttpClient();
     }
 
     @Test
@@ -64,6 +68,61 @@ public class J4pClientBuilderTest {
         assertNotNull(J4pClient.socketBufferSize(8192));
         assertNotNull(J4pClient.socketTimeout(5000));
         assertNotNull(J4pClient.cookieStore(new BasicCookieStore()));
+    }
+
+    @Test
+    public void testParseProxySettings_null() throws Exception {
+        assertNull(J4pClientBuilder.parseProxySettings(null));
+    }
+
+    @Test
+    public void proxy_stringWithUserPassHostAndPort() {
+        J4pClient client =
+                J4pClient
+                        .url("http://localhost:8080/jolokia")
+                        .proxy("http://user:pass@host:8080")
+                        .build();
+        client.getHttpClient();
+    }
+
+    @Test
+    public void proxy_hostAndPort() {
+        J4pClient client =
+                J4pClient
+                        .url("http://localhost:8080/jolokia")
+                        .proxy("host", 8080)
+                        .build();
+        client.getHttpClient();
+    }
+
+    @Test
+    public void proxy_hostPortUserAndPassword() {
+        J4pClient client =
+                J4pClient
+                        .url("http://localhost:8080/jolokia")
+                        .proxy("host",8080,"user","pass")
+                        .build();
+        client.getHttpClient();
+    }
+    @Test
+    public void proxy_useProxyFromEnvironment() {
+        J4pClient client =
+                J4pClient
+                        .url("http://localhost:8080/jolokia")
+                        .useProxyFromEnvironment()
+                        .build();
+        client.getHttpClient();
+    }
+
+    @Test(expectedExceptions = J4pConnectException.class, expectedExceptionsMessageRegExp = ".*localhost:65535.*")
+    public void proxy_executeNoProxy() throws MalformedObjectNameException, J4pException {
+        J4pClient client =
+                J4pClient
+                        .url("http://localhost:8080/jolokia")
+                        .proxy("localhost", 65535, "user", "pass") // most likely there is no proxy on this port
+                        .build();
+        J4pReadRequest readRequest = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+        client.execute(readRequest);
     }
 
 }

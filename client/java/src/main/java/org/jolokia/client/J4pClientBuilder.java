@@ -16,11 +16,18 @@ package org.jolokia.client;
  * limitations under the License.
  */
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.*;
@@ -35,7 +42,7 @@ import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
 import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.VersionInfo;
-import org.jolokia.client.request.J4pTargetConfig;
+import org.jolokia.client.request.*;
 
 /**
  * A builder for a {@link org.jolokia.client.J4pClient}.
@@ -81,6 +88,12 @@ public class J4pClientBuilder {
     // Authenticator to use for performing a login
     private J4pAuthenticator authenticator;
 
+    // HTTP proxy settings
+    private Proxy httpProxy;
+
+    // Extractor used creating responses
+    private J4pResponseExtractor responseExtractor;
+
     /**
      * Package access constructor, use static method on J4pClient for creating
      * the builder.
@@ -99,6 +112,7 @@ public class J4pClientBuilder {
         password(null);
         cookieStore(new BasicCookieStore());
         authenticator(new BasicAuthenticator());
+        responseExtractor(ValidatingResponseExtractor.DEFAULT);
     }
 
     /**
@@ -302,6 +316,68 @@ public class J4pClientBuilder {
         return this;
     }
 
+    /**
+     * Set the proxy for this client
+     *
+     * @param pProxy proxy definition in the format <code>http://user:pass@host:port</code> or <code>http://host:port</code>
+     *               Example:   <code>http://tom:sEcReT@my.proxy.com:8080</code>
+     */
+    public final J4pClientBuilder proxy(String pProxy) {
+        httpProxy = parseProxySettings(pProxy);
+        return this;
+    }
+
+    /**
+     * Set the proxy for this client
+     *
+     * @param pProxyHost proxy hostname
+     * @param pProxyPort proxy port number
+     */
+    public final J4pClientBuilder proxy(String pProxyHost, int pProxyPort) {
+        httpProxy = new Proxy(pProxyHost,pProxyPort);
+        return this;
+    }
+
+    /**
+     * Set the proxy for this client
+     *
+     * @param pProxyHost  proxy hostname
+     * @param pProxyPort  proxy port number
+     * @param pProxyUser  proxy authentication username
+     * @param pProxyPass  proxy authentication password
+     */
+    public final J4pClientBuilder proxy(String pProxyHost, int pProxyPort, String pProxyUser, String pProxyPass) {
+        httpProxy = new Proxy(pProxyHost,pProxyPort, pProxyUser,pProxyPass);
+        return this;
+    }
+
+    /**
+     * Set the proxy for this client based on http_proxy system environment variable
+     */
+    public final J4pClientBuilder useProxyFromEnvironment(){
+        Map<String, String> env = System.getenv();
+        for (String key : env.keySet()) {
+            if (key.equalsIgnoreCase("http_proxy")){
+                httpProxy = parseProxySettings(env.get(key));
+                break;
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Set the response extractor to use for handling single responses. By default the JSON answer from
+     * the agent is parsed and only considered as successful if the status code returned is 200. In all other
+     * cases an exception is thrown. An alternative extractor e.g. could silently ignored non existent MBeans (which
+     * might be considered optional.
+     *
+     * @param pResponseExtractor response extractor to use.
+     */
+    public final J4pClientBuilder responseExtractor(J4pResponseExtractor pResponseExtractor) {
+        this.responseExtractor = pResponseExtractor;
+        return this;
+    }
+
     // =====================================================================================
 
     /**
@@ -311,9 +387,8 @@ public class J4pClientBuilder {
      */
     public J4pClient build() {
         return new J4pClient(url,createHttpClient(),
-                                         targetUrl != null ?
-                                                 new J4pTargetConfig(targetUrl,targetUser,targetPassword) :
-                                                 null);
+                             targetUrl != null ? new J4pTargetConfig(targetUrl,targetUser,targetPassword) :  null,
+                             responseExtractor);
     }
 
     public HttpClient createHttpClient() {
@@ -329,7 +404,44 @@ public class J4pClientBuilder {
         if (user != null && authenticator != null) {
             authenticator.authenticate(builder, user, password);
         }
+
+        setupProxyIfNeeded(builder);
+
         return builder.build();
+    }
+
+
+
+    /**
+     * Parse proxy specification and return a proxy object representing the proxy configuration.
+     * @param spec specification of for a proxy
+     * @return proxy object or null if none is set
+     */
+    static Proxy parseProxySettings(String spec) {
+
+        try {
+            if (spec == null || spec.length() == 0) {
+                return null;
+            }
+            return new Proxy(spec);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    // ==========================================================================================
+
+    private void setupProxyIfNeeded(HttpClientBuilder builder) {
+        if (httpProxy != null) {
+            builder.setProxy(new HttpHost(httpProxy.getHost(),httpProxy.getPort()));
+            if (httpProxy.getUser() != null) {
+                AuthScope proxyAuthScope = new AuthScope(httpProxy.getHost(),httpProxy.getPort());
+                UsernamePasswordCredentials proxyCredentials = new UsernamePasswordCredentials(httpProxy.getUser(),httpProxy.getPass());
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(proxyAuthScope,proxyCredentials);
+                builder.setDefaultCredentialsProvider(credentialsProvider);
+            }
+        }
     }
 
     private String getVersionInfo() {
@@ -402,5 +514,71 @@ public class J4pClientBuilder {
     private HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {
         return new ManagedHttpClientConnectionFactory(new DefaultHttpRequestWriterFactory(),
                                                       new DefaultHttpResponseParserFactory());
+    }
+
+
+    /**
+     * Internal representation of proxy server. Package protected so that it can be accessed by tests.
+     */
+    static class Proxy {
+        private String host;
+        private int port;
+        private String user;
+        private String pass;
+
+        public Proxy(String host, int port) {
+            this(host,port,null,null);
+        }
+
+        public Proxy(String host, int port, String user, String pass) {
+            this.host = host;
+            this.port = port;
+            this.user = user;
+            this.pass = pass;
+        }
+
+        /**
+         * Create a proxy object from the environment
+         *
+         * @param env environment variable to parse
+         * @throws URISyntaxException if the given env var is not a valid proxy specification
+         */
+        public Proxy(String env) throws URISyntaxException {
+            String colon = ":";
+
+            URI uri = new URI(env);
+            this.host = uri.getHost();
+            this.port = uri.getPort();
+
+            if (host == null || host.isEmpty() || port < 0 || port > 65535) {
+                throw new URISyntaxException(env, "Invalid host '" + host + "' or port " + port);
+            }
+
+            String userInfo = uri.getUserInfo();
+            if (userInfo != null && !userInfo.isEmpty()){
+                if(userInfo.contains(colon)){
+                    this.user = userInfo.substring(0,userInfo.indexOf(colon));
+                    this.pass = userInfo.substring(userInfo.indexOf(colon)+1);
+                } else {
+                    this.user = userInfo;
+                }
+            }
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public String getPass() {
+            return pass;
+        }
     }
 }

@@ -196,6 +196,8 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
                     infoData.addMBeanInfo(mBeanInfo, pName);
                 } catch (IOException exp) {
                     infoData.handleException(pName, exp);
+                } catch (InstanceNotFoundException exp) {
+                    infoData.handleException(pName, exp);
                 } catch (IllegalStateException exp) {
                     infoData.handleException(pName, exp);
                 } catch (IntrospectionException exp) {

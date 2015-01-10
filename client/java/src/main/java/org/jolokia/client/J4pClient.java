@@ -43,6 +43,9 @@ public class J4pClient extends J4pClientBuilderFactory {
     // Creating and parsing HTTP-Requests and Responses
     private J4pRequestHandler requestHandler;
 
+    // Extractor used for creating J4pResponses
+    private J4pResponseExtractor responseExtractor;
+
     /**
      * Construct a new client for a given server url
      *
@@ -71,7 +74,22 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param pTargetConfig optional target
      */
     public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient,J4pTargetConfig pTargetConfig) {
+        this(pJ4pServerUrl,pHttpClient,pTargetConfig, ValidatingResponseExtractor.DEFAULT);
+    }
+
+
+    /**
+     * Constructor using a given Agent URL, HttpClient and a proxy target config. If the HttpClient is null,
+     * a default client is used. If no target config is given, a plain request is performed
+     *
+     * @param pJ4pServerUrl the agent URL for how to contact the server.
+     * @param pHttpClient HTTP client to use for the connecting to the agent
+     * @param pTargetConfig optional target
+     * @param pExtractor response extractor to use
+     */
+    public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient,J4pTargetConfig pTargetConfig,J4pResponseExtractor pExtractor) {
         requestHandler = new J4pRequestHandler(pJ4pServerUrl,pTargetConfig);
+        responseExtractor = pExtractor;
         // Using the default as defined in the client builder
         if (pHttpClient != null) {
             httpClient = pHttpClient;
@@ -81,21 +99,22 @@ public class J4pClient extends J4pClientBuilderFactory {
         }
     }
 
+    // =============================================================================================
 
     /**
      * Execute a single J4pRequest returning a single response.
      * The HTTP Method used is determined automatically.
      *
      * @param pRequest request to execute
-     * @param <R> response type
-     * @param <T> request type
+     * @param <RESP> response type
+     * @param <REQ> request type
      * @return the response as returned by the server
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest)
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest)
             throws J4pException {
         // type spec is required to keep OpenJDK 1.6 happy (other JVM dont have a problem
         // with infering the type is missing here)
-        return this.<R,T>execute(pRequest,null,null);
+        return this.<RESP, REQ>execute(pRequest,null,null);
     }
 
     /**
@@ -104,16 +123,16 @@ public class J4pClient extends J4pClientBuilderFactory {
      *
      * @param pRequest request to execute
      * @param pProcessingOptions optional map of processing options
-     * @param <R> response type
-     * @param <T> request type
+     * @param <RESP> response type
+     * @param <REQ> request type
      * @return the response as returned by the server
      * @throws java.io.IOException when the execution fails
      * @throws org.json.simple.parser.ParseException if parsing of the JSON answer fails
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,
                                                                      Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
-        return this.<R,T>execute(pRequest,null,pProcessingOptions);
+        return this.<RESP, REQ>execute(pRequest,null,pProcessingOptions);
     }
 
     /**
@@ -122,13 +141,13 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param pRequest request to execute
      * @param pMethod method to use which should be either "GET" or "POST"
      *
-     * @param <R> response type
-     * @param <T> request type
+     * @param <RESP> response type
+     * @param <REQ> request type
      * @return response object
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod) throws J4pException {
-        return this.<R,T>execute(pRequest, pMethod, null);
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,String pMethod) throws J4pException {
+        return this.<RESP, REQ>execute(pRequest, pMethod, null);
     }
 
     /**
@@ -136,29 +155,44 @@ public class J4pClient extends J4pClientBuilderFactory {
      *
      * @param pRequest request to execute
      * @param pMethod method to use which should be either "GET" or "POST"
-     * @param pProcessingOptions optional map of processiong options
+     * @param pProcessingOptions optional map of processing options
      *
-     * @param <R> response type
-     * @param <T> request type
+     * @param <RESP> response type
+     * @param <REQ> request type
      * @return response object
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> R execute(T pRequest,String pMethod,
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,String pMethod,
                                                                      Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
+        return this.<RESP, REQ>execute(pRequest,pMethod,pProcessingOptions,responseExtractor);
+    }
+
+    /**
+     * Execute a single J4pRequest which returns a single response.
+     *
+     * @param pRequest request to execute
+     * @param pMethod method to use which should be either "GET" or "POST"
+     * @param pProcessingOptions optional map of processing options
+     * @param pExtractor extractor for actually creating the response
+     *
+     * @param <RESP> response type
+     * @param <REQ> request type
+     * @return response object
+     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     */
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,String pMethod,
+                                                                     Map<J4pQueryParameter,String> pProcessingOptions,
+                                                                     J4pResponseExtractor pExtractor)
+            throws J4pException {
+
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod,pProcessingOptions));
             JSONAware jsonResponse = extractJsonResponse(pRequest,response);
             if (! (jsonResponse instanceof JSONObject)) {
                 throw new J4pException("Invalid JSON answer for a single request (expected a map but got a " + jsonResponse.getClass() + ")");
             }
-            JSONObject jsonResponseObject = (JSONObject) jsonResponse;
-            J4pRemoteException exp = validate(pRequest,jsonResponseObject);
-            if (exp == null) {
-                return requestHandler.<R,T>extractResponse(pRequest, jsonResponseObject);
-            } else {
-                throw exp;
-            }
+            return pExtractor.extract(pRequest, (JSONObject) jsonResponse);
         }
         catch (IOException e) {
             throw mapException(e);
@@ -172,14 +206,14 @@ public class J4pClient extends J4pClientBuilderFactory {
      * dispatched on the agent side. The results are given back in the same order as the arguments provided.
      *
      * @param pRequests requests to execute
-     * @param <R> response type
-     * @param <T> request type
+     * @param <RESP> response type
+     * @param <REQ> request type
      * @return list of responses, one response for each request
      * @throws J4pException when an communication error occurs
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests)
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests)
             throws J4pException {
-        return this.<R,T>execute(pRequests, null);
+        return this.<RESP, REQ>execute(pRequests, null);
     }
 
     /**
@@ -188,12 +222,31 @@ public class J4pClient extends J4pClientBuilderFactory {
      *
      * @param pRequests requests to execute
      * @param pProcessingOptions processing options to use
-     * @param <R> response type
-     * @param <T> request type
+     * @param <RESP> response type
+     * @param <REQ> request type
      * @return list of responses, one response for each request
      * @throws J4pException when an communication error occurs
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
+            throws J4pException {
+        return execute(pRequests,pProcessingOptions,responseExtractor);
+    }
+
+    /**
+     * Execute multiple requests at once. All given request will result in a single HTTP request where it gets
+     * dispatched on the agent side. The results are given back in the same order as the arguments provided.
+     *
+     * @param pRequests requests to execute
+     * @param pProcessingOptions processing options to use
+     * @param pResponseExtractor use this for custom extraction handling
+     * @param <RESP> response type
+     * @param <REQ> request type
+     * @return list of responses, one response for each request
+     * @throws J4pException when an communication error occurs
+     */
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests,
+                                                                                      Map<J4pQueryParameter,String> pProcessingOptions,
+                                                                                      J4pResponseExtractor pResponseExtractor)
             throws J4pException {
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests,pProcessingOptions));
@@ -201,7 +254,7 @@ public class J4pClient extends J4pClientBuilderFactory {
 
             verifyBulkJsonResponse(jsonResponse);
 
-            return this.<R,T>extractResponses(jsonResponse, pRequests);
+            return this.<RESP, REQ>extractResponses(jsonResponse, pRequests, pResponseExtractor);
         } catch (IOException e) {
             throw mapException(e);
         } catch (URISyntaxException e) {
@@ -212,8 +265,7 @@ public class J4pClient extends J4pClientBuilderFactory {
     // =====================================================================================================
 
     @SuppressWarnings("PMD.PreserveStackTrace")
-
-    private <T extends J4pRequest> JSONAware extractJsonResponse(T pRequest, HttpResponse pResponse) throws J4pException {
+    private <REQ extends J4pRequest> JSONAware extractJsonResponse(REQ pRequest, HttpResponse pResponse) throws J4pException {
         try {
             return requestHandler.extractJsonResponse(pResponse);
         } catch (IOException e) {
@@ -229,9 +281,10 @@ public class J4pClient extends J4pClientBuilderFactory {
         }
     }
 
-
     // Extract J4pResponses from a returned bulk JSON answer
-    private <R extends J4pResponse<T>, T extends J4pRequest> List<R> extractResponses(JSONAware pJsonResponse, List<T> pRequests) throws J4pException {
+    private <R extends J4pResponse<T>, T extends J4pRequest> List<R> extractResponses(JSONAware pJsonResponse,
+                                                                                      List<T> pRequests,
+                                                                                      J4pResponseExtractor pResponseExtractor) throws J4pException {
         JSONArray responseArray = (JSONArray) pJsonResponse;
         List<R> ret = new ArrayList<R>(responseArray.size());
         J4pRemoteException remoteExceptions[] = new J4pRemoteException[responseArray.size()];
@@ -242,14 +295,12 @@ public class J4pClient extends J4pClientBuilderFactory {
             if (!(jsonResp instanceof JSONObject)) {
                 throw new J4pException("Response for request Nr. " + i + " is invalid (expected a map but got " + jsonResp.getClass() + ")");
             }
-            JSONObject jsonRespObject = (JSONObject) jsonResp;
-            J4pRemoteException exp = validate(request,jsonRespObject);
-            if (exp != null) {
+            try {
+                ret.add(i,pResponseExtractor.<R,T>extract(request, (JSONObject) jsonResp));
+            } catch (J4pRemoteException exp) {
                 remoteExceptions[i] = exp;
                 exceptionFound = true;
                 ret.add(i,null);
-            } else {
-                ret.add(i,requestHandler.<R,T>extractResponse(request, (JSONObject) jsonResp));
             }
         }
         if (exceptionFound) {
@@ -294,29 +345,14 @@ public class J4pClient extends J4pClientBuilderFactory {
         if (!(pJsonResponse instanceof JSONArray)) {
             if (pJsonResponse instanceof JSONObject) {
                 JSONObject errorObject = (JSONObject) pJsonResponse;
-                J4pRemoteException exp = validate(null,errorObject);
-                if (exp != null) {
-                    throw exp;
+
+                if (!errorObject.containsKey("status") || (Long) errorObject.get("status") != 200) {
+                    throw new J4pRemoteException(null, errorObject);
                 }
             }
             throw new J4pException("Invalid JSON answer for a bulk request (expected an array but got a " + pJsonResponse.getClass() + ")");
         }
     }
-
-    // Validate a result object and create a remote exception in case of an error
-    private <T extends J4pRequest> J4pRemoteException validate(T pRequest, JSONObject pJsonRespObject) {
-        Long status = (Long) pJsonRespObject.get("status");
-        if (status == null) {
-            return new J4pRemoteException(pRequest,"Invalid response received: " + pJsonRespObject.toJSONString(), null, 500,null, null);
-        } else if (status != 200) {
-            return new J4pRemoteException(pRequest,(String) pJsonRespObject.get("error"), (String) pJsonRespObject.get("error_type"),
-                                          status.intValue(),(String) pJsonRespObject.get("stacktrace"),
-                                          (JSONObject) pJsonRespObject.get("error_value"));
-        } else {
-            return null;
-        }
-    }
-
 
     /**
      * Execute multiple requests at once. All given request will result in a single HTTP request where it gets
