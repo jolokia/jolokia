@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.SocketException;
 import java.util.*;
 
+import javax.management.JMException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -529,6 +530,8 @@ public class AgentServletTest {
         context.log((String) anyObject());
         expectLastCall().asStub();
         context.log(find("TestDetector"),isA(RuntimeException.class));
+        context.log((String) anyObject(),isA(JMException.class));
+        expectLastCall().anyTimes();
     }
 
     private StringWriter initRequestResponseMocks() throws IOException {

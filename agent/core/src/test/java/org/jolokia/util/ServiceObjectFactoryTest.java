@@ -19,12 +19,9 @@ package org.jolokia.util;
 import java.util.Iterator;
 import java.util.List;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 /**
  * @author roland
@@ -54,21 +51,6 @@ public class ServiceObjectFactoryTest {
     public void classCastException() {
         List<String> services = ServiceObjectFactory.createServiceObjects("service/test-services");
         String bla = services.get(0);
-    }
-
-    @Test
-    public void extractServiceConfiguration() throws ParseException {
-        String configString = "{ \"healthCheck\" : { \"path\": \"/tmp\"}}";
-        JSONObject extra =
-                ServiceObjectFactory.extractServiceConfiguration(configString, "healthCheck");
-        assertEquals("/tmp",extra.get("path"));
-        assertEquals(extra.size(),1);
-        assertNull(ServiceObjectFactory.extractServiceConfiguration(configString,"blub"));
-    }
-
-    @Test(expectedExceptions = ParseException.class)
-    public void extractServiceConfigurationFailed() throws ParseException {
-                ServiceObjectFactory.extractServiceConfiguration("{{ blub }", "healthCheck");
     }
 
     interface TestService { String getName(); }

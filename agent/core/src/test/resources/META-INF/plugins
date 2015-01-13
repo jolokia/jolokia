@@ -1,0 +1,2 @@
+org.jolokia.backend.TestMBeanPlugin
+org.jolokia.backend.TestMBeanPluginFailing

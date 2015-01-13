@@ -8,7 +8,8 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.backend.plugin.*;
+import org.jolokia.backend.plugin.MBeanPlugin;
+import org.jolokia.backend.plugin.MBeanPluginContext;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.detector.*;
@@ -16,6 +17,9 @@ import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.ServiceObjectFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -71,16 +75,30 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         mBeanServerManager = new MBeanServerExecutorLocal(detectors);
         initServerHandle(pConfig, pLogHandler, detectors);
         initMBean();
-        initPlugins(pLogHandler);
+        initPlugins(pConfig, pLogHandler);
     }
 
-    private void initPlugins(LogHandler pLogHandler) {
-        List<MBeanPlugin> plugins = ServiceObjectFactory.createServiceObjects("META-INF/mbean-plugins");
+    private void initPlugins(Configuration pConfig, LogHandler pLogHandler) {
+        List<MBeanPlugin> plugins = ServiceObjectFactory.createServiceObjects("META-INF/plugins");
         if (plugins.size() > 0) {
             MBeanPluginContext ctx = createMBeanPluginContext();
+            Map pluginConfigs = getPluginOptions(pConfig,pLogHandler);
             for (MBeanPlugin plugin : plugins) {
-                plugin.init(ctx);
+                try {
+                    plugin.init(ctx,(Map) pluginConfigs.get(plugin.getId()));
+                } catch (JMException exp) {
+                    pLogHandler.error("Error while initializing plugin " + plugin.getId(),exp);
+                }
             }
+        }
+    }
+
+    private Map getPluginOptions(Configuration pConfig, LogHandler pLogHandler) {
+        String options = pConfig.get(ConfigKey.MBEAN_PLUGIN_OPTIONS);
+        try {
+            return options != null ? (JSONObject) new JSONParser().parse(options) : new JSONObject();
+        } catch (ParseException e) {
+            throw new IllegalStateException("Could not parse plugin options '" + options + "' as JSON Objects" + e,e);
         }
     }
 

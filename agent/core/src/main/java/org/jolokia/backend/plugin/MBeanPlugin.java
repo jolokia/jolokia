@@ -17,6 +17,10 @@ package org.jolokia.backend.plugin;
  * limitations under the License.
  */
 
+import java.util.Map;
+
+import javax.management.JMException;
+
 /**
  * Interface describing a plugin which can be used to register extra MBeans for enhancing the Jolokia API.
  * MBeanPlugins are looked up from the classpath and should be registered in <code>META-INF/mbean-plugins</code>
@@ -32,6 +36,14 @@ public interface MBeanPlugin {
      * that it can be reused for JMX lookups during its operation.
      *
      * @param ctx the context in order to access JMX
+     * @param map
      */
-    void init(MBeanPluginContext ctx);
+    void init(MBeanPluginContext ctx, Map map) throws JMException;
+
+    /**
+     * Get unique id for this plugin. This id is also used for looking up plugin specific configuration.
+     *
+     * @return unique id for this plugin
+     */
+    String getId();
 }

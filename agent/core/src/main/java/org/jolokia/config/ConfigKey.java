@@ -19,6 +19,8 @@ package org.jolokia.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jolokia.backend.plugin.MBeanPlugin;
+
 /**
  * Enumeration defining the various configuration constant names which
  * can be used to configure the agent globally (e.g. in web.xml) or
@@ -237,6 +239,13 @@ public enum ConfigKey {
      * </pre>
      */
     DETECTOR_OPTIONS("detectorOptions",true, false),
+
+    /**
+     * Extra options which are passed to {@link MBeanPlugin}. As for {@link #DETECTOR_OPTIONS}, the value
+     * must be a JSON object in string representation where the keys are MBean plugin ids and the values are
+     * JSON objects whith the plugin specific configuration.
+     */
+    MBEAN_PLUGIN_OPTIONS("mbeanPluginOptions",true , false),
 
     /**
      * The ID to uniquely identify this agent within a JVM. There

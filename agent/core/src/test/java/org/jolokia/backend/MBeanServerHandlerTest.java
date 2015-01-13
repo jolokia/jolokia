@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.management.*;
+import javax.management.openmbean.CompositeData;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
@@ -52,7 +53,8 @@ public class MBeanServerHandlerTest {
     @BeforeMethod
     public void setup() throws MalformedObjectNameException {
         TestDetector.reset();
-        Configuration config = new Configuration(ConfigKey.MBEAN_QUALIFIER,"qualifier=test");
+        Configuration config = new Configuration(ConfigKey.MBEAN_QUALIFIER,"qualifier=test",
+                                                 ConfigKey.MBEAN_PLUGIN_OPTIONS,"{\"test\" : { \"path\" : \"/tmp\" }}");
         handler = new MBeanServerHandler(config,getEmptyLogHandler());
         request = new JmxRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
@@ -60,6 +62,29 @@ public class MBeanServerHandlerTest {
     @AfterMethod
     public void tearDown() throws JMException {
         handler.destroy();
+        assertTrue(TestMBeanPlugin.isInitCalled());
+    }
+
+    @Test
+    public void testPluginUsed() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("jolokia:type=plugin,name=test");
+        long memBean = (Long) conn.getAttribute(name,"MemoryUsed");
+        CompositeData memSystemCd = (CompositeData) conn.getAttribute(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage");
+        long memSystem = (Long) memSystemCd.get("used");
+        double diff = Math.abs(memBean - memSystem) / memSystem * 100;
+        // Less than 10% difference
+        assertTrue(diff < 10);
+    }
+
+    @Test
+    public void testPluginMax() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
+        MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("jolokia:type=plugin,name=test");
+        long memBean = (Long) conn.getAttribute(name,"MemoryMax");
+        CompositeData memSystemCd = (CompositeData) conn.getAttribute(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage");
+        long memSystem = (Long) memSystemCd.get("max");
+        assertEquals(memBean,memSystem);
     }
 
     @Test
