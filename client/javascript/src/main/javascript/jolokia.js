@@ -66,7 +66,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.2.3";
+            this.CLIENT_VERSION = "1.2.4-SNAPSHOT";
 
             // Registered requests for fetching periodically
             var jobs = [];
