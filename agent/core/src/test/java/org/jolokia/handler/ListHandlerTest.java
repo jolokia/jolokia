@@ -53,7 +53,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @AfterMethod
     private void destroy() {
-        executor.destroy();
+        executor.unregisterFromMBeanNotifications();
     }
 
     @Test

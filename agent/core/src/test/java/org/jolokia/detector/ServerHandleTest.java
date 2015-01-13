@@ -97,7 +97,7 @@ public class ServerHandleTest {
     @Test
     public void detectOptionsFail() {
         LogHandler handler = EasyMock.createMock(LogHandler.class);
-        handler.error(matches("^.*parse options.*"),isA(Exception.class));
+        handler.error(matches("^.*parse detector options.*"),isA(Exception.class));
         replay(handler);
 
         Configuration opts = new Configuration(ConfigKey.DETECTOR_OPTIONS,"blub: bla");

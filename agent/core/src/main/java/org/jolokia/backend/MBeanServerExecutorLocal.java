@@ -126,8 +126,8 @@ public class MBeanServerExecutorLocal extends AbstractMBeanServerExecutor implem
     /**
      * Lifecycle method called at the end of life for this object.
      */
-    public void destroy() {
-        super.destroy();
+    public void unregisterFromMBeanNotifications() {
+        super.unregisterFromMBeanNotifications();
         mbeanServers.destroy();
     }
 

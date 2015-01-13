@@ -20,6 +20,10 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 /**
  * A simple factory for creating services with no-arg constructors from a textual
  * descriptor. This descriptor, which must be a resource loadable by this class'
@@ -53,7 +57,7 @@ public final class ServiceObjectFactory {
      *        Normally, default service should be given as first parameter so that custom
      *        descriptors have a chance to remove a default service.
      * @param <T> type of the service objects to create
-     * @return a ordered list of created services.
+     * @return a ordered list of created services or an empty list.
      */
     public static <T> List<T> createServiceObjects(String... pDescriptorPaths) {
         try {
@@ -148,6 +152,22 @@ public final class ServiceObjectFactory {
                 // Best effort
             }
         }
+    }
+
+    /**
+     * Helper method for parsing a string as a JSON Object and returns the JSON object which is stored under a certain key
+     *
+     * @param serviceConfigString string holding the extra configuration
+     * @param key key to lookup the extra configuration
+     * @return the extra configuration or <code>null</code> if none has been given.
+     * @throws ParseException if parsing of the original string as JSON object fails.
+     */
+    public static JSONObject extractServiceConfiguration(String serviceConfigString, String key) throws ParseException {
+        if (serviceConfigString != null) {
+                JSONObject opts = (JSONObject) new JSONParser().parse(serviceConfigString);
+                return (JSONObject) opts.get(key);
+        }
+        return null;
     }
 
     // =============================================================================

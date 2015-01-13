@@ -138,7 +138,7 @@ public abstract class AbstractMBeanServerExecutor implements MBeanServerExecutor
     /**
      * Unregister us as listener from every registered server
      */
-    public void destroy() {
+    public void unregisterFromMBeanNotifications() {
         Set<MBeanServerConnection> servers = getMBeanServers();
         Exception lastExp = null;
         StringBuilder errors = new StringBuilder();

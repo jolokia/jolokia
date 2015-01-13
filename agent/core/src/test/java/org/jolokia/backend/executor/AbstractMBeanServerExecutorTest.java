@@ -95,14 +95,14 @@ public class AbstractMBeanServerExecutorTest {
                 }
             }
         } finally {
-            executor.destroy();
+            executor.unregisterFromMBeanNotifications();
         }
     }
 
     @Test
     public void destroyWithoutPriorRegistration() throws NoSuchFieldException, IllegalAccessException {
         // Should always work, even when no registration has happened. Non exisiting listeners will be simplu ignored, since we didnt do any registration before
-        executor.destroy();
+        executor.unregisterFromMBeanNotifications();
     }
 
     private long currentTime() {

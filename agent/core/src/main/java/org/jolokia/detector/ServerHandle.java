@@ -25,8 +25,9 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.ServiceObjectFactory;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Information about the the server product the agent is running in.
@@ -198,14 +199,11 @@ public class ServerHandle {
      * @return the detector specific configuration
      */
     protected JSONObject getDetectorOptions(Configuration pConfig, LogHandler pLogHandler) {
-        String optionString = pConfig.get(ConfigKey.DETECTOR_OPTIONS);
-        if (optionString != null) {
-            try {
-                JSONObject opts = (JSONObject) new JSONParser().parse(optionString);
-                return (JSONObject) opts.get(getProduct());
-            } catch (Exception e) {
-                pLogHandler.error("Could not parse options '" + optionString + "' as JSON object: " + e,e);
-            }
+        String options = pConfig.get(ConfigKey.DETECTOR_OPTIONS);
+        try {
+            return ServiceObjectFactory.extractServiceConfiguration(options,getProduct());
+        } catch (ParseException e) {
+            pLogHandler.error("Could not parse detector options '" + options + "' as JSON object: " + e,e);
         }
         return null;
     }

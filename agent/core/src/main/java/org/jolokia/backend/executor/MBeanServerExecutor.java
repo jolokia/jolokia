@@ -80,12 +80,6 @@ public interface MBeanServerExecutor {
     Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException;
 
     /**
-     * Destructor method. After this method has been called, this executor is out of service and
-     * must not be used anymore
-     */
-    void destroy();
-
-    /**
      * Check whether the set of MBeans in all managed MBeanServer has been changed
      * since the given time. The input is the epoch time in seconds, however, milliseconds
      * would be much more appropriate. However, the Jolokia responses contain

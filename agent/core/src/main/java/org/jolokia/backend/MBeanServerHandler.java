@@ -8,12 +8,14 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.backend.plugin.*;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.detector.*;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.util.*;
+import org.jolokia.util.LogHandler;
+import org.jolokia.util.ServiceObjectFactory;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -69,7 +71,44 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         mBeanServerManager = new MBeanServerExecutorLocal(detectors);
         initServerHandle(pConfig, pLogHandler, detectors);
         initMBean();
+        initPlugins(pLogHandler);
     }
+
+    private void initPlugins(LogHandler pLogHandler) {
+        List<MBeanPlugin> plugins = ServiceObjectFactory.createServiceObjects("META-INF/mbean-plugins");
+        if (plugins.size() > 0) {
+            MBeanPluginContext ctx = createMBeanPluginContext();
+            for (MBeanPlugin plugin : plugins) {
+                plugin.init(ctx);
+            }
+        }
+    }
+
+    // Delegate to internal objects
+    private MBeanPluginContext createMBeanPluginContext() {
+        return new MBeanPluginContext() {
+            public ObjectName registerMBean(Object pMBean, String... pOptionalName) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
+                return MBeanServerHandler.this.registerMBean(pMBean,pOptionalName);
+            }
+
+            public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
+                mBeanServerManager.each(pObjectName,pCallback);
+            }
+
+            public <R> R call(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object... pExtraArgs) throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
+                return mBeanServerManager.call(pObjectName,pMBeanAction,pExtraArgs);
+            }
+
+            public Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException {
+                return mBeanServerManager.queryNames(pObjectName);
+            }
+
+            public boolean hasMBeansListChangedSince(long pTimestamp) {
+                return mBeanServerManager.hasMBeansListChangedSince(pTimestamp);
+            }
+        };
+    }
+
 
     /**
      * Initialize the server handle.
@@ -124,7 +163,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
                 return registeredName;
             } catch (RuntimeException exp) {
                 throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
-                } catch (MBeanRegistrationException exp) {
+            } catch (MBeanRegistrationException exp) {
                 throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
             }
         }
@@ -166,7 +205,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         }
 
         // Unregister any notification listener
-        mBeanServerManager.destroy();
+        mBeanServerManager.unregisterFromMBeanNotifications();
     }
 
     /**
@@ -217,6 +256,10 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         // An detector at the end of the chain in order to get a default handle
         detectors.add(new FallbackServerDetector());
         return detectors;
+    }
+
+    private List<MBeanPlugin> lookupMBeanPlugins() {
+        return ServiceObjectFactory.createServiceObjects("META-INF/mbean-plugins");
     }
 
     // Detect the server by delegating it to a set of predefined detectors. These will be created
