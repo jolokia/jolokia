@@ -88,7 +88,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     private MBeanPluginContext createMBeanPluginContext() {
         return new MBeanPluginContext() {
             public ObjectName registerMBean(Object pMBean, String... pOptionalName) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException {
-                return MBeanServerHandler.this.registerMBean(pMBean,pOptionalName);
+                return MBeanServerHandler.this.registerMBean(pMBean, pOptionalName);
             }
 
             public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
@@ -205,7 +205,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         }
 
         // Unregister any notification listener
-        mBeanServerManager.unregisterFromMBeanNotifications();
+        mBeanServerManager.destroy();
     }
 
     /**
