@@ -268,4 +268,59 @@ public class StringToObjectConverterTest {
         list.add(null);
         converter.prepareValue("[I",list);
     }
+    
+    public static class Example {
+    	private String value;
+    	private List<String> list;
+    	
+    	public Example(String value) { this.value = value; }
+    	public Example(List<String> list) { this.list = list; }
+    	
+    	public String getValue() { return value; }
+    	public List<String> getList() { return list; }
+    }
+    
+    public static class PrivateExample {
+    	private String value;
+    	private PrivateExample(String value) { this.value = value; }
+    	public String getValue() { return value; }
+    }
+    
+    public static class MultipleConstructorExample {
+    	private String value;
+    	private List<String> list;
+    	
+    	public MultipleConstructorExample(String value, List<String> list) { 
+    		this.value = value;
+    		this.list = list;
+    	}
+    	
+    	public String getValue() { return value; }
+    	public List<String> getList() { return list; }
+    }
+    
+    @Test
+    public void prepareValueWithConstructor() {
+    	Object o = converter.prepareValue(this.getClass().getCanonicalName() + "$Example", "test");
+    	assertTrue(o instanceof Example);
+    	assertEquals("test", ((Example)o).getValue());
+    }
+    
+    @Test
+    public void prepareValueWithConstructorList() {
+    	Object o = converter.prepareValue(this.getClass().getCanonicalName() + "$Example", Arrays.asList("test"));
+    	assertTrue(o instanceof Example);
+    	assertEquals(1, ((Example)o).getList().size());
+    	assertEquals("test", ((Example)o).getList().get(0));
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void prepareValueWithPrivateExample() {
+    	converter.prepareValue(this.getClass().getCanonicalName() + "$PrivateExample", "test");
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void prepareValueWithMultipleConstructors() {
+    	converter.prepareValue(this.getClass().getCanonicalName() + "$PrivateExample", "test");
+    }
 }

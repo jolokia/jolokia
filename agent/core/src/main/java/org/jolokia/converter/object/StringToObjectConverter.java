@@ -1,6 +1,8 @@
 package org.jolokia.converter.object;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -161,14 +163,29 @@ public class StringToObjectConverter {
 
     // ======================================================================================================
 
-    // Check whether an argument can be used directly or whether it needs some sort
-    // of conversion. Returns null if a string conversion should happen
+    // Check whether an argument can be used directly 
+    // or the argument could be used in a public constructor
+    // or whether it needs some sort of conversion, 
+    // Returns null if a string conversion should happen
     private Object prepareForDirectUsage(Class expectedClass, Object pArgument) {
         Class givenClass = pArgument.getClass();
         if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
             return convertListToArray(expectedClass, (List) pArgument);
+        } else if (expectedClass.isAssignableFrom(givenClass)) {
+        	return pArgument;
         } else {
-            return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
+        	for (Constructor<?> constructor : expectedClass.getConstructors()) {
+        		if (Modifier.isPublic(constructor.getModifiers()) &&
+        			constructor.getParameterCount() == 1 &&
+        			constructor.getParameterTypes()[0].isAssignableFrom(givenClass)) {
+        			
+        			try {
+        				return constructor.newInstance(pArgument);
+        			} catch (Exception ignore) { }
+        		}
+        	}
+        	
+        	return null;
         }
     }
 
