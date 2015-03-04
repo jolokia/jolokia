@@ -7,3 +7,6 @@ target
 .idea
 wiki
 felix
++.settings
++.classpath
++.project
