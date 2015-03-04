@@ -1,25 +1,12 @@
 package org.jolokia.converter.object;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertNull;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -31,6 +18,13 @@ import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertNull;
 
 
 /*
@@ -341,7 +335,7 @@ public class StringToObjectConverterTest {
     
     @Test
     public void dateConversionNotByConstructor() throws ParseException {
-    	final String dateStr = "2015-11-20";
+    	final String dateStr = "2015-11-20T00:00:00+00:00";
     	
     	try {
     		new Date(dateStr);
@@ -353,9 +347,9 @@ public class StringToObjectConverterTest {
     	Object obj = converter.convertFromString(Date.class.getCanonicalName(), dateStr);
     	assertNotNull(obj);
     	assertTrue(obj instanceof Date);
-    	
-    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    	Date expectedDate = sdf.parse(dateStr);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    	Date expectedDate = sdf.parse(dateStr.replaceFirst("\\+(0\\d)\\:(\\d{2})$", "+$1$2"));
     	assertEquals(expectedDate, obj);
     }
 }
