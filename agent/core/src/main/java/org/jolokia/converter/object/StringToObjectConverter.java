@@ -171,22 +171,26 @@ public class StringToObjectConverter {
         Class givenClass = pArgument.getClass();
         if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
             return convertListToArray(expectedClass, (List) pArgument);
-        } else if (expectedClass.isAssignableFrom(givenClass)) {
-        	return pArgument;
         } else {
-        	for (Constructor<?> constructor : expectedClass.getConstructors()) {
-        		if (Modifier.isPublic(constructor.getModifiers()) &&
-        			constructor.getParameterCount() == 1 &&
-        			constructor.getParameterTypes()[0].isAssignableFrom(givenClass)) {
-        			
-        			try {
-        				return constructor.newInstance(pArgument);
-        			} catch (Exception ignore) { }
-        		}
-        	}
-        	
-        	return null;
+        	return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
         }
+    }
+    
+    private Object convertByConstructor(String pType, String pValue) {
+        Class<?> expectedClass = ClassUtil.classForName(pType);
+        if (expectedClass != null) {
+            for (Constructor<?> constructor : expectedClass.getConstructors()) {
+                // only support only 1 constructor parameter
+                if (constructor.getParameterTypes().length == 1 &&
+                    constructor.getParameterTypes()[0].isAssignableFrom(String.class)) {
+                    try {
+                        return constructor.newInstance(pValue);
+                    } catch (Exception ignore) { }
+                }
+            }
+        }
+        
+        return null;
     }
 
     /**
@@ -207,12 +211,18 @@ public class StringToObjectConverter {
         }
 
         Parser parser = PARSER_MAP.get(pType);
-        if (parser == null) {
-            throw new IllegalArgumentException(
-                    "Cannot convert string " + value + " to type " +
-                            pType + " because no converter could be found");
+        if (parser != null) {
+            return parser.extract(value);
         }
-        return parser.extract(value);
+        
+        Object cValue = convertByConstructor(pType, pValue);
+        if (cValue != null) {
+        	return cValue;
+        }
+        
+        throw new IllegalArgumentException(
+                "Cannot convert string " + value + " to type " +
+                        pType + " because no converter could be found");
     }
 
     // Convert an array

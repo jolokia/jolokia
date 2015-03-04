@@ -1,10 +1,25 @@
 package org.jolokia.converter.object;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertNull;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -16,12 +31,6 @@ import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNull;
 
 
 /*
@@ -310,17 +319,43 @@ public class StringToObjectConverterTest {
     public void prepareValueWithConstructorList() {
     	Object o = converter.prepareValue(this.getClass().getCanonicalName() + "$Example", Arrays.asList("test"));
     	assertTrue(o instanceof Example);
-    	assertEquals(1, ((Example)o).getList().size());
-    	assertEquals("test", ((Example)o).getList().get(0));
+    	assertNull(((Example)o).getList());
+    	assertEquals("[test]", ((Example)o).getValue());
     }
     
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class, 
+    	  expectedExceptionsMessageRegExp = "Cannot convert string test to type "
+      	  		+ "org.jolokia.converter.object.StringToObjectConverterTest\\$PrivateExample "
+      	  		+ "because no converter could be found")
     public void prepareValueWithPrivateExample() {
     	converter.prepareValue(this.getClass().getCanonicalName() + "$PrivateExample", "test");
     }
-    
-    @Test(expectedExceptions = IllegalArgumentException.class)
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+    	  expectedExceptionsMessageRegExp = "Cannot convert string test to type "
+    	  		+ "org.jolokia.converter.object.StringToObjectConverterTest\\$MultipleConstructorExample "
+    	  		+ "because no converter could be found")
     public void prepareValueWithMultipleConstructors() {
-    	converter.prepareValue(this.getClass().getCanonicalName() + "$PrivateExample", "test");
+    	converter.prepareValue(this.getClass().getCanonicalName() + "$MultipleConstructorExample", "test");
+    }
+    
+    @Test
+    public void dateConversionNotByConstructor() throws ParseException {
+    	final String dateStr = "2015-11-20";
+    	
+    	try {
+    		new Date(dateStr);
+    		fail("Should have throw IllegalArgumentException");
+    	} catch (IllegalArgumentException ignore) {}
+    	
+    	// new Date(dateStr) will throw IllegalArgumentException but our convert does not. 
+    	// so it does not use Constructor to convert date
+    	Object obj = converter.convertFromString(Date.class.getCanonicalName(), dateStr);
+    	assertNotNull(obj);
+    	assertTrue(obj instanceof Date);
+    	
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    	Date expectedDate = sdf.parse(dateStr);
+    	assertEquals(expectedDate, obj);
     }
 }
