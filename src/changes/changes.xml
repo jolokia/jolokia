@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="1.2.4-SNAPSHOT" description="Release 1.2.4-SNAPSHOT">
+      <action dev="khaing211" type="add" date="2015-02-01" issue="183">
+        Support for constructor based serialization conversion
+      </action>
       <action dev="jcordes73" type="fix" date="2015-01-10" issue="178">
        Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list" 
       </action>
