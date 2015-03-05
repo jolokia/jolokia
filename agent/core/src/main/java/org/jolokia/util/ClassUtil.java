@@ -214,7 +214,7 @@ public final class ClassUtil {
             if (!method.getName().equals(pMethod)) {
                 continue;
             }
-            Parameter[] parameters = method.getParameters();
+            Class[] parameters = method.getParameterTypes();
             if (parametersMatch(parameters, pArgs)) {
                 return method;
             }
@@ -231,7 +231,7 @@ public final class ClassUtil {
         return argTypes;
     }
 
-    private static boolean parametersMatch(Parameter[] parameters, Object[] pArgs) {
+    private static boolean parametersMatch(Class[] parameters, Object[] pArgs) {
         if (parameters.length != pArgs.length) {
             return false;
         }
@@ -240,7 +240,7 @@ public final class ClassUtil {
                 continue;
             }
             Class argClass = pArgs[i].getClass();
-            Class paramClass = parameters[i].getType();
+            Class paramClass = parameters[i];
             if (!paramClass.isAssignableFrom(argClass)) {
                 if (checkForPrimitive(argClass, paramClass)) {
                     continue;
