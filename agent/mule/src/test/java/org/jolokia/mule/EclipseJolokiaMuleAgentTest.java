@@ -28,7 +28,15 @@ public class EclipseJolokiaMuleAgentTest extends JolokiaMuleAgentTestCase {
 		return new JolokiaMuleAgent() {
 	    	@Override
 	    	public void initialise() throws InitialisationException {
-	    		this.server = new EclipseMuleAgentHttpServer(this, this);
+                if (Jetty9MuleAgentHttpServer.detect()) {
+                    this.server = new Jetty9MuleAgentHttpServer(this, this);
+                    System.out.println("Testing Jetty 9");
+                } else if (Jetty7And8MuleAgentHttpServer.detect()) {
+                    this.server = new Jetty7And8MuleAgentHttpServer(this,this);
+                    System.out.println("Testing Jetty 7/8");
+                } else {
+                    throw new IllegalStateException("Cannot detect neither Jetty 7/8 or Jetty9");
+                }
 	    	};
 	    };
 	}

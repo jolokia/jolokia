@@ -26,10 +26,8 @@ import org.mule.api.agent.Agent;
  * @since 10.10.14
  */
 public final class MuleAgentHttpServerFactory {
-	// Server class for Jetty6
-	static String CLAZZ_NAME = "org.mortbay.jetty.Server";
-	
-	protected MuleAgentHttpServerFactory() {}
+
+    protected MuleAgentHttpServerFactory() {}
 
 	/**
      * Create the internal HTTP server.
@@ -41,14 +39,13 @@ public final class MuleAgentHttpServerFactory {
 	 * @return internal HTTP server
 	 */
 	public static MuleAgentHttpServer create(Agent pParent, MuleAgentConfig pConfig) {
-		MuleAgentHttpServer server = null;
-
-		try {
-			Class.forName(CLAZZ_NAME);
-			server = new MortbayMuleAgentHttpServer(pParent, pConfig);	
-		} catch (ClassNotFoundException e) {
-			server = new EclipseMuleAgentHttpServer(pParent, pConfig);
-		}		
-		return server;	
-	}
+        if (MortbayMuleAgentHttpServer.detect()) {
+            return new MortbayMuleAgentHttpServer(pParent, pConfig);
+        } else if (Jetty9MuleAgentHttpServer.detect()) {
+            return new Jetty9MuleAgentHttpServer(pParent, pConfig);
+        } else if (Jetty7And8MuleAgentHttpServer.detect()) {
+            return new Jetty7And8MuleAgentHttpServer(pParent, pConfig);
+        }
+        throw new IllegalStateException("Cannot detect Jetty version (tried 6,7,8,9)");
+    }
 }

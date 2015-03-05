@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jolokia.http.AgentServlet;
+import org.jolokia.util.ClassUtil;
 import org.jolokia.util.NetworkUtil;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.nio.SelectChannelConnector;
@@ -157,4 +158,7 @@ public class MortbayMuleAgentHttpServer implements MuleAgentHttpServer {
         return ret;
     }
 
+    public static boolean detect() {
+        return ClassUtil.checkForClass("org.mortbay.jetty.Server");
+    }
 }

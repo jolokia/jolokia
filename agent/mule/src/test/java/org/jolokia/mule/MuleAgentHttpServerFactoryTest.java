@@ -1,12 +1,8 @@
 package org.jolokia.mule;
 
-import static org.testng.Assert.assertEquals;
-
-import java.lang.reflect.Field;
-
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 /*
  * Copyright 2014 Michio Nakagawa
@@ -30,36 +26,11 @@ import org.testng.annotations.Test;
  * @since 10.10.14
  */
 public class MuleAgentHttpServerFactoryTest {
-    String originalValue = null;
     JolokiaMuleAgent agent = new JolokiaMuleAgent();
-
-    @BeforeMethod
-    public void setup() throws Exception {
-        originalValue = MuleAgentHttpServerFactory.CLAZZ_NAME;
-    }
-
-    @AfterMethod
-    public void teardown() throws Exception {
-        setFieldValue(new MuleAgentHttpServerFactory(), "CLAZZ_NAME", originalValue);
-    }
 
     @Test
     public void createServerOfMortbayPackage() throws Exception {
         MuleAgentHttpServer actual = MuleAgentHttpServerFactory.create(agent, agent);
         assertEquals(actual.getClass(), MortbayMuleAgentHttpServer.class);
-    }
-
-    @Test
-    public void createServerOfEclipsePackage() throws Exception {
-        setFieldValue(new MuleAgentHttpServerFactory(), "CLAZZ_NAME", "xxx");
-
-        MuleAgentHttpServer actual = MuleAgentHttpServerFactory.create(agent, agent);
-        assertEquals(actual.getClass(), EclipseMuleAgentHttpServer.class);
-    }
-
-    private void setFieldValue(Object target, String name, Object value) throws Exception {
-        Field field = target.getClass().getDeclaredField(name);
-        field.setAccessible(true);
-        field.set(target, value);
     }
 }

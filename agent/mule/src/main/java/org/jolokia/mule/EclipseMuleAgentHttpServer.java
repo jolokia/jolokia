@@ -19,20 +19,15 @@ package org.jolokia.mule;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.*;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HandlerContainer;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Credential;
 import org.jolokia.http.AgentServlet;
+import org.jolokia.util.ClassUtil;
 import org.jolokia.util.NetworkUtil;
 import org.mule.api.agent.Agent;
 import org.mule.api.lifecycle.StartException;
@@ -43,9 +38,9 @@ import org.mule.api.lifecycle.StopException;
  *
  *
  * @author Michio Nakagawa
- * @since 10.10.14
+ * @since 10.10.141
  */
-public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer {
+abstract public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer {
 
     // parent agent
     private Agent parent;
@@ -95,21 +90,36 @@ public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer {
         }
     }
 
-    // ======================================================================================
-
-    // Create a Jetty Server with the agent servlet installed
-    private Server getServer(MuleAgentConfig pConfig) {
+    /**
+     * Get the agent server for suing it with mule
+     *
+     * @param pConfig agent configuration
+     * @return the server
+     */
+    protected Server getServer(MuleAgentConfig pConfig) {
         Server newServer = new Server();
 
-        Connector connector = new SelectChannelConnector();
+        Connector connector = createConnector(newServer);
         if (pConfig.getHost() != null) {
-            connector.setHost(pConfig.getHost());
+            ClassUtil.applyMethod(connector, "setHost", pConfig.getHost());
         }
-        connector.setPort(pConfig.getPort());
-        newServer.setConnectors(new Connector[]{connector});
+        ClassUtil.applyMethod(connector,"setPort",pConfig.getPort());
 
+        newServer.setConnectors(new Connector[]{connector});
         return newServer;
     }
+
+    /**
+     * Create the one and only HTTP connector. The connector class is different for Jetty 7/8 hence the creation
+     * is delegated to subclasses. An implementation should use reflection in order to avoid class path issues
+     * during creation.
+     *
+     * @param pServer the http server
+     * @return the connector to set
+     */
+    protected abstract Connector createConnector(Server pServer);
+
+    // ======================================================================================
 
     private ServletHolder getServletHolder(MuleAgentConfig pConfig) {
         ServletHolder holder = new ServletHolder(new AgentServlet());
