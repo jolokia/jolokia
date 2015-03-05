@@ -889,6 +889,8 @@
               <listitem>URL</listitem>
               <listitem>Enums (whose type is accessible to the agent,
               see below)</listitem>
+              <listitem>Any type, that is accessible to the agent, and
+                has a public constructor with one String parameter</listitem>
             </itemizedlist>
           </para>
           <para>

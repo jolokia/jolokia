@@ -18,6 +18,7 @@ package org.jolokia.server.core.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
 
@@ -38,7 +39,7 @@ public final class ClassUtil {
      * @param pClassName name to lookup.
      * @return the class found or null if no class could be found.
      */
-    public static Class classForName(String pClassName, ClassLoader ... pClassLoaders) {
+    public static <T> Class<T> classForName(String pClassName, ClassLoader ... pClassLoaders) {
         return classForName(pClassName,true,pClassLoaders);
     }
 
@@ -62,7 +63,7 @@ public final class ClassUtil {
                     if (!tried.contains(loader)) {
                         return Class.forName(pClassName,pInitialize, loader);
                     }
-                } catch (ClassNotFoundException e) {}
+                } catch (ClassNotFoundException ignored) {}
                 tried.add(loader);
                 loader = loader.getParent();
             }
@@ -121,15 +122,22 @@ public final class ClassUtil {
      * Instantiate an instance of the given class with its default constructor
      *
      * @param pClass name of class to instantiate
+     * @param pArguments optional constructor arguments. Works only for objects with the same class as declared in
+     *                   the constructor types (no subclasses)
      * @param <T> type object type
      * @return instantiated class
      * @throws IllegalArgumentException if the class could not be found or instantiated
      */
-    public static <T> T newInstance(String pClass) {
+    public static <T> T newInstance(String pClass, Object ... pArguments) {
         try {
             Class<T> clazz = classForName(pClass);
             if (clazz != null) {
-                return clazz.newInstance();
+                if (pArguments.length == 0) {
+                    return clazz.newInstance();
+                } else {
+                    Constructor<T> ctr = lookupConstructor(clazz, pArguments);
+                    return ctr.newInstance(pArguments);
+                }
             } else {
                 throw new IllegalArgumentException("Cannot find " + pClass);
             }
@@ -137,9 +145,35 @@ public final class ClassUtil {
             throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
         }
     }
 
+    /**
+     * Apply a method to a given object with optional arguments. The method is looked up the whole class
+     * hierarchy.
+     *
+     * @param pObject object on which to apply the method
+     * @param pMethod the method name
+     * @param pArgs optional arguments
+     * @return return value (if any)
+     */
+    public static Object applyMethod(Object pObject, String pMethod, Object ... pArgs) {
+        Class<?> clazz = pObject.getClass();
+        try {
+            Method method = extractMethod(pMethod, clazz, pArgs);
+            return method.invoke(pObject,pArgs);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
+        }
+    }
 
     /**
      * Get all resources from the classpath which are specified by the given path.
@@ -167,5 +201,71 @@ public final class ClassUtil {
             ret.add(urlEnum.nextElement().toExternalForm());
         }
         return ret;
+    }
+
+    // Lookup appropriate constructor
+    private static <T> Constructor<T> lookupConstructor(Class<T> clazz, Object[] pArguments) throws NoSuchMethodException {
+        Class[] argTypes = extractArgumentTypes(pArguments);
+        return clazz.getConstructor(argTypes);
+    }
+
+    private static Method extractMethod(String pMethod, Class<?> clazz, Object[] pArgs) throws NoSuchMethodException {
+        for (Method method : clazz.getMethods()) {
+            if (!method.getName().equals(pMethod)) {
+                continue;
+            }
+            Class[] parameters = method.getParameterTypes();
+            if (parametersMatch(parameters, pArgs)) {
+                return method;
+            }
+        }
+        throw new NoSuchMethodException("No " + pMethod + " on " + clazz + " with " + pArgs.length + " arguments found ");
+    }
+
+    private static Class[] extractArgumentTypes(Object[] pArguments) {
+        Class[] argTypes = new Class[pArguments.length];
+        int i = 0;
+        for (Object arg : pArguments) {
+            argTypes[i++] = arg.getClass();
+        }
+        return argTypes;
+    }
+
+    private static boolean parametersMatch(Class[] parameters, Object[] pArgs) {
+        if (parameters.length != pArgs.length) {
+            return false;
+        }
+        for (int i = 0; i < parameters.length; i++) {
+            if (pArgs[i] == null) {
+                continue;
+            }
+            Class argClass = pArgs[i].getClass();
+            Class paramClass = parameters[i];
+            if (!paramClass.isAssignableFrom(argClass)) {
+                if (checkForPrimitive(argClass, paramClass)) {
+                    continue;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkForPrimitive(Class argClass, Class paramClass) {
+        return paramClass.isPrimitive() && PRIMITIVE_TO_OBJECT_MAP.get(paramClass.getName()) != null;
+    }
+
+    private static final Map<String,Class> PRIMITIVE_TO_OBJECT_MAP = new HashMap<String, Class>();
+
+    static {
+        PRIMITIVE_TO_OBJECT_MAP.put("int", Integer.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("long", Long.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("double", Double.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("float", Float.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("bool", Boolean.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("char", Character.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("byte", Byte.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("void", Void.TYPE);
+        PRIMITIVE_TO_OBJECT_MAP.put("short", Short.TYPE);
     }
 }

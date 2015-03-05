@@ -62,7 +62,7 @@ public final class LocalServiceFactory {
      *        Normally, default service should be given as first parameter so that custom
      *        descriptors have a chance to remove a default service.
      * @param <T> type of the service objects to create
-     * @return a ordered list of created services.
+     * @return a ordered list of created services or an empty list.
      */
     public static <T> List<T> createServices(ClassLoader pClassLoader, String ... pDescriptorPaths) {
         try {

@@ -24,6 +24,15 @@
   </properties>
   <body>
     <release version="1.2.4-SNAPSHOT" description="Release 1.2.4-SNAPSHOT">
+      <action dev="roland" type="add" date="2015-03-05" issue="182">
+        Added support for Mule 3.6 (which contains Jetty 9)
+      </action>
+      <action dev="roland" type="fix" date="2015-03-05" issue="184">
+        Fix race condition when creating response date headers
+      </action>
+      <action dev="khaing211" type="add" date="2015-02-01" issue="183">
+        Support for constructor based serialization conversion
+      </action>
       <action dev="jcordes73" type="fix" date="2015-01-10" issue="178">
        Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list" 
       </action>

@@ -160,7 +160,7 @@ public class DefaultMBeanServerAccess implements MBeanServerAccess, Notification
     /**
      * Unregister us as listener from every registered server
      */
-    public void destroy() {
+    public void unregisterFromMBeanNotifications() {
         Set<MBeanServerConnection> servers = getMBeanServers();
         Exception lastExp = null;
         StringBuilder errors = new StringBuilder();

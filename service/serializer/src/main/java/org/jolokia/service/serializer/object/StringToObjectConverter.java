@@ -1,6 +1,8 @@
 package org.jolokia.service.serializer.object;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -115,38 +117,12 @@ public class StringToObjectConverter {
         }
     }
 
-    /**
-     * Deserialize a string representation to an object for a given type
-     *
-     * @param pType type to convert to
-     * @param pValue the value to convert from
-     * @return the converted value
-     */
-    public Object convertFromString(String pType, String pValue) {
-        String value = EscapeUtil.convertSpecialStringTags(pValue);
-
-        if (value == null) {
-            return null;
-        }
-        if (pType.startsWith("[") && pType.length() >= 2) {
-            return convertToArray(pType, value);
-        }
-
-        Parser parser = PARSER_MAP.get(pType);
-        if (parser == null) {
-            throw new IllegalArgumentException(
-                    "Cannot convert string " + value + " to type " +
-                    pType + " because no converter could be found");
-        }
-        return parser.extract(value);
-    }
-
     // ======================================================================================================
 
     // Extract a type version of the method above. This might be useful later
     // on, e.g. when setting enums should be supported for certain
     // use cases
-    private Object prepareValue(Class expectedClass, Object pValue) {
+    Object prepareValue(Class expectedClass, Object pValue) {
         if (pValue == null) {
             return null;
         }
@@ -157,15 +133,98 @@ public class StringToObjectConverter {
         }
     }
 
-    // Check whether an argument can be used directly or whether it needs some sort
-    // of conversion. Returns null if a string conversion should happen
+    /**
+     * For GET requests, where operation arguments and values to write are given in
+     * string representation as part of the URL, certain special tags are used to indicate
+     * special values:
+     *
+     * <ul>
+     *    <li><code>[null]</code> for indicating a null value</li>
+     *    <li><code>""</code> for indicating an empty string</li>
+     * </ul>
+     *
+     * This method converts these tags to the proper value. If not a tag, the original
+     * value is returned.
+     *
+     * If you need this tag values in the original semantics, please use POST requests.
+     *
+     * @param pValue the string value to check for a tag
+     * @return the converted value or the original one if no tag has been found.
+     */
+    public static String convertSpecialStringTags(String pValue) {
+        if ("[null]".equals(pValue)) {
+            // Null marker for get requests
+            return null;
+        } else if ("\"\"".equals(pValue)) {
+            // Special string value for an empty String
+            return "";
+        } else {
+            return pValue;
+        }
+    }
+
+    // ======================================================================================================
+
+    // Check whether an argument can be used directly 
+    // or the argument could be used in a public constructor
+    // or whether it needs some sort of conversion,
+    // Returns null if a string conversion should happen
     private Object prepareForDirectUsage(Class expectedClass, Object pArgument) {
         Class givenClass = pArgument.getClass();
         if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
             return convertListToArray(expectedClass, (List) pArgument);
         } else {
-            return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
+        	return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
         }
+    }
+    
+    private Object convertByConstructor(String pType, String pValue) {
+        Class<?> expectedClass = ClassUtil.classForName(pType);
+        if (expectedClass != null) {
+            for (Constructor<?> constructor : expectedClass.getConstructors()) {
+                // only support only 1 constructor parameter
+                if (constructor.getParameterTypes().length == 1 &&
+                    constructor.getParameterTypes()[0].isAssignableFrom(String.class)) {
+                    try {
+                        return constructor.newInstance(pValue);
+                    } catch (Exception ignore) { }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Deserialize a string representation to an object for a given type
+     *
+     * @param pType type to convert to
+     * @param pValue the value to convert from
+     * @return the converted value
+     */
+    public Object convertFromString(String pType, String pValue) {
+        String value = convertSpecialStringTags(pValue);
+
+        if (value == null) {
+            return null;
+        }
+        if (pType.startsWith("[") && pType.length() >= 2) {
+            return convertToArray(pType, value);
+        }
+
+        Parser parser = PARSER_MAP.get(pType);
+        if (parser != null) {
+            return parser.extract(value);
+        }
+        
+        Object cValue = convertByConstructor(pType, pValue);
+        if (cValue != null) {
+        	return cValue;
+        }
+        
+        throw new IllegalArgumentException(
+                "Cannot convert string " + value + " to type " +
+                        pType + " because no converter could be found");
     }
 
     // Convert an array

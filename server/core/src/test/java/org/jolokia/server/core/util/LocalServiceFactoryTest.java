@@ -55,7 +55,6 @@ public class LocalServiceFactoryTest {
         String bla = services.get(0);
     }
 
-
     interface TestService { String getName(); }
     public static class Test1 implements TestService { public String getName() { return "one"; } }
     public static class Test2 implements TestService { public String getName() { return "two"; } }

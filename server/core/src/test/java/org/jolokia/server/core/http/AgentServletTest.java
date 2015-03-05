@@ -20,6 +20,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.management.JMException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -511,6 +512,8 @@ public class AgentServletTest {
         }
         context.log((String) anyObject());
         EasyMock.expectLastCall().asStub();
+        context.log((String) anyObject(),isA(JMException.class));
+        expectLastCall().anyTimes();
     }
 
     private String[] prepareDebugLogging(String[] pInitParams) {

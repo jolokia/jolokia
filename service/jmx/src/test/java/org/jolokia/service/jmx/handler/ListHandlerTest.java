@@ -60,11 +60,6 @@ public class ListHandlerTest extends BaseHandlerTest {
         executor = new DefaultMBeanServerAccess();
     }
 
-    @AfterMethod
-    private void destroy() throws JMException {
-        executor.destroy();
-    }
-
     @Test
     public void singleSlashPath() throws Exception {
         for (String p : new String[]{null, "", "/"}) {

@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -32,8 +33,11 @@ import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.service.discovery.DiscoveryMulticastResponder;
 import org.json.simple.JSONAware;
 
 /**
@@ -53,9 +57,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Content type matching
     private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
-    // Formatted for formatting Date response headers
-    private final SimpleDateFormat rfc1123Format;
-
     // Global context
     private JolokiaContext jolokiaContext;
 
@@ -72,8 +73,6 @@ public class JolokiaHttpHandler implements HttpHandler {
             contextPath += "/";
         }
 
-        rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         requestHandler = new HttpRequestHandler(jolokiaContext);
     }
 
@@ -201,13 +200,13 @@ public class JolokiaHttpHandler implements HttpHandler {
         // RFC-2616. See also {@link AgentServlet#setNoCacheHeaders()}
         // Issue: #71
         Calendar cal = Calendar.getInstance();
-        headers.set("Date",rfc1123Format.format(cal.getTime()));
+        headers.set("Date",formatHeaderDate(cal.getTime()));
         // 1h  in the past since it seems, that some servlet set the date header on their
         // own so that it cannot be guaranteed that these headers are really equals.
         // It happened on Tomcat that "Date:" was finally set *before* "Expires:" in the final
         // answers sometimes which seems to be an implementation peculiarity from Tomcat
         cal.add(Calendar.HOUR, -1);
-        headers.set("Expires",rfc1123Format.format(cal.getTime()));
+        headers.set("Expires",formatHeaderDate(cal.getTime()));
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
@@ -248,5 +247,12 @@ public class JolokiaHttpHandler implements HttpHandler {
             mimeType = jolokiaContext.getConfig(ConfigKey.MIME_TYPE);
             return mimeType != null ? mimeType : ConfigKey.MIME_TYPE.getDefaultValue();
         }
+    }
+
+
+    private String formatHeaderDate(Date date) {
+        DateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return rfc1123Format.format(date);
     }
 }
