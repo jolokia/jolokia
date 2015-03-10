@@ -36,6 +36,9 @@
       <action dev="jcordes73" type="fix" date="2015-01-10" issue="178">
        Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list" 
       </action>
+      <action dev="roland" type="add" date="2015-01-13" issue="177">
+        Added MBeanPlugin as a way to hook into the agent's lifecyle
+      </action>
       <action dev="roland" type="add" date="2014-12-23" issue="173">
         Added the possibility to hook into the deserialization process
         for responses.

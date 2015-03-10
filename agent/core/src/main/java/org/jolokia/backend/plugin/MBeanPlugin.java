@@ -23,7 +23,8 @@ import javax.management.JMException;
 
 /**
  * Interface describing a plugin which can be used to register extra MBeans for enhancing the Jolokia API.
- * MBeanPlugins are looked up from the classpath and should be registered in <code>META-INF/mbean-plugins</code>
+ * MBeanPlugins should have a no argument constructor,
+ * are looked up from the classpath and should be registered in <code>META-INF/mbean-plugins</code>
  *
  * @author roland
  * @since 12/01/15
