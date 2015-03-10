@@ -52,6 +52,10 @@ public interface AttributeCheckingMBean {
 
     String[] getStringArray();
 
+    PojoBean[] createLargeArray(int nr);
+
+    List<List<PojoBean>> createLargeList(int nr);
+
     void setStringArray(String[] array);
 
     int getIntValue();

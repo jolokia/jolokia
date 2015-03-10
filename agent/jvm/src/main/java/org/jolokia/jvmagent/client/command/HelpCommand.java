@@ -95,7 +95,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans (default: " + ConfigKey.MAX_DEPTH.getDefaultValue() + ")\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response (default: " + ConfigKey.MAX_COLLECTION_SIZE.getDefaultValue() + ")\n" +
-"    --maxObjects <nr>               Maximum number of objects to consider for serialization (default: " + ConfigKey.MAX_OBJECTS + ")\n" +
+"    --maxObjects <nr>               Maximum number of objects to consider for serialization (default: " + ConfigKey.MAX_OBJECTS.getDefaultValue() + ")\n" +
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +
