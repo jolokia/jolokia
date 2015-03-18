@@ -97,7 +97,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
-          <td><constant>agentDecription</constant></td>
+          <td><constant>agentDescription</constant></td>
           <td>
             An optional description which can be used for clients to
             present a humand readable label for this agent.
