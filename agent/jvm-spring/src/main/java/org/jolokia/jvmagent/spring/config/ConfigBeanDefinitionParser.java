@@ -49,7 +49,7 @@ class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaConfigHolder.class);
-        Map<String, String> config = new HashMap<String, String>();
+        Map<String, Object> config = new HashMap<String, Object>();
         NamedNodeMap attrs = element.getAttributes();
         for (int i = 0;i < attrs.getLength(); i++) {
             Attr attr = (Attr) attrs.item(i);
@@ -57,7 +57,7 @@ class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
             if (skipMap.contains(name)) {
                 continue;
             }
-            config.put(name,attr.getValue());
+            config.put(name, attr.getValue());
         }
         builder.addPropertyValue("config",config);
         String order = element.getAttribute("order");
@@ -66,7 +66,6 @@ class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
         }
         return builder.getBeanDefinition();
     }
-
 
     @Override
     protected boolean shouldGenerateIdAsFallback() {
