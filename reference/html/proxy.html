@@ -1,0 +1,55 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;5.&nbsp;Proxy Mode</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="security.html" title="Chapter&nbsp;4.&nbsp;Security"><link rel="next" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol"></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="proxy"></a>Chapter&nbsp;5.&nbsp;Proxy Mode </h1></div></div></div><p>
+      Using Jolokia in proxy mode enables for agentless operation
+      on the target server. A dedicated agent deployment proxies by
+      accepting Jolokia requests as input, translating them to JSR-160
+      requests for the target. This setup is described in <a href="architecture.html">Chapter&nbsp;2, <i xmlns:xlink="http://www.w3.org/1999/xlink">Architecture</i></a>. As noted there, the real target is
+      given within the original request, which must be sent as a POST
+      request.
+    </p><p>
+      Agents of all types support the proxy mode. However, since one
+      has usually the free choice of platform for a dedicated Jolokia
+      proxy, an enviroment optimized for HTTP communication should be
+      used. These are either servlet container or JEE server hosting
+      the WAR agent or an OSGi runtime with an OSGi HttpService (which
+      in turn is typically based on an embedded serlvet container like
+      Tomcat or Jetty). The two other agents, the Mule and JVM agents
+      are not that well suited for this job. 
+    </p><p>
+      All client libraries (jmx4perl, Java and Javascript) support the
+      usage of proxy mode in its API.
+    </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="d0e2762"></a>5.1.&nbsp;Limitations of proxy mode</h2></div></div></div><p>
+        The proxy mode has some limitations compared to the direct
+        agent mode, so it is recommended to use a
+        direct agent deployment if possible. The limitations are:
+      </p><div class="itemizedlist"><ul><li>
+          There is no automatic merging of JMX MBeanServers as in the case
+          of the direct mode. Most application servers uses their own
+          MBeanServer in addition to the
+          <code class="literal">PlatformMBeanServer</code> (which is always
+          present). Each MBean is registered only in one MBeanServer. The
+          choice of which <code class="literal">MBeanServer</code> to use has to be
+          given up front, usually as a part of the JMX Service URL. But even
+          then (as it is the case for JBoss 5.1) you might run into problems
+          when selecting the proper MBeanServer.
+        </li><li>
+          Proxying adds an additional remote layer which causes
+          additional problems. I.e. the complex operations like
+          <code class="constant">list</code> might fail in the proxy mode
+          because of serialization issues. E.g. for JBoss it happens
+          that certain MBeanInfo objects requested for the list
+          operation are not serializable. This is a bug of JBoss, but
+          I expect similar limitations for other application servers
+          as well.
+        </li><li>
+          Certain workarounds (like the JBoss "<span class="emphasis"><em>can not find
+          MXBeans before MBeanInfo has been fetched</em></span>" bug)
+          works only in agent mode.
+        </li><li>
+          It is astonishingly hard to set up an application server for
+          JSR-160 export. And there are even cases (combinations of
+          JDK and AppServer Version) which don't work at all properly
+          (e.g. JDK 1.5 and JBoss 5). For certain application servers,
+          detailed setup instructions are published at our <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://labs.consol.de/tags/jsr-160/" target="_top">blog</a>.
+        </li></ul></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Next</a></div></div></div></body></html>

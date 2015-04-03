@@ -1,0 +1,110 @@
+/*
+ * Copyright 2009-2013 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+footer {
+    font-size: small;
+    margin-top: 8em;
+}
+
+aside {
+    font-size: small;
+    left: 780px;
+    position: absolute;
+    width: 180px;
+}
+
+
+svg {
+    font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+sup, sub {
+    line-height: 0;
+}
+
+.axis {
+    font: 10px ;
+}
+
+.axis text {
+    -webkit-transition: fill-opacity 250ms linear;
+}
+
+.axis path {
+    display: none;
+}
+
+.axis line {
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.horizon {
+    border-bottom: solid 1px #000;
+    overflow: hidden;
+    position: relative;
+}
+
+.horizon {
+    border-top: solid 1px #000;
+    border-bottom: solid 1px #000;
+}
+
+.horizon + .horizon {
+    border-top: none;
+}
+
+.horizon canvas {
+    display: block;
+}
+
+.horizon .title,
+.horizon .value {
+    bottom: 0;
+    line-height: 30px;
+    margin: 0 6px;
+    position: absolute;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+    white-space: nowrap;
+}
+
+.horizon-gc .title {
+    line-height: 10px;
+    font-size: 6pt;
+}
+.horizon .title {
+    left: 0;
+}
+.horizon .value {
+    right: 0;
+}
+
+.col_title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.line {
+    background: #000;
+    opacity: .2;
+    z-index: 2;
+}
