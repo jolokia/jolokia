@@ -48,7 +48,7 @@
           </tr>
           <tr>
             <td>Osgi-Agent (full bundle)</td>
-            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Mule-Agent</td>
