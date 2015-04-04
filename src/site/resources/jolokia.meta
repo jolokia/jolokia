@@ -1,10 +1,9 @@
 {
    "repositories" : [
-      "http://labs.consol.de/maven/repository",
       "http://repo1.maven.org/maven2"
    ],
    "snapshots-repositories" : [
-      "http://labs.consol.de/maven/snapshots-repository"
+      "https://oss.sonatype.org/content/repositories/snapshots"
    ],
    "versions" : {
       "1.2.3" : {

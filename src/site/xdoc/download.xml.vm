@@ -11,7 +11,7 @@
   <body>
     <section name="Jolokia ${currentStableVersion}">
       <p>
-        This is the first official release of Jolokia. It can be
+        Jolokia can be
         downloaded in two variants: As a binary release including the
         agents and the client libraries and the reference manual (PDF
         and HTML). The source release contains the complete source
@@ -40,27 +40,27 @@
           </tr>
           <tr>
             <td>WAR-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>
           </tr>
           <tr>
             <td>Osgi-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Osgi-Agent (full bundle)</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Mule-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>
           </tr>
           <tr>
             <td>Java Client Library</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>
           </tr>
         </tbody>
       </table>

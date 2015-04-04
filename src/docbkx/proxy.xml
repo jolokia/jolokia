@@ -80,9 +80,7 @@
           It is astonishingly hard to set up an application server for
           JSR-160 export. And there are even cases (combinations of
           JDK and AppServer Version) which don't work at all properly
-          (e.g. JDK 1.5 and JBoss 5). For certain application servers,
-          detailed setup instructions are published at our <ulink
-          url="http://labs.consol.de/tags/jsr-160/">blog</ulink>.
+          (e.g. JDK 1.5 and JBoss 5).</ulink>.
         </listitem>
       </itemizedlist>
     </section>
