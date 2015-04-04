@@ -133,7 +133,23 @@
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
       </plugin>
-      
+
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <configuration>
+          <message>Creating site for Jolokia ${project.version}</message>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <phase>site</phase>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
     
     
@@ -185,7 +201,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.4</version>
+          <version>1.6</version>
         </plugin>
 
         <plugin>
@@ -272,6 +288,12 @@
           <version>4.3</version>
         </plugin>
 
+        <plugin>
+          <groupId>com.github.github</groupId>
+          <artifactId>site-maven-plugin</artifactId>
+          <version>0.11</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
@@ -318,7 +340,7 @@
         </reportSets>
       </plugin>
     </plugins>
-    
+
   </reporting>
 
   <!-- ===========================================================  -->
@@ -441,7 +463,7 @@
     <currentSnapshotVersion>1.2.4-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-
+    <github.global.server>github</github.global.server>
   </properties>
 
   <repositories>
@@ -510,7 +532,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -523,6 +545,9 @@
             <configuration>
               <useAgent>true</useAgent>
               <keyname>roland@jolokia.org</keyname>
+              <gpgArguments>
+                <arg>--allow-weak-digest-algos</arg>
+              </gpgArguments>
             </configuration>
           </plugin>
         </plugins>
