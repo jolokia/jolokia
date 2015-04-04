@@ -44,7 +44,7 @@
       connectors.  It is an agent based approach with support for many
       platforms. In addition to basic JMX operations it enhances JMX
       remoting with unique features like bulk requests and fine grained
-      security policies..
+      security policies.
     </p>
     <subsection name="Starting points">
       <!--
