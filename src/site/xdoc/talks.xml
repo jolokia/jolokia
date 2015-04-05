@@ -48,7 +48,7 @@
         <object width="480" height="780"><param name="movie" value="https://www.parleys.com/dist/share/parleysshare.swf"></param><param name="allowFullScreen" value="true"></param><param name="wmode" value="direct"></param><param name="bgcolor" value="#222222"></param><param name="flashVars" value="sv=true&amp;pageId=2864" ></param><embed src="http://www.parleys.com/dist/share/parleysshare.swf" type="application/x-shockwave-flash" flashVars="sv=true&amp;pageId=2864" allowfullscreen="true" bgcolor="#222222" width="480" height="780"></embed></object>
       </div>
       <p>The slides with included videos are also available at <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx">Slideshare</a>:</p>
-      <div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="http://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
+      <div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="https://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
     </section>
     <section name="OSMC 2011">
       <p>
