@@ -383,8 +383,8 @@
     </p><p>
       In order for this servlet definition to find the referenced
       Java class, the JAR <code class="filename">jolokia-core.jar</code> must
-      be included. This jar can be found in <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core" target="_top">Jolokia's maven
-      resository</a>. Maven users will can declare a
+      be included. This jar can be found in <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://repo1.maven.org/maven2/org/jolokia/jolokia-core" target="_top">Maven central
+      </a>. Maven users will can declare a
       dependency on this jar artifact:
     </p><pre class="programlisting">
     &lt;project&gt;
@@ -396,15 +396,7 @@
           &lt;version&gt;${jolokia.version}&lt;/version&gt;
         &lt;/dependency&gt;
       &lt;/dependencies&gt;
-
-      &lt;!-- Maven repository hosting Jolokia --&gt;
-      &lt;repositories&gt;
-        &lt;repository&gt;
-          &lt;id&gt;labs-consol-release&lt;/id&gt;
-          &lt;name&gt;ConSol* Labs Repository (Releases)&lt;/name&gt;
-          &lt;url&gt;http://labs.consol.de/maven/repository&lt;/url&gt;
-        &lt;/repository&gt;
-      &lt;/repositories&gt;
+      &lt;!-- .... --&gt;
     &lt;/project&gt;</pre><p>
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
