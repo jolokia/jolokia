@@ -45,7 +45,7 @@
         talk, so please concentrate on the facts and fade out the speaker ;-)
       </p>
       <div style="margin-left: 110px">
-        <object width="480" height="780"><param name="movie" value="http://www.parleys.com/dist/share/parleysshare.swf"></param><param name="allowFullScreen" value="true"></param><param name="wmode" value="direct"></param><param name="bgcolor" value="#222222"></param><param name="flashVars" value="sv=true&amp;pageId=2864" ></param><embed src="http://www.parleys.com/dist/share/parleysshare.swf" type="application/x-shockwave-flash" flashVars="sv=true&amp;pageId=2864" allowfullscreen="true" bgcolor="#222222" width="480" height="780"></embed></object>
+        <object width="480" height="780"><param name="movie" value="https://www.parleys.com/dist/share/parleysshare.swf"></param><param name="allowFullScreen" value="true"></param><param name="wmode" value="direct"></param><param name="bgcolor" value="#222222"></param><param name="flashVars" value="sv=true&amp;pageId=2864" ></param><embed src="http://www.parleys.com/dist/share/parleysshare.swf" type="application/x-shockwave-flash" flashVars="sv=true&amp;pageId=2864" allowfullscreen="true" bgcolor="#222222" width="480" height="780"></embed></object>
       </div>
       <p>The slides with included videos are also available at <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx">Slideshare</a>:</p>
       <div style="width:510px; margin-left: auto; margin-right: auto;"><iframe src="http://www.slideshare.net/slideshow/embed_code/10259713" width="510" height="426" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe></div>
@@ -62,7 +62,7 @@
         catering was phantastic, too ;-)
       </p>
       <div style="width:600px; margin-left: auto; margin-right: auto;">
-        <iframe width="600" height="450" src="http://www.youtube.com/embed/Hn8zkghsrIs" frameborder="0" allowfullscreen="true"></iframe>
+        <iframe width="600" height="450" src="https://www.youtube.com/embed/Hn8zkghsrIs" frameborder="0" allowfullscreen="true"></iframe>
       </div>
     </section>
     <section name="Osgish">
@@ -71,7 +71,7 @@
         managing OSGi container. It works well, but is still yet some sort of prototype. The screencast is cool nevertheless ;-)
       </p>
       <div style="width:500px; margin-left: auto; margin-right: auto;">
-        <iframe src="http://player.vimeo.com/video/9800210?badge=0" width="500" height="375" frameborder="0" webkitAllowFullScreen="true" mozallowfullscreen="true" allowFullScreen="trueaaa"></iframe> <p><a href="http://vimeo.com/9800210">Osgish - A OSGi Shell</a> from <a href="http://vimeo.com/user3278848">Roland Huss</a> on <a href="http://vimeo.com">Vimeo</a>.</p>
+        <iframe src="https://player.vimeo.com/video/9800210?badge=0" width="500" height="375" frameborder="0" webkitAllowFullScreen="true" mozallowfullscreen="true" allowFullScreen="trueaaa"></iframe> <p><a href="http://vimeo.com/9800210">Osgish - A OSGi Shell</a> from <a href="http://vimeo.com/user3278848">Roland Huss</a> on <a href="http://vimeo.com">Vimeo</a>.</p>
       </div>
     </section>
   </body>
