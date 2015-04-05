@@ -405,8 +405,8 @@
       In order for this servlet definition to find the referenced
       Java class, the JAR <filename>jolokia-core.jar</filename> must
       be included. This jar can be found in <ulink
-      url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-core">Jolokia's maven
-      resository</ulink>. Maven users will can declare a
+      url="http://repo1.maven.org/maven2/org/jolokia/jolokia-core">Maven central
+      </ulink>. Maven users will can declare a
       dependency on this jar artifact:
     </para>
     <programlisting language="xml"><![CDATA[
@@ -419,15 +419,7 @@
           <version>${jolokia.version}</version>
         </dependency>
       </dependencies>
-
-      <!-- Maven repository hosting Jolokia -->
-      <repositories>
-        <repository>
-          <id>labs-consol-release</id>
-          <name>ConSol* Labs Repository (Releases)</name>
-          <url>http://labs.consol.de/maven/repository</url>
-        </repository>
-      </repositories>
+      <!-- .... -->
     </project>]]></programlisting>
     <para>
       The <classname>org.jolokia.http.Agent</classname> can be

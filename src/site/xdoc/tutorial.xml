@@ -50,8 +50,8 @@ $ TC=`pwd`]]></pre>
         <pre><![CDATA[
 $ cd $TC/webapps
 $ wget \ 
-http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/1.0.0/jolokia-war-1.0.0.war
-$ mv jolokia-war-1.0.0.war jolokia.war]]></pre>
+http://repo1.maven.org/maven2/org/jolokia/jolokia-war/1.2.3/jolokia-war-1.2.3.war
+$ mv jolokia-war-1.2.3.war jolokia.war]]></pre>
       </subsection>
       <subsection name="Startup and Verification">
         <p>
@@ -102,7 +102,7 @@ public class JolokiaDemo {
         <ul>
           <li>
             <a
-                href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/1.0.0/jolokia-client-java-1.0.0.jar">jolokia-client-java-1.0.0.jar</a>
+                href="http://repo1.maven.org/maven2/org/jolokia/jolokia-client-java/1.2.3/jolokia-client-java-1.2.3.jar">jolokia-client-java-1.0.0.jar</a>
           </li>
           <li>
             <a
@@ -123,7 +123,7 @@ public class JolokiaDemo {
           and put it into the same directory as this demo
           class. Finally, compile the demo and let it run:
         </p>
-        <pre class="prettyprin lang-bash"><![CDATA[
+        <pre class="prettyprint lang-bash"><![CDATA[
 $ export CLASSPATH=json_simple-1.1.jar:jolokia-client-java-1.0.0.jar:\
 httpcore-4.1.2.jar:httpclient-4.1.2.jar:commons-logging-1.1.1.jar:.
 ]]>

@@ -151,7 +151,7 @@ if you forgot it the first time.
 [![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
 [![Flattr](http://api.flattr.com/button/flattr-badge-large.png)](http://flattr.com/thing/73919/Jolokia-JMX-on-Capsaicin)
 
- [1]: http://labs.consol.de/wp-content/uploads/2010/10/jolokia_logo.png "Jolokia"
+ [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
  [3]: http://www.mulesoft.org
  [4]: http://www.jmx4perl.org
