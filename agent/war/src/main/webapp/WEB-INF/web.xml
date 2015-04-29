@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+<web-app id="WebApp_1" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
@@ -162,7 +162,8 @@
 
   <!--
   Example Configuration for switching on BASIC security. The role 'Jolokia'
-  must be mapped to real users with passwords on the Appserver side:
+  must be mapped to real users with passwords on the Appserver side: 
+  -->
 
   <login-config>
     <auth-method>BASIC</auth-method>
@@ -175,14 +176,35 @@
       <url-pattern>/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>Jolokia</role-name>
+      <role-name>administrator</role-name>
+      <role-name>operator</role-name>
+      <role-name>configurator</role-name>
+      <role-name>monitor</role-name>
     </auth-constraint>
   </security-constraint>
 
   <security-role>
-    <role-name>Jolokia</role-name>
+    <description>Administrator role</description>
+    <role-name>administrator</role-name>
   </security-role>
-  -->
+  <security-role>
+    <description>Operator role</description>
+    <role-name>operator</role-name>
+  </security-role>
+  <security-role>
+    <description>Configurator role</description>
+    <role-name>configurator</role-name>
+  </security-role>
+  <security-role>
+    <description>Monitor role</description>
+    <role-name>monitor</role-name>
+  </security-role>
+  <security-role>
+    <description>Nobody role</description>
+    <role-name>nobody</role-name>
+  </security-role>
+
+  <!-- -->
 </web-app>
 
 <!--

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<com.ibm.ejs.models.base.bindings.webappbnd:WebAppBinding xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:com.ibm.ejs.models.base.bindings.webappbnd="webappbnd.xmi" xmi:id="WebAppBinding_1" virtualHostName="admin_host">
+  <webapp href="WEB-INF/web.xml#WebApp_1"/>
+</com.ibm.ejs.models.base.bindings.webappbnd:WebAppBinding>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<com.ibm.ejs.models.base.extensions.webappext:WebAppExtension xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:com.ibm.ejs.models.base.extensions.webappext="webappext.xmi" xmi:id="WebAppExtension_1" reloadInterval="5" reloadingEnabled="false" defaultErrorPage="error.jsp" additionalClassPath="" fileServingEnabled="true" directoryBrowsingEnabled="false" serveServletsByClassnameEnabled="false" autoRequestEncoding="true" autoResponseEncoding="true">
+  <webApp href="WEB-INF/web.xml#WebApp_1"/>
+  <jspAttributes xmi:id="JSPAttribute_1" name="useThreadTagPool" value="true"/>
+  <jspAttributes xmi:id="JSPAttribute_2" name="disableJspRuntimeCompilation" value="true"/>
+  <jspAttributes xmi:id="JSPAttribute_3" name="useFullPackageNames" value="true"/>
+</com.ibm.ejs.models.base.extensions.webappext:WebAppExtension>

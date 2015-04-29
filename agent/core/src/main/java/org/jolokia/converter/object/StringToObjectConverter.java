@@ -10,6 +10,8 @@ import java.net.URL;
 import java.util.*;
 
 import javax.management.ObjectName;
+import javax.management.Attribute;
+import javax.management.AttributeList;
 
 import org.jolokia.util.*;
 import org.json.simple.JSONArray;
@@ -44,6 +46,7 @@ public class StringToObjectConverter {
 
     private static final Map<String,Parser> PARSER_MAP = new HashMap<String,Parser>();
     private static final Map<String,Class> TYPE_SIGNATURE_MAP = new HashMap<String, Class>();
+    private static final Map<String,Class> AL_TYPE_SIGNATURE_MAP = new HashMap<String, Class>();
 
     static {
         PARSER_MAP.put(Byte.class.getName(),new ByteParser());
@@ -60,7 +63,7 @@ public class StringToObjectConverter {
         PARSER_MAP.put("float",new FloatParser());
         PARSER_MAP.put(BigDecimal.class.getName(),new BigDecimalParser());
         PARSER_MAP.put(BigInteger.class.getName(),new BigIntegerParser());
-        
+
 
         PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
         PARSER_MAP.put("boolean",new BooleanParser());
@@ -70,6 +73,7 @@ public class StringToObjectConverter {
         PARSER_MAP.put(Date.class.getName(),new DateParser());
         PARSER_MAP.put(ObjectName.class.getName(), new ObjectNameParser());
         PARSER_MAP.put(URL.class.getName(),new URLParser());
+        PARSER_MAP.put(AttributeList.class.getName(), new AttributeListParser());
 
         JSONParser jsonExtractor = new JSONParser();
         for (Class type : new Class[] { Map.class, List.class,
@@ -85,6 +89,16 @@ public class StringToObjectConverter {
         TYPE_SIGNATURE_MAP.put("J",long.class);
         TYPE_SIGNATURE_MAP.put("F",float.class);
         TYPE_SIGNATURE_MAP.put("D",double.class);
+
+        AL_TYPE_SIGNATURE_MAP.put("B",Boolean.class);
+        AL_TYPE_SIGNATURE_MAP.put("Y",Byte.class);
+        AL_TYPE_SIGNATURE_MAP.put("C",Character.class);
+        AL_TYPE_SIGNATURE_MAP.put("T",Short.class);
+        AL_TYPE_SIGNATURE_MAP.put("I",Integer.class);
+        AL_TYPE_SIGNATURE_MAP.put("L",Long.class);
+        AL_TYPE_SIGNATURE_MAP.put("F",Float.class);
+        AL_TYPE_SIGNATURE_MAP.put("D",Double.class);
+        AL_TYPE_SIGNATURE_MAP.put("S",String.class);
     }
 
     /**
@@ -163,9 +177,9 @@ public class StringToObjectConverter {
 
     // ======================================================================================================
 
-    // Check whether an argument can be used directly 
+    // Check whether an argument can be used directly
     // or the argument could be used in a public constructor
-    // or whether it needs some sort of conversion, 
+    // or whether it needs some sort of conversion,
     // Returns null if a string conversion should happen
     private Object prepareForDirectUsage(Class expectedClass, Object pArgument) {
         Class givenClass = pArgument.getClass();
@@ -175,7 +189,7 @@ public class StringToObjectConverter {
         	return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
         }
     }
-    
+
     private Object convertByConstructor(String pType, String pValue) {
         Class<?> expectedClass = ClassUtil.classForName(pType);
         if (expectedClass != null) {
@@ -189,7 +203,7 @@ public class StringToObjectConverter {
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -214,12 +228,12 @@ public class StringToObjectConverter {
         if (parser != null) {
             return parser.extract(value);
         }
-        
+
         Object cValue = convertByConstructor(pType, pValue);
         if (cValue != null) {
         	return cValue;
         }
-        
+
         throw new IllegalArgumentException(
                 "Cannot convert string " + value + " to type " +
                         pType + " because no converter could be found");
@@ -381,6 +395,45 @@ public class StringToObjectConverter {
                 return new URL(pValue);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Cannot parse URL " + pValue + ": " + e, e);
+            }
+        }
+    }
+    private static class AttributeListParser implements Parser {
+
+        /** {@inheritDoc} */
+        public Object extract(String pValue) {
+            if (pValue == null)
+                return null;
+
+            // The string must be in following format:
+            //  attribute-name1=attribute-type1:attribute-value1,attribute-name2=attribute-type2:attribute-value2...
+
+            // Escape rules for the special characters within the attribute value:
+            // 1.for "," and "=",put three PATH_ESCAPE characters before it
+            // 2.for ":",put four PATH_ESCAPE characters before it
+
+            try {
+                String[] values = EscapeUtil.splitAsArray(pValue, EscapeUtil.PATH_ESCAPE, ",");
+                AttributeList ret = new AttributeList(values.length);
+                for (String value : values) {
+                    String[] attr = EscapeUtil.splitAsArray(value, EscapeUtil.PATH_ESCAPE, "=");
+                    // We need the type info because Attribute must match the type the mbean required.
+                    if (attr.length == 2) {
+                        String[] tvPair = EscapeUtil.splitAsArray(attr[1],EscapeUtil.PATH_ESCAPE, ":");
+
+                        if (tvPair.length == 2) {
+                            Class[] plist = new Class[] {java.lang.String.class};
+                            ret.add(new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
+                        } else {
+                            throw new IllegalArgumentException("Cannot parse Attributelist " + pValue + ": " + attr[1] + " not in type:value format.");
+                        }
+                    } else { // value is empty
+                        ret.add(new Attribute(attr[0],null));
+                    }
+                }
+                return ret;
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Cannot parse AttributeList "+ pValue +": " +e, e);
             }
         }
     }
