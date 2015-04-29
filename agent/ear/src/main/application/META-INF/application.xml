@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE application PUBLIC "-//Sun Microsystems, Inc.//DTD J2EE Application 1.3//EN" "http://java.sun.com/dtd/application_1_3.dtd">
+
+<application>
+    <display-name>jolokia</display-name>
+    <description>Jolokia WAR agent</description>
+    <module id="WebModule_1">
+        <web>
+            <web-uri>jolokia.war</web-uri>
+            <context-root>/jolokia</context-root>
+        </web>
+    </module>
+    <security-role id="SecurityRole_1">
+        <description>Administrator role</description>
+        <role-name>administrator</role-name>
+    </security-role>
+    <security-role id="SecurityRole_2">
+        <description>Operator role</description>
+        <role-name>operator</role-name>
+    </security-role>
+    <security-role id="SecurityRole_3">
+        <description>Configurator role</description>
+        <role-name>configurator</role-name>
+    </security-role>
+    <security-role id="SecurityRole_4">
+        <description>Monitor role</description>
+        <role-name>monitor</role-name>
+    </security-role>
+</application>

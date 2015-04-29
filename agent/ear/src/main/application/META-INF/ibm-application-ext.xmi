@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--THIS PRODUCT CONTAINS RESTRICTED MATERIALS OF IBM
+5724-i63, 5724-H88(C) COPYRIGHT International Business Machines Corp., 1997, 2004
+All Rights Reserved * Licensed Materials - Property of IBM
+US Government Users Restricted Rights - Use, duplication or disclosure
+restricted by GSA ADP Schedule Contract with IBM Corp.--> 
+
+<applicationext:ApplicationExtension xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:applicationext="applicationext.xmi" xmlns:application="application.xmi" xmi:id="Application_ID_Ext">
+  <moduleExtensions xmi:type="applicationext:WebModuleExtension" xmi:id="WebModuleExtension_1">
+    <module xmi:type="application:WebModule" href="META-INF/application.xml#WebModule_1"/>
+  </moduleExtensions>
+  <application href="META-INF/application.xml#Application_ID"/>
+</applicationext:ApplicationExtension>

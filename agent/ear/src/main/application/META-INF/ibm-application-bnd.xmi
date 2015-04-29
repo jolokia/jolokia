@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--THIS PRODUCT CONTAINS RESTRICTED MATERIALS OF IBM
+5724-i63, 5724-H88(C) COPYRIGHT International Business Machines Corp., 1997, 2004
+All Rights Reserved * Licensed Materials - Property of IBM
+US Government Users Restricted Rights - Use, duplication or disclosure
+restricted by GSA ADP Schedule Contract with IBM Corp.--> 
+
+<applicationbnd:ApplicationBinding xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:applicationbnd="applicationbnd.xmi" xmlns:common="common.xmi" xmlns:application="application.xmi" xmi:id="Application_ID_Bnd" appName="jolokia">
+  <authorizationTable xmi:id="AuthorizationTable_1">
+    <authorizations xmi:id="RoleAssignment_1">
+      <role href="META-INF/application.xml#SecurityRole_1"/>
+      <specialSubjects xmi:type="applicationbnd:Server" xmi:id="Server_1" name="Server"/>
+    </authorizations>
+    <authorizations xmi:id="RoleAssignment_2">
+      <role href="META-INF/application.xml#SecurityRole_2"/>
+    </authorizations>
+    <authorizations xmi:id="RoleAssignment_3">
+      <role href="META-INF/application.xml#SecurityRole_3"/>
+    </authorizations>
+    <authorizations xmi:id="RoleAssignment_4">
+      <role href="META-INF/application.xml#SecurityRole_4"/>
+    </authorizations>
+  </authorizationTable>
+  <application href="META-INF/application.xml#Application_ID"/>
+</applicationbnd:ApplicationBinding>
