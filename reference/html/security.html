@@ -5,18 +5,7 @@
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
        }
-     </script><script xmlns:xslthl="http://xslthl.sf.net" type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-9534565-3']);
-  _gaq.push(['_setDomainName', '.jolokia.org']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="security"></a>Chapter&nbsp;4.&nbsp;Security</h1></div></div></div><p>
+     </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="security"></a>Chapter&nbsp;4.&nbsp;Security</h1></div></div></div><p>
       Security in JSR-160 remoting is an all-or-nothing option. Either
       all or none of your MBeans are accessible (except when your application server
       uses a SecurityManager, but that is not often the case). Jolokia, on

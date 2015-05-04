@@ -5,18 +5,7 @@
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
        }
-     </script><script xmlns:xslthl="http://xslthl.sf.net" type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-9534565-3']);
-  _gaq.push(['_setDomainName', '.jolokia.org']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="tools.html" title="Chapter&nbsp;10.&nbsp;Tools">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="jmx"></a>Chapter&nbsp;9.&nbsp;Jolokia JMX</h1></div></div></div><p>
+     </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="tools.html" title="Chapter&nbsp;10.&nbsp;Tools">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="jmx"></a>Chapter&nbsp;9.&nbsp;Jolokia JMX</h1></div></div></div><p>
     The main focus of Jolokia is to allow easy access to JMX MBeans
     from everywhere. MBeans can be provided by the JVM itself, by an
     application server or an application itself, where each MBean is
@@ -260,6 +249,45 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         of the application context. By default this is set to
         <code class="constant">true</code>, so the server starts up automatically
         by default.
+      </p><p>
+        Just in case you don't want to use the Jolokia Spring namespace you can also
+        use plain beans to configure a JVM agent. The following examples shows the example above with
+        only base Spring bean configurations (including an Spring EL expression) :
+      </p><pre class="programlisting">
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+             http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+             http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util
+             http://www.springframework.org/schema/util/spring-util.xsd"&gt;
+
+  &lt;bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent"&gt;
+    &lt;property name="lookupConfig" value="false"/&gt;
+    &lt;property name="systemPropertiesMode" value="never"/&gt;
+    &lt;property name="config"&gt;
+      &lt;bean class="org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder"&gt;
+        &lt;property name="config"&gt;
+          &lt;util:map&gt;
+            &lt;entry key="autoStart" value="true"/&gt;
+            &lt;entry key="host" value="0.0.0.0"/&gt;
+            &lt;entry key="port" value="#{configuration['jmx.jolokiaPort']}"/&gt;
+            ...
+          &lt;/util:map&gt;
+        &lt;/property&gt;
+      &lt;/bean&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;
+</pre><p>
+        This style however is only recommended if there are some issues with the Jolokia spring configuration setup
+        (like using Spring EL expressions in Jolokia versions earlier than 1.2.4). Otherwise, the Jolokia configuration
+        namespace is much easier to read.
       </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-spring-mbean-server"></a>9.3.2.&nbsp;Jolokia MBeanServer</h3></div></div></div><p>
         With <code class="constant">&lt;jolokia:mbean-server&gt;</code> the Jolokia
         MBeanServer can be specified. This is especially useful for
@@ -275,9 +303,9 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans
              http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.jolokia.org/jolokia-spring/schema/config 
+       http://www.jolokia.org/jolokia-spring/schema/config
              http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
        http://www.springframework.org/schema/context
              http://www.springframework.org/schema/context/spring-context.xsd
