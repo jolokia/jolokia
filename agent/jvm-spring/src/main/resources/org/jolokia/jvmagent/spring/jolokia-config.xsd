@@ -115,7 +115,7 @@
           &lt;jolokia:config&gt; config objects exist, they get applied in the provided
           order. This attribute is ignored when using &lt;jolokia:config&gt; within a
           &lt;jolokia:server&gt; configuration. Embedded configuration always serves as
-          default value with the lowese precedence. The higher the
+          default value with the lowest precedence. The higher the
           order the higher the importance/precedence configuration is.
         </xs:documentation>
       </xs:annotation>

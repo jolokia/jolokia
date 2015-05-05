@@ -44,4 +44,14 @@ public class JolokiaServerIntegrationTest extends BaseServerTest {
         assertNotNull(mbeanServer);
         checkServerAndStop(server);
     }
+
+    @Test
+    public void withPlainBean() throws Exception {
+        System.setProperty("jolokia.port", "" + EnvTestUtil.getFreePort());
+        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("/spring-jolokia-plain-beans.xml");
+        SpringJolokiaAgent server = (SpringJolokiaAgent) ctx.getBean("jolokia");
+        JolokiaServerConfig cfg = server.getServerConfig();
+        assertEquals(cfg.getContextPath(),"/jolokia/");
+        checkServerAndStop(server);
+    }
 }

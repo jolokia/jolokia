@@ -55,7 +55,9 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         if (systemPropertyMode == SystemPropertyMode.MODE_FALLBACK) {
             finalConfig.putAll(lookupSystemProperties());
         }
-        finalConfig.putAll(config.getConfig());
+        if (config != null) {
+            finalConfig.putAll(config.getConfig());
+        }
         if (lookupConfig) {
             // Merge all configs in the context in the reverse order
             Map<String, SpringJolokiaConfigHolder> configsMap = context.getBeansOfType(SpringJolokiaConfigHolder.class);
