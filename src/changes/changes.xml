@@ -56,7 +56,7 @@
       </action>
       <action dev="roland" type="add" date="2014-12-23" issue="173">
         Added the possibility to hook into the deserialization process
-        for responses.
+        for responses (Java client).
       </action>
       <action dev="nevenr" type="add" date="2014-12-11" issue="169">
         Allow a proxy to be specified in J4pClientBuilder
