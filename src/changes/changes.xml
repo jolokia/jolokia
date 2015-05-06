@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.2.4-SNAPSHOT" description="Release 1.2.4-SNAPSHOT">
+      <action dev="roland" type="fix" date="2015-05-06" issue="187">
+        Removed default truncation on 1000 collection elements as defined for the WAR agent in web.xml. Truncation
+        can be enabled by setting the config parameter maxCollectionSize in web.xml to a value greater than 0.
+      </action>
       <action dev="roland" type="fix" date="2015-05-06" issue="193">
         Fixed setting of "secured" flag when doing autodiscovery with the servlet agent. It will be now
         always be set after the first HTTP request has been served.
