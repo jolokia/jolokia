@@ -35,6 +35,7 @@ import com.sun.net.httpserver.*;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.http.HttpRequestHandler;
 import org.jolokia.restrictor.*;
@@ -129,7 +130,10 @@ public class JolokiaHttpHandler implements HttpHandler {
     public void start(boolean pLazy, String pUrl, boolean pSecured) {
         start(pLazy);
 
-        backendManager.getAgentDetails().updateAgentParameters(pUrl, pSecured);
+        AgentDetails details = backendManager.getAgentDetails();
+        details.setUrl(pUrl);
+        details.setSecured(pSecured);
+        details.seal();
     }
 
     /**

@@ -44,8 +44,8 @@ public class NetworkUtilTest {
     public void replaceExpression() throws SocketException, UnknownHostException {
         String host = NetworkUtil.getLocalAddress().getHostName();
         String ip = NetworkUtil.getLocalAddress().getHostAddress();
-        System.getProperties().setProperty("test.prop","testy");
-        System.getProperties().setProperty("test2:prop","testx");
+        System.getProperties().setProperty("test.prop", "testy");
+        System.getProperties().setProperty("test2:prop", "testx");
         String[] testData = {
                 "$host",host,
                 "bla ${host} blub","bla " + host + " blub",
@@ -85,5 +85,4 @@ public class NetworkUtilTest {
             }
         }
     }
-
 }

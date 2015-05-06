@@ -13,6 +13,7 @@ import javax.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.*;
@@ -72,9 +73,6 @@ public class AgentServlet extends HttpServlet {
 
     // Listen for discovery request (if switched on)
     private DiscoveryMulticastResponder discoveryMulticastResponder;
-
-    // If discovery multicast is enabled and URL should be initialized by request
-    private boolean initAgentUrlFromRequest = false;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -168,12 +166,7 @@ public class AgentServlet extends HttpServlet {
     private void initDiscoveryMulticast(Configuration pConfig) {
         String url = findAgentUrl(pConfig);
         if (url != null || listenForDiscoveryMcRequests(pConfig)) {
-            if (url == null) {
-                initAgentUrlFromRequest = true;
-            } else {
-                initAgentUrlFromRequest = false;
-                backendManager.getAgentDetails().updateAgentParameters(url, null);
-            }
+            backendManager.getAgentDetails().setUrl(url);
             try {
                 discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
                 discoveryMulticastResponder.start();
@@ -249,7 +242,7 @@ public class AgentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(httpGetHandler,req, resp);
+        handle(httpGetHandler, req, resp);
     }
 
     /** {@inheritDoc} */
@@ -285,7 +278,7 @@ public class AgentServlet extends HttpServlet {
                                        getOriginOrReferer(pReq));
 
             // Remember the agent URL upon the first request. Needed for discovery
-            updateAgentUrlIfNeeded(pReq);
+            updateAgentDetailsIfNeeded(pReq);
 
             // Dispatch for the proper HTTP request method
             json = handleSecurely(pReqHandler, pReq, pResp);
@@ -331,22 +324,24 @@ public class AgentServlet extends HttpServlet {
 
 
     // Update the agent URL in the agent details if not already done
-    private void updateAgentUrlIfNeeded(HttpServletRequest pReq) {
+    private void updateAgentDetailsIfNeeded(HttpServletRequest pReq) {
         // Lookup the Agent URL if needed
-        if (initAgentUrlFromRequest) {
-            updateAgentUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()), extractServletPath(pReq),pReq.getAuthType() != null);
-            initAgentUrlFromRequest = false;
+        AgentDetails details = backendManager.getAgentDetails();
+        if (details.isInitRequired()) {
+            if (details.isUrlMissing()) {
+                String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()),
+                                        extractServletPath(pReq));
+                details.setUrl(url);
+            }
+            if (details.isSecuredMissing()) {
+                details.setSecured(pReq.getAuthType() != null);
+            }
+            details.seal();
         }
     }
 
     private String extractServletPath(HttpServletRequest pReq) {
         return pReq.getRequestURI().substring(0,pReq.getContextPath().length());
-    }
-
-    // Update the URL in the AgentDetails
-    private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
-        String url = getBaseUrl(pRequestUrl, pServletPath);
-        backendManager.getAgentDetails().updateAgentParameters(url,pIsAuthenticated);
     }
 
     // Strip off everything unneeded

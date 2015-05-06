@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.2.4-SNAPSHOT" description="Release 1.2.4-SNAPSHOT">
+      <action dev="roland" type="fix" date="2015-05-06" issue="193">
+        Fixed setting of "secured" flag when doing autodiscovery with the servlet agent. It will be now
+        always be set after the first HTTP request has been served.
+      </action>
       <action dev="roland" type="fix" date="2015-05-05" issue="192">
         Fixed resolving of Spring EL expressions (#{ ... }) when Jolokia's Spring configuration
         schema is used
