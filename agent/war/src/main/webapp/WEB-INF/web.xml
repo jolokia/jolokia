@@ -68,18 +68,18 @@
     <init-param>
       <description>
         Maximum size of collections returned when
-        serializing to JSON. When set to 0, not
-        collections are truncated.
+        serializing to JSON. When set to 0
+        collections are not truncated.
       </description>
       <param-name>maxCollectionSize</param-name>
-      <param-value>1000</param-value>
+      <param-value>0</param-value>
     </init-param>
     <init-param>
       <description>
         Maximum number of objects which is traversed
         when serializing a single response. Use this
         as airbag to avoid boosting your memory and
-        network traffic. Nevertheless, when set to 0
+        network traffic. Nevertheless when set to 0
         not limit is used.
       </description>
       <param-name>maxObjects</param-name>
