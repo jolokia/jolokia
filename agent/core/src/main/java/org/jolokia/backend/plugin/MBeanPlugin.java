@@ -37,7 +37,7 @@ public interface MBeanPlugin {
      * that it can be reused for JMX lookups during its operation.
      *
      * @param ctx the context in order to access JMX
-     * @param map
+     * @param map configuration specific for this plugin
      */
     void init(MBeanPluginContext ctx, Map map) throws JMException;
 
