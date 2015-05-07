@@ -193,10 +193,10 @@ public final class EscapeUtil {
                                    // purpose
                                    "(?<!" + pEscape  + ")((?:" + pEscape + ".)*)" + pDel + "|" +
                                    "$" +    // or end-of-line
-                                 ")"),
+                                 ")",Pattern.DOTALL),
 
                 // Unescape, group must match unescaped value
-                Pattern.compile(pEscape + "(.)")
+                Pattern.compile(pEscape + "(.)",Pattern.DOTALL)
         };
     }
 
