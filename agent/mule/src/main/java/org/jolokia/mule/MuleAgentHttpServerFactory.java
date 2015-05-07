@@ -16,6 +16,7 @@ package org.jolokia.mule;
  *  limitations under the License.
  */
 
+import org.jolokia.util.ClassUtil;
 import org.mule.api.agent.Agent;
 
 /**
@@ -39,11 +40,11 @@ public final class MuleAgentHttpServerFactory {
 	 * @return internal HTTP server
 	 */
 	public static MuleAgentHttpServer create(Agent pParent, MuleAgentConfig pConfig) {
-        if (MortbayMuleAgentHttpServer.detect()) {
+        if (ClassUtil.checkForClass("org.mortbay.jetty.Server")) {
             return new MortbayMuleAgentHttpServer(pParent, pConfig);
-        } else if (Jetty9MuleAgentHttpServer.detect()) {
+        } else if (ClassUtil.checkForClass("org.eclipse.jetty.server.ServerConnector")) {
             return new Jetty9MuleAgentHttpServer(pParent, pConfig);
-        } else if (Jetty7And8MuleAgentHttpServer.detect()) {
+        } else if (ClassUtil.checkForClass("org.eclipse.jetty.server.Server")) {
             return new Jetty7And8MuleAgentHttpServer(pParent, pConfig);
         }
         throw new IllegalStateException("Cannot detect Jetty version (tried 6,7,8,9)");

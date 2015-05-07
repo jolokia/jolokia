@@ -16,6 +16,7 @@ package org.jolokia.mule;
  *  limitations under the License.
  */
 
+import org.jolokia.util.ClassUtil;
 import org.mule.api.lifecycle.InitialisationException;
 
 /**
@@ -28,10 +29,10 @@ public class EclipseJolokiaMuleAgentTest extends JolokiaMuleAgentTestCase {
 		return new JolokiaMuleAgent() {
 	    	@Override
 	    	public void initialise() throws InitialisationException {
-                if (Jetty9MuleAgentHttpServer.detect()) {
+                if (ClassUtil.checkForClass(Jetty9MuleAgentHttpServer.SERVER_CONNECTOR_CLASS)) {
                     this.server = new Jetty9MuleAgentHttpServer(this, this);
                     System.out.println("Testing Jetty 9");
-                } else if (Jetty7And8MuleAgentHttpServer.detect()) {
+                } else if (ClassUtil.checkForClass("org.eclipse.jetty.server.Server")) {
                     this.server = new Jetty7And8MuleAgentHttpServer(this,this);
                     System.out.println("Testing Jetty 7/8");
                 } else {

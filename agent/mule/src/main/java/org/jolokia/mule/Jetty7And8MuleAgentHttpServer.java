@@ -43,7 +43,4 @@ public class Jetty7And8MuleAgentHttpServer extends EclipseMuleAgentHttpServer {
         return ClassUtil.newInstance("org.eclipse.jetty.server.nio.SelectChannelConnector");
     }
 
-    public static boolean detect() {
-        return ClassUtil.checkForClass("org.eclipse.jetty.server.Server");
-    }
 }
