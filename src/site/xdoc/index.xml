@@ -75,6 +75,39 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+
+      <subsection name="Jolokia 1.3.0">
+        <div class="news-date">2015-05-07</div>
+        <p>
+          After quite some winter sleep Jolokia is back with a fresh
+          release. This is mostly a <a href="changes-report.html">bug fix release</a> with one important change:
+          Up to 1.2.3 Jolokia truncates any collection in the response value at
+          a threshold of 1000 elements by default. This limit can be overwritten
+          permanently in the configuration or per request as query parameter
+          (<code>maxCollectionSize</code>). However, it turned out that this limit was <a href="https://github.com/hawtio/hawtio/issues/1725">not
+          large enough</a>. So the new default behaviour is to have <strong>no limit</strong> at
+          all. As said, if you need it you always can set a hard limit in the
+          agent's configuration.
+        </p>
+        <p>
+          But the biggest news is probably something complete different: I'm
+          super happy to announce that I joined Red Hat since May, where I will
+          able to continue to work on Jolokia with an even higher
+          intensity. Before looking into the future, acknowledgements go to my
+          former employer <a href="http://www.consol.com">ConSol</a>. Without the support from ConSol Jolokia would
+          probably never has been grown from the original personal pet project to a full
+          featured, production ready JMX remote access solution as it is
+          today. Thank you !
+        </p>
+        <p>
+          What are the next steps ? <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx2014/11">Jolokia<a/>
+          <a href="https://github.com/rhuss/jolokia/wiki">2.0</a> (code name: "Duke Nukem
+          Forever") is not so far away, all changes from 1.x has been already
+          merged up to the 2.0 branch. A release candidate should be available
+          soon, however I can't give any estimates yet. But what I can say:
+          Jolokia is alive and kicking more than ever!
+        </p>
+      </subsection>
       <subsection name="Autumn edition 1.2.3">
         <div class="news-date">2014-11-08</div>
         <p>
