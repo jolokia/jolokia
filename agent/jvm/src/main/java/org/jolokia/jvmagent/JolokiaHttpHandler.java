@@ -133,7 +133,6 @@ public class JolokiaHttpHandler implements HttpHandler {
         AgentDetails details = backendManager.getAgentDetails();
         details.setUrl(pUrl);
         details.setSecured(pSecured);
-        details.seal();
     }
 
     /**

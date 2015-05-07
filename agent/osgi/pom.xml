@@ -129,6 +129,7 @@
               org.jolokia.util;version="${project.version}",
               org.osgi.framework;version="[1.0.0,2.0.0)",
               org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
+              org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
               org.osgi.service.log;version="[1.0.0,2.0.0)",
               org.osgi.util.tracker;version="[1.0.0,2.0.0)",
               *
