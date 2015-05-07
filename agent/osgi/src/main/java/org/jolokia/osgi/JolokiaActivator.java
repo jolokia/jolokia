@@ -82,7 +82,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
         //Track ConfigurationAdmin service
         configAdminTracker = new ServiceTracker(pBundleContext,
-                                                ConfigurationAdmin.class.getCanonicalName(),
+                                                "org.osgi.service.cm.ConfigurationAdmin",
                                                 null);
         configAdminTracker.open();
 
