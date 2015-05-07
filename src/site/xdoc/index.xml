@@ -83,14 +83,12 @@
           release. This is mostly a <a href="changes-report.html">bug fix release</a> with some new features:
         </p>
         <ul>
-          <li>A simple <code>MBeanPlugin</code> hook added so that own MBean can be easily registered along
-            with the agent</li>
-          <li>Support for OSGi's ConfigAdmin Service added</li>
-          <li>Added the possibility to hook into the deserialization process
-            for responses in the Java client</li>
-          <li>Allow a proxy to be specified in <code>J4pClientBuilder</code></li>
-          <li>Constructor based deserialization of Strings added</li>
-          <li>Support for Mule 3.6.1 added</li>
+          <li>A simple <code>MBeanPlugin</code> hook for registering own MBeans with the agent</li>
+          <li>Support for OSGi's ConfigAdmin Service</li>
+          <li>New possibility to hook into the deserialization process for responses in the Java client</li>
+          <li>Proxy can be specified for the Java client</li>
+          <li>Constructor based deserialization of Strings</li>
+          <li>Support for Mule 3.6.1</li>
         </ul>
         <p>
           There is one important change in the default behaviour of the WAR agent: Up to 1.2.3 Jolokia truncates any
@@ -107,7 +105,7 @@
           super happy to announce that I (roland) joined Red Hat since May, where I will
           able to continue to work on Jolokia with an even higher
           intensity. Before looking into the future, acknowledgements go to my
-          former employer <a href="http://www.consol.com">ConSol</a>. Without the support from ConSol Jolokia would
+          former employer <a href="http://www.consol.com">ConSol</a>. Without the support donated by ConSol Jolokia would
           probably never has been grown from the original personal pet project to a full
           featured, production ready JMX remote access solution as it is
           today. Thank you !
