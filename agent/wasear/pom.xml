@@ -19,11 +19,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-ear</artifactId>
+  <artifactId>jolokia-wasear</artifactId>
   <version>1.2.4-SNAPSHOT</version>
-  <name>jolokia-ear</name>
+  <name>jolokia-wasear</name>
   <packaging>ear</packaging>
-  <description>agent as ear application</description>
+  <description>agent as ear application for WebSphere</description>
 
   <parent>
     <groupId>org.jolokia</groupId>

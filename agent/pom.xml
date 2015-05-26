@@ -42,7 +42,7 @@
     <module>osgi</module>
     <module>osgi-bundle</module>
     <module>jmx</module>
-    <module>ear</module>
+    <module>wasear</module>
   </modules>
 
   <profiles>

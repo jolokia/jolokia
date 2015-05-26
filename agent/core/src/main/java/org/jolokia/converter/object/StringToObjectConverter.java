@@ -422,8 +422,12 @@ public class StringToObjectConverter {
                         String[] tvPair = EscapeUtil.splitAsArray(attr[1],EscapeUtil.PATH_ESCAPE, ":");
 
                         if (tvPair.length == 2) {
-                            Class[] plist = new Class[] {java.lang.String.class};
-                            ret.add(new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
+                            if (AL_TYPE_SIGNATURE_MAP.containsKey(tvPair[0])) {
+                                Class [] plist = new Class [] {java.lang.String.class};
+                                ret. add (new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
+                            } else {
+                                throw new IllegalArgumentException("Type in the t:v format must be one of " + AL_TYPE_SIGNATURE_MAP.keySet());
+                            }
                         } else {
                             throw new IllegalArgumentException("Cannot parse Attributelist " + pValue + ": " + attr[1] + " not in type:value format.");
                         }

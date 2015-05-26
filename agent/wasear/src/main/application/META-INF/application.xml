@@ -6,7 +6,7 @@
     <description>Jolokia WAR agent</description>
     <module id="WebModule_1">
         <web>
-            <web-uri>jolokia.war</web-uri>
+            <web-uri>jolokia-war-1.2.4-SNAPSHOT.war</web-uri>
             <context-root>/jolokia</context-root>
         </web>
     </module>
