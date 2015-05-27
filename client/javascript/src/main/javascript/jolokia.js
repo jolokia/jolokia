@@ -494,7 +494,7 @@
             };
 
             function addResponse(resp,j) {
-                // Only remember responses with values and remember lowest timetamp, too.
+                // Only remember responses with values and remember lowest timestamp, too.
                 if (resp.status != 304) {
                     if (lastModified == 0 || resp.timestamp < lastModified ) {
                         lastModified = resp.timestamp;

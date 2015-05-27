@@ -140,7 +140,7 @@ public final class EscapeUtil {
      * @param pArg argument to split
      * @param pEscape escape pattern as it can be used in a regular expression.
      * @param pDelimiter delimiter to use
-     * @return the splitted string as list or an empty array if the argument was null
+     * @return the split string as list or an empty array if the argument was null
      */
     public static List<String> split(String pArg,String pEscape, String pDelimiter) {
         if (pArg != null) {
