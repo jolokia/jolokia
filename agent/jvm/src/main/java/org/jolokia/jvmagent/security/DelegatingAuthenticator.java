@@ -62,9 +62,17 @@ public class DelegatingAuthenticator extends Authenticator {
                 return new Failure(401);
             }
         } catch (final IOException e) {
-            pHttpExchange.getResponseHeaders().add("X-Error-Details","Cannot call delegate url " + delegateURL + ": " + e);
-            return new Failure(503);
+            return prepareFailure(pHttpExchange, "Cannot call delegate url " + delegateURL + ": " + e, 503);
+        } catch (final IllegalArgumentException e) {
+            return prepareFailure(pHttpExchange, "Illegal Argument: " + e, 400);
+        } catch (ParseException e) {
+            return prepareFailure(pHttpExchange, "Invalid JSON response: " + e, 422);
         }
+    }
+
+    private Result prepareFailure(HttpExchange pHttpExchange, String pErrorDetails, int pCode) {
+        pHttpExchange.getResponseHeaders().add("X-Error-Details", pErrorDetails);
+        return new Failure(pCode);
     }
 
     private PrincipalExtractor createPrincipalExtractor(String pPrincipalExtractorSpec) {
@@ -80,7 +88,7 @@ public class DelegatingAuthenticator extends Authenticator {
     // =======================================================================================
 
     private interface PrincipalExtractor {
-        public HttpPrincipal extract(URLConnection connection) throws IOException;
+        HttpPrincipal extract(URLConnection connection) throws IOException, ParseException;
     }
 
     // Extract principal from a JSON object
@@ -93,22 +101,18 @@ public class DelegatingAuthenticator extends Authenticator {
         }
 
         @Override
-        public HttpPrincipal extract(URLConnection connection) throws IOException {
-            try {
-                Object payload = new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
-                Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
-                Object result = payload;
-                while (!pathElements.isEmpty()) {
-                    if (result == null) {
-                        throw new IllegalStateException("No path '" + path + "' found in " + payload.toString());
-                    }
-                    String key = pathElements.pop();
-                    result = extractValue(result, key);
+        public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
+            Object payload = new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
+            Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
+            Object result = payload;
+            while (!pathElements.isEmpty()) {
+                if (result == null) {
+                    throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
                 }
-                return new HttpPrincipal(result.toString(),realm);
-            } catch (ParseException e) {
-                throw new IllegalArgumentException("Invalid JSON content: " + e,e);
+                String key = pathElements.pop();
+                result = extractValue(result, key);
             }
+            return new HttpPrincipal(result.toString(),realm);
         }
 
         private Object extractValue(Object payload, String key) {
@@ -163,9 +167,9 @@ public class DelegatingAuthenticator extends Authenticator {
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
         } catch (KeyManagementException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Disabling SSL certificate failed: " + e,e);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Disabling SSL certificate failed: " + e,e);
         }
     }
 }
