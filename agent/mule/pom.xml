@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.mule</groupId>
       <artifactId>mule-core</artifactId>
-      <version>3.2.0</version>
+      <version>3.6.0</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
