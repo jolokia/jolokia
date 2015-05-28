@@ -1126,16 +1126,17 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authMode</code></td>
           <td>
-            Can be either <code class="literal">basic</code> (the default) or <code class="literal">jaas</code>. If
-            <code class="literal">jaas</code> is used, the user and password given in the <code class="literal">Authorization:</code>
-            header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-            This has only an effect, if user is set.
+            Can be either <code class="constant">basic</code> (the default), <code class="constant">jaas</code> or <code class="constant">delegate</code>. If
+            <code class="constant">jaas</code> is used, the user and password given in the <code class="constant">Authorization:</code>
+            header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+            This has only an effect, if user is set. For authentication mode <code class="constant">delegate</code>, the authentication
+            decision is delegated to a service specified by <code class="constant">authUrl</code> (see below for details).
           </td>
           <td>
             basic
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
-          <td><code class="constant">authenticatorClass</code></td>
+          <td><code class="constant">authClass</code></td>
           <td>
             Fully qualified name of an authenticator class. Class must be on classpath and must extend
             <code class="constant">com.sun.net.httpserver.Authenticator</code>. Class can declare a constructor
@@ -1147,12 +1148,49 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">authUrl</code></td>
+          <td>
+            URL of a service used for checking the authentication. This configuration option is only effective if
+            <code class="constant">authMode</code> is set to <code class="constant">delegate</code>. This URL can have a HTTP or HTTPS scheme.
+            The initially provided <code class="constant">Authorization:</code> header is copied over to the request against this
+            URL.
+          </td>
+          <td>
+          </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">authPrincipalSpec</code></td>
+          <td>
+            Expression used for extracting a principal name from the response of a delegate authentication service. This
+            parameter is only in use when the <code class="constant">authMode</code> is set to <code class="constant">delegate</code>. The
+            following expressions are supported:
+            <div class="variablelist"><dl><dt><span class="term"><code class="literal">json:path</code></span></dt><dd><p>
+                    a path into a JSON response which points to the principal.
+                    E.g. a principal spec <code class="literal">jason:metadata/name</code> will select the "name" property within the JSON
+                  object specified by the "metadata" property. For navigate into arrays, numeric indexes can be used.
+                  </p></dd><dt><span class="term"><code class="literal">empty:</code></span></dt><dd><p>
+                    Always extracts an empty ("") principal.
+                  </p></dd></dl></div>
+            If this option is not specified, not principal is extracted.
+          </td>
+          <td>
+          </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">authIgnoreCerts</code></td>
+          <td>
+            If given, the <code class="constant">authMode</code> is set to <code class="constant">delegate</code> and the delegate URL is
+            as HTTPS-URL then the server certificate as well as the server's DNS name will not be verified. This useful
+            in order to avoid (or introduce) complex keymanagement issues, but is of course less secure. By default
+            certs a verified with the local keystore.
+          </td>
+          <td>
+          </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">protocol</code></td>
           <td>
             HTTP protocol to use. Should be either <code class="literal">http</code>
             or <code class="literal">https</code>. For the SSL stack there are various
             additional configuration options. 
-          </td>        
+          </td>
           <td>
             <code class="constant">http</code>
           </td>
