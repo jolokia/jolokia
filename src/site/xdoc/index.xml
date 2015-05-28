@@ -88,9 +88,10 @@
           <code>openshift:8443</code>:
         </p>
         <pre class="prettyprint lang-bash"><![CDATA[
-java -javaagent:authMode=delegate,\
+java -javaagent:jolokia.jar=\
+                authMode=delegate,\
                 authUrl=https://openshift:8443/osapi/v1beta3/users/~,\
-                authPrincipalSpec=metadata/name,\
+                authPrincipalSpec=json:metadata/name,\
                 authIgnoreCerts=true\
                 ...
 ]]></pre>

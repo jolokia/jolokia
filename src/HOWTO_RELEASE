@@ -34,7 +34,7 @@ mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVe
 * Upload tar.gz and zip files from target/checkout/target
 * Upload all JavaScript folies in client/javascript/target:
   - compressed/jolokia-*.js
-  - scripts/jplokia*.js
+  - scripts/jolokia*.js
 
 # Deploy to Sonatype staging
 cd target/checkout
