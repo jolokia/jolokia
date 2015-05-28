@@ -75,7 +75,32 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
-
+      <subsection name="Delegating Authentication with Jolokia 1.3.1">
+        <div class="news-date">2015-05-28</div>
+        <p>
+          This minor release introduces one single new feature: A delegating authentication provider for the
+          JVM agent. This can be switched on with configuration options and allow to delegate the authentication
+          decision to an external service so that an easy SSO e.g. via OAuth2 is possible.
+        </p>
+        <p>
+          For example, if you are an OpenShift user and want to participate in OpenShift's OAuth2 SSO, then you can
+          specify the following startup parameters, assuming that you OpenShift API server is running as
+          <code>openshift:8443</code>:
+        </p>
+        <pre class="prettyprint lang-bash"><![CDATA[
+java -javaagent:authMode=delegate,\
+                authUrl=https://openshift:8443/osapi/v1beta3/users/~,\
+                authPrincipalSpec=metadata/name,\
+                authIgnoreCerts=true\
+                ...
+]]></pre>
+        <p>
+          More about this can be found in the <a href="reference/html/agents.html#agents-jvm">reference manual</a>.
+          Note, that the parameter <literal>authenticationClass</literal> has been renamed to <literal>authClass</literal>
+          for consistencies sake. Please raise an <a href="https://github.com/rhuss/jolokia/issues/new">issue</a> if this
+          doesn't work for you.
+        </p>
+      </subsection>
       <subsection name="Jolokia 1.3.0">
         <div class="news-date">2015-05-07</div>
         <p>

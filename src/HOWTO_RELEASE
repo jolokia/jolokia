@@ -73,7 +73,7 @@ vi tools/site-skin/pom.xml
 git commit -a
 
 # Adapted tracking code
-git co piwik
+git co analytics
 git rebase master
 cd tools/site-skin; mvn clean install;
 cd ../..

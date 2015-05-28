@@ -157,17 +157,18 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>authMode</constant></td>
           <td>
-            Can be either <literal>basic</literal> (the default) or <literal>jaas</literal>. If
-            <literal>jaas</literal> is used, the user and password given in the <literal>Authorization:</literal>
-            header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-            This has only an effect, if user is set.
+            Can be either <constant>basic</constant> (the default), <constant>jaas</constant> or <constant>delegate</constant>. If
+            <constant>jaas</constant> is used, the user and password given in the <constant>Authorization:</constant>
+            header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+            This has only an effect, if user is set. For authentication mode <constant>delegate</constant>, the authentication
+            decision is delegated to a service specified by <constant>authUrl</constant> (see below for details).
           </td>
           <td>
             basic
           </td>
         </tr>
         <tr>
-          <td><constant>authenticatorClass</constant></td>
+          <td><constant>authClass</constant></td>
           <td>
             Fully qualified name of an authenticator class. Class must be on classpath and must extend
             <constant>com.sun.net.httpserver.Authenticator</constant>. Class can declare a constructor
@@ -180,12 +181,65 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>authUrl</constant></td>
+          <td>
+            URL of a service used for checking the authentication. This configuration option is only effective if
+            <constant>authMode</constant> is set to <constant>delegate</constant>. This URL can have a HTTP or HTTPS scheme.
+            The initially provided <constant>Authorization:</constant> header is copied over to the request against this
+            URL.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>authPrincipalSpec</constant></td>
+          <td>
+            Expression used for extracting a principal name from the response of a delegate authentication service. This
+            parameter is only in use when the <constant>authMode</constant> is set to <constant>delegate</constant>. The
+            following expressions are supported:
+            <variablelist>
+              <varlistentry>
+                <term><literal>json:path</literal></term>
+                <listitem>
+                  <para>
+                    a path into a JSON response which points to the principal.
+                    E.g. a principal spec <literal>jason:metadata/name</literal> will select the "name" property within the JSON
+                  object specified by the "metadata" property. For navigate into arrays, numeric indexes can be used.
+                  </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><literal>empty:</literal></term>
+                <listitem>
+                  <para>
+                    Always extracts an empty ("") principal.
+                  </para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+            If this option is not specified, not principal is extracted.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>authIgnoreCerts</constant></td>
+          <td>
+            If given, the <constant>authMode</constant> is set to <constant>delegate</constant> and the delegate URL is
+            as HTTPS-URL then the server certificate as well as the server's DNS name will not be verified. This useful
+            in order to avoid (or introduce) complex keymanagement issues, but is of course less secure. By default
+            certs a verified with the local keystore.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
           <td><constant>protocol</constant></td>
           <td>
             HTTP protocol to use. Should be either <literal>http</literal>
             or <literal>https</literal>. For the SSL stack there are various
             additional configuration options. 
-          </td>        
+          </td>
           <td>
             <constant>http</constant>
           </td>
