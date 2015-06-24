@@ -99,6 +99,7 @@ public class StringToObjectConverter {
         AL_TYPE_SIGNATURE_MAP.put("F",Float.class);
         AL_TYPE_SIGNATURE_MAP.put("D",Double.class);
         AL_TYPE_SIGNATURE_MAP.put("S",String.class);
+        AL_TYPE_SIGNATURE_MAP.put("SA",String.class);
     }
 
     /**
@@ -423,8 +424,12 @@ public class StringToObjectConverter {
 
                         if (tvPair.length == 2) {
                             if (AL_TYPE_SIGNATURE_MAP.containsKey(tvPair[0])) {
-                                Class [] plist = new Class [] {java.lang.String.class};
-                                ret. add (new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
+                                if ("SA".equals(tvPair[0])) {
+                                    ret.add(new Attribute(attr[0],new ArrayList<String>(Arrays.asList(EscapeUtil.splitAsArray(tvPair[1],EscapeUtil.PATH_ESCAPE," ")))));
+                                } else {
+                                    Class [] plist = new Class [] {java.lang.String.class};
+                                    ret.add (new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
+                                }
                             } else {
                                 throw new IllegalArgumentException("Type in the t:v format must be one of " + AL_TYPE_SIGNATURE_MAP.keySet());
                             }
