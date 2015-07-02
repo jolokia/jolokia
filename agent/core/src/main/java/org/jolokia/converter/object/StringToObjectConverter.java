@@ -99,7 +99,15 @@ public class StringToObjectConverter {
         AL_TYPE_SIGNATURE_MAP.put("F",Float.class);
         AL_TYPE_SIGNATURE_MAP.put("D",Double.class);
         AL_TYPE_SIGNATURE_MAP.put("S",String.class);
-        AL_TYPE_SIGNATURE_MAP.put("SA",String.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoB",Boolean.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoY",Byte.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoC",Character.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoT",Short.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoI",Integer.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoL",Long.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoF",Float.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoD",Double.class);
+        AL_TYPE_SIGNATURE_MAP.put("AoS",String.class);
     }
 
     /**
@@ -424,10 +432,20 @@ public class StringToObjectConverter {
 
                         if (tvPair.length == 2) {
                             if (AL_TYPE_SIGNATURE_MAP.containsKey(tvPair[0])) {
-                                if ("SA".equals(tvPair[0])) {
-                                    ret.add(new Attribute(attr[0],new ArrayList<String>(Arrays.asList(EscapeUtil.splitAsArray(tvPair[1],EscapeUtil.PATH_ESCAPE," ")))));
+                                Class [] plist = new Class [] {java.lang.String.class};
+                                if (tvPair[0].startsWith("Ao")) {
+                                    String [] escapedArray = EscapeUtil.splitAsArray(tvPair[1],EscapeUtil.PATH_ESCAPE," ");
+                                    if ("AoS".equals(tvPair[0])) {
+                                        ret.add(new Attribute(attr[0],new ArrayList(Arrays.asList(escapedArray))));
+                                    } else {
+                                        Object convertedArray = Array.newInstance(AL_TYPE_SIGNATURE_MAP.get(tvPair[0]), escapedArray.length);
+                                        int i = 0;
+                                        for (String v : escapedArray) {
+                                            Array.set(convertedArray,i++,AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(v));
+                                        }
+                                        ret.add(new Attribute(attr[0],new ArrayList(Arrays.asList(convertedArray))));
+                                    }
                                 } else {
-                                    Class [] plist = new Class [] {java.lang.String.class};
                                     ret.add (new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
                                 }
                             } else {
