@@ -2,6 +2,7 @@ package org.jolokia.service.discovery;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,6 @@ import static org.jolokia.service.discovery.MulticastUtil.sendQueryAndCollectAns
 public class MulticastSocketListenerThreadTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
-
 
     private MulticastSocketListenerThread startSocketListener(String pId) throws IOException, InterruptedException {
         final AgentDetails details = new AgentDetails(pId);

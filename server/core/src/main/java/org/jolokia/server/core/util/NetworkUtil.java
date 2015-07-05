@@ -193,12 +193,22 @@ public final class NetworkUtil {
         try {
             URL url = new URL(pRequestURL);
             String host = url.getHost();
-            InetAddress address = findLocalAddressListeningOnPort(host, url.getPort());
-            return new URL(url.getProtocol(), address.getHostAddress(), url.getPort(), url.getFile()).toExternalForm();
+            int port = getPort(url);
+            InetAddress address = findLocalAddressListeningOnPort(host, port);
+            return new URL(url.getProtocol(), address.getHostAddress(), port, url.getFile()).toExternalForm();
         } catch (IOException e) {
             // Best effort, we at least tried it
             return pRequestURL;
         }
+    }
+
+    private static int getPort(URL url) {
+        int port = url.getPort();
+        if (port != -1) {
+            return port;
+        }
+        // Return default ports
+        return url.getProtocol().equalsIgnoreCase("https") ? 443 : 80;
     }
 
     // =======================================================================================================

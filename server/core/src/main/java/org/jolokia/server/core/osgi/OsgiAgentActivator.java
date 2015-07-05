@@ -78,7 +78,7 @@ public class OsgiAgentActivator implements BundleActivator {
 
         //Track ConfigurationAdmin service
         configAdminTracker = new ServiceTracker(pBundleContext,
-                                                ConfigurationAdmin.class.getCanonicalName(),
+                                                "org.osgi.service.cm.ConfigurationAdmin",
                                                 null);
         configAdminTracker.open();
 
@@ -138,7 +138,7 @@ public class OsgiAgentActivator implements BundleActivator {
     }
 
     /**
-     * Get the servlet alias under which the agen servlet is registered
+     * Get the servlet alias under which the agent servlet is registered
      * @return get the servlet alias
      */
     public String getServletAlias() {

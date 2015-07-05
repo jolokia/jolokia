@@ -179,17 +179,10 @@ public class AgentServletTest {
     public void initWithAgentDiscoveryAndUrlCreationAfterGet() throws ServletException, IOException, NoSuchFieldException, IllegalAccessException {
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
-            StringWriter sw = initRequestResponseMocks();
-            expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
-            expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
             String url = "http://10.9.11.1:9876/jolokia";
-            StringBuffer buf = new StringBuffer();
-            buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
-            expect(request.getRequestURL()).andReturn(buf);
-            expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.VERSION_GET_REQUEST);
-            expect(request.getContextPath()).andReturn("/jolokia");
-            expect(request.getAuthType()).andReturn("BASIC");
-            expect(request.getAttribute("subject")).andReturn(null);
+            StringWriter sw = initRequestResponseMocks(
+                    getDiscoveryRequestSetup(url),
+                    getStandardResponseSetup());
             replay(request, response);
 
             servlet.doGet(request, response);
@@ -203,6 +196,7 @@ public class AgentServletTest {
             servlet.destroy();
         }
     }
+
 
     public static class CustomLogHandler implements LogHandler {
 
@@ -254,6 +248,7 @@ public class AgentServletTest {
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
+                        setupAgentDetailsInitExpectations();
                         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
                         expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
                         expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
@@ -366,7 +361,10 @@ public class AgentServletTest {
                         expect(request.getHeader("Origin")).andStubReturn(in);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                        expect(request.getRequestURI()).andReturn("/jolokia/");
+                        expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
+                        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
+                        expect(request.getContextPath()).andReturn("/jolokia");
+                        expect(request.getAuthType()).andReturn(null);
                         expect(request.getParameterMap()).andReturn(null);
                         expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
                         expect(request.getAttribute("subject")).andReturn(null);
@@ -586,13 +584,41 @@ public class AgentServletTest {
                 expect(request.getHeader("Referer")).andStubReturn(null);
                 expect(request.getRemoteHost()).andReturn("localhost");
                 expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                expect(request.getRequestURI()).andStubReturn("/jolokia/");
-                expect(request.getRequestURL()).andStubReturn(new StringBuffer("http://localhost:127.0.0.1/jolokia/"));
-                expect(request.getContextPath()).andStubReturn("/jolokia");
-                expect(request.getAuthType()).andStubReturn(null);
-
+                expect(request.getRequestURI()).andReturn("/jolokia/");
+                setupAgentDetailsInitExpectations();
                 expect(request.getParameterMap()).andReturn(null);
                 expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+            }
+        };
+    }
+
+    private void setupAgentDetailsInitExpectations() {
+        expect(request.getRequestURI()).andReturn("/jolokia/");
+        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
+        expect(request.getContextPath()).andReturn("/jolokia/");
+        expect(request.getAuthType()).andReturn(null);
+    }
+
+    private Runnable getDiscoveryRequestSetup(final String url) {
+        return new Runnable() {
+            public void run() {
+                expect(request.getHeader("Origin")).andStubReturn(null);
+                expect(request.getHeader("Referer")).andStubReturn(null);
+                expect(request.getRemoteHost()).andReturn("localhost");
+                expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+                expect(request.getRequestURI()).andReturn("/jolokia/");
+                expect(request.getParameterMap()).andReturn(null);
+                expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+
+                expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+                expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+                StringBuffer buf = new StringBuffer();
+                buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
+                expect(request.getRequestURL()).andReturn(buf);
+                expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.VERSION_GET_REQUEST);
+                expect(request.getContextPath()).andReturn("/jolokia");
+                expect(request.getAuthType()).andReturn("BASIC");
+                expect(request.getAttribute("subject")).andReturn(null);
             }
         };
     }

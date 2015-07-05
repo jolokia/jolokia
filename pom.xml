@@ -153,7 +153,6 @@
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
       </plugin>
-      
     </plugins>
     
     
@@ -214,7 +213,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.4</version>
+          <version>1.6</version>
         </plugin>
 
         <plugin>
@@ -301,6 +300,12 @@
           <version>4.3</version>
         </plugin>
 
+        <plugin>
+          <groupId>com.github.github</groupId>
+          <artifactId>site-maven-plugin</artifactId>
+          <version>0.11</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
@@ -347,7 +352,7 @@
         </reportSets>
       </plugin>
     </plugins>
-    
+
   </reporting>
 
   <!-- ===========================================================  -->
@@ -382,7 +387,6 @@
       <name>Roland Huss</name>
       <id>roland</id>
       <email>roland@jolokia.org</email>
-      <organization>ConSol</organization>
       <roles>
         <role>Developer, Architect</role>
       </roles>
@@ -501,7 +505,7 @@
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-
+    <github.global.server>github</github.global.server>
   </properties>
 
   <repositories>
@@ -570,7 +574,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -583,74 +587,29 @@
             <configuration>
               <useAgent>true</useAgent>
               <keyname>roland@jolokia.org</keyname>
+              <gpgArguments>
+                <arg>--allow-weak-digest-algos</arg>
+              </gpgArguments>
             </configuration>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-    
-    <profile>
-      <!-- Distribution to labs.consol.de, for artefacts and site -->
-      <id>labs</id>
-      <distributionManagement>
-        <repository>
-          <id>consol-labs-release</id>
-          <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/repository</url>
-        </repository>
-        <snapshotRepository>
-          <id>consol-labs-snapshots</id>
-          <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/snapshots-repository</url>
-        </snapshotRepository>
-        <site>
-          <id>jolokia-site</id>
-          <url>scpexe://labs.consol.de/home/jolokia/www/htdocs</url>
-        </site>
-      </distributionManagement>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>maven-bundle-plugin</artifactId>
-              <configuration>
-                <remoteOBR>true</remoteOBR>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-    
-    <profile>
-      <id>obr-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <configuration>
-              <repositoryId>consol-labs-release</repositoryId>
-              <bundleUrl>httppgp://labs.consol.de/maven/repository/org/jolokia/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
-              <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/repository</url>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
 
-    <profile>
-      <id>obr-snapshot</id>
-      <build>
-        <plugins>
           <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
+            <groupId>com.github.github</groupId>
+            <artifactId>site-maven-plugin</artifactId>
+            <version>0.12-SNAPSHOT</version>
             <configuration>
-              <repositoryId>consol-labs-snapshots</repositoryId>
-              <bundleUrl>httppgp://labs.consol.de/maven/snapshots-repository/org/jolokia/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
-              <url>scpexe://labs.consol.de/home/maven-repository/www/htdocs/snapshots-repository</url>
+              <message>Creating site for Jolokia ${project.version}</message>
             </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>site</goal>
+                </goals>
+                <phase>site</phase>
+              </execution>
+            </executions>
           </plugin>
+
         </plugins>
       </build>
     </profile>

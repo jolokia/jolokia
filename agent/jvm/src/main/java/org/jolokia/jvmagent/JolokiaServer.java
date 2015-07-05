@@ -312,7 +312,7 @@ public class JolokiaServer {
                     try {
                         realAddress = InetAddress.getLocalHost();
                     } catch (UnknownHostException e1) {
-                        // Ok, ok. We take the orginal one
+                        // Ok, ok. We take the original one
                         realAddress = serverAddress.getAddress();
                     }
                 }

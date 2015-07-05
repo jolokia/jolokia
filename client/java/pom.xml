@@ -41,6 +41,21 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient-osgi</artifactId>
       <version>4.3.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Dependency required by httpclient-osgi via transitive dependencies which need to include since
+         httpclient-osgi is a fat-jar. In fact this is a workaround for httpclient-osgi's borked pom.xml -->
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

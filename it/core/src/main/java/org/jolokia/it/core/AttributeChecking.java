@@ -143,6 +143,27 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         return strings;
     }
 
+
+    public PojoBean[] createLargeArray(int nr) {
+        PojoBean[] ret = new PojoBean[nr];
+        for (int i = 0; i < nr; i++) {
+            ret[i] = new PojoBean("" + i,"value" + i);
+        }
+        return ret;
+    }
+
+    public List<List<PojoBean>> createLargeList(int nr) {
+        List<List<PojoBean>> ret = new ArrayList<List<PojoBean>>(nr);
+        for (int i = 0; i < nr; i++) {
+            List<PojoBean> inner = new ArrayList<PojoBean>(i / 10);
+            for (int j = 0; j < i / 10; j++) {
+                inner.add(new PojoBean("" + j, i + "."));
+            }
+            ret.add(inner);
+        }
+        return ret;
+    }
+
     public void setStringArray(String[] array) {
         strings = array;
     }

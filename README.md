@@ -151,15 +151,15 @@ if you forgot it the first time.
 [![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
 [![Flattr](http://api.flattr.com/button/flattr-badge-large.png)](http://flattr.com/thing/73919/Jolokia-JMX-on-Capsaicin)
 
- [1]: http://labs.consol.de/wp-content/uploads/2010/10/jolokia_logo.png "Jolokia"
+ [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
  [3]: http://www.mulesoft.org
  [4]: http://www.jmx4perl.org
- [5]: http://www.jolokia.org
+ [5]: https://www.jolokia.org
  [6]: http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
  [7]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
  [8]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
- [9]: http://forum.jolokia.org
+ [9]: https://jolokia.org/forum.html
  [10]: https://github.com/rhuss/jolokia/issues
  [11]: http://webchat.freenode.net/?channels=jolokia
- [12]: http://www.jolokia.org/reference/html/index.html
+ [12]: https://www.jolokia.org/reference/html/index.html

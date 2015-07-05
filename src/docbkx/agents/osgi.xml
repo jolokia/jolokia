@@ -178,7 +178,7 @@
         </td>        
       </tr>
       <tr>
-        <td>org.jolokia.agentDecription</td>
+        <td>org.jolokia.agentDescription</td>
         <td></td>
         <td>
           An optional description which can be used for clients to

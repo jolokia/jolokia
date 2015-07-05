@@ -25,16 +25,16 @@ Check in and push
 # Build release and deploy it on labs
 git clone git@github.com:rhuss/jolokia.git
 cd jolokia
-mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:prepare
-mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Plabs,dist,roo release:perform
+mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist,roo release:prepare
+mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist,roo release:perform
 
-# Copy assembly to labs:
-ssh jolokia@labs.consol.de mkdir -p www/dist/1.x.0/js
-cd target/checkout/target
-scp *gz *zip jolokia@labs.consol.de:www/dist/1.x.0/
-cd ../client/javascript/target 
-scp compressed/jolokia-* scripts/jolokia* jolokia@labs.consol.de:www/dist/1.x.0/js/
-cd ../../../../..
+# Copy assembly to Github
+
+* Create a new release ("Draft a release" - Button)
+* Upload tar.gz and zip files from target/checkout/target
+* Upload all JavaScript folies in client/javascript/target:
+  - compressed/jolokia-*.js
+  - scripts/jolokia*.js
 
 # Deploy to Sonatype staging
 cd target/checkout
@@ -58,7 +58,7 @@ cd ../..
 # Add new release to jolokia.meta
 vi src/site/resources/jolokia.meta
 # Sign and create checksums
-gpg --digest-algo=SHA1 --local-user roland@jolokia.org -a -b src/site/resources/jolokia.meta
+gpg --allow-weak-digest-algos --digest-algo=SHA1 --local-user roland@jolokia.org -a -b src/site/resources/jolokia.meta
 shasum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.sha1
 md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
  
@@ -73,12 +73,12 @@ vi tools/site-skin/pom.xml
 git commit -a
 
 # Adapted tracking code
-git co piwik
+git co analytics
 git rebase master
 cd tools/site-skin; mvn clean install;
 cd ../..
 mvn clean install
-mvn -Plabs site site:deploy
+mvn -N site
 
 # Roo-Plugin:
 # Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 
@@ -89,7 +89,7 @@ mvn -Plabs site site:deploy
 # Snapshot release
 
 # Set version number in Version.java, jolokia.js, jolokia-cubism.js, test-app/pom.xml, docbkx/index.xml
-mvn -Pdist,labs deploy
+mvn -Pdist deploy
 # Adapt URI and version number in root-repository.xml on labs.consol.de to us a httppgp URL
 
 

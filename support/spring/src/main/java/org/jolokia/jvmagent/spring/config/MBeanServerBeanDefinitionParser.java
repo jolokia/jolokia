@@ -17,10 +17,7 @@ package org.jolokia.jvmagent.spring.config;
  */
 
 import org.jolokia.jvmagent.spring.SpringJolokiaMBeanServerFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.w3c.dom.Element;
 
 /**
@@ -29,12 +26,11 @@ import org.w3c.dom.Element;
  * @author roland
  * @since 11.02.13
  */
-public class MBeanServerBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public class MBeanServerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+
     @Override
-    /** {@inheritDoc} */
-    protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaMBeanServerFactory.class);
-        return builder.getBeanDefinition();
+    protected Class<?> getBeanClass(Element element) {
+        return SpringJolokiaMBeanServerFactory.class;
     }
 
     @Override

@@ -193,9 +193,24 @@ public enum ConfigKey {
     AUTH_MODE("authMode", true, false, "basic"),
 
     /**
-     * Custom authenticator to be used instead of default user/password one
+     * Custom authenticator to be used instead of default user/password one (JVM agent)
      */
-    AUTHENTICATOR_CLASS("authenticatorClass", true, false),
+    AUTH_CLASS("authClass", true, false),
+
+    /**
+     * URL used for a dispatcher authentication (authMode == delegate)
+     */
+    AUTH_URL("authUrl",true,false),
+
+    /**
+     * Extractor specification for getting the principal (authMode == delegate)
+     */
+    AUTH_PRINCIPAL_SPEC("authPrincipalSpec",true,false),
+
+    /**
+     * Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+     */
+    AUTH_IGNORE_CERTS("authIgnoreCerts",true,false,"false"),
 
     /**
      * Context used for agent, used e.g. in the OSGi activator

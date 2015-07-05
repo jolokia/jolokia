@@ -78,7 +78,8 @@ public class DiscoveryMessageTest {
         for (int i = 0; i < size; i++) {
             large.append("Y");
         }
-        details.updateAgentParameters(large.toString(),true);
+        details.setUrl(large.toString());
+        details.setSecured(true);
         return details;
     }
 }

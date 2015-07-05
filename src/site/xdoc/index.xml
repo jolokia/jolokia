@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2009-2013 Roland Huss
+  ~ Copyright 2009-2015 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@
 
   <head>
     <meta name="description" content="Jolokia is an alternative to JSR-160 connectors for remote JMX access. It provides REST-like access to JMX with JSON over HTTP."/>
-    <link rel="alternate" 
-          type="application/rss+xml" 
-          title="Jolokia" 
-          href="http://labs.consol.de/tags/jolokia/feed" />
     <!--
     <script type="text/javascript" src="js/flattr.js"></script>
     -->
@@ -44,7 +40,7 @@
       connectors.  It is an agent based approach with support for many
       platforms. In addition to basic JMX operations it enhances JMX
       remoting with unique features like bulk requests and fine grained
-      security policies. 
+      security policies.
     </p>
     <subsection name="Starting points">
       <!--
@@ -79,6 +75,76 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Delegating Authentication with Jolokia 1.3.1">
+        <div class="news-date">2015-05-28</div>
+        <p>
+          This minor release introduces one single new feature: A delegating authentication provider for the
+          JVM agent. This can be switched on with configuration options and allow to delegate the authentication
+          decision to an external service so that an easy SSO e.g. via OAuth2 is possible.
+        </p>
+        <p>
+          For example, if you are an OpenShift user and want to participate in OpenShift's OAuth2 SSO, then you can
+          specify the following startup parameters, assuming that you OpenShift API server is running as
+          <code>openshift:8443</code>:
+        </p>
+        <pre class="prettyprint lang-bash"><![CDATA[
+java -javaagent:jolokia.jar=\
+                authMode=delegate,\
+                authUrl=https://openshift:8443/osapi/v1beta3/users/~,\
+                authPrincipalSpec=json:metadata/name,\
+                authIgnoreCerts=true\
+                ...
+]]></pre>
+        <p>
+          More about this can be found in the <a href="reference/html/agents.html#agents-jvm">reference manual</a>.
+          Note, that the parameter <literal>authenticationClass</literal> has been renamed to <literal>authClass</literal>
+          for consistencies sake. Please raise an <a href="https://github.com/rhuss/jolokia/issues/new">issue</a> if this
+          doesn't work for you.
+        </p>
+      </subsection>
+      <subsection name="Jolokia 1.3.0">
+        <div class="news-date">2015-05-07</div>
+        <p>
+          After quite some winter sleep Jolokia is back with a fresh
+          release. This is mostly a <a href="changes-report.html">bug fix release</a> with some new features:
+        </p>
+        <ul>
+          <li>A simple <code>MBeanPlugin</code> hook for registering own MBeans with the agent</li>
+          <li>Support for OSGi's ConfigAdmin Service</li>
+          <li>New possibility to hook into the deserialization process for responses in the Java client</li>
+          <li>Proxy can be specified for the Java client</li>
+          <li>Constructor based deserialization of Strings</li>
+          <li>Support for Mule 3.6.1</li>
+        </ul>
+        <p>
+          There is one important change in the default behaviour of the WAR agent: Up to 1.2.3 Jolokia truncates any
+          collection in the response value at
+          a threshold of 1000 elements by default. This limit can be overwritten
+          permanently in the configuration or per request as query parameter
+          (<code>maxCollectionSize</code>). However, it turned out that this limit was <a href="https://github.com/hawtio/hawtio/issues/1725">not
+          large enough</a>. So the new default behaviour is to have <strong>no limit</strong> at
+          all. As said, if you need it you always can set a hard limit in the
+          agent's configuration.
+        </p>
+        <p>
+          But the biggest news is probably something complete different: I'm
+          super happy to announce that I (roland) joined Red Hat since May, where I will
+          able to continue to work on Jolokia with an even higher
+          intensity. Before looking into the future, acknowledgements go to my
+          former employer <a href="http://www.consol.com">ConSol</a>. Without the support donated by ConSol Jolokia would
+          probably never has been grown from the original personal pet project to a full
+          featured, production ready JMX remote access solution as it is
+          today. Thank you !
+        </p>
+        <p>
+          What are the next steps ? <a href="http://www.slideshare.net/roland.huss/jolokia-devoxx2014/11">Jolokia</a>
+          <a href="https://github.com/rhuss/jolokia/wiki">2.0</a> (code name: "Duke Nukem
+          Forever") is not so far away, all changes from 1.x has been already
+          merged up to the 2.0 branch. A release candidate should be available
+          soon, however I can't give any estimates yet. But what I can say:
+          Jolokia is alive and kicking more than ever!
+        </p>
+      </subsection>
       <subsection name="Autumn edition 1.2.3">
         <div class="news-date">2014-11-08</div>
         <p>

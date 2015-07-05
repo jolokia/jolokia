@@ -67,7 +67,9 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         if (systemPropertyMode == SystemPropertyMode.FALLBACK) {
             config.putAll(lookupSystemProperties());
         }
-        config.putAll(configHolder.getConfig());
+        if (configHolder.getConfig() != null) {
+            config.putAll(configHolder.getConfig());
+        }
 
         if (lookupConfig) {
             config.putAll(lookupConfigurationFromContext());

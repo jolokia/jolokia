@@ -25,9 +25,9 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import com.sun.net.httpserver.Authenticator;
-import org.jolokia.jvmagent.security.JaasHttpAuthenticator;
-import org.jolokia.jvmagent.security.UserPasswordHttpAuthenticator;
+import org.jolokia.jvmagent.security.*;
 import org.jolokia.server.core.config.*;
+import org.jolokia.server.core.osgi.security.JaasAuthenticator;
 
 /**
  * Configuration required for the JolokiaServer
@@ -249,12 +249,12 @@ public class JolokiaServerConfig {
     private void initAuthenticator() {
         initCustomAuthenticator();
         if (authenticator == null) {
-            initDefaultAuthenticator();
+            initAuthenticatorFromAuthMode();
         }
     }
 
     private void initCustomAuthenticator() {
-        String authenticatorClass = jolokiaConfig.getConfig(ConfigKey.AUTHENTICATOR_CLASS);
+        String authenticatorClass = jolokiaConfig.getConfig(ConfigKey.AUTH_CLASS);
 
         if (authenticatorClass != null) {
             Class authClass = getAuthenticatorClass(authenticatorClass);
@@ -314,23 +314,26 @@ public class JolokiaServerConfig {
         }
     }
 
-    private void initDefaultAuthenticator() {
+    private void initAuthenticatorFromAuthMode() {
         String user = jolokiaConfig.getConfig(ConfigKey.USER);
         String password = jolokiaConfig.getConfig(ConfigKey.PASSWORD);
 
-        if (user != null) {
-            String authMode = jolokiaConfig.getConfig(ConfigKey.AUTH_MODE);
-            String realm = jolokiaConfig.getConfig(ConfigKey.REALM);
-            if ("basic".equalsIgnoreCase(authMode)) {
-                authenticator = new UserPasswordHttpAuthenticator(realm,user,password);
-            } else if ("jaas".equalsIgnoreCase(authMode)) {
-                authenticator = new JaasHttpAuthenticator(realm);
-            } else {
-                throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
-                                                   "Must be either 'basic' or 'jaas'");
-            }
+        String authMode = jolokiaConfig.getConfig(ConfigKey.AUTH_MODE);
+        String realm = jolokiaConfig.getConfig(ConfigKey.REALM);
+        if ("basic".equalsIgnoreCase(authMode)) {
+            authenticator = user != null ? new UserPasswordHttpAuthenticator(realm,user,password) : null;
+        } else if ("jaas".equalsIgnoreCase(authMode)) {
+            authenticator = new JaasHttpAuthenticator(realm);
+        } else if ("delegate".equalsIgnoreCase(authMode)) {
+            String ignoreCerts = jolokiaConfig.getConfig(ConfigKey.AUTH_IGNORE_CERTS);
+            authenticator = new DelegatingAuthenticator(realm,
+                                                        jolokiaConfig.getConfig(ConfigKey.AUTH_URL),
+                                                        jolokiaConfig.getConfig(ConfigKey.AUTH_PRINCIPAL_SPEC),
+                                                        Boolean.getBoolean(ignoreCerts));
+
         } else {
-            authenticator = null;
+            throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
+                                               "Must be either 'basic' or 'jaas'");
         }
     }
 

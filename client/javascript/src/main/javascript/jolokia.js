@@ -66,7 +66,7 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.2.4-SNAPSHOT";
+            this.CLIENT_VERSION = "1.3.1";
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -570,7 +570,7 @@
             };
 
             function addResponse(resp,j) {
-                // Only remember responses with values and remember lowest timetamp, too.
+                // Only remember responses with values and remember lowest timestamp, too.
                 if (resp.status != 304) {
                     if (lastModified == 0 || resp.timestamp < lastModified ) {
                         lastModified = resp.timestamp;

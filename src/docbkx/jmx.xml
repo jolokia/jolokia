@@ -345,6 +345,48 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         <constant>true</constant>, so the server starts up automatically
         by default.
       </para>
+      <para>
+        Just in case you don't want to use the Jolokia Spring namespace you can also
+        use plain beans to configure a JVM agent. The following examples shows the example above with
+        only base Spring bean configurations (including an Spring EL expression) :
+      </para>
+       <programlisting><![CDATA[
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+             http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+             http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util
+             http://www.springframework.org/schema/util/spring-util.xsd">
+
+  <bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent">
+    <property name="lookupConfig" value="false"/>
+    <property name="systemPropertiesMode" value="never"/>
+    <property name="config">
+      <bean class="org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder">
+        <property name="config">
+          <util:map>
+            <entry key="autoStart" value="true"/>
+            <entry key="host" value="0.0.0.0"/>
+            <entry key="port" value="#{configuration['jmx.jolokiaPort']}"/>
+            ...
+          </util:map>
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+</beans>
+]]></programlisting>
+      <para>
+        This style however is only recommended if there are some issues with the Jolokia spring configuration setup
+        (like using Spring EL expressions in Jolokia versions earlier than 1.2.4). Otherwise, the Jolokia configuration
+        namespace is much easier to read.
+      </para>
     </section>
     <section id="jvm-spring-mbean-server">
       <title>Jolokia MBeanServer</title>
@@ -364,9 +406,9 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans
              http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.jolokia.org/jolokia-spring/schema/config 
+       http://www.jolokia.org/jolokia-spring/schema/config
              http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
        http://www.springframework.org/schema/context
              http://www.springframework.org/schema/context/spring-context.xsd

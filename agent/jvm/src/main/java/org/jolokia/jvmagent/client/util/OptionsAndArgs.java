@@ -39,7 +39,8 @@ public final class OptionsAndArgs {
             // JVM Agent options:
             "host", "port", "agentContext", "user", "password",
             "quiet!", "verbose!", "version!", "executor", "threadNr",
-            "backlog", "hide!", "protocol",
+            "backlog", "hide!", "protocol","authMode","authClass",
+            "authUrl", "authPrincipalSpec", "authIgnoreCerts!",
             //https options:
             "keystore", "keystorePassword", "useSslClientAuthentication!",
             "secureSocketProtocol", "keyStoreType", "keyManagerAlgorithm", "trustManagerAlgorithm",
@@ -133,6 +134,7 @@ public final class OptionsAndArgs {
     public String toAgentArg() {
         StringBuilder arg = new StringBuilder();
         for (Map.Entry<String,String> entry : options.entrySet()) {
+            String key = entry.getKey();
             if (!entry.getKey().equals("quiet") && !entry.getKey().equals("verbose")) {
                 arg.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
             }

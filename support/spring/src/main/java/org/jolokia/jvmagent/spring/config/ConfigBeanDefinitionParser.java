@@ -19,9 +19,10 @@ package org.jolokia.jvmagent.spring.config;
 import java.util.*;
 
 import org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.*;
@@ -32,12 +33,15 @@ import org.w3c.dom.*;
 * @author roland
 * @since 29.12.12
 */
-class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
+class ConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     // Properties to ignore for setting the configuration
     private static final String SKIP_ATTRIBUTES[] = {
             "order",
-            "xmlns"
+            "xmlns",
+            "xmlns:xsi",
+            "xsi:schemaLocation",
+            "id"
     };
 
     private Set<String>         skipMap;
@@ -47,26 +51,37 @@ class ConfigBeanDefinitionParser extends AbstractBeanDefinitionParser {
     }
 
     @Override
-    protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaConfigHolder.class);
-        Map<String, String> config = new HashMap<String, String>();
-        NamedNodeMap attrs = element.getAttributes();
-        for (int i = 0;i < attrs.getLength(); i++) {
-            Attr attr = (Attr) attrs.item(i);
-            String name = attr.getName();
-            if (skipMap.contains(name)) {
-                continue;
-            }
-            config.put(name,attr.getValue());
-        }
-        builder.addPropertyValue("config",config);
+    protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+        Map<String, Object> config = new HashMap<String, Object>();
+        builder.addPropertyValue("config",createConfigMap(element.getAttributes()));
         String order = element.getAttribute("order");
         if (StringUtils.hasText(order)) {
             builder.addPropertyValue("order",Integer.parseInt(order));
         }
-        return builder.getBeanDefinition();
     }
 
+    private Map<Object, Object> createConfigMap(NamedNodeMap attributes) {
+        ManagedMap<Object, Object> map = new ManagedMap<Object, Object>(attributes.getLength());
+		map.setKeyTypeName("java.lang.String");
+		map.setValueTypeName("java.lang.String");
+
+        for (int i = 0;i < attributes.getLength(); i++) {
+            Attr attr = (Attr) attributes.item(i);
+            String name = attr.getName();
+            if (skipMap.contains(name)) {
+                continue;
+            }
+            Object key = new TypedStringValue(name, String.class);
+            Object value = new TypedStringValue(attr.getValue(),String.class);
+            map.put(key,value);
+        }
+        return map;
+    }
+
+    @Override
+    protected Class<?> getBeanClass(Element element) {
+        return SpringJolokiaConfigHolder.class;
+    }
 
     @Override
     protected boolean shouldGenerateIdAsFallback() {

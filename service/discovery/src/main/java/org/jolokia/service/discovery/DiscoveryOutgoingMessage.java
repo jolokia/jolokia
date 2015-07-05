@@ -75,7 +75,13 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
                     type,
                     targetAddress,
                     targetPort,
-                    agentDetails != null ? agentDetails : new AgentDetails(agentId));
+                    agentDetails != null ? agentDetails : createAgentDetails());
+        }
+
+        private AgentDetails createAgentDetails() {
+            AgentDetails ret = new AgentDetails(agentId);
+            ret.seal();
+            return ret;
         }
 
     }

@@ -20,6 +20,7 @@ import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.json.simple.JSONAware;
+import sun.management.resources.agent;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -266,7 +267,7 @@ public class AgentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(httpGetHandler,req, resp);
+        handle(httpGetHandler, req, resp);
     }
 
     /** {@inheritDoc} */
@@ -302,7 +303,7 @@ public class AgentServlet extends HttpServlet {
                                        getOriginOrReferer(pReq));
 
             // Remember the agent URL upon the first request. Needed for discovery
-            updateAgentUrlIfNeeded(pReq);
+            updateAgentDetailsIfNeeded(pReq);
 
             // Dispatch for the proper HTTP request method
             json = handleSecurely(pReqHandler, pReq, pResp);
@@ -347,18 +348,27 @@ public class AgentServlet extends HttpServlet {
     }
 
     // Update the agent URL in the agent details if not already done
-    private void updateAgentUrlIfNeeded(HttpServletRequest pReq) {
+    private void updateAgentDetailsIfNeeded(HttpServletRequest pReq) {
         // Lookup the Agent URL if needed
         if (initAgentUrlFromRequest) {
             updateAgentUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()), extractServletPath(pReq),pReq.getAuthType() != null);
             initAgentUrlFromRequest = false;
         }
     }
-
     // Update the URL in the AgentDetails
     private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
-        String url = getBaseUrl(pRequestUrl, pServletPath);
-        jolokiaContext.getAgentDetails().updateAgentParameters(url,pIsAuthenticated);
+        AgentDetails details = jolokiaContext.getAgentDetails();
+        if (details.isInitRequired()) {
+            if (details.isUrlMissing()) {
+                String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pRequestUrl), pServletPath);
+                details.setUrl(url);
+            }
+            if (details.isSecuredMissing()) {
+                details.setSecured(pIsAuthenticated);
+            }
+            details.seal();
+        }
+        details.seal();
     }
 
     // Strip off everything unneeded

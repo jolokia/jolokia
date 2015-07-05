@@ -17,9 +17,8 @@ package org.jolokia.jvmagent.spring.config;
  */
 
 import org.jolokia.jvmagent.spring.SpringJolokiaAgent;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -29,15 +28,13 @@ import org.w3c.dom.Element;
  * Bean definition parser for a &lt;jolokia:agent&gt; spring configuration
  *
  */
-public class AgentBeanDefinitionParser extends AbstractBeanDefinitionParser {
+public class AgentBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     @Override
-    protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaAgent.class);
+    protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         Element config = DomUtils.getChildElementByTagName(element,"config");
         if (config != null) {
-            ConfigBeanDefinitionParser configParser = new ConfigBeanDefinitionParser();
-            builder.addPropertyValue("config", configParser.parseInternal(config, parserContext));
+            builder.addPropertyValue("config", parserContext.getDelegate().parseCustomElement(config,builder.getRawBeanDefinition()));
         }
         Element log = DomUtils.getChildElementByTagName(element,"log");
         if (log != null) {
@@ -58,7 +55,11 @@ public class AgentBeanDefinitionParser extends AbstractBeanDefinitionParser {
         if (StringUtils.hasLength(exposeApplicationContext)) {
             builder.addPropertyValue("exposeApplicationContext",exposeApplicationContext);
         }
-        return builder.getBeanDefinition();
+    }
+
+    @Override
+    protected Class<?> getBeanClass(Element element) {
+        return SpringJolokiaAgent.class;
     }
 
     @Override

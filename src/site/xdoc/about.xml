@@ -128,14 +128,7 @@
       <p>
         My name is <a href="http://github.com/rhuss">Roland Huss</a>
         and during the last decades, I mainly acted as Java wizard,
-        transforming large XML documents into huge stacktraces. As
-        head of "Research &amp; Development" at the Munich based IT
-        consulting and softwarehouse <a
-        href="http://www.consol.com">ConSol*</a>, I'm particularly
-        active in the area of <a
-        href="http://www.consol.com/open-source-monitoring/">Open
-        Source Monitoring</a> especially when it comes to JEE
-        monitoring.
+        transforming large XML documents into huge stacktraces.
       </p>
     </section>
     <section name="Acknowledgments">
@@ -147,9 +140,7 @@
           way to allow JMX usage from a Java hostile environment.
         </li>
         <li>
-          My employer <a href="http://www.consol.com">ConSol*</a> for
-          allowing me to provide professional support and consulting
-          for Jolokia and for sponsoring the graphics on this site.
+          My former employer <a href="http://www.consol.com">ConSol*</a> for supporting the development of Jolokia.
         </li>
         <li>
           <a href="http://www.allez.de">Allez</a> (and especially
@@ -158,7 +149,7 @@
         <li>
           <a
               href="http://www.wanderinghorse.net/home/stephan/">Stephan
-          Beal</a> for iron out my dump english and proofreading the
+          Beal</a> for ironing out my dump english and proofreading the
           documentation. 
         </li>
       </ul>

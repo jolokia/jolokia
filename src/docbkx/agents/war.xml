@@ -406,7 +406,7 @@
       Java class, the JAR <filename>jolokia-server-core.jar</filename> must
       be included. This jar can be found in <ulink
       url="http://labs.consol.de/maven/repository/org/jolokia/jolokia-server-core">Jolokia's maven
-      resository</ulink>. Maven users will can declare a
+      resository</ulink>. Maven users can declare a
       dependency on this jar artifact:
     </para>
     <programlisting language="xml"><![CDATA[
@@ -419,15 +419,7 @@
           <version>${jolokia.version}</version>
         </dependency>
       </dependencies>
-
-      <!-- Maven repository hosting Jolokia -->
-      <repositories>
-        <repository>
-          <id>labs-consol-release</id>
-          <name>ConSol* Labs Repository (Releases)</name>
-          <url>http://labs.consol.de/maven/repository</url>
-        </repository>
-      </repositories>
+      <!-- .... -->
     </project>]]></programlisting>
     <para>
       The <classname>org.jolokia.core.http.Agent</classname> can be

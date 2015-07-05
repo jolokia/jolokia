@@ -11,7 +11,7 @@
   <body>
     <section name="Jolokia ${currentStableVersion}">
       <p>
-        This is the first official release of Jolokia. It can be
+        Jolokia can be
         downloaded in two variants: As a binary release including the
         agents and the client libraries and the reference manual (PDF
         and HTML). The source release contains the complete source
@@ -20,13 +20,13 @@
       </p>
       <ul>
         <li><strong>jolokia-${currentStableVersion}-bin</strong> (<a
-        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
+        href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-${currentStableVersion}-bin.tar.gz">tar.gz</a>
         | <a
-        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
+        href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-${currentStableVersion}-bin.zip">zip</a>)</li>
         <li><strong>jolokia-${currentStableVersion}-source</strong> (<a
-        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-source.tar.gz">tar.gz</a>
+        href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-${currentStableVersion}-source.tar.gz">tar.gz</a>
         | <a
-        href="dist/${currentStableVersion}/jolokia-${currentStableVersion}-source.zip">zip</a>)</li>
+        href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-${currentStableVersion}-source.zip">zip</a>)</li>
       </ul>
       <p>
         The agents and the client library can be downloaded directly
@@ -40,27 +40,27 @@
           </tr>
           <tr>
             <td>WAR-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>
           </tr>
           <tr>
             <td>Osgi-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi/${currentStableVersion}/jolokia-osgi-${currentStableVersion}.jar">jolokia-osgi-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Osgi-Agent (full bundle)</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi-bundle/${currentStableVersion}/jolokia-osgi-bundle-${currentStableVersion}.jar">jolokia-osgi-bundle-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Mule-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-mule/${currentStableVersion}/jolokia-mule-${currentStableVersion}-agent.jar">jolokia-mule-${currentStableVersion}-agent.jar</a></td>
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>
           </tr>
           <tr>
             <td>Java Client Library</td>
-            <td><a href="http://labs.consol.de/maven/repository/org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>            
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>
           </tr>
         </tbody>
       </table>
@@ -86,27 +86,27 @@
             </tr>
             <tr>
               <td>Base script</td>
-              <td><a href="dist/${currentStableVersion}/js/jolokia.js">jolokia.js</a></td>            
+              <td><a href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia.js">jolokia.js</a></td>
             </tr>
             <tr>
               <td>Base script, compressed</td>
-              <td><a href="dist/${currentStableVersion}/js/jolokia-min.js">jolokia-min.js</a></td>            
+              <td><a href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-min.js">jolokia-min.js</a></td>
           </tr>
           <tr>
             <td>Simplified API</td>
-            <td><a href="dist/${currentStableVersion}/js/jolokia-simple.js">jolokia-simple.js</a></td>            
+            <td><a href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-simple.js">jolokia-simple.js</a></td>
           </tr>
           <tr>
             <td>Simplified API, compressed</td>
-            <td><a href="dist/${currentStableVersion}/js/jolokia-simple-min.js">jolokia-simple-min.js</a></td>            
+            <td><a href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-simple-min.js">jolokia-simple-min.js</a></td>
           </tr>
           <tr>
             <td>Jolokia Cubism Integration</td>
-            <td><a href="dist/${currentStableVersion}/js/jolokia-cubism.js">jolokia-cubism.js</a></td>            
+            <td><a href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-cubism.js">jolokia-cubism.js</a></td>
           </tr>
           <tr>
             <td>Jolokia Cubism Integration, compressed</td>
-            <td><a href="dist/${currentStableVersion}/js/jolokia-cubism-min.js">jolokia-cubism-min.js</a></td>            
+            <td><a href="https://github.com/rhuss/jolokia/releases/download/v${currentStableVersion}/jolokia-cubism-min.js">jolokia-cubism-min.js</a></td>
           </tr>
           </tbody>
         </table>
@@ -148,23 +148,9 @@
           href="../reference/html/clients.html#js-maven">Reference Manual</a>
         </p>
         <p>
-          The released Jolokia artifacts are available from <a
-          href="http://search.maven.org/">Maven central</a>. Snapshots
-          are deployed regulary and can be accessed via this
-          repository:
+          The released Jolokia artifacts as well as SNAPSHOTS are available from <a
+          href="http://search.maven.org/">Maven central</a>.
         </p>
-        <pre class="prettyprint"><![CDATA[
- <repository>
-   <id>labs-consol-snapshot</id>
-   <name>ConSol* Labs Repository (Snapshots)</name>
-   <url>http://labs.consol.de/maven/snapshots-repository</url>
-   <snapshots>
-     <enabled>true</enabled>
-   </snapshots>
-   <releases>
-     <enabled>false</enabled>
-   </releases>
- </repository>]]></pre>
       </subsection>
 
     </section>

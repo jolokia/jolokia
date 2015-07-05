@@ -191,5 +191,12 @@
         <span class="hl-value"><xsl:apply-templates mode="xslthl"/></span>
     </xsl:template>
 
-
+    <xsl:template name="user.head.content">
+     <script data-cfasync="false" type="text/javascript">
+       var host = "jolokia.org";
+       if ((host == window.location.host) &amp;&amp; (window.location.protocol != "https:")) {
+            window.location.protocol = "https";
+       }
+     </script>
+    </xsl:template>
 </xsl:stylesheet>
