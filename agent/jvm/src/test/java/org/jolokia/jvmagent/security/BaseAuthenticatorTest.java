@@ -21,7 +21,7 @@ import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.jolokia.config.ConfigKey;
+import org.jolokia.server.core.config.ConfigKey;
 
 import static org.easymock.EasyMock.*;
 

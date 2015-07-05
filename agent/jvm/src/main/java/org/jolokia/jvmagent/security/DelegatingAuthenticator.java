@@ -13,7 +13,7 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
-import org.jolokia.util.EscapeUtil;
+import org.jolokia.server.core.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

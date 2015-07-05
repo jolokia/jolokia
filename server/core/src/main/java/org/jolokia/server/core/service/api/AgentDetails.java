@@ -6,7 +6,6 @@ import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.json.simple.JSONObject;
-import sun.management.resources.agent;
 
 import static org.jolokia.server.core.service.api.AgentDetails.AgentDetailProperty.*;
 
@@ -91,6 +90,12 @@ public class AgentDetails {
         checkSeal();
         url = pUrl;
         secured = pSecured;
+    }
+
+
+    public void setUrl(String url) {
+        checkSeal();
+        this.url = url;
     }
 
     public void setSecured(Boolean pSecured) {

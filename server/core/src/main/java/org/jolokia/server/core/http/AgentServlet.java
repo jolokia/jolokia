@@ -20,7 +20,6 @@ import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.json.simple.JSONAware;
-import sun.management.resources.agent;
 
 /*
  * Copyright 2009-2013 Roland Huss

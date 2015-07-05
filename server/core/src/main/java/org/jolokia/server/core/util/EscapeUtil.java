@@ -169,7 +169,7 @@ public final class EscapeUtil {
      * @param pArg argument to split
      * @param pEscape single character used for escaping
      * @param pDelimiter delimiter to use
-     * @return the splitted string as list or an empty array if the argument was null
+     * @return the split string as list or an empty array if the argument was null
      */
     public static String[] splitAsArray(String pArg, String pEscape, String pDelimiter) {
         if (pArg != null) {
@@ -193,10 +193,10 @@ public final class EscapeUtil {
                                    // purpose
                                    "(?<!" + pEscape  + ")((?:" + pEscape + ".)*)" + pDel + "|" +
                                    "$" +    // or end-of-line
-                                 ")"),
+                                 ")",Pattern.DOTALL),
 
                 // Unescape, group must match unescaped value
-                Pattern.compile(pEscape + "(.)")
+                Pattern.compile(pEscape + "(.)",Pattern.DOTALL)
         };
     }
 
