@@ -274,7 +274,7 @@
         <plugin>
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
-          <version>0.11</version>
+          <version>0.12</version>
         </plugin>
 
       </plugins>
@@ -536,7 +536,6 @@
           <plugin>
             <groupId>com.github.github</groupId>
             <artifactId>site-maven-plugin</artifactId>
-            <version>0.12-SNAPSHOT</version>
             <configuration>
               <message>Creating site for Jolokia ${project.version}</message>
             </configuration>

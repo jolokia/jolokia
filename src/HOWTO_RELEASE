@@ -78,7 +78,7 @@ git rebase master
 cd tools/site-skin; mvn clean install;
 cd ../..
 mvn clean install
-mvn -N site
+mvn -N -Pdist site
 
 # Roo-Plugin:
 # Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 
