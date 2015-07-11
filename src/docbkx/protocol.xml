@@ -224,7 +224,10 @@
           linkend="jolokia-operations"/> or are <emphasis>processing
           parameters</emphasis> which influence the overall behaviour
           and can be mixed in to any request. See <xref
-          linkend="processing-parameters"/> for details.
+          linkend="processing-parameters"/> for details. Operation specific attributes
+          can be either mandatory or optional and depend on the operation type.
+          In the following, if not mentioned otherwise, attributes are mandatory.
+          Processing parameters are always optional, though.
         </para>
         <para>
           A sample read request in JSON format looks like the
@@ -407,21 +410,34 @@
           requested with the URL 
           <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</literal>
           which returns a complex JSON structure like
-          <programlisting language="json">
- {
-   "committed" : 18292736,
-   "used" : 15348352,
-   "max" : 532742144,
-   "init" : 0
- }</programlisting>
+          <programlisting language="json"><![CDATA[
+{
+  "status" : 200,
+  "value" :  {
+               "committed" : 18292736,
+               "used" : 15348352,
+               "max" : 532742144,
+               "init" : 0
+              },
+  "request" : { .... },
+  "timestamp" : ....
+}]]></programlisting>
         </para>
         <para>
           In order to get to the value for used heap memory you should
           specify an inner path <literal>used</literal>, so that the
           request
           <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</literal>
-          results in a response of <literal>15348352</literal>.  If
-          the attribute contains arrays at some level, use a numeric
+          results in a response of <literal>15348352</literal>for the value:
+        </para>
+        <programlisting><![CDATA[
+{
+  "status" : 200,
+  "value" :  15348352,
+  "request" : { .... },
+  "timestamp" : ....
+}]]></programlisting>
+        <para> If the attribute contains arrays at some level, use a numeric
           index (0 based) as part of the inner path if you want to
           traverse into this array.
         </para>    
