@@ -88,7 +88,7 @@
     </para>
     <para>
       Jolokia can be also integrated
-      into one's own applications very easily. The <literal>joloki-core</literal>
+      into one's own applications very easily. The <literal>jolokia-core</literal>
       library (which comes bundled as a jar), includes a servlet
       which can be easily added to a custom application. <xref
       linkend="agent-war-programmatic"/> contains more information
