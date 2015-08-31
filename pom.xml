@@ -71,10 +71,20 @@
         <artifactId>docbkx-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>docbkx-html</id>
             <goals>
               <goal>generate-html</goal>
+            </goals>
+            <phase>pre-site</phase>
+          </execution>
+          <execution>
+            <id>docbkx-pdf</id>
+            <goals>
               <goal>generate-pdf</goal>
             </goals>
+            <configuration>
+               <imgSrcPath>file:///${project.basedir}/src/docbkx/images/</imgSrcPath>
+            </configuration>
             <phase>pre-site</phase>
           </execution>
         </executions>
