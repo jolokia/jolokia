@@ -285,7 +285,7 @@
           property <literal>jolokia.discoveryUrl</literal>. Within the value you can use the
           placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
           by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
-          <literal>${sys:property}</literal> envirnoment and system properties can be referenced, respectively.
+          <literal>${sys:property}</literal> environment and system properties can be referenced, respectively.
         </td>
         <td>          
           <constant>http://10.9.11.87:8080/jolokia</constant>
@@ -298,7 +298,8 @@
           calculated. If provided it should be ensured that this id is
           unique among all agent reachable via multicast requests used
           by the discovery mechanism. It is recommended not to set
-          this value. 
+          this value. Within the <literal>agentId</literal> specification you
+          can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
         </td>
         <td>          
           <constant>my-unique-agent-id</constant>

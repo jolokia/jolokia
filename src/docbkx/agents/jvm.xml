@@ -90,7 +90,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
             calculated. If provided it should be ensured that this id is
             unique among all agent reachable via multicast requests used
             by the discovery mechanism. It is recommended not to set
-            this value. 
+            this value. Within the <literal>agentId</literal> specification you
+            can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
           </td>        
           <td>
             <constant>my-unique-agent-id</constant>
@@ -425,12 +426,12 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <literal>--help</literal> to get a short usage information:
     </para>
     <programlisting><![CDATA[
-$ java -jar jolokia-jvm-1.2.0-agent.jar --help
+$ java -jar jolokia-jvm-1.3.1-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.2.0-agent.jar [options] <command> <pid/regexp>
+Usage: java -jar jolokia-jvm-1.3.1-agent.jar [options] <command> <pid/regexp>
 
 where <command> is one of
     start     -- Start a Jolokia agent for the process specified

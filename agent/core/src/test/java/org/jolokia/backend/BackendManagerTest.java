@@ -204,8 +204,6 @@ public class BackendManagerTest {
         backendManager.destroy();
     }
 
-
-
     // =========================================================================================
 
     static class RequestDispatcherTest implements RequestDispatcher {
