@@ -17,6 +17,8 @@ package org.jolokia.backend;
  */
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import javax.management.*;
@@ -69,7 +71,7 @@ public class BackendManagerTest {
         BackendManager backendManager = new BackendManager(config, log);
         JmxRequest req = new JmxRequestBuilder(RequestType.LIST).build();
         JSONObject ret = backendManager.handleRequest(req);
-        assertEquals(ret.get("status"),304);
+        assertEquals(ret.get("status"), 304);
         backendManager.destroy();
     }
 
@@ -143,14 +145,50 @@ public class BackendManagerTest {
     @Test
     public void remoteAccessCheck() {
         BackendManager backendManager = new BackendManager(config,log);
-        assertTrue(backendManager.isRemoteAccessAllowed("localhost","127.0.0.1"));
+        assertTrue(backendManager.isRemoteAccessAllowed("localhost", "127.0.0.1"));
         backendManager.destroy();
     }
 
     @Test
     public void corsAccessCheck() {
         BackendManager backendManager = new BackendManager(config,log);
-        assertTrue(backendManager.isOriginAllowed("http://bla.com",false));
+        assertTrue(backendManager.isOriginAllowed("http://bla.com", false));
+        backendManager.destroy();
+    }
+
+    @Test
+    public void agentIdHost() throws SocketException, UnknownHostException {
+        Configuration myConfig = new Configuration(ConfigKey.AGENT_ID, "${host}");
+        BackendManager backendManager = new BackendManager(myConfig,log);
+        assertEquals(backendManager.getAgentDetails().getAgentId(), NetworkUtil.getLocalAddress().getHostName());
+        backendManager.destroy();
+    }
+
+    @Test
+    public void agentIdIp() throws SocketException, UnknownHostException {
+        Configuration myConfig = new Configuration(ConfigKey.AGENT_ID, "${ip}");
+        BackendManager backendManager = new BackendManager(myConfig,log);
+        assertEquals(backendManager.getAgentDetails().getAgentId(), NetworkUtil.getLocalAddress().getHostAddress());
+        backendManager.destroy();
+    }
+
+    @Test
+    public void agentIdSystemProperty()  {
+        System.setProperty("agentIdSystemProperty","test1234");
+        Configuration myConfig = new Configuration(ConfigKey.AGENT_ID, "${prop:agentIdSystemProperty}");
+        BackendManager backendManager = new BackendManager(myConfig,log);
+        assertEquals(backendManager.getAgentDetails().getAgentId(), "test1234");
+        backendManager.destroy();
+        System.clearProperty("agentIdSystemProperty");
+    }
+
+    @Test(enabled = false) // first env var could contain illegal characters ....
+    public void agentIdEnvironmentVariable() {
+        Map<String, String> env = System.getenv();
+        Map.Entry<String, String> entry = env.entrySet().iterator().next();
+        Configuration myConfig = new Configuration(ConfigKey.AGENT_ID, "${env:"+entry.getKey()+"}");
+        BackendManager backendManager = new BackendManager(myConfig, log);
+        assertEquals(backendManager.getAgentDetails().getAgentId(), entry.getValue());
         backendManager.destroy();
     }
 
@@ -162,9 +200,11 @@ public class BackendManagerTest {
         JSONObject jsonError = (JSONObject) backendManager.convertExceptionToJson(exp,req);
         assertTrue(!jsonError.containsKey("stackTrace"));
         assertEquals(jsonError.get("message"),"Hans");
-        assertEquals(((JSONObject) jsonError.get("cause")).get("message"),"Kalb");
+        assertEquals(((JSONObject) jsonError.get("cause")).get("message"), "Kalb");
         backendManager.destroy();
     }
+
+
 
     // =========================================================================================
 

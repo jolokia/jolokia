@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jolokia.Version;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.Payload;
@@ -53,7 +54,7 @@ public class AgentDetails {
     }
 
     public AgentDetails(Configuration pConfig) {
-        this(pConfig.get(ConfigKey.AGENT_ID));
+        this(NetworkUtil.replaceExpression(pConfig.get(ConfigKey.AGENT_ID)));
         agentDescription = pConfig.get(ConfigKey.AGENT_DESCRIPTION);
     }
 
