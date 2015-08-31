@@ -56,7 +56,10 @@
 java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <para>
         <filename>agent.jar</filename> is the filename of the Jolokia
-        JVM agent. Options can be appended as a comma separated
+        JVM agent. The agent can be downloaded like the others from the <ulink url="https://jolokia.org/download.html">download page</ulink>.
+        When downloading from a Maven repository you need to check for the classifier <literal>agent</literal> (i.e. the
+        jar to download looks like <filename>jolokia-jvm-1.3.1-agent.jar</filename>, not <filename>jolokia-jvm-1.1.5.jar</filename>).
+        Options can be appended as a comma separated
         list. The available options are the same as described in <xref
         linkend="agent-war-init-params"/> plus the one described in
         table <xref linkend="agent-jvm-config"/>. If an options
