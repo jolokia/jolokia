@@ -42,28 +42,8 @@
     <module>osgi</module>
     <module>osgi-bundle</module>
     <module>jmx</module>
+    <module>jvm</module>
+    <module>jvm-spring</module>
   </modules>
 
-  <profiles>
-    <profile>
-      <id>jdk6</id>
-      <activation>
-        <jdk>1.6</jdk>
-      </activation>
-      <modules>
-        <module>jvm</module>
-        <module>jvm-spring</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>jdk7</id>
-      <activation>
-        <jdk>1.7</jdk>
-      </activation>
-      <modules>
-        <module>jvm</module>
-        <module>jvm-spring</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
