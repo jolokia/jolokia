@@ -238,6 +238,17 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>authFallbackHeader</constant></td>
+          <td>
+            When using the delegate authentication handler, then the <constant>Authorization</constant> header from
+            the original request is copied over for the validation request. If this header is empty and a
+            fallback header is set with this option, then the fallback header is used (e.g. <constant>X-Authorization:</constant>).
+            If this header is empty, too, then an error is raised.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
           <td><constant>protocol</constant></td>
           <td>
             HTTP protocol to use. Should be either <literal>http</literal>
