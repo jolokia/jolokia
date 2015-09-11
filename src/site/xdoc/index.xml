@@ -75,6 +75,25 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Summer update">
+        <div class="news-date">2015-09-12</div>
+        <p>
+          It was quite calm around Jolokia this summer and not much happened in Jolokia-land. Not many bugs arrived, too,
+          which I take as a good sign :)
+        </p>
+        <p>
+          This minor-minor release 1.3.2 introduced two new features:
+        </p>
+        <ul>
+          <li>The delegating authentication introduced in 1.3.1 is now able to use an alternate header for using
+            as the authorization token against the delegation service.</li>
+          <li>The configuration parameter <code>agentId</code> now supports also the parameter placeholders like the
+            <code>policyLocation</code> or the <code>discoveryAgentUrl</code></li>
+        </ul>
+        <p>
+          Progress on Jolokia 2.0 continues slowly, won't tell much here until I have a M1 release. No promises either :)
+        </p>
+      </subsection>
       <subsection name="Delegating Authentication with Jolokia 1.3.1">
         <div class="news-date">2015-05-28</div>
         <p>
