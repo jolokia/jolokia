@@ -4,6 +4,7 @@ import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 import org.jolokia.util.ClassUtil;
 import org.jolokia.util.JolokiaCipher;
+import org.jolokia.util.Resource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class EncryptCommand extends AbstractBaseCommand {
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         try {
             String keystorePassword = parseKeystorePassword(pOpts.toAgentArg());
-            String key = readKeyFromFile();
+            String key = Resource.getResourceAsString("META-INF/encrypt-command-password-default");
             JolokiaCipher jolokiaCipher = new JolokiaCipher();
             String encrypted = jolokiaCipher.encrypt64(keystorePassword, key);
             System.out.printf("{%s}%n", encrypted);
@@ -35,23 +36,6 @@ public class EncryptCommand extends AbstractBaseCommand {
         }
 
         return 0;
-    }
-
-    private String readKeyFromFile() throws IOException {
-
-        InputStream in = ClassUtil.getResourceAsStream("META-INF/encrypt-command-password-default");
-        InputStreamReader is = new InputStreamReader(in);
-        StringBuilder sb = new StringBuilder();
-        BufferedReader br = new BufferedReader(is);
-
-        String read = br.readLine();
-
-        while (read != null) {
-            sb.append(read);
-            read = br.readLine();
-        }
-
-        return sb.toString();
     }
 
     private String parseKeystorePassword(String params) {

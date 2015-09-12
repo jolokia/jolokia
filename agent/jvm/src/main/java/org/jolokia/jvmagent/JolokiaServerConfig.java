@@ -28,7 +28,9 @@ import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
+import org.jolokia.util.JolokiaCipher;
 import org.jolokia.util.NetworkUtil;
+import org.jolokia.util.Resource;
 
 /**
  * Configuration required for the JolokiaServer
@@ -101,7 +103,7 @@ public class JolokiaServerConfig {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
             pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), NetworkUtil.getAgentId(hashCode(),"jvm"));
         }
-        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(),"jvm");
+        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(), "jvm");
     }
 
     protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
@@ -342,8 +344,23 @@ public class JolokiaServerConfig {
         useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
 
         String password = agentConfig.get("keystorePassword");
+        password = decryptPasswordIfNecessary(password);
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
 
+    }
+
+    private String decryptPasswordIfNecessary(String password) {
+        if (password == null || !password.startsWith("{") || !password.endsWith("}")) {
+            return password;
+        }
+
+        try {
+            JolokiaCipher jolokiaCipher = new JolokiaCipher();
+            String key = Resource.getResourceAsString("META-INF/encrypt-command-password-default");
+            return jolokiaCipher.decrypt64(password,key);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void initThreadNr(Map<String, String> agentConfig) {
