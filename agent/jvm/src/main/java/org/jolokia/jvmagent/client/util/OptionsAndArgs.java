@@ -51,7 +51,7 @@ public final class OptionsAndArgs {
             "canonicalNaming", "includeStackTrace", "serializeException",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
             // Others:
-            "config", "help!"));
+            "config", "help!", "encrypt"));
 
     static {
         String shortOptsDef[] = {
@@ -288,7 +288,7 @@ public final class OptionsAndArgs {
 
     // Command which dont need an argument
     private static final Set<String> COMMANDS_WITHOUT_PID =
-            new HashSet<String>(Arrays.asList("list","help","version"));
+            new HashSet<String>(Arrays.asList("list","help","version", "encrypt"));
     
     private void verifyCommandAndProcess() {
         if (!COMMANDS_WITHOUT_PID.contains(command) &&
@@ -304,6 +304,8 @@ public final class OptionsAndArgs {
             command = "help";
         } else if (options.containsKey("version")) {
             command = "version";
+        } else if (options.containsKey("encrypt")) {
+            command = "encrypt";
         } else if (command != null && pProcess == null && !pCommands.contains(command)) {
             ret = command;
             command = "toggle";

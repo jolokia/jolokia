@@ -107,6 +107,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: true)\n" +
 "    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
 "    --config <configfile>           Path to a property file from where to read the configuration\n" +
+"    --encrypt <password>            Encrypt keystore password\n" +
 "    --help                          This help documentation\n" +
 "    --version                       Version of this agent (it's " + Version.getAgentVersion() + " btw :)\n" +
 "\n" +
