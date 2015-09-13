@@ -33,12 +33,19 @@ public class Base64UtilTest {
 
     @Test
     public void decodeEmpty() {
-        assertEquals(Base64Util.decode("").length,0);
+        assertEquals(Base64Util.decode("").length, 0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void decodeToSmall() {
         assertEquals(Base64Util.decode("abc").length,0);
+    }
+
+
+    @Test
+    public void identity() {
+        String text = "The Milkiman of Human Kindness";
+        assertEquals(text.getBytes(),Base64Util.decode(Base64Util.encode(text.getBytes())));
     }
 
     @Test

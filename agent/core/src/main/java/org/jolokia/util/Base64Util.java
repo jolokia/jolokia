@@ -64,7 +64,7 @@ public class Base64Util {
      * @since 1.4
      */
     public static String encode(byte[] source) {
-        byte[] encoded = encodeBytesToBytes( source, 0, source.length);
+        byte[] encoded = encodeBytesToBytes( source, source.length);
 
         try {
             return new String(encoded, "US-ASCII");
@@ -184,7 +184,7 @@ public class Base64Util {
     }
 
 
-    public static byte[] encodeBytesToBytes(byte[] source, int off, int len) {
+    public static byte[] encodeBytesToBytes(byte[] source, int len) {
         int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0); // Bytes needed for actual encoding
         byte[] outBuff = new byte[encLen];
 
@@ -192,11 +192,11 @@ public class Base64Util {
         int e = 0;
         int len2 = len - 2;
         for (; d < len2; d+=3, e+=4) {
-            encode3to4( source, d+off, 3, outBuff, e);
+            encode3to4( source, d, 3, outBuff, e);
         }
 
         if(d < len) {
-            encode3to4( source, d+off, len - d, outBuff, e);
+            encode3to4( source, d, len - d, outBuff, e);
             e += 4;
         }
 
