@@ -99,9 +99,7 @@ public class JolokiaCipher {
 
             System.arraycopy(encryptedBytes, 0, allEncryptedBytes, SALT_SIZE + 1, len);
 
-            byte[] encryptedTextBytes = Base64.encodeBase64(allEncryptedBytes);
-
-            return new String(encryptedTextBytes, STRING_ENCODING);
+            return Base64Util.encode(allEncryptedBytes);
         } catch (Exception e) {
             throw new JolokiaCipherException(e);
         }
@@ -111,7 +109,7 @@ public class JolokiaCipher {
     public String decrypt64(final String encryptedText, final String password)
             throws JolokiaCipherException {
         try {
-            byte[] allEncryptedBytes = Base64.decodeBase64(encryptedText.getBytes());
+            byte[] allEncryptedBytes = Base64Util.decode(encryptedText);
 
             int totalLen = allEncryptedBytes.length;
 

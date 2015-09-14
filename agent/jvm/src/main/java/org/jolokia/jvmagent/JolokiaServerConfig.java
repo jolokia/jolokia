@@ -354,6 +354,8 @@ public class JolokiaServerConfig {
             return password;
         }
 
+        password = password.substring(1,password.length() - 1);
+
         try {
             JolokiaCipher jolokiaCipher = new JolokiaCipher();
             String key = Resource.getResourceAsString("META-INF/encrypt-command-password-default");
