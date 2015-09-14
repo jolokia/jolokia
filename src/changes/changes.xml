@@ -26,9 +26,12 @@
     <release version="1.3.2-SNAPSHOT" description="Release 1.3.2-SNAPSHOT" date="2015-05-28">
       <action dev="nevenr" type="add" date="2015-07-02" issue="199">
         Allow environment placeholders in "agentId"
-      </action>
       <action dev="roland" type="add" date="2015-09-11" issue="213">
         Added "authFallbackHeader" which is used in the delegation auth header if no "Authorization-Header" is set.
+      </action>
+      <action dev="zisili" type="update" date="2015-09-14" issue="214">
+        Enhanced 'GlassfishDetector' for Payara flavour of glassfish
+      </action>
       </action>
     </release>
     <release version="1.3.1" description="Release 1.3.1" date="2015-05-28">
