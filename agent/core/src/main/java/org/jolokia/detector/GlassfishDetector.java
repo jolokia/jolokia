@@ -38,8 +38,8 @@ import org.json.simple.JSONObject;
  */
 public class GlassfishDetector extends AbstractServerDetector {
 
-    private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*GlassFish.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
-    private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^.*GlassFish.*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
+    private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*(?:Glassfish|Payara).*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
+    private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^.*(?:Glassfish|Payara).*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
 
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
