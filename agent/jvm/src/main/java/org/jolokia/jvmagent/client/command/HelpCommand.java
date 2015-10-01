@@ -94,6 +94,12 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --keyStoreType <name>           Keystore type (https only, default: JKS)\n" +
 "    --keyManagerAlgorithm <name>    Key manager algorithm (https only, default: SunX509)\n" +
 "    --trustManagerAlgorithm <name>  Trust manager algorithm (https only, default: SunX509)\n" +
+"    --caCert <path>                 Path to a PEM encoded CA cert file (https & sslClientAuth only)\n" +
+"    --serverCert <path>             Path to a PEM encoded server cert file (https only)\n" +
+"    --serverKey <path>              Path to a PEM encoded server key file (https only)\n"  +
+"    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA)\n" +
+"    --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)\n" +
+"    --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage (https & sslClientAuth only)\n" +
 "    --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: true)\n" +
 "    --discoveryAgentUrl <url>       The URL to use for answering discovery requests. Will be autodetected if not given.\n" +
 "    --debug                         Switch on agent debugging\n" +

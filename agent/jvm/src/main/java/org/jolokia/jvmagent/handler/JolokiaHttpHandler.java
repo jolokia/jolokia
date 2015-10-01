@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent;
+package org.jolokia.jvmagent.handler;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.security.cert.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -38,12 +39,13 @@ import org.jolokia.config.Configuration;
 import org.jolokia.discovery.AgentDetails;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.http.HttpRequestHandler;
+import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.*;
 import org.json.simple.JSONAware;
 
 /**
- * HttpHandler for handling a jolokia request
+ * HttpHandler for handling a Jolokia request
  *
  * @author roland
  * @since Mar 3, 2010
@@ -157,22 +159,44 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @throws IllegalStateException if the handler has not yet been started
      */
     public void handle(final HttpExchange pHttpExchange) throws IOException {
-        Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
-        if (subject!=null)  {
-            try {
-                Subject.doAs(subject, new PrivilegedExceptionAction<Void>() {
-                    public Void run() throws IOException {
-                        doHandle(pHttpExchange);
-                        return null;
-                    }
-                });
-            } catch (PrivilegedActionException e) {
-                throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
+        try {
+            checkAuthentication(pHttpExchange);
+            
+            Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
+            if (subject!=null)  {
+                doHandleAs(subject, pHttpExchange);
+            }  else {
+                doHandle(pHttpExchange);
             }
-        }  else {
-            doHandle(pHttpExchange);
+        } catch (SecurityException exp) {
+            sendForbidden(pHttpExchange,exp);
         }
     }
+
+    // run as priviledged action
+    private void doHandleAs(Subject subject, final HttpExchange pHttpExchange) {
+        try {
+            Subject.doAs(subject, new PrivilegedExceptionAction<Void>() {
+            public Void run() throws IOException {
+                doHandle(pHttpExchange);
+                return null;
+            }
+            });
+        } catch (PrivilegedActionException e) {
+            throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
+        }
+    }
+
+    /**
+     * Protocol based authentication checks called very early and before handling a request.
+     * If the check fails a security exception must be thrown
+     *
+     * The default implementation does nothing and should be overridden for a valid check.
+     *
+     * @param pHttpExchange exchange to check
+     * @throws SecurityException if check fails.
+     */
+    protected void checkAuthentication(HttpExchange pHttpExchange) throws SecurityException { }
 
     @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
     public void doHandle(HttpExchange pExchange) throws IOException {
@@ -182,7 +206,7 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         JSONAware json = null;
         URI uri = pExchange.getRequestURI();
-        ParsedUri parsedUri = new ParsedUri(uri,context);
+        ParsedUri parsedUri = new ParsedUri(uri, context);
         try {
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
@@ -206,7 +230,7 @@ public class JolokiaHttpHandler implements HttpHandler {
             json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
         } finally {
-            sendResponse(pExchange,parsedUri,json);
+            sendResponse(pExchange, parsedUri, json);
         }
     }
 
@@ -293,6 +317,17 @@ public class JolokiaHttpHandler implements HttpHandler {
         // answers sometimes which seems to be an implementation peculiarity from Tomcat
         cal.add(Calendar.HOUR, -1);
         headers.set("Expires",formatHeaderDate(cal.getTime()));
+    }
+
+    private void sendForbidden(HttpExchange pExchange, SecurityException securityException) throws IOException {
+        String response = "403 (Forbidden)\n";
+        if (securityException != null && securityException.getMessage() != null) {
+            response += "\n" + securityException.getMessage() + "\n";
+        }
+        pExchange.sendResponseHeaders(403, response.length());
+        OutputStream os = pExchange.getResponseBody();
+        os.write(response.getBytes());
+        os.close();
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {

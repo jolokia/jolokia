@@ -38,7 +38,6 @@
     <module>core</module>
     <module>war</module>
     <module>jsr160</module>
-    <module>mule</module>
     <module>osgi</module>
     <module>osgi-bundle</module>
     <module>jmx</module>
@@ -46,4 +45,16 @@
     <module>jvm-spring</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <id>mule</id>
+      <modules>
+        <!-- Mule only for Java 7+ (test won't compile on java 6 -->
+        <module>mule</module>
+      </modules>
+      <activation>
+        <jdk>[1.7,</jdk>
+      </activation>
+    </profile>
+  </profiles>
 </project>

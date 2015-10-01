@@ -58,6 +58,12 @@ public class JolokiaServerConfig {
     private String keyManagerAlgorithm;
     private String trustManagerAlgorithm;
     private String keyStoreType;
+    private String caCert;
+    private String serverCert;
+    private String serverKey;
+    private String serverKeyAlgorithm;
+    private List<String> clientPrincipals;
+    private boolean extendedClientCheck;
 
     /**
      * Constructor which prepares the server configuration from a map
@@ -208,12 +214,53 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * Password for keystore if a keystore is used. If not given, no password is assumed.
+     * Password for keystore if a keystore is used. If not given, no password is assumed. If certs are not
+     * loaded from a keystore but from PEM files directly, then this password is used for the private
+     * server key
      *
      * @return the keystore password as char array or an empty array of no password is given
      */
     public char[] getKeystorePassword() {
         return keystorePassword;
+    }
+
+    /**
+     * Get a path to a CA PEM file which is used to verify client certificates. This path
+     * is only used when {@link #getKeystore()} is not set.
+     *
+     * @return the file path where the ca cert is located.
+     */
+    public String getCaCert() {
+        return caCert;
+    }
+
+    /**
+     * Get the path to a server cert which is presented clients when using TLS.
+     * This is only used when {@link #getKeystore()} is not set.
+     *
+     * @return the file path where the server cert is located.
+     */
+    public String getServerCert() {
+        return serverCert;
+    }
+
+    /**
+     * Get the path to a the cert which has the private server key.
+     * This is only used when {@link #getKeystore()} is not set.
+     *
+     * @return the file path where the private server cert is located.
+     */
+    public String getServerKey() {
+        return serverKey;
+    }
+
+    /**
+     * The algorithm to use for extracting the private server key.
+     *
+     * @return the server keyl algoritm
+     */
+    public String getServerKeyAlgorithm() {
+        return serverKeyAlgorithm;
     }
 
     // Initialise and validate early in order to fail fast in case of an configuration error
@@ -293,7 +340,14 @@ public class JolokiaServerConfig {
         String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
         String realm = jolokiaConfig.get(ConfigKey.REALM);
         if ("basic".equalsIgnoreCase(authMode)) {
-            authenticator = user != null ? new UserPasswordAuthenticator(realm,user,password) : null;
+            if (user != null) {
+                if (password == null) {
+                    throw new IllegalArgumentException("'password' must be set if a 'user' (here: '" + user + "') is given");
+                }
+                authenticator = new UserPasswordAuthenticator(realm,user,password);
+            } else {
+                authenticator = null;
+            }
         } else if ("jaas".equalsIgnoreCase(authMode)) {
             authenticator = new JaasAuthenticator(realm);
         } else if ("delegate".equalsIgnoreCase(authMode)) {
@@ -328,10 +382,9 @@ public class JolokiaServerConfig {
     private void initHttpsRelatedSettings(Map<String, String> agentConfig) {
         // keystore
         keystore = agentConfig.get("keystore");
-        if (protocol.equals("https") && keystore == null) {
-            throw new IllegalArgumentException("No keystore defined for HTTPS protocol. " +
-                                               "Please use the 'keystore' option to point to a valid keystore");
-        }
+        caCert = agentConfig.get("caCert");
+        serverCert = agentConfig.get("serverCert");
+        serverKey = agentConfig.get("serverKey");
 
         secureSocketProtocol = agentConfig.get("secureSocketProtocol");
         keyStoreType = agentConfig.get("keyStoreType");
@@ -344,11 +397,32 @@ public class JolokiaServerConfig {
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
 
+        serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
+        clientPrincipals = extractList(agentConfig,"clientPrincipal");
+        String xCheck = agentConfig.get("extendedClientCheck");
+        extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
     }
 
-    private void initThreadNr(Map<String, String> agentConfig) {
+    // Extract list from multiple string entries. <code>null</code> if no such config is given
+    // The first element is one without extensions
+    // More elements can be given with ".1", ".2", ... added.
+    private List<String> extractList(Map<String, String> pAgentConfig, String pKey) {
+        List<String> ret = new ArrayList<String>();
+        if (pAgentConfig.containsKey(pKey)) {
+            ret.add(pAgentConfig.get(pKey));
+        }
+        int idx = 1;
+        String keyIdx = pKey + "." + idx;
+        while (pAgentConfig.containsKey(keyIdx)) {
+            ret.add(pAgentConfig.get(keyIdx));
+            keyIdx = pKey + "." + ++idx;
+        }
+        return ret.size() > 0 ? ret : null;
+    }
+
+    private void initThreadNr(Map<String, String> pAgentConfig) {
         // Thread-Nr
-        String threadNrS =  agentConfig.get("threadNr");
+        String threadNrS =  pAgentConfig.get("threadNr");
         threadNr = threadNrS != null ? Integer.parseInt(threadNrS) : 5;
     }
 
@@ -361,7 +435,6 @@ public class JolokiaServerConfig {
                                                "' but most be either 'single', 'fixed' or 'cached'");
         }
     }
-
 
     private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
@@ -419,5 +492,13 @@ public class JolokiaServerConfig {
 
     public String getKeyStoreType() {
         return keyStoreType;
+    }
+
+    public List<String> getClientPrincipals() {
+        return clientPrincipals;
+    }
+
+    public boolean getExtendedClientCheck() {
+        return extendedClientCheck;
     }
 }

@@ -42,12 +42,11 @@ public class JaasAuthenticatorTest extends BaseAuthenticatorTest {
 
     @Test
     public void testAuthenticateNoLoginModules() throws Exception {
-        Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader,"Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
+            Headers respHeader = new Headers();
+            HttpExchange ex = createExchange(respHeader, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
 
-        Authenticator.Result result = auth.authenticate(ex);
-
-        assertEquals(((Authenticator.Failure) result).getResponseCode(), 401);
+            Authenticator.Result result = auth.authenticate(ex);
+            assertEquals(((Authenticator.Failure) result).getResponseCode(), 401);
     }
 
     @Test

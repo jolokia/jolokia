@@ -75,23 +75,58 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
-      <subsection name="Summer update">
-        <div class="news-date">2015-09-12</div>
+      <subsection name="TLS updates for the JVM agent">
+        <div class="news-date">2015-10-5</div>
         <p>
-          It was quite calm around Jolokia this summer and not much happened in Jolokia-land. Not many bugs arrived, too,
+          It was quite calm around Jolokia this summer and not much
+          happened in Jolokia-land. Not many bugs arrived, too, 
           which I take as a good sign :)
         </p>
         <p>
-          This minor-minor release 1.3.2 introduced two new features:
+          Now let's start a next round with some revamped TLS support
+          for https connections. Version 1.3.2 introduces a handful of
+          new options for advanced configuration of the JVM agent's
+          TLS connector:
         </p>
-        <ul>
-          <li>The delegating authentication introduced in 1.3.1 is now able to use an alternate header for using
-            as the authorization token against the delegation service.</li>
-          <li>The configuration parameter <code>agentId</code> now supports also the parameter placeholders like the
-            <code>policyLocation</code> or the <code>discoveryAgentUrl</code></li>
-        </ul>
         <p>
-          Progress on Jolokia 2.0 continues slowly, won't tell much here until I have a M1 release. No promises either :)
+          In addition to the keystore (option
+          <code>keystore</code>) the CA and the server cert as well
+          as the server cert's key can be provided as PEM
+          files with the options <code>caCert</code>,
+          <code>serverCert</code> and <code>serverKey</code>,
+          respectively. 
+        </p>
+        <p>
+          Client cert validation has also be enhanced. In addition to
+          validating the CA signature of a client cert, one can now
+          also check the <em>extended key usage</em> block of the cert
+          that the cert was created for client usage (option
+          <code>extendedClientCheck</code>). Also, one or more
+          principals can be configured with
+          <code>clientPrincipal</code> which are also compared againt
+          the subject within a client certificate. 
+        </p>
+        <p>
+          For simple use cases where no server validation is required,
+          Jolokia is now able to create self-signed server
+          certificates on the fly. This happens if neither a keystore
+          nor a server PEM cert is provided. So, the easiest way to
+          enable https is simply to use `protocol=https`. Of course,
+          the client needs to disable cert validation then and it is
+          recommended to use basic-authentication to authenticate the
+          connection.
+        </p>
+        <p>
+          The changes affect the JVM agent only and are explained in
+          detail in the <a
+          href="reference/html/agents.html#agents-jvm">reference
+          manual</a>. 
+        <p>
+          That's it for now mostly, but see the <a
+          href="changes-report.html">changelog</a> for some other minor
+          additions. Progress on Jolokia 2.0 continues slowly, won't
+          tell much here until I have a M1 release. No promises either
+          :)
         </p>
       </subsection>
       <subsection name="Delegating Authentication with Jolokia 1.3.1">

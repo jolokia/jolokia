@@ -219,7 +219,6 @@
       </xs:annotation>
     </xs:attribute>
 
-
     <!-- Jolokia generic config (see enum ConfigKey) -->
     <xs:attribute name="user" type="xs:string">
       <xs:annotation>
