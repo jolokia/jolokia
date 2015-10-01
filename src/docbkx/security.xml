@@ -312,7 +312,7 @@
           But how do the agents lookup the policy file ? By default,
           the agents will lookup for a policy file top-level in the
           classpath under the name
-          <filename>jolokia-access.html</filename>. Hence for the war
+          <filename>jolokia-access.xml</filename>. Hence for the war
           agent, the policy file must be packaged within the war at
           <filename>WEB-INF/classes/jolokia-access.xml</filename>, for
           all other agents at

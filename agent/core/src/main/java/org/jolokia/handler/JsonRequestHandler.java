@@ -157,6 +157,7 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
     public Object handleRequest(MBeanServerExecutor pServerManager, R request)
             throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
         checkForRestriction(request);
+        checkHttpMethod(request);
         return doHandleRequest(pServerManager,request);
     }
 
