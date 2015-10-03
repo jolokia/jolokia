@@ -124,4 +124,15 @@ public class OptionsAndArgsTest {
         assertEquals(o.toAgentArg(), "encrypt=passwd");
 
     }
+
+    @Test
+    public void encryptEmpty() {
+        // It is not possible to have option that works with and without argument so
+        // value ! represent special case when user want to type in password from within application
+        // and not on command line during start
+        OptionsAndArgs o = opts("--encrypt", "!");
+        assertEquals(o.getCommand(), "encrypt");
+        assertEquals(o.toAgentArg(), "encrypt=!");
+
+    }
 }

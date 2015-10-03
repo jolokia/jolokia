@@ -34,6 +34,8 @@ public class JolokiaCipher {
 
     protected boolean _onLinux = false;
 
+
+
     public JolokiaCipher() throws JolokiaCipherException {
         try {
             _digester = MessageDigest.getInstance(DIGEST_ALG);
@@ -201,5 +203,8 @@ public class JolokiaCipher {
 
         return cipher;
     }
+
+
+
 
 }

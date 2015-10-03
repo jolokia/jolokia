@@ -29,6 +29,7 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
 import org.jolokia.util.JolokiaCipher;
+import org.jolokia.util.JolokiaCipherPasswordProvider;
 import org.jolokia.util.NetworkUtil;
 import org.jolokia.util.Resource;
 
@@ -358,7 +359,8 @@ public class JolokiaServerConfig {
 
         try {
             JolokiaCipher jolokiaCipher = new JolokiaCipher();
-            String key = Resource.getResourceAsString("META-INF/encrypt-command-password-default");
+            JolokiaCipherPasswordProvider passwordProvider = new JolokiaCipherPasswordProvider();
+            String key = passwordProvider.getDefaultKey();
             return jolokiaCipher.decrypt64(password,key);
         } catch (Exception e) {
             throw new RuntimeException(e);
