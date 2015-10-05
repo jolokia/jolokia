@@ -39,10 +39,6 @@
         Support for PEM certs and keys when using the JVM agent with
         TLS 
       </action>
-      <action>
-        Added "authFallbackHeader" which is used in the delegation auth header if
-        no "Authorization-Header" is set.
-      </action>
       <action dev="zisili" type="update" date="2015-09-14" issue="214">
         Enhanced 'GlassfishDetector' for Payara flavour of glassfish
       </action>
