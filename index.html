@@ -302,8 +302,8 @@
 <p>
           Client cert validation has also be enhanced. In addition to
           validating the CA signature of a client cert, one can now
-          also check the <i>extended key usage</i> block of the cert
-          that the cert was created for client usage (option
+          also check that the <i>extended key usage</i> block of the cert
+          was created for client usage (option
           <tt>extendedClientCheck</tt>). Also, one or more
           principals can be configured with
           <tt>clientPrincipal</tt> which are also compared againt
@@ -315,16 +315,16 @@
           Jolokia is now able to create self-signed server
           certificates on the fly. This happens if neither a keystore
           nor a server PEM cert is provided. So, the easiest way to
-          enable https is simply to use `protocol=https`. Of course,
-          the client needs to disable cert validation then and it is
-          recommended to use basic-authentication to authenticate the
-          connection.
+          enable https is simply to add
+          <tt>protocol=https</tt>. Of course, the client needs to
+          disable cert validation then and it is recommended to use
+          basic-authentication to authenticate the connection.
         </p>
         
 <p>
-          The changes affect the JVM agent only and are explained in
-          detail in the <a href="reference/html/agents.html#agents-jvm">reference
-          manual</a>. 
+          The changes affect the <a class="externalLink" href="https://jolokia.org/agent/jvm.html">JVM agent</a> only
+          and are explained in the <a href="reference/html/agents.html#agents-jvm">reference
+          manual</a>.
         </p>
         
 <p>
