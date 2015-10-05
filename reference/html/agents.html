@@ -291,7 +291,7 @@
           property <code class="literal">jolokia.discoveryUrl</code>. Within the value you can use the
           placeholders <code class="literal">${host}</code> and <code class="literal">${ip}</code> which gets replaced
           by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
-          <code class="literal">${sys:property}</code> envirnoment and system properties can be referenced, respectively.
+          <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
         </td>
         <td>          
           <code class="constant">http://10.9.11.87:8080/jolokia</code>
@@ -303,7 +303,8 @@
           calculated. If provided it should be ensured that this id is
           unique among all agent reachable via multicast requests used
           by the discovery mechanism. It is recommended not to set
-          this value. 
+          this value. Within the <code class="literal">agentId</code> specification you
+          can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
         </td>
         <td>          
           <code class="constant">my-unique-agent-id</code>
@@ -401,7 +402,7 @@
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<sup>[<a name="d0e751" href="#ftn.d0e751">5</a>]</sup>
+      for details.<sup>[<a name="d0e757" href="#ftn.d0e757">5</a>]</sup>
     </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
@@ -537,7 +538,8 @@
           calculated. If provided it should be ensured that this id is
           unique among all agent reachable via multicast requests used
           by the discovery mechanism. It is recommended not to set
-          this value. 
+          this value. Within the <code class="literal">agentId</code> specification you
+          can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
         </td>        
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.agentDescription</td>
@@ -702,7 +704,10 @@
           implicetly to true. This URL can also be provied by an
           environment variable
           <code class="literal">JOLOKIA_DISCOVERY_URL</code> or the system
-          property <code class="literal">jolokia.discoveryUrl</code>
+          property <code class="literal">jolokia.discoveryUrl</code>. Within the value you can use the
+          placeholders <code class="literal">${host}</code> and <code class="literal">${ip}</code> which gets replaced
+          by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
+          <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.realm</td>
@@ -820,7 +825,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService. 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1472"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1496"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -1040,7 +1045,10 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       </p><pre class="programlisting">
 java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         <code class="filename">agent.jar</code> is the filename of the Jolokia
-        JVM agent. Options can be appended as a comma separated
+        JVM agent. The agent can be downloaded like the others from the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://jolokia.org/download.html" target="_top">download page</a>.
+        When downloading from a Maven repository you need to check for the classifier <code class="literal">agent</code> (i.e. the
+        jar to download looks like <code class="filename">jolokia-jvm-1.3.1-agent.jar</code>, not <code class="filename">jolokia-jvm-1.1.5.jar</code>).
+        Options can be appended as a comma separated
         list. The available options are the same as described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> plus the one described in
         table <a href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a>. If an options
         contains a comma, an equal sign or a backslash, it must be
@@ -1066,7 +1074,8 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             calculated. If provided it should be ensured that this id is
             unique among all agent reachable via multicast requests used
             by the discovery mechanism. It is recommended not to set
-            this value. 
+            this value. Within the <code class="literal">agentId</code> specification you
+            can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
           </td>        
           <td>
             <code class="constant">my-unique-agent-id</code>
@@ -1247,7 +1256,8 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">useSslClientAuthentication</code></td>
           <td>
             Whether client certificates should be used for
-            authentication (https only). (<code class="constant">true</code> or
+            authentication. The presented certificate is validate whether signed by
+            a known CA which must be in the keystore (https only). (<code class="constant">true</code> or
             <code class="constant">false</code>). 
           </td>        
           <td>
@@ -1269,6 +1279,53 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">trustManagerAlgorithm</code></td>
           <td>Trust manager algorithm (https only)</td>
           <td><code class="constant">SunX509</code></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">caCert</code></td>
+          <td>
+            If HTTPs is to be used and no <code class="constant">keystore</code> is given, then <code class="constant">caCert</code>
+            can be used to point to a PEM encoded CA certification file. This is use to verify
+            client certificates when <code class="constant">useSslClientAuthentication</code> is switched on (https only)
+          </td>
+          <td></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">serverCert</code></td>
+          <td>
+            For SSL (and when no <code class="constant">keyStore</code> is used) then this path must point to server
+            certificate which is presented to clients (https only)
+          </td>
+          <td></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">serverKey</code></td>
+          <td>Path to the PEM encoded key file for signing the server cert during TLS handshake. This is only
+            used when no <code class="constant">keyStore</code> is used. For decrypting the key the password given with
+            <code class="constant">keystorePassword</code> is used (https only).</td>
+          <td></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">serverKeyAlgorithm</code></td>
+          <td>Encryption algorithm to use for descrypting the key given with <code class="constant">serverKey</code>
+            (https only)</td>
+          <td><code class="constant">RSA</code></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">clientPrincipal</code></td>
+          <td>
+            The principal which must be given in a client certificate to allow access to the agent. This can be one or
+            or more relative distinguished names (RDN), separated by commas. The subject of a given client certificate
+            must match on all configured RDNs. For example, when the configuration is "O=jolokia.org,OU=Dev" then a
+            client certificate's subject must contain "O=jolokia.org" and "OU=Dev" to allow the request. Multiple alternative
+            principals can be configured by using additional options with consecutive index suffix like in
+            <code class="code">clientPrincipal.1</code>, <code class="code">clientPrincipal.2</code>, ... Please remember that a <code class="code">,</code>
+            separating RDNs must be escaped with a backslash (<code class="code">\,</code>) when used on the commandline as agent arguments.
+            (https and useSslAuthentication only)
+          </td>
+          <td></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">extraClientCheck</code></td>
+          <td>
+            If switched on the agent performs an extra check for client authentication that the presented client
+            cert contains a client flag in the extended key usage section which must be present.
+            (https and useSslAuthentication only)
+          </td>
+          <td></td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">bootAmx</code></td>
           <td>
@@ -1333,12 +1390,12 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
       <code class="literal">-jar</code> option. Call it with
       <code class="literal">--help</code> to get a short usage information:
     </p><pre class="programlisting">
-$ java -jar jolokia-jvm-1.2.0-agent.jar --help
+$ java -jar jolokia-jvm-1.3.1-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.2.0-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-jvm-1.3.1-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1499,7 +1556,7 @@ java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
           You could even instrument a JEE application server this way,
           however this is not recommended.
-        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e751" href="#d0e751">5</a>] </sup>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e757" href="#d0e757">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use
