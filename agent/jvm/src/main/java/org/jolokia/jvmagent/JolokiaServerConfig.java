@@ -354,8 +354,7 @@ public class JolokiaServerConfig {
             authenticator = new DelegatingAuthenticator(realm,
                                                         jolokiaConfig.get(ConfigKey.AUTH_URL),
                                                         jolokiaConfig.get(ConfigKey.AUTH_PRINCIPAL_SPEC),
-                                                        jolokiaConfig.getAsBoolean(ConfigKey.AUTH_IGNORE_CERTS),
-                                                        jolokiaConfig.get(ConfigKey.AUTH_FALLBACK_HEADER));
+                                                        jolokiaConfig.getAsBoolean(ConfigKey.AUTH_IGNORE_CERTS));
         } else {
             throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
                                                "Must be either 'basic' or 'jaas'");

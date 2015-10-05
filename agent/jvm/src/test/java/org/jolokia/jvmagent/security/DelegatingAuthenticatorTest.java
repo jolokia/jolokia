@@ -78,7 +78,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia",url,"json:metadata/name",false);
 
         Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader, "Authorization", "Bla");
+        HttpExchange ex = createExchange(respHeader);
 
         Authenticator.Result result = authenticator.authenticate(ex);
         assertNotNull(result);
@@ -97,12 +97,10 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
                     "empty:", "",
                     null, ""
             };
-            for (String authHeaderName : new String[] { "Authorization", "X-Authorization"}) {
-                for (int i = 0; i < data.length; i += 2) {
-                    HttpPrincipal principal = executeAuthCheck(data[i], authHeaderName, "Bearer blub");
-                    assertEquals(principal.getRealm(), "jolokia");
-                    assertEquals(principal.getUsername(), data[i + 1]);
-                }
+            for (int i = 0; i < data.length; i += 2) {
+                HttpPrincipal principal = executeAuthCheck(data[i]);
+                assertEquals(principal.getRealm(), "jolokia");
+                assertEquals(principal.getUsername(), data[i+1]);
             }
         } finally {
             HttpsURLConnection.setDefaultSSLSocketFactory(sFactory);
@@ -110,28 +108,11 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         }
     }
 
-    @Test
-    public void withDoubleAuth() {
-        SSLSocketFactory sFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
-        HostnameVerifier hVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
-        try {
-            // Authorization takes precedence
-            HttpPrincipal principal = executeAuthCheck("json:metadata/name",
-                                                       "X-Authorization", "Bearer wrongToken",
-                                                       "Authorization", "Bearer blub");
-            assertEquals(principal.getRealm(), "jolokia");
-            assertEquals(principal.getUsername(), "roland");
-        } finally {
-            HttpsURLConnection.setDefaultSSLSocketFactory(sFactory);
-            HttpsURLConnection.setDefaultHostnameVerifier(hVerifier);
-        }
-    }
-
-    private HttpPrincipal executeAuthCheck(String pSpec, String ... headers) {
-        DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, pSpec, true,"X-Authorization");
+    private HttpPrincipal executeAuthCheck(String pSpec) {
+        DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, pSpec, true);
 
         Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader, headers);
+        HttpExchange ex = createExchange(respHeader, "Authorization", "Bearer blub");
 
         Authenticator.Result result = authenticator.authenticate(ex);
         assertNotNull(result);
@@ -143,18 +124,9 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     public void invalidProtocol() {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia","ftp://ftp.redhat.com",null,false);
 
-        Authenticator.Result result = authenticator.authenticate(createExchange(new Headers(), "Authorization", "bla"));
-        Authenticator.Failure failure = (Authenticator.Failure) result;
-        assertEquals(failure.getResponseCode(),401);
-    }
-
-    @Test
-    public void noAuthorization() {
-        DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia","http://openauth.redhat.com",null,false);
-
         Authenticator.Result result = authenticator.authenticate(createExchange(new Headers()));
         Authenticator.Failure failure = (Authenticator.Failure) result;
-        assertEquals(failure.getResponseCode(),503);
+        assertEquals(failure.getResponseCode(),401);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*blub.*")
@@ -207,7 +179,8 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
     @Test
     public void emptySpec() {
-        HttpPrincipal principal = executeAuthCheck("empty:","Authorization", "Bearer blub");
+
+        HttpPrincipal principal = executeAuthCheck("empty:");
         assertEquals(principal.getRealm(), "jolokia");
         assertEquals(principal.getUsername(), "");
     }
