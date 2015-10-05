@@ -163,7 +163,7 @@ public class JolokiaHttpHandler implements HttpHandler {
             checkAuthentication(pHttpExchange);
             
             Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
-            if (subject!=null)  {
+            if (subject != null)  {
                 doHandleAs(subject, pHttpExchange);
             }  else {
                 doHandle(pHttpExchange);

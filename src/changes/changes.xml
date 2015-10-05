@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.3.2-SNAPSHOT" description="Release 1.3.2-SNAPSHOT" date="2015-10-5">
+    <release version="1.3.2-SNAPSHOT" description="Release 1.3.2" date="2015-10-5">
       <action dev="roland" type="add" date="2015-10-04">
         Support for dynamically created, self-signed server
         certificates when no server certificate is configured 
