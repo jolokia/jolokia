@@ -24,7 +24,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Enumeration;
 
-import org.jolokia.Version;
+import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

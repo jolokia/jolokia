@@ -22,9 +22,9 @@ import java.security.cert.Certificate;
 import java.security.spec.*;
 import java.util.Date;
 
-import org.jolokia.Version;
-import org.jolokia.util.Base64Util;
-import org.jolokia.util.ClassUtil;
+import org.jolokia.server.core.Version;
+import org.jolokia.server.core.util.Base64Util;
+import org.jolokia.server.core.util.ClassUtil;
 import sun.security.x509.X500Name;
 
 /**

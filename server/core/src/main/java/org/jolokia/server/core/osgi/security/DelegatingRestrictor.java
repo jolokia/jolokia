@@ -162,7 +162,7 @@ public class DelegatingRestrictor implements Restrictor {
 
     /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return checkRestrictorService(REMOTE_CHECK,pHostOrAddress);
+        return checkRestrictorService(REMOTE_CHECK, pHostOrAddress);
     }
 
 

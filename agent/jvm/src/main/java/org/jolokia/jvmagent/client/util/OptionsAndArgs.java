@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.regex.*;
 
-import org.jolokia.util.EscapeUtil;
+import org.jolokia.server.core.util.EscapeUtil;
 
 /**
  * Class representing options and arguments known to the client launcher. It also knows how
@@ -144,7 +144,7 @@ public final class OptionsAndArgs {
         for (Map.Entry<String,String> entry : options.entrySet()) {
             String key = entry.getKey();
             if (!key.equals("quiet") && !key.equals("verbose")) {
-                arg.append(key).append("=").append(EscapeUtil.escape(entry.getValue(),EscapeUtil.CSV_ESCAPE,",")).append(",");
+                arg.append(key).append("=").append(EscapeUtil.escape(entry.getValue(), EscapeUtil.CSV_ESCAPE, ",")).append(",");
             }
         }
         return arg.length() > 0 ? arg.substring(0,arg.length() - 1) : "";

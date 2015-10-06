@@ -112,14 +112,9 @@ public class JvmAgentConfigTest {
         assertEquals(config.getProtocol(), "https");
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
-<<<<<<< HEAD
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,OU=JVM");
         assertTrue(authenticator instanceof UserPasswordHttpAuthenticator);
         assertTrue(((UserPasswordHttpAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
-=======
-        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,OU=JVM");
-        assertTrue(authenticator instanceof UserPasswordAuthenticator);
-        assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
->>>>>>> master
     }
 
     @Test

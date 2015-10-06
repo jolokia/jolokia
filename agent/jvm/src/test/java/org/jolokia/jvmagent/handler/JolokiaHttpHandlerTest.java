@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent;
+package org.jolokia.jvmagent.handler;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -28,6 +28,7 @@ import javax.management.MalformedObjectNameException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
+import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
 import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.backend.RequestDispatcher;
 import org.jolokia.server.core.config.ConfigKey;

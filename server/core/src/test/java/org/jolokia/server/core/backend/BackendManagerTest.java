@@ -17,11 +17,13 @@ package org.jolokia.server.core.backend;
  */
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;

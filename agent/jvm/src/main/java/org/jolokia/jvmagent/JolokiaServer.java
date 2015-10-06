@@ -27,6 +27,9 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
+import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
+import org.jolokia.jvmagent.handler.JolokiaHttpsHandler;
+import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.restrictor.PolicyRestrictorFactory;
@@ -217,10 +220,6 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = pConfig.getContextPath();
-        jolokiaHttpHandler = useHttps(pConfig) ?
-                new JolokiaHttpsHandler(pConfig) :
-                new JolokiaHttpHandler(pConfig.getJolokiaConfig());
-        HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
 
         Configuration jolokiaCfg = config.getJolokiaConfig();
         LogHandler log = pLogHandler != null ?
@@ -253,7 +252,10 @@ public class JolokiaServer {
     // Startup the context and create the HttpHandler
     private HttpHandler startupJolokiaContext() {
         JolokiaContext jolokiaContext = serviceManager.start();
-        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
+        JolokiaHttpHandler jolokiaHttpHandler =
+                useHttps(config) ?
+                        new JolokiaHttpsHandler(jolokiaContext, config) :
+                        new JolokiaHttpHandler(jolokiaContext);
         updateAgentUrl(jolokiaContext);
         return jolokiaHttpHandler;
     }
@@ -479,14 +481,6 @@ public class JolokiaServer {
                 fis.close();
             }
         }
-    }
-
-    /**
-     * @return the address that the server is listening on. Thus, a program can initialize the server
-     * with 'port 0' and then retrieve the actual running port that was bound.
-     */
-    public InetSocketAddress getAddress() {
-        return serverAddress;
     }
 
     // A handler class which does the initialization lazily on the first request

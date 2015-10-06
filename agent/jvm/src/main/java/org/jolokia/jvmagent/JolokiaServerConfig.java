@@ -283,14 +283,7 @@ public class JolokiaServerConfig {
         backlog = Integer.parseInt(agentConfig.get("backlog"));
         initExecutor(agentConfig);
         initThreadNr(agentConfig);
-        initKeystore(agentConfig);
-
-        String auth = agentConfig.get("useSslClientAuthentication");
-        useSslClientAuthentication = auth != null && Boolean.getBoolean(auth);
-
-
-        String password = agentConfig.get("keystorePassword");
-        keystorePassword =  password != null ? password.toCharArray() : new char[0];
+        initHttpsRelatedSettings(agentConfig);
     }
 
     private void initAuthenticator() {
@@ -408,7 +401,7 @@ public class JolokiaServerConfig {
         }
     }
 
-    private void initKeystore(Map<String, String> agentConfig) {
+    private void initHttpsRelatedSettings(Map<String, String> agentConfig) {
         // keystore
         keystore = agentConfig.get("keystore");
         caCert = agentConfig.get("caCert");

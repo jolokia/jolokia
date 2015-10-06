@@ -20,7 +20,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.*;
 
-import org.jolokia.util.Base64Util;
+import org.jolokia.server.core.util.Base64Util;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

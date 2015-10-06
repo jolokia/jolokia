@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.server.core.util.EscapeUtil;
 
 public class AuthorizationHeaderParser {
@@ -40,7 +41,7 @@ public class AuthorizationHeaderParser {
         }
 
         String b64Auth = stok.nextToken();
-        String auth = new String(EscapeUtil.decodeBase64(b64Auth));
+        String auth = new String(Base64Util.decode(b64Auth));
 
         int p = auth.indexOf(':');
         String user;

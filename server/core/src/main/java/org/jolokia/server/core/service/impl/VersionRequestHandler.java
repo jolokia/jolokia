@@ -11,6 +11,7 @@ import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestHandler;
+import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -59,7 +60,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         JSONObject ret = new JSONObject();
         ret.put("agent", Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
-        ret.put("id",context.getConfig(ConfigKey.AGENT_ID));
+        ret.put("id", NetworkUtil.replaceExpression(context.getConfig(ConfigKey.AGENT_ID)));
         AgentDetails agentDetails = context.getAgentDetails();
         if (agentDetails != null) {
             ret.put("details", agentDetails.toJSONObject());

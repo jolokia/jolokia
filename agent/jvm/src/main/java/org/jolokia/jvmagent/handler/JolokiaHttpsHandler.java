@@ -27,7 +27,7 @@ import javax.security.auth.x500.X500Principal;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsExchange;
 import org.jolokia.jvmagent.JolokiaServerConfig;
-import org.jolokia.util.LogHandler;
+import org.jolokia.server.core.service.api.JolokiaContext;
 
 /**
  * Add specific HTTPs handling when https is used. This handler needs the full configuration
@@ -47,22 +47,12 @@ public class JolokiaHttpsHandler extends JolokiaHttpHandler {
     private final boolean extendedClientCheck;
 
     /**
-     * Constructor with a standard log handler
-     *
-     * @param pConfig full server config (in contrast to the jolokia config)
-     */
-    public JolokiaHttpsHandler(JolokiaServerConfig pConfig) {
-        this(pConfig, null);
-    }
-
-    /**
      * Constructor
      *
-     * @param pConfig full server config (in contrast to the jolokia config use by the http-handler)
-     * @param pLogHandler log handler to use
+     * @param pContext the Jolokia context to use
      */
-    public JolokiaHttpsHandler(JolokiaServerConfig pConfig, LogHandler pLogHandler) {
-        super(pConfig.getJolokiaConfig(), pLogHandler);
+    public JolokiaHttpsHandler(JolokiaContext pContext, JolokiaServerConfig pConfig) {
+        super(pContext);
         useClientCertAuth = pConfig.useSslClientAuthentication();
         allowedPrincipals = parseAllowedPrincipals(pConfig);
         extendedClientCheck = pConfig.getExtendedClientCheck();
