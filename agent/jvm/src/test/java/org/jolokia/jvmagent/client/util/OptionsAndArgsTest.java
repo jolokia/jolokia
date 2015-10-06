@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
+import org.jolokia.util.EscapeUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -73,6 +74,19 @@ public class OptionsAndArgsTest {
         OptionsAndArgs o = opts();
         assertEquals(o.getJarFileName(),"classes");
         assertNotNull(o.getJarFilePath(),"");
+    }
+
+    @Test
+    public void listArgs() {
+        String DN1 = "CN=adminuser, C=XX, O=Default Company Ltd";
+        String DN2 = "CN=Max Mustermann, C=DE, O=Volkswagen";
+        OptionsAndArgs o = opts("--clientPrincipal",DN1,"--clientPrincipal",DN2);
+        assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN1,EscapeUtil.CSV_ESCAPE,",")));
+        assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN2,EscapeUtil.CSV_ESCAPE,",")));
+        assertTrue(o.toAgentArg().contains("clientPrincipal"));
+        assertTrue(o.toAgentArg().contains("clientPrincipal.1"));
+        assertFalse(o.toAgentArg().contains("clientPrincipal.0"));
+        assertFalse(o.toAgentArg().contains("clientPrincipal.2"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown option.*")

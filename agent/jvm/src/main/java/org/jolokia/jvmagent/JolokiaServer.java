@@ -16,10 +16,11 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.*;
 
 import javax.net.ssl.*;
@@ -215,6 +216,11 @@ public class JolokiaServer {
         httpServer = pServer;
 
         // Create proper context along with handler
+        final String contextPath = pConfig.getContextPath();
+        jolokiaHttpHandler = useHttps(pConfig) ?
+                new JolokiaHttpsHandler(pConfig) :
+                new JolokiaHttpHandler(pConfig.getJolokiaConfig());
+        HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
 
         Configuration jolokiaCfg = config.getJolokiaConfig();
         LogHandler log = pLogHandler != null ?
@@ -336,11 +342,9 @@ public class JolokiaServer {
     private HttpServer createHttpServer(JolokiaServerConfig pConfig) throws IOException {
         int port = pConfig.getPort();
         InetAddress address = pConfig.getAddress();
-        String protocol = pConfig.getProtocol();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
-        HttpServer server =
-                protocol.equalsIgnoreCase("https") ?
+        HttpServer server = useHttps(pConfig) ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
 
@@ -359,8 +363,12 @@ public class JolokiaServer {
         return server;
     }
 
-
     // =========================================================================================================
+
+    private boolean useHttps(JolokiaServerConfig pConfig) {
+        String protocol = pConfig.getProtocol();
+        return protocol.equalsIgnoreCase("https");
+    }
 
     private HttpServer createHttpsServer(InetSocketAddress pSocketAddress,JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
@@ -369,23 +377,14 @@ public class JolokiaServer {
             SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
             // initialise the keystore
-            char[] password = pConfig.getKeystorePassword();
-            KeyStore ks = KeyStore.getInstance(pConfig.getKeyStoreType());
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(pConfig.getKeystore());
-                ks.load(fis, password);
-            } finally {
-                if (fis != null) {
-                    fis.close();
-                }
-            }
+            KeyStore ks = getKeyStore(pConfig);
+
             // setup the key manager factory
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(pConfig.getKeyManagerAlgorithm());
-            kmf.init(ks, password);
+            KeyManagerFactory kmf = getKeyManagerFactory(pConfig);
+            kmf.init(ks, pConfig.getKeystorePassword());
 
             // setup the trust manager factory
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(pConfig.getTrustManagerAlgorithm());
+            TrustManagerFactory tmf = getTrustManagerFactory(pConfig);
             tmf.init(ks);
 
             // setup the HTTPS context and parameters
@@ -399,7 +398,96 @@ public class JolokiaServer {
         }
     }
 
-    // ====================================================================================================
+    private TrustManagerFactory getTrustManagerFactory(JolokiaServerConfig pConfig) throws NoSuchAlgorithmException {
+        String algo = pConfig.getTrustManagerAlgorithm();
+        return TrustManagerFactory.getInstance(algo != null ? algo : TrustManagerFactory.getDefaultAlgorithm());
+    }
+
+    private KeyManagerFactory getKeyManagerFactory(JolokiaServerConfig pConfig) throws NoSuchAlgorithmException {
+        String algo = pConfig.getKeyManagerAlgorithm();
+        return KeyManagerFactory.getInstance(algo != null ? algo : KeyManagerFactory.getDefaultAlgorithm());
+    }
+
+    private KeyStore getKeyStore(JolokiaServerConfig pConfig) throws KeyStoreException, IOException,
+                                                                     NoSuchAlgorithmException, CertificateException,
+                                                                     InvalidKeySpecException, InvalidKeyException,
+                                                                     NoSuchProviderException, SignatureException {
+        char[] password = pConfig.getKeystorePassword();
+        String keystoreFile = pConfig.getKeystore();
+        KeyStore keystore = KeyStore.getInstance(pConfig.getKeyStoreType());
+        if (keystoreFile != null) {
+            // Load everything from a keystore which must include CA (if useClientSslAuthenticatin is used) and
+            // server cert/key
+            loadKeyStoreFromFile(keystore, keystoreFile, password);
+        } else {
+            // Load keys from PEM files
+            keystore.load(null);
+            updateKeyStoreFromPEM(keystore,pConfig);
+
+            // If no server cert is configured, then use a self-signed server certificate
+            if (pConfig.getServerCert() == null) {
+                KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
+            }
+        }
+        return keystore;
+    }
+
+    private void updateKeyStoreFromPEM(KeyStore keystore, JolokiaServerConfig pConfig)
+            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+                   InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, SignatureException {
+
+        if (pConfig.getCaCert() != null) {
+            File caCert = getAndValidateFile(pConfig.getCaCert(),"CA cert");
+            KeyStoreUtil.updateWithCaPem(keystore, caCert);
+        } else if (pConfig.useSslClientAuthentication()) {
+            throw new IllegalArgumentException("Cannot use client cert authentication if no CA is given with 'caCert'");
+        }
+
+        if (pConfig.getServerCert() != null) {
+            // Use the provided server key
+            File serverCert = getAndValidateFile(pConfig.getServerCert(),"server cert");
+            if (pConfig.getServerKey() == null) {
+                throw new IllegalArgumentException("Cannot use server cert from " + pConfig.getServerCert() +
+                                                   " without a provided a key given with 'serverKey'");
+            }
+            File serverKey = getAndValidateFile(pConfig.getServerKey(),"server key");
+            KeyStoreUtil.updateWithServerPems(keystore, serverCert, serverKey,
+                                              pConfig.getServerKeyAlgorithm(), pConfig.getKeystorePassword());
+        }
+    }
+
+    private File getAndValidateFile(String pFile, String pWhat) throws IOException {
+        File ret = new File(pFile);
+        if (!ret.exists()) {
+            throw new FileNotFoundException("No such " + pWhat + " " + pFile);
+        }
+        if (!ret.canRead()) {
+            throw new IOException(pWhat.substring(0,1).toUpperCase() + pWhat.substring(1) + " " + pFile + " is not readable");
+        }
+        return ret;
+    }
+
+    private void loadKeyStoreFromFile(KeyStore pKeyStore, String pFile, char[] pPassword)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        File file = getAndValidateFile(pFile,"keystore");
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(pFile);
+            pKeyStore.load(fis, pPassword);
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
+        }
+    }
+
+    /**
+     * @return the address that the server is listening on. Thus, a program can initialize the server
+     * with 'port 0' and then retrieve the actual running port that was bound.
+     */
+    public InetSocketAddress getAddress() {
+        return serverAddress;
+    }
 
     // A handler class which does the initialization lazily on the first request
     // Useful for server detection since the app container is not initialized from the very beginning

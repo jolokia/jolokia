@@ -208,6 +208,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <forkMode>always</forkMode>
+          <!--<argLine>-Djava.security.debug=certpath,Provider</argLine>-->
         </configuration>
       </plugin>
     </plugins>

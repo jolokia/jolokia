@@ -27,12 +27,13 @@ import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.jolokia.service.jmx.handler.BaseHandlerTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
-import static org.jolokia.server.core.util.RequestType.READ;
 import static org.testng.Assert.*;
+import static org.jolokia.server.core.util.RequestType.READ;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -385,7 +386,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
     // ==============================================================================================================
 
-    @Test
+   @Test
     public void restrictAccess() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
@@ -401,6 +402,25 @@ public class ReadHandlerTest extends BaseHandlerTest {
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
             fail("Restrictor should forbid access");
+        } catch (SecurityException exp) {}
+        verify(restrictor,server);
+    }
+
+    @Test
+    public void restrictHttpMethodAccess() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isHttpMethodAllowed(HttpMethod.POST)).andReturn(false);
+        ctx = new TestJolokiaContext.Builder().restrictor(restrictor).build();
+        handler = new ReadHandler();
+        handler.init(ctx,null);
+        JolokiaReadRequest request = new JolokiaRequestBuilder(READ, testBeanName).
+                attribute("attr").
+                build();
+        MBeanServer server = createMock(MBeanServer.class);
+        replay(restrictor,server);
+        try {
+            handler.handleAllServerRequest(getMBeanServerManager(server),request, null);
+            fail("Restrictor should forbid HTTP Method Access");
         } catch (SecurityException exp) {}
         verify(restrictor,server);
     }

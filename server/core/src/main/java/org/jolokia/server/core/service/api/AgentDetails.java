@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.util.NetworkUtil;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.server.core.service.api.AgentDetails.AgentDetailProperty.*;
@@ -51,8 +52,8 @@ public class AgentDetails {
         sealed = false;
     }
 
-    public AgentDetails(Configuration pConfig,ServerHandle pServerHandle) {
-        this(pConfig.getConfig(ConfigKey.AGENT_ID));
+    public AgentDetails(Configuration pConfig, ServerHandle pServerHandle) {
+        this(NetworkUtil.replaceExpression(pConfig.getConfig(ConfigKey.AGENT_ID)));
         agentDescription = pConfig.getConfig(ConfigKey.AGENT_DESCRIPTION);
         serverVendor = pServerHandle.getVendor();
         serverProduct = pServerHandle.getProduct();

@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent;
+package org.jolokia.jvmagent.handler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import javax.management.JMException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
+import org.jolokia.jvmagent.handler.JolokiaHttpHandlerTest;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;

@@ -1,7 +1,6 @@
-package org.jolokia.osgi.security;
-
-/*
- * Copyright 2009-2013 Roland Huss
+package org.jolokia.server.core.util;/*
+ *
+ * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +15,22 @@ package org.jolokia.osgi.security;
  * limitations under the License.
  */
 
-import java.util.StringTokenizer;
-
-import javax.servlet.http.HttpServletRequest;
-
-public final class AuthorizationHeaderParser {
-
-    private AuthorizationHeaderParser() { }
-
-    /**
-     * Parse the HTTP authorization header
-     *
-     * @param pAuthInfo header to parse
-     * @return method, user, password and whehter the header was valid
-     */
-    public static Result parse(String pAuthInfo) {
-        StringTokenizer stok = new StringTokenizer(pAuthInfo);
-        String method = stok.nextToken();
-        if (!HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(method)) {
-            throw new IllegalArgumentException("Only BasicAuthentication is supported");
-        }
-
-        String b64Auth = stok.nextToken();
-        String auth = new String(decode(b64Auth));
-
-        int p = auth.indexOf(':');
-        String user;
-        String password;
-        boolean valid;
-        if (p != -1) {
-            user = auth.substring(0, p);
-            password = auth.substring(p+1);
-            valid = true;
-        } else {
-            valid = false;
-            user = null;
-            password = null;
-        }
-        return new Result(method,user,password,valid);
-    }
+/**
+ * Base64 routine taken from http://iharder.sourceforge.net/current/java/base64/ (public domain)
+ * It has be tailored to suite our needs, so some things likes compression and
+ * multiline output has been removed for the sake of simplicity.
+ *
+ * @author roland
+ * @since 13/09/15
+ */
+public class Base64Util {
 
     /**
      * Base64 encoding methods of Authentication
      * Taken from http://iharder.sourceforge.net/current/java/base64/ (public domain)
      * and adapted for our needs here.
      */
-    static byte[] decode(String s) {
+    public static byte[] decode(String s) {
 
         if( s == null ){
             throw new IllegalArgumentException("Input string was null.");
@@ -85,10 +54,31 @@ public final class AuthorizationHeaderParser {
         return decodeBytes(inBytes);
     }
 
+    /**
+     * Encodes a byte array into Base64 notation.
+     * Does not GZip-compress data.
+     *
+     * @param source The data to convert
+     * @return The data in Base64-encoded form
+     * @throws NullPointerException if source array is null
+     * @since 1.4
+     */
+    public static String encode(byte[] source) {
+        byte[] encoded = encodeBytesToBytes( source, source.length);
+
+        try {
+            return new String(encoded, "US-ASCII");
+        }
+        catch (java.io.UnsupportedEncodingException uue) {
+            return new String( encoded );
+        }
+    }
+
     // ==========================================================================================================
     // Do the conversion to bytes
+
     private static byte[] decodeBytes(byte[] pInBytes) {
-        byte[] decodabet = AuthorizationHeaderParser.DECODABET;
+        byte[] decodabet = DECODABET;
 
         int    len34   = pInBytes.length * 3 / 4;       // Estimate on array size
         byte[] outBuff = new byte[ len34 ]; // Upper limit on size of output
@@ -193,7 +183,99 @@ public final class AuthorizationHeaderParser {
         }   // end if
     }
 
+
+    public static byte[] encodeBytesToBytes(byte[] source, int len) {
+        int encLen = (len / 3) * 4 + (len % 3 > 0 ? 4 : 0); // Bytes needed for actual encoding
+        byte[] outBuff = new byte[encLen];
+
+        int d = 0;
+        int e = 0;
+        int len2 = len - 2;
+        for (; d < len2; d+=3, e+=4) {
+            encode3to4( source, d, 3, outBuff, e);
+        }
+
+        if(d < len) {
+            encode3to4( source, d, len - d, outBuff, e);
+            e += 4;
+        }
+
+        // Only resize array if we didn't guess it right.
+        if (e <= outBuff.length - 1){
+            byte[] finalOut = new byte[e];
+            System.arraycopy(outBuff,0, finalOut,0,e);
+            return finalOut;
+        } else {
+            return outBuff;
+        }
+    }
+
+
+    private static byte[] encode3to4(
+            byte[] source, int srcOffset, int numSigBytes,
+            byte[] destination, int destOffset) {
+
+        //           1         2         3
+        // 01234567890123456789012345678901 Bit position
+        // --------000000001111111122222222 Array position from threeBytes
+        // --------|    ||    ||    ||    | Six bit groups to index ALPHABET
+        //          >>18  >>12  >> 6  >> 0  Right shift necessary
+        //                0x3f  0x3f  0x3f  Additional AND
+
+        // Create buffer with zero-padding if there are only one or two
+        // significant bytes passed in the array.
+        // We have to shift left 24 in order to flush out the 1's that appear
+        // when Java treats a value as negative that is cast from a byte to an int.
+        int inBuff =   ( numSigBytes > 0 ? ((source[ srcOffset     ] << 24) >>>  8) : 0 )
+                     | ( numSigBytes > 1 ? ((source[ srcOffset + 1 ] << 24) >>> 16) : 0 )
+                     | ( numSigBytes > 2 ? ((source[ srcOffset + 2 ] << 24) >>> 24) : 0 );
+
+        switch( numSigBytes )
+        {
+            case 3:
+                destination[ destOffset     ] = ALPHABET[ (inBuff >>> 18)        ];
+                destination[ destOffset + 1 ] = ALPHABET[ (inBuff >>> 12) & 0x3f ];
+                destination[ destOffset + 2 ] = ALPHABET[ (inBuff >>>  6) & 0x3f ];
+                destination[ destOffset + 3 ] = ALPHABET[ (inBuff       ) & 0x3f ];
+                return destination;
+
+            case 2:
+                destination[ destOffset     ] = ALPHABET[ (inBuff >>> 18)        ];
+                destination[ destOffset + 1 ] = ALPHABET[ (inBuff >>> 12) & 0x3f ];
+                destination[ destOffset + 2 ] = ALPHABET[ (inBuff >>>  6) & 0x3f ];
+                destination[ destOffset + 3 ] = EQUALS_SIGN;
+                return destination;
+
+            case 1:
+                destination[ destOffset     ] = ALPHABET[ (inBuff >>> 18)        ];
+                destination[ destOffset + 1 ] = ALPHABET[ (inBuff >>> 12) & 0x3f ];
+                destination[ destOffset + 2 ] = EQUALS_SIGN;
+                destination[ destOffset + 3 ] = EQUALS_SIGN;
+                return destination;
+
+            default:
+                return destination;
+        }   // end switch
+    }   // end encode3to4
+
+
+    // ===============================================================================================
     // Constants
+
+    /** The 64 valid Base64 values. */
+    /* Host platform me be something funny like EBCDIC, so we hardcode these values. */
+    private final static byte[] ALPHABET = {
+        (byte)'A', (byte)'B', (byte)'C', (byte)'D', (byte)'E', (byte)'F', (byte)'G',
+        (byte)'H', (byte)'I', (byte)'J', (byte)'K', (byte)'L', (byte)'M', (byte)'N',
+        (byte)'O', (byte)'P', (byte)'Q', (byte)'R', (byte)'S', (byte)'T', (byte)'U',
+        (byte)'V', (byte)'W', (byte)'X', (byte)'Y', (byte)'Z',
+        (byte)'a', (byte)'b', (byte)'c', (byte)'d', (byte)'e', (byte)'f', (byte)'g',
+        (byte)'h', (byte)'i', (byte)'j', (byte)'k', (byte)'l', (byte)'m', (byte)'n',
+        (byte)'o', (byte)'p', (byte)'q', (byte)'r', (byte)'s', (byte)'t', (byte)'u',
+        (byte)'v', (byte)'w', (byte)'x', (byte)'y', (byte)'z',
+        (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5',
+        (byte)'6', (byte)'7', (byte)'8', (byte)'9', (byte)'+', (byte)'/'
+    };
 
     /**
      * Translates a Base64 value to either its 6-bit reconstruction value
@@ -226,32 +308,4 @@ public final class AuthorizationHeaderParser {
     private static final byte EQUALS_SIGN_ENC = -1; // Indicates equals sign in encoding
 
     private static final byte EQUALS_SIGN = (byte)'=';
-
-    // ============================================================================================================
-
-    public static class Result {
-        private final String method;
-        private final String user;
-        private final String password;
-        private final boolean valid;
-
-        public Result(String pMethod, String pUser, String pPassword, boolean pValid) {
-            method = pMethod;
-            user = pUser;
-            password = pPassword;
-            valid = pValid;
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public boolean isValid() {
-            return valid;
-        }
-    }
 }

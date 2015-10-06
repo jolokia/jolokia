@@ -70,7 +70,7 @@ public class HttpMethodChecker extends AbstractChecker<HttpMethod> {
     }
 
     @Override
-    public boolean  check(HttpMethod pMethod) {
+    public boolean check(HttpMethod pMethod) {
         return httpMethodsSet == null || httpMethodsSet.contains(pMethod.getMethod());
     }
 

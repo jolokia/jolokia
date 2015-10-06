@@ -90,9 +90,9 @@ public class JvmAgentConfig extends JolokiaServerConfig {
         Map<String,String> ret = new HashMap<String, String>();
         if (pAgentArgs != null && pAgentArgs.length() > 0) {
             for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
-                String[] prop = EscapeUtil.splitAsArray(arg, EscapeUtil.CSV_ESCAPE, "=");
+                String[] prop = arg.split("=",2);
                 if (prop == null || prop.length != 2) {
-                    throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'. Ignoring");
+                    throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'");
                 } else {
                     ret.put(prop[0],prop[1]);
                 }

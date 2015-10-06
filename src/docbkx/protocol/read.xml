@@ -179,7 +179,7 @@ value: {
       <tr>
         <td><constant>attribute</constant></td>
         <td>Attribute name to read or a JSON array containing a list
-        attributes to read. No attribute is given, then all attributes
+        of attributes to read. No attribute is given, then all attributes
         are read.</td>
         <td><literal>HeapMemoryUsage</literal>, <literal>[
         "HeapMemoryUsage", "NonHeapMemoryUsage" ]</literal></td>

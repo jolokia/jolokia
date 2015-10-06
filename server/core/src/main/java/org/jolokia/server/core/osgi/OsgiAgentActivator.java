@@ -156,7 +156,7 @@ public class OsgiAgentActivator implements BundleActivator {
                 config.put(key.getKeyValue(),value);
             }
         }
-        String jolokiaId = config.get(ConfigKey.AGENT_ID.getKeyValue());
+        String jolokiaId = NetworkUtil.replaceExpression(config.get(ConfigKey.AGENT_ID.getKeyValue()));
         if (jolokiaId == null) {
             config.put(ConfigKey.AGENT_ID.getKeyValue(),
                        NetworkUtil.getAgentId(hashCode(),"osgi"));

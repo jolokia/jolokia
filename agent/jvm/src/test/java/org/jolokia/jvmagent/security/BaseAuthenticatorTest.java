@@ -42,6 +42,8 @@ public class BaseAuthenticatorTest {
         }
         expect(ex.getResponseHeaders()).andStubReturn(respHeaders);
         expect(ex.getRequestHeaders()).andStubReturn(reqHeaders);
+        // For JDK6:
+        expect(ex.getHttpContext()).andStubReturn(null);
         if (subject != null) {
             ex.setAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE, subject);
         }

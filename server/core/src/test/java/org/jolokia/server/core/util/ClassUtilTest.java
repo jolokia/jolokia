@@ -134,9 +134,11 @@ public class ClassUtilTest {
     }
     @Test
     public void testApplyNoArgs() {
-        File testFile = new File("/tmp");
+        String fs = System.getProperty("path.separator");
+        String pathname = fs + "tmp";
+        File testFile = new File(pathname);
         String path = (String) ClassUtil.applyMethod(testFile,"getPath");
-        assertEquals(path,"/tmp");
+        assertEquals(path, pathname);
     }
     @Test
     public void testApplyWithArgs() {

@@ -69,7 +69,7 @@ public abstract class AbstractBaseCommand {
         if (pAdditionalOpts.length > 0) {
             args = args.length() != 0 ? args + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
         }
-        method.invoke(pVm, pOpts.getJarFilePath(),args);
+        method.invoke(pVm, pOpts.getJarFilePath(),args.length() > 0 ? args : null);
     }
 
     /**

@@ -56,7 +56,10 @@
 java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <para>
         <filename>agent.jar</filename> is the filename of the Jolokia
-        JVM agent. Options can be appended as a comma separated
+        JVM agent. The agent can be downloaded like the others from the <ulink url="https://jolokia.org/download.html">download page</ulink>.
+        When downloading from a Maven repository you need to check for the classifier <literal>agent</literal> (i.e. the
+        jar to download looks like <filename>jolokia-jvm-1.3.1-agent.jar</filename>, not <filename>jolokia-jvm-1.1.5.jar</filename>).
+        Options can be appended as a comma separated
         list. The available options are the same as described in <xref
         linkend="agent-war-init-params"/> plus the one described in
         table <xref linkend="agent-jvm-config"/>. If an options
@@ -90,7 +93,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
             calculated. If provided it should be ensured that this id is
             unique among all agent reachable via multicast requests used
             by the discovery mechanism. It is recommended not to set
-            this value. 
+            this value. Within the <literal>agentId</literal> specification you
+            can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
           </td>        
           <td>
             <constant>my-unique-agent-id</constant>
@@ -321,7 +325,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>useSslClientAuthentication</constant></td>
           <td>
             Whether client certificates should be used for
-            authentication (https only). (<constant>true</constant> or
+            authentication. The presented certificate is validate whether signed by
+            a known CA which must be in the keystore (https only). (<constant>true</constant> or
             <constant>false</constant>). 
           </td>        
           <td>
@@ -347,6 +352,59 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>trustManagerAlgorithm</constant></td>
           <td>Trust manager algorithm (https only)</td>
           <td><constant>SunX509</constant></td>
+        </tr>
+        <tr>
+          <td><constant>caCert</constant></td>
+          <td>
+            If HTTPs is to be used and no <constant>keystore</constant> is given, then <constant>caCert</constant>
+            can be used to point to a PEM encoded CA certification file. This is use to verify
+            client certificates when <constant>useSslClientAuthentication</constant> is switched on (https only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>serverCert</constant></td>
+          <td>
+            For SSL (and when no <constant>keyStore</constant> is used) then this path must point to server
+            certificate which is presented to clients (https only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>serverKey</constant></td>
+          <td>Path to the PEM encoded key file for signing the server cert during TLS handshake. This is only
+            used when no <constant>keyStore</constant> is used. For decrypting the key the password given with
+            <constant>keystorePassword</constant> is used (https only).</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>serverKeyAlgorithm</constant></td>
+          <td>Encryption algorithm to use for descrypting the key given with <constant>serverKey</constant>
+            (https only)</td>
+          <td><constant>RSA</constant></td>
+        </tr>
+        <tr>
+          <td><constant>clientPrincipal</constant></td>
+          <td>
+            The principal which must be given in a client certificate to allow access to the agent. This can be one or
+            or more relative distinguished names (RDN), separated by commas. The subject of a given client certificate
+            must match on all configured RDNs. For example, when the configuration is "O=jolokia.org,OU=Dev" then a
+            client certificate's subject must contain "O=jolokia.org" and "OU=Dev" to allow the request. Multiple alternative
+            principals can be configured by using additional options with consecutive index suffix like in
+            <code>clientPrincipal.1</code>, <code>clientPrincipal.2</code>, ... Please remember that a <code>,</code>
+            separating RDNs must be escaped with a backslash (<code>\,</code>) when used on the commandline as agent arguments.
+            (https and useSslAuthentication only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>extraClientCheck</constant></td>
+          <td>
+            If switched on the agent performs an extra check for client authentication that the presented client
+            cert contains a client flag in the extended key usage section which must be present.
+            (https and useSslAuthentication only)
+          </td>
+          <td></td>
         </tr>
         <tr>
           <td><constant>bootAmx</constant></td>
@@ -425,12 +483,12 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <literal>--help</literal> to get a short usage information:
     </para>
     <programlisting><![CDATA[
-$ java -jar jolokia-jvm-1.2.0-agent.jar --help
+$ java -jar jolokia-jvm-1.3.1-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.2.0-agent.jar [options] <command> <pid/regexp>
+Usage: java -jar jolokia-jvm-1.3.1-agent.jar [options] <command> <pid/regexp>
 
 where <command> is one of
     start     -- Start a Jolokia agent for the process specified
