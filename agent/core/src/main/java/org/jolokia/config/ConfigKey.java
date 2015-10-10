@@ -209,12 +209,6 @@ public enum ConfigKey {
     AUTH_IGNORE_CERTS("authIgnoreCerts",true,false,"false"),
 
     /**
-     * A header which should be copied over to 'Authorization:' when authMode is delegate and no
-     * Authorization: header is set
-     */
-    AUTH_FALLBACK_HEADER("authFallbackHeader",true,false),
-
-    /**
      * Context used for agent, used e.g. in the OSGi activator
      * (but not for the servlet, this is done in web.xml)
      */

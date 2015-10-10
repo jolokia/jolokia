@@ -30,16 +30,9 @@ public class DelegatingAuthenticator extends Authenticator {
     private final URL delegateURL;
     private final PrincipalExtractor principalExtractor;
     private final String realm;
-    private final String fallbackAuthHeader;
 
     public DelegatingAuthenticator(String pRealm, String pUrl, String pPrincipalSpec, boolean pDisableCertCheck) {
-        this(pRealm,pUrl,pPrincipalSpec,pDisableCertCheck,null);
-    }
-
-    public DelegatingAuthenticator(String pRealm, String pUrl, String pPrincipalSpec, boolean pDisableCertCheck,
-                                   String pFallbackAuthHeader) {
         this.realm = pRealm;
-        this.fallbackAuthHeader = pFallbackAuthHeader;
         try {
             this.delegateURL = new URL(pUrl);
             this.principalExtractor = createPrincipalExtractor(pPrincipalSpec);
@@ -57,7 +50,7 @@ public class DelegatingAuthenticator extends Authenticator {
         try {
             URLConnection connection = delegateURL.openConnection();
             connection.addRequestProperty("Authorization",
-                                          getAuthorizationHeader(pHttpExchange));
+                                          pHttpExchange.getRequestHeaders().getFirst("Authorization"));
             connection.setConnectTimeout(2000);
             connection.connect();
             if (connection instanceof HttpURLConnection) {
@@ -75,18 +68,6 @@ public class DelegatingAuthenticator extends Authenticator {
         } catch (ParseException e) {
             return prepareFailure(pHttpExchange, "Invalid JSON response: " + e, 422);
         }
-    }
-
-    private String getAuthorizationHeader(HttpExchange pHttpExchange) throws IOException {
-        String header = pHttpExchange.getRequestHeaders().getFirst("Authorization");
-        if (header == null && fallbackAuthHeader != null) {
-            header = pHttpExchange.getRequestHeaders().getFirst(fallbackAuthHeader);
-        }
-        if (header == null) {
-            throw new IOException("No Authorization: " +
-                                  (fallbackAuthHeader != null ? " and no " + fallbackAuthHeader + ": " : "") + "found");
-        }
-        return header;
     }
 
     private Result prepareFailure(HttpExchange pHttpExchange, String pErrorDetails, int pCode) {

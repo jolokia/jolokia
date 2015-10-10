@@ -45,11 +45,28 @@ public class JvmAgentConfigTest {
     }
 
     @Test
+    public void withMultipleEquals() {
+        JvmAgentConfig config = new JvmAgentConfig("clientPrincipal=O=jolokia.org\\,DN=Roland Huss,protocol=https");
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,DN=Roland Huss");
+        assertEquals(config.getProtocol(),"https");
+        assertEquals(config.getBacklog(), 10);
+
+    }
+
+    @Test
     public void detectorArgs() {
         JvmAgentConfig config = new JvmAgentConfig("bootAmx=true");
         Configuration jConfig = config.getJolokiaConfig();
         String detectorOpts = jConfig.get(ConfigKey.DETECTOR_OPTIONS);
         assertEquals(detectorOpts.replaceAll("\\s*", ""), "{\"glassfish\":{\"bootAmx\":true}}");
+    }
+
+    @Test
+    public void listArgs() {
+        JvmAgentConfig config = new JvmAgentConfig("clientPrincipal=O=jolokia.org\\,CN=Roland Huss,clientPrincipal.1=O=redhat.com\\,CN=jolokia,clientPrincipal.3=bla");
+        assertEquals(config.getClientPrincipals().size(),2);
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,CN=Roland Huss");
+        assertEquals(config.getClientPrincipals().get(1),"O=redhat.com,CN=jolokia");
     }
 
     @Test
@@ -95,6 +112,7 @@ public class JvmAgentConfigTest {
         assertEquals(config.getProtocol(), "https");
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,OU=JVM");
         assertTrue(authenticator instanceof UserPasswordAuthenticator);
         assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland", "s!cr!t"));
     }
@@ -113,11 +131,6 @@ public class JvmAgentConfigTest {
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*bla\\.txt.*")
     public void configNotFound() {
         new JvmAgentConfig("config=/bla.txt");
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void noKeystore() {
-        new JvmAgentConfig("protocol=https");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
