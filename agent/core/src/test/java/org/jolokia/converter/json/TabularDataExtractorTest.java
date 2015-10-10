@@ -153,6 +153,23 @@ public class TabularDataExtractorTest {
         Object result = extract(true,data,"key1");
         assertEquals(result,TEST_VALUE);
     }
+
+    @Test
+    void extractGenericTabularDataWithJsonEmpty() throws OpenDataException, AttributeNotFoundException {
+        CompositeTypeAndJson ctj = new CompositeTypeAndJson(
+                STRING,"name",null,
+                STRING,"firstname",null,
+                INTEGER,"age",null,
+                BOOLEAN,"male",null
+        );
+        TabularTypeAndJson taj = new TabularTypeAndJson(new String[] { "name", "firstname" },ctj);
+        TabularData data = new TabularDataSupport(taj.getType());
+
+        JSONObject result = (JSONObject) extract(true, data);
+
+        assertTrue(result.isEmpty());
+    }
+
     @Test
     void extractGenericTabularDataWithJson() throws OpenDataException, AttributeNotFoundException {
         TabularData data = getComplexTabularData();

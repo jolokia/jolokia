@@ -174,9 +174,16 @@ public class TabularDataExtractor implements Extractor {
 
     // Convert tabular data to (nested) maps. Path access is allowed here
     private Object convertToMaps(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter) throws AttributeNotFoundException {
+        JSONObject ret = new JSONObject();
+
+        if (pTd.isEmpty()) {
+            //empty TabularData
+            return ret;
+        }
+
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
-        JSONObject ret = new JSONObject();
+
         boolean found = false;
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
             Stack<String> path = (Stack<String>) pExtraArgs.clone();
