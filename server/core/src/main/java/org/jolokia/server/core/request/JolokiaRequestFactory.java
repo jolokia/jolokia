@@ -30,10 +30,10 @@ import org.jolokia.server.core.util.RequestType;
  * @author roland
  * @since Oct 29, 2009
  */
-public final class JmxRequestFactory {
+public final class JolokiaRequestFactory {
 
     // private constructor for static class
-    private JmxRequestFactory() { }
+    private JolokiaRequestFactory() { }
 
     /**
      *

@@ -64,14 +64,14 @@ public class Jsr160RequestHandlerTest {
 
     @Test
     public void canHandle() {
-        assertFalse(dispatcher.canHandle(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
+        assertFalse(dispatcher.canHandle(JolokiaRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
         JolokiaRequest req = preparePostReadRequest(null);
         assertTrue(dispatcher.canHandle(req));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
-        dispatcher.handleRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()),null);
+        dispatcher.handleRequest(JolokiaRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()), null);
     }
 
     @Test(expectedExceptions = IOException.class)
@@ -129,7 +129,7 @@ public class Jsr160RequestHandlerTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JolokiaReadRequest) JmxRequestFactory.createPostRequest(params, new TestProcessingParameters());
+        return (JolokiaReadRequest) JolokiaRequestFactory.createPostRequest(params, new TestProcessingParameters());
     }
 
 }

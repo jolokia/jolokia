@@ -70,7 +70,7 @@ public class HttpRequestHandler {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JolokiaRequest jmxReq =
-                JmxRequestFactory.createGetRequest(pathInfo, getProcessingParameter(pParameterMap));
+                JolokiaRequestFactory.createGetRequest(pathInfo, getProcessingParameter(pParameterMap));
 
         if (jolokiaCtx.isDebug()) {
             jolokiaCtx.debug("URI: " + pUri);
@@ -119,7 +119,7 @@ public class HttpRequestHandler {
 
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof JSONArray) {
-            List<JolokiaRequest> jolokiaRequests = JmxRequestFactory.createPostRequests((List) jsonRequest,getProcessingParameter(pParameterMap));
+            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List) jsonRequest, getProcessingParameter(pParameterMap));
 
             JSONArray responseList = new JSONArray();
             for (JolokiaRequest jmxReq : jolokiaRequests) {
@@ -132,7 +132,7 @@ public class HttpRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof JSONObject) {
-            JolokiaRequest jmxReq = JmxRequestFactory.createPostRequest((Map<String, ?>) jsonRequest,getProcessingParameter(pParameterMap));
+            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest((Map<String, ?>) jsonRequest, getProcessingParameter(pParameterMap));
             return executeRequest(jmxReq);
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);
