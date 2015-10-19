@@ -64,7 +64,13 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-pullnotif</artifactId>
+      <artifactId>jolokia-service-notif-pull</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-sse</artifactId>
       <version>${project.version}</version>
     </dependency>
 

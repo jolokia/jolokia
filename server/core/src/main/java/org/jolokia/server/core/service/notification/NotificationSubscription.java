@@ -29,7 +29,7 @@ public interface NotificationSubscription {
      *
      * @return client id
      */
-    String getClient();
+    Client getClient();
 
     /**
      * Get the handle of the registration. Required for retreiving

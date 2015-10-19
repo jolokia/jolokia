@@ -37,7 +37,8 @@
     <module>agent/jvm</module>
 
     <module>service/jmx</module>
-    <module>service/pullnotif</module>
+    <module>service/notif/pull</module>
+    <module>service/notif/sse</module>
     <module>service/serializer</module>
     <module>service/discovery</module>
     <module>service/jsr160</module>

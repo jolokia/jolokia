@@ -3,6 +3,7 @@ package org.jolokia.server.core.service.notification;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jolokia.server.core.http.BackChannel;
 import org.json.simple.JSONObject;
 
 /**
@@ -16,7 +17,10 @@ import org.json.simple.JSONObject;
 public class Client {
 
     // Client ID
-    private String id;
+    private final String id;
+
+    // Back channel which can be used an backend to transport notifications
+    private Map<String,BackChannel> backChannelMap;
 
     // Map of all registrations for a client
     private Map<String, ListenerRegistration> listenerConfigMap;
@@ -32,6 +36,8 @@ public class Client {
 
     /**
      * Initialize
+     *
+     * @param pId unique id for this client
      */
     public Client(String pId) {
         id = pId;
@@ -133,6 +139,28 @@ public class Client {
     }
 
     /**
+     * Return the HTTP back channel or <code>null</code> if none is set.
+     *
+     * @param pMode for which backend a channel is required
+     * @return back channel
+     */
+    public BackChannel getBackChannel(String pMode) {
+        verifyBackend(pMode);
+        return backChannelMap.get(pMode);
+    }
+
+    /**
+     * Set a back channel from the outside
+     *
+     * @param pMode backend mode
+     * @param pChannel back channel to use
+     */
+    public void setBackChannel(String pMode,BackChannel pChannel) {
+        verifyBackend(pMode);
+        backChannelMap.put(pMode,pChannel);
+    }
+
+    /**
      * Add a backend which is used by this client
      * @param pType backend type
      */
@@ -142,10 +170,15 @@ public class Client {
 
     /**
      * Get all used backend types
-     * @return used backedn types
+     * @return used backend types
      */
     Set<String> getUsedBackendModes() {
         return usedBackends;
     }
 
+    private void verifyBackend(String pMode) {
+        if (!usedBackends.contains(pMode)) {
+            throw new IllegalArgumentException("No backend of type '" + pMode + "' known. Registered backends: " + usedBackends);
+        }
+    }
 }

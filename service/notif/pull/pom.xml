@@ -16,19 +16,20 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>jolokia-agent-war</artifactId>
+  <artifactId>jolokia-service-notif-pull</artifactId>
   <version>2.0.0-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <packaging>bundle</packaging>
 
-  <description>Jolokia :: Agent :: WAR</description>
+  <description>Jolokia :: Service :: Notification :: Pull</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
 
   <dependencies>
@@ -40,50 +41,16 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-server-detector</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-jmx</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-serializer</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-notif-pull</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-notif-sse</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-discovery</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-history</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-jsr160</artifactId>
+      <artifactId>jolokia-server-core</artifactId>
+      <scope>test</scope>
+      <classifier>tests</classifier>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
@@ -91,21 +58,23 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>7.3.0.v20110203</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+
         <configuration>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
-          <webAppConfig>
-            <contextPath>/jolokia</contextPath>
-          </webAppConfig>
-          <stopPort>9999</stopPort>
-          <stopKey>foo</stopKey>
+          <instructions>
+           <Bundle-Activator>org.jolokia.service.notif.pull.osgi.PullNotificationServiceActivator</Bundle-Activator>
+            <Bundle-SymbolicName>org.jolokia.service.pullnotif</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia pull notification</Bundle-Description>
+            <Export-Package/>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>
   </build>
-  
+
+
   <reporting>
     <plugins>
       <plugin>
@@ -119,7 +88,6 @@
           </reportSet>
         </reportSets>
       </plugin>
-
     </plugins>
   </reporting>
 

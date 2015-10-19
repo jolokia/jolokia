@@ -17,10 +17,14 @@
 package org.jolokia.service.jmx.handler.notification;
 
 import java.io.IOException;
+import java.nio.channels.Channel;
 import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.server.core.http.BackChannel;
+import org.jolokia.server.core.http.BackChannelHolder;
+import org.jolokia.server.core.request.notification.OpenCommand;
 import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.request.notification.AddCommand;
@@ -132,7 +136,7 @@ class NotificationListenerDelegate implements NotificationListener {
         // listener
         synchronized (client) {
             String handle = client.getNextHandle();
-            NotificationSubscription notificationSubscription = new NotificationSubscriptionImpl(handle,pCommand,this);
+            NotificationSubscription notificationSubscription = new NotificationSubscriptionImpl(handle,pCommand,client,this);
             BackendCallback callback = backend.subscribe(notificationSubscription);
             final ListenerRegistration listenerRegistration = new ListenerRegistration(pCommand,callback);
             client.addUsedBackend(pCommand.getMode());
@@ -217,6 +221,29 @@ class NotificationListenerDelegate implements NotificationListener {
             if (client.getValue().getLastRefresh() < pOldest) {
                 unregister(pExecutor,client.getKey());
             }
+        }
+    }
+
+    /**
+     * Open a new back channel and attach it to a client.
+     * An already active back channel for this client is closed before.
+     *
+     * The back channel is obtained
+     * @param pCommand command used for opening this channel
+     */
+    void openChannel(OpenCommand pCommand) throws IOException {
+        String clientId = pCommand.getClient();
+        Client client = getClient(clientId);
+        String mode = pCommand.getMode();
+        synchronized (client) {
+            BackChannel channel = client.getBackChannel(mode);
+            if (channel != null) {
+                channel.close();
+            }
+            NotificationBackend backend = backendManager.getBackend(pCommand.getMode());
+            channel = BackChannelHolder.getChannel();
+            channel.open(backend.getConfig());
+            client.setBackChannel(mode,channel);
         }
     }
 

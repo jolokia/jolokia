@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.management.ObjectName;
 
+import org.jolokia.server.core.service.notification.Client;
 import org.jolokia.server.core.service.notification.NotificationSubscription;
 import org.jolokia.server.core.request.notification.AddCommand;
 
@@ -32,7 +33,7 @@ class NotificationSubscriptionImpl implements NotificationSubscription {
     private NotificationListenerDelegate delegate;
 
     // Client id
-    private String client;
+    private Client client;
 
     // Registration handle
     private String handle;
@@ -44,23 +45,23 @@ class NotificationSubscriptionImpl implements NotificationSubscription {
      * @param pCommand original command used for registration
      * @param pListenerDelegate delegate for updating freshness
      */
-    NotificationSubscriptionImpl(String pHandle, AddCommand pCommand, NotificationListenerDelegate pListenerDelegate) {
+    NotificationSubscriptionImpl(String pHandle, AddCommand pCommand, Client pClient, NotificationListenerDelegate pListenerDelegate) {
         mBean = pCommand.getObjectName();
         filter = pCommand.getFilter();
         handback = pCommand.getHandback();
         config = pCommand.getConfig();
         delegate = pListenerDelegate;
-        client = pCommand.getClient();
+        client = pClient;
         handle = pHandle;
     }
 
     /** {@inheritDoc} */
     public void ping() {
-        delegate.refresh(client);
+        delegate.refresh(client.getId());
     }
 
     /** {@inheritDoc} */
-    public String getClient() {
+    public Client getClient() {
         return client;
     }
 

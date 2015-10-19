@@ -42,7 +42,7 @@ public class NotificationDispatcher {
      * @throws IOException
      * @throws ReflectionException
      */
-    public Object dispatch(MBeanServerAccess pExecutor,NotificationCommand pCommand)
+    public Object dispatch(MBeanServerAccess pExecutor, NotificationCommand pCommand)
             throws MBeanException, IOException, ReflectionException {
 
         // Shortcut for client used later
@@ -62,6 +62,8 @@ public class NotificationDispatcher {
             case PING:
                 listenerDelegate.refresh(client);
                 return null;
+            case OPEN:
+                listenerDelegate.openChannel((OpenCommand) pCommand);
             case LIST:
                 return listenerDelegate.list(client);
         }

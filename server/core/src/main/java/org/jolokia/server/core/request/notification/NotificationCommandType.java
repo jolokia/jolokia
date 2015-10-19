@@ -48,6 +48,10 @@ public enum NotificationCommandType {
      */
     PING("ping"),
     /**
+     * Open a channel which can be used to transmit notifications
+     */
+    OPEN("open"),
+    /**
      * List all notifications for a client
      */
     LIST("list");

@@ -111,6 +111,11 @@ public final class NotificationCommandFactory {
                 return pStack != null ? new PingCommand(pStack) : new PingCommand(pMap);
             }
         });
+        CREATORS.put(NotificationCommandType.OPEN, new Creator() {
+            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
+                return pStack != null ? new OpenCommand(pStack) : new OpenCommand(pMap);
+            }
+        });
         CREATORS.put(NotificationCommandType.LIST,new Creator() {
             /** {@inheritDoc} */
             public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
