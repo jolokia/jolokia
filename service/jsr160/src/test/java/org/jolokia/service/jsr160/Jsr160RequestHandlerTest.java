@@ -70,7 +70,7 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         dispatcher.handleRequest(JolokiaRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()), null);
     }
 
@@ -87,20 +87,20 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test
-    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaReadRequest req =  preparePostReadRequest(null);
         Map result = (Map) dispatcher.handleRequest(req,null);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
     @Test
-    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
         assertNotNull(dispatcher.handleRequest(req,null));
     }
 
     @Test
-    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JolokiaRequest req = preparePostReadRequest("roland");

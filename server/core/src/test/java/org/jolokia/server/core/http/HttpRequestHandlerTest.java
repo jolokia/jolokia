@@ -23,8 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.*;
-import org.jolokia.server.core.request.JolokiaReadRequest;
-import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.service.api.LogHandler;
@@ -139,14 +138,14 @@ public class HttpRequestHandlerTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidJson() throws IOException {
+    public void invalidJson() throws IOException, EmptyResponseException {
         //replay(backend);
         InputStream is = HttpTestUtil.createServletInputStream("{ bla;");
         handler.handlePostRequest("/jolokia", is, "utf-8", null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidJson2() throws IOException {
+    public void invalidJson2() throws IOException, EmptyResponseException {
         //replay(backend);
         InputStream is = HttpTestUtil.createServletInputStream("12");
         handler.handlePostRequest("/jolokia", is, "utf-8", null);

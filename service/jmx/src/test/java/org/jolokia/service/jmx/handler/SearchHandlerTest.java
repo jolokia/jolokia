@@ -21,10 +21,8 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.JolokiaRequestBuilder;
-import org.jolokia.server.core.request.JolokiaSearchRequest;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
@@ -57,7 +55,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
+    public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
         handler.handleSingleServerRequest(null,
                                           new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build());
     }
@@ -68,7 +66,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         String names[] = { "java.lang:type=Memory", "java.lang:type=Runtime" };
         List<String> res = doSearch(handler, "java.lang:*", null, null, names);
         verifyResult(res, Collections.EMPTY_LIST, null, names);
@@ -77,13 +75,13 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
 
     @Test
-    public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void withEscaping() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         String[] attrs = { "java.lang:type=\"m:e*m\\\"?o\\\\y\\n\"" };
         checkAllHandlers("java.lang:*", null, attrs);
         verify(server);
     }
 
-    private void checkAllHandlers(String pSearch, Boolean pCanonical, String[] pNames) throws MalformedObjectNameException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, AttributeNotFoundException, MBeanException {
+    private void checkAllHandlers(String pSearch, Boolean pCanonical, String[] pNames) throws MalformedObjectNameException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, AttributeNotFoundException, MBeanException, EmptyResponseException {
         for (SearchHandler h : new SearchHandler[] { handler, handlerWithRealm }) {
             List<String> previousResults = new ArrayList<String>(Arrays.asList("jolokia:type=dummy", "bla:name=blub"));
             List<String> res = doSearch(h, pSearch, pCanonical, new ArrayList(previousResults), pNames);
@@ -102,7 +100,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         String namesIn[] = { "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run" };
         String namesOut[] = { "java.lang:name=bla,type=Memory", "java.lang:mode=run,type=Runtime" };
         List<String> res = doSearch(handler, "java.lang:*", Boolean.TRUE, null, namesIn);
@@ -111,13 +109,13 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         String names[] = { "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run" };
         checkAllHandlers("java.lang:*",Boolean.FALSE,names);
         verify(server);
     }
 
-    private List<String> doSearch(SearchHandler pHandler, String pPattern, Boolean pUseCanonicalName, List<String> previousResult, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
+    private List<String> doSearch(SearchHandler pHandler, String pPattern, Boolean pUseCanonicalName, List<String> previousResult, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException, EmptyResponseException {
         ObjectName oName = new ObjectName(pPattern);
         JolokiaRequestBuilder builder = new JolokiaRequestBuilder(RequestType.SEARCH,oName);
         if (pUseCanonicalName != null) {

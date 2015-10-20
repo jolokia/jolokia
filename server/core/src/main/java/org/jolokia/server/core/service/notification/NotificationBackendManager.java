@@ -69,7 +69,8 @@ public class NotificationBackendManager {
                 return backend;
             }
         }
-        throw new IllegalArgumentException("No backend of type '" + pType + "' registered");
+        throw new IllegalArgumentException("No notification backend of type '" + pType + "' registered. Known backends: "
+                                           + context.getServices(NotificationBackend.class));
     }
 
     /**

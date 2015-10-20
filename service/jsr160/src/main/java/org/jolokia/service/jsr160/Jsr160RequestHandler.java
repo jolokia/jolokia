@@ -24,8 +24,7 @@ import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -75,7 +74,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @throws IOException
      */
     public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
 
         CommandHandler<R> handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
         JMXConnector connector = null;

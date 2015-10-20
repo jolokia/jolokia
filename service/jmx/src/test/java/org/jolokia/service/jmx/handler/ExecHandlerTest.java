@@ -22,9 +22,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.request.JolokiaExecRequest;
-import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
@@ -65,7 +63,7 @@ public class ExecHandlerTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException {
+    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("simple").
                 build();
@@ -75,7 +73,7 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void simpleWithWrongArguments() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException {
+    public void simpleWithWrongArguments() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("simple").
                 arguments("blub","bla").
@@ -84,13 +82,13 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void illegalRequest() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void illegalOperationName() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).operation("koan titel").build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
@@ -113,7 +111,7 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("overloaded").
                 build();
@@ -121,7 +119,7 @@ public class ExecHandlerTest {
     }
 
     @Test
-    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("overloaded(int)").
                 arguments(10).
@@ -145,7 +143,7 @@ public class ExecHandlerTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void overloadedWrongSignature() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void overloadedWrongSignature() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("overloaded(java.lang.Integer)").
                 arguments(1).

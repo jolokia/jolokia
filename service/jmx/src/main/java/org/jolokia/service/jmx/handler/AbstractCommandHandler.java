@@ -5,8 +5,7 @@ import java.io.IOException;
 import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.api.CommandHandler;
@@ -54,7 +53,8 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
 
     /** {@inheritDoc} */
     public Object handleSingleServerRequest(MBeanServerConnection pServer, R pRequest)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException,
+                   NotChangedException, EmptyResponseException {
         checkForRestriction(pRequest);
         checkHttpMethod(pRequest);
         return doHandleSingleServerRequest(pServer, pRequest);
@@ -62,7 +62,8 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
 
     /** {@inheritDoc} */
     public Object handleAllServerRequest(MBeanServerAccess pServerManager, R pRequest, Object pPreviousResult)
-            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
+            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException,
+                   NotChangedException, EmptyResponseException {
         checkForRestriction(pRequest);
         checkHttpMethod(pRequest);
         return doHandleAllServerRequest(pServerManager, pRequest, pPreviousResult);
@@ -116,7 +117,8 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
      * @throws IOException
      */
     protected abstract Object doHandleSingleServerRequest(MBeanServerConnection server, R request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException,
+                   IOException, NotChangedException, EmptyResponseException;
 
     /**
      * Default implementation fo handling a request for multiple servers at once. A subclass, which returns,
@@ -133,7 +135,8 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
      * @throws ReflectionException
      */
     protected Object doHandleAllServerRequest(MBeanServerAccess serverManager, R request, Object pPreviousResult)
-                throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+                throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException,
+                       NotChangedException, EmptyResponseException {
         return null;
     }
 

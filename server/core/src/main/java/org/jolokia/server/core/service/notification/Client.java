@@ -20,10 +20,10 @@ public class Client {
     private final String id;
 
     // Back channel which can be used an backend to transport notifications
-    private Map<String,BackChannel> backChannelMap;
+    final private Map<String,BackChannel> backChannelMap;
 
     // Map of all registrations for a client
-    private Map<String, ListenerRegistration> listenerConfigMap;
+    final private Map<String, ListenerRegistration> listenerConfigMap;
 
     // Epoch time in millis since last refresh
     private long lastRefresh;
@@ -42,6 +42,7 @@ public class Client {
     public Client(String pId) {
         id = pId;
         listenerConfigMap = new HashMap<String, ListenerRegistration>();
+        backChannelMap = new HashMap<String, BackChannel>();
         usedBackends = new HashSet<String>();
         lastRefresh = System.currentTimeMillis();
     }
@@ -145,7 +146,6 @@ public class Client {
      * @return back channel
      */
     public BackChannel getBackChannel(String pMode) {
-        verifyBackend(pMode);
         return backChannelMap.get(pMode);
     }
 
@@ -155,8 +155,7 @@ public class Client {
      * @param pMode backend mode
      * @param pChannel back channel to use
      */
-    public void setBackChannel(String pMode,BackChannel pChannel) {
-        verifyBackend(pMode);
+    public void setBackChannel(String pMode, BackChannel pChannel) {
         backChannelMap.put(pMode,pChannel);
     }
 
@@ -174,11 +173,5 @@ public class Client {
      */
     Set<String> getUsedBackendModes() {
         return usedBackends;
-    }
-
-    private void verifyBackend(String pMode) {
-        if (!usedBackends.contains(pMode)) {
-            throw new IllegalArgumentException("No backend of type '" + pMode + "' known. Registered backends: " + usedBackends);
-        }
     }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
+import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.notification.NotificationBackendManager;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -43,7 +44,7 @@ public class NotificationDispatcher {
      * @throws ReflectionException
      */
     public Object dispatch(MBeanServerAccess pExecutor, NotificationCommand pCommand)
-            throws MBeanException, IOException, ReflectionException {
+            throws MBeanException, IOException, ReflectionException, EmptyResponseException {
 
         // Shortcut for client used later
         String client = pCommand instanceof ClientCommand ? ((ClientCommand) pCommand).getClient() : null;

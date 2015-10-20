@@ -4,8 +4,7 @@ import java.io.IOException;
 
 import javax.management.*;
 
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -51,7 +50,8 @@ public interface CommandHandler<R extends JolokiaRequest> {
      * @throws java.io.IOException
      */
     Object handleSingleServerRequest(MBeanServerConnection pServer, R pRequest)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException;
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException,
+                   NotChangedException, EmptyResponseException;
 
     /**
      * Override this if you want to have all servers at once for processing the request
@@ -69,7 +69,8 @@ public interface CommandHandler<R extends JolokiaRequest> {
      * @throws ReflectionException
      */
     Object handleAllServerRequest(MBeanServerAccess pServerManager, R request, Object pPreviousResult)
-            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException;
+            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException,
+                   IOException, NotChangedException, EmptyResponseException;
 
     /**
      * Lifecycle method in order to initialize the handler

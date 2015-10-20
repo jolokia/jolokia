@@ -31,7 +31,7 @@ public class RequestDispatcherImplTest {
     }
 
     @Test
-    public void requestDispatcherNoHandlingHandler() throws JMException, IOException, NotChangedException {
+    public void requestDispatcherNoHandlingHandler() throws JMException, IOException, NotChangedException, EmptyResponseException {
 
         TestRequestHandler testHandler = new TestRequestHandler(false);
         try {
@@ -48,11 +48,11 @@ public class RequestDispatcherImplTest {
 
 
     @Test
-    public void withPathParts() throws NotChangedException, IOException, JMException {
+    public void withPathParts() throws NotChangedException, IOException, JMException, EmptyResponseException {
         callRequestHandler(request.getPathParts());
     }
 
-    private void callRequestHandler(List<String> pathParts) throws JMException, IOException, NotChangedException {
+    private void callRequestHandler(List<String> pathParts) throws JMException, IOException, NotChangedException, EmptyResponseException {
         TestRequestHandler h1 = new TestRequestHandler(false);
         TestRequestHandler h2 = new TestRequestHandler(true);
         TestRequestHandler h3 = new TestRequestHandler(true);

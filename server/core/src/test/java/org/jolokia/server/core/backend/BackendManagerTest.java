@@ -24,8 +24,7 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.server.core.config.*;
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.LogHandler;
@@ -59,7 +58,7 @@ public class BackendManagerTest {
     }
 
     @Test
-    public void simpleRead() throws JMException, IOException {
+    public void simpleRead() throws JMException, IOException, EmptyResponseException {
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -84,7 +83,7 @@ public class BackendManagerTest {
     }
 
     @Test
-    public void lazyInit() throws JMException, IOException {
+    public void lazyInit() throws JMException, IOException, EmptyResponseException {
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();

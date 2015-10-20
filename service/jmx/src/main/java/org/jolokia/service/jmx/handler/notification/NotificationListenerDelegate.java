@@ -17,13 +17,13 @@
 package org.jolokia.service.jmx.handler.notification;
 
 import java.io.IOException;
-import java.nio.channels.Channel;
 import java.util.*;
 
 import javax.management.*;
 
 import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.http.BackChannelHolder;
+import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.notification.OpenCommand;
 import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -231,7 +231,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * The back channel is obtained
      * @param pCommand command used for opening this channel
      */
-    void openChannel(OpenCommand pCommand) throws IOException {
+    void openChannel(OpenCommand pCommand) throws IOException, EmptyResponseException {
         String clientId = pCommand.getClient();
         Client client = getClient(clientId);
         String mode = pCommand.getMode();
@@ -240,12 +240,14 @@ class NotificationListenerDelegate implements NotificationListener {
             if (channel != null) {
                 channel.close();
             }
-            NotificationBackend backend = backendManager.getBackend(pCommand.getMode());
-            channel = BackChannelHolder.getChannel();
+            NotificationBackend backend = backendManager.getBackend(mode);
+            channel = BackChannelHolder.get();
             channel.open(backend.getConfig());
             client.setBackChannel(mode,channel);
         }
+        throw new EmptyResponseException();
     }
+
 
     /**
      * List all listener registered by a client along with its configuration parameters

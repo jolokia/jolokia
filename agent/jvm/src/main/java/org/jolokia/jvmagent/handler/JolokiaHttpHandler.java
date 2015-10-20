@@ -37,6 +37,7 @@ import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.http.HttpRequestHandler;
+import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.service.discovery.DiscoveryMulticastResponder;
@@ -178,11 +179,11 @@ public class JolokiaHttpHandler implements HttpHandler {
         return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
     }
 
-    private JSONAware executeGetRequest(ParsedUri parsedUri) {
+    private JSONAware executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
 
-    private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException {
+    private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException, EmptyResponseException {
         String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
         String cType =  headers.getFirst("Content-Type");

@@ -68,7 +68,7 @@ public class LocalRequestHandler extends AbstractRequestHandler {
 
     /** {@inheritDoc} */
     public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException, EmptyResponseException {
 
         CommandHandler<R> handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
 
@@ -96,7 +96,8 @@ public class LocalRequestHandler extends AbstractRequestHandler {
 
     // Handle a single request
     private <R extends JolokiaRequest> Object handleRequest(CommandHandler<R> pRequestHandler, R pJmxReq)
-            throws MBeanException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException, NotChangedException {
+            throws MBeanException, ReflectionException, AttributeNotFoundException,
+                   InstanceNotFoundException, NotChangedException, EmptyResponseException {
         AttributeNotFoundException attrException = null;
         InstanceNotFoundException objNotFoundException = null;
 

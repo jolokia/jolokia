@@ -4,8 +4,7 @@ import java.io.IOException;
 
 import javax.management.JMException;
 
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.request.RequestHandler;
 
 /**
@@ -26,8 +25,9 @@ public interface RequestDispatcher {
      *
      * @throws NotChangedException the request handler detects no change for the requests' result and
      *                             hence returns without result.
+     * @throws EmptyResponseException when no response should be created
      * @throws IOException IO Exception during the operation.
      * @throws JMException a JMX operation failed.
      */
-    Object dispatch(JolokiaRequest pJolokiaRequest) throws JMException, NotChangedException, IOException;
+    Object dispatch(JolokiaRequest pJolokiaRequest) throws JMException, NotChangedException, EmptyResponseException, IOException;
 }

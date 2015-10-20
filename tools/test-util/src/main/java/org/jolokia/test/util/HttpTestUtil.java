@@ -82,7 +82,7 @@ public class HttpTestUtil {
         }
 
         final Vector paramNames = new Vector(configParams.keySet());
-        EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
+        EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
             public Enumeration answer() throws Throwable {
                 return paramNames.elements();
             }
@@ -106,7 +106,7 @@ public class HttpTestUtil {
             }
         }
         final Vector paramNames = new Vector(configParams.keySet());
-        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
+        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
             public Enumeration answer() throws Throwable {
                 return paramNames.elements();
             }

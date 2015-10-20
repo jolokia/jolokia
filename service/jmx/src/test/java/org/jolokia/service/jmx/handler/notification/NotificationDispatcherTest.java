@@ -8,6 +8,7 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.notification.*;
@@ -67,7 +68,7 @@ public class NotificationDispatcherTest {
         assertNotNull(ret);
     }
 
-    private String registerClient() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, MBeanException, IOException, ReflectionException {
+    private String registerClient() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, MBeanException, IOException, ReflectionException, EmptyResponseException {
         RegisterCommand cmd = createCommand(RegisterCommand.class);
         JSONObject config = dispatch(cmd);
         return (String) config.get("id");
@@ -147,7 +148,7 @@ public class NotificationDispatcherTest {
         return (T) field.get(pObject);
     }
 
-    private <T> T dispatch(NotificationCommand cmd) throws MBeanException, IOException, ReflectionException {
+    private <T> T dispatch(NotificationCommand cmd) throws MBeanException, IOException, ReflectionException, EmptyResponseException {
         return (T) dispatcher.dispatch(executor,cmd);
     }
     private <T extends NotificationCommand> T createCommand(Class<T> pClass, Object ... keyValues) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

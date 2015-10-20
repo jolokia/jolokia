@@ -13,6 +13,7 @@ import javax.servlet.http.*;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.restrictor.PolicyRestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
@@ -304,35 +305,65 @@ public class AgentServlet extends HttpServlet {
             // Remember the agent URL upon the first request. Needed for discovery
             updateAgentDetailsIfNeeded(pReq);
 
+            // Set back channel
+            prepareBackChannel(pReq);
+
             // Dispatch for the proper HTTP request method
             json = handleSecurely(pReqHandler, pReq, pResp);
+        } catch (EmptyResponseException exp) {
+            // Nothing needs to be done
+            return;
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
         } finally {
+            releaseBackChannel();
             setCorsHeader(pReq, pResp);
+        }
+        sendAnswer(pReq, pResp, json);
+    }
 
-            String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
-            String answer = json != null ?
-                    json.toJSONString() :
-                    requestHandler.handleThrowable(new Exception("Internal error while handling an exception")).toJSONString();
-            if (callback != null) {
-                // Send a JSONP response
-                sendResponse(pResp, "text/javascript", callback + "(" + answer + ");");
-            } else {
-                sendResponse(pResp, getMimeType(pReq),answer);
-            }
+    private void sendAnswer(HttpServletRequest pReq, HttpServletResponse pResp, JSONAware json) throws IOException {
+        String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        String answer = json != null ?
+                json.toJSONString() :
+                requestHandler.handleThrowable(new Exception("Internal error while handling an exception")).toJSONString();
+        if (callback != null) {
+            // Send a JSONP response
+            sendResponse(pResp, "text/javascript", callback + "(" + answer + ");");
+        } else {
+            sendResponse(pResp, getMimeType(pReq), answer);
         }
     }
 
-    private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp) throws IOException, PrivilegedActionException {
+    private void releaseBackChannel() {
+        BackChannelHolder.remove();
+    }
+
+
+    private void prepareBackChannel(HttpServletRequest pReq) {
+        BackChannelHolder.set(new ServletBackChannel(pReq));
+    }
+
+    private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
+            throws IOException, PrivilegedActionException, EmptyResponseException {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
         if (subject != null) {
-            return Subject.doAs(subject, new PrivilegedExceptionAction<JSONAware>() {
-                    public JSONAware run() throws IOException {
+            try {
+                return Subject.doAs(subject, new PrivilegedExceptionAction<JSONAware>() {
+                    public JSONAware run() throws IOException, EmptyResponseException {
                         return pReqHandler.handleRequest(pReq, pResp);
                     }
-            });
+                });
+            } catch (PrivilegedActionException exp) {
+                // Unwrap an empty response exception
+                Throwable innerExp = exp.getCause();
+                if (innerExp instanceof EmptyResponseException) {
+                    throw (EmptyResponseException) innerExp;
+                } else {
+                    throw exp;
+                }
+            }
         } else {
             return pReqHandler.handleRequest(pReq, pResp);
         }
@@ -441,7 +472,7 @@ public class AgentServlet extends HttpServlet {
          * @throws IOException if handling of an input or output stream failed
          */
         JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                throws IOException;
+                throws IOException, EmptyResponseException;
     }
 
     // factory method for POST request handler
@@ -449,7 +480,7 @@ public class AgentServlet extends HttpServlet {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
              public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                    throws IOException {
+                     throws IOException, EmptyResponseException {
                  String encoding = pReq.getCharacterEncoding();
                  InputStream is = pReq.getInputStream();
                  return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, getParameterMap(pReq));
@@ -461,7 +492,7 @@ public class AgentServlet extends HttpServlet {
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
-            public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) {
+            public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) throws EmptyResponseException {
                 return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
             }
         };

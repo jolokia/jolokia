@@ -20,10 +20,9 @@ import java.io.IOException;
 
 import javax.management.*;
 
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
-import org.jolokia.server.core.request.JolokiaNotificationRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 
@@ -65,13 +64,16 @@ public class NotificationHandler extends AbstractCommandHandler<JolokiaNotificat
 
     @Override
     /** {@inheritDoc} */
-    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException,
+                                                                                                                          NotChangedException {
         throw new UnsupportedOperationException("Internal: Notification handler works an all MBeanServers, not on single one");
     }
 
     @Override
     /** {@inheritDoc} */
-    public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaNotificationRequest request, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaNotificationRequest request, Object pPreviousResult)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException,
+                   MBeanException, IOException, NotChangedException, EmptyResponseException {
         return dispatcher.dispatch(serverManager,request.getCommand());
     }
 

@@ -4,8 +4,7 @@ import java.io.IOException;
 
 import javax.management.JMException;
 
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaService;
 
 /*
@@ -64,9 +63,10 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      * @throws IOException if handling fails
      * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
      *         has been set).
+     * @throws EmptyResponseException when no response should be created
      */
     <R extends JolokiaRequest>  Object handleRequest(R pJmxReq, Object pPreviousResult)
-            throws JMException, IOException, NotChangedException;
+            throws JMException, IOException, NotChangedException, EmptyResponseException;
 
     /**
      * Check whether current dispatcher can handle the given request

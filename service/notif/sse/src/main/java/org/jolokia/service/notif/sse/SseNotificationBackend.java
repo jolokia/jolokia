@@ -54,26 +54,30 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
 
     /** {@inheritDoc} */
     public BackendCallback subscribe(final NotificationSubscription pSubscription) {
-        Client client = pSubscription.getClient();
-        final BackChannel backChannel = client.getBackChannel(getNotifType());
+        final Client client = pSubscription.getClient();
         return new BackendCallback() {
 
             /** {@inheritDoc} */
             public void handleNotification(Notification notification, Object handback) {
+                BackChannel backChannel = client.getBackChannel(getNotifType());
                 if (backChannel != null) {
                     try {
                         JolokiaContext ctx = getJolokiaContext();
                         Serializer serializer = ctx.getMandatoryService(Serializer.class);
                         PrintWriter writer = backChannel.getWriter();
                         SseNotificationResult result = new SseNotificationResult(notification,handback);
-                        // TODO: Should options be specified somehow ?
-                        writer.print(serializer.serialize(result, null /* no path */, SerializeOptions.DEFAULT));
+                        writer.println("id:" + notification.getSequenceNumber());
+                        writer.println("data:" + serializer.serialize(result, null /* no path */, SerializeOptions.DEFAULT));
+                        writer.println();
+                        writer.flush();
                     } catch (IOException e) {
-                        // Hmm, what to do here ? Ignore it ? Collect it in an MBean ?
+                        // TODO: Collect in a buffer, ordered by sequence number
                     } catch (AttributeNotFoundException e) {
                         // No path, no exception
                     }
                 }
+                // TODO: Collect exception in client specific buffer and send it when a reconnect happened
+                // Also: Think about thread for periodically pinging with a comment in order to keep connection open
             }
         };
     }
@@ -91,8 +95,8 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
     /** {@inheritDoc} */
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
-        ret.put("backChannel.contentType","text/event-stream");
-        ret.put("backChannel.encoding","UTF-8");
+        ret.put(BackChannel.CONTENT_TYPE, "text/event-stream");
+        ret.put(BackChannel.ENCODING, "UTF-8");
         return ret;
     }
 }

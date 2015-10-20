@@ -31,7 +31,7 @@ public class BackChannelHolder {
      *
      * @return the back channel acquired
      */
-    public static BackChannel getChannel() {
+    public static BackChannel get() {
         synchronized (backChannelThreadLocal) {
             return backChannelThreadLocal.get();
         }
@@ -40,13 +40,16 @@ public class BackChannelHolder {
     /**
      * Set the back channel for this request.
      */
-    public static void setBackChannel(BackChannel pBackChannel) {
+    public static void set(BackChannel pBackChannel) {
         synchronized (backChannelThreadLocal) {
             backChannelThreadLocal.set(pBackChannel);
         }
     }
 
-    public static void releaseBackChannel() {
+    /**
+     * Cleanup
+     */
+    public static void remove() {
         synchronized (backChannelThreadLocal) {
             backChannelThreadLocal.remove();
         }

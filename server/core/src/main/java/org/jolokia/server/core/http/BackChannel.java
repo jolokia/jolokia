@@ -27,6 +27,15 @@ import java.util.Map;
  */
 public interface BackChannel {
 
+    /**
+     * Parameter specifying the content type of the backchannel
+     */
+    String CONTENT_TYPE = "backChannel.contentType";
+
+    /**
+     * Parameter speficying the encoding
+     */
+    String ENCODING = "backChannel.encoding";
 
     /**
      * Open the channel. Note, that a channel which has been already closed cannot be

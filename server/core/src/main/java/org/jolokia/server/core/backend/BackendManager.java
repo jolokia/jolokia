@@ -7,8 +7,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.JMException;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.service.serializer.Serializer;
@@ -83,7 +82,7 @@ public class BackendManager {
      * @throws JMException
      * @throws IOException
      */
-    public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException {
+    public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, EmptyResponseException {
         boolean debug = jolokiaCtx.isDebug();
 
         long time = 0;
@@ -102,7 +101,6 @@ public class BackendManager {
             json.put("status",304);
             json.put("timestamp",System.currentTimeMillis() / 1000);
         }
-
         // Call request logger
         intercept(pJmxReq, json);
 
@@ -175,7 +173,7 @@ public class BackendManager {
 
     // call the an appropriate request dispatcher
     private JSONObject callRequestDispatcher(JolokiaRequest pJmxReq)
-            throws JMException, IOException, NotChangedException {
+            throws JMException, IOException, NotChangedException, EmptyResponseException {
         Object result = requestDispatcher.dispatch(pJmxReq);
 
         SerializeOptions opts = getSerializeOptions(pJmxReq);

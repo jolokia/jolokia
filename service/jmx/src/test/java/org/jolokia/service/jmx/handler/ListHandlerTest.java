@@ -23,12 +23,10 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.EasyMock;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.request.JolokiaListRequest;
-import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
@@ -283,7 +281,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         execute(handler, request);
     }
 
-    private Map execute(ListHandler pHandler, JolokiaListRequest pRequest, Map ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException {
+    private Map execute(ListHandler pHandler, JolokiaListRequest pRequest, Map ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException, EmptyResponseException {
         return (Map) pHandler.handleAllServerRequest(executor, pRequest,
                                                      pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
     }
@@ -305,7 +303,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     @Test
-    public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException {
+    public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException, EmptyResponseException {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", "attr")
                 .build();
@@ -321,7 +319,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
-    public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException {
+    public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException, EmptyResponseException {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("bullerbue", "country=sweden")
                 .build();

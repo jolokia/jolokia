@@ -5,8 +5,7 @@ import java.util.Set;
 
 import javax.management.JMException;
 
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestHandler;
 
@@ -33,7 +32,7 @@ class RequestDispatcherImpl implements RequestDispatcher {
 
     /** {@inheritDoc} */
     public Object dispatch(JolokiaRequest pJolokiaRequest)
-            throws JMException, IOException, NotChangedException {
+            throws JMException, IOException, NotChangedException, EmptyResponseException {
 
         // Request handlers are looked up each time to cope with the dynamics e.g. in OSGi envs.
         boolean found = false;

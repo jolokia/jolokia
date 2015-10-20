@@ -61,7 +61,7 @@ public class LocalRequestHandlerTest {
 
 
     @Test
-    public void dispatchRequest() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException {
+    public void dispatchRequest() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
@@ -72,22 +72,22 @@ public class LocalRequestHandlerTest {
 
 
     @Test(expectedExceptions = InstanceNotFoundException.class)
-    public void dispatchRequestInstanceNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException {
+    public void dispatchRequestInstanceNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         dispatchWithException(new InstanceNotFoundException());
     }
 
 
     @Test(expectedExceptions = AttributeNotFoundException.class)
-    public void dispatchRequestAttributeNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException {
+    public void dispatchRequestAttributeNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         dispatchWithException(new AttributeNotFoundException());
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
-    public void dispatchRequestIOException() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException {
+    public void dispatchRequestIOException() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         dispatchWithException(new IOException());
     }
 
-    private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+    private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
         expect(commandHandler.handleSingleServerRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(commandHandler);
@@ -95,7 +95,7 @@ public class LocalRequestHandlerTest {
     }
 
     @Test
-    public void dispatchAtOnce() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void dispatchAtOnce() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
@@ -105,7 +105,7 @@ public class LocalRequestHandlerTest {
     }
 
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
-    public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+    public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);
         expect(commandHandler.handleAllServerRequest(isA(MBeanServerAccess.class), eq(request), isNull())).andThrow(new IOException());
         replay(commandHandler);

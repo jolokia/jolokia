@@ -66,7 +66,7 @@ public class HttpRequestHandler {
      * @param pPathInfo path of the request
      * @param pParameterMap parameters of the GET request  @return the response
      */
-    public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) {
+    public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) throws EmptyResponseException {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JolokiaRequest jmxReq =
@@ -112,7 +112,7 @@ public class HttpRequestHandler {
      * @throws IOException if reading from the input stream fails
      */
     public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
-            throws IOException {
+            throws IOException, EmptyResponseException {
         if (jolokiaCtx.isDebug()) {
             jolokiaCtx.debug("URI: " + pUri);
         }
@@ -190,7 +190,7 @@ public class HttpRequestHandler {
      * @param pJmxReq the request to execute
      * @return the JSON representation of the answer.
      */
-    private JSONObject executeRequest(JolokiaRequest pJmxReq) {
+    private JSONObject executeRequest(JolokiaRequest pJmxReq) throws EmptyResponseException {
         // Call handler and retrieve return value
         try {
             return backendManager.handleRequest(pJmxReq);
