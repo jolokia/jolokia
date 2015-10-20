@@ -73,7 +73,7 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
                     } catch (IOException e) {
                         // TODO: Collect in a buffer, ordered by sequence number
                     } catch (AttributeNotFoundException e) {
-                        // No path, no exception
+                        // No path, no exception, so cant happen (TM)
                     }
                 }
                 // TODO: Collect exception in client specific buffer and send it when a reconnect happened
