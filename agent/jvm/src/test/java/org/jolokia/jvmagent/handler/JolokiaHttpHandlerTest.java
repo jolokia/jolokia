@@ -162,6 +162,93 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
+    public void customTestRestrictorTrue() throws URISyntaxException, IOException, ParseException {
+
+        Configuration config = getConfig(ConfigKey.RESTRICTOR_CLASS, "org.jolokia.restrictor.TestRestrictorTrue");
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        newHandler.start(false);
+        try {
+            newHandler.doHandle(exchange);
+        } finally {
+            newHandler.stop();
+        }
+        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        assertFalse(resp.containsKey("error"));
+
+    }
+
+    @Test
+    public void customTestRestrictorFalse() throws URISyntaxException, IOException, ParseException {
+        Configuration config = getConfig(ConfigKey.RESTRICTOR_CLASS, "org.jolokia.restrictor.TestRestrictorFalse");
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        newHandler.start(false);
+        try {
+            newHandler.doHandle(exchange);
+        } finally {
+            newHandler.stop();
+        }
+        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        assertTrue(resp.containsKey("error"));
+        assertTrue(((String) resp.get("error")).contains("No access"));
+    }
+
+    @Test
+    public void customTestRestrictorWithConfigTrue() throws URISyntaxException, IOException, ParseException {
+        Configuration config = getConfig(
+                ConfigKey.RESTRICTOR_CLASS, "org.jolokia.restrictor.TestRestrictorWithConfig",
+                ConfigKey.POLICY_LOCATION, "true"
+        );
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        newHandler.start(false);
+        try {
+            newHandler.doHandle(exchange);
+        } finally {
+            newHandler.stop();
+        }
+        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        assertFalse(resp.containsKey("error"));
+    }
+
+    @Test
+    public void customTestRestrictorWithConfigFalse() throws URISyntaxException, IOException, ParseException {
+        Configuration config = getConfig(
+                ConfigKey.RESTRICTOR_CLASS, "org.jolokia.restrictor.TestRestrictorWithConfig",
+                ConfigKey.POLICY_LOCATION, "false"
+        );
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        newHandler.start(false);
+        try {
+            newHandler.doHandle(exchange);
+        } finally {
+            newHandler.stop();
+        }
+        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        assertTrue(resp.containsKey("error"));
+        assertTrue(((String) resp.get("error")).contains("No access"));
+    }
+
+
+    @Test
     public void customLogHandler1() throws Exception {
         JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(), new CustomLogHandler());
         handler.start(false);

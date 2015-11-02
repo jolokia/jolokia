@@ -435,6 +435,14 @@
       </xs:annotation>
     </xs:attribute>
 
+    <xs:attribute name="restrictorClass" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Classname of an custom restrictor which must be loadable from the classpath
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
     <xs:attribute name="policyLocation" type="xs:string">
       <xs:annotation>
         <xs:documentation>

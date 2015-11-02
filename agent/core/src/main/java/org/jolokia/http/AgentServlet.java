@@ -86,7 +86,7 @@ public class AgentServlet extends HttpServlet {
      * Constructor taking a restrictor to use
      *
      * @param pRestrictor restrictor to use or <code>null</code> if the restrictor
-     *        should be created in the default way ({@link #createRestrictor(String)})
+     *        should be created in the default way ({@link RestrictorFactory#createRestrictor(Configuration,LogHandler)})
      */
     public AgentServlet(Restrictor pRestrictor) {
         restrictor = pRestrictor;
@@ -102,36 +102,8 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
-     * Create a restrictor restrictor to use. By default, a policy file
-     * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
-     * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
-     * used by default. This method is called during the {@link #init(ServletConfig)} when initializing
-     * the subsystems and can be overridden for custom restrictor creation.
-     *
-     * @param pLocation location to lookup the restrictor
-     * @return the restrictor to use.
-     */
-    protected Restrictor createRestrictor(String pLocation) {
-        LogHandler log = getLogHandler();
-        try {
-            Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
-            if (newRestrictor != null) {
-                log.info("Using access restrictor " + pLocation);
-                return newRestrictor;
-            } else {
-                log.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
-                return new AllowAllRestrictor();
-            }
-        } catch (IOException e) {
-            log.error("Error while accessing access restrictor at " + pLocation +
-                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
-            return new DenyAllRestrictor();
-        }
-    }
-
-    /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig, boolean)}
+     * this step by overriding {@link RestrictorFactory#createRestrictor(Configuration,LogHandler)} and {@link #createLogHandler(ServletConfig, boolean)}
      *
      * @param pServletConfig servlet configuration
      */
@@ -152,7 +124,7 @@ public class AgentServlet extends HttpServlet {
         httpPostHandler = newPostHttpRequestHandler();
 
         if (restrictor == null) {
-            restrictor = createRestrictor(NetworkUtil.replaceExpression(config.get(ConfigKey.POLICY_LOCATION)));
+            restrictor = RestrictorFactory.createRestrictor(config,logHandler);
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
@@ -199,7 +171,7 @@ public class AgentServlet extends HttpServlet {
     }
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
-     * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
+     * to provide a custom log handler. This method is called before {@link RestrictorFactory#createRestrictor(Configuration,LogHandler)} so the log handler
      * can already be used when building up the restrictor.
      *
      * @return a default log handler

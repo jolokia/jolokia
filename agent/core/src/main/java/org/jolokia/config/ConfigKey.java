@@ -74,6 +74,11 @@ public enum ConfigKey {
     MAX_OBJECTS("maxObjects",true, true),
 
     /**
+     * Custom restrictor to be used instead of default one
+     */
+    RESTRICTOR_CLASS("restrictorClass", true, false),
+
+    /**
      * Init parameter for the location of the policy file. This should be an URL pointing to
      * the policy file. If this URL uses a scheme <code>classpath</code> then do a class lookup.
      *

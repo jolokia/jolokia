@@ -21,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.security.cert.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -103,7 +102,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        Restrictor restrictor = createRestrictor(configuration);
+        Restrictor restrictor = RestrictorFactory.createRestrictor(configuration,logHandler);
         backendManager = new BackendManager(configuration, logHandler, restrictor, pLazy);
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
         if (listenForDiscoveryMcRequests(configuration)) {
@@ -236,23 +235,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // ========================================================================
 
-    private Restrictor createRestrictor(Configuration pConfig) {
-        String location = NetworkUtil.replaceExpression(pConfig.get(ConfigKey.POLICY_LOCATION));
-        try {
-            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
-            if (ret != null) {
-                logHandler.info("Using access restrictor " + location);
-                return ret;
-            } else {
-                logHandler.info("No access restrictor found, access to all MBean is allowed");
-                return new AllowAllRestrictor();
-            }
-        } catch (IOException e) {
-            logHandler.error("Error while accessing access restrictor at " + location +
-                             ". Denying all access to MBeans for security reasons. Exception: " + e, e);
-            return new DenyAllRestrictor();
-        }
-    }
 
 
     // Used for checking origin or referer is an origin policy is enabled
