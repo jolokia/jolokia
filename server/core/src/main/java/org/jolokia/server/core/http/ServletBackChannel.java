@@ -15,45 +15,59 @@ package org.jolokia.server.core.http;/*
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Map;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A Backchannel using the async request API as specified in the Servlet 3.0 spec.
+ * A back channel using the async request API as specified in the Servlet 3.0 spec.
  * @author roland
  * @since 19/10/15
  */
 public class ServletBackChannel implements BackChannel {
 
-    private final HttpServletRequest request;
-
+    private HttpServletRequest request;
     private AsyncContext asyncContext;
+
+    private boolean closed = true;
 
     public ServletBackChannel(HttpServletRequest pReq) {
         request = pReq;
     }
 
-    public void open(Map<String, ?> pParams) throws IOException {
+    public synchronized void open(Map<String, ?> pParams) throws IOException {
+        if (request == null) {
+            throw new IllegalStateException("Channel has been already used and can't be reused. " +
+                                            "You need to create a new channel");
+        }
         asyncContext = request.startAsync();
         setResponseHeaders(pParams);
         asyncContext.setTimeout(3600 * 1000);
+        closed = false;
     }
 
-    public void close() {
-        try {
+    public synchronized void close() {
+        if (!closed) {
             asyncContext.complete();
-        } catch (IllegalArgumentException exp) {
-            exp.printStackTrace();
+            closed = true;
+            request = null;
         }
     }
 
-    public PrintWriter getWriter() throws IOException {
-        return asyncContext.getResponse().getWriter();
+    public synchronized boolean isClosed() {
+        return closed;
+    }
+
+    public OutputStream getOutputStream() throws IOException {
+        if (!closed) {
+            return asyncContext.getResponse().getOutputStream();
+        } else {
+            throw new IOException("Channel already closed");
+        }
     }
 
     // =====================================================
@@ -65,5 +79,12 @@ public class ServletBackChannel implements BackChannel {
         if (pParams.containsKey(BackChannel.ENCODING)) {
             asyncContext.getResponse().setCharacterEncoding((String) pParams.get(BackChannel.ENCODING));
         }
+        // Disable HTTP chunking
+        ServletResponse response = asyncContext.getResponse();
+        if (response instanceof HttpServletResponse) {
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            httpResponse.setHeader("Connection", "close");
+        }
+
     }
 }

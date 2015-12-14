@@ -25,6 +25,7 @@ import java.security.cert.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +37,7 @@ import com.sun.net.httpserver.*;
 import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.http.BackChannelHolder;
 import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -63,6 +65,8 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Global context
     private JolokiaContext jolokiaContext;
 
+    // Backchannel Thread Pool (TODO: Optimize that for backchannel handling)
+    private Executor backChannelThreadPool = Executors.newCachedThreadPool();
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -138,9 +142,13 @@ public class JolokiaHttpHandler implements HttpHandler {
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
         try {
+            // Set back channel
+            prepareBackChannel(pExchange);
+
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
-            requestHandler.checkAccess(address.getHostName(), address.getAddress().getHostAddress(),
+            requestHandler.checkAccess(address.getHostName(),
+                                       address.getAddress().getHostAddress(),
                                        extractOriginOrReferer(pExchange));
             String method = pExchange.getRequestMethod();
 
@@ -159,13 +167,26 @@ public class JolokiaHttpHandler implements HttpHandler {
             if (jolokiaContext.isDebug()) {
                 jolokiaContext.info("Response: " + json);
             }
+        } catch (EmptyResponseException exp) {
+            // No response needed, will answer later ..
+            return;
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
         } finally {
-            sendResponse(pExchange, parsedUri, json);
+            releaseBackChannel();
         }
+        sendResponse(pExchange, parsedUri, json);
     }
+
+    private void prepareBackChannel(HttpExchange pExchange) {
+        BackChannelHolder.set(new HttpExchangeBackChannel(pExchange,backChannelThreadPool));
+    }
+
+    private void releaseBackChannel() {
+        BackChannelHolder.remove();
+    }
+
 
     // ========================================================================
 

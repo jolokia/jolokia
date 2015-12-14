@@ -2,6 +2,7 @@ package org.jolokia.server.core.service.notification;
 
 import java.util.Map;
 
+import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
@@ -33,6 +34,15 @@ public interface NotificationBackend extends JolokiaService<NotificationBackend>
     BackendCallback subscribe(NotificationSubscription pSubscription);
 
     /**
+     * Callback method called when a channel has been created and opened. This can be used to start
+     * channel specific code like starting a heartbeat for SSE event.
+     *
+     * @param client
+     * @param channel created channel
+     */
+    void channelInit(Client client, BackChannel channel);
+
+    /**
      * Unsubscribe for the given notification. Time to clean up
      *
      * @param pClientId client id
@@ -43,9 +53,9 @@ public interface NotificationBackend extends JolokiaService<NotificationBackend>
     /**
      * Unregister a client
      *
-     * @param pClientId client id
+     * @param pClient client id
      */
-    void unregister(String pClientId);
+    void unregister(Client pClient);
 
     /**
      * Return the global configuration specific for this backend. This can contain URL and

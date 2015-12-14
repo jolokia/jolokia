@@ -22,6 +22,7 @@ import javax.management.Notification;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.notification.BackendCallback;
+import org.jolokia.server.core.service.notification.Client;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.annotations.*;
 
@@ -93,6 +94,6 @@ public class SseNotificationBackendTest {
         Notification notification = new Notification("test.test", this, 1);
         callback.handleNotification(notification,handback);
 
-        backend.unregister(client);
+        backend.unregister(new Client(client));
     }
 }

@@ -243,7 +243,8 @@ class NotificationListenerDelegate implements NotificationListener {
             NotificationBackend backend = backendManager.getBackend(mode);
             channel = BackChannelHolder.get();
             channel.open(backend.getConfig());
-            client.setBackChannel(mode,channel);
+            backend.channelInit(client, channel);
+            client.setBackChannel(mode, channel);
         }
         throw new EmptyResponseException();
     }

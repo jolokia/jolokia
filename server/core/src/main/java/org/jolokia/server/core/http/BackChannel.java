@@ -15,8 +15,7 @@ package org.jolokia.server.core.http;/*
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Map;
 
 /**
@@ -59,10 +58,15 @@ public interface BackChannel {
     void close();
 
     /**
+     * Check whether the backchanel is closed
+     */
+    boolean isClosed();
+
+    /**
      * Get the write for writing to the client
      *
-     * @return writer
+     * @return output stream for writing out the answer
      * @throws IOException if the channel is already closed.
      */
-    PrintWriter getWriter() throws IOException;
+    OutputStream getOutputStream() throws IOException;
 }

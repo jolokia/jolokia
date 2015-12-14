@@ -1,7 +1,8 @@
 package org.jolokia.service.notif.sse;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.AttributeNotFoundException;
@@ -22,6 +23,13 @@ import org.json.simple.JSONObject;
  * @since 20.03.13
  */
 public class SseNotificationBackend extends AbstractJolokiaService<NotificationBackend> implements NotificationBackend {
+
+    private static final byte[] CRLF = new byte[]{'\r', '\n'};
+    private static final byte[] ID_FIELD = "id: ".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] DATA_FIELD = "data: ".getBytes(StandardCharsets.UTF_8);
+
+    // Map with heart beat threads
+    private HashMap<String,SseHeartBeat> heartBeatMap = new HashMap<String,SseHeartBeat>();
 
     /**
      * Create a server side event notification backend which will return notifications
@@ -61,35 +69,53 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
             public void handleNotification(Notification notification, Object handback) {
                 BackChannel backChannel = client.getBackChannel(getNotifType());
                 if (backChannel != null) {
-                    try {
                         JolokiaContext ctx = getJolokiaContext();
                         Serializer serializer = ctx.getMandatoryService(Serializer.class);
-                        PrintWriter writer = backChannel.getWriter();
                         SseNotificationResult result = new SseNotificationResult(notification,handback);
-                        writer.println("id:" + notification.getSequenceNumber());
-                        writer.println("data:" + serializer.serialize(result, null /* no path */, SerializeOptions.DEFAULT));
-                        writer.println();
-                        writer.flush();
+                    try {
+                        long id = notification.getSequenceNumber();
+                        String data =
+                                serializer.serialize(result, null /* no path */, SerializeOptions.DEFAULT)
+                                          .toString();
+                        sendMessage(backChannel,id,data);
                     } catch (IOException e) {
                         // TODO: Collect in a buffer, ordered by sequence number
                     } catch (AttributeNotFoundException e) {
-                        // No path, no exception, so cant happen (TM)
+                        // No path, no exception, so cant happen (TM) in 'serialize()'
                     }
                 }
                 // TODO: Collect exception in client specific buffer and send it when a reconnect happened
-                // Also: Think about thread for periodically pinging with a comment in order to keep connection open
             }
         };
     }
 
-    /** {@inheritDoc} */
-    public void unsubscribe(String pClientId, String pHandle) {
-
+    public void channelInit(Client client, BackChannel channel) {
+        // Start heartbeat
+        SseHeartBeat heartBeat = new SseHeartBeat(channel);
+        heartBeat.start();
+        heartBeatMap.put(client.getId(),heartBeat);
     }
 
-    /** {@inheritDoc} */
-    public void unregister(String pClientId) {
 
+    /** {@inheritDoc} */
+    public void unsubscribe(String pClientId, String pHandle) {
+        // TODO: Clean up any store notifications
+    }
+
+    /** {@inheritDoc}
+     * @param pClient*/
+    public void unregister(Client pClient) {
+        // Stop heartbeat
+        SseHeartBeat heartBeat = heartBeatMap.remove(pClient.getId());
+        if (heartBeat != null) {
+            heartBeat.stop();
+        }
+
+        // Close channel.
+        BackChannel backChannel = pClient.getBackChannel(getNotifType());
+        if (backChannel != null) {
+            backChannel.close();
+        }
     }
 
     /** {@inheritDoc} */
@@ -98,5 +124,37 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
         ret.put(BackChannel.CONTENT_TYPE, "text/event-stream");
         ret.put(BackChannel.ENCODING, "UTF-8");
         return ret;
+    }
+
+    // ===================================================================================
+
+    private void sendMessage(BackChannel pBackChannel, long pId, String pData) throws IOException {
+        synchronized (pBackChannel) {
+            OutputStream os = pBackChannel.getOutputStream();
+            id(os,pId);
+            data(os,pData);
+            os.write(CRLF);
+            os.flush();
+        }
+    }
+
+    private void id(OutputStream pOs, long pId) throws IOException {
+        printLine(pOs, ID_FIELD, Long.toString(pId).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void data(OutputStream pOs, String pData) throws IOException {
+        synchronized (this) {
+            BufferedReader reader = new BufferedReader(new StringReader(pData));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                printLine(pOs, DATA_FIELD, line.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+    }
+
+    private void printLine(OutputStream pOs, byte[] pField, byte[] pValue) throws IOException {
+        pOs.write(pField);
+        pOs.write(pValue);
+        pOs.write(CRLF);
     }
 }

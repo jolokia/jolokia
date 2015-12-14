@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.management.Notification;
 import javax.management.ObjectName;
 
+import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.*;
@@ -73,13 +74,19 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     }
 
     /** {@inheritDoc} */
+    public void channelInit(Client client, BackChannel channel) {
+        // ignored here since this backend doesnt use back channels.
+    }
+
+    /** {@inheritDoc} */
     public void unsubscribe(String pClientId, String pHandle) {
         store.removeSubscription(pClientId, pHandle);
     }
 
-    /** {@inheritDoc} */
-    public void unregister(String pClientId) {
-        store.removeClient(pClientId);
+    /** {@inheritDoc}
+     * @param pClient*/
+    public void unregister(Client pClient) {
+        store.removeClient(pClient.getId());
     }
 
     /** {@inheritDoc} */

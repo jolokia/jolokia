@@ -8,6 +8,7 @@ import javax.management.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
@@ -182,11 +183,15 @@ public class NotificationDispatcherTest {
             return null;
         }
 
+        public void channelInit(Client client, BackChannel channel) {
+
+        }
+
         public void unsubscribe(String pClientId, String pHandle) {
 
         }
 
-        public void unregister(String pClientId) {
+        public void unregister(Client pClient) {
 
         }
 

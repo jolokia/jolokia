@@ -218,9 +218,6 @@ public class JolokiaServer {
         config = pConfig;
         httpServer = pServer;
 
-        // Create proper context along with handler
-        final String contextPath = pConfig.getContextPath();
-
         Configuration jolokiaCfg = config.getJolokiaConfig();
         LogHandler log = pLogHandler != null ?
                 pLogHandler :

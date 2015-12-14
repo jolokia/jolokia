@@ -94,7 +94,7 @@ public class NotificationBackendManager {
     public void unregister(Client pClient) {
         for (String mode : pClient.getUsedBackendModes()) {
             NotificationBackend backend = getBackend(mode);
-            backend.unregister(pClient.getId());
+            backend.unregister(pClient);
         }
     }
 }

@@ -24,6 +24,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.notification.BackendCallback;
+import org.jolokia.server.core.service.notification.Client;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
@@ -111,7 +112,7 @@ public class PullNotificationBackendTest {
         Notification notification = new Notification("test.test", this, 1);
         callback.handleNotification(notification,handback);
 
-        backend.unregister(client);
+        backend.unregister(new Client(client));
 
         NotificationResult notifs = jmxPull(client, handle);
         Assert.assertNull(notifs);
