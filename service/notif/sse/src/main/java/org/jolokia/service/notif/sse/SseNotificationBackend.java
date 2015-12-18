@@ -2,8 +2,7 @@ package org.jolokia.service.notif.sse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.Notification;
@@ -71,7 +70,9 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
                 if (backChannel != null) {
                         JolokiaContext ctx = getJolokiaContext();
                         Serializer serializer = ctx.getMandatoryService(Serializer.class);
-                        SseNotificationResult result = new SseNotificationResult(notification,handback);
+                        NotificationResult result =
+                                new NotificationResult(pSubscription.getHandle(), Arrays.asList(notification),
+                                                       handback, 0);
                     try {
                         long id = notification.getSequenceNumber();
                         String data =

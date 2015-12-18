@@ -23,8 +23,7 @@ import java.util.UUID;
 import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.notification.BackendCallback;
-import org.jolokia.server.core.service.notification.Client;
+import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.Assert;

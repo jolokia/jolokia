@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.service.notif.pull;
+package org.jolokia.server.core.service.notification;
 
 import java.util.List;
 
@@ -27,7 +27,10 @@ import javax.management.Notification;
  * @author roland
  * @since 23.03.13
  */
-class NotificationResult {
+public class NotificationResult {
+
+    // Notification handle
+    private final String handle;
 
     // List of notifications
     private List<Notification> notifications;
@@ -38,10 +41,11 @@ class NotificationResult {
     // Number of notifications dropped since the last pull
     private int dropped;
 
-    NotificationResult(List<Notification> pNotifications, Object pHandback, int pDropped) {
+    public NotificationResult(String pHandle, List<Notification> pNotifications, Object pHandback, int pDropped) {
         notifications = pNotifications;
         handback = pHandback;
         dropped = pDropped;
+        handle = pHandle;
     }
 
     public List<Notification> getNotifications() {
@@ -54,5 +58,9 @@ class NotificationResult {
 
     public int getDropped() {
         return dropped;
+    }
+
+    public String getHandle() {
+        return handle;
     }
 }

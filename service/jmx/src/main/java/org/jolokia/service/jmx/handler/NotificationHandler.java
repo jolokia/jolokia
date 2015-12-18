@@ -64,8 +64,9 @@ public class NotificationHandler extends AbstractCommandHandler<JolokiaNotificat
 
     @Override
     /** {@inheritDoc} */
-    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException,
-                                                                                                                          NotChangedException {
+    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request)
+            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException,
+                   MBeanException, IOException, NotChangedException {
         throw new UnsupportedOperationException("Internal: Notification handler works an all MBeanServers, not on single one");
     }
 

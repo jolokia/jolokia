@@ -66,20 +66,23 @@
             }
 
             // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.3.2";
+            this.CLIENT_VERSION = "2.0.0-SNAPSHOT";
 
             // Registered requests for fetching periodically
             var jobs = [];
 
             // Our client id and notification backend config
-            // Is null as long as notification are not used
-            var notifConfig = null;
+            // Is null as long as notifications are not used
+            var client = null;
 
             // Options used for every request
             var agentOptions = {};
 
             // State of the scheduler
             var pollerIsRunning = false;
+
+            // Seal this in a closure so that it can be referenced from unnamed functions easily
+            var jolokia = this;
 
             // Allow a single URL parameter as well
             if (typeof param === "string") {
@@ -169,8 +172,8 @@
              * @param params parameters used for sending the request
              * @return the response object if called synchronously or nothing if called for asynchronous operation.
              */
-            this.request = function (request, params) {
-                var opts = $.extend({}, agentOptions, params);
+            jolokia.request = function (request, params) {
+                var opts = mergeInDefaults(params);
                 assertNotNull(opts.url, "No URL given");
 
                 var ajaxParams = {};
@@ -199,7 +202,7 @@
                     // Add appropriate field for CORS access
                     ajaxParams.xhrFields = {
                         // Please note that for CORS access with credentials, the request
-                        // must be asynchronous (see https://dvcs.w3.org/hg/xhr/raw-file/tip/Overview.html#the-withcredentials-attribute)
+                        // must be asynchronous (see https://dvcs.w3.org/hg/xhr/raw-file/tip/Overvie.html#the-withcredentials-attribute)
                         // It works synchronously in Chrome nevertheless, but fails in Firefox.
                         withCredentials: true
                     };
@@ -286,7 +289,7 @@
              * @param request, request, .... One or more requests to be registered for this single callback
              * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
              */
-            this.register = function() {
+            jolokia.register = function() {
                 if (arguments.length < 2) {
                     throw "At a least one request must be provided";
                 }
@@ -329,74 +332,24 @@
                 return addJob(job);
             };
 
-            this.registerNotification = function(opts) {
-                // Check that client is registered
-                checkNotificationRegistration.call(this);
-
-                // Add a notification request
-                var resp = this.request({
-                    type: "notification",
-                    command: "add",
-                    mode: "pull",
-                    client: notifConfig.id,
-                    mbean: opts.mbean,
-                    filter: opts.filter,
-                    config: opts.config,
-                    handback: opts.handback
-                });
-                if (Jolokia.isError(resp)) {
-                    throw new Error("Cannot not add notification subscription for " + opts.mbean +
-                                    " (client: " + notifConfig.id + "): " + resp.error);
-                }
-                var handle = resp.value;
-                // Add a job for periodically fetching the value and calling the callback with the response
-                var job = {
-                    callback: function(resp) {
-                        if (!Jolokia.isError(resp)) {
-                            var notifs = resp.value;
-                            if (notifs && notifs.notifications.length) {
-                                opts.callback(notifs);
-                            }
-                        }
-                    },
-                    requests: [{
-                            type: "exec",
-                            mbean: notifConfig.backend.pull.store,
-                            operation: "pull",
-                            arguments: [ notifConfig.id, handle ]
-                        }],
-                    pull: { client: notifConfig.id, handle: handle}
-                };
-                return addJob(job);
-            };
 
             /**
              * Unregister one or more request which has been registered with {@link #register}. As parameter
              * the handle returned during the registration process must be given
              * @param handle the job handle to unregister
              */
-            this.unregister = function(handle) {
+            jolokia.unregister = function(handle) {
                 if (handle < jobs.length) {
-                    var job = jobs[handle];
-                    if (job && job.pull) {
-                        // Unregister notification
-                        var resp = this.request({
-                            type: "notification",
-                            command: "remove",
-                            client: job.pull.client,
-                            handle: job.pull.handle
-                        });
-                    }
                     delete jobs[handle];
                 }
             };
 
 
             /**
-             * Return an array of handles for currently registered jobs.
-             * @return Array of job handles or an empty array
+             * Return an array of jobIds for currently registered jobs.
+             * @return Array of job jobIds or an empty array
              */
-            this.jobs = function() {
+            jolokia.jobs = function() {
                 var ret = [],
                     len = jobs.length;
                 for (var i = 0; i < len; i++) {
@@ -417,7 +370,7 @@
              *
              * @param interval interval in milliseconds between two polling attempts
              */
-            this.start = function(interval) {
+            jolokia.start = function(interval) {
                 interval = interval || agentOptions.fetchInterval || 30000;
                 if (pollerIsRunning) {
                     if (interval === agentOptions.fetchInterval) {
@@ -425,10 +378,10 @@
                         return;
                     }
                     // Re-start with new interval
-                    this.stop();
+                    jolokia.stop();
                 }
                 agentOptions.fetchInterval = interval;
-                this.timerId = setInterval(callJolokia(this,jobs), interval);
+                jolokia.timerId = setInterval(callJolokia(jolokia,jobs), interval);
 
                 pollerIsRunning = true;
             };
@@ -436,12 +389,12 @@
             /**
              * Stop the poller. If the poller is not running, no operation is performed.
              */
-            this.stop = function() {
-                if (!pollerIsRunning && this.timerId != undefined) {
+            jolokia.stop = function() {
+                if (!pollerIsRunning && jolokia.timerId != undefined) {
                     return;
                 }
-                clearInterval(this.timerId);
-                this.timerId = null;
+                clearInterval(jolokia.timerId);
+                jolokia.timerId = null;
 
                 pollerIsRunning = false;
             };
@@ -450,11 +403,74 @@
              * Check whether the poller is running.
              * @return true if the poller is running, false otherwise.
              */
-            this.isRunning = function() {
+            jolokia.isRunning = function() {
                 return pollerIsRunning;
             };
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Notification handling
+
+            jolokia.addNotificationListener = function(opts) {
+                // Check that client is registered
+                ensureNotificationRegistration();
+
+                // Notification mode. Typically "pull" or "sse"
+                var mode = extractNotificationMode(opts);
+
+                notificationHandlerFunc("lazy-init",mode)();
+
+                // Add a notification request
+                var resp = jolokia.request({
+                    type: "notification",
+                    command: "add",
+                    mode: mode,
+                    client: client.id,
+                    mbean: opts.mbean,
+                    filter: opts.filter,
+                    config: opts.config,
+                    handback: opts.handback
+                });
+                if (Jolokia.isError(resp)) {
+                    throw new Error("Cannot not add notification subscription for " + opts.mbean +
+                                    " (client: " + client.id + "): " + resp.error);
+                }
+                var handle = { id: resp.value, mode: mode };
+                notificationHandlerFunc("add",mode)(handle, opts);
+                return handle;
+            };
+
+            jolokia.removeNotificationListener = function(handle) {
+                notificationHandlerFunc("remove",handle.mode)(handle);
+                // Unregister notification
+                jolokia.request({
+                    type:    "notification",
+                    command: "remove",
+                    client:  client.id,
+                    handle:  handle.id
+                });
+            };
+
+            jolokia.unregisterNotificationClient = function() {
+                var backends = client.backend || {};
+                for (mode in NOTIFICATION_HANDLERS) {
+                    if (NOTIFICATION_HANDLERS.hasOwnProperty(mode) && backends[mode]) {
+                        notificationHandlerFunc("unregister")()
+                    }
+                }
+                jolokia.request({
+                    type:    "notification",
+                    command: "unregister",
+                    client: client.id
+                });
+            };
+
+            // ===================================================================
+            // Private methods
+
+            // Merge a set of parameters with the defaults values
+            function mergeInDefaults(params) {
+                return $.extend({}, agentOptions, params);
+            }
 
             // Add a job to the job queue
             function addJob(job) {
@@ -465,23 +481,136 @@
 
             // Check that this agent is registered as a notification client.
             // If not, do a register call
-            function checkNotificationRegistration() {
-                if (!notifConfig) {
-                    var resp = this.request({
+            function ensureNotificationRegistration() {
+                if (!client) {
+                    var resp = jolokia.request({
                         type:    "notification",
                         command: "register"
                     });
                     if (Jolokia.isError(resp)) {
                         throw new Error("Can not register client for notifications: " + resp.error);
                     } else {
-                        notifConfig = resp.value;
+                        client = resp.value;
                     }
                 }
             }
+
+            // Get notification mode with a sane default based on which is provided
+            // by the backend
+            function extractNotificationMode(opts) {
+                var backends = client.backend || {};
+                // A mode given takes precedence
+                var mode = opts.mode;
+                if (!mode) {
+                    // Try 'sse' first as default then 'pull'.
+                    mode = backends["sse"] ? "sse" : (backends["pull"] ? "pull" : undefined);
+                    // If only one backend is configured, that's the default
+                    if (!mode && backends.length == 1) {
+                        return backends[0];
+                    }
+                }
+                if (!mode || !backends[mode]) {
+                    throw new Error("Notification mode must be one of " + Object.keys(backends) + (mode ? " and not " + mode : ""));
+                }
+                return mode
+            }
+
+            // Call a function from the handlers defined below, depending on the mode
+            // "this" is set to the handler object.
+            function notificationHandlerFunc(mode, what) {
+                var notifHandler = NOTIFICATION_HANDLERS[mode];
+                if (!notifHandler) {
+                    throw new Error("Unsupported notification mode '" + mode + "'");
+                }
+                return function() {
+                    // Fix 'this' context to the notifHandler object which holds some state objects
+                    return notifHandler[what].apply(notifHandler,Array.prototype.slice.call(arguments));
+                }
+            }
+
+            // ===== Notification handler state vars and functions ...
+            // Notification hanler definition for various notification modes
+            var NOTIFICATION_HANDLERS = {
+                // Pull mode for notifications
+                pull : {
+                    add: function(handle, opts) {
+                        // Add a job for periodically fetching the value and calling the callback with the response
+                        var job = {
+                            callback: function (resp) {
+                                if (!Jolokia.isError(resp)) {
+                                    var notifs = resp.value;
+                                    if (notifs && notifs.notifications && notifs.notifications.length > 0) {
+                                        opts.callback(notifs);
+                                    }
+                                }
+                            },
+                            requests: [{
+                                type:      "exec",
+                                mbean:     client.backend.pull.store,
+                                operation: "pull",
+                                arguments: [client.id, handle.id]
+                            }]
+                        };
+                        this.jobIds[handle.id] = addJob(job);
+                    },
+                    remove: function(handle) {
+                        // Remove notification subscription from server
+                        var job = this.jobIds[handle.id];
+                        if (job) {
+                            // Remove from scheduler
+                            jolokia.unregister(job);
+                            delete this.jobIds[handle.id];
+                        }
+                    },
+                    unregister: function() {
+                        // Remove all notification jobs from scheduler
+                        for (var handleId in this.jobIds) {
+                            if (this.jobIds.hasOwnProperty(handleId)) {
+                                var jobId = this.jobIds[handleId];
+                                jolokia.unregister(jobId);
+                            }
+                        }
+                        this.jobIds = {}
+                    },
+                    jobIds: {}
+                },
+
+                // Server sent event mode
+                sse : {
+                    "lazy-init": function() {
+                        if (!this.eventSource) {
+                            sseEventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse");
+                            sseEventSource.addEventListener("message", function (event) {
+                                var data = $.parseJSON(event.data);
+                                var callback = this.dispatchMap[data.handle];
+                                if (callback != null) {
+                                    callback(data);
+                                }
+                            });
+                        }
+                    },
+                    add: function(handle, opts) {
+                        this.dispatchMap[handle.id] = opts.callback;
+                    },
+                    remove: function(handle) {
+                        delete sseCallbackDispatchMap[handle.id];
+                    },
+                    unregister: function() {
+                        this.dispatchMap = {};
+                        this.eventSource = null;
+                    },
+
+                    // Map for dispatching SSE return notifications
+                    dispatchMap : {},
+
+                    // SSE event-source
+                    eventSource : null
+                }
+            };
         }
 
         // ========================================================================
-        // Private Methods:
+        // Private Functions:
 
         // Create a function called by a timer, which requests the registered requests
         // calling the stored callback on receipt. jolokia and jobs are put into the closure
@@ -489,8 +618,7 @@
             return function() {
                 var errorCbs = [],
                     successCbs = [],
-                    i, j,
-                    len = jobs.length;
+                    i, j;
                 var requests = [];
                 for (i in jobs) {
                     if (!jobs.hasOwnProperty(i)) {

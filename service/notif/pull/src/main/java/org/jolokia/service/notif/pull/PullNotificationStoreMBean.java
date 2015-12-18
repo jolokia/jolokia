@@ -1,5 +1,7 @@
 package org.jolokia.service.notif.pull;
 
+import org.jolokia.server.core.service.notification.NotificationResult;
+
 /**
  * MBean for accessing pull requests.
  *

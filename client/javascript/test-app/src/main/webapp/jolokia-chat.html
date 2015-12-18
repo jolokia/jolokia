@@ -25,7 +25,7 @@
   <script type="text/javascript">
     $(function() {
       var j4p = new Jolokia("/jolokia");
-      j4p.registerNotification({
+      j4p.addNotificationListener({
         mbean: "jolokia.it:type=Chat",
         callback: function(notifs) {
           $.each(notifs.notifications,function(i,notif) {

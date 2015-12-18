@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.management.Notification;
 
+import org.jolokia.server.core.service.notification.NotificationResult;
 import org.jolokia.server.core.service.notification.NotificationSubscription;
 
 /**
@@ -62,7 +63,7 @@ public class NotificationStore {
      */
     NotificationResult fetchAndClear() {
         ArrayList<Notification> notifs = new ArrayList<Notification>(entries);
-        NotificationResult ret = new  NotificationResult(notifs, subscription.getHandback(),dropped);
+        NotificationResult ret = new  NotificationResult(subscription.getHandle(),notifs, subscription.getHandback(),dropped);
         entries.clear();
         subscription.ping();
         dropped = 0;

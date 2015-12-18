@@ -20,16 +20,16 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-client-javascript-test-app</artifactId>
-  <version>1.3.2-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <name>jolokia-client-javascript-test-app</name>
   <packaging>war</packaging>
   <description>Test application for Jolokia's JavaScript client library</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-client-parent</artifactId>
-    <version>1.3.2-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <relativePath>../../../pom.xml</relativePath>
   </parent>
   
   <dependencies>
@@ -41,7 +41,49 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-jsr160</artifactId>
+      <artifactId>jolokia-server-detector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jmx</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-pull</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-sse</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-discovery</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-history</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jsr160</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -54,14 +96,12 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-javascript</artifactId>
-      <type>javascript</type>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-servlet_3.0_spec</artifactId>
     </dependency>
 
   </dependencies>

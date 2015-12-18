@@ -18,6 +18,7 @@ package org.jolokia.service.notif.pull;
 
 import javax.management.Notification;
 
+import org.jolokia.server.core.service.notification.NotificationResult;
 import org.jolokia.server.core.service.notification.NotificationSubscription;
 import org.testng.annotations.Test;
 

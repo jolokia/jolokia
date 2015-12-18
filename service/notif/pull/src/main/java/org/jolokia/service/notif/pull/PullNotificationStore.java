@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.management.Notification;
 
+import org.jolokia.server.core.service.notification.NotificationResult;
 import org.jolokia.server.core.service.notification.NotificationSubscription;
 
 /**

@@ -21,8 +21,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import org.jolokia.it.ItSetup;
-
+import org.jolokia.it.core.ItSetup;
 
 public class TestMBeanRegisteringServlet extends HttpServlet {
 
