@@ -517,7 +517,7 @@
 
             // Call a function from the handlers defined below, depending on the mode
             // "this" is set to the handler object.
-            function notificationHandlerFunc(mode, what) {
+            function notificationHandlerFunc(what, mode) {
                 var notifHandler = NOTIFICATION_HANDLERS[mode];
                 if (!notifHandler) {
                     throw new Error("Unsupported notification mode '" + mode + "'");
@@ -579,10 +579,11 @@
                 sse : {
                     "lazy-init": function() {
                         if (!this.eventSource) {
-                            sseEventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse");
-                            sseEventSource.addEventListener("message", function (event) {
+                            this.eventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse");
+                            var dispatcher = this.dispatchMap;
+                            this.eventSource.addEventListener("message", function (event) {
                                 var data = $.parseJSON(event.data);
-                                var callback = this.dispatchMap[data.handle];
+                                var callback = dispatcher[data.handle];
                                 if (callback != null) {
                                     callback(data);
                                 }
@@ -593,7 +594,7 @@
                         this.dispatchMap[handle.id] = opts.callback;
                     },
                     remove: function(handle) {
-                        delete sseCallbackDispatchMap[handle.id];
+                        delete this.dispatchMap[handle.id];
                     },
                     unregister: function() {
                         this.dispatchMap = {};

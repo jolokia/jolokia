@@ -139,7 +139,8 @@
                   <include>org.jolokia:jolokia-server-detector</include>
                   <include>org.jolokia:jolokia-service-jmx</include>
                   <include>org.jolokia:jolokia-service-serializer</include>
-                  <include>org.jolokia:jolokia-service-pullnotif</include>
+                  <include>org.jolokia:jolokia-service-notif-pull</include>
+                  <include>org.jolokia:jolokia-service-notif-sse</include>
                   <include>org.jolokia:jolokia-service-discovery</include>
                   <include>org.jolokia:jolokia-service-history</include>
                   <include>com.googlecode.json-simple:json-simple</include>
@@ -177,9 +178,15 @@
                   </excludes>
                 </filter>
                 <filter>
-                  <artifact>org.jolokia:jolokia-service-pullnotif</artifact>
+                  <artifact>org.jolokia:jolokia-service-notif-pull</artifact>
                   <excludes>
-                    <exclude>org/jolokia/service/pullnotif/osgi/**</exclude>
+                    <exclude>org/jolokia/service/notif/pull/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-notif-sse</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/notif/sse/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
