@@ -41,7 +41,7 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     }
 
     /** {@inheritDoc} */
-    public void init(JolokiaContext pContext) {
+    public synchronized void init(JolokiaContext pContext) {
         if (getJolokiaContext() == null) {
             super.init(pContext);
             // TODO: Get configuration parameter for maxEntries

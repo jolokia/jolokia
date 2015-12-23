@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 
 import org.jolokia.server.core.http.BackChannel;
+import org.jolokia.server.core.util.DaemonThreadFactory;
 
 /**
  * @author roland
@@ -42,7 +43,7 @@ class SseHeartBeat implements Runnable {
     private Future<?> heartBeat;
 
     public SseHeartBeat(BackChannel pBackChannel) {
-        this.scheduler = Executors.newSingleThreadScheduledExecutor();
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
         this.backChannel = pBackChannel;
     }
 
@@ -52,7 +53,8 @@ class SseHeartBeat implements Runnable {
 
     public void stop() {
         if (heartBeat != null) {
-            heartBeat.cancel(false);
+            heartBeat.cancel(true);
+            scheduler.shutdownNow();
         }
     }
 

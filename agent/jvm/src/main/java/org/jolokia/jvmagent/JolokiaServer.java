@@ -36,8 +36,7 @@ import org.jolokia.server.core.restrictor.PolicyRestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
-import org.jolokia.server.core.util.ClassUtil;
-import org.jolokia.server.core.util.NetworkUtil;
+import org.jolokia.server.core.util.*;
 
 /**
  * Factory for creating the HttpServer used for exporting

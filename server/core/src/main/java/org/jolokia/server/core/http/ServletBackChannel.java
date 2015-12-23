@@ -47,6 +47,7 @@ public class ServletBackChannel implements BackChannel {
         asyncContext = request.startAsync();
         setResponseHeaders(pParams);
         asyncContext.setTimeout(3600 * 1000);
+        asyncContext.getResponse().flushBuffer();
         closed = false;
     }
 

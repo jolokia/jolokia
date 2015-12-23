@@ -488,7 +488,8 @@
                         command: "register"
                     });
                     if (Jolokia.isError(resp)) {
-                        throw new Error("Can not register client for notifications: " + resp.error);
+                        throw new Error("Can not register client for notifications: " + resp.error +
+                                        "\nTrace:\n" + resp.stacktrace);
                     } else {
                         client = resp.value;
                     }

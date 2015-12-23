@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent;
+package org.jolokia.server.core.util;
 
 import java.util.concurrent.ThreadFactory;
 
@@ -8,9 +8,8 @@ import java.util.concurrent.ThreadFactory;
  * @author roland
  * @since 28.02.14
  */
-class DaemonThreadFactory implements ThreadFactory {
+public class DaemonThreadFactory implements ThreadFactory {
 
-    @Override
     /** {@inheritDoc} */
     public Thread newThread(Runnable r) {
         Thread t = new Thread(r);
