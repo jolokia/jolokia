@@ -41,6 +41,8 @@ public class JolokiaCipherTest {
 
         System.out.println(enc);
 
+        Thread.sleep(1000);
+
         String enc2 = _cipher.encrypt64(_cleatText, _password);
 
         assertNotNull(enc2);
