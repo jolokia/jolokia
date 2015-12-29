@@ -67,13 +67,15 @@ public final class LocalServiceFactory {
     public static <T> List<T> createServices(ClassLoader pClassLoader, String ... pDescriptorPaths) {
         try {
             ServiceEntry.initDefaultOrder();
-            TreeMap<ServiceEntry,T> extractorMap = new TreeMap<ServiceEntry,T>();
+            HashMap<ServiceEntry,T> extractorMap = new HashMap<ServiceEntry,T>();
             for (String descriptor : pDescriptorPaths) {
                 readServiceDefinitions(pClassLoader, extractorMap, descriptor);
             }
             List<T> ret = new ArrayList<T>();
-            for (T service : extractorMap.values()) {
-                ret.add(service);
+            List<ServiceEntry> entries = new ArrayList<ServiceEntry>(extractorMap.keySet());
+            Collections.sort(entries);
+            for (ServiceEntry entry : entries) {
+                ret.add(extractorMap.get(entry));
             }
             return ret;
         } finally {
@@ -105,7 +107,7 @@ public final class LocalServiceFactory {
                                                    Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
             for (String url : ClassUtil.getResources(pDefPath)) {
-                readServiceDefinitionFromUrl(pClassLoader,pExtractorMap, url);
+                readServiceDefinitionFromUrl(pClassLoader, pExtractorMap, url);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e,e);

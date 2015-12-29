@@ -12,7 +12,7 @@ import org.jolokia.server.core.service.notification.*;
 import org.json.simple.JSONObject;
 
 /**
- * Dummy implementation
+ * Pull based implementation for notifications
  *
  * @author roland
  * @since 20.03.13
