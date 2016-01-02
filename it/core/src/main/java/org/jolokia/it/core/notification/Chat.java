@@ -47,6 +47,7 @@ public class Chat extends NotificationBroadcasterSupport implements ChatMBean  {
         Map<String,String> data = new HashMap<String, String>();
         data.put("user",who);
         data.put("message",message);
+        data.put("timestamp",Long.toString(System.currentTimeMillis()));
         notification.setUserData(data);
 
         sendNotification(notification);

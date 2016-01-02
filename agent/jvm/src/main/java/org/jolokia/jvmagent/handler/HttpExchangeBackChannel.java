@@ -100,10 +100,6 @@ public class HttpExchangeBackChannel implements BackChannel, Runnable {
             }
             headers.add("Content-Type", ct);
         }
-
-        // Disable HTTP chunking
-        headers.add("Connection", "close");
-
         exchange.sendResponseHeaders(200,0);
     }
 }

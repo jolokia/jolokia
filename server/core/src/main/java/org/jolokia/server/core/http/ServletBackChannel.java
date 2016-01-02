@@ -84,7 +84,7 @@ public class ServletBackChannel implements BackChannel {
         ServletResponse response = asyncContext.getResponse();
         if (response instanceof HttpServletResponse) {
             HttpServletResponse httpResponse = (HttpServletResponse) response;
-            httpResponse.setHeader("Connection", "close");
+            //httpResponse.setHeader("Connection", "close");
         }
 
     }
