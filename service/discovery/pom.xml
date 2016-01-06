@@ -67,7 +67,7 @@
             <Bundle-Activator>org.jolokia.service.discovery.osgi.DiscoveryServiceActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.discovery</Bundle-SymbolicName>
             <Bundle-Description>Jolokia auto discovery</Bundle-Description>
-            <Export-Package />
+            <Export-Package/>
           </instructions>
         </configuration>
       </plugin>

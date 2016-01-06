@@ -67,7 +67,7 @@
             <Bundle-Activator>org.jolokia.server.detector.osgi.DetectorActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.server.detector</Bundle-SymbolicName>
             <Bundle-Description>Jolokia server detectors</Bundle-Description>
-            <Export-Package />
+            <Export-Package/>
           </instructions>
         </configuration>
       </plugin>
