@@ -502,7 +502,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>1.2.0</currentStableVersion>
+    <currentStableVersion>2.0.0-M1</currentStableVersion>
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
