@@ -23,5 +23,5 @@ import javax.management.MalformedObjectNameException;
  * @since 23.03.13
  */
 public interface ChatMBean {
-    public void message(String who,String message) throws MalformedObjectNameException;
+    public void message(String who,String message);
 }

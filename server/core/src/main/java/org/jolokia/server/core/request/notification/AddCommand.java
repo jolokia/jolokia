@@ -153,7 +153,7 @@ public class AddCommand extends ClientCommand {
 
     /**
      * Get the configuration for an add request
-     * @return map holding extra configuratio. This can be null or empty.
+     * @return map holding extra configuration. This can be null or empty.
      */
     public Map<String, ?> getConfig() {
         return config;

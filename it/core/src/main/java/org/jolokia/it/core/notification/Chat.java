@@ -23,33 +23,46 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.management.*;
 
 /**
- * @author roland
- * @since 23.03.13
+ * A sample MBean throwing notification on demand
  */
 public class Chat extends NotificationBroadcasterSupport implements ChatMBean  {
 
-    public static final String NOTIF_TYPE = "jolokia.chat";
-    private final ObjectName source;
+    // Sequence number uniquely identifying a notification
     private AtomicInteger seqNumber = new AtomicInteger();
 
+    /**
+     * Constructor preparing the meta data for the base class
+     * {@link NotificationBroadcasterSupport}.
+     *
+     * @throws MalformedObjectNameException
+     */
     public Chat() throws MalformedObjectNameException {
         super(new MBeanNotificationInfo(
-                new String[] {NOTIF_TYPE},
+                new String[] {"jolokia.chat"},
                 Notification.class.getName(),
-                "Chat notification"
-        ));
-        source = new ObjectName("jolokia.it:type=Chat");
+                "Chat notification"));
     }
 
-    public void message(String who, String message) throws MalformedObjectNameException {
-        Notification notification = new Notification(NOTIF_TYPE,source,seqNumber.getAndIncrement());
+    /**
+     * JMX exposed operation for dispatching a message to all registered
+     * notification listeners. This is the only method defined in the standard-MBean
+     * interface {@link ChatMBean}.
+     *
+     * @param who who is sending the message
+     * @param message the message itself
+     */
+    public void message(String who, String message) {
+        // Create notification
+        Notification notification =
+                new Notification("jolokia.chat", this, seqNumber.getAndIncrement());
 
+        // Prepare and set payload for listeners
         Map<String,String> data = new HashMap<String, String>();
         data.put("user",who);
         data.put("message",message);
-        data.put("timestamp",Long.toString(System.currentTimeMillis()));
         notification.setUserData(data);
 
+        // Fire notification to all listeners
         sendNotification(notification);
     }
 }
