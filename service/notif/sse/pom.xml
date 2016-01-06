@@ -67,7 +67,7 @@
            <Bundle-Activator>org.jolokia.service.notif.sse.osgi.SseNotificationServiceActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.pullnotif</Bundle-SymbolicName>
             <Bundle-Description>Jolokia pull notification</Bundle-Description>
-            <Export-Package />
+            <Export-Package/>
           </instructions>
         </configuration>
       </plugin>
