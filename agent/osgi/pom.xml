@@ -219,12 +219,12 @@
                   <artifactItems>
                     <artifactItem>
                       <groupId>org.jolokia</groupId>
-                      <artifactId>jolokia-core</artifactId>
+                      <artifactId>jolokia-server-core</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                     <artifactItem>
                       <groupId>org.jolokia</groupId>
-                      <artifactId>jolokia-jsr160</artifactId>
+                      <artifactId>jolokia-service-jsr160</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                     <artifactItem>
