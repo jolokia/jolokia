@@ -223,11 +223,6 @@
                       <classifier>sources</classifier>
                     </artifactItem>
                     <artifactItem>
-                      <groupId>org.jolokia</groupId>
-                      <artifactId>jolokia-service-jsr160</artifactId>
-                      <classifier>sources</classifier>
-                    </artifactItem>
-                    <artifactItem>
                       <groupId>com.googlecode.json-simple</groupId>
                       <artifactId>json-simple</artifactId>
                       <classifier>sources</classifier>
