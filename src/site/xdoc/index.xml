@@ -75,11 +75,32 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
+      <subsection name="Welcome to 2016 - the year Jolokia 2.0 will see the light of day">
+        <div class="news-date">2016-01-07</div>
+        <p>
+          We are getting closer. I'm happy to announce that the first
+          milestone release 2.0.0-M1 is out and available from Maven central.
+          Of course, it is highly experimental. The main new features are JMX notification support
+          (pull and SSE mode) and refactorings leading to an internal modularization (which
+          you will see when looking into WAR agent).
+        </p>
+        <p>
+          I would be more than happy if you would try out the <a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/2.0.0-M1/jolokia-agent-jvm-2.0.0-M1-agent.jar">JAR</a> and
+          <a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-war/2.0.0-M1/jolokia-agent-war-2.0.0-M1.war">WAR</a> agent which are supposed to be drop in replacements for Jolokia 1.3.2.
+        </p>
+        <p>
+          More information can be found on my <a href="https://ro14nd.de">Blog</a>. Soon there will be also
+          demo and screencast showing the new features.
+        </p>
+        <p>
+          Jolokia 1.3.2 is still the latest stable version and will receive minor updates in the future, too. 
+        </p>
+      </subsection>
       <subsection name="TLS updates for the JVM agent">
         <div class="news-date">2015-10-5</div>
         <p>
           It was quite calm around Jolokia this summer and not much
-          happened in Jolokia-land. Not many bugs arrived, too, 
+          happened in Jolokia-land. Not many bugs arrived, too,
           which I take as a good sign :)
         </p>
         <p>
@@ -94,7 +115,7 @@
           as the server cert's key can be provided as PEM
           files with the options <code>caCert</code>,
           <code>serverCert</code> and <code>serverKey</code>,
-          respectively. 
+          respectively.
         </p>
         <p>
           Client cert validation has also be enhanced. In addition to
@@ -104,7 +125,7 @@
           <code>extendedClientCheck</code>). Also, one or more
           principals can be configured with
           <code>clientPrincipal</code> which are also compared againt
-          the subject within a client certificate. 
+          the subject within a client certificate.
         </p>
         <p>
           For simple use cases where no server validation is required,
