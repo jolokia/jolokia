@@ -16,10 +16,9 @@ package org.jolokia.service.jmx.handler.list;
  *  limitations under the License.
  */
 
-import java.util.*;
-
 import javax.management.*;
 
+import org.jolokia.server.core.util.JsonUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -57,28 +56,10 @@ class OperationDataUpdater extends DataUpdater {
                 map.put(ARGS.getKey(), argList);
                 map.put(RETURN_TYPE.getKey(), opInfo.getReturnType());
                 map.put(DESCRIPTION.getKey(), opInfo.getDescription());
-                Object ops = opMap.get(opInfo.getName());
-                if (ops != null) {
-                    if (ops instanceof List) {
-                        // If it is already a list, simply add it to the end
-                        ((List) ops).add(map);
-                    } else if (ops instanceof Map) {
-                        // If it is a map, add a list with two elements
-                        // (the old one and the new one)
-                        JSONArray opList = new JSONArray();
-                        opList.add(ops);
-                        opList.add(map);
-                        opMap.put(opInfo.getName(), opList);
-                    } else {
-                        throw new IllegalArgumentException("Internal: list, addOperations: Expected Map or List, not "
-                                                           + ops.getClass());
-                    }
-                } else {
-                    // No value set yet, simply add the map as plain value
-                    opMap.put(opInfo.getName(), map);
-                }
+                JsonUtil.addJSONObjectToJSONObject(opMap, opInfo.getName(), map);
             }
         }
         return opMap;
     }
+
 }
