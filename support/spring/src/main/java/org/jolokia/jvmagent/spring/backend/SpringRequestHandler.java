@@ -24,6 +24,8 @@ import org.springframework.context.ApplicationContext;
 public class SpringRequestHandler extends AbstractRequestHandler
         implements RequestHandler {
 
+    public static final String PROVIDER = "spring";
+
     // Application context for looking up beans
     private ApplicationContext appContext;
 
@@ -37,7 +39,7 @@ public class SpringRequestHandler extends AbstractRequestHandler
      * @param pOrder order of this service
      */
     public SpringRequestHandler(ApplicationContext pAppContext,int pOrder) {
-        super("spring",pOrder);
+        super(PROVIDER, pOrder);
         this.appContext = pAppContext;
     }
 
@@ -53,8 +55,8 @@ public class SpringRequestHandler extends AbstractRequestHandler
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         for (SpringCommandHandler handler : new SpringCommandHandler[] {
-                new SpringReadHandler(appContext,pJolokiaContext),
-                new SpringListHandler(appContext,pJolokiaContext)
+                new SpringReadHandler(appContext, pJolokiaContext),
+                new SpringListHandler(appContext, pJolokiaContext)
         }) {
             commandHandlerMap.put(handler.getType(),handler);
         }

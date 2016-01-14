@@ -53,7 +53,6 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
                     field.setAccessible(isAccessible);
                 }
             }
-
             throw new AttributeNotFoundException("No attribute " + attribute +
                                                  " found on bean " + beanName + "(class " + clazz + ") while processing " + oName);
 

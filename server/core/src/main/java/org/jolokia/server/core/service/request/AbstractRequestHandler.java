@@ -15,12 +15,12 @@ public abstract class AbstractRequestHandler extends AbstractJolokiaService<Requ
         implements RequestHandler {
 
     // Realm of this request handler
-    private String realm;
+    private String provider;
 
     /** {@inheritDoc} */
-    protected AbstractRequestHandler(String pRealm,int pOrderId) {
+    protected AbstractRequestHandler(String pProvider,int pOrderId) {
         super(RequestHandler.class, pOrderId);
-        this.realm = pRealm;
+        this.provider = pProvider;
     }
 
     /** {@inheritDoc} */
@@ -37,12 +37,12 @@ public abstract class AbstractRequestHandler extends AbstractJolokiaService<Requ
      */
     protected boolean checkRealm(JolokiaRequest pRequest) {
         return pRequest instanceof JolokiaObjectNameRequest &&
-               realm.equals(((JolokiaObjectNameRequest) pRequest).getRealm());
+               provider.equals(((JolokiaObjectNameRequest) pRequest).getRealm());
     }
 
     /** {@inheritDoc} */
-    public String getRealm() {
-        return realm;
+    public String getProvider() {
+        return provider;
     }
 
     /**

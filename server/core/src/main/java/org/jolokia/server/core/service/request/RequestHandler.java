@@ -81,7 +81,7 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
      *
      * @return realm name for which this handler is responsible.
      */
-    String getRealm();
+    String getProvider();
 
     /**
      * Any extra runtime associated with this handler, which is used in a "version" request

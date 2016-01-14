@@ -75,7 +75,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
                 continue;
             }
             Object rtInfo = handler.getRuntimeInfo();
-            info.put(handler.getRealm(),rtInfo != null ? rtInfo : new JSONObject());
+            info.put(handler.getProvider(), rtInfo != null ? rtInfo : new JSONObject());
         }
         ret.put("info",info);
         ret.put("config", configToJSONObject());
@@ -102,7 +102,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
     }
 
     // Not used here
-    public String getRealm() {
+    public String getProvider() {
         return null;
     }
 

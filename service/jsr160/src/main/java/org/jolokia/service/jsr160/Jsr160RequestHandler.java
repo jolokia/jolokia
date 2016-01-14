@@ -58,7 +58,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @param pContext the jolokia context
      */
     public void init(JolokiaContext pContext) {
-        commandHandlerManager = new CommandHandlerManager(pContext,getRealm());
+        commandHandlerManager = new CommandHandlerManager(pContext, getProvider());
     }
 
     /**
@@ -141,7 +141,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
         return pJolokiaRequest.getOption("target") != null;
     }
 
-    public String getRealm() {
+    public String getProvider() {
         return "proxy";
     }
 
