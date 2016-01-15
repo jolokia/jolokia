@@ -23,6 +23,12 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.3.3-SNAPSHOT" description="Release 1.3.3">
+      <action dev="dejanb" type="add" date="2016-01-15" issue="239">
+        Ignoring transient values during serialization when annotated
+        with @Transient
+      </action>
+    </release>
     <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">
       <action dev="roland" type="add" date="2015-10-04">
         Support for dynamically created, self-signed server

@@ -155,9 +155,8 @@ public class ObjectToJsonConverterTest {
         bean.transientValue = "transient";
 
         Map ret =  (Map)converter.convertToJson(bean, null, JsonConvertOptions.DEFAULT);
-        System.out.println(ret);
         assertNull(ret.get("transientValue"));
-
+        assertEquals(ret.get("value"),"value");
     }
 
     // ============================================================================
