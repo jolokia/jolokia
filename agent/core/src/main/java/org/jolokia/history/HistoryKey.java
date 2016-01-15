@@ -126,7 +126,7 @@ public class HistoryKey implements Serializable {
         target = sanitize(pTarget);
     }
 
-    // Return null
+    // Return null for an empty string
     private String sanitize(String pValue) {
         return "".equals(pValue) ? null : pValue;
     }
@@ -140,7 +140,8 @@ public class HistoryKey implements Serializable {
      * @param pTarget optional proxy target
      * @throws MalformedObjectNameException if the mbean name is invalid
      */
-    public HistoryKey(String pMBean, String pAttribute, String pPath,String pTarget) throws MalformedObjectNameException {
+    public HistoryKey(String pMBean, String pAttribute, String pPath, String pTarget)
+            throws MalformedObjectNameException {
         type = "attribute";
         mBean = new ObjectName(pMBean);
         secondary = pAttribute;

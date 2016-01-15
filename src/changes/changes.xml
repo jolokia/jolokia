@@ -28,6 +28,12 @@
         Ignoring transient values during serialization when annotated
         with @Transient
       </action>
+      <action dev="arnabbiswas1" type="fix" date="2016-01-15" issue="150">
+        Treat null and empty paths the same when using HistoryKey
+      </action>
+      <action dev="arnabbiswas1" type="fix" date="2016-01-15" issue="221">
+        Fix race condition when initializing the agent details
+      </action>
     </release>
     <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">
       <action dev="roland" type="add" date="2015-10-04">

@@ -138,6 +138,12 @@ public class HistoryKeyTest {
 
         assertTrue(key.matches(key2));
         assertFalse(key.matches(key3));
+    }
 
+    @Test
+    public void emptyPath() throws MalformedObjectNameException {
+        HistoryKey key1 = new HistoryKey("test:type=bla","bla","",null);
+        HistoryKey key2 = new HistoryKey("test:type=bla","bla",null,null);
+        assertEquals(key1,key2);
     }
 }
