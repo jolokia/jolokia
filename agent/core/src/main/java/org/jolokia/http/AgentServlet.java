@@ -328,15 +328,19 @@ public class AgentServlet extends HttpServlet {
         // Lookup the Agent URL if needed
         AgentDetails details = backendManager.getAgentDetails();
         if (details.isInitRequired()) {
-            if (details.isUrlMissing()) {
-                String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()),
-                                        extractServletPath(pReq));
-                details.setUrl(url);
+            synchronized (details) {
+                if (details.isInitRequired()) {
+                    if (details.isUrlMissing()) {
+                        String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()),
+                                extractServletPath(pReq));
+                        details.setUrl(url);
+                    }
+                    if (details.isSecuredMissing()) {
+                        details.setSecured(pReq.getAuthType() != null);
+                    }
+                    details.seal();
+                }
             }
-            if (details.isSecuredMissing()) {
-                details.setSecured(pReq.getAuthType() != null);
-            }
-            details.seal();
         }
     }
 

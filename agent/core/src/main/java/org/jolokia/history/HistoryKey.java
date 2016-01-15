@@ -144,7 +144,7 @@ public class HistoryKey implements Serializable {
         type = "attribute";
         mBean = new ObjectName(pMBean);
         secondary = pAttribute;
-        path = pPath;
+        path = sanitize(pPath);
         target = pTarget;
     }
 
