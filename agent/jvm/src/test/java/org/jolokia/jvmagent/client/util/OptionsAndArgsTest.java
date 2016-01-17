@@ -91,7 +91,7 @@ public class OptionsAndArgsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown option.*")
     public void unknownOption() {
-        opts("--blubber","bla");
+        opts("--blubber", "bla");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*short option.*")
@@ -114,7 +114,7 @@ public class OptionsAndArgsTest {
         OptionsAndArgs o = opts();
         assertEquals(o.getCommand(),"list");
         o = opts("12");
-        assertEquals(o.getCommand(),"toggle");
+        assertEquals(o.getCommand(), "toggle");
     }
 
     @Test
@@ -128,6 +128,25 @@ public class OptionsAndArgsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Invalid pattern.*")
     public void invalidPattern() {
-        opts("start","i+*");
+        opts("start", "i+*");
+    }
+
+    @Test
+    public void encrypt() {
+        OptionsAndArgs o = opts("--encrypt", "passwd");
+        assertEquals(o.getCommand(), "encrypt");
+        assertEquals(o.toAgentArg(), "encrypt=passwd");
+
+    }
+
+    @Test
+    public void encryptEmpty() {
+        // It is not possible to have option that works with and without argument so
+        // value ! represent special case when user want to type in password from within application
+        // and not on command line during start
+        OptionsAndArgs o = opts("--encrypt", "!");
+        assertEquals(o.getCommand(), "encrypt");
+        assertEquals(o.toAgentArg(), "encrypt=!");
+
     }
 }

@@ -28,7 +28,10 @@ import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
+import org.jolokia.util.JolokiaCipher;
+import org.jolokia.util.JolokiaCipherPasswordProvider;
 import org.jolokia.util.NetworkUtil;
+import org.jolokia.util.Resource;
 
 /**
  * Configuration required for the JolokiaServer
@@ -107,7 +110,7 @@ public class JolokiaServerConfig {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
             pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), NetworkUtil.getAgentId(hashCode(),"jvm"));
         }
-        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(),"jvm");
+        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(), "jvm");
     }
 
     protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
@@ -394,12 +397,30 @@ public class JolokiaServerConfig {
         useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
 
         String password = agentConfig.get("keystorePassword");
+        password = decryptPasswordIfNecessary(password);
         keystorePassword =  password != null ? password.toCharArray() : new char[0];
 
         serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
         clientPrincipals = extractList(agentConfig,"clientPrincipal");
         String xCheck = agentConfig.get("extendedClientCheck");
         extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
+    }
+
+    private String decryptPasswordIfNecessary(String password) {
+        if (password == null || !password.startsWith("{") || !password.endsWith("}")) {
+            return password;
+        }
+
+        password = password.substring(1,password.length() - 1);
+
+        try {
+            JolokiaCipher jolokiaCipher = new JolokiaCipher();
+            JolokiaCipherPasswordProvider passwordProvider = new JolokiaCipherPasswordProvider();
+            String key = passwordProvider.getDefaultKey();
+            return jolokiaCipher.decrypt64(password,key);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Extract list from multiple string entries. <code>null</code> if no such config is given

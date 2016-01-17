@@ -107,12 +107,14 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response\n" +
 "    --maxObjects <nr>               Maximum number of objects to consider for serialization\n" +
+"    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath\n" +
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +
 "    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: true)\n" +
 "    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
 "    --config <configfile>           Path to a property file from where to read the configuration\n" +
+"    --encrypt <password>            Encrypt keystore password\n" +
 "    --help                          This help documentation\n" +
 "    --version                       Version of this agent (it's " + Version.getAgentVersion() + " btw :)\n" +
 "\n" +
