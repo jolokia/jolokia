@@ -321,7 +321,7 @@ public class TabularDataExtractor implements Extractor {
                 }
             }
         }
-        if (ret.isEmpty()) {
+        if (!pTd.isEmpty() && ret.isEmpty()) {
             // Bubble up if not a single thingy has been found
             throw new ValueFaultHandler.AttributeFilteredException();
         }
