@@ -1,5 +1,7 @@
 package org.jolokia.util;
 
+import java.security.GeneralSecurityException;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -11,61 +13,46 @@ import static org.testng.Assert.*;
  */
 public class JolokiaCipherTest {
 
-    JolokiaCipher _cipher;
-
-    String _cleatText = "veryOpenText";
-
-    String _encryptedText = "ibeHrdCOonkH7d7YnH7sarQLbwOk1ljkkM/z8hUhl4c=";
-
-    String _password = "testtest";
-
+    JolokiaCipher cipher;
+    String clearText = "veryOpenText";
+    String encryptedText = "ibeHrdCOonkH7d7YnH7sarQLbwOk1ljkkM/z8hUhl4c=";
 
     @BeforeMethod
-    public void setUp() throws JolokiaCipherException {
-        _cipher = new JolokiaCipher();
+    public void setUp() throws GeneralSecurityException {
+        cipher = new JolokiaCipher(new JolokiaCipher.KeyHolder() {
+            public String getKey() {
+                return "testtest";
+            }
+        });
     }
-
 
     @Test
     public void testRoundTrip() throws Exception {
-        String encrypted = _cipher.encrypt64(_cleatText, _password);
-        String decrypted = _cipher.decrypt64(encrypted, _password);
-        assertEquals(decrypted, _cleatText);
+        String encrypted = cipher.encrypt(clearText);
+        String decrypted = cipher.decrypt(encrypted);
+        assertEquals(decrypted, clearText);
     }
 
     @Test
-    public void testEncrypt() throws Exception {
-        String enc = _cipher.encrypt64(_cleatText, _password);
-
+    public void testSalt() throws Exception {
+        String enc = cipher.encrypt(clearText);
         assertNotNull(enc);
-
-        System.out.println(enc);
-
-        Thread.sleep(1000);
-
-        String enc2 = _cipher.encrypt64(_cleatText, _password);
-
+        String enc2 = cipher.encrypt(clearText);
         assertNotNull(enc2);
-
-        System.out.println(enc2);
-
-        assertFalse(enc.equals(enc2));
+        assertNotEquals(enc,enc2);
     }
 
     @Test
     public void testDecrypt() throws Exception {
-        String clear = _cipher.decrypt64(_encryptedText, _password);
-
-        assertEquals(_cleatText, clear);
+        String clear = cipher.decrypt(encryptedText);
+        assertEquals(clearText, clear);
     }
 
     @Test
     public void testEncoding() throws Exception {
-        System.out.println("file.encoding=" + System.getProperty("file.encoding"));
-
         String pwd = "äüöÜÖÄß\"§$%&/()=?é";
-        String encPwd = _cipher.encrypt64(pwd, pwd);
-        String decPwd = _cipher.decrypt64(encPwd, pwd);
+        String encPwd = cipher.encrypt(pwd);
+        String decPwd = cipher.decrypt(encPwd);
         assertEquals(pwd, decPwd);
     }
 }

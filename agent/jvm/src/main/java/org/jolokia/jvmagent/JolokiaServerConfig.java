@@ -22,16 +22,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
 import org.jolokia.util.JolokiaCipher;
-import org.jolokia.util.JolokiaCipherPasswordProvider;
 import org.jolokia.util.NetworkUtil;
-import org.jolokia.util.Resource;
 
 /**
  * Configuration required for the JolokiaServer
@@ -397,8 +398,7 @@ public class JolokiaServerConfig {
         useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
 
         String password = agentConfig.get("keystorePassword");
-        password = decryptPasswordIfNecessary(password);
-        keystorePassword =  password != null ? password.toCharArray() : new char[0];
+        keystorePassword =  password != null ? decipherPasswordIfNecessary(password) : new char[0];
 
         serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
         clientPrincipals = extractList(agentConfig,"clientPrincipal");
@@ -406,20 +406,18 @@ public class JolokiaServerConfig {
         extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
     }
 
-    private String decryptPasswordIfNecessary(String password) {
-        if (password == null || !password.startsWith("{") || !password.endsWith("}")) {
-            return password;
-        }
-
-        password = password.substring(1,password.length() - 1);
-
-        try {
-            JolokiaCipher jolokiaCipher = new JolokiaCipher();
-            JolokiaCipherPasswordProvider passwordProvider = new JolokiaCipherPasswordProvider();
-            String key = passwordProvider.getDefaultKey();
-            return jolokiaCipher.decrypt64(password,key);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    private char[] decipherPasswordIfNecessary(String password) {
+        Matcher encryptedPasswordMatcher = Pattern.compile("^\\[\\[(.*)]]$").matcher(password);
+        if (encryptedPasswordMatcher.matches()) {
+            String encryptedPassword = encryptedPasswordMatcher.group(1);
+            try {
+                JolokiaCipher jolokiaCipher = new JolokiaCipher();
+                return jolokiaCipher.decrypt(encryptedPassword).toCharArray();
+            } catch (GeneralSecurityException e) {
+                throw new IllegalArgumentException("Cannot decrypt password " + encryptedPassword);
+            }
+        } else {
+            return password.toCharArray();
         }
     }
 

@@ -2,13 +2,12 @@ package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.util.JolokiaCipher;
-import org.jolokia.util.JolokiaCipherPasswordProvider;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
 
@@ -18,9 +17,9 @@ import static org.testng.Assert.assertEquals;
  */
 public class EncryptCommandTest {
 
-    class JCPPTest extends JolokiaCipherPasswordProvider {
+    class JCPPTest implements JolokiaCipher.KeyHolder {
         @Override
-        public String getDefaultKey() throws IOException {
+        public String getKey() {
             return "changeit";
         }
     }
@@ -29,25 +28,23 @@ public class EncryptCommandTest {
     public void testEncryptDecrypt() throws Exception {
         String passwd = "test 123";
 
-        JCPPTest passwordProvider = new JCPPTest();
+        JCPPTest keyHolder = new JCPPTest();
 
-        EncryptCommand ec = new EncryptCommand(passwordProvider);
-        OptionsAndArgs oaa = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),"--encrypt", passwd);
+        EncryptCommand ec = new EncryptCommand(keyHolder);
+        OptionsAndArgs oaa = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),"encrypt", passwd);
         PrintStream original = System.out;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         System.setOut(new PrintStream(baos));
         ec.execute(oaa, null, null);
         System.setOut(original);
-        String encripted = baos.toString();
-        System.out.println("encripted:" + encripted);
 
+        Matcher matcher = Pattern.compile("^\\[\\[(.*)]]").matcher(baos.toString());
+        matcher.find();
+        String encrypted = matcher.group(1);
 
-        JolokiaCipher jolokiaCipher = new JolokiaCipher();
-        String decripted = jolokiaCipher.decrypt64(encripted.substring(1, encripted.length() - 1), passwordProvider.getDefaultKey());
-        System.out.println("decripted:" + decripted);
-
-        assertEquals(decripted,passwd);
-
+        JolokiaCipher jolokiaCipher = new JolokiaCipher(keyHolder);
+        String decrypted = jolokiaCipher.decrypt(encrypted);
+        assertEquals(decrypted,passwd);
     }
 
 }

@@ -1,210 +1,170 @@
 package org.jolokia.util;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Random;
 
 /**
- * Copied from https://github.com/sonatype/plexus-cipher/blob/plexus-cipher-1.7/src/main/java/org/sonatype/plexus/components/cipher/PBECipher.java
+ * Simple symmetric, salted encryption.
+ *
+ * Most of the code has been borrowed from
+ * <a href="https://github.com/sonatype/plexus-cipher/blob/plexus-cipher-1.7/src/main/java/org/sonatype/plexus/components/cipher/PBECipher.java">
+ * Plexus</a> code
  *
  * @author nevenr
  * @since  12/09/2015
  */
 public class JolokiaCipher {
-    protected static final String STRING_ENCODING = "UTF8";
 
-    protected static final int SPICE_SIZE = 16;
+    private static final int SALT_SIZE = 8;
+    private static final int CHUNK_SIZE = 16;
+    public static final String JOLOKIA_CYPHER_PASSWORD = "META-INF/jolokia-password";
 
-    protected static final int SALT_SIZE = 8;
+    private MessageDigest digest;
+    private Random random;
 
-    protected static final int CHUNK_SIZE = 16;
+    private KeyHolder keyHolder;
 
-    protected static final String DIGEST_ALG = "SHA-256";
-
-    protected static final String KEY_ALG = "AES";
-
-    protected static final String CIPHER_ALG = "AES/CBC/PKCS5Padding";
-
-    protected MessageDigest _digester;
-
-    protected SecureRandom _secureRandom;
-
-    protected boolean _onLinux = false;
-
-
-
-    public JolokiaCipher() throws JolokiaCipherException {
-        try {
-            _digester = MessageDigest.getInstance(DIGEST_ALG);
-
-            if (System.getProperty("os.name", "blah").toLowerCase().contains("linux")) {
-                _onLinux = true;
-            }
-
-            if (_onLinux) {
-                System.setProperty("securerandom.source", "file:/dev/./urandom");
-            } else {
-                _secureRandom = new SecureRandom();
-            }
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new JolokiaCipherException(e);
-        }
+    public JolokiaCipher() throws GeneralSecurityException {
+        this(new KeyHolderImpl());
     }
 
-    private byte[] getSalt(final int sz)
-            throws NoSuchAlgorithmException, NoSuchProviderException {
-        byte[] res;
+    public JolokiaCipher(KeyHolder pKeyHolder) throws NoSuchAlgorithmException {
+        digest = MessageDigest.getInstance("SHA-256");
+        random = new SecureRandom();
+        keyHolder = pKeyHolder;
 
-        if (_secureRandom != null) {
-            _secureRandom.setSeed(System.currentTimeMillis());
-            res = _secureRandom.generateSeed(sz);
-        } else {
-            res = new byte[sz];
-            Random r = new Random(System.currentTimeMillis());
-            r.nextBytes(res);
-        }
+        // Automatic decryption of passwords with Jolokia isnt secure
+        // anyway (but only stops getting the password by accident),
+        // so we are going to use a simple seed for the salt
+        random.setSeed(System.currentTimeMillis());
+    }
 
+    /**
+     * Encrypt a string with a password.
+     *
+     * @param pText text to encode
+     * @return the encoded password
+     */
+    public String encrypt(final String pText) throws GeneralSecurityException {
+        byte[] clearBytes = pText.getBytes(StandardCharsets.UTF_8);
+        byte[] salt = getSalt(SALT_SIZE);
+
+        Cipher cipher = createCipher(salt, Cipher.ENCRYPT_MODE);
+        byte[] encryptedBytes = cipher.doFinal(clearBytes);
+        int len = encryptedBytes.length;
+
+        byte padLen = (byte) (CHUNK_SIZE - (SALT_SIZE + len + 1) % CHUNK_SIZE);
+        int totalLen = SALT_SIZE + len + padLen + 1;
+
+        byte[] allEncryptedBytes = getSalt(totalLen);
+        System.arraycopy(salt, 0, allEncryptedBytes, 0, SALT_SIZE);
+        allEncryptedBytes[SALT_SIZE] = padLen;
+        System.arraycopy(encryptedBytes, 0, allEncryptedBytes, SALT_SIZE + 1, len);
+
+        return Base64Util.encode(allEncryptedBytes);
+    }
+
+    /**
+     * Decrypt a password encrypted with {@link #encrypt(String)}
+     *
+     * @param pEncryptedText encrypted text
+     * @return the decrypted text
+     * @throws GeneralSecurityException when decryption fails
+     */
+    public String decrypt(final String pEncryptedText) throws GeneralSecurityException {
+        byte[] allEncryptedBytes = Base64Util.decode(pEncryptedText);
+        int totalLen = allEncryptedBytes.length;
+        byte[] salt = new byte[SALT_SIZE];
+
+        System.arraycopy(allEncryptedBytes, 0, salt, 0, SALT_SIZE);
+        byte padLen = allEncryptedBytes[SALT_SIZE];
+
+        byte[] encryptedBytes = new byte[totalLen - SALT_SIZE - 1 - padLen];
+        System.arraycopy(allEncryptedBytes, SALT_SIZE + 1, encryptedBytes, 0, encryptedBytes.length);
+
+        Cipher cipher = createCipher(salt, Cipher.DECRYPT_MODE);
+        byte[] clearBytes = cipher.doFinal(encryptedBytes);
+
+        return new String(clearBytes, StandardCharsets.UTF_8);
+    }
+
+    // =================================================================
+
+    private byte[] getSalt(final int sz) {
+        byte[] res = new byte[sz];
+        random.nextBytes(res);
         return res;
     }
 
-    public String encrypt64(final String clearText, final String password)
-            throws JolokiaCipherException {
-        try {
-            byte[] clearBytes = clearText.getBytes(STRING_ENCODING);
-
-            byte[] salt = getSalt(SALT_SIZE);
-
-            // spin it :)
-            if (_secureRandom != null) {
-                new SecureRandom().nextBytes(salt);
-            }
-
-            Cipher cipher = createCipher(password.getBytes(STRING_ENCODING), salt, Cipher.ENCRYPT_MODE);
-
-            byte[] encryptedBytes = cipher.doFinal(clearBytes);
-
-            int len = encryptedBytes.length;
-
-            byte padLen = (byte) (CHUNK_SIZE - (SALT_SIZE + len + 1) % CHUNK_SIZE);
-
-            int totalLen = SALT_SIZE + len + padLen + 1;
-
-            byte[] allEncryptedBytes = getSalt(totalLen);
-
-            System.arraycopy(salt, 0, allEncryptedBytes, 0, SALT_SIZE);
-
-            allEncryptedBytes[SALT_SIZE] = padLen;
-
-            System.arraycopy(encryptedBytes, 0, allEncryptedBytes, SALT_SIZE + 1, len);
-
-            return Base64Util.encode(allEncryptedBytes);
-        } catch (Exception e) {
-            throw new JolokiaCipherException(e);
-        }
-    }
-
-
-    public String decrypt64(final String encryptedText, final String password)
-            throws JolokiaCipherException {
-        try {
-            byte[] allEncryptedBytes = Base64Util.decode(encryptedText);
-
-            int totalLen = allEncryptedBytes.length;
-
-            byte[] salt = new byte[SALT_SIZE];
-
-            System.arraycopy(allEncryptedBytes, 0, salt, 0, SALT_SIZE);
-
-            byte padLen = allEncryptedBytes[SALT_SIZE];
-
-            byte[] encryptedBytes = new byte[totalLen - SALT_SIZE - 1 - padLen];
-
-            System.arraycopy(allEncryptedBytes, SALT_SIZE + 1, encryptedBytes, 0, encryptedBytes.length);
-
-            Cipher cipher = createCipher(password.getBytes(STRING_ENCODING), salt, Cipher.DECRYPT_MODE);
-
-            byte[] clearBytes = cipher.doFinal(encryptedBytes);
-
-            return new String(clearBytes, STRING_ENCODING);
-        } catch (Exception e) {
-            throw new JolokiaCipherException(e);
-        }
-    }
-
-    private Cipher createCipher(final byte[] pwdAsBytes, byte[] salt, final int mode)
+    private Cipher createCipher(byte[] salt, final int mode)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
-        _digester.reset();
+        digest.reset();
 
-        byte[] keyAndIv = new byte[SPICE_SIZE * 2];
-
-        if (salt == null || salt.length == 0) {
-            // Unsalted!  Bad idea!
-            salt = null;
-        }
-
+        byte[] pwdAsBytes = getKeyAsBytes();
+        byte[] keyAndIv = new byte[16 * 2];
         byte[] result;
 
         int currentPos = 0;
 
         while (currentPos < keyAndIv.length) {
-            _digester.update(pwdAsBytes);
-
-            if (salt != null) {
-                // First 8 bytes of salt ONLY!  That wasn't obvious to me
-                // when using AES encrypted private keys in "Traditional
-                // SSLeay Format".
-                //
-                // Example:
-                // DEK-Info: AES-128-CBC,8DA91D5A71988E3D4431D9C2C009F249
-                //
-                // Only the first 8 bytes are salt, but the whole thing is
-                // re-used again later as the IV.  MUCH gnashing of teeth!
-                _digester.update(salt, 0, 8);
-            }
-            result = _digester.digest();
+            digest.update(pwdAsBytes);
+            digest.update(salt, 0, 8);
+            result = digest.digest();
 
             int stillNeed = keyAndIv.length - currentPos;
 
-            // Digest gave us more than we need.  Let's truncate it.
             if (result.length > stillNeed) {
                 byte[] b = new byte[stillNeed];
-
                 System.arraycopy(result, 0, b, 0, b.length);
-
                 result = b;
             }
 
             System.arraycopy(result, 0, keyAndIv, currentPos, result.length);
-
             currentPos += result.length;
-
             if (currentPos < keyAndIv.length) {
-                // Next round starts with a hash of the hash.
-                _digester.reset();
-                _digester.update(result);
+                digest.reset();
+                digest.update(result);
             }
         }
 
-        byte[] key = new byte[SPICE_SIZE];
-
-        byte[] iv = new byte[SPICE_SIZE];
+        byte[] key = new byte[16];
+        byte[] iv = new byte[16];
 
         System.arraycopy(keyAndIv, 0, key, 0, key.length);
-
         System.arraycopy(keyAndIv, key.length, iv, 0, iv.length);
-
-        Cipher cipher = Cipher.getInstance(CIPHER_ALG);
-
-        cipher.init(mode, new SecretKeySpec(key, KEY_ALG), new IvParameterSpec(iv));
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(mode, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv));
 
         return cipher;
     }
 
+    // =====================================================================
 
+    public interface KeyHolder { String getKey(); };
 
+    private byte[] getKeyAsBytes() {
+        return keyHolder.getKey().getBytes(StandardCharsets.UTF_8);
+    }
 
+    private static class KeyHolderImpl implements KeyHolder {
+
+        public String getKey() {
+            InputStream in = ClassUtil.getResourceAsStream(JOLOKIA_CYPHER_PASSWORD);
+            if (in != null) {
+                try {
+                    return new BufferedReader(new InputStreamReader(in)).readLine();
+                } catch (IOException e) {
+                    throw new IllegalStateException("Can not read password from " + JOLOKIA_CYPHER_PASSWORD + ": " + e,e);
+                }
+            } else {
+                return "`x%_rDL9T'&ENuyA{LPcc(UDv`NzzY6NZF\"F=rba-9Ftg,HJr.y@E;amfr>B4z<UqQg}2_4kq\\Y@6mNJEpwGx#CT;&?%%.$T_br`(&%3)2vC:5?3f9ptX?KR9kYQu2;#".substring(40, 72);
+            }
+        }
+    }
 }

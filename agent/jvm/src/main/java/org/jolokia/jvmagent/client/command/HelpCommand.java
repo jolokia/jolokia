@@ -62,6 +62,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    status    -- Show status of an (potentially) attached agent\n" +
 "    toggle    -- Toggle between start/stop (default when no command is given)\n" +
 "    list      -- List all attachable Java processes (default when no argument is given at all)\n" +
+"    encrypt   -- Encrypt a password which is given as argument or read from standard input\n" +
 "\n" +
 "[options] are used for providing runtime information for attaching the agent:\n" +
 "\n" +
@@ -114,7 +115,6 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: true)\n" +
 "    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
 "    --config <configfile>           Path to a property file from where to read the configuration\n" +
-"    --encrypt <password>            Encrypt keystore password\n" +
 "    --help                          This help documentation\n" +
 "    --version                       Version of this agent (it's " + Version.getAgentVersion() + " btw :)\n" +
 "\n" +

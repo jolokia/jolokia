@@ -54,7 +54,7 @@ public final class AgentLauncher {
             CommandDispatcher dispatcher = new CommandDispatcher(options);
 
             // Attach a VirtualMachine to a given PID (if PID is given)
-            Object vm = vmHandler.attachVirtualMachine();
+            Object vm = options.needsVm() ? vmHandler.attachVirtualMachine() : null;
 
             // Dispatch command
             int exitCode = 0;
@@ -67,7 +67,9 @@ public final class AgentLauncher {
             } catch (IllegalAccessException e) {
                 throw new ProcessingException("IllegalAccess",e,options);
             } finally {
-                vmHandler.detachAgent(vm);
+                if (vm != null) {
+                    vmHandler.detachAgent(vm);
+                }
             }
             System.exit(exitCode);
 

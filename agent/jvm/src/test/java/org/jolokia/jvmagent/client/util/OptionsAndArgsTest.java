@@ -16,8 +16,7 @@ package org.jolokia.jvmagent.client.util;
  * limitations under the License.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
@@ -128,25 +127,15 @@ public class OptionsAndArgsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Invalid pattern.*")
     public void invalidPattern() {
-        opts("start", "i+*");
+        OptionsAndArgs o = opts("start", "i+*");
+        o.getProcessPattern();
     }
 
     @Test
     public void encrypt() {
-        OptionsAndArgs o = opts("--encrypt", "passwd");
+        OptionsAndArgs o = opts("encrypt", "passwd");
         assertEquals(o.getCommand(), "encrypt");
-        assertEquals(o.toAgentArg(), "encrypt=passwd");
-
-    }
-
-    @Test
-    public void encryptEmpty() {
-        // It is not possible to have option that works with and without argument so
-        // value ! represent special case when user want to type in password from within application
-        // and not on command line during start
-        OptionsAndArgs o = opts("--encrypt", "!");
-        assertEquals(o.getCommand(), "encrypt");
-        assertEquals(o.toAgentArg(), "encrypt=!");
+        assertEquals(o.getExtraArgs(), Arrays.asList("passwd"));
 
     }
 }

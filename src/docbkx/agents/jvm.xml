@@ -316,7 +316,9 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>keystorePassword</constant></td>
           <td>
-            Keystore password (https only)
+            Keystore password (https only). If the password is given embedded in brackets <constant>[[...]]</constant>,
+            then it is treated as an encrypted password which was encrypted with <code>java -jar jvm-agent.jar
+            encrypt</code>. See below for details.
           </td>        
           <td>
           </td>
@@ -648,7 +650,19 @@ For more documentation please visit www.jolokia.org
             operation and with 1 otherwise.
           </para>
         </listitem>
-      </varlistentry>    
+      </varlistentry>
+      <varlistentry>
+        <term><literal>encrypt</literal></term>
+        <listitem>
+          <para>
+            Encrypt the keystore password. You can add the password to encrypt
+            as an additional argument or, if not given, it is read from standard input.
+            The output of this command is the encrypted password in the format <code>[[....]]</code>,
+            which should be used literally (excluding the final newline) for the keystore password
+            when using the option <constant>keystorePassword</constant> in the agent configuration.
+          </para>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <para>
       The launcher is especially suited for

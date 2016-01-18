@@ -3,14 +3,11 @@ package org.jolokia.restrictor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.util.ClassUtil;
-import org.jolokia.util.LogHandler;
-import org.jolokia.util.NetworkUtil;
+import org.jolokia.util.*;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -43,7 +40,7 @@ public final class RestrictorFactory {
 
         Restrictor customRestrictor = createCustomRestrictor(pConfig);
         if (customRestrictor != null) {
-            logHandler.info("Using custom restrictor " + customRestrictor.getClass().getCanonicalName());
+            logHandler.info("Using restrictor " + customRestrictor.getClass().getCanonicalName());
             return customRestrictor;
         }
 
@@ -51,15 +48,15 @@ public final class RestrictorFactory {
         try {
             Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
             if (ret != null) {
-                logHandler.info("Using access restrictor " + location);
+                logHandler.info("Using policy access restrictor " + location);
                 return ret;
             } else {
-                logHandler.info("No access restrictor found, access to all MBean is allowed");
+                logHandler.info("No access restrictor found, access to any MBean is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
             logHandler.error("Error while accessing access restrictor at " + location +
-                    ". Denying all access to MBeans for security reasons. Exception: " + e, e);
+                             ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
     }
@@ -69,60 +66,32 @@ public final class RestrictorFactory {
         if (restrictorClassName == null) {
             return null;
         }
-
-        Class restrictorClass;
-        try {
-            restrictorClass = Class.forName(restrictorClassName);
-            if(!Restrictor.class.isAssignableFrom(restrictorClass)){
-                throw new IllegalArgumentException("Provided restrictor class [" + restrictorClassName +
-                        "] is not a subclass of Restrictor");
-            }
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Cannot find restrictor class", e);
+        Class restrictorClass = ClassUtil.classForName(restrictorClassName);
+        if (restrictorClass == null) {
+            throw new IllegalArgumentException("No custom restrictor class " + restrictorClassName + " found");
         }
-
-
         return lookupRestrictor(pConfig, restrictorClass);
-
     }
 
     private static Restrictor lookupRestrictor(Configuration pConfig, Class restrictorClass) {
-        // prefer constructor that takes configuration
         try {
-            Constructor constructorThatTakesConfiguration = restrictorClass.getConstructor(Configuration.class);
-            return (Restrictor) constructorThatTakesConfiguration.newInstance(pConfig);
-        } catch (NoSuchMethodException ignore) {
-            return  lookupRestrictorWithDefaultConstructor(restrictorClass, ignore);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
+            try {
+                // Prefer constructor that takes configuration
+                Constructor ctr = restrictorClass.getConstructor(Configuration.class);
+                return (Restrictor) ctr.newInstance(pConfig);
+            } catch (NoSuchMethodException exp) {
+                // Fallback to default constructor
+                Constructor defaultConstructor = restrictorClass.getConstructor();
+                return (Restrictor) defaultConstructor.newInstance();
+            }
+        } catch (NoSuchMethodException exp) {
+            throw new IllegalArgumentException("Cannot create custom restrictor for class " + restrictorClass + " " +
+                                               "because neither a constructor with 'Configuration' as only element " +
+                                               "nor a default constructor is available");
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
         }
     }
-
-    private static Restrictor lookupRestrictorWithDefaultConstructor(Class restrictorClass, NoSuchMethodException ignore) {
-        // fallback to default constructor
-        try {
-            Constructor defaultConstructor = restrictorClass.getConstructor();
-            return (Restrictor) defaultConstructor.newInstance();
-        } catch (InvocationTargetException e) {
-            e.initCause(ignore);
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
-        } catch (NoSuchMethodException e) {
-            e.initCause(ignore);
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
-        } catch (InstantiationException e) {
-            e.initCause(ignore);
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
-        } catch (IllegalAccessException e) {
-            e.initCause(ignore);
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class", e);
-        }
-    }
-
-
 
     /**
      * Lookup a restrictor based on an URL

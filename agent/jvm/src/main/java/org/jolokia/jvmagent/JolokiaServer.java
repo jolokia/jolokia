@@ -366,10 +366,9 @@ public class JolokiaServer {
 
     private void loadKeyStoreFromFile(KeyStore pKeyStore, String pFile, char[] pPassword)
             throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        File file = getAndValidateFile(pFile,"keystore");
         FileInputStream fis = null;
         try {
-            fis = new FileInputStream(pFile);
+            fis = new FileInputStream(getAndValidateFile(pFile, "keystore"));
             pKeyStore.load(fis, pPassword);
         } finally {
             if (fis != null) {

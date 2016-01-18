@@ -161,7 +161,7 @@ public class JvmAgentConfigTest {
 
     @Test
     public void keystorePasswordEncrypted() throws UnknownHostException {
-        JvmAgentConfig config = new JvmAgentConfig("keystorePassword={b4m+ADwT8u8HAoVvv3n6WLAEfFFceJHSu6rsNT1/CsHiWFzUseNMS4C2d1AtxJNC}");
+        JvmAgentConfig config = new JvmAgentConfig("keystorePassword=[[b4m+ADwT8u8HAoVvv3n6WLAEfFFceJHSu6rsNT1/CsHiWFzUseNMS4C2d1AtxJNC]]");
         assertEquals(config.getKeystorePassword(), "1234567890123456".toCharArray());
     }
 

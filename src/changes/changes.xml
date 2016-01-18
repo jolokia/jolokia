@@ -37,6 +37,17 @@
       <action dev="nevenr" type="fix" date="2016-01-17" issue="200">
         Fix serialization of empty TabularData
       </action>
+      <action dev="nevenr" type="add" date="2016-01-17" issue="224">
+        Allow custom restrictors for the JVM and WAR agent.
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-17" issue="218">
+        Add missing SSL config options to Spring's jolokia-config.xsd
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-18" issue="164">
+        Allow encrypted keystore passwords which can be created with
+        the "encrypt" command of the JVM agent.
+      </action>
+
     </release>
     <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">
       <action dev="roland" type="add" date="2015-10-04">

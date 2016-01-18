@@ -16,8 +16,7 @@ package org.jolokia.util;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
@@ -85,27 +84,6 @@ public final class ClassUtil {
             }
         }
         return ret;
-    }
-
-    /**
-     * Get the given path as an input stream or return <code>null</code> if not found
-     *
-     * @param pPath path to lookup
-     * @return input stream or null if not found.
-     */
-    public static InputStream getResourceAsStream(String pPath) {
-        for (ClassLoader loader : new ClassLoader[] {
-                Thread.currentThread().getContextClassLoader(),
-                ClassUtil.class.getClassLoader()
-        } ) {
-            if (loader != null) {
-                InputStream is = loader.getResourceAsStream(pPath);
-                if (is != null) {
-                    return is;
-                }
-            }
-        }
-        return null;
     }
 
     /**
@@ -285,5 +263,26 @@ public final class ClassUtil {
         PRIMITIVE_TO_OBJECT_MAP.put("byte", Byte.TYPE);
         PRIMITIVE_TO_OBJECT_MAP.put("void", Void.TYPE);
         PRIMITIVE_TO_OBJECT_MAP.put("short", Short.TYPE);
+    }
+
+    /**
+     * Get the given path as an input stream or return <code>null</code> if not found
+     *
+     * @param pPath path to lookup
+     * @return input stream or null if not found.
+     */
+    public static InputStream getResourceAsStream(String pPath) {
+        for (ClassLoader loader : new ClassLoader[] {
+                Thread.currentThread().getContextClassLoader(),
+                ClassUtil.class.getClassLoader()
+        } ) {
+            if (loader != null) {
+                InputStream is = loader.getResourceAsStream(pPath);
+                if (is != null) {
+                    return is;
+                }
+            }
+        }
+        return null;
     }
 }
