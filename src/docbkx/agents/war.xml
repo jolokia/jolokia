@@ -105,12 +105,23 @@
           <literal>classpath:</literal> which is used for looking up
           the policy file in the web application's classpath. See
           <xref linkend="security-policy-location"/> for details about this
-          parameter. 
+          parameter.
         </td>
         <td>
           <filename>file:///home/jolokia/jolokia-access.xml</filename>
-          for a file based access to the policy file. Default is 
+          for a file based access to the policy file. Default is
           <filename>classpath:/jolokia-access.xml</filename>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>restrictorClass</constant></td>
+        <td>
+          Full classname of an implementation of <literal>org.jolokia.restrictor.Restrictor</literal>
+          which is used as a custom restrictor for securing access via Jolokia.
+        </td>
+        <td>
+          <literal>com.mycompany.jolokia.CustomRestrictor</literal> (which must be included in the
+          war file and must implement <literal>org.jolokia.restrictor.Restrictor</literal>)
         </td>
       </tr>
       <tr>

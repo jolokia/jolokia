@@ -498,6 +498,7 @@ where <command> is one of
     status    -- Show status of an (potentially) attached agent
     toggle    -- Toggle between start/stop (default when no command is given)
     list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
 
 [options] are used for providing runtime information for attaching the agent:
 
@@ -538,6 +539,7 @@ where <command> is one of
     --maxObjects <nr>              Maximum number of objects to consider for serialization 
                                    (default: maxObjects)
     --policyLocation <url>         Location of a Jolokia policy file
+    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath
     --mbeanQualifier <qualifier>   Qualifier to use when registering Jolokia internal MBeans
     --canonicalNaming <t|f>        whether to use canonicalName for ObjectNames in 'list' or 'search' 
                                    (default: true)
