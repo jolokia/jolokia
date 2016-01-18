@@ -87,6 +87,27 @@ public final class ClassUtil {
     }
 
     /**
+     * Get the given path as an input stream or return <code>null</code> if not found
+     *
+     * @param pPath path to lookup
+     * @return input stream or null if not found.
+     */
+    public static InputStream getResourceAsStream(String pPath) {
+        for (ClassLoader loader : new ClassLoader[] {
+                Thread.currentThread().getContextClassLoader(),
+                ClassUtil.class.getClassLoader()
+        } ) {
+            if (loader != null) {
+                InputStream is = loader.getResourceAsStream(pPath);
+                if (is != null) {
+                    return is;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Check for the existence of a given class
      *
      * @param pClassName class name to check
@@ -263,26 +284,5 @@ public final class ClassUtil {
         PRIMITIVE_TO_OBJECT_MAP.put("byte", Byte.TYPE);
         PRIMITIVE_TO_OBJECT_MAP.put("void", Void.TYPE);
         PRIMITIVE_TO_OBJECT_MAP.put("short", Short.TYPE);
-    }
-
-    /**
-     * Get the given path as an input stream or return <code>null</code> if not found
-     *
-     * @param pPath path to lookup
-     * @return input stream or null if not found.
-     */
-    public static InputStream getResourceAsStream(String pPath) {
-        for (ClassLoader loader : new ClassLoader[] {
-                Thread.currentThread().getContextClassLoader(),
-                ClassUtil.class.getClassLoader()
-        } ) {
-            if (loader != null) {
-                InputStream is = loader.getResourceAsStream(pPath);
-                if (is != null) {
-                    return is;
-                }
-            }
-        }
-        return null;
     }
 }

@@ -84,13 +84,6 @@ public final class OptionsAndArgs {
     // Extra arguments
     private List<String> extraArgs;
 
-    // Either pid or processPattern must be set, but not both
-    // Process id.
-    private String pid;
-
-    // Pattern for matching a process pattern
-    private Pattern processPattern;
-
     private Map<String,String> options;
 
     private boolean quiet;
@@ -357,21 +350,6 @@ public final class OptionsAndArgs {
         }
         verifyCommandAndArgs(command,ret);
         return ret;
-    }
-
-    // Dispatch to either a numeric PID or a pattern matching the process name
-    private void initPid(String pProcess) {
-        if (pProcess != null) {
-            if (pProcess.matches("^\\d+$")) {
-                pid = pProcess;
-            } else {
-                try {
-                    processPattern = Pattern.compile(pProcess, Pattern.CASE_INSENSITIVE);
-                } catch (PatternSyntaxException exp) {
-                    throw new IllegalArgumentException("Invalid pattern '" + pProcess + "' for matching process names",exp);
-                }
-            }
-        }
     }
 
     // A parsed argument
