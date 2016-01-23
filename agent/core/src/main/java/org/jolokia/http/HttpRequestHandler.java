@@ -310,16 +310,18 @@ public class HttpRequestHandler {
     }
 
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JmxRequest pJmxReq) {
-        String includeStackTrace = pJmxReq != null ?
-                pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
-        if (includeStackTrace.equalsIgnoreCase("true") ||
-            (includeStackTrace.equalsIgnoreCase("runtime") && pExp instanceof RuntimeException)) {
-            StringWriter writer = new StringWriter();
-            pExp.printStackTrace(new PrintWriter(writer));
-            pErrorResp.put("stacktrace",writer.toString());
-        }
-        if (pJmxReq != null && pJmxReq.getParameterAsBool(ConfigKey.SERIALIZE_EXCEPTION)) {
-            pErrorResp.put("error_value",backendManager.convertExceptionToJson(pExp,pJmxReq));
+        if (config.getAsBoolean(ConfigKey.ALLOW_ERROR_DETAILS)) {
+            String includeStackTrace = pJmxReq != null ?
+                    pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
+            if (includeStackTrace.equalsIgnoreCase("true") ||
+                (includeStackTrace.equalsIgnoreCase("runtime") && pExp instanceof RuntimeException)) {
+                StringWriter writer = new StringWriter();
+                pExp.printStackTrace(new PrintWriter(writer));
+                pErrorResp.put("stacktrace", writer.toString());
+            }
+            if (pJmxReq != null && pJmxReq.getParameterAsBool(ConfigKey.SERIALIZE_EXCEPTION)) {
+                pErrorResp.put("error_value", backendManager.convertExceptionToJson(pExp, pJmxReq));
+            }
         }
     }
 

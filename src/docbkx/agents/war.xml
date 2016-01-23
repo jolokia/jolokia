@@ -271,6 +271,18 @@
         </td>
       </tr>
       <tr>
+        <td><constant>allowErrorDetails</constant></td>
+        <td>
+          If set to <constant>true</constant> then no error details like a stack trace
+          (when <constant>includeStackTrace</constant> is set) or a serialized exception
+          (when <constant>serializeExceptin</constant> is set) are included. This can be user as
+          a startup option to avoid exposure of error details regardless of other options.
+        </td>
+        <td>
+          Default: <constant>true</constant>
+        </td>
+      </tr>
+      <tr>
         <td><constant>detectorOptions</constant></td>
         <td>
           Extra options passed to an detector after successful

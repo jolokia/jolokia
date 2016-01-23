@@ -123,6 +123,13 @@ public enum ConfigKey {
     SERIALIZE_EXCEPTION("serializeException", true, true, "false"),
 
     /**
+     * Whether expose extended error information like stacktraces or serialized exception
+     * at all. INCLUDE_STACKTRACE and SERIALIZE_EXCEPTION take effect only when ALLOW_ERROR_DETAILS
+     * is set to true. This could be set to false to avoid exposure of internal data.
+     */
+    ALLOW_ERROR_DETAILS("allowErrorDetails", true, false, "true"),
+
+    /**
      * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
      * are created.
      * The allowed values are either "true" in which case the canonical key order (== alphabetical
