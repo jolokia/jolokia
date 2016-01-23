@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.discovery.JolokiaDiscovery;
-import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.*;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
@@ -248,6 +248,60 @@ public class AgentServletTest {
 
         assertTrue(sw.toString().contains("used"));
         servlet.destroy();
+    }
+
+    @Test
+    public void simpleGetWithNoReverseDnsLookupFalse() throws ServletException, IOException {
+        checkNoReverseDns(false,"127.0.0.1");
+    }
+
+    @Test
+    public void simpleGetWithNoReverseDnsLookupTrue() throws ServletException, IOException {
+        checkNoReverseDns(true,"localhost","127.0.0.1");
+    }
+
+    private void checkNoReverseDns(boolean enabled, String ... expectedHosts) throws ServletException, IOException {
+        prepareStandardInitialisation(
+                (Restrictor) null,
+                ConfigKey.RESTRICTOR_CLASS.getKeyValue(),NoDnsLookupRestrictorChecker.class.getName(),
+                ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(),Boolean.toString(enabled));
+        NoDnsLookupRestrictorChecker.expectedHosts = expectedHosts;
+        StringWriter sw = initRequestResponseMocks();
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
+        replay(request, response);
+
+        servlet.doGet(request, response);
+
+        assertFalse(sw.toString().contains("error"));
+        servlet.destroy();
+    }
+
+
+    // Check whether restrictor is called with the proper args
+    public static class NoDnsLookupRestrictorChecker extends AbstractConstantRestrictor {
+
+        static String[] expectedHosts;
+
+        public NoDnsLookupRestrictorChecker() {
+            super(true);
+        }
+
+        @Override
+        public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
+            if (expectedHosts.length != pHostOrAddress.length) {
+                return false;
+            }
+            for (int i = 0; i < expectedHosts.length; i++) {
+                if (!expectedHosts[i].equals(pHostOrAddress[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
     }
 
     @Test
@@ -562,11 +616,15 @@ public class AgentServletTest {
         expect(request.getInputStream()).andReturn(is);
     }
 
-    private void prepareStandardInitialisation(String ... params) throws ServletException {
-        servlet = new AgentServlet(new AllowAllRestrictor());
+    private void prepareStandardInitialisation(Restrictor restrictor, String ... params) throws ServletException {
+        servlet = new AgentServlet(restrictor);
         initConfigMocks(params.length > 0 ? params : null, null,"custom access", null);
         replay(config, context);
         servlet.init(config);
+    }
+
+    private void prepareStandardInitialisation(String ... params) throws ServletException {
+        prepareStandardInitialisation(new AllowAllRestrictor(),params);
     }
 
     private Runnable getStandardResponseSetup() {
@@ -584,8 +642,8 @@ public class AgentServletTest {
             public void run() {
                 expect(request.getHeader("Origin")).andStubReturn(null);
                 expect(request.getHeader("Referer")).andStubReturn(null);
-                expect(request.getRemoteHost()).andReturn("localhost");
-                expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+                expect(request.getRemoteHost()).andStubReturn("localhost");
+                expect(request.getRemoteAddr()).andStubReturn("127.0.0.1");
                 expect(request.getRequestURI()).andReturn("/jolokia/");
                 setupAgentDetailsInitExpectations();
                 expect(request.getParameterMap()).andReturn(null);

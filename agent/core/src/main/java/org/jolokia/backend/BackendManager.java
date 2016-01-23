@@ -211,12 +211,14 @@ public class BackendManager implements AgentDetailsHolder {
     /**
      * Check whether remote access from the given client is allowed.
      *
-     * @param pRemoteHost remote host to check against
+     * @param pRemoteHost remote host to check against. Can be null if no reverse lookup is configured.
      * @param pRemoteAddr alternative IP address
      * @return true if remote access is allowed
      */
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
-        return restrictor.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
+        return restrictor.isRemoteAccessAllowed(pRemoteHost != null ?
+                                                        new String[] { pRemoteHost, pRemoteAddr } :
+                                                        new String[] { pRemoteAddr });
     }
 
     /**

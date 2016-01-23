@@ -280,7 +280,7 @@ public class HttpRequestHandler {
      * @param pOrigin (optional) origin header to check also.
      */
     public void checkAccess(String pHost, String pAddress, String pOrigin) {
-        if (!backendManager.isRemoteAccessAllowed(pHost,pAddress)) {
+        if (!backendManager.isRemoteAccessAllowed(pHost, pAddress)) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
         if (pOrigin != null && !backendManager.isOriginAllowed(pOrigin,true)) {

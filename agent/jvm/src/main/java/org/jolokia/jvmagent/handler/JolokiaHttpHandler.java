@@ -209,7 +209,8 @@ public class JolokiaHttpHandler implements HttpHandler {
         try {
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
-            requestHandler.checkAccess(address.getHostName(), address.getAddress().getHostAddress(),
+            requestHandler.checkAccess(getHostName(address),
+                                       address.getAddress().getHostAddress(),
                                        extractOriginOrReferer(pExchange));
             String method = pExchange.getRequestMethod();
 
@@ -235,8 +236,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // ========================================================================
 
-
-
     // Used for checking origin or referer is an origin policy is enabled
     private String extractOriginOrReferer(HttpExchange pExchange) {
         Headers headers = pExchange.getRequestHeaders();
@@ -245,6 +244,11 @@ public class JolokiaHttpHandler implements HttpHandler {
             origin = headers.getFirst("Referer");
         }
         return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
+    }
+
+    // Return hostnmae of given address, but only when reverse DNS lookups are allowed
+    private String getHostName(InetSocketAddress address) {
+        return configuration.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP) ? address.getHostName() : null;
     }
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) {

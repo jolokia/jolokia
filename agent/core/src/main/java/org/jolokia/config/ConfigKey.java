@@ -93,6 +93,13 @@ public enum ConfigKey {
     POLICY_LOCATION("policyLocation",true,false,"classpath:/jolokia-access.xml"),
 
     /**
+     * Whether a reverse DNS lookup is allowed or not. Reverse DNS lookups might happen for checking
+     * host based restrictions, but might be costly.
+     */
+    // 2.0 : Default to 'false'
+    ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, "true"),
+
+    /**
      * Runtime configuration (i.e. must come in with a request)
      * for ignoring errors during JMX operations and JSON serialization.
      * This works only for certain operations like pattern reads.
@@ -105,6 +112,7 @@ public enum ConfigKey {
      * should be included or "runtime" if only {@link RuntimeException}s should
      * be included. Default is "true"
      */
+    // 2.0: Default to 'false'
     INCLUDE_STACKTRACE("includeStackTrace", true, true, "true"),
 
     /**
@@ -113,6 +121,7 @@ public enum ConfigKey {
      * the response. Default is false.
      */
     SERIALIZE_EXCEPTION("serializeException", true, true, "false"),
+
     /**
      * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
      * are created.

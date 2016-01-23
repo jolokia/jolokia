@@ -47,6 +47,11 @@
         Allow encrypted keystore passwords which can be created with
         the "encrypt" command of the JVM agent.
       </action>
+      <action dev="rhuss" type="add" date="2016-01-18" issue="234">
+        Add new configuration option "allowDnsReverseLookup" which, if set
+        to false, will omit reverse DNS lookups during restrictor checking.
+        Default is "true" (for backwards compatibility).
+      </action>
 
     </release>
     <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">

@@ -125,6 +125,18 @@
         </td>
       </tr>
       <tr>
+        <td><constant>allowDnsReverseLookup</constant></td>
+        <td>
+          Access can be restricted based on the remote host accessing Jolokia. This host can be
+          specified as address or an hostname. However, using the hostname normally requires a reverse
+          DNS lookup which might slow down operations. In order to avoid this reverse DNS lookup
+          set this property to <literal>false</literal>.
+        </td>
+        <td>
+          Default: <constant>true</constant>
+        </td>
+      </tr>
+      <tr>
         <td><constant>debug</constant></td>
         <td>
           Debugging state after startup. Can be changed via

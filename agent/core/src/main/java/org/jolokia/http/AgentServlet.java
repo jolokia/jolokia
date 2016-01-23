@@ -74,6 +74,9 @@ public class AgentServlet extends HttpServlet {
     // Listen for discovery request (if switched on)
     private DiscoveryMulticastResponder discoveryMulticastResponder;
 
+    // whether to allow reverse DNS lookup for checking the remote host
+    private boolean allowDnsReverseLookup;
+
     /**
      * No argument constructor, used e.g. by an servlet
      * descriptor when creating the servlet out of web.xml
@@ -131,6 +134,7 @@ public class AgentServlet extends HttpServlet {
         configMimeType = config.get(ConfigKey.MIME_TYPE);
         backendManager = new BackendManager(config,logHandler, restrictor);
         requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
+        allowDnsReverseLookup = config.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP);
 
         initDiscoveryMulticast(config);
     }
@@ -246,7 +250,8 @@ public class AgentServlet extends HttpServlet {
         JSONAware json = null;
         try {
             // Check access policy
-            requestHandler.checkAccess(pReq.getRemoteHost(), pReq.getRemoteAddr(),
+            requestHandler.checkAccess(allowDnsReverseLookup ? pReq.getRemoteHost() : null,
+                                       pReq.getRemoteAddr(),
                                        getOriginOrReferer(pReq));
 
             // Remember the agent URL upon the first request. Needed for discovery

@@ -104,8 +104,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             // Register us as JolokiaContext
             jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(), this, null);
         }
-
-
     }
 
     /** {@inheritDoc} */
