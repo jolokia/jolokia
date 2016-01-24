@@ -16,11 +16,11 @@
   -->
 
 <config id="config"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
-       xsi:schemaLocation="http://www.jolokia.org/jolokia-spring/schema/config http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd"
-       host="127.0.0.1"
-       order="1000"
-       port="8778"
-       autoStart="false"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
+        xsi:schemaLocation="http://www.jolokia.org/jolokia-spring/schema/config http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd"
+        host="127.0.0.1"
+        order="1000"
+        port="8778"
+        autoStart="false"
        />
