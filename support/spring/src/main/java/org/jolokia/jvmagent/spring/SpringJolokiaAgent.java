@@ -216,6 +216,5 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      *
      * @param pId id to set
      */
-    public void setId(String pId) {
-    }
+    public void setId(String pId) {}
 }
