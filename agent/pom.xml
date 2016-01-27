@@ -53,7 +53,7 @@
         <module>mule</module>
       </modules>
       <activation>
-        <jdk>[1.7,</jdk>
+        <jdk>[1.7,)</jdk>
       </activation>
     </profile>
   </profiles>
