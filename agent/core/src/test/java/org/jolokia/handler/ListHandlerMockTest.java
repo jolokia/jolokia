@@ -22,6 +22,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -42,7 +43,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     @BeforeMethod
     private void createHandler() {
-        handler = new ListHandler(new AllowAllRestrictor());
+        handler = new ListHandler(new AllowAllRestrictor(), new Configuration());
     }
 
     @Test(expectedExceptions = { UnsupportedOperationException.class })

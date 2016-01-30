@@ -138,6 +138,15 @@ public enum ConfigKey {
     CANONICAL_NAMING("canonicalNaming", true, true, "true"),
 
     /**
+     * The format how a value should be included. Possible values are "plain" in which case only the
+     * read value is added (or in case of bulk read requests also the MBean names in a nested structure)
+     * or "tag" in which case the object name is is split up in key-value pairs (+ the special keys 'domain' + 'value')
+     * and added as a map to the value part of the response. This especially well suited for usage with
+     * (time series) databases to directly store the value.
+     */
+    VALUE_FORMAT("valueFormat", true, true, "plain"),
+
+    /**
      * Optional domain name for registering own MBeans
      */
     MBEAN_QUALIFIER("mbeanQualifier", true, false),

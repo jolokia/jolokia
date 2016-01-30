@@ -37,22 +37,19 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since Jun 12, 2009
  */
-public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
+public class VersionHandler extends AbstractJsonRequestHandler<JmxVersionRequest> {
 
-    private final Configuration config;
     private ServerHandle serverHandle;
 
     /**
      * Constructor
-     *
+     *  @param pRestrictor access restrictions
      * @param pConfig configuration holding additional meta data. Might be null.
-     * @param pRestrictor access restrictions
      * @param pServerHandle a server handle as obtained from a {@link org.jolokia.detector.ServerDetector}
      */
-    public VersionHandler(Configuration pConfig, Restrictor pRestrictor, ServerHandle pServerHandle) {
-        super(pRestrictor);
+    public VersionHandler(Restrictor pRestrictor, Configuration pConfig, ServerHandle pServerHandle) {
+        super(pRestrictor, pConfig);
         serverHandle = pServerHandle;
-        config = pConfig;
     }
 
     /** {@inheritDoc} */
@@ -90,6 +87,7 @@ public class VersionHandler extends JsonRequestHandler<JmxVersionRequest> {
 
     private JSONObject configToJSONObject() {
         JSONObject info = new JSONObject();
+        Configuration config = getConfig();
         if (config != null) {
             for (ConfigKey key : ConfigKey.values()) {
                 if (key.isGlobalConfig() && config.containsKey(key)) {

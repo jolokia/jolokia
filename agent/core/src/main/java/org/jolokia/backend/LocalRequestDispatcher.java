@@ -27,7 +27,7 @@ import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
 import org.jolokia.discovery.JolokiaDiscovery;
 import org.jolokia.discovery.JolokiaDiscoveryMBean;
-import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.handler.AbstractJsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JmxRequest;
@@ -88,14 +88,14 @@ public class LocalRequestDispatcher implements RequestDispatcher {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
+        AbstractJsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 
     /** {@inheritDoc} */
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
+        AbstractJsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         return mBeanServerHandler.dispatchRequest(handler, pJmxReq);
     }
 

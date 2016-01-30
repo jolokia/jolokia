@@ -21,12 +21,13 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.config.ConfigKey;
+import org.jolokia.config.*;
 import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.HttpMethod;
+import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,7 +49,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ReadHandler(new AllowAllRestrictor());
+        handler = new ReadHandler(new AllowAllRestrictor(), new Configuration());
         testBeanName = new ObjectName("jolokia:type=test");
     }
 
@@ -64,6 +65,22 @@ public class ReadHandlerTest extends BaseHandlerTest {
         Object res = handler.handleRequest(connection,request);
         verify(connection);
         assertEquals("testValue",res);
+    }
+
+    @Test
+    public void singleBeanSingleAttributeInTagFormat() throws Exception {
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
+                attribute("testAttribute").
+                option(ConfigKey.VALUE_FORMAT,"tag").
+                build();
+
+        MBeanServerConnection connection = createMock(MBeanServerConnection.class);
+        expect(connection.getAttribute(testBeanName,"testAttribute")).andReturn("testValue");
+        replay(connection);
+        JSONObject res = (JSONObject) handler.handleRequest(connection, request);
+        verify(connection);
+
+        verifyTagFormatValue(res,testBeanName,"testValue",ValueFormat.KEY_ATTRIBUTE,"testAttribute");
     }
 
     @Test
@@ -109,6 +126,34 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertEquals("val1",res.get("attr1"));
     }
 
+
+    @Test
+    public void singleBeanMultiAttributesWithTagFormat() throws Exception {
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
+                attributes(Arrays.asList("attr0", "attr1")).
+                option(ConfigKey.VALUE_FORMAT,"tag").
+                build();
+
+        MBeanServer server = createMock(MBeanServer.class);
+        expect(server.isRegistered(testBeanName)).andStubReturn(true);
+        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
+        expect(server.getAttribute(testBeanName,"attr1")).andReturn("val1");
+        replay(server);
+
+        List res = (List) handler.handleRequest(getMBeanServerManager(server),request);
+        verify(server);
+
+        String[][] toCheck = {
+                { "attr0", "val0" },
+                { "attr1", "val1" }
+        };
+        for (int i = 0; i < res.size(); i++) {
+            Map value = (Map) res.get(i);
+            verifyTagFormatValue(value,testBeanName,toCheck[i][1],ValueFormat.KEY_ATTRIBUTE,toCheck[i][0]);
+        }
+    }
+
+
     @Test(expectedExceptions = AttributeNotFoundException.class)
     public void singleBeanMultiAttributesWithAWrongAttributeNameThrowingException() throws Exception {
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
@@ -116,13 +161,17 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 option(ConfigKey.IGNORE_ERRORS, "false").
                 build();
 
+        MBeanServer server = preparteMultiAttributeRequestWithException();
+        handler.handleRequest(getMBeanServerManager(server),request);
+    }
+
+    private MBeanServer preparteMultiAttributeRequestWithException() throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         MBeanServer server = createMock(MBeanServer.class);
         expect(server.isRegistered(testBeanName)).andStubReturn(true);
         expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
         expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
         replay(server);
-
-        Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
+        return server;
     }
 
     @Test
@@ -132,13 +181,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 option(ConfigKey.IGNORE_ERRORS, "true").
                 build();
 
-        MBeanServer server = createMock(MBeanServer.class);
-        expect(server.isRegistered(testBeanName)).andStubReturn(true);
-        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
-        expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
-        replay(server);
-
-
+        MBeanServer server = preparteMultiAttributeRequestWithException();
         Map res = (Map) handler.handleRequest(getMBeanServerManager(server),request);
         verify(server);
         assertEquals("val0",res.get("attr0"));
@@ -146,9 +189,27 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertTrue(err != null && err.contains("ERROR"));
     }
 
+    @Test
+    public void singleBeanMultiAttributesWithAWrongAttributeNameHandlingExceptionAndTagValueFormat() throws Exception {
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName.getCanonicalName()).
+                attributes(Arrays.asList("attr0", "attr1")).
+                option(ConfigKey.IGNORE_ERRORS, "true").
+                option(ConfigKey.VALUE_FORMAT, "tag").
+                build();
+
+        MBeanServer server = preparteMultiAttributeRequestWithException();
+        List res = (List) handler.handleRequest(getMBeanServerManager(server),request);
+        verify(server);
+
+        verifyTagFormatValue((Map) res.get(0), testBeanName, "val0", ValueFormat.KEY_ATTRIBUTE, "attr0");
+        Map errorEntry = (Map) res.get(1);
+        String err = (String) errorEntry.get(ValueFormat.KEY_VALUE);
+        assertTrue(err != null && err.contains("ERROR"));
+    }
+
     // ======================================================================================================
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoMatch() throws Exception {
         ObjectName patternMBean = new ObjectName("bla:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -163,7 +224,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         } catch (InstanceNotFoundException exp) {}
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternSingleAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -184,50 +245,95 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
     }
 
-    @Test(groups = "java6")
+    @Test
+    public void searchPatternSingleAttributeWithTagFormat() throws Exception {
+        ObjectName patternMBean = new ObjectName("java.lang:type=*");
+        JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
+                attribute("mem1").
+                option(ConfigKey.VALUE_FORMAT,"tag").
+                build();
+
+        ObjectName beans[] =  {
+                new ObjectName("java.lang:type=Memory"),
+                new ObjectName("java.lang:type=GarbageCollection")
+        };
+        MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+        expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
+        replay(server);
+        List res = (List) handler.handleRequest(getMBeanServerManager(server), request);
+        verify(server);
+        assertEquals(1,res.size());
+        verifyTagFormatValue((Map) res.get(0),beans[0],"memval1",ValueFormat.KEY_ATTRIBUTE,"mem1");
+    }
+
+    @Test
     public void searchPatternNoAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest[] requests = new JmxReadRequest[2];
-        requests[0] =
-                new JmxRequestBuilder(READ, patternMBean).
-                        attribute(null).
-                        build();
-        requests[1] =
-                new JmxRequestBuilder(READ, patternMBean).
-                        // A single null element is enough to denote "all"
-                        attributes(Arrays.asList((String) null)).
-                        build();
+        for (ValueFormat format : ValueFormat.values()) {
+            requests[0] =
+                    new JmxRequestBuilder(READ, patternMBean).
+                            attribute(null).
+                            option(ConfigKey.VALUE_FORMAT,format.name()).
+                            build();
+            requests[1] =
+                    new JmxRequestBuilder(READ, patternMBean).
+                            // A single null element is enough to denote "all"
+                            attributes(Arrays.asList((String) null)).
+                            option(ConfigKey.VALUE_FORMAT,format.name()).
+                            build();
 
-        for (JmxReadRequest request : requests) {
-            ObjectName beans[] =  {
-                    new ObjectName("java.lang:type=Memory"),
-                    new ObjectName("java.lang:type=GarbageCollection")
-            };
-            MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
-            expect(server.getAttribute(beans[0],"mem0")).andReturn("memval0");
-            expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
-            expect(server.getAttribute(beans[0],"common")).andReturn("commonVal0");
-            expect(server.getAttribute(beans[1],"gc0")).andReturn("gcval0");
-            expect(server.getAttribute(beans[1],"gc1")).andReturn("gcval1");
-            expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
-            expect(server.getAttribute(beans[1],"common")).andReturn("commonVal1");
-            replay(server);
+            for (JmxReadRequest request : requests) {
+                ObjectName beans[] = {
+                        new ObjectName("java.lang:type=Memory"),
+                        new ObjectName("java.lang:type=GarbageCollection")
+                };
+                MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
+                expect(server.getAttribute(beans[0], "mem0")).andReturn("memval0");
+                expect(server.getAttribute(beans[0], "mem1")).andReturn("memval1");
+                expect(server.getAttribute(beans[0], "common")).andReturn("commonVal0");
+                expect(server.getAttribute(beans[1], "gc0")).andReturn("gcval0");
+                expect(server.getAttribute(beans[1], "gc1")).andReturn("gcval1");
+                expect(server.getAttribute(beans[1], "gc3")).andReturn("gcval3");
+                expect(server.getAttribute(beans[1], "common")).andReturn("commonVal1");
+                replay(server);
 
-            Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
+                String[][] expectVals = new String[][] {
+                        { "java.lang:type=Memory", "mem0", "memval0" },
+                        { "java.lang:type=Memory", "mem1", "memval1" },
+                        { "java.lang:type=Memory", "common", "commonVal0" },
+                        { "java.lang:type=GarbageCollection", "gc0", "gcval0" },
+                        { "java.lang:type=GarbageCollection", "gc1", "gcval1" },
+                        { "java.lang:type=GarbageCollection", "gc3", "gcval3" },
+                        { "java.lang:type=GarbageCollection", "common", "commonVal1" }
+                };
 
-            assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
-            assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
-            assertEquals("commonVal0",((Map) res.get("java.lang:type=Memory")).get("common"));
-            assertEquals("gcval0",((Map) res.get("java.lang:type=GarbageCollection")).get("gc0"));
-            assertEquals("gcval1",((Map) res.get("java.lang:type=GarbageCollection")).get("gc1"));
-            assertEquals("gcval3",((Map) res.get("java.lang:type=GarbageCollection")).get("gc3"));
-            assertEquals("commonVal1",((Map) res.get("java.lang:type=GarbageCollection")).get("common"));
+                if (format == ValueFormat.PLAIN) {
+                    Map res = (Map) handler.handleRequest(getMBeanServerManager(server), request);
 
-            verify(server);
+                    for (int i = 0; i < expectVals.length; i++) {
+                        assertEquals(expectVals[i][2],((Map) res.get(expectVals[i][0])).get(expectVals[i][1]));
+                    }
+                 } else {
+                    List<Map> res = (List<Map>) handler.handleRequest(getMBeanServerManager(server), request);
+                    assertEquals(expectVals.length,res.size());
+                    Set<String> expected = new HashSet<String>();
+                    for (int i = 0; i < expectVals.length; i++) {
+                        expected.add(expectVals[i][0] + expectVals[i][1] + expectVals[i][2]);
+                    }
+                    for (Map val : res) {
+                        String key = val.get(ValueFormat.KEY_DOMAIN) + ":type=" + val.get("type") +
+                                     val.get(ValueFormat.KEY_ATTRIBUTE) + val.get(ValueFormat.KEY_VALUE);
+                        assertTrue(expected.contains(key));
+                    }
+                }
+
+                verify(server);
+            }
         }
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoAttributesFound() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -251,9 +357,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         verify(server);
     }
 
-
-
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoMatchingAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -274,7 +378,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         verify(server);
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternMultiAttributes1() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -298,7 +402,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     }
 
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternMultiAttributes3() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -320,7 +424,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         }
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternMultiAttributes4() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JmxReadRequest request = new JmxRequestBuilder(READ, patternMBean).
@@ -358,6 +462,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     }
 
     // ==============================================================================================================
+
     @Test
     public void handleAllServersAtOnceTest() throws MalformedObjectNameException {
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
@@ -386,7 +491,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
         expect(restrictor.isHttpMethodAllowed(HttpMethod.POST)).andReturn(true);
-        handler = new ReadHandler(restrictor);
+        handler = new ReadHandler(restrictor, new Configuration());
 
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
                 attribute("attr").
@@ -404,7 +509,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     public void restrictHttpMethodAccess() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isHttpMethodAllowed(HttpMethod.POST)).andReturn(false);
-        handler = new ReadHandler(restrictor);
+        handler = new ReadHandler(restrictor, new Configuration());
 
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
                 attribute("attr").
@@ -416,6 +521,54 @@ public class ReadHandlerTest extends BaseHandlerTest {
             fail("Restrictor should forbid HTTP Method Access");
         } catch (SecurityException exp) {}
         verify(restrictor,server);
+    }
+
+    @Test
+    public void formatValuePlain() throws MalformedObjectNameException {
+        for (String paramVal : new String[] { null, "plain" }) {
+            JmxReadRequest request =
+                    new JmxRequestBuilder(READ,"testDomain:type1=label1,type2=label2")
+                    .option(ConfigKey.VALUE_FORMAT,paramVal)
+                    .build();
+            String value = (String) handler.formatValue(request, "value");
+            assertEquals("value", value);
+        }
+    }
+
+    @Test
+    public void formatValueTag() throws MalformedObjectNameException {
+        JmxReadRequest request =
+                new JmxRequestBuilder(READ,"testDomain:type1=label1,type2=label2")
+                        .option(ConfigKey.VALUE_FORMAT,"tag")
+                        .build();
+        getAndVerifyValueInTagFormat(request);
+    }
+
+    @Test
+    public void formatValueTagFromConfiguration() throws MalformedObjectNameException {
+        handler = new ReadHandler(new AllowAllRestrictor(), new Configuration(ConfigKey.VALUE_FORMAT,"tag"));
+        JmxReadRequest request =
+                new JmxRequestBuilder(READ,"testDomain:type1=label1,type2=label2")
+                        .option(ConfigKey.VALUE_FORMAT,"tag")
+                        .build();
+        getAndVerifyValueInTagFormat(request);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*bla.*PLAIN.*TAG.*")
+    public void invalidValueFormat() throws Exception {
+        JmxReadRequest request =
+                new JmxRequestBuilder(READ,"testDomain:type1=label1,type2=label2")
+                        .option(ConfigKey.VALUE_FORMAT,"bla")
+                        .build();
+        handler.formatValue(request, "value");
+    }
+    private void getAndVerifyValueInTagFormat(JmxReadRequest request) throws MalformedObjectNameException {
+        JSONObject value = (JSONObject) handler.formatValue(request, "value");
+        assertEquals(4,value.size());
+        assertEquals("testDomain",value.get(ValueFormat.KEY_DOMAIN));
+        assertEquals("value",value.get(ValueFormat.KEY_VALUE));
+        assertEquals("label1",value.get("type1"));
+        assertEquals("label2",value.get("type2"));
     }
 
     // ==============================================================================================================

@@ -6,10 +6,12 @@ import javax.management.*;
 
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
-import org.jolokia.config.ConfigKey;
+import org.jolokia.config.*;
+import org.jolokia.request.JmxObjectNameRequest;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.RequestType;
+import org.json.simple.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -32,14 +34,17 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public abstract class JsonRequestHandler<R extends JmxRequest> {
+public abstract class AbstractJsonRequestHandler<R extends JmxRequest> {
 
     // Restrictor for restricting operations
-
     private final Restrictor restrictor;
 
-    protected JsonRequestHandler(Restrictor pRestrictor) {
+    // Global configuration
+    private final Configuration config;
+
+    protected AbstractJsonRequestHandler(Restrictor pRestrictor, Configuration pConfig) {
         restrictor = pRestrictor;
+        config = pConfig;
     }
 
 
@@ -106,7 +111,6 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
                     getType() + " not allowed due to policy used");
         }
     }
-
 
     /**
      * Check whether the HTTP method with which the request was sent is allowed according to the policy
@@ -199,6 +203,14 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
     }
 
     /**
+     * Get system configuration
+     * @return configuration
+     */
+    public Configuration getConfig() {
+        return config;
+    }
+
+    /**
      * Check, whether the set of MBeans for any managed MBeanServer has been change since the timestamp
      * provided in the given request
      * @param pServerManager manager for all MBeanServers
@@ -211,5 +223,71 @@ public abstract class JsonRequestHandler<R extends JmxRequest> {
         if (!pServerManager.hasMBeansListChangedSince(ifModifiedSince)) {
             throw new NotChangedException(pRequest);
         }
+    }
+
+    /**
+     * Format the value depending on the configuration / processing option 'valueFormat'.
+     * If set to "plain" the value is returned directly, otherwise when set to "tags" an {@link JSONObject} is returned
+     * which
+     * <ul>
+     *     <li>contains the key properties of the objectname as key-value pairs</li>
+     *     <li>an entry with <code>domain</code> key holding the domain part of the object name</li>
+     *     <li>an entry with <code>value</code> key holding the given value</li>
+     * </ul>
+     * @param pRequest request with which this handler was called. Must be {@link JmxObjectNameRequest} if used with
+     *                 format "tag"
+     * @param pValue the value to format
+     * @param pExtraValues extra key-value pairs to add. Must be an even number of parameters.
+     * @return the formatted value
+     * @throws ClassCastException if given request is not a {@link JmxObjectNameRequest}
+     */
+    protected Object formatValue(R pRequest, Object pValue, String ... pExtraValues) {
+        ValueFormat format = getValueFormat(pRequest);
+        if (format == ValueFormat.PLAIN) {
+            return pValue;
+        } else if (format == ValueFormat.TAG) {
+            return asTaggedValueFormat(((JmxObjectNameRequest) pRequest).getObjectName(), pValue, pExtraValues);
+        } else {
+            throw new IllegalArgumentException("No value format '" + format + "' supported. " +
+                                               "Only 'plain' or 'tag' is allowed.");
+        }
+    }
+
+    protected Object asTaggedValueFormat(ObjectName pObjectName, Object pValue, String ... pExtraValues) {
+        // Cast is save since we use this only for handler which deals with object names
+        // If the cast fails, the class cast is an internal error.
+        JSONObject ret = new JSONObject(pObjectName.getKeyPropertyList());
+        ret.put(ValueFormat.KEY_DOMAIN, pObjectName.getDomain());
+        ret.put(ValueFormat.KEY_VALUE, pValue);
+        for (int i = 0; i < pExtraValues.length; i += 2) {
+            if (pExtraValues[i+1] != null) {
+                ret.put(pExtraValues[i], pExtraValues[i + 1]);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Get the value format from processing parameters or global configuration
+     * @param pRequest request holding processing params
+     * @return the value format
+     * @throws  IllegalArgumentException if an invalid value format is given
+     */
+    protected ValueFormat getValueFormat(R pRequest) {
+        return ValueFormat.parseString(getParamWithConfigAsFallback(pRequest,ValueFormat.KEY));
+    }
+    /**
+     * Get a processing parameter and, if not provided, use a global configuration as fallback.
+     *
+     * @param pRequest the given request holding the processing parameters
+     * @param pKey the key to lookup
+     * @return the value which can come from: processing parameter, global configuration, default value.
+     */
+    protected String getParamWithConfigAsFallback(R pRequest, ConfigKey pKey) {
+        String format = pRequest.getParameter(pKey);
+        if (format == null) {
+            format = config.get(pKey);
+        }
+        return format;
     }
 }

@@ -29,7 +29,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.converter.Converters;
 import org.jolokia.detector.ServerHandle;
-import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.handler.AbstractJsonRequestHandler;
 import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
@@ -73,7 +73,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     public Object dispatchRequest(JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
 
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
+        AbstractJsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxReq.getType());
         JMXConnector connector = null;
         try {
             connector = createConnector(pJmxReq);
@@ -142,7 +142,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     /** {@inheritDoc} */
     public boolean useReturnValueWithPath(JmxRequest pJmxRequest) {
-        JsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
+        AbstractJsonRequestHandler handler = requestHandlerManager.getRequestHandler(pJmxRequest.getType());
         return handler.useReturnValueWithPath();
     }
 }

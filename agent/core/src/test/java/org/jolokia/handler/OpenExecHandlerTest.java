@@ -7,6 +7,8 @@ import javax.management.*;
 import javax.management.openmbean.CompositeData;
 
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.*;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.*;
 import org.jolokia.request.JmxExecRequest;
 import org.jolokia.request.JmxRequestBuilder;
@@ -39,7 +41,7 @@ public class OpenExecHandlerTest {
 	
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ExecHandler(new AllowAllRestrictor(),new Converters());
+        handler = new ExecHandler(new AllowAllRestrictor(), new Configuration(), new Converters());
     }
 
     @BeforeTest

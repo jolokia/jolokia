@@ -23,19 +23,24 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.*;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.testng.Assert;
 import org.testng.annotations.*;
 
 import static org.jolokia.util.RequestType.EXEC;
 import static org.testng.Assert.*;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 /**
  * @author roland
  * @since 19.04.11
  */
-public class ExecHandlerTest {
+public class ExecHandlerTest extends BaseHandlerTest {
 
     private ExecHandler handler;
 
@@ -43,7 +48,7 @@ public class ExecHandlerTest {
 
     @BeforeMethod
     public void createHandler() throws MalformedObjectNameException {
-        handler = new ExecHandler(new AllowAllRestrictor(),new Converters());
+        handler = new ExecHandler(new AllowAllRestrictor(), new Configuration(), new Converters());
     }
 
     @BeforeTest
@@ -69,6 +74,17 @@ public class ExecHandlerTest {
         assertEquals(handler.getType(), EXEC);
         Object res = handler.handleRequest(getMBeanServer(),request);
         assertNull(res);
+    }
+
+    @Test
+    public void simpleWithTagValue() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC, oName).
+                operation("simple").
+                option(ConfigKey.VALUE_FORMAT,"tag").
+                build();
+        assertEquals(handler.getType(), EXEC);
+        Object res = handler.handleRequest(getMBeanServer(),request);
+        verifyTagFormatValue((Map) res,oName,null,ValueFormat.KEY_OPERATION,"simple");
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
@@ -109,6 +125,31 @@ public class ExecHandlerTest {
         assertTrue((Boolean) result.get("boolean"));
     }
 
+    @Test
+    public void execWithArgumentsAndReturnInTaggedFormat() throws Exception {
+        ArrayList list = new ArrayList();
+        list.add("wollscheid");
+
+        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+                operation("withArgs").
+                arguments(10L,list,Boolean.TRUE).
+                option(ConfigKey.VALUE_FORMAT,"tag").
+                build();
+        Map result = (Map) handler.handleRequest(getMBeanServer(),request);
+        assertEquals(oName.getKeyPropertyList().size() + 4, result.size());
+        assertEquals(oName.getDomain(), result.get(ValueFormat.KEY_DOMAIN));
+        Map<String,String> props = oName.getKeyPropertyList();
+        for (Map.Entry<String,String> entry : props.entrySet()) {
+            assertEquals(entry.getValue(), result.get(entry.getKey()));
+        }
+        assertEquals("withArgs", result.get(ValueFormat.KEY_OPERATION));
+        assertEquals("[10, [wollscheid], true]", result.get(ValueFormat.KEY_ARGUMENTS));
+        Map value = (Map) result.get(ValueFormat.KEY_VALUE);
+        assertEquals(10L,value.get("long"));
+        assertArrayEquals(list.toArray(),new ArrayList((List) value.get("list")).toArray());
+        assertEquals(Boolean.TRUE,value.get("boolean"));
+    }
+
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void overloadedFailed() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
@@ -139,6 +180,18 @@ public class ExecHandlerTest {
                 build();
         res = (Integer) handler.handleRequest(getMBeanServer(),request);
         assertEquals(res,Integer.valueOf(3));
+    }
+
+    @Test
+    public void overloadedTagValueFormat() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
+        JmxExecRequest request = new JmxRequestBuilder(EXEC,oName).
+                operation("overloaded(int)").
+                arguments(10).
+                option(ConfigKey.VALUE_FORMAT,"tag").
+                build();
+        Map res = (Map) handler.handleRequest(getMBeanServer(),request);
+        verifyTagFormatValue(res,oName,Integer.valueOf(1),ValueFormat.KEY_OPERATION,"overloaded(int)",
+                             ValueFormat.KEY_ARGUMENTS,"[10]");
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })

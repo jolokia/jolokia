@@ -13,7 +13,7 @@ import org.jolokia.backend.plugin.MBeanPluginContext;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.detector.*;
-import org.jolokia.handler.JsonRequestHandler;
+import org.jolokia.handler.AbstractJsonRequestHandler;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.ServiceObjectFactory;
@@ -146,7 +146,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      * @param pJmxReq the request to dispatch
      * @return the result of the request
      */
-    public Object dispatchRequest(JsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
+    public Object dispatchRequest(AbstractJsonRequestHandler pRequestHandler, JmxRequest pJmxReq)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException {
         serverHandle.preDispatch(mBeanServerManager,pJmxReq);
         if (pRequestHandler.handleAllServersAtOnce(pJmxReq)) {

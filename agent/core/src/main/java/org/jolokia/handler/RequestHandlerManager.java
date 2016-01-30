@@ -35,7 +35,7 @@ import org.jolokia.util.RequestType;
 public class RequestHandlerManager {
 
     // Map with all json request handlers
-    private final Map<RequestType, JsonRequestHandler> requestHandlerMap = new HashMap<RequestType, JsonRequestHandler>();
+    private final Map<RequestType, AbstractJsonRequestHandler> requestHandlerMap = new HashMap<RequestType, AbstractJsonRequestHandler>();
 
     /**
      * Manager and dispatcher for incoming requests
@@ -46,15 +46,15 @@ public class RequestHandlerManager {
      * @param pRestrictor handler for access restrictions
      */
     public RequestHandlerManager(Configuration pConfig, Converters pConverters, ServerHandle pServerHandle, Restrictor pRestrictor) {
-        JsonRequestHandler handlers[] = {
-                new ReadHandler(pRestrictor),
-                new WriteHandler(pRestrictor, pConverters),
-                new ExecHandler(pRestrictor, pConverters),
-                new ListHandler(pRestrictor),
-                new VersionHandler(pConfig,pRestrictor, pServerHandle),
-                new SearchHandler(pRestrictor)
+        AbstractJsonRequestHandler handlers[] = {
+                new ReadHandler(pRestrictor, pConfig),
+                new WriteHandler(pRestrictor, pConfig, pConverters),
+                new ExecHandler(pRestrictor, pConfig, pConverters),
+                new ListHandler(pRestrictor, pConfig),
+                new VersionHandler(pRestrictor, pConfig, pServerHandle),
+                new SearchHandler(pRestrictor, pConfig)
         };
-        for (JsonRequestHandler handler : handlers) {
+        for (AbstractJsonRequestHandler handler : handlers) {
             requestHandlerMap.put(handler.getType(),handler);
         }
     }
@@ -76,8 +76,8 @@ public class RequestHandlerManager {
      * @param pType type of request
      * @return handler which can handle requests of the given type
      */
-    public JsonRequestHandler getRequestHandler(RequestType pType) {
-        JsonRequestHandler handler = requestHandlerMap.get(pType);
+    public AbstractJsonRequestHandler getRequestHandler(RequestType pType) {
+        AbstractJsonRequestHandler handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");
         }

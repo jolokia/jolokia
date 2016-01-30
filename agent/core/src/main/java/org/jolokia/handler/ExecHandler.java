@@ -25,6 +25,7 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.*;
 import org.jolokia.request.*;
 import org.jolokia.restrictor.Restrictor;
@@ -37,7 +38,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
+public class ExecHandler extends AbstractJsonRequestHandler<JmxExecRequest> {
 
     private Converters converters;
 
@@ -46,8 +47,8 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
      * @param pRestrictor restrictor for checking access restrictions
      * @param pConverters converters for serialization
      */
-    public ExecHandler(Restrictor pRestrictor, Converters pConverters) {
-        super(pRestrictor);
+    public ExecHandler(Restrictor pRestrictor, Configuration pConfig, Converters pConverters) {
+        super(pRestrictor, pConfig);
         converters = pConverters;
     }
 
@@ -95,7 +96,10 @@ public class ExecHandler extends JsonRequestHandler<JmxExecRequest> {
         }
 
         // TODO: Maybe allow for a path as well which could be applied on the return value ...
-        return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
+        Object ret = server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
+
+        String arguments = request.getArguments() != null ? request.getArguments().toString() : null;
+        return formatValue(request,ret,ValueFormat.KEY_OPERATION,request.getOperation(),ValueFormat.KEY_ARGUMENTS,arguments);
     }
 
     // check whether the given arguments are compatible with the signature and if not so, raise an excepton

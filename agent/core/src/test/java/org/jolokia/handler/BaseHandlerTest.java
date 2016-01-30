@@ -19,9 +19,13 @@ package org.jolokia.handler;
 import java.util.*;
 
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 
 import org.jolokia.backend.executor.AbstractMBeanServerExecutor;
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.json.simple.JSONObject;
+
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author roland
@@ -36,5 +40,18 @@ public class BaseHandlerTest {
                 return new HashSet<MBeanServerConnection>(Arrays.asList(connections));
             }
         };
+    }
+
+    protected void verifyTagFormatValue(Map res, ObjectName oName, Object expectedValue, String ... extraValues) {
+        assertEquals(oName.getKeyPropertyList().size() + 2 + (extraValues.length / 2), res.size());
+        assertEquals(oName.getDomain(), res.get(ValueFormat.KEY_DOMAIN));
+        Map<String,String> props = oName.getKeyPropertyList();
+        for (Map.Entry<String,String> entry : props.entrySet()) {
+            assertEquals(entry.getValue(),res.get(entry.getKey()));
+        }
+        for (int i = 0; i < extraValues.length; i+=2) {
+            assertEquals(extraValues[i+1],res.get(extraValues[i]));
+        }
+        assertEquals(expectedValue, res.get(ValueFormat.KEY_VALUE));
     }
 }

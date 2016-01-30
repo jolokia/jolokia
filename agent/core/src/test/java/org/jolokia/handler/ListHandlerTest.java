@@ -26,10 +26,11 @@ import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.MBeanServerExecutorLocal;
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.*;
+import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
-import org.jolokia.config.ConfigKey;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;
 
@@ -47,7 +48,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @BeforeMethod
     private void createHandler() {
-        handler = new ListHandler(new AllowAllRestrictor());
+        handler = new ListHandler(new AllowAllRestrictor(), new Configuration());
         executor = new MBeanServerExecutorLocal();
     }
 

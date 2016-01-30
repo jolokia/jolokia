@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class encapsulating parametrs used during processing
+ * Class encapsulating parameters used during processing
  *
  * @author roland
  * @since 07.02.13
@@ -34,10 +34,10 @@ public class ProcessingParameters {
     private String pathInfo;
 
     /**
-     * Constructor which is already filtered and splitted
+     * Constructor which is already filtered and split
      *
      * @param pConfig configuration to use
-     * @param pPathInfo optional pathinfo
+     * @param pPathInfo optional path info
      */
     ProcessingParameters(Map<ConfigKey, String> pConfig, String pPathInfo) {
         params = pConfig;

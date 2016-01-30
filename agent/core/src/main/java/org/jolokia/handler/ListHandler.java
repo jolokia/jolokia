@@ -9,6 +9,7 @@ import javax.management.*;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import org.jolokia.handler.list.MBeanInfoData;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -39,7 +40,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class ListHandler extends JsonRequestHandler<JmxListRequest> {
+public class ListHandler extends AbstractJsonRequestHandler<JmxListRequest> {
 
 
     /** {@inheritDoc} */
@@ -52,8 +53,8 @@ public class ListHandler extends JsonRequestHandler<JmxListRequest> {
      *
      * @param pRestrictor restrictor to apply
      */
-    public ListHandler(Restrictor pRestrictor) {
-        super(pRestrictor);
+    public ListHandler(Restrictor pRestrictor, Configuration pConfig) {
+        super(pRestrictor, pConfig);
     }
 
     /**

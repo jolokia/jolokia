@@ -23,6 +23,8 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.config.*;
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxWriteRequest;
@@ -37,7 +39,7 @@ import static org.testng.AssertJUnit.assertEquals;
  * @author roland
  * @since 21.04.11
  */
-public class WriteHandlerTest {
+public class WriteHandlerTest extends BaseHandlerTest {
 
     private WriteHandler handler;
 
@@ -45,7 +47,7 @@ public class WriteHandlerTest {
 
     @BeforeTest
     public void createHandler() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
-        handler = new WriteHandler(new AllowAllRestrictor(),new Converters());
+        handler = new WriteHandler(new AllowAllRestrictor(), new Configuration(), new Converters());
 
         oName = new ObjectName("jolokia:test=write");
 
@@ -74,6 +76,23 @@ public class WriteHandlerTest {
         assertEquals(ret,new Integer(10));
         assertEquals(handler.getType(),WRITE);
         assertFalse(handler.useReturnValueWithPath());
+    }
+
+    @Test
+    public void simpleWithTagValue() throws Exception {
+        JmxWriteRequest req =
+                new JmxRequestBuilder(WRITE,oName)
+                        .attribute("Simple")
+                        .value("10")
+                        .build();
+        handler.doHandleRequest(getMBeanServer(),req);
+        req = new JmxRequestBuilder(WRITE,oName)
+                .attribute("Simple")
+                .value("20")
+                .option(ConfigKey.VALUE_FORMAT,ValueFormat.TAG.name())
+                .build();
+        Map ret = (Map) handler.doHandleRequest(getMBeanServer(),req);
+        verifyTagFormatValue(ret,oName,new Integer(10),ValueFormat.KEY_ATTRIBUTE,"Simple");
     }
 
     @Test

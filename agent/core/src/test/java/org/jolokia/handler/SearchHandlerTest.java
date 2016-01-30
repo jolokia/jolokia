@@ -22,6 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.request.JmxSearchRequest;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -46,7 +47,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
     @BeforeMethod
     public void setup() {
-        handler = new SearchHandler(new AllowAllRestrictor());
+        handler = new SearchHandler(new AllowAllRestrictor(), new Configuration());
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)

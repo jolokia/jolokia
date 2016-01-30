@@ -7,6 +7,7 @@ import java.util.List;
 import javax.management.*;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 
+import org.jolokia.config.Configuration;
 import org.jolokia.converter.Converters;
 import org.jolokia.request.JmxWriteRequest;
 import org.jolokia.restrictor.Restrictor;
@@ -35,7 +36,7 @@ import org.jolokia.util.RequestType;
  * @author roland
  * @since Jun 12, 2009
  */
-public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
+public class WriteHandler extends AbstractJsonRequestHandler<JmxWriteRequest> {
 
     private Converters converters;
 
@@ -45,8 +46,8 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
      * @param pRestrictor access restriction to apply
      * @param pConverters converters used for serialization
      */
-    public WriteHandler(Restrictor pRestrictor, Converters pConverters) {
-        super(pRestrictor);
+    public WriteHandler(Restrictor pRestrictor, Configuration pConfig, Converters pConverters) {
+        super(pRestrictor, pConfig);
         converters = pConverters;
     }
 
@@ -110,7 +111,7 @@ public class WriteHandler extends JsonRequestHandler<JmxWriteRequest> {
         }
         Attribute attribute = new Attribute(request.getAttributeName(),values[0]);
         server.setAttribute(request.getObjectName(),attribute);
-        return values[1];
+        return formatValue(request,values[1],ValueFormat.KEY_ATTRIBUTE,request.getAttributeName());
     }
 
     /**
