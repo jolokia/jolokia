@@ -1,6 +1,8 @@
 package org.jolokia.server.core.osgi;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -188,7 +190,7 @@ public class OsgiAgentActivator implements BundleActivator {
             if (config == null) {
                 return null;
             }
-            Dictionary props = config.getProperties();
+            Dictionary<?, ?> props = config.getProperties();
             if (props == null) {
                 return null;
             }
@@ -211,8 +213,70 @@ public class OsgiAgentActivator implements BundleActivator {
     }
 
     private Authenticator createAuthenticator() {
+        Authenticator authenticator = createCustomAuthenticator();
+        if (authenticator == null) {
+            authenticator = createAuthenticatorFromAuthMode();
+        }
+        return authenticator;
+    }
+
+    private Authenticator createCustomAuthenticator() {
+        final String authenticatorClass = getConfiguration(ConfigKey.AUTH_CLASS);
+        if (authenticatorClass != null) {
+            try {
+                Class<?> authClass = Class.forName(authenticatorClass);
+                if (!Authenticator.class.isAssignableFrom(authClass)) {
+                    throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
+                                                       "] is not a subclass of Authenticator");
+                }
+                return lookupAuthenticator(authClass);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Cannot find authenticator class", e);
+            }
+        }
+        return null;
+    }
+
+    private Authenticator lookupAuthenticator(final Class<?> pAuthClass) {
+        Authenticator authenticator = null;
+        try {
+            // prefer constructor that takes configuration
+            try {
+                final Constructor<?> constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+                authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(getConfiguration());
+            } catch (NoSuchMethodException ignore) {
+                // Next try
+                authenticator = lookupAuthenticatorWithDefaultConstructor(pAuthClass, ignore);
+            } catch (InvocationTargetException e) {
+                throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
+            }
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+        }
+        return authenticator;
+    }
+
+    private Authenticator lookupAuthenticatorWithDefaultConstructor(final Class<?> pAuthClass, final NoSuchMethodException ignore)
+            throws InstantiationException, IllegalAccessException {
+
+        // fallback to default constructor
+        try {
+            final Constructor<?> defaultConstructor = pAuthClass.getConstructor();
+            return (Authenticator) defaultConstructor.newInstance();
+        } catch (NoSuchMethodException e) {
+            e.initCause(ignore);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
+        } catch (InvocationTargetException e) {
+            e.initCause(ignore);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
+        }
+    }
+
+    private Authenticator createAuthenticatorFromAuthMode() {
         Authenticator authenticator;
-        String authMode = getConfiguration(AUTH_MODE);
+        final String authMode = getConfiguration(AUTH_MODE);
         if ("basic".equalsIgnoreCase(authMode)) {
             authenticator = new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
         } else if ("jaas".equalsIgnoreCase(authMode)) {

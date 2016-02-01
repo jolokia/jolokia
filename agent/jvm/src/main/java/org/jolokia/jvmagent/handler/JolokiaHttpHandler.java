@@ -21,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.security.cert.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -147,7 +146,7 @@ public class JolokiaHttpHandler implements HttpHandler {
 
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
-            requestHandler.checkAccess(address.getHostName(),
+            requestHandler.checkAccess(getHostName(address),
                                        address.getAddress().getHostAddress(),
                                        extractOriginOrReferer(pExchange));
             String method = pExchange.getRequestMethod();
@@ -198,6 +197,11 @@ public class JolokiaHttpHandler implements HttpHandler {
             origin = headers.getFirst("Referer");
         }
         return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
+    }
+
+    // Return hostname of given address, but only when reverse DNS lookups are allowed
+    private String getHostName(InetSocketAddress address) {
+        return configuration.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP) ? address.getHostName() : null;
     }
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {

@@ -62,6 +62,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    status    -- Show status of an (potentially) attached agent\n" +
 "    toggle    -- Toggle between start/stop (default when no command is given)\n" +
 "    list      -- List all attachable Java processes (default when no argument is given at all)\n" +
+"    encrypt   -- Encrypt a password which is given as argument or read from standard input\n" +
 "\n" +
 "[options] are used for providing runtime information for attaching the agent:\n" +
 "\n" +
@@ -107,6 +108,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response\n" +
 "    --maxObjects <nr>               Maximum number of objects to consider for serialization\n" +
+"    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath\n" +
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +

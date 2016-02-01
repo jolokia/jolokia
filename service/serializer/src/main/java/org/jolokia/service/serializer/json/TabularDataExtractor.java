@@ -175,9 +175,10 @@ public class TabularDataExtractor implements Extractor {
 
     // Convert tabular data to (nested) maps. Path access is allowed here
     private Object convertToMaps(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter) throws AttributeNotFoundException {
+        JSONObject ret = new JSONObject();
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
-        JSONObject ret = new JSONObject();
+
         boolean found = false;
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
             Stack<String> path = (Stack<String>) pExtraArgs.clone();
@@ -198,7 +199,7 @@ public class TabularDataExtractor implements Extractor {
                 // Ignoring filtered attributes
             }
         }
-        if (!found) {
+        if (!pTd.isEmpty() && !found) {
             throw new ValueFaultHandler.AttributeFilteredException();
         }
         return ret;
@@ -321,7 +322,7 @@ public class TabularDataExtractor implements Extractor {
                 }
             }
         }
-        if (ret.isEmpty()) {
+        if (!pTd.isEmpty() && ret.isEmpty()) {
             // Bubble up if not a single thingy has been found
             throw new ValueFaultHandler.AttributeFilteredException();
         }

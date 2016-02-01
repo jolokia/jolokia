@@ -22,7 +22,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.jvmagent.security.*;
@@ -417,12 +420,27 @@ public class JolokiaServerConfig {
         useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
 
         String password = agentConfig.get("keystorePassword");
-        keystorePassword =  password != null ? password.toCharArray() : new char[0];
+        keystorePassword =  password != null ? decipherPasswordIfNecessary(password) : new char[0];
 
         serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
         clientPrincipals = extractList(agentConfig,"clientPrincipal");
         String xCheck = agentConfig.get("extendedClientCheck");
         extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
+    }
+
+    private char[] decipherPasswordIfNecessary(String password) {
+        Matcher encryptedPasswordMatcher = Pattern.compile("^\\[\\[(.*)]]$").matcher(password);
+        if (encryptedPasswordMatcher.matches()) {
+            String encryptedPassword = encryptedPasswordMatcher.group(1);
+            try {
+                JolokiaCipher jolokiaCipher = new JolokiaCipher();
+                return jolokiaCipher.decrypt(encryptedPassword).toCharArray();
+            } catch (GeneralSecurityException e) {
+                throw new IllegalArgumentException("Cannot decrypt password " + encryptedPassword);
+            }
+        } else {
+            return password.toCharArray();
+        }
     }
 
     // Extract list from multiple string entries. <code>null</code> if no such config is given

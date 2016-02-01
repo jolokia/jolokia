@@ -50,7 +50,7 @@ public final class OptionsAndArgs {
             // Jolokia options:
             "historyMaxEntries", "debug!", "debugMaxEntries",
             "dispatcherClasses", "maxDepth", "maxCollectionSize",
-            "maxObjects", "policyLocation", "mbeanQualifier",
+            "maxObjects", "restrictorClass", "policyLocation", "mbeanQualifier",
             "canonicalNaming", "includeStackTrace", "serializeException",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
             // Others:
@@ -74,15 +74,15 @@ public final class OptionsAndArgs {
         }
     }
 
+    // Command which require a PID as argument
+    private static final Set<String> COMMANDS_REQUIRING_PID =
+            new HashSet<String>(Arrays.asList("start","stop","toggle","status"));
+
     // Launcher command
     private String command;
 
-    // Either pid or processPattern must be set, but not both
-    // Process id.
-    private String pid;
-
-    // Pattern for matching a process pattern
-    private Pattern processPattern;
+    // Extra arguments
+    private List<String> extraArgs;
 
     private Map<String,String> options;
 
@@ -108,7 +108,7 @@ public final class OptionsAndArgs {
      * @param pArgs arguments as given on the command line
      * @throws IllegalArgumentException if parsing fails
      */
-    public OptionsAndArgs(Set<String> pCommands,String ... pArgs) {
+    public OptionsAndArgs(Set<String> pCommands, String ... pArgs) {
         options = new HashMap<String, String>();
 
         // Parse options
@@ -128,10 +128,10 @@ public final class OptionsAndArgs {
                 arguments.add(arg);
             }
         }
-        command = arguments.size() > 0 ? arguments.get(0) : null;
-        String pidArg = arguments.size() > 1 ? arguments.get(1) : null;
+        command = arguments.size() > 0 ? arguments.remove(0) : null;
+        String[] args = arguments.size() > 0 ? arguments.toArray(new String[0]) : new String[0];
 
-        init(pCommands, pidArg);
+        init(pCommands, args);
     }
 
     /**
@@ -157,7 +157,8 @@ public final class OptionsAndArgs {
      * @return process id or null
      */
     public String getPid() {
-        return pid;
+        String arg = extraArgs.size() > 0 ? extraArgs.get(0) : null;
+        return arg != null && arg.matches("^\\d+$") ? arg : null;
     }
 
     /**
@@ -167,7 +168,15 @@ public final class OptionsAndArgs {
      * @return pattern to match a process name or null
      */
     public Pattern getProcessPattern() {
-        return processPattern;
+        String arg = extraArgs.size() > 0 ? extraArgs.get(0) : null;
+        try {
+            return arg != null && getPid() == null ?
+                    Pattern.compile(arg, Pattern.CASE_INSENSITIVE)
+                    : null;
+        } catch (PatternSyntaxException exp) {
+            throw new IllegalArgumentException("Invalid pattern '" + arg + "' for matching process names", exp);
+        }
+
     }
 
     /**
@@ -177,6 +186,13 @@ public final class OptionsAndArgs {
      */
     public String getCommand() {
         return command;
+    }
+
+    /**
+     * Get extra arguments in addition to the command, or an empty list
+     */
+    public List<String> getExtraArgs() {
+        return extraArgs;
     }
 
     /**
@@ -194,6 +210,15 @@ public final class OptionsAndArgs {
      */
     public boolean isVerbose() {
         return verbose;
+    }
+
+    /**
+     * Return <code>true</code> if this command required a attached VM or <code>false</code> otherwise
+     *
+     * @return true if the command requires an attached VM
+     */
+    public boolean needsVm() {
+        return COMMANDS_REQUIRING_PID.contains(command) || "list".equals(command);
     }
 
     /**
@@ -264,7 +289,7 @@ public final class OptionsAndArgs {
             opt = matcher.group(1);
             value = matcher.group(2);
         }
-        
+
         if (OPTIONS.contains(opt)) {
             verifyOptionWithArgument(opt, value, pNextArgument);
             return value != null ? new ArgParsed(opt, value, false) : new ArgParsed(opt,pNextArgument,true);
@@ -296,57 +321,35 @@ public final class OptionsAndArgs {
     }
 
     // Initialise default command and validate
-    private void init(Set<String> pCommands, String pArg) {
+    private void init(Set<String> pCommands, String ... pArgs) {
         quiet = options.containsKey("quiet");
         verbose = options.containsKey("verbose");
         jarFile = lookupJarFile();
 
         // Special cases first
-        String process = checkCommand(pCommands, pArg);
-        initPid(process);
-        verifyCommandAndProcess();
+        extraArgs = checkCommandAndArgs(pCommands, pArgs);
     }
 
-    // Command which dont need an argument
-    private static final Set<String> COMMANDS_WITHOUT_PID =
-            new HashSet<String>(Arrays.asList("list","help","version"));
-    
-    private void verifyCommandAndProcess() {
-        if (!COMMANDS_WITHOUT_PID.contains(command) &&
-            pid == null &&
-            processPattern == null) {
-                throw new IllegalArgumentException("No process id (PID) or pattern given");
-        }
+    private void verifyCommandAndArgs(String pCommand, List<String> pArgs) {
+        if (COMMANDS_REQUIRING_PID.contains(pCommand) && pArgs.size() == 0) {
+            throw new IllegalArgumentException("No process id (PID) or pattern given");
+        };
     }
 
-    private String checkCommand(Set<String> pCommands, String pProcess) {
-        String ret = pProcess;
+    private List<String> checkCommandAndArgs(Set<String> pCommands, String ... pArgs) {
+        List<String> ret = new ArrayList<String>(Arrays.asList(pArgs));
         if (options.containsKey("help")) {
             command = "help";
         } else if (options.containsKey("version")) {
             command = "version";
-        } else if (command != null && pProcess == null && !pCommands.contains(command)) {
-            ret = command;
+        } else if (command != null && pArgs.length == 0 && !pCommands.contains(command)) {
+            ret.add(command);
             command = "toggle";
-        } else if (command == null && pProcess == null) {
+        } else if (command == null && pArgs.length == 0) {
             command = "list";
         }
+        verifyCommandAndArgs(command,ret);
         return ret;
-    }
-
-    // Dispatch to either a numeric PID or a pattern matching the process name
-    private void initPid(String pProcess) {
-        if (pProcess != null) {
-            if (pProcess.matches("^\\d+$")) {
-                pid = pProcess;
-            } else {
-                try {
-                    processPattern = Pattern.compile(pProcess, Pattern.CASE_INSENSITIVE);
-                } catch (PatternSyntaxException exp) {
-                    throw new IllegalArgumentException("Invalid pattern '" + pProcess + "' for matching process names",exp);
-                }
-            }
-        }
     }
 
     // A parsed argument

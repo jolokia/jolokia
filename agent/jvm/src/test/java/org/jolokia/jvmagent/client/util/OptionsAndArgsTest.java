@@ -16,8 +16,7 @@ package org.jolokia.jvmagent.client.util;
  * limitations under the License.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
@@ -91,7 +90,7 @@ public class OptionsAndArgsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown option.*")
     public void unknownOption() {
-        opts("--blubber","bla");
+        opts("--blubber", "bla");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*short option.*")
@@ -114,7 +113,7 @@ public class OptionsAndArgsTest {
         OptionsAndArgs o = opts();
         assertEquals(o.getCommand(),"list");
         o = opts("12");
-        assertEquals(o.getCommand(),"toggle");
+        assertEquals(o.getCommand(), "toggle");
     }
 
     @Test
@@ -128,6 +127,15 @@ public class OptionsAndArgsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Invalid pattern.*")
     public void invalidPattern() {
-        opts("start","i+*");
+        OptionsAndArgs o = opts("start", "i+*");
+        o.getProcessPattern();
+    }
+
+    @Test
+    public void encrypt() {
+        OptionsAndArgs o = opts("encrypt", "passwd");
+        assertEquals(o.getCommand(), "encrypt");
+        assertEquals(o.getExtraArgs(), Arrays.asList("passwd"));
+
     }
 }

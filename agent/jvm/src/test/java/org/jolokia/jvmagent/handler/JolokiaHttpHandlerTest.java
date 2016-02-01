@@ -155,6 +155,64 @@ public class JolokiaHttpHandlerTest {
         assertTrue(((String) resp.get("error")).contains("PUT"));
     }
 
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
+    public void handlerNotStarted() throws URISyntaxException, IOException {
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getConfig());
+        newHandler.doHandle(prepareExchange("http://localhost:8080/"));
+
+    }
+
+    @Test
+    public void customRestrictor() throws URISyntaxException, IOException, ParseException {
+        System.setProperty("jolokia.test1.policy.location","access-restrictor.xml");
+        System.setProperty("jolokia.test2.policy.location","access-restrictor");
+        for (String[] params : new String[][] {
+                {"classpath:/access-restrictor.xml","not allowed"},
+                {"file:///not-existing.xml","No access"},
+                {"classpath:/${prop:jolokia.test1.policy.location}", "not allowed"},
+                {"classpath:/${prop:jolokia.test2.policy.location}.xml", "not allowed"}
+        }) {
+            Configuration config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
+            JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+            HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+            // Simple GET method
+            expect(exchange.getRequestMethod()).andReturn("GET");
+            Headers header = new Headers();
+            ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+            newHandler.start(false);
+            try {
+                newHandler.doHandle(exchange);
+            } finally {
+                newHandler.stop();
+            }
+            JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+            assertTrue(resp.containsKey("error"));
+            assertTrue(((String) resp.get("error")).contains(params[1]));
+        }
+    }
+
+    @Test
+    public void customLogHandler1() throws Exception {
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(), new CustomLogHandler());
+        handler.start(false);
+        handler.stop();
+        assertTrue(CustomLogHandler.infoCount  > 0);
+    }
+
+    @Test
+    public void customLogHandler2() throws Exception {
+        CustomLogHandler.infoCount = 0;
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.LOGHANDLER_CLASS,CustomLogHandler.class.getName()));
+        handler.start(false);
+        handler.stop();
+        assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void invalidCustomLogHandler() throws Exception {
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.LOGHANDLER_CLASS,InvalidLogHandler.class.getName()));
+    }
+
     @Test
     public void simlePostRequestWithCors() throws URISyntaxException, IOException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia",
@@ -222,6 +280,23 @@ public class JolokiaHttpHandlerTest {
         replay(exchange);
         return out;
     }
+
+    private JSONObject simpleMemoryGetReadRequest(Configuration config) throws URISyntaxException, IOException, ParseException {
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        newHandler.start(false);
+        try {
+            newHandler.doHandle(exchange);
+        } finally {
+            newHandler.stop();
+        }
+        return (JSONObject) new JSONParser().parse(out.toString());
+    }
+
 
     private static boolean debugToggle = false;
     public TestJolokiaContext getContext(Object... extra) {

@@ -74,6 +74,9 @@ public class AgentServlet extends HttpServlet {
     // Service manager for creating/destroying the Jolokia context
     private JolokiaServiceManager serviceManager;
 
+    // whether to allow reverse DNS lookup for checking the remote host
+    private boolean allowDnsReverseLookup;
+
     /**
      * No argument constructor, used e.g. by an servlet
      * descriptor when creating the servlet out of web.xml
@@ -119,13 +122,15 @@ public class AgentServlet extends HttpServlet {
         // Start it up ....
         jolokiaContext = serviceManager.start();
         requestHandler = new HttpRequestHandler(jolokiaContext);
+        allowDnsReverseLookup = config.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP);
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
-   
+
         initAgentUrl();
     }
+
 
     @Override
     public void destroy() {
@@ -242,7 +247,7 @@ public class AgentServlet extends HttpServlet {
 
         /** {@inheritDoc} */
         public void debug(String message) {
-            
+
             log(message);
         }
 
@@ -299,7 +304,8 @@ public class AgentServlet extends HttpServlet {
         JSONAware json = null;
         try {
             // Check access policy
-            requestHandler.checkAccess(pReq.getRemoteHost(), pReq.getRemoteAddr(),
+            requestHandler.checkAccess(allowDnsReverseLookup ? pReq.getRemoteHost() : null,
+                                       pReq.getRemoteAddr(),
                                        getOriginOrReferer(pReq));
 
             // Remember the agent URL upon the first request. Needed for discovery
@@ -389,14 +395,18 @@ public class AgentServlet extends HttpServlet {
     private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
         AgentDetails details = jolokiaContext.getAgentDetails();
         if (details.isInitRequired()) {
-            if (details.isUrlMissing()) {
-                String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pRequestUrl), pServletPath);
-                details.setUrl(url);
-            }
-            if (details.isSecuredMissing()) {
-                details.setSecured(pIsAuthenticated);
-            }
-            details.seal();
+           synchronized(details) {
+               if (details.isInitRequired()) {
+                   if (details.isUrlMissing()) {
+                       String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pRequestUrl), pServletPath);
+                       details.setUrl(url);
+                   }
+                   if (details.isSecuredMissing()) {
+                       details.setSecured(pIsAuthenticated);
+                   }
+                   details.seal();
+               }
+           }
         }
         details.seal();
     }

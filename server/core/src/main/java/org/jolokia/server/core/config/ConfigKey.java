@@ -72,6 +72,11 @@ public enum ConfigKey {
     MAX_OBJECTS("maxObjects",true, true),
 
     /**
+     * Custom restrictor to be used instead of default one
+     */
+    RESTRICTOR_CLASS("restrictorClass", true, false),
+
+    /**
      * Init parameter for the location of the policy file. This should be an URL pointing to
      * the policy file. If this URL uses a scheme <code>classpath</code> then do a class lookup.
      *
@@ -86,6 +91,13 @@ public enum ConfigKey {
     POLICY_LOCATION("policyLocation",true,false,"classpath:/jolokia-access.xml"),
 
     /**
+     * Whether a reverse DNS lookup is allowed or not. Reverse DNS lookups might happen for checking
+     * host based restrictions, but might be costly.
+     */
+    // 2.0 : Default to 'false'
+    ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, Constants.TRUE),
+
+    /**
      * Runtime configuration (i.e. must come in with a request)
      * for ignoring errors during JMX operations and JSON serialization.
      * This works only for certain operations like pattern reads.
@@ -98,6 +110,7 @@ public enum ConfigKey {
      * should be included or "runtime" if only {@link RuntimeException}s should
      * be included. Default is "true"
      */
+    // TODO-2.0: Default to 'false'
     INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.TRUE),
 
     /**
@@ -106,6 +119,14 @@ public enum ConfigKey {
      * the response. Default is false.
      */
     SERIALIZE_EXCEPTION("serializeException", true, true, Constants.FALSE),
+
+    /**
+     * Whether expose extended error information like stacktraces or serialized exception
+     * at all. INCLUDE_STACKTRACE and SERIALIZE_EXCEPTION take effect only when ALLOW_ERROR_DETAILS
+     * is set to true. This could be set to false to avoid exposure of internal data.
+     */
+    ALLOW_ERROR_DETAILS("allowErrorDetails", true, false, Constants.TRUE),
+
     /**
      * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
      * are created.

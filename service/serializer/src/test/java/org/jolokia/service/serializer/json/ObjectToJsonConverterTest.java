@@ -1,5 +1,6 @@
 package org.jolokia.service.serializer.json;
 
+import java.beans.Transient;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -147,6 +148,18 @@ public class ObjectToJsonConverterTest {
         assertEquals(oldValue,"bar");
         assertEquals(bean.getArray()[0],"fcn");
     }
+
+    @Test
+    public void convertTransientValue() throws AttributeNotFoundException {
+        TransientValueBean bean = new TransientValueBean();
+        bean.value = "value";
+        bean.transientValue = "transient";
+
+        Map ret =  (Map)converter.convertToJson(bean, null, JsonConvertOptions.DEFAULT);
+        assertNull(ret.get("transientValue"));
+        assertEquals(ret.get("value"),"value");
+    }
+
     // ============================================================================
     // TestBeans:
 
@@ -229,6 +242,31 @@ public class ObjectToJsonConverterTest {
 
         public String[] getArray() {
             return array;
+        }
+    }
+
+    class TransientValueBean {
+
+        String value;
+
+        transient String transientValue;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Transient
+        public String getTransientValue() {
+            return transientValue;
+        }
+
+        @Transient
+        public void setTransientValue(String transientValue) {
+            this.transientValue = transientValue;
         }
     }
 }

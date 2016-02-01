@@ -16,8 +16,7 @@ package org.jolokia.server.core.util;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;

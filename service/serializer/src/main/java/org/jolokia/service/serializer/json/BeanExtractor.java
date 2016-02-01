@@ -1,5 +1,6 @@
 package org.jolokia.service.serializer.json;
 
+import java.beans.Transient;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.*;
@@ -208,7 +209,8 @@ public class BeanExtractor implements Extractor {
         for (Method method : pValue.getClass().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers()) &&
                 !IGNORE_METHODS.contains(method.getName()) &&
-                !isIgnoredType(method.getReturnType())) {
+                !isIgnoredType(method.getReturnType()) &&
+                !method.isAnnotationPresent(Transient.class)) {
                 addAttributes(attrs, method);
             }
         }

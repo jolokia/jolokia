@@ -28,7 +28,43 @@
         Initial milestone release with notification support.
       </action>
     </release>
-    <release version="1.3.2" description="Release 1.3.2" date="2015-10-05">
+
+    <release version="1.3.3-SNAPSHOT" description="Release 1.3.3">
+      <action dev="dejanb" type="add" date="2016-01-15" issue="239">
+        Ignoring transient values during serialization when annotated
+        with @Transient
+      </action>
+      <action dev="arnabbiswas1" type="fix" date="2016-01-15" issue="150">
+        Treat null and empty paths the same when using HistoryKey
+      </action>
+      <action dev="arnabbiswas1" type="fix" date="2016-01-15" issue="221">
+        Fix race condition when initializing the agent details
+      </action>
+      <action dev="nevenr" type="fix" date="2016-01-17" issue="200">
+        Fix serialization of empty TabularData
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-17" issue="224">
+        Allow custom restrictors for the JVM and WAR agent.
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-17" issue="218">
+        Add missing SSL config options to Spring's jolokia-config.xsd
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-18" issue="164">
+        Allow encrypted keystore passwords which can be created with
+        the "encrypt" command of the JVM agent.
+      </action>
+      <action dev="rhuss" type="add" date="2016-01-23" issue="234">
+        Add configuration option "allowDnsReverseLookup" which, if set
+        to false, will omit reverse DNS lookups during restrictor checking.
+        Default is "true" (for backwards compatibility).
+      </action>
+      <action dev="rhuss" type="add" date="2016-01-23" issue="240">
+        Add global configuration option "allowErrorDetails" which allows to avoid
+        the inclusion of stack traces and error details when set.
+      </action>
+    </release>
+
+    <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">
       <action dev="roland" type="add" date="2015-10-04">
         Support for dynamically created, self-signed server
         certificates when no server certificate is configured

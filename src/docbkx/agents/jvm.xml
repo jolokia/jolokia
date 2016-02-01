@@ -316,7 +316,9 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>keystorePassword</constant></td>
           <td>
-            Keystore password (https only)
+            Keystore password (https only). If the password is given embedded in brackets <constant>[[...]]</constant>,
+            then it is treated as an encrypted password which was encrypted with <code>java -jar jvm-agent.jar
+            encrypt</code>. See below for details.
           </td>        
           <td>
           </td>
@@ -496,6 +498,7 @@ where <command> is one of
     status    -- Show status of an (potentially) attached agent
     toggle    -- Toggle between start/stop (default when no command is given)
     list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
 
 [options] are used for providing runtime information for attaching the agent:
 
@@ -536,6 +539,7 @@ where <command> is one of
     --maxObjects <nr>              Maximum number of objects to consider for serialization 
                                    (default: maxObjects)
     --policyLocation <url>         Location of a Jolokia policy file
+    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath
     --mbeanQualifier <qualifier>   Qualifier to use when registering Jolokia internal MBeans
     --canonicalNaming <t|f>        whether to use canonicalName for ObjectNames in 'list' or 'search' 
                                    (default: true)
@@ -648,7 +652,19 @@ For more documentation please visit www.jolokia.org
             operation and with 1 otherwise.
           </para>
         </listitem>
-      </varlistentry>    
+      </varlistentry>
+      <varlistentry>
+        <term><literal>encrypt</literal></term>
+        <listitem>
+          <para>
+            Encrypt the keystore password. You can add the password to encrypt
+            as an additional argument or, if not given, it is read from standard input.
+            The output of this command is the encrypted password in the format <code>[[....]]</code>,
+            which should be used literally (excluding the final newline) for the keystore password
+            when using the option <constant>keystorePassword</constant> in the agent configuration.
+          </para>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <para>
       The launcher is especially suited for

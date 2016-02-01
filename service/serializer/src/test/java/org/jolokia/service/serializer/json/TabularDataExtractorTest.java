@@ -84,7 +84,7 @@ public class TabularDataExtractorTest {
 
     @Test
     public void extractMapAsJsonWithWildcardPath() throws OpenDataException, AttributeNotFoundException, MalformedObjectNameException {
-        TabularData data = prepareMxMBeanMapData();
+        TabularData data = prepareMxMBeanMapData("key1", "test:type=bla", "key2", "java.lang:type=Memory");
 
         JSONObject result = (JSONObject) extract(true, data, null, "domain");
         assertEquals(result.size(), 2);
@@ -94,12 +94,13 @@ public class TabularDataExtractorTest {
 
     @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     public void extractMapAsJsonWithWildcardPathButFiltered() throws OpenDataException, AttributeNotFoundException, MalformedObjectNameException {
-        TabularData data = prepareMxMBeanMapData();
+        TabularData data = prepareMxMBeanMapData("key1", "test:type=bla", "key2", "java.lang:type=Memory");
         extract(true, data, null, "noKnownAttribute");
     }
 
 
-    private TabularData prepareMxMBeanMapData() throws OpenDataException, MalformedObjectNameException {
+    private TabularData prepareMxMBeanMapData(String ... keyAndValues) throws OpenDataException,
+                                                                        MalformedObjectNameException {
         CompositeTypeAndJson ctj = new CompositeTypeAndJson(
                 STRING, "key", null,
                 OBJECTNAME, "value", null
@@ -108,12 +109,12 @@ public class TabularDataExtractorTest {
         TabularTypeAndJson taj = new TabularTypeAndJson(new String[]{"key"}, ctj);
         TabularData data = new TabularDataSupport(taj.getType());
 
-        CompositeData cd = new CompositeDataSupport(ctj.getType(), new String[]{"key", "value"},
-                                                    new Object[]{"key1", new ObjectName("test:type=bla")});
-        data.put(cd);
-        cd = new CompositeDataSupport(ctj.getType(), new String[]{"key", "value"},
-                                                    new Object[]{"key2", new ObjectName("java.lang:type=Memory")});
-        data.put(cd);
+        for (int i = 0; i < keyAndValues.length; i+=2) {
+            CompositeData cd = new CompositeDataSupport(ctj.getType(), new String[]{"key", "value"},
+                                                        new Object[]{keyAndValues[i],
+                                                                     new ObjectName(keyAndValues[i+1])});
+            data.put(cd);
+        }
         return data;
     }
 
@@ -155,6 +156,23 @@ public class TabularDataExtractorTest {
         Object result = extract(true,data,"key1");
         assertEquals(result,TEST_VALUE);
     }
+
+    @Test
+    void extractGenericTabularDataWithJsonEmpty() throws OpenDataException, AttributeNotFoundException {
+        CompositeTypeAndJson ctj = new CompositeTypeAndJson(
+                STRING,"name",null,
+                STRING,"firstname",null,
+                INTEGER,"age",null,
+                BOOLEAN,"male",null
+        );
+        TabularTypeAndJson taj = new TabularTypeAndJson(new String[] { "name", "firstname" },ctj);
+        TabularData data = new TabularDataSupport(taj.getType());
+
+        JSONObject result = (JSONObject) extract(true, data);
+
+        assertTrue(result.isEmpty());
+    }
+
     @Test
     void extractGenericTabularDataWithJson() throws OpenDataException, AttributeNotFoundException {
         TabularData data = getComplexTabularData();
@@ -295,6 +313,30 @@ public class TabularDataExtractorTest {
                 new Object[] { "fcn", 6, false }
         ));
         extract(true,data,"fcn","true");
+    }
+
+
+    @Test
+    void emptyMxMBeanTabularData() throws MalformedObjectNameException, OpenDataException, AttributeNotFoundException {
+        TabularData data = prepareMxMBeanMapData();
+        JSONObject result = (JSONObject) extract(true, data);
+        assertNotNull(result);
+        assertEquals(result.size(),0);
+    }
+
+    @Test
+    void emptyTabularData() throws MalformedObjectNameException, OpenDataException, AttributeNotFoundException {
+        CompositeType type = new CompositeType(
+                "testType",
+                "Type for testing",
+                new String[] { "testKey" },
+                new String[] { "bla" },
+                new OpenType[] { STRING }
+                );
+        TabularData data = new TabularDataSupport(new TabularType("test","test desc",type,new String[] { "testKey"}));
+        JSONObject result = (JSONObject) extract(true, data);
+        assertNotNull(result);
+        assertEquals(result.size(),0);
     }
 
 
