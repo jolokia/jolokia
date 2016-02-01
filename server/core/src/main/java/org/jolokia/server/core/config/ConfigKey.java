@@ -94,7 +94,7 @@ public enum ConfigKey {
      * Whether a reverse DNS lookup is allowed or not. Reverse DNS lookups might happen for checking
      * host based restrictions, but might be costly.
      */
-    // 2.0 : Default to 'false'
+    // TODO-2.0 : Default to 'false'
     ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, Constants.TRUE),
 
     /**

@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.util.JolokiaCipher;
+import org.jolokia.server.core.util.JolokiaCipher;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;

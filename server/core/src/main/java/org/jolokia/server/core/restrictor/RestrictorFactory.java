@@ -62,14 +62,14 @@ public final class RestrictorFactory {
         try {
             Restrictor ret = lookupPolicyRestrictor(policyLocation);
             if (ret != null) {
-                log.info("Using policy access restrictor " + pConfig);
+                log.info("Using policy access restrictor " + policyLocation);
                 return ret;
             } else {
                 log.info("No access restrictor found, access to any MBean is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            log.error("Error while accessing access restrictor at " + pConfig +
+            log.error("Error while accessing access restrictor at " + policyLocation +
                       ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }

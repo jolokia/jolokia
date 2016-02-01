@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javax.management.JMException;
+import javax.management.MalformedObjectNameException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandlerTest;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
+import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -45,6 +48,4 @@ public class JolokiaHttpHandlerRestrictorTest {
         assertTrue(resp.containsKey("error"));
         assertTrue(((String) resp.get("error")).contains(pParam));
     }
-
-
 }

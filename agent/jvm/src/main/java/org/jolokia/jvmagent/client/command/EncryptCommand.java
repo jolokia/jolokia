@@ -2,7 +2,7 @@ package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
-import org.jolokia.util.*;
+import org.jolokia.server.core.util.JolokiaCipher;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;

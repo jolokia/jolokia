@@ -15,10 +15,7 @@ package org.jolokia.restrictor;/*
  * limitations under the License.
  */
 
-import javax.management.ObjectName;
-
-import org.jolokia.util.HttpMethod;
-import org.jolokia.util.RequestType;
+import org.jolokia.server.core.restrictor.AbstractConstantRestrictor;
 
 /**
  * @author roland

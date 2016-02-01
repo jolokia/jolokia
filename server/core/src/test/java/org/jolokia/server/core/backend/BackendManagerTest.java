@@ -107,12 +107,6 @@ public class BackendManagerTest {
         BackendManager b2 = new BackendManager(ctx, dispatcher);
     }
 
-    @Test
-    public void remoteAccessCheck() {
-        ctx = new TestJolokiaContext.Builder().restrictor(new AllowAllRestrictor()).build();
-        BackendManager backendManager = new BackendManager(ctx, createDispatcher());
-        assertTrue(backendManager.isRemoteAccessAllowed("localhost", "127.0.0.1"));
-    }
 
     @Test
     public void convertError() throws MalformedObjectNameException {

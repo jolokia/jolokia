@@ -201,7 +201,7 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // Return hostname of given address, but only when reverse DNS lookups are allowed
     private String getHostName(InetSocketAddress address) {
-        return configuration.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP) ? address.getHostName() : null;
+        return Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP)) ? address.getHostName() : null;
     }
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {

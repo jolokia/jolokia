@@ -281,7 +281,7 @@ public class HttpRequestHandler {
      * @param pOrigin (optional) origin header to check also.
      */
     public void checkAccess(String pHost, String pAddress, String pOrigin) {
-        if (!jolokiaCtx.isRemoteAccessAllowed(pHost, pAddress)) {
+        if (!jolokiaCtx.isRemoteAccessAllowed(pHost != null ? new String[] { pHost, pAddress } : new String[] { pAddress })) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
         if (pOrigin != null && !jolokiaCtx.isOriginAllowed(pOrigin,true)) {
@@ -337,7 +337,7 @@ public class HttpRequestHandler {
 
 
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
-        if (config.getAsBooleans(ConfigKey.ALLOW_ERROR_DETAILS)) {
+        if (Boolean.parseBoolean(jolokiaCtx.getConfig(ConfigKey.ALLOW_ERROR_DETAILS))) {
             String includeStackTrace = pJmxReq != null ?
                     pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
             if (includeStackTrace.equalsIgnoreCase("true") ||

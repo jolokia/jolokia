@@ -32,7 +32,7 @@ import org.jolokia.jvmagent.handler.JolokiaHttpsHandler;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
-import org.jolokia.server.core.restrictor.PolicyRestrictorFactory;
+import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
@@ -223,12 +223,11 @@ public class JolokiaServer {
                 createLogHandler(jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_CLASS),
                                  Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
 
-        String policyLocation = NetworkUtil.replaceExpression(jolokiaCfg.getConfig(ConfigKey.POLICY_LOCATION));
         serviceManager =
                 JolokiaServiceManagerFactory.createJolokiaServiceManager(
                         jolokiaCfg,
                         log,
-                        PolicyRestrictorFactory.createRestrictor(policyLocation, log));
+                        RestrictorFactory.createRestrictor(jolokiaCfg, log));
         serviceManager.addServices(new ClasspathServiceCreator("services"));
 
         // Get own URL for later reference

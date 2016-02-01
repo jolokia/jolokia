@@ -1,7 +1,8 @@
 package org.jolokia.server.core.restrictor;
 
-import org.jolokia.util.HttpMethod;
-import org.jolokia.util.RequestType;
+import org.jolokia.server.core.service.api.Restrictor;
+import org.jolokia.server.core.util.HttpMethod;
+import org.jolokia.server.core.util.RequestType;
 
 import javax.management.ObjectName;
 

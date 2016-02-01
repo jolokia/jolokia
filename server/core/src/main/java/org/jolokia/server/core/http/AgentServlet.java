@@ -14,7 +14,7 @@ import javax.servlet.http.*;
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.request.EmptyResponseException;
-import org.jolokia.server.core.restrictor.PolicyRestrictorFactory;
+import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
@@ -122,7 +122,7 @@ public class AgentServlet extends HttpServlet {
         // Start it up ....
         jolokiaContext = serviceManager.start();
         requestHandler = new HttpRequestHandler(jolokiaContext);
-        allowDnsReverseLookup = config.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP);
+        allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
@@ -220,7 +220,7 @@ public class AgentServlet extends HttpServlet {
     protected Restrictor createRestrictor(Configuration pConfig, LogHandler pLogHandler) {
         return initRestrictor != null ?
                 initRestrictor :
-                PolicyRestrictorFactory.createRestrictor(pConfig.getConfig(ConfigKey.POLICY_LOCATION), pLogHandler);
+                RestrictorFactory.createRestrictor(pConfig, pLogHandler);
     }
 
     // ==============================================================================================

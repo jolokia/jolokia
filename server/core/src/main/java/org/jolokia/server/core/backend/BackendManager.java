@@ -141,17 +141,6 @@ public class BackendManager {
         }
     }
 
-    /**
-     * Check whether remote access from the given client is allowed.
-     *
-     * @param pRemoteHost remote host to check against
-     * @param pRemoteAddr alternative IP address
-     * @return true if remote access is allowed
-     */
-    public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
-        return jolokiaCtx.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
-    }
-
     // ==========================================================================================================
 
     private void init(JolokiaContext pCtx) {
