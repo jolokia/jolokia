@@ -32,6 +32,7 @@ import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.*;
+import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
@@ -42,6 +43,8 @@ import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.*;
 import org.json.simple.JSONAware;
+import org.json.simple.JSONStreamAware;
+import sun.net.www.http.ChunkedOutputStream;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -317,6 +320,47 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
+        boolean streaming = configuration.getAsBoolean(ConfigKey.STREAMING);
+        if (streaming) {
+            JSONStreamAware jsonStream = (JSONStreamAware)pJson;
+            sendStreamingResponse(pExchange, pParsedUri, jsonStream);
+        } else {
+            sendAllJSON(pExchange, pParsedUri, pJson);
+        }
+    }
+
+    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStreamAware pJson) throws IOException {
+        ChunkedWriter writer = null;
+        try {
+            Headers headers = pExchange.getResponseHeaders();
+            if (pJson != null) {
+                headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+                String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
+                pExchange.sendResponseHeaders(200, 0);
+                writer = new ChunkedWriter(pExchange.getResponseBody(), "UTF-8");
+                if (callback == null) {
+                    pJson.writeJSONString(writer);
+                } else {
+                    writer.write("(");
+                    writer.write(callback);
+                    pJson.writeJSONString(writer);
+                    writer.write(");");
+                }
+            } else {
+                headers.set("Content-Type", "text/plain");
+                pExchange.sendResponseHeaders(200,-1);
+            }
+        } finally {
+            if (writer != null) {
+                // Always close in order to finish the request.
+                // Otherwise the thread blocks.
+                writer.flush();
+                writer.close();
+            }
+        }
+    }
+
+    private void sendAllJSON(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
         OutputStream out = null;
         try {
             Headers headers = pExchange.getResponseHeaders();
