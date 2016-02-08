@@ -9,6 +9,13 @@ import java.nio.charset.*;
 
 /**
  * Created by gnufied on 2/7/16.
+ * Implement chunked writing of data. Part of chunking is actually already
+ * done by OutputStream and doing so here again will result in double chunking.
+ * We just ensure that, we are flushing and closing the stream properly.
+ *
+ * This code is very closely yanked from java.nio.StreamEncoder class.
+ * The reason we couldn't simply extend StreamEncoder class is, that class marks certain
+ * attributes private which are very important for overriding close and flush methods.
  */
 public class ChunkedWriter extends Writer {
 
@@ -45,7 +52,7 @@ public class ChunkedWriter extends Writer {
             throw new IOException("Stream closed");
     }
 
-    private boolean isOpen() { return isOpen; }
+    public boolean isOpen() { return isOpen; }
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {

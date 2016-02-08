@@ -274,18 +274,23 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void usingStreamingJSON() throws IOException, URISyntaxException {
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException {
         Configuration config = getConfig(ConfigKey.STREAMING, "true");
         JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
         newHandler.start(false);
 
-        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/list");
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/list?maxDepth=1");
         expect(exchange.getRequestMethod()).andReturn("GET");
 
         Headers header = new Headers();
-        prepareResponse(newHandler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(newHandler, exchange, header);
         newHandler.doHandle(exchange);
-        assertEquals(header.getFirst("Transfer-encoding"),"chunked");
+
+        String result = out.toString("utf-8");
+
+        assertNull(header.getFirst("Content-Length"));
+        JSONObject resp = (JSONObject) new JSONParser().parse(result);
+        assertTrue(resp.containsKey("value"));
     }
 
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
