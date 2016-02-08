@@ -275,7 +275,7 @@ public class JolokiaHttpHandlerTest {
 
     @Test
     public void usingStreamingJSON() throws IOException, URISyntaxException {
-        Configuration config = getConfig(ConfigKey.STREAMING, true);
+        Configuration config = getConfig(ConfigKey.STREAMING, "true");
         JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
         newHandler.start(false);
 
