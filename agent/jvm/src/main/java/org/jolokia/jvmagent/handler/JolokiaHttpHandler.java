@@ -32,7 +32,6 @@ import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.*;
-import com.sun.org.apache.xml.internal.serializer.OutputPropertiesFactory;
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
@@ -44,7 +43,6 @@ import org.jolokia.restrictor.*;
 import org.jolokia.util.*;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONStreamAware;
-import sun.net.www.http.ChunkedOutputStream;
 
 /**
  * HttpHandler for handling a Jolokia request
