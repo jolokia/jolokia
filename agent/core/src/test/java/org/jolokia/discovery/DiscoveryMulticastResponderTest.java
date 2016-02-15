@@ -34,8 +34,13 @@ public class DiscoveryMulticastResponderTest {
         JolokiaDiscovery discovery = new JolokiaDiscovery("test",new LogHandler.StdoutLogHandler(true));
         try {
             List<JSONObject> msgs = discovery.lookupAgents();
-        System.out.println("=================================================");
-        assertTrue(msgs.size() > 0);
+            System.out.println("=================================================");
+            if (msgs.size() == 0) {
+                // We are retrying it with a longer timeout
+                System.out.println("No answer received, trying now with 30s timeout");
+                msgs = discovery.lookupAgentsWithTimeout(30000);
+            }
+            assertTrue(msgs.size() > 0);
         } catch (UnknownHostException exp) {
             throw new SkipException("Skipping test because no single multicast request could be send on any interface");
         } finally {

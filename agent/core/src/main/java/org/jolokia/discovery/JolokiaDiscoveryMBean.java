@@ -15,7 +15,7 @@ public interface JolokiaDiscoveryMBean {
     /**
      * Lookup agents.
      *
-     * @patam pTimeout timeout for the lookup
+     * @patam pTimeout timeout for the lookup in milliseconds
      * @return an array with JSON objects containing the agent details discovered
      */
     List lookupAgentsWithTimeout(int pTimeout) throws IOException;
