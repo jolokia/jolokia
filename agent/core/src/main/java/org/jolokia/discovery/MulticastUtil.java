@@ -100,9 +100,10 @@ public final class MulticastUtil {
     }
 
     // Collect the incoming messages and filter out duplicates
-    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures, LogHandler pLogHandler) {
+    private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures, LogHandler pLogHandler) throws UnknownHostException {
         List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
         Set<String> seen = new HashSet<String>();
+        int nrCouldntSend = 0;
         for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
             try {
                 List<DiscoveryIncomingMessage> inMsgs = future.get(pTimeout + 500 /* some additional buffer */, TimeUnit.MILLISECONDS);
@@ -118,12 +119,22 @@ public final class MulticastUtil {
             } catch (InterruptedException exp) {
                 // Try next one ...
             } catch (ExecutionException e) {
+                Throwable exp = e.getCause();
+                if (exp instanceof CouldntSendDiscoveryPacketException) {
+                    nrCouldntSend++;
+                    pLogHandler.debug("--> Couldnt send discovery message from " +
+                                      ((CouldntSendDiscoveryPacketException) exp).getAddress() + ": " + exp.getCause());
+                }
                 // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
                 // throw new IOException("Error while performing a discovery call " + e,e);
                 pLogHandler.debug("--> Exception during lookup: " + e);
             } catch (TimeoutException e) {
                 // Timeout occurred while waiting for the results. So we go to the next one ...
             }
+        }
+        if (nrCouldntSend == pFutures.size()) {
+            // No a single discovery message could be send out
+            throw new UnknownHostException("Cannot send a single multicast recovery request on any multicast enabled interface");
         }
         return ret;
     }
@@ -168,14 +179,23 @@ public final class MulticastUtil {
             logHandler = pLogHandler;
         }
 
-        public List<DiscoveryIncomingMessage> call() throws SocketException {
+        public List<DiscoveryIncomingMessage> call() throws IOException {
             final DatagramSocket socket = new DatagramSocket(0, address);
 
             List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
+
             try {
                 socket.setSoTimeout(timeout);
                 logHandler.debug(address + "--> Sending");
                 socket.send(outPacket);
+            } catch (IOException exp) {
+                throw new CouldntSendDiscoveryPacketException(
+                    address,
+                    "Can't send discovery UDP packet from " + address + ": " + exp.getMessage(),
+                    exp);
+            }
+
+            try {
 
                 try {
                     do {
@@ -188,10 +208,9 @@ public final class MulticastUtil {
                 } catch (SocketTimeoutException exp) {
                     logHandler.debug(address + "--> Timeout");
                     // Expected until no responses are returned anymore
+                } catch (IOException exp) {
+                    throw new IOException("Cannot receive broadcast answer on " + address + ": " + exp.getMessage(),exp);
                 }
-                return ret;
-            } catch (IOException exp) {
-                logHandler.debug(address + "--> Could not send multicast request : " + exp);
                 return ret;
             } finally {
                 socket.close();
@@ -207,6 +226,20 @@ public final class MulticastUtil {
             } catch (Exception exp) {
                 logHandler.debug("Invalid incoming package from " + in.getAddress() + "  --> " + exp + ". Ignoring");
             }
+        }
+
+    }
+
+    private static class CouldntSendDiscoveryPacketException extends IOException {
+        private final InetAddress address;
+
+        public CouldntSendDiscoveryPacketException(InetAddress pAddress, String pMessage, IOException pNested) {
+            super(pMessage,pNested);
+            this.address = pAddress;
+        }
+
+        public InetAddress getAddress() {
+            return address;
         }
     }
 }

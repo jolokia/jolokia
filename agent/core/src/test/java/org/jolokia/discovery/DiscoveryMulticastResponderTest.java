@@ -1,6 +1,7 @@
 package org.jolokia.discovery;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,10 +32,15 @@ public class DiscoveryMulticastResponderTest {
         // Warming up
         Thread.sleep(1000);
         JolokiaDiscovery discovery = new JolokiaDiscovery("test",new LogHandler.StdoutLogHandler(true));
-        List<JSONObject> msgs = discovery.lookupAgents();
+        try {
+            List<JSONObject> msgs = discovery.lookupAgents();
         System.out.println("=================================================");
         assertTrue(msgs.size() > 0);
-        responder.stop();
+        } catch (UnknownHostException exp) {
+            throw new SkipException("Skipping test because no single multicast request could be send on any interface");
+        } finally {
+            responder.stop();
+        }
 
     }
 
