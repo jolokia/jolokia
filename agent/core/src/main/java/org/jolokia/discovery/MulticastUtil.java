@@ -191,7 +191,7 @@ public final class MulticastUtil {
                 }
                 return ret;
             } catch (IOException exp) {
-                logHandler.debug(address + "--> Could not send multicast over : " + exp);
+                logHandler.debug(address + "--> Could not send multicast request : " + exp);
                 return ret;
             } finally {
                 socket.close();
