@@ -75,11 +75,11 @@
       <span style="clear: both;"></span>          
     </subsection>
     <section name="News">
-      <subsection name="1.3.3">
+      <subsection name="Jolokia 1.3.3">
         <div class="news-date">2016-02-16</div>
         <p>
-          Beside quite some bug fixes as described in the <a href="changes-report.html">changelog</a>, this minor
-          release brings some minor features, too:
+          Beside bug fixes as described in the <a href="changes-report.html">changelog</a>, this minor
+          release brings some small features:
         </p>
         <ul>
           <li>
