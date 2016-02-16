@@ -125,12 +125,33 @@
           <code class="literal">classpath:</code> which is used for looking up
           the policy file in the web application's classpath. See
           <a href="security.html#security-policy-location">Section&nbsp;4.1.7, &#8220;Policy Location&#8221;</a> for details about this
-          parameter. 
+          parameter.
         </td>
         <td>
           <code class="filename">file:///home/jolokia/jolokia-access.xml</code>
-          for a file based access to the policy file. Default is 
+          for a file based access to the policy file. Default is
           <code class="filename">classpath:/jolokia-access.xml</code>
+        </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">restrictorClass</code></td>
+        <td>
+          Full classname of an implementation of <code class="literal">org.jolokia.restrictor.Restrictor</code>
+          which is used as a custom restrictor for securing access via Jolokia.
+        </td>
+        <td>
+          <code class="literal">com.mycompany.jolokia.CustomRestrictor</code> (which must be included in the
+          war file and must implement <code class="literal">org.jolokia.restrictor.Restrictor</code>)
+        </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">allowDnsReverseLookup</code></td>
+        <td>
+          Access can be restricted based on the remote host accessing Jolokia. This host can be
+          specified as address or an hostname. However, using the hostname normally requires a reverse
+          DNS lookup which might slow down operations. In order to avoid this reverse DNS lookup
+          set this property to <code class="literal">false</code>.
+        </td>
+        <td>
+          Default: <code class="constant">true</code>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">debug</code></td>
@@ -254,6 +275,17 @@
         </td>
         <td>
           Default: <code class="constant">false</code>
+        </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">allowErrorDetails</code></td>
+        <td>
+          If set to <code class="constant">true</code> then no error details like a stack trace
+          (when <code class="constant">includeStackTrace</code> is set) or a serialized exception
+          (when <code class="constant">serializeExceptin</code> is set) are included. This can be user as
+          a startup option to avoid exposure of error details regardless of other options.
+        </td>
+        <td>
+          Default: <code class="constant">true</code>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">detectorOptions</code></td>
@@ -402,7 +434,7 @@
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<sup>[<a name="d0e757" href="#ftn.d0e757">5</a>]</sup>
+      for details.<sup>[<a name="d0e820" href="#ftn.d0e820">5</a>]</sup>
     </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
@@ -825,7 +857,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService. 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1496"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1559"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -1248,7 +1280,9 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">keystorePassword</code></td>
           <td>
-            Keystore password (https only)
+            Keystore password (https only). If the password is given embedded in brackets <code class="constant">[[...]]</code>,
+            then it is treated as an encrypted password which was encrypted with <code class="code">java -jar jvm-agent.jar
+            encrypt</code>. See below for details.
           </td>        
           <td>
           </td>
@@ -1403,6 +1437,7 @@ where &lt;command&gt; is one of
     status    -- Show status of an (potentially) attached agent
     toggle    -- Toggle between start/stop (default when no command is given)
     list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
 
 [options] are used for providing runtime information for attaching the agent:
 
@@ -1443,6 +1478,7 @@ where &lt;command&gt; is one of
     --maxObjects &lt;nr&gt;              Maximum number of objects to consider for serialization 
                                    (default: maxObjects)
     --policyLocation &lt;url&gt;         Location of a Jolokia policy file
+    --restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
     --mbeanQualifier &lt;qualifier&gt;   Qualifier to use when registering Jolokia internal MBeans
     --canonicalNaming &lt;t|f&gt;        whether to use canonicalName for ObjectNames in 'list' or 'search' 
                                    (default: true)
@@ -1522,6 +1558,12 @@ For more documentation please visit www.jolokia.org
             default command if no non-option argument is given at
             all. <code class="literal">list</code> returns with 0 upon normal
             operation and with 1 otherwise.
+          </p></dd><dt><span class="term"><code class="literal">encrypt</code></span></dt><dd><p>
+            Encrypt the keystore password. You can add the password to encrypt
+            as an additional argument or, if not given, it is read from standard input.
+            The output of this command is the encrypted password in the format <code class="code">[[....]]</code>,
+            which should be used literally (excluding the final newline) for the keystore password
+            when using the option <code class="constant">keystorePassword</code> in the agent configuration.
           </p></dd></dl></div><p>
       The launcher is especially suited for
       <span class="emphasis"><em>one-shot</em></span>, <span class="emphasis"><em>local</em></span>
@@ -1556,7 +1598,7 @@ java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
           You could even instrument a JEE application server this way,
           however this is not recommended.
-        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e757" href="#d0e757">5</a>] </sup>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e820" href="#d0e820">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use
