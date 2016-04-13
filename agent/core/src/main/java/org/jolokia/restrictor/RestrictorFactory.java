@@ -3,6 +3,7 @@ package org.jolokia.restrictor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.jolokia.config.ConfigKey;
@@ -88,7 +89,11 @@ public final class RestrictorFactory {
             throw new IllegalArgumentException("Cannot create custom restrictor for class " + restrictorClass + " " +
                                                "because neither a constructor with 'Configuration' as only element " +
                                                "nor a default constructor is available");
-        } catch (ReflectiveOperationException e) {
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
+        } catch (InvocationTargetException e) {
             throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
         }
     }
