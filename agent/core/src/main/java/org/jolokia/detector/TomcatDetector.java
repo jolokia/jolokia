@@ -30,7 +30,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 public class TomcatDetector extends AbstractServerDetector {
 
     private static final Pattern SERVER_INFO_PATTERN =
-            Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+(-RC\\d+)?)",Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^\\s*([^/]+)\\s*/\\s*([\\d\\.]+(-RC\\d+)?).*",Pattern.CASE_INSENSITIVE);
 
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
