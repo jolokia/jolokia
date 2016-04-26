@@ -10,6 +10,7 @@ import javax.management.openmbean.OpenType;
 
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.service.serializer.WriteRequestValues;
 import org.jolokia.server.core.util.RequestType;
 
 /*
@@ -87,7 +88,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
                 break;
             }
         }
-        Object values[];
+        WriteRequestValues values;
         if (aInfo instanceof OpenMBeanAttributeInfo) {
             OpenMBeanAttributeInfo info = (OpenMBeanAttributeInfo) aInfo;
             values = getValues(info.getOpenType(), oldValue, request);
@@ -95,9 +96,9 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
             // aInfo is != null otherwise getAttribute() would have already thrown an ArgumentNotFoundException
             values = getValues(aInfo.getType(), oldValue, request);
         }
-        Attribute attribute = new Attribute(request.getAttributeName(),values[0]);
+        Attribute attribute = new Attribute(request.getAttributeName(),values.getUpdatedValue());
         server.setAttribute(request.getObjectName(),attribute);
-        return values[1];
+        return values.getOldValue();
     }
 
     /**
@@ -119,7 +120,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
      * @throws IllegalAccessException if access to MBean fails
      * @throws InvocationTargetException reflection error when setting an object's attribute
      */
-    private Object[] getValues(String pType, Object pCurrentValue, JolokiaWriteRequest pRequest)
+    private WriteRequestValues getValues(String pType, Object pCurrentValue, JolokiaWriteRequest pRequest)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         List<String> pathParts = pRequest.getPathParts();
         Object newValue = pRequest.getValue();
@@ -132,21 +133,15 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
 
             // We set an inner value, hence we have to return provided value itself for resetting
             // it later back via JMX
-            return new Object[] {
-                    pCurrentValue,
-                    context.getMandatoryService(Serializer.class).setInnerValue(pCurrentValue, newValue, pathParts)
-            };
+            return context.getMandatoryService(Serializer.class).setInnerValue(pCurrentValue, newValue, pathParts);
 
         } else {
             // Return the objectified value
-            return new Object[] {
-                    context.getMandatoryService(Serializer.class).deserialize(pType, newValue),
-                    pCurrentValue
-            };
+            return new WriteRequestValues(context.getMandatoryService(Serializer.class).deserialize(pType, newValue), pCurrentValue);
         }
     }
 
-    private Object[] getValues(OpenType<?> pOpenType, Object pCurrentValue, JolokiaWriteRequest pRequest) {
+    private WriteRequestValues getValues(OpenType<?> pOpenType, Object pCurrentValue, JolokiaWriteRequest pRequest) {
         // TODO: What to do when path is not null ? Simplest: Throw exception. Advanced: Extract other values and create
         // a new CompositeData with old values and the new value.
         // However, since this is probably out of scope, we will simply throw an exception if the path is not empty.
@@ -155,10 +150,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
             throw new IllegalArgumentException("Cannot set value for OpenType " + pOpenType + " with inner path " +
                                                pRequest.getPath() + " since OpenTypes are immutable");
         }
-        return new Object[] {
-                context.getMandatoryService(Serializer.class).deserializeOpenType(pOpenType, pRequest.getValue()),
-                pCurrentValue
-        };
+        return new WriteRequestValues(context.getMandatoryService(Serializer.class).deserializeOpenType(pOpenType, pRequest.getValue()), pCurrentValue);
     }
 }
 

@@ -7,6 +7,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.service.serializer.WriteRequestValues;
 import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.service.serializer.object.OpenTypeDeserializer;
@@ -74,8 +75,8 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
     }
 
     /** {@inheritDoc} */
-    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
-        return toJsonConverter.setInnerValue(pOuterObject,pNewValue,pPathParts);
+    public WriteRequestValues setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+        return new WriteRequestValues(pOuterObject, toJsonConverter.setInnerValue(pOuterObject,pNewValue,pPathParts));
     }
 
     /** {@inheritDoc} */
