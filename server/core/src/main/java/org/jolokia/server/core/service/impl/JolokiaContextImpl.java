@@ -75,13 +75,11 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     /** {@inheritDoc} */
     public <T extends JolokiaService> T getMandatoryService(Class<T> pType) {
-        SortedSet<T> services = serviceManager.getServices(pType);
-        if (services.size() > 1) {
-            throw new IllegalStateException("More than one service of type " + pType + " found: " + services);
-        } else if (services.size() == 0) {
+        T service = serviceManager.getService(pType);
+        if (service == null) {
             throw new IllegalStateException("No service of type " + pType + " found");
         }
-        return services.first();
+        return service;
     }
 
     /** {@inheritDoc} */
