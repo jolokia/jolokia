@@ -52,7 +52,7 @@ public interface Serializer extends JolokiaService<Serializer> {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
+    WriteRequestValues setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException;
 
     /**
