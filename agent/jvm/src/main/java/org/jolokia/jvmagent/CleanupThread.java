@@ -31,7 +31,7 @@ class CleanupThread extends Thread {
 
     private HttpServer server;
     private ThreadGroup threadGroup;
-    private boolean active = true;
+    private volatile boolean active = true;
 
     /**
      * Constructor associating the clean up thread with an HTTP-Server
@@ -68,9 +68,10 @@ class CleanupThread extends Thread {
     /**
      * Stop the server.
      */
-    public void stopServer() {
+    public void stopServer() throws InterruptedException {
         active = false;
         interrupt();
+        join(); // once interrupted, wait for server to stop
     }
 
     // Enumerate all active threads
