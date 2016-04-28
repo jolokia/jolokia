@@ -352,12 +352,12 @@ public class JolokiaServerTest {
                              HostnameVerifier pVerifier,
                              boolean pValidateCa,
                              String pClientCert) throws Exception {
-        JolokiaServer server = new JolokiaServer(pConfig);
-        server.start();
-        //Thread.sleep(2000);
+        JolokiaServer server = null;
         HostnameVerifier oldVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
         SSLSocketFactory oldSslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
         try {
+            server =  new JolokiaServer(pConfig);
+            server.start();
             if (pDoRequest) {
                 if (pVerifier != null) {
                     HttpsURLConnection.setDefaultHostnameVerifier(pVerifier);
@@ -381,7 +381,9 @@ public class JolokiaServerTest {
             String resp = EnvTestUtil.readToString(url.openStream());
             assertTrue(resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
         } finally {
-            server.stop();
+            if (server != null) {
+                server.stop();
+            }
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

@@ -150,7 +150,11 @@ public class JolokiaServer {
         serviceManager.stop();
 
         if (cleaner != null) {
-            cleaner.stopServer();
+            try {
+                cleaner.stopServer();
+            } catch (InterruptedException exp) {
+                System.err.println("Could not stop Jolokia server properly: " + exp);
+            }
         }
     }
 
@@ -369,8 +373,9 @@ public class JolokiaServer {
 
     private HttpServer createHttpsServer(InetSocketAddress pSocketAddress,JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
+        HttpsServer server = null;
         try {
-            HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
+            server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
             SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
             // initialise the keystore
@@ -389,9 +394,21 @@ public class JolokiaServer {
             server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig.useSslClientAuthentication()));
             return server;
         } catch (GeneralSecurityException e) {
+            stopServer(server);
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
         } catch (IOException e) {
+            stopServer(server);
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
+        }
+        catch (IllegalArgumentException e) {
+            stopServer(server);
+            throw e;
+        }
+    }
+
+    private void stopServer(HttpsServer server) {
+        if (server != null) {
+            server.stop(0);
         }
     }
 
