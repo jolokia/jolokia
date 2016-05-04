@@ -501,13 +501,22 @@ public class J4pClientBuilder {
         return socketConfigB.build();
     }
 
-    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
+    /**
+     * Create SSLConnectionSocketFactory using system defaults.
+     * This method can be overriden to tune protocol (SSLv3, TLSv1.2...),
+     * {@link javax.net.ssl.KeyManager}, {@link javax.net.ssl.TrustManager}...
+     * @return SSLContext used for HTTPS connections
+     */
+    protected SSLConnectionSocketFactory createSSLConnectionSocketFactory() {
         SSLContext sslcontext = SSLContexts.createSystemDefault();
         X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
+        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
+    }
 
+    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
         return RegistryBuilder.<ConnectionSocketFactory>create()
                               .register("http", PlainConnectionSocketFactory.INSTANCE)
-                              .register("https", new SSLConnectionSocketFactory(sslcontext, hostnameVerifier))
+                              .register("https", createSSLConnectionSocketFactory())
                               .build();
     }
 
