@@ -273,6 +273,26 @@ public class JolokiaHttpHandlerTest {
         assertNotNull(header.getFirst("Access-Control-Allow-Max-Age"));
     }
 
+    @Test
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException {
+        Configuration config = getConfig(ConfigKey.STREAMING, "true");
+        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
+        newHandler.start(false);
+
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/list?maxDepth=1");
+        expect(exchange.getRequestMethod()).andReturn("GET");
+
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(newHandler, exchange, header);
+        newHandler.doHandle(exchange);
+
+        String result = out.toString("utf-8");
+
+        assertNull(header.getFirst("Content-Length"));
+        JSONObject resp = (JSONObject) new JSONParser().parse(result);
+        assertTrue(resp.containsKey("value"));
+    }
+
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
         return prepareExchange(pUri,"Origin",null);
     }

@@ -112,6 +112,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +
+"    --streaming <t|f>               whether to use streaming json (default: false)\n" +
 "    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: true)\n" +
 "    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
 "    --config <configfile>           Path to a property file from where to read the configuration\n" +
