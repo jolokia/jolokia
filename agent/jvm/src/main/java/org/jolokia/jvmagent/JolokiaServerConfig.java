@@ -28,6 +28,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sun.net.httpserver.Authenticator;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
@@ -68,6 +70,8 @@ public class JolokiaServerConfig {
     private String serverKeyAlgorithm;
     private List<String> clientPrincipals;
     private boolean extendedClientCheck;
+    private String[] sslProtocols;
+    private String[] sslCipherSuites;
 
     /**
      * Constructor which prepares the server configuration from a map
@@ -134,6 +138,15 @@ public class JolokiaServerConfig {
      */
     public String getProtocol() {
         return protocol;
+    }
+
+    /**
+     * Whether or not to use https as the procol
+     *
+     * @return true when using https as the protocol
+     */
+    public boolean useHttps() {
+        return protocol.equalsIgnoreCase("https");
     }
 
     /**
@@ -261,10 +274,71 @@ public class JolokiaServerConfig {
     /**
      * The algorithm to use for extracting the private server key.
      *
-     * @return the server keyl algoritm
+     * @return the server key algorithm
      */
     public String getServerKeyAlgorithm() {
         return serverKeyAlgorithm;
+    }
+
+    /**
+     * The list of enabled SSL / TLS protocols to serve with
+     *
+     * @return the list of enabled protocols
+     */
+    public String[] getSSLProtocols() { return sslProtocols; }
+
+    /**
+     * The list of enabled SSL / TLS cipher suites
+     *
+     * @return the list of cipher suites
+     */
+    public String[] getSSLCipherSuites() {
+        return sslCipherSuites;
+    }
+
+    /**
+     * Filter the list of protocols and ciphers to those supported by the given SSLContext
+     *
+     * @param sslContext the SSLContext to pull information from
+     */
+    public void updateHTTPSSettingsFromContext(SSLContext sslContext) {
+        SSLParameters parameters = sslContext.getSupportedSSLParameters();
+
+        // Protocols
+        if (sslProtocols == null) {
+            sslProtocols = parameters.getProtocols();
+        } else {
+            List<String> supportedProtocols = Arrays.asList(parameters.getProtocols());
+            List<String> sslProtocolsList = new ArrayList<String>(Arrays.asList(sslProtocols));
+
+            Iterator<String> pit = sslProtocolsList.iterator();
+            while (pit.hasNext()) {
+                String protocol = pit.next();
+                if (!supportedProtocols.contains(protocol)) {
+                    System.out.println("Jolokia: Discarding unsupported protocol: " + protocol);
+                    pit.remove();
+                }
+            }
+            sslProtocols = sslProtocolsList.toArray(new String[0]);
+        }
+
+        // Cipher Suites
+        if (sslCipherSuites == null) {
+            sslCipherSuites = parameters.getCipherSuites();
+        } else {
+            List<String> supportedCipherSuites = Arrays.asList(parameters.getCipherSuites());
+            List<String> sslCipherSuitesList = new ArrayList<String>(Arrays.asList(sslCipherSuites));
+
+            Iterator<String> cit = sslCipherSuitesList.iterator();
+            while (cit.hasNext()) {
+                String cipher = cit.next();
+                if (!supportedCipherSuites.contains(cipher)) {
+                    System.out.println("Jolokia: Discarding unsupported cipher suite: " + cipher);
+                    cit.remove();
+                }
+            }
+            sslCipherSuites = sslCipherSuitesList.toArray(new String[0]);
+        }
     }
 
     // Initialise and validate early in order to fail fast in case of an configuration error
@@ -401,9 +475,18 @@ public class JolokiaServerConfig {
         keystorePassword =  password != null ? decipherPasswordIfNecessary(password) : new char[0];
 
         serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
-        clientPrincipals = extractList(agentConfig,"clientPrincipal");
+        clientPrincipals = extractList(agentConfig, "clientPrincipal");
         String xCheck = agentConfig.get("extendedClientCheck");
         extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
+
+        List<String> sslProtocolsList = extractList(agentConfig, "sslProtocol");
+        if (sslProtocolsList != null) {
+            sslProtocols = sslProtocolsList.toArray(new String[0]);
+        }
+        List<String> sslCipherSuitesList = extractList(agentConfig, "sslCipherSuite");
+        if (sslCipherSuitesList != null) {
+            sslCipherSuites = sslCipherSuitesList.toArray(new String[0]);
+        }
     }
 
     private char[] decipherPasswordIfNecessary(String password) {

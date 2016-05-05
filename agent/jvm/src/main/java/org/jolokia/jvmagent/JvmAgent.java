@@ -64,7 +64,7 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs) {
-        startAgent(new JvmAgentConfig(agentArgs),true /* register and detect lazy */);
+        startAgent(new JvmAgentConfig(agentArgs), true /* register and detect lazy */);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class JvmAgent {
         }
     }
 
-    private static void startAgent(JvmAgentConfig pConfig,boolean pLazy)  {
+    private static void startAgent(JvmAgentConfig pConfig, boolean pLazy)  {
         try {
             server = new JolokiaServer(pConfig,pLazy);
 
