@@ -7,7 +7,7 @@ target
 .idea
 wiki
 felix
-+.settings
-+.classpath
-+.project
+.settings
+.classpath
+.project
 .gitshots
