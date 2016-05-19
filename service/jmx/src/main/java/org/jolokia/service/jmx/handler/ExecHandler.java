@@ -73,12 +73,20 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         Object[] params = new Object[nrParams];
         List<Object> args = request.getArguments();
         verifyArguments(request, types, nrParams, args);
-        for (int i = 0;i < nrParams; i++) {
-        	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
-        		params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
-        	} else { 
-        		params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
-        	}
+        List<String> clientTypes = splitOperation(request.getOperation());
+        for (int i = 0; i < nrParams; i++) {
+            if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
+                params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
+            } else {
+                String type;
+                String clientType = clientTypes.size() > i + 1 ? clientTypes.get(i + 1) : null;
+                if (clientType != null && !clientType.equals(types.paramClasses[i])) {
+                    type = clientType; //  preferring the type eventually received from client
+                } else {
+                    type = types.paramClasses[i];
+                }
+                params[i] = context.getMandatoryService(Serializer.class).deserialize(type, args.get(i));
+            }
         }
 
         // TODO: Maybe allow for a path as well which could be applied on the return value ...
@@ -187,9 +195,10 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
                 // Number of arguments dont match
                 continue OUTER;
             }
-            for (int i=0;i<infos.length;i++) {
+            for (int i = 0; i < infos.length; i++) {
                 String type = infos[i].getType();
-                if (!type.equals(pTypes.get(i))) {
+                // Object is here for an eventual case of type erasure
+                if (!type.equals(pTypes.get(i)) && !type.equals(Object.class.getName())) {
                     // Non-matching signature
                     continue OUTER;
                 }
