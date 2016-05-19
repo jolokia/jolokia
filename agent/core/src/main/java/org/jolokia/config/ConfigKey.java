@@ -140,7 +140,7 @@ public enum ConfigKey {
     /**
      * Whether to use streaming json responses. Default is "false"
      */
-    STREAMING("streaming", true, false, "false"),
+    STREAMING("streaming", true, false, "true"),
 
     /**
      * Optional domain name for registering own MBeans

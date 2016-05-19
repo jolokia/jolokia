@@ -323,6 +323,8 @@ public class JolokiaHttpHandler implements HttpHandler {
             JSONStreamAware jsonStream = (JSONStreamAware)pJson;
             sendStreamingResponse(pExchange, pParsedUri, jsonStream);
         } else {
+            // Fallback, send as one object
+            // TODO: Remove for 2.0
             sendAllJSON(pExchange, pParsedUri, pJson);
         }
     }
@@ -339,8 +341,8 @@ public class JolokiaHttpHandler implements HttpHandler {
                 if (callback == null) {
                     pJson.writeJSONString(writer);
                 } else {
-                    writer.write("(");
                     writer.write(callback);
+                    writer.write("(");
                     pJson.writeJSONString(writer);
                     writer.write(");");
                 }

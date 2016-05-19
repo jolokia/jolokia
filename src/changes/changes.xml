@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="1.3.4" description="Release 1.3.4">
+      <action dev="gnufied" type="add" date="2016-05-19" issue="243">
+        JSON response is streamed by default for the JVM agent to reduce memory activity
+      </action>
       <action dev="gquintana" type="add" date="2016-05-04" issue="247">
         Add the possibility to add a SSL connection factory the J4pClient
       </action>
