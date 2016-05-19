@@ -137,7 +137,6 @@ public enum ConfigKey {
      */
     CANONICAL_NAMING("canonicalNaming", true, true, "true"),
 
-
     /**
      * Whether to use streaming json responses. Default is "false"
      */
