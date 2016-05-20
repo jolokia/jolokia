@@ -16,6 +16,9 @@ package org.jolokia.detector;
  *  limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import javax.management.*;
@@ -142,5 +145,69 @@ public class JBossDetectorTest extends BaseDetectorTest {
         detector.addMBeanServers(new HashSet<MBeanServerConnection>());
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void verifyIsClassLoadedArgumentChecksNullInstrumentation() {
+        detector.isClassLoaded("xx", null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void verifyIsClassLoadedArgumentChecks2NullClassname() {
+        detector.isClassLoaded(null, createMock(Instrumentation.class));
+    }
+
+    @Test
+    public void verifyIsClassLoadedNotLoaded() {
+        Instrumentation inst = createMock(Instrumentation.class);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {}).once();
+        replay(inst);
+        assertFalse(detector.isClassLoaded("org.Dummy", inst));
+        verify(inst);
+    }
+
+    @Test
+    public void verifyIsClassLoadedLoaded() {
+        Instrumentation inst = createMock(Instrumentation.class);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {JBossDetectorTest.class}).once();
+        replay(inst);
+        assertTrue(detector.isClassLoaded(JBossDetectorTest.class.getName(), inst));
+        verify(inst);
+    }
+
+    @Test
+    public void verifyEarlyDetectForJBossModulesBasedContainer() throws MalformedURLException {
+        ClassLoader cl = createMock(ClassLoader.class);
+        expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).once();
+        replay(cl);
+        String prevValue = System.setProperty("org.jboss.boot.log.file", "blah");
+        try {
+            assertTrue(detector.earlyDetectForJBossModulesBasedContainer(cl));
+        } finally {
+            if (prevValue == null) {
+                System.getProperties().remove("org.jboss.boot.log.file");
+            } else {
+                System.setProperty("org.jboss.boot.log.file", prevValue);
+            }
+        }
+        verify(cl);
+    }
+
+    @Test
+    public void verifyAwaitServerInitialization() throws MalformedURLException {
+        Instrumentation inst = createMock(Instrumentation.class);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {}).times(3);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {JBossDetectorTest.class}).atLeastOnce();
+        replay(inst);
+        String prevValue = System.setProperty("java.util.logging.manager", JBossDetectorTest.class.getName());
+        try {
+            detector.awaitServerInitialization(inst);
+        } finally {
+            if (prevValue == null) {
+                System.getProperties().remove("java.util.logging.manager");
+            } else {
+                System.setProperty("java.util.logging.manager", prevValue);
+            }
+        }
+        verify(inst);
+    }
 
 }

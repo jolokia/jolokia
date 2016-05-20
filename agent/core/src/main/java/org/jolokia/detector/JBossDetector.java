@@ -1,6 +1,8 @@
 package org.jolokia.detector;
 
+import java.lang.instrument.Instrumentation;
 import java.lang.reflect.*;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +33,59 @@ public class JBossDetector extends AbstractServerDetector {
             }
         }
         return handle;
+    }
+
+    /**
+     * Attempts to return true in case the JVM will start a JBoss modules based application server. Because getting
+     * access to the main arguments is not possible, it returns true in case the system property
+     * {@code org.jboss.boot.log.file} is set and the {@code org/jboss/modules/Main.class} resource can be found using
+     * the current class loader.
+     */
+    @Override
+    public boolean earlyDetect(Instrumentation instrumentation) {
+        return earlyDetectForJBossModulesBasedContainer(JBossDetector.class.getClassLoader());
+    }
+
+    protected boolean earlyDetectForJBossModulesBasedContainer(ClassLoader classLoader) {
+        URL jbossModulesUrl = classLoader.getResource("org/jboss/modules/Main.class");
+        if (System.getProperty("org.jboss.boot.log.file") != null && jbossModulesUrl != null) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Awaits the early initialization of a JBoss modules based application server by polling the system property
+     * {@code java.util.logging.manager} and waiting until the specified class specified by this property has been
+     * loaded by the JVM.
+     */
+    @Override
+    public void awaitServerInitialization(Instrumentation instrumentation) {
+        awaitServerInitializationForJBossModulesBasedContainer(instrumentation);
+    }
+
+    private void awaitServerInitializationForJBossModulesBasedContainer(Instrumentation instrumentation) {
+        while (true) {
+            String loggingManagerClassName = System.getProperty("java.util.logging.manager");
+            if (loggingManagerClassName != null) {
+                if (isClassLoaded(loggingManagerClassName, instrumentation)) {
+                    // Assuming that the logging manager (most likely org.jboss.logmanager.LogManager)
+                    // is loaded by the static initializer of java.util.logging.LogManager (and not by
+                    // other code), we know now that either the java.util.logging.LogManager singleton
+                    // is or will be initialized.
+                    // Here where trigger to for load the class:
+                    // https://github.com/jboss-modules/jboss-modules/blob/1.5.1.Final/src/main/java/org/jboss/modules/Main.java#L482
+                    // Therefore the steps 3-6 of the proposal for option 2 don't need to be performed,
+                    // see https://github.com/rhuss/jolokia/issues/258 for details.
+                    break;
+                }
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private ServerHandle checkFromJSR77(MBeanServerExecutor pMBeanServerExecutor) {

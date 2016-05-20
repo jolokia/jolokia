@@ -16,6 +16,7 @@ package org.jolokia.backend;
  *  limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
 import java.util.*;
 
 import javax.management.*;
@@ -85,6 +86,13 @@ public class TestDetector implements ServerDetector {
             } catch (JMException e) {
             }
         }
+    }
+
+    public boolean earlyDetect(Instrumentation instrumentation) {
+        return false;
+    }    
+
+    public void awaitServerInitialization(Instrumentation instrumentation) {
     }
 
     public static void setThrowAddException(boolean b) {
