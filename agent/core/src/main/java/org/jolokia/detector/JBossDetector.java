@@ -38,8 +38,8 @@ public class JBossDetector extends AbstractServerDetector {
     /**
      * Attempts to return true in case the JVM will start a JBoss modules based application server. Because getting
      * access to the main arguments is not possible, it returns true in case the system property
-     * {@code org.jboss.boot.log.file} is set and the {@code org/jboss/modules/Main.class} resource can be found using
-     * the current class loader.
+     * {@code jboss.modules.system.pkgs} is set and the {@code org/jboss/modules/Main.class} resource can be found
+     * using the class loader of this class.
      */
     @Override
     public boolean earlyDetect(Instrumentation instrumentation) {
@@ -48,7 +48,7 @@ public class JBossDetector extends AbstractServerDetector {
 
     protected boolean earlyDetectForJBossModulesBasedContainer(ClassLoader classLoader) {
         URL jbossModulesUrl = classLoader.getResource("org/jboss/modules/Main.class");
-        if (System.getProperty("org.jboss.boot.log.file") != null && jbossModulesUrl != null) {
+        if (System.getProperty("jboss.modules.system.pkgs") != null && jbossModulesUrl != null) {
             return true;
         }
         return false;

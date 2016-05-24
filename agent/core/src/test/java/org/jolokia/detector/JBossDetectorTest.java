@@ -178,12 +178,12 @@ public class JBossDetectorTest extends BaseDetectorTest {
         ClassLoader cl = createMock(ClassLoader.class);
         expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).once();
         replay(cl);
-        String prevValue = System.setProperty("org.jboss.boot.log.file", "blah");
+        String prevValue = System.setProperty("jboss.modules.system.pkgs", "blah");
         try {
             assertTrue(detector.earlyDetectForJBossModulesBasedContainer(cl));
         } finally {
             if (prevValue == null) {
-                System.getProperties().remove("org.jboss.boot.log.file");
+                System.getProperties().remove("jboss.modules.system.pkgs");
             } else {
                 System.setProperty("org.jboss.boot.log.file", prevValue);
             }
