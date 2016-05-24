@@ -30,6 +30,7 @@ public enum RequestType {
     EXEC("exec"),
     VERSION("version"),
     SEARCH("search"),
+    HOT_THREADS("hot_threads"),
 
     // Unsupported:
     REGNOTIF("regnotif"),

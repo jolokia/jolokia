@@ -52,7 +52,8 @@ public class RequestHandlerManager {
                 new ExecHandler(pRestrictor, pConverters),
                 new ListHandler(pRestrictor),
                 new VersionHandler(pConfig,pRestrictor, pServerHandle),
-                new SearchHandler(pRestrictor)
+                new SearchHandler(pRestrictor),
+                new HotThreadsHandler(pConfig, pRestrictor, pServerHandle)
         };
         for (JsonRequestHandler handler : handlers) {
             requestHandlerMap.put(handler.getType(),handler);
