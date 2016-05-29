@@ -1,5 +1,10 @@
 ![Jolokia - JMX on Capsaicin][1]
 
+[![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
+[![Coverage](https://img.shields.io/sonar/https/nemo.sonarqube.org/org.jolokia:jolokia/coverage.svg)](https://nemo.sonarqube.org/overview?id=org.jolokia%3Ajolokia)
+[![Technical Debt](https://img.shields.io/sonar/https/nemo.sonarqube.org/org.jolokia:jolokia/tech_debt.svg)](https://nemo.sonarqube.org/overview?id=org.jolokia%3Ajolokia)
+[![Gitter](https://badges.gitter.im/Join+Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 Jolokia is a fresh way to access JMX MBeans remotely. It is
 different from JSR-160 connectors in that it is an agent-based
 approach which uses JSON over HTTP for its communication in a
@@ -145,11 +150,6 @@ commit automatically with `git commit -s`.
 If you fix some documentation (typos, formatting, ...) you are not required to sign-off. 
 It is possible to sign you commits in retrospective, [too](http://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
 if you forgot it the first time. 
-
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![endorse](http://api.coderwall.com/rhuss/endorsecount.png)](http://coderwall.com/rhuss)
-[![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
-[![Flattr](http://api.flattr.com/button/flattr-badge-large.png)](http://flattr.com/thing/73919/Jolokia-JMX-on-Capsaicin)
 
  [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
