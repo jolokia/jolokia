@@ -12,33 +12,32 @@ REST-stylish way.
 
 Multiple agents are provided for different environments:
 
-* __WAR Agent__ for deployment as web application in a JEE Server. 
-* __OSGi Agent__ for deployment in an [OSGi][2] container. This agent
+* **WAR Agent** for deployment as web application in a JEE Server. 
+* **OSGi Agent** for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).
-* __Mule Agent__ for usage within a [Mule][3] ESB
-* __JVM JDK6 Agent__ which can be used with any Oracle/Sun JVM,
+* **Mule Agent** for usage within a [Mule][3] ESB
+* **JVM JDK6 Agent** which can be used with any Oracle/Sun JVM,
   Version 6 and which is able to attach to a running Java process 
   dynamically. 
 
-Features
---------
+# Features
 
 The agent approach as several advantages:
 
-* __Firewall friendly__
+* **Firewall friendly**
 
   Since all communication is over HTTP, proxying through firewalls
   becomes mostly a none-issue (in contrast to RMI communication, which
   is the default mode for JSR-160)
 
-* __Polyglot__
+* **Polyglot**
 
   No Java installation is required on the client
   side. E.g. [Jmx4Perl][4] provides a rich Perl client library and
   Perl based tools for accessing the agents.
 
-* __Simple Setup__
+* **Simple Setup**
 
   The Setup is done by a simple agent deployment. In contrast,
   exporting JMX via JSR-160 can be remarkable complicated (see these
@@ -48,7 +47,7 @@ The agent approach as several advantages:
 Additionally, the agents provide extra features not available with
 JSR-160 connectors:
 
-* __Bulk requests__
+* **Bulk requests**
 
   In contrast to JSR-160 remoting, Jolokia can process many JMX
   requests with a single round trip. A single HTTP POST request puts
@@ -57,7 +56,7 @@ JSR-160 connectors:
   especially for monitoring solutions. The Nagios plugin
   [check_jmx4perl][8] uses bulk requests for its multi-check feature.
   
-* __Fine grained security__
+* **Fine grained security**
 
   In addition to standard HTTP security (SSL, HTTP-Authentication)
   Jolokia supports a custom policy with fine grained restrictions
@@ -66,7 +65,7 @@ JSR-160 connectors:
   defined in an XML format with support for allow/deny sections and
   wildcards.
 
-* __Proxy mode__
+* **Proxy mode**
 
   Jolokia can operate in an agentless mode where the only requirement
   on the target platform is the standard JSR-160 export of its
@@ -75,8 +74,7 @@ JSR-160 connectors:
   remote JSR-160 JMX calls. Bulk requests get dispatched into
   multiple JSR-160 requests on the proxy transparently.
 
-Resources
----------
+# Resources
 
 * The [Jolokia Forum][9] can be used for questions about Jolokia 
   (and Jmx4perl).
@@ -89,8 +87,7 @@ Resources
 Even more information on Jolokia can be found at [www.jolokia.org][5], including
 a complete [reference manual][12].
 
-Contributions
--------------
+# Contributions
 
 Contributions in form of pull requests are highly appreciated. All your work must be donated under the 
 Apache Public License, too. Please sign-off your work before 
