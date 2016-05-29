@@ -21,7 +21,7 @@ Multiple agents are provided for different environments:
   Version 6 and which is able to attach to a running Java process 
   dynamically. 
 
-# Features
+## Features
 
 The agent approach as several advantages:
 
@@ -74,7 +74,7 @@ JSR-160 connectors:
   remote JSR-160 JMX calls. Bulk requests get dispatched into
   multiple JSR-160 requests on the proxy transparently.
 
-# Resources
+## Resources
 
 * The [Jolokia Forum][9] can be used for questions about Jolokia 
   (and Jmx4perl).
@@ -87,7 +87,7 @@ JSR-160 connectors:
 Even more information on Jolokia can be found at [www.jolokia.org][5], including
 a complete [reference manual][12].
 
-# Contributions
+## Contributions
 
 Contributions in form of pull requests are highly appreciated. All your work must be donated under the 
 Apache Public License, too. Please sign-off your work before 
