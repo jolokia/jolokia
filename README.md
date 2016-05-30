@@ -19,7 +19,7 @@ Multiple agents are provided for different environments:
   all-in-one).
 * **Mule Agent** for usage within a [Mule][3] ESB
 * **JVM JDK6 Agent** which can be used with any Oracle/Sun JVM,
-  Version 6 and which is able to attach to a running Java process 
+  Version 6 or later and which is able to attach to a running Java process 
   dynamically. 
 
 ## Features
