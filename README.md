@@ -1,5 +1,6 @@
 ![Jolokia - JMX on Capsaicin][1]
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/io.fabric8/docker-maven-plugin/)
 [![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
 [![Coverage](https://img.shields.io/sonar/https/nemo.sonarqube.org/org.jolokia:jolokia/coverage.svg)](https://nemo.sonarqube.org/overview?id=org.jolokia%3Ajolokia)
 [![Technical Debt](https://img.shields.io/sonar/https/nemo.sonarqube.org/org.jolokia:jolokia/tech_debt.svg)](https://nemo.sonarqube.org/overview?id=org.jolokia%3Ajolokia)
