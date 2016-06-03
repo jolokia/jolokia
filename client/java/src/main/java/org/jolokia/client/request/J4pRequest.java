@@ -263,19 +263,21 @@ public abstract class J4pRequest {
 
     private String getArrayForArgument(Object[] pArg) {
         StringBuilder inner = new StringBuilder();
+        inner.append("[");
         for (int i = 0; i< pArg.length; i++) {
             inner.append(nullEscape(pArg[i]));
             if (i < pArg.length - 1) {
                 inner.append(",");
             }
         }
+        inner.append("]");
         return inner.toString();
     }
 
     // null escape used for GET requests
     private String nullEscape(Object pArg) {
         if (pArg == null) {
-            return "[null]";
+            return "null";
         } else if (pArg instanceof String && ((String) pArg).length() == 0) {
             return "\"\"";
         } else if (pArg instanceof JSONAware) {

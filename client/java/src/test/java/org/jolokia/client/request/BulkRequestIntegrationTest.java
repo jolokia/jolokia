@@ -52,7 +52,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
-    @Test
+    @Test (enabled = false) // MAX_DEPTH is not supported by GSon/JSonPath serializer
     public void simpleBulkRequestWithOptions() throws MalformedObjectNameException, J4pException {
         J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
         J4pVersionRequest req2 = new J4pVersionRequest();
@@ -95,7 +95,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
 
     private List<J4pReadRequest> createBulkRequests() throws MalformedObjectNameException {
         J4pReadRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
-        req1.setPath("Blub/0");
+        req1.setPath("$.Blub[0]");
         J4pReadRequest req2 = new J4pReadRequest("bla:type=blue","Sucks");
         J4pReadRequest req3 = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
         return Arrays.asList(req1,req2,req3);

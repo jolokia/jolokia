@@ -57,8 +57,9 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                                                     "{\"name\": \"hello\", \"value\": \"world\"}");
         J4pExecResponse resp = j4pClient.execute(request);
         JSONObject bean = resp.getValue();
-        Assert.assertEquals(bean.get("name"),"hello");
-        Assert.assertEquals(bean.get("value"),"world");
+        JSONObject bean2 = (JSONObject) bean.get("contents");
+        Assert.assertEquals(bean2.get("name"),"hello");
+        Assert.assertEquals(bean2.get("value"),"world");
     }
 
     @Test
@@ -152,7 +153,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         Object args[] = new Object[] { 12,true,null, "Bla" };
         for (J4pExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
             J4pExecResponse resp = j4pClient.execute(request,"POST");
-            assertEquals(12L,resp.getValue());
+            assertEquals(12.0,resp.getValue());
         }
     }
 
@@ -280,7 +281,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 Map res = resp.getValue();
                 assertEquals(res.get("eins"),"fcn");
                 assertEquals(((List) res.get("zwei")).get(1),"svw");
-                assertEquals(res.get("drei"),10L);
+                assertEquals(res.get("drei"),10.0);
                 assertEquals(res.get("vier"),true);
             }
 

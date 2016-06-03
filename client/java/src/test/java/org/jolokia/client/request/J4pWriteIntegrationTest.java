@@ -48,7 +48,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void withPath() throws MalformedObjectNameException, J4pException {
-        checkWrite("ComplexNestedValue","Blub/1/numbers/0",13L);
+        checkWrite("ComplexNestedValue","$.Blub[1].numbers[0]",13.0);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         Map map = createTestMap();
         checkWrite(new String[]{"POST"}, "Map", null, map);
         checkWrite("Map","fcn","svw");
-        checkWrite("Map","zahl",20L);
+        checkWrite("Map","zahl",20.0);
 
         // Write an not yet known key
         J4pWriteRequest wReq = new J4pWriteRequest(IT_ATTRIBUTE_MBEAN,"Map","hofstadter","douglas");
@@ -89,7 +89,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         map.put("zwei","bvb");
         map.put("drei",true);
         map.put("vier",null);
-        map.put("fuenf",12L);
+        map.put("fuenf",12.0);
         return map;
     }
 
@@ -97,14 +97,14 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     void list() throws MalformedObjectNameException, J4pException {
         List list = new ArrayList();
         list.add("fcn");
-        list.add(42L);
+        list.add(42.0);
         list.add(createTestMap());
         list.add(null);
         list.add(23.2);
         checkWrite(new String[] { "POST" }, "List",null,list);
-        checkWrite("List","0",null);
-        checkWrite("List","0","");
-        checkWrite("List","2",42L);
+        checkWrite("List","$[0]",null);
+        checkWrite("List","$[0]","");
+        checkWrite("List","$[2]",42.0);
     }
 
 
@@ -159,18 +159,23 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mxMap() throws MalformedObjectNameException, J4pException {
-        final Map<String,Long> input = new HashMap<String,Long>();
-        input.put("roland",13L);
-        input.put("heino",19L);
-        checkMxWrite(new String[] {"POST"},"Map", null, input, new ResponseAssertion() {
+        final Map<String, Long> input = new HashMap<String, Long>();
+        input.put("roland", 13L);
+        input.put("heino", 19L);
+        checkMxWrite(new String[]{"POST"}, "Map", null, input, new ResponseAssertion() {
             public void assertResponse(J4pResponse resp) {
-                JSONObject val = (JSONObject)resp.getValue();
+                JSONObject val = (JSONObject) resp.getValue();
                 assertEquals(val.size(), input.size());
                 for (String key : input.keySet()) {
-                    assertEquals(input.get(key),val.get(key));
+                    assertEquals(input.get(key), getFromMXMap(val, key));
                 }
             }
         });
+    }
+
+    private Object getFromMXMap(JSONObject map, String key) {
+        String wrappedKey = "[" + key  + "]";
+        return ((Map)((Map)map.get(wrappedKey)).get("contents")).get("value");
     }
 
     @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*immutable.*")
@@ -223,6 +228,9 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
                 if (pFinalAssert != null && pFinalAssert.length > 0) {
                     pFinalAssert[0].assertResponse(readResp);
                 } else {
+                    if (pValue instanceof String && ((String) pValue).isEmpty()) {
+                        pValue = null;
+                    }
                     assertEquals("New value should be set",pValue != null ? pValue : null,readResp.getValue());
                 }
             }

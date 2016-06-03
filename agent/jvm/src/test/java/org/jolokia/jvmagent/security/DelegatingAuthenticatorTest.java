@@ -120,15 +120,6 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         return success.getPrincipal();
     }
 
-    @Test
-    public void invalidProtocol() {
-        DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia","ftp://ftp.redhat.com",null,false);
-
-        Authenticator.Result result = authenticator.authenticate(createExchange(new Headers()));
-        Authenticator.Failure failure = (Authenticator.Failure) result;
-        assertEquals(failure.getResponseCode(),401);
-    }
-
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*blub.*")
     public void invalidExtractor() {
         new DelegatingAuthenticator("jolokia","http://www.redhat.com","blub:bla",false);
