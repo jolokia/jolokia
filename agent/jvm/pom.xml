@@ -144,6 +144,8 @@
                   <include>org.jolokia:jolokia-service-discovery</include>
                   <include>org.jolokia:jolokia-service-history</include>
                   <include>com.googlecode.json-simple:json-simple</include>
+                  <include>com.google.code.gson:gson</include>
+                  <include>com.jayway.jsonpath:json-path</include>
                 </includes>
               </artifactSet>
               <filters>
