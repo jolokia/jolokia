@@ -3,7 +3,7 @@
 
 cd target/
 dir=`ls -d jolokia-client* | grep -v .war`
-cd $dir;
+cd ${dir};
 rm jolokia-test.html
 ln -s ../../src/main/webapp/jolokia-test.html .
 rm jolokia-simple-test.html
