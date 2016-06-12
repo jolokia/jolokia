@@ -296,12 +296,6 @@
         </plugin>
 
         <plugin>
-          <groupId>org.codehaus.sonar</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-          <version>4.3</version>
-        </plugin>
-
-        <plugin>
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
           <version>0.11</version>
@@ -504,7 +498,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <currentStableVersion>2.0.0-M1</currentStableVersion>
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
-    <sonar.host.url>http://labs.consol.de/sonar</sonar.host.url>
+    <sonar.host.url>https://nemo.sonarqube.org</sonar.host.url>
+    <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
     <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
     <github.global.server>github</github.global.server>
   </properties>
