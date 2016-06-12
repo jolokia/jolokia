@@ -61,6 +61,9 @@ public class J4pClientBuilder {
     private boolean tcpNoDelay;
     private int socketBufferSize;
 
+    // Add socket factories to tune
+    private ConnectionSocketFactory sslConnectionSocketFactory;
+
     // whether to use thread safe, pooled connections
     private boolean pooledConnections;
 
@@ -378,6 +381,18 @@ public class J4pClientBuilder {
         return this;
     }
 
+    /**
+     * Set the SSL connection factory to use when connecting via SSL. This can be used to tune
+     * the SSL setup (SSLv3, TLSv1.2...),
+     *
+     * @param pSslConnectionSocketFactory the SSL connection factory to use
+     * @return this builder object
+     */
+    public final J4pClientBuilder sslConnectionSocketFactory(ConnectionSocketFactory pSslConnectionSocketFactory) {
+        this.sslConnectionSocketFactory = pSslConnectionSocketFactory;
+        return this;
+    }
+
     // =====================================================================================
 
     /**
@@ -409,8 +424,6 @@ public class J4pClientBuilder {
 
         return builder.build();
     }
-
-
 
     /**
      * Parse proxy specification and return a proxy object representing the proxy configuration.
@@ -485,6 +498,13 @@ public class J4pClientBuilder {
         return connManager;
     }
 
+
+    private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
+        SSLContext sslcontext = SSLContexts.createSystemDefault();
+        X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
+        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
+    }
+
     private ConnectionConfig createConnectionConfig() {
         return ConnectionConfig.custom()
                 .setBufferSize(socketBufferSize)
@@ -502,12 +522,11 @@ public class J4pClientBuilder {
     }
 
     private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
-        SSLContext sslcontext = SSLContexts.createSystemDefault();
-        X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
-
         return RegistryBuilder.<ConnectionSocketFactory>create()
                               .register("http", PlainConnectionSocketFactory.INSTANCE)
-                              .register("https", new SSLConnectionSocketFactory(sslcontext, hostnameVerifier))
+                              .register("https", sslConnectionSocketFactory != null ?
+                                  sslConnectionSocketFactory :
+                                  createDefaultSSLConnectionSocketFactory())
                               .build();
     }
 

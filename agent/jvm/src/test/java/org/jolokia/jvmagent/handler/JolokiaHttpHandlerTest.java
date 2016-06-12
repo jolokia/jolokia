@@ -194,6 +194,25 @@ public class JolokiaHttpHandlerTest {
         assertNotNull(header.getFirst("Access-Control-Allow-Max-Age"));
     }
 
+    @Test
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException, MalformedObjectNameException {
+        handler = new JolokiaHttpHandler(getContext(ConfigKey.STREAMING, "true"));
+        injectRequestDispatcher(handler,requestDispatcher);
+
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
+        expect(exchange.getRequestMethod()).andReturn("GET");
+
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
+        handler.doHandle(exchange);
+
+        String result = out.toString("utf-8");
+
+        assertNull(header.getFirst("Content-Length"));
+        JSONObject resp = (JSONObject) new JSONParser().parse(result);
+        assertTrue(resp.containsKey("value"));
+    }
+
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
         return prepareExchange(pUri,"Origin",null);
     }

@@ -136,6 +136,11 @@ public enum ConfigKey {
     CANONICAL_NAMING("canonicalNaming", true, true, Constants.TRUE),
 
     /**
+     * Whether to use streaming json responses. Default is "false"
+     */
+    STREAMING("streaming", true, false, Constants.TRUE),
+
+    /**
      * Optional domain name for registering own MBeans
      */
     MBEAN_QUALIFIER("mbeanQualifier", true, false),

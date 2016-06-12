@@ -41,8 +41,10 @@ import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.server.core.util.ChunkedWriter;
 import org.jolokia.service.discovery.DiscoveryMulticastResponder;
 import org.json.simple.JSONAware;
+import org.json.simple.JSONStreamAware;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -270,6 +272,49 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
+        boolean streaming = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.STREAMING));
+        if (streaming) {
+            JSONStreamAware jsonStream = (JSONStreamAware)pJson;
+            sendStreamingResponse(pExchange, pParsedUri, jsonStream);
+        } else {
+            // Fallback, send as one object
+            // TODO: Remove for 2.0
+            sendAllJSON(pExchange, pParsedUri, pJson);
+        }
+    }
+
+    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStreamAware pJson) throws IOException {
+        ChunkedWriter writer = null;
+        try {
+            Headers headers = pExchange.getResponseHeaders();
+            if (pJson != null) {
+                headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+                String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
+                pExchange.sendResponseHeaders(200, 0);
+                writer = new ChunkedWriter(pExchange.getResponseBody(), "UTF-8");
+                if (callback == null) {
+                    pJson.writeJSONString(writer);
+                } else {
+                    writer.write(callback);
+                    writer.write("(");
+                    pJson.writeJSONString(writer);
+                    writer.write(");");
+                }
+            } else {
+                headers.set("Content-Type", "text/plain");
+                pExchange.sendResponseHeaders(200,-1);
+            }
+        } finally {
+            if (writer != null) {
+                // Always close in order to finish the request.
+                // Otherwise the thread blocks.
+                writer.flush();
+                writer.close();
+            }
+        }
+    }
+
+    private void sendAllJSON(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
         OutputStream out = null;
         try {
             Headers headers = pExchange.getResponseHeaders();
