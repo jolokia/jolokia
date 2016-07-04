@@ -47,6 +47,7 @@ public final class OptionsAndArgs {
             "keystore", "keystorePassword", "useSslClientAuthentication!",
             "secureSocketProtocol", "keyStoreType", "keyManagerAlgorithm", "trustManagerAlgorithm",
             "caCert", "serverCert", "serverKey", "serverKeyAlgorithm", "clientPrincipal", "extractClientCheck",
+            "sslProtocol", "sslCipherSuite",
             // Jolokia options:
             "historyMaxEntries", "debug!", "debugMaxEntries",
             "dispatcherClasses", "maxDepth", "maxCollectionSize",
@@ -57,7 +58,7 @@ public final class OptionsAndArgs {
             "config", "help!"));
 
     private static final Set<String> LIST_OPTIONS = new HashSet<String>(Arrays.asList(
-            "clientPrincipal"));
+            "clientPrincipal", "sslProtocol", "sslCipherSuite"));
 
     static {
         String shortOptsDef[] = {

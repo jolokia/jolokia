@@ -169,7 +169,7 @@ public class JolokiaServer {
     protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
         // We manage it on our own
         httpServer = createHttpServer(pConfig);
-        init(httpServer,pConfig,pLazy);
+        init(httpServer, pConfig, pLazy);
     }
 
     /**
@@ -186,7 +186,7 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = pConfig.getContextPath();
-        jolokiaHttpHandler = useHttps(pConfig) ?
+        jolokiaHttpHandler = pConfig.useHttps() ?
                 new JolokiaHttpsHandler(pConfig) :
                 new JolokiaHttpHandler(pConfig.getJolokiaConfig());
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
@@ -240,7 +240,7 @@ public class JolokiaServer {
         InetAddress address = pConfig.getAddress();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
-        HttpServer server = useHttps(pConfig) ?
+        HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
 
@@ -261,13 +261,7 @@ public class JolokiaServer {
 
     // =========================================================================================================
     // HTTPS handling
-
-    private boolean useHttps(JolokiaServerConfig pConfig) {
-        String protocol = pConfig.getProtocol();
-        return protocol.equalsIgnoreCase("https");
-    }
-
-    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress,JolokiaServerConfig pConfig) {
+    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress, JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
         try {
             HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
@@ -285,8 +279,12 @@ public class JolokiaServer {
             tmf.init(ks);
 
             // setup the HTTPS context and parameters
-            sslContext.init(kmf.getKeyManagers(),tmf.getTrustManagers(), null);
-            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig.useSslClientAuthentication()));
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+            // Update the config to filter out bad protocols or ciphers
+            pConfig.updateHTTPSSettingsFromContext(sslContext);
+
+            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig));
             return server;
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
@@ -401,29 +399,34 @@ public class JolokiaServer {
 
     // HTTPS configurator
     private static final class JolokiaHttpsConfigurator extends HttpsConfigurator {
-        private boolean useClientAuthentication;
+        private JolokiaServerConfig serverConfig;
         private SSLContext context;
 
-        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthentication) {
+        private JolokiaHttpsConfigurator(SSLContext pSSLContext, JolokiaServerConfig pConfig) {
             super(pSSLContext);
             this.context = pSSLContext;
-            useClientAuthentication = pUseClientAuthentication;
+            this.serverConfig = pConfig;
         }
 
         /** {@inheritDoc} */
         public void configure(HttpsParameters params) {
-
             // initialise the SSL context
             SSLEngine engine = context.createSSLEngine();
-            params.setNeedClientAuth(useClientAuthentication);
-            params.setCipherSuites(engine.getEnabledCipherSuites());
-            params.setProtocols(engine.getEnabledProtocols());
-
             // get the default parameters
             SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
-            defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
-            params.setSSLParameters(defaultSSLParameters);
 
+            params.setNeedClientAuth(serverConfig.useSslClientAuthentication());
+            defaultSSLParameters.setNeedClientAuth(serverConfig.useSslClientAuthentication());
+
+            // Cipher Suites
+            params.setCipherSuites(serverConfig.getSSLCipherSuites());
+            defaultSSLParameters.setCipherSuites(serverConfig.getSSLCipherSuites());
+
+            // Protocols
+            params.setProtocols(serverConfig.getSSLProtocols());
+            defaultSSLParameters.setProtocols(serverConfig.getSSLProtocols());
+
+            params.setSSLParameters(defaultSSLParameters);
         }
     }
 }
