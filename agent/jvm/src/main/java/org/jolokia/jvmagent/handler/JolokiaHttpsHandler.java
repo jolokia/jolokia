@@ -112,12 +112,15 @@ public class JolokiaHttpsHandler extends JolokiaHttpHandler {
             try {
                 certPrincipal = (X500Principal) pHttpsExchange.getSSLSession().getPeerPrincipal();
                 Set<Rdn> certPrincipalRdns = getPrincipalRdns(certPrincipal);
+                boolean matchFound = false;
                 for (LdapName principal : allowedPrincipals) {
-                    for (Rdn rdn : principal.getRdns()) {
-                        if (!certPrincipalRdns.contains(rdn)) {
-                            throw new SecurityException("Principal " + certPrincipal + " not allowed");
-                        }
+                    if( certPrincipalRdns.containsAll(principal.getRdns()) ) {
+                        matchFound = true;
+                        break;
                     }
+                }
+                if (!matchFound) {
+                    throw new SecurityException("Principal " + certPrincipal + " not allowed");
                 }
             } catch (SSLPeerUnverifiedException e) {
                 throw new SecurityException("SSLPeer unverified");
