@@ -1,13 +1,13 @@
-package org.jolokia.jvmagent.handler;/*
- * 
- * Copyright 2015 Roland Huss
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,57 +15,66 @@ package org.jolokia.jvmagent.handler;/*
  * limitations under the License.
  */
 
-import java.security.cert.*;
-import java.util.*;
+package org.jolokia.jvmagent.security;
+
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpPrincipal;
+import com.sun.net.httpserver.HttpsExchange;
+import org.jolokia.jvmagent.JolokiaServerConfig;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.security.auth.x500.X500Principal;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpsExchange;
-import org.jolokia.jvmagent.JolokiaServerConfig;
-import org.jolokia.util.LogHandler;
-
-/**
- * Add specific HTTPs handling when https is used. This handler needs the full configuration
- * in order get to the SSL specific configuration.
- *
- * @author roland
- * @since 01/10/15
- */
-public class JolokiaHttpsHandler extends JolokiaHttpHandler {
+public class ClientCertAuthenticator extends Authenticator {
 
     // ASN.1 path to the extended usage info within a CERT
     private static final String CLIENTAUTH_OID = "1.3.6.1.5.5.7.3.2";
 
     // whether to use client cert authentication
-    private final boolean useClientCertAuth;
     private final List<LdapName> allowedPrincipals;
     private final boolean extendedClientCheck;
-
-    /**
-     * Constructor with a standard log handler
-     *
-     * @param pConfig full server config (in contrast to the jolokia config)
-     */
-    public JolokiaHttpsHandler(JolokiaServerConfig pConfig) {
-        this(pConfig, null);
-    }
 
     /**
      * Constructor
      *
      * @param pConfig full server config (in contrast to the jolokia config use by the http-handler)
-     * @param pLogHandler log handler to use
      */
-    public JolokiaHttpsHandler(JolokiaServerConfig pConfig, LogHandler pLogHandler) {
-        super(pConfig.getJolokiaConfig(), pLogHandler);
-        useClientCertAuth = pConfig.useSslClientAuthentication();
+    public ClientCertAuthenticator(JolokiaServerConfig pConfig) {
         allowedPrincipals = parseAllowedPrincipals(pConfig);
         extendedClientCheck = pConfig.getExtendedClientCheck();
+    }
+
+    @Override
+    public Result authenticate(HttpExchange httpExchange) {
+        if( !(httpExchange instanceof HttpsExchange) ) {
+            return new Failure(500);
+        }
+        try {
+            HttpsExchange httpsExchange = (HttpsExchange) httpExchange;
+            checkCertForClientUsage(httpsExchange);
+            checkCertForAllowedPrincipals(httpsExchange);
+
+            String name="";
+            try {
+                name = httpsExchange.getSSLSession().getPeerPrincipal().getName();
+            } catch (SSLPeerUnverifiedException ignore) {
+            }
+            return new Success(new HttpPrincipal(name, "ssl"));
+
+        } catch (SecurityException e) {
+            return new Failure(403);
+        }
     }
 
     // =================================================================================
@@ -74,11 +83,6 @@ public class JolokiaHttpsHandler extends JolokiaHttpHandler {
     // handling the request
     protected void checkAuthentication(HttpExchange pHttpExchange) throws SecurityException {
         // Cast will always work since this handler is only used for Http
-        HttpsExchange httpsExchange = (HttpsExchange) pHttpExchange;
-        if (useClientCertAuth) {
-            checkCertForClientUsage(httpsExchange);
-            checkCertForAllowedPrincipals(httpsExchange);
-        }
     }
 
     // Check the cert's principal against the list of given allowedPrincipals.
@@ -112,15 +116,12 @@ public class JolokiaHttpsHandler extends JolokiaHttpHandler {
             try {
                 certPrincipal = (X500Principal) pHttpsExchange.getSSLSession().getPeerPrincipal();
                 Set<Rdn> certPrincipalRdns = getPrincipalRdns(certPrincipal);
-                boolean matchFound = false;
                 for (LdapName principal : allowedPrincipals) {
-                    if( certPrincipalRdns.containsAll(principal.getRdns()) ) {
-                        matchFound = true;
-                        break;
+                    for (Rdn rdn : principal.getRdns()) {
+                        if (!certPrincipalRdns.contains(rdn)) {
+                            throw new SecurityException("Principal " + certPrincipal + " not allowed");
+                        }
                     }
-                }
-                if (!matchFound) {
-                    throw new SecurityException("Principal " + certPrincipal + " not allowed");
                 }
             } catch (SSLPeerUnverifiedException e) {
                 throw new SecurityException("SSLPeer unverified");
@@ -155,4 +156,5 @@ public class JolokiaHttpsHandler extends JolokiaHttpHandler {
             return null;
         }
     }
+
 }

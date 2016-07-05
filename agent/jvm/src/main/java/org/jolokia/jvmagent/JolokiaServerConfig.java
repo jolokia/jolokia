@@ -344,7 +344,6 @@ public class JolokiaServerConfig {
     // Initialise and validate early in order to fail fast in case of an configuration error
     protected void initConfigAndValidate(Map<String,String> agentConfig) {
         initContext();
-        initAuthenticator();
         initProtocol(agentConfig);
         initAddress(agentConfig);
         port = Integer.parseInt(agentConfig.get("port"));
@@ -352,6 +351,7 @@ public class JolokiaServerConfig {
         initExecutor(agentConfig);
         initThreadNr(agentConfig);
         initHttpsRelatedSettings(agentConfig);
+        initAuthenticator();
     }
 
     private void initAuthenticator() {
@@ -417,7 +417,10 @@ public class JolokiaServerConfig {
 
         String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
         String realm = jolokiaConfig.get(ConfigKey.REALM);
-        if ("basic".equalsIgnoreCase(authMode)) {
+
+        if( useHttps() && useSslClientAuthentication() ) {
+            authenticator = new ClientCertAuthenticator(this);
+        } else if ("basic".equalsIgnoreCase(authMode)) {
             if (user != null) {
                 if (password == null) {
                     throw new IllegalArgumentException("'password' must be set if a 'user' (here: '" + user + "') is given");

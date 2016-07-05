@@ -29,7 +29,6 @@ import com.sun.net.httpserver.*;
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
-import org.jolokia.jvmagent.handler.JolokiaHttpsHandler;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.util.NetworkUtil;
 
@@ -186,9 +185,7 @@ public class JolokiaServer {
 
         // Create proper context along with handler
         final String contextPath = pConfig.getContextPath();
-        jolokiaHttpHandler = pConfig.useHttps() ?
-                new JolokiaHttpsHandler(pConfig) :
-                new JolokiaHttpHandler(pConfig.getJolokiaConfig());
+        jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig());
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
 
         // Add authentication if configured
