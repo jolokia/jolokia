@@ -99,7 +99,7 @@
   <section id="proxy-mode">
     <title>Proxy Mode</title>
     <para>
-      Proxy mode is a solution for when when it is impossible to deploy
+      Proxy mode is a solution for when it is impossible to deploy
       the Jolokia agent on the target platform. For this mode, the
       only prerequisite for accessing the target server is a JSR-160
       connection. Most of the time this happens for political reasons,
