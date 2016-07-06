@@ -344,7 +344,6 @@ public class JolokiaServerConfig {
     // Initialise and validate early in order to fail fast in case of an configuration error
     protected void initConfigAndValidate(Map<String,String> agentConfig) {
         initContext();
-        initAuthenticator();
         initProtocol(agentConfig);
         initAddress(agentConfig);
         port = Integer.parseInt(agentConfig.get("port"));
@@ -352,6 +351,7 @@ public class JolokiaServerConfig {
         initExecutor(agentConfig);
         initThreadNr(agentConfig);
         initHttpsRelatedSettings(agentConfig);
+        initAuthenticator();
     }
 
     private void initAuthenticator() {
@@ -417,25 +417,41 @@ public class JolokiaServerConfig {
 
         String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
         String realm = jolokiaConfig.get(ConfigKey.REALM);
+
+        ArrayList<Authenticator> authenticators = new ArrayList<Authenticator>();
+
+        if( useHttps() && useSslClientAuthentication() ) {
+            authenticators.add(new ClientCertAuthenticator(this));
+        }
+
         if ("basic".equalsIgnoreCase(authMode)) {
             if (user != null) {
                 if (password == null) {
                     throw new IllegalArgumentException("'password' must be set if a 'user' (here: '" + user + "') is given");
                 }
-                authenticator = new UserPasswordAuthenticator(realm,user,password);
-            } else {
-                authenticator = null;
+
+                authenticators.add(new UserPasswordAuthenticator(realm,user,password));
             }
         } else if ("jaas".equalsIgnoreCase(authMode)) {
-            authenticator = new JaasAuthenticator(realm);
+            authenticators.add(new JaasAuthenticator(realm));
         } else if ("delegate".equalsIgnoreCase(authMode)) {
-            authenticator = new DelegatingAuthenticator(realm,
+            authenticators.add(new DelegatingAuthenticator(realm,
                                                         jolokiaConfig.get(ConfigKey.AUTH_URL),
                                                         jolokiaConfig.get(ConfigKey.AUTH_PRINCIPAL_SPEC),
-                                                        jolokiaConfig.getAsBoolean(ConfigKey.AUTH_IGNORE_CERTS));
+                                                        jolokiaConfig.getAsBoolean(ConfigKey.AUTH_IGNORE_CERTS)));
         } else {
             throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
                                                "Must be either 'basic' or 'jaas'");
+        }
+
+        if( authenticators.isEmpty() ) {
+            authenticator = null;
+        } else if( authenticators.size()==1 ) {
+            authenticator = authenticators.get(0);
+        } else {
+            // Multiple auth strategies were configured, pass auth if any of them
+            // succeed.
+            authenticator = new AnyAuthenticator(authenticators);
         }
     }
 
