@@ -327,7 +327,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>useSslClientAuthentication</constant></td>
           <td>
             Whether client certificates should be used for
-            authentication. The presented certificate is validate whether signed by
+            authentication. The presented certificate is validated that it is signed by
             a known CA which must be in the keystore (https only). (<constant>true</constant> or
             <constant>false</constant>). 
           </td>        

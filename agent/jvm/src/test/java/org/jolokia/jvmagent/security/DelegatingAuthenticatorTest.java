@@ -78,7 +78,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia",url,"json:metadata/name",false);
 
         Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader);
+        HttpExchange ex = createHttpExchange(respHeader);
 
         Authenticator.Result result = authenticator.authenticate(ex);
         assertNotNull(result);
@@ -112,7 +112,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, pSpec, true);
 
         Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader, "Authorization", "Bearer blub");
+        HttpExchange ex = createHttpExchange(respHeader, "Authorization", "Bearer blub");
 
         Authenticator.Result result = authenticator.authenticate(ex);
         assertNotNull(result);
@@ -124,7 +124,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     public void invalidProtocol() {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia","ftp://ftp.redhat.com",null,false);
 
-        Authenticator.Result result = authenticator.authenticate(createExchange(new Headers()));
+        Authenticator.Result result = authenticator.authenticate(createHttpExchange(new Headers()));
         Authenticator.Failure failure = (Authenticator.Failure) result;
         assertEquals(failure.getResponseCode(),401);
     }
@@ -138,7 +138,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     public void ioException() {
         String wrongUrl = "http://0.0.0.2:80";
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia",wrongUrl,null,false);
-        HttpExchange exchange = createExchange(new Headers());
+        HttpExchange exchange = createHttpExchange(new Headers());
         Authenticator.Result result = authenticator.authenticate(exchange);
         Authenticator.Failure failure = (Authenticator.Failure) result;
         assertEquals(failure.getResponseCode(),503);
@@ -152,7 +152,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
                                         "json:metadata/name/yet/deeper", "deeper" };
         for (int i = 0; i < data.length; i +=2) {
             DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, data[i], false);
-            HttpExchange exchange = createExchange(new Headers(), "Authorization", "Bearer blub");
+            HttpExchange exchange = createHttpExchange(new Headers(), "Authorization", "Bearer blub");
             Authenticator.Result result = authenticator.authenticate(exchange);
             Authenticator.Failure failure = (Authenticator.Failure) result;
             assertEquals(failure.getResponseCode(), 400);
@@ -164,7 +164,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     @Test
     public void invalidJson() {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url + "/invalid","json:metadata/name", false);
-        HttpExchange exchange = createExchange(new Headers(), "Authorization", "Bearer blub");
+        HttpExchange exchange = createHttpExchange(new Headers(), "Authorization", "Bearer blub");
         Authenticator.Result result = authenticator.authenticate(exchange);
         Authenticator.Failure failure = (Authenticator.Failure) result;
         assertEquals(failure.getResponseCode(), 422);

@@ -21,30 +21,51 @@ import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Authenticator that succeeds if any of the Authenticators it delegates to succeed.
+ * Authenticator encapsulating multiple other authenticators whose
+ * results are combined to a single one, depending on the given mode
+ *
+ * <ul>
+ *     <li>Mode.ALL : All authenticators must succeed for this authenticator to succeed</li>
+ *     <li>Mode.ANY : A single sucessful authenticator is sufficient for this authenticator to succeed</li>
+ * </ul>
  *
  * @author roland
  * @since 26.05.14
  */
-public class AnyAuthenticator extends Authenticator {
+public class MultiAuthenticator extends Authenticator {
 
     final private ArrayList<Authenticator> authenticators;
 
-    public AnyAuthenticator(ArrayList<Authenticator> authenticators) {
-        if( authenticators == null ) {
-            throw new IllegalArgumentException("authenticators cannot be null");
+    final private Mode mode;
+
+    /**
+     * How to combine multiple authenticators
+     */
+    public enum Mode {
+        // All authenticators must match
+        ALL,
+        // At least one authenticator must match
+        ANY
+    };
+
+    public MultiAuthenticator(Mode mode, List<Authenticator> authenticators) {
+        if (authenticators == null) {
+            throw new IllegalArgumentException("Authenticators cannot be null");
         }
-        if( authenticators.isEmpty() ) {
-            throw new IllegalArgumentException("authenticators cannot be empty");
+        if (authenticators.isEmpty()) {
+            throw new IllegalArgumentException("Authenticators cannot be empty");
         }
         this.authenticators = new ArrayList<Authenticator>(authenticators);
+        this.mode = mode;
     }
 
     /**
+     * Authenticate against the given request
      *
-     * @param httpExchange
+     * @param httpExchange request and response object
      * @return the result of the first authenticator that does succeed, or the last failure result.
      */
     @Override
@@ -52,10 +73,12 @@ public class AnyAuthenticator extends Authenticator {
         Result result = null;
         for (Authenticator a : authenticators) {
             result = a.authenticate(httpExchange);
-            if( result instanceof Success ) {
+            if ((result instanceof Success && mode == Mode.ANY) ||
+                (!(result instanceof Success) && mode == Mode.ALL)) {
                 return result;
             }
         }
+        // Return last resul, which is either SUCCESS for mode.ALL or FAILURE for mode.ANY
         return result;
     }
 }

@@ -39,7 +39,7 @@ import java.util.Set;
 public class ClientCertAuthenticator extends Authenticator {
 
     // ASN.1 path to the extended usage info within a CERT
-    private static final String CLIENTAUTH_OID = "1.3.6.1.5.5.7.3.2";
+    static final String CLIENTAUTH_OID = "1.3.6.1.5.5.7.3.2";
 
     // whether to use client cert authentication
     private final List<LdapName> allowedPrincipals;
@@ -79,12 +79,6 @@ public class ClientCertAuthenticator extends Authenticator {
 
     // =================================================================================
 
-    // Verify https certs if its Https request and we have SSL auth enabled. Will be called before
-    // handling the request
-    protected void checkAuthentication(HttpExchange pHttpExchange) throws SecurityException {
-        // Cast will always work since this handler is only used for Http
-    }
-
     // Check the cert's principal against the list of given allowedPrincipals.
     // If no allowedPrincipals are given than every principal is allowed.
     // If an empty list as allowedPrincipals is given, no one is allowed to access
@@ -116,12 +110,15 @@ public class ClientCertAuthenticator extends Authenticator {
             try {
                 certPrincipal = (X500Principal) pHttpsExchange.getSSLSession().getPeerPrincipal();
                 Set<Rdn> certPrincipalRdns = getPrincipalRdns(certPrincipal);
+                boolean matchFound = false;
                 for (LdapName principal : allowedPrincipals) {
-                    for (Rdn rdn : principal.getRdns()) {
-                        if (!certPrincipalRdns.contains(rdn)) {
-                            throw new SecurityException("Principal " + certPrincipal + " not allowed");
-                        }
+                    if (certPrincipalRdns.containsAll(principal.getRdns())) {
+                        matchFound = true;
+                        break;
                     }
+                }
+                if (!matchFound) {
+                    throw new SecurityException("Principal " + certPrincipal + " not allowed");
                 }
             } catch (SSLPeerUnverifiedException e) {
                 throw new SecurityException("SSLPeer unverified");
