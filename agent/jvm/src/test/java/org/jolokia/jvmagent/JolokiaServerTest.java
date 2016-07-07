@@ -226,7 +226,7 @@ public class JolokiaServerTest {
         JvmAgentConfig config = new JvmAgentConfig(
             prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," +
                 getFullCertSetup() + ",config=" +  getResourcePath("/agent-test-specialHttpsSettings.properties")));
-        JolokiaServer server = new JolokiaServer(config, false);
+        JolokiaServer server = new JolokiaServer(config);
         server.start();
 
         // Skipping hostname verification because the cert doesn't have a SAN of localhost
@@ -461,11 +461,6 @@ public class JolokiaServerTest {
     public static class CustomLogHandler implements LogHandler {
     // FakeSSLSocketFactory wraps a normal SSLSocketFactory so it can set the explicit SSL / TLS
     // protocol version(s) and cipher suite(s)
-    private static class FakeSSLSocketFactory extends SSLSocketFactory {
-        private String[] cipherSuites;
-        private String[] protocols;
-        private SSLSocketFactory socketFactory;
-
         private static int debugCount, infoCount, errorCount;
 
         public CustomLogHandler() {
@@ -514,6 +509,13 @@ public class JolokiaServerTest {
             return false;
         }
     }
+
+    private static class FakeSSLSocketFactory extends SSLSocketFactory {
+        private String[] cipherSuites;
+        private String[] protocols;
+        private SSLSocketFactory socketFactory;
+
+
         public FakeSSLSocketFactory(SSLSocketFactory socketFactory, String[] protocols, String[] cipherSuites) {
             super();
             this.socketFactory = socketFactory;

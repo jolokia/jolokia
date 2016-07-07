@@ -30,8 +30,6 @@ import java.util.regex.Pattern;
 import com.sun.net.httpserver.Authenticator;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.util.JolokiaCipher;

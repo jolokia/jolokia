@@ -248,7 +248,7 @@ public class JolokiaServer {
     private HttpHandler startupJolokiaContext() {
         JolokiaContext jolokiaContext = serviceManager.start();
         JolokiaHttpHandler jolokiaHttpHandler =
-                useHttps(config) ?
+                config.useHttps() ?
                         new JolokiaHttpsHandler(jolokiaContext, config) :
                         new JolokiaHttpHandler(jolokiaContext);
         updateAgentUrl(jolokiaContext);

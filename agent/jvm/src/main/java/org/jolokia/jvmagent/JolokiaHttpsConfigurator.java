@@ -14,11 +14,11 @@ import com.sun.net.httpserver.HttpsParameters;
  */
 final class JolokiaHttpsConfigurator extends HttpsConfigurator {
 
-    private boolean useClientAuthentication;
+    private final JolokiaServerConfig config;
 
-    JolokiaHttpsConfigurator(SSLContext pSSLContext, boolean pUseClientAuthenication) {
+    JolokiaHttpsConfigurator(SSLContext pSSLContext, JolokiaServerConfig pConfig) {
         super(pSSLContext);
-        useClientAuthentication = pUseClientAuthenication;
+        config = pConfig;
     }
 
     /** {@inheritDoc} */
@@ -27,13 +27,20 @@ final class JolokiaHttpsConfigurator extends HttpsConfigurator {
             // initialise the SSL context
             SSLContext context = SSLContext.getDefault();
             SSLEngine engine = context.createSSLEngine();
-            params.setNeedClientAuth(useClientAuthentication);
-            params.setCipherSuites(engine.getEnabledCipherSuites());
-            params.setProtocols(engine.getEnabledProtocols());
-
             // get the default parameters
             SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
-            defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
+
+            params.setNeedClientAuth(config.useSslClientAuthentication());
+            defaultSSLParameters.setNeedClientAuth(config.useSslClientAuthentication());
+
+            // Cipher Suites
+            params.setCipherSuites(config.getSSLCipherSuites());
+            defaultSSLParameters.setCipherSuites(config.getSSLCipherSuites());
+
+            // Protocols
+            params.setProtocols(config.getSSLProtocols());
+            defaultSSLParameters.setProtocols(config.getSSLProtocols());
+
             params.setSSLParameters(defaultSSLParameters);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
