@@ -34,6 +34,7 @@ import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.Version;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.util.Base64Util;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -100,6 +101,7 @@ public class JolokiaServerTest {
         - 241 matching clientPrincipal --> ok
         - 241 non-matching clientPrincipal --> fail
       - 25 no CA given to verify against --> fail
+      - 26 with clientPrincipal and basic auth
      */
 
     @Test
@@ -195,6 +197,7 @@ public class JolokiaServerTest {
                        "client/with-key-usage");
     }
 
+
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*no CA.*")
     public void t_25_no_ca_given() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true,"
@@ -202,6 +205,40 @@ public class JolokiaServerTest {
                        "serverKey=" + getCertPath("server/key.pem"),
                        true,
                        "client/with-key-usage");
+    }
+
+    @Test
+    public void t_261_with_client_principal() throws Exception {
+        httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O\\=jolokia.org\\,CN\\=Client signed with client key usage,"
+                       + getFullCertSetup(),
+                       true,
+                       "client/with-key-usage");
+    }
+
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    public void t_262_with_wrong_client_principal() throws Exception {
+        httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
+                       + getFullCertSetup(),
+                       true,
+                       "client/with-key-usage");
+    }
+
+    @Test
+    public void t_263_with_basic_auth() throws Exception {
+        httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
+                       + getFullCertSetup(),
+                       true,
+                       "client/with-key-usage",
+                       "admin:password");
+    }
+
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    public void t_264_with_wrong_basic_auth() throws Exception {
+        httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
+                       + getFullCertSetup(),
+                       true,
+                       "client/with-key-usage",
+                       "admin:wrong");
     }
 
     // ==================================================================================================
@@ -230,12 +267,7 @@ public class JolokiaServerTest {
         server.start();
 
         // Skipping hostname verification because the cert doesn't have a SAN of localhost
-        HostnameVerifier verifier = new HostnameVerifier() {
-            @Override
-            public boolean verify(String host, SSLSession sslSession) {
-                return true;
-            }
-        };
+        HostnameVerifier verifier = createHostnameVerifier();
 
         HostnameVerifier oldVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
         SSLSocketFactory oldSslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
@@ -360,13 +392,22 @@ public class JolokiaServerTest {
     private void httpsRoundtrip(String pConfig, boolean pValidateCa, String clientCert) throws Exception {
         JvmAgentConfig config = new JvmAgentConfig(
                 prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," + pConfig));
-        HostnameVerifier verifier = new HostnameVerifier() {
+        checkServer(config, true, createHostnameVerifier(), pValidateCa, clientCert);
+    }
+
+    private void httpsRoundtrip(String pConfig, boolean pValidateCa, String clientCert, String pUserPassword) throws Exception {
+        JvmAgentConfig config = new JvmAgentConfig(
+                prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," + pConfig));
+        checkServer(config, true, createHostnameVerifier(), pValidateCa, clientCert, pUserPassword);
+    }
+
+    private HostnameVerifier createHostnameVerifier() {
+        return new HostnameVerifier() {
             @Override
             public boolean verify(String host, SSLSession sslSession) {
                 return true;
             }
         };
-        checkServer(config, true, verifier, pValidateCa, clientCert);
     }
 
     private String prepareConfigString(String pConfig) throws IOException {
@@ -413,11 +454,18 @@ public class JolokiaServerTest {
             }
         };
     }
-
     private void checkServer(JvmAgentConfig pConfig, boolean pDoRequest,
                              HostnameVerifier pVerifier,
                              boolean pValidateCa,
                              String pClientCert) throws Exception {
+        checkServer(pConfig, pDoRequest, pVerifier, pValidateCa, pClientCert, null);
+    }
+
+    private void checkServer(JvmAgentConfig pConfig, boolean pDoRequest,
+                             HostnameVerifier pVerifier,
+                             boolean pValidateCa,
+                             String pClientCert, String pUserPassword) throws Exception {
+        JolokiaServer server = new JolokiaServer(pConfig, false);
         JolokiaServer server = new JolokiaServer(pConfig);
         server.start();
         //Thread.sleep(2000);
@@ -444,7 +492,12 @@ public class JolokiaServerTest {
                 HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             }
             URL url = new URL(server.getUrl());
-            String resp = EnvTestUtil.readToString(url.openStream());
+            URLConnection uc = url.openConnection();
+            if( pUserPassword!=null ) {
+                uc.setRequestProperty("Authorization", "Basic " + Base64Util.encode(pUserPassword.getBytes()));
+            }
+            uc.connect();
+            String resp = EnvTestUtil.readToString(uc.getInputStream());
             assertTrue(resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
         } finally {
             server.stop();

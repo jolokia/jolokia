@@ -28,7 +28,6 @@ import javax.net.ssl.*;
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
-import org.jolokia.jvmagent.handler.JolokiaHttpsHandler;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
@@ -247,10 +246,7 @@ public class JolokiaServer {
     // Startup the context and create the HttpHandler
     private HttpHandler startupJolokiaContext() {
         JolokiaContext jolokiaContext = serviceManager.start();
-        JolokiaHttpHandler jolokiaHttpHandler =
-                config.useHttps() ?
-                        new JolokiaHttpsHandler(jolokiaContext, config) :
-                        new JolokiaHttpHandler(jolokiaContext);
+        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
         updateAgentUrl(jolokiaContext);
         return jolokiaHttpHandler;
     }

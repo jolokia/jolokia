@@ -32,7 +32,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     @Test
     public void testAuthenticateNoAuthorizationHeader() throws Exception {
         Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader);
+        HttpExchange ex = createHttpExchange(respHeader);
 
         Authenticator.Result res = auth.authenticate(ex);
 
@@ -44,7 +44,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     @Test
     public void testAuthenticateNoLoginModules() throws Exception {
             Headers respHeader = new Headers();
-            HttpExchange ex = createExchange(respHeader, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
+            HttpExchange ex = createHttpExchange(respHeader, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
 
             Authenticator.Result result = auth.authenticate(ex);
             assertEquals(((Authenticator.Failure) result).getResponseCode(), 401);
@@ -53,7 +53,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     @Test
     public void testAuthenticateSuccess() throws Exception {
         Headers respHeader = new Headers();
-        HttpExchange ex = createExchange(respHeader, MockLoginContext.SUBJECT, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
+        HttpExchange ex = createHttpExchange(respHeader, MockLoginContext.SUBJECT, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
 
         new MockLoginContext("jolokia",true);
 

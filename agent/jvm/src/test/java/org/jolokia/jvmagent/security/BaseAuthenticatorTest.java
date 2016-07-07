@@ -30,11 +30,11 @@ import static org.easymock.EasyMock.*;
  * @since 27/05/15
  */
 public class BaseAuthenticatorTest {
-    protected HttpExchange createExchange(Headers respHeaders, String... reqHeaderValues) {
-        return createExchange(respHeaders,null,reqHeaderValues);
+    protected HttpExchange createHttpExchange(Headers respHeaders, String... reqHeaderValues) {
+        return createHttpExchange(respHeaders, null, reqHeaderValues);
     }
 
-    protected HttpExchange createExchange(Headers respHeaders, Subject subject, String... reqHeaderValues) {
+    protected HttpExchange createHttpExchange(Headers respHeaders, Subject subject, String... reqHeaderValues) {
         HttpExchange ex = createMock(HttpExchange.class);
         Headers reqHeaders = new Headers();
         for (int i = 0; i < reqHeaderValues.length; i+=2) {
@@ -50,4 +50,6 @@ public class BaseAuthenticatorTest {
         replay(ex);
         return ex;
     }
+
+
 }
