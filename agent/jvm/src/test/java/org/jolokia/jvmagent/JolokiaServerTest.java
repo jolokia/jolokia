@@ -22,7 +22,9 @@ import java.net.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.*;
@@ -53,7 +55,7 @@ public class JolokiaServerTest {
         };
 
         for (String c : configs) {
-            roundtrip(c,true);
+            roundtrip(c, true);
         }
     }
 
@@ -61,15 +63,15 @@ public class JolokiaServerTest {
     @Test(expectedExceptions = IOException.class,expectedExceptionsMessageRegExp = ".*401.*")
     public void httpWithAuthenticationRejected() throws Exception {
         Map config = new HashMap();
-        config.put("user","roland");
-        config.put("password","s!cr!t");
-        config.put("port","0");
-        roundtrip(config,true);
+        config.put("user", "roland");
+        config.put("password", "s!cr!t");
+        config.put("port", "0");
+        roundtrip(config, true);
     }
 
     @Test
     public void serverPicksThePort() throws Exception {
-        roundtrip("host=localhost,port=0",true);
+        roundtrip("host=localhost,port=0", true);
     }
 
 
@@ -102,17 +104,17 @@ public class JolokiaServerTest {
 
     @Test
     public void t_11_https_only() throws Exception {
-        httpsRoundtrip("agentId=test",false);
+        httpsRoundtrip("agentId=test", false);
     }
 
     @Test
     public void t_12_with_keystore() throws Exception {
-        httpsRoundtrip("keystore=" + getResourcePath("/keystore") + ",keystorePassword=jetty7",false);
+        httpsRoundtrip("keystore=" + getResourcePath("/keystore") + ",keystorePassword=jetty7", false);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*without.*key.*")
     public void serverCertWithoutKey() throws Exception {
-        httpsRoundtrip("serverCert=" + getCertPath("server/cert.pem"),false);
+        httpsRoundtrip("serverCert=" + getCertPath("server/cert.pem"), false);
     }
 
     @Test
@@ -219,6 +221,70 @@ public class JolokiaServerTest {
                        false);
     }
 
+    @Test
+    public void sslWithSpecialHttpsSettings() throws Exception {
+        JvmAgentConfig config = new JvmAgentConfig(
+            prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," +
+                getFullCertSetup() + ",config=" +  getResourcePath("/agent-test-specialHttpsSettings.properties")));
+        JolokiaServer server = new JolokiaServer(config, false);
+        server.start();
+
+        // Skipping hostname verification because the cert doesn't have a SAN of localhost
+        HostnameVerifier verifier = new HostnameVerifier() {
+            @Override
+            public boolean verify(String host, SSLSession sslSession) {
+                return true;
+            }
+        };
+
+        HostnameVerifier oldVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
+        SSLSocketFactory oldSslSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
+
+        List<String> cipherSuites = Arrays.asList(config.getSSLCipherSuites());
+        List<String> protocols = Arrays.asList(config.getSSLProtocols());
+
+        for (String protocol : new String[]{"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"}) {
+            // Make sure at least one connection for this protocol succeeds (if expected to)
+            boolean connectionSucceeded = false;
+
+            for (String cipherSuite : oldSslSocketFactory.getSupportedCipherSuites()) {
+                if (!cipherSuites.contains(cipherSuite))
+                    continue;
+
+                try {
+                    TrustManager tms[] = getTrustManagers(true);
+                    SSLContext sc = SSLContext.getInstance(protocol);
+                    sc.init(new KeyManager[0], tms, new java.security.SecureRandom());
+
+                    HttpsURLConnection.setDefaultHostnameVerifier(verifier);
+                    HttpsURLConnection.setDefaultSSLSocketFactory(
+                        new FakeSSLSocketFactory(sc.getSocketFactory(), new String[]{protocol}, new String[]{cipherSuite}));
+
+                    URL url = new URL(server.getUrl());
+                    String resp = EnvTestUtil.readToString(url.openStream());
+                    assertTrue(
+                        resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
+                    if (!protocols.contains(protocol) || !cipherSuites.contains(cipherSuite)) {
+                        fail(String.format("Expected SSLHandshakeException with the %s protocol and %s cipher suite", protocol, cipherSuite));
+                    }
+                    connectionSucceeded = true;
+                } catch (javax.net.ssl.SSLHandshakeException e) {
+                    // We make sure at least one connection with this protocol succeeds if expected
+                    // down below
+                } finally {
+                    HttpsURLConnection.setDefaultHostnameVerifier(oldVerifier);
+                    HttpsURLConnection.setDefaultSSLSocketFactory(oldSslSocketFactory);
+                }
+            }
+
+            if (protocols.contains(protocol) && !connectionSucceeded) {
+                fail("Expected at least one connection to succeed on " + protocol);
+            }
+        }
+
+        server.stop();
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*password.*")
     public void invalidConfig() throws IOException, InterruptedException {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
@@ -279,7 +345,7 @@ public class JolokiaServerTest {
     }
 
     private void roundtrip(Map<String,String> pConfig, boolean pDoRequest) throws Exception {
-        checkServer(new JvmAgentConfig(pConfig),pDoRequest);
+        checkServer(new JvmAgentConfig(pConfig), pDoRequest);
     }
 
     private void roundtrip(String pConfig, boolean pDoRequest) throws Exception {
@@ -288,7 +354,7 @@ public class JolokiaServerTest {
     }
 
     private void httpsRoundtrip(String pConfig, boolean pValidateCa) throws Exception {
-        httpsRoundtrip(pConfig,pValidateCa,"client/with-key-usage");
+        httpsRoundtrip(pConfig, pValidateCa, "client/with-key-usage");
     }
 
     private void httpsRoundtrip(String pConfig, boolean pValidateCa, String clientCert) throws Exception {
@@ -393,6 +459,12 @@ public class JolokiaServerTest {
     }
 
     public static class CustomLogHandler implements LogHandler {
+    // FakeSSLSocketFactory wraps a normal SSLSocketFactory so it can set the explicit SSL / TLS
+    // protocol version(s) and cipher suite(s)
+    private static class FakeSSLSocketFactory extends SSLSocketFactory {
+        private String[] cipherSuites;
+        private String[] protocols;
+        private SSLSocketFactory socketFactory;
 
         private static int debugCount, infoCount, errorCount;
 
@@ -440,6 +512,45 @@ public class JolokiaServerTest {
         @Override
         public boolean isDebug() {
             return false;
+        }
+    }
+        public FakeSSLSocketFactory(SSLSocketFactory socketFactory, String[] protocols, String[] cipherSuites) {
+            super();
+            this.socketFactory = socketFactory;
+            this.protocols = protocols;
+            this.cipherSuites = cipherSuites;
+        }
+
+        public Socket createSocket(InetAddress host, int port) throws IOException {
+            return wrapSocket((SSLSocket)socketFactory.createSocket(host, port));
+        }
+
+        public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
+            return wrapSocket((SSLSocket)socketFactory.createSocket(s, host, port, autoClose));
+        }
+
+        public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+            return wrapSocket((SSLSocket)socketFactory.createSocket(address, port, localAddress, localPort));
+        }
+
+        public Socket createSocket(String host, int port) throws IOException {
+            return wrapSocket((SSLSocket)socketFactory.createSocket(host, port));
+        }
+
+        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+            return wrapSocket((SSLSocket)socketFactory.createSocket(host, port, localHost, localPort));
+        }
+
+        public String[] getDefaultCipherSuites() {
+            return socketFactory.getDefaultCipherSuites();
+        }
+
+        public String[] getSupportedCipherSuites() { return socketFactory.getSupportedCipherSuites(); }
+
+        private Socket wrapSocket(SSLSocket sslSocket) {
+            sslSocket.setEnabledProtocols(this.protocols);
+            sslSocket.setEnabledCipherSuites(this.cipherSuites);
+            return sslSocket;
         }
     }
 }

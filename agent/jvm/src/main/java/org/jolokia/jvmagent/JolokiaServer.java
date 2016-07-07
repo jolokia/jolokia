@@ -341,7 +341,7 @@ public class JolokiaServer {
         InetAddress address = pConfig.getAddress();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
-        HttpServer server = useHttps(pConfig) ?
+        HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
 
@@ -361,13 +361,8 @@ public class JolokiaServer {
     }
 
     // =========================================================================================================
-
-    private boolean useHttps(JolokiaServerConfig pConfig) {
-        String protocol = pConfig.getProtocol();
-        return protocol.equalsIgnoreCase("https");
-    }
-
-    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress,JolokiaServerConfig pConfig) {
+    // HTTPS handling
+    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress, JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
         try {
             HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
@@ -385,8 +380,12 @@ public class JolokiaServer {
             tmf.init(ks);
 
             // setup the HTTPS context and parameters
-            sslContext.init(kmf.getKeyManagers(),tmf.getTrustManagers(), null);
-            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig.useSslClientAuthentication()));
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+            // Update the config to filter out bad protocols or ciphers
+            pConfig.updateHTTPSSettingsFromContext(sslContext);
+
+            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig));
             return server;
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);

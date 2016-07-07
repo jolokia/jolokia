@@ -100,9 +100,12 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --serverKey <path>              Path to a PEM encoded server key file (https only)\n"  +
 "    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA)\n" +
 "    --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)\n" +
+"                                    If supplied multiple times, any one of the clientPrincipals must match\n" +
 "    --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage (https & sslClientAuth only)\n" +
 "    --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: true)\n" +
 "    --discoveryAgentUrl <url>       The URL to use for answering discovery requests. Will be autodetected if not given.\n" +
+"    --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times\n" +
+"    --sslCipherSuite <suite>        SSL / TLS cipher suite to enable, can be provided multiple times\n" +
 "    --debug                         Switch on agent debugging\n" +
 "    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
@@ -128,7 +131,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "is printed\n" +
 "\n" +
 "There are several possible reasons, why attaching to a process can fail:\n" +
-"   * The UID of this launcher must be the very *same*as the process to attach too. It not sufficient to be root.\n" +
+"   * The UID of this launcher must be the very *same* as the process to attach too. It not sufficient to be root.\n" +
 "   * The JVM must have HotSpot enabled and be a JVM 1.6 or larger.\n" +
 "   * It must be a Java process ;-)\n" +
 "\n" +

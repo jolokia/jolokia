@@ -86,7 +86,7 @@ public final class JvmAgent {
         }
     }
 
-    private static void startAgent(JvmAgentConfig pConfig,boolean pLazy)  {
+    private static void startAgent(JvmAgentConfig pConfig, boolean pLazy)  {
         try {
             server = new JolokiaServer(pConfig);
 
