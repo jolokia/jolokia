@@ -56,7 +56,6 @@
     <module>tools/test-util</module>
   </modules>
 
-
   <build>
 
     <plugins>
@@ -496,6 +495,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <additionalparam>-Xdoclint:none</additionalparam>
     <currentStableVersion>2.0.0-M1</currentStableVersion>
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>https://nemo.sonarqube.org</sonar.host.url>
@@ -666,14 +666,5 @@
       </modules>
   </profile>
 
- <profile>
-      <id>doclint-java8-disable</id>
-      <activation>
-        <jdk>[1.8,)</jdk>
-      </activation>
-      <properties>
-          <javadoc.opts>-Xdoclint:none</javadoc.opts>
-      </properties>
-    </profile>
   </profiles>
 </project>
