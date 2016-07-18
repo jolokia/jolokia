@@ -24,6 +24,10 @@
   </properties>
   <body>
     <release version="1.3.4" description="Release 1.3.4">
+      <action dev="chirino" type="add" date="2016-07-18" issue="273">
+        Allow a basic auth as alternative to client cert authentication when boty --user and
+        --useSslClientAuthentication is used.
+      </action>
       <action dev="drcapulet" type="add" date="2016-07-04" issue="257">
         Allow user-specifiable SSL / TLS protocols and ciphers to the JVM agent
       </action>
@@ -77,7 +81,7 @@
     <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">
       <action dev="roland" type="add" date="2015-10-04">
         Support for dynamically created, self-signed server
-        certificates when no server certificate is configured 
+        certificates when no server certificate is configured
       </action>
       <action dev="arnabbiswas1" type="fix" date="2015-09-30" issue="204">
         Add missing check for HTTP method in request handler.
@@ -88,7 +92,7 @@
       </action>
       <action dev="roland" type="add" date="2015-10-01">
         Support for PEM certs and keys when using the JVM agent with
-        TLS 
+        TLS
       </action>
       <action dev="zisili" type="update" date="2015-09-14" issue="214">
         Enhanced 'GlassfishDetector' for Payara flavour of glassfish
@@ -136,7 +140,7 @@
         Support for constructor based serialization conversion
       </action>
       <action dev="jcordes73" type="fix" date="2015-01-10" issue="178">
-       Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list" 
+       Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list"
       </action>
       <action dev="roland" type="add" date="2015-01-13" issue="177">
         Added MBeanPlugin as a way to hook into the agent's lifecyle
@@ -414,10 +418,10 @@
         proper server detection.
       </action>
       <action dev="mikael,jstrachan,roland" type="add" date="2012-10-10">
-        One can now change the key property order for MBeans names with the query parameter "canonicalNaming" 
+        One can now change the key property order for MBeans names with the query parameter "canonicalNaming"
         for read, list and search operations. By default this is set to "true" in which case
         an alphabetical ordering for the keys is used. If set to "false", then the original name as registered
-        is used. 
+        is used.
       </action>
       <action dev="roland" type="add" date="2012-11-23">
         Added a method "jobs()" to the JavaScript Jolokia agent to get all handles for all currently registered
@@ -460,7 +464,7 @@
       </action>
       <action dev="roland" type="add" date="2012-06-05">
         Added a page showing the Jolokia-Cubism integration including
-        live demos. 
+        live demos.
       </action>
       <action dev="roland" type="add" date="2012-05-16">
         Added a scheduler to the JavaScript client library.
@@ -470,7 +474,7 @@
       </action>
       <action dev="roland" type="fix" date="2012-04-26">
         Fixed fallback when registering ConfigMBean which didn't
-        properly work (see pull request #42)  
+        properly work (see pull request #42)
       </action>
     </release>
     <release version="1.0.3" description="Release 1.0.3" date="2012-04-11">
@@ -660,18 +664,18 @@
       <action dev="roland" type="add" date="2011-03-24">
         The activator in jolokia-osgi and jolokia-osgi-bundle can now
         use an OSGi restrictor service implementing
-        org.jolokia.restrictor.Restrictor when bundle property 
+        org.jolokia.restrictor.Restrictor when bundle property
         org.jolokia.useRestrictorService is set to true.
       </action>
       <action dev="roland" type="add" date="2011-03-24">
         Added a servlet init parameter "policyLocation" for specifying
         the location of the policy file. This can be an URL or an
         string with prefix "classpath:". Default:
-        "classpath:/jolokia-access.xml" 
+        "classpath:/jolokia-access.xml"
       </action>
       <action dev="roland" type="update" date="2011-03-24">
         Refactored restrictor handling and exported
-        org.jolokia.restrictor in the OSGi bundles. JolokiaServlet can 
+        org.jolokia.restrictor in the OSGi bundles. JolokiaServlet can
         take now an Restrictor object as constructor parameter.
       </action>
       <action dev="roland" type="update" date="2011-03-24">
@@ -680,7 +684,7 @@
         loader added.
       </action>
       <action dev="roland" type="update" date="2011-03-16">
-        jolokia.js: Works now with jQuery 1.5.1, too (but still doesn't use 
+        jolokia.js: Works now with jQuery 1.5.1, too (but still doesn't use
         the advanced Ajax features)
       </action>
       <action dev="roland" type="update" date="2011-03-16">
@@ -749,7 +753,7 @@
         Fixed MBean registration issue with Websphere AS 7.0 where
         MBean registration via the MBeanRegistration intefaces causes
         the WAS MBeanServer to raise a NPE (but register the MBean
-        nevertheless, so no rollback here). 
+        nevertheless, so no rollback here).
       </action>
       <action dev="roland" type="add" date="2010-10-24">
         New request parameter "callback" allows for sending a response

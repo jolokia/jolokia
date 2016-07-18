@@ -42,6 +42,7 @@ public class ClientCertAuthenticator extends Authenticator {
     static final String CLIENTAUTH_OID = "1.3.6.1.5.5.7.3.2";
 
     // whether to use client cert authentication
+    private final boolean useSslClientAuthentication;
     private final List<LdapName> allowedPrincipals;
     private final boolean extendedClientCheck;
 
@@ -51,6 +52,7 @@ public class ClientCertAuthenticator extends Authenticator {
      * @param pConfig full server config (in contrast to the jolokia config use by the http-handler)
      */
     public ClientCertAuthenticator(JolokiaServerConfig pConfig) {
+        useSslClientAuthentication = pConfig.useSslClientAuthentication();
         allowedPrincipals = parseAllowedPrincipals(pConfig);
         extendedClientCheck = pConfig.getExtendedClientCheck();
     }
@@ -62,7 +64,11 @@ public class ClientCertAuthenticator extends Authenticator {
         }
         try {
             HttpsExchange httpsExchange = (HttpsExchange) httpExchange;
-            checkCertForClientUsage(httpsExchange);
+            X509Certificate certificate = getClientCert(httpsExchange);
+            if (certificate == null) {
+                return new Failure(401);
+            }
+            checkCertForClientUsage(certificate);
             checkCertForAllowedPrincipals(httpsExchange);
 
             String name="";
@@ -79,28 +85,30 @@ public class ClientCertAuthenticator extends Authenticator {
 
     // =================================================================================
 
+    private X509Certificate getClientCert(HttpsExchange pHttpsExchange) {
+        try {
+            Certificate[] peerCerts = pHttpsExchange.getSSLSession().getPeerCertificates();
+            return peerCerts != null && peerCerts.length > 0 ? (X509Certificate) peerCerts[0] : null;
+        } catch (SSLPeerUnverifiedException e) {
+            throw new SecurityException("SSL Peer couldn't be verified");
+        }
+
+    }
+
     // Check the cert's principal against the list of given allowedPrincipals.
     // If no allowedPrincipals are given than every principal is allowed.
     // If an empty list as allowedPrincipals is given, no one is allowed to access
-    private void checkCertForClientUsage(HttpsExchange pHttpsExchange) {
+    private void checkCertForClientUsage(X509Certificate clientCert) {
         try {
-            Certificate[] peerCerts = pHttpsExchange.getSSLSession().getPeerCertificates();
-            if (peerCerts != null && peerCerts.length > 0) {
-                X509Certificate clientCert = (X509Certificate) peerCerts[0];
-
-                // We required that the extended key usage must be present if we are using
-                // client cert authentication
-                if (extendedClientCheck &&
-                    (clientCert.getExtendedKeyUsage() == null || !clientCert.getExtendedKeyUsage().contains(CLIENTAUTH_OID))) {
-                    throw new SecurityException("No extended key usage available");
-                }
+            // We required that the extended key usage must be present if we are using
+            // client cert authentication
+            if (extendedClientCheck &&
+                (clientCert.getExtendedKeyUsage() == null ||
+                 !clientCert.getExtendedKeyUsage().contains(CLIENTAUTH_OID))) {
+                throw new SecurityException("No extended key usage available");
             }
-        } catch (ClassCastException e) {
-            throw new SecurityException("No X509 client certificate");
         } catch (CertificateParsingException e) {
             throw new SecurityException("Can't parse client cert");
-        } catch (SSLPeerUnverifiedException e) {
-            throw new SecurityException("SSL Peer couldn't be verified");
         }
     }
 

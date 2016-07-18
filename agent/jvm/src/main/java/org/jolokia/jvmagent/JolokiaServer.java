@@ -412,8 +412,9 @@ public class JolokiaServer {
             // get the default parameters
             SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
 
-            params.setNeedClientAuth(serverConfig.useSslClientAuthentication());
-            defaultSSLParameters.setNeedClientAuth(serverConfig.useSslClientAuthentication());
+            // Cert authentication is delayed later to the ClientCertAuthenticator
+            params.setWantClientAuth(serverConfig.useSslClientAuthentication());
+            defaultSSLParameters.setWantClientAuth(serverConfig.useSslClientAuthentication());
 
             // Cipher Suites
             params.setCipherSuites(serverConfig.getSSLCipherSuites());
