@@ -337,7 +337,7 @@ public class JolokiaServerTest {
     @Test
     public void customHttpServer() throws IOException, NoSuchFieldException, IllegalAccessException {
         HttpServer httpServer = HttpServer.create();
-        JvmAgentConfig cfg = new JvmAgentConfig("");
+        JvmAgentConfig cfg = new JvmAgentConfig("port=" + EnvTestUtil.getFreePort());
         JolokiaServer server = new JolokiaServer(httpServer,cfg,null);
         Field field = JolokiaServer.class.getDeclaredField("useOwnServer");
         field.setAccessible(true);
@@ -348,7 +348,7 @@ public class JolokiaServerTest {
 
     @Test
     public void customLogHandler1() throws Exception {
-        JvmAgentConfig cfg = new JvmAgentConfig("");
+        JvmAgentConfig cfg = new JvmAgentConfig("port=" + EnvTestUtil.getFreePort());
         JolokiaServer server = new JolokiaServer(cfg,new CustomLogHandler());
         server.start();
         server.stop();
@@ -357,7 +357,7 @@ public class JolokiaServerTest {
 
     @Test
     public void customLogHandler2() throws Exception {
-        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + CustomLogHandler.class.getName());
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + CustomLogHandler.class.getName() + ",port=" + EnvTestUtil.getFreePort());
         CustomLogHandler.infoCount = 0;
         JolokiaServer handler = new JolokiaServer(cfg);
         handler.start();
@@ -367,7 +367,7 @@ public class JolokiaServerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidCustomLogHandler() throws Exception {
-        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + InvalidLogHandler.class.getName());
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + InvalidLogHandler.class.getName() + ",port=" + EnvTestUtil.getFreePort());
         new JolokiaServer(cfg);
     }
 
