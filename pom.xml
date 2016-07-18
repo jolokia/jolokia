@@ -496,7 +496,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <additionalparam>-Xdoclint:none</additionalparam>
-    <currentStableVersion>2.0.0-M1</currentStableVersion>
+    <currentStableVersion>2.0.0-M3</currentStableVersion>
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.host.url>https://nemo.sonarqube.org</sonar.host.url>
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
