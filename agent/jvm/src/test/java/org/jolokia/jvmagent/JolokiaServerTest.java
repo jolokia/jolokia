@@ -131,6 +131,7 @@ public class JolokiaServerTest {
         httpsRoundtrip(getFullCertSetup(), true);
     }
 
+
     @Test(expectedExceptions = IOException.class)
     public void t_21_self_signed_client_cert_fail() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true," + getFullCertSetup(),
@@ -238,6 +239,15 @@ public class JolokiaServerTest {
                        + getFullCertSetup(),
                        true,
                        "client/with-key-usage",
+                       "admin:wrong");
+    }
+
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    public void t_264_with_basic_auth_and_wrong_client_cert() throws Exception {
+        httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
+                       + getFullCertSetup(),
+                       true,
+                       "client/self-signed-with-key-usage",
                        "admin:wrong");
     }
 
@@ -492,7 +502,7 @@ public class JolokiaServerTest {
             }
             URL url = new URL(server.getUrl());
             URLConnection uc = url.openConnection();
-            if( pUserPassword!=null ) {
+            if (pUserPassword != null) {
                 uc.setRequestProperty("Authorization", "Basic " + Base64Util.encode(pUserPassword.getBytes()));
             }
             uc.connect();

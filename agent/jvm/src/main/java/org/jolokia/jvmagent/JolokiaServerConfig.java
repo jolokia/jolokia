@@ -441,7 +441,7 @@ public class JolokiaServerConfig {
 
         ArrayList<Authenticator> authenticators = new ArrayList<Authenticator>();
 
-        if( useHttps() && useSslClientAuthentication() ) {
+        if (useHttps() && useSslClientAuthentication()) {
             authenticators.add(new ClientCertAuthenticator(this));
         }
 
@@ -465,9 +465,9 @@ public class JolokiaServerConfig {
                                                "Must be either 'basic' or 'jaas'");
         }
 
-        if( authenticators.isEmpty() ) {
+        if (authenticators.isEmpty()) {
             authenticator = null;
-        } else if( authenticators.size()==1 ) {
+        } else if (authenticators.size() == 1) {
             authenticator = authenticators.get(0);
         } else {
             // Multiple auth strategies were configured, pass auth if any of them

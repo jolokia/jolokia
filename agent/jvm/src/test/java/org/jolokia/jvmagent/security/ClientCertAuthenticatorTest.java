@@ -1,6 +1,6 @@
 package org.jolokia.jvmagent.security;
 /*
- * 
+ *
  * Copyright 2016 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,7 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
     public void positive() throws Exception {
         ClientCertAuthenticator auth = new ClientCertAuthenticator(getConfig("clientPrincipal","cn=roland",
                                                                              "extendedClientCheck","true"));
-        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de",true));
+        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de", true, true));
         assertTrue(result instanceof Authenticator.Success);
     }
 
@@ -52,7 +52,7 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
     public void positiveWithoutExtendedClientCheck() throws Exception {
         ClientCertAuthenticator auth = new ClientCertAuthenticator(getConfig("clientPrincipal","cn=roland",
                                                                              "extendedClientCheck","false"));
-        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de",false));
+        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de", true, false));
         assertTrue(result instanceof Authenticator.Success);
     }
 
@@ -60,7 +60,7 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
     public void negativeWithExtendedClientCheck() throws Exception {
         ClientCertAuthenticator auth = new ClientCertAuthenticator(getConfig("clientPrincipal","cn=roland",
                                                                              "extendedClientCheck","true"));
-        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de",false));
+        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de", true, false));
         assertTrue(result instanceof Authenticator.Failure);
     }
 
@@ -68,7 +68,16 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
     public void negativeWithWrongClientPrincipal() throws Exception {
         ClientCertAuthenticator auth = new ClientCertAuthenticator(getConfig("clientPrincipal","cn=roland",
                                                                              "extendedClientCheck","true"));
-        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=manuel,o=redhat,c=de",true));
+        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=manuel,o=redhat,c=de", true, true));
+        assertTrue(result instanceof Authenticator.Failure);
+    }
+
+    @Test
+    public void negativeWithNoCert() throws Exception {
+                ClientCertAuthenticator auth = new ClientCertAuthenticator(getConfig("clientPrincipal","cn=roland",
+                                                                             "extendedClientCheck","false"));
+        Authenticator.Result result = auth.authenticate(createHttpsExchange(new Headers(),"uid=blub,cn=roland,o=redhat,c=de",
+                                                                            false /* no cert */, false));
         assertTrue(result instanceof Authenticator.Failure);
     }
 
@@ -89,6 +98,7 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
     }
 
     private HttpExchange createHttpsExchange(Headers respHeaders, String principalName,
+                                             boolean withCert,
                                              boolean withExtendedUsage, String... reqHeaderValues)
         throws SSLPeerUnverifiedException, CertificateParsingException {
         HttpsExchange ex = createMock(HttpsExchange.class);
@@ -104,18 +114,23 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
         // SSLSession
         SSLSession session = createMock(SSLSession.class);
         expect(ex.getSSLSession()).andStubReturn(session);
-        X509Certificate cert = createMock(X509Certificate.class);
-        Certificate[] certs = new Certificate[] {
-            cert
-        };
-        expect(session.getPeerCertificates()).andStubReturn(certs);
-        expect(cert.getExtendedKeyUsage()).andStubReturn(Arrays.asList(withExtendedUsage ? ClientCertAuthenticator.CLIENTAUTH_OID : ""));
+        if (withCert) {
+            X509Certificate cert = createMock(X509Certificate.class);
+            Certificate[] certs = new Certificate[]{
+                cert
+            };
+            expect(session.getPeerCertificates()).andStubReturn(certs);
+            expect(cert.getExtendedKeyUsage()).andStubReturn(Arrays.asList(withExtendedUsage ? ClientCertAuthenticator.CLIENTAUTH_OID : ""));
+            replay(cert);
+        } else {
+            expect(session.getPeerCertificates()).andStubReturn(null);
+        }
 
         // Principal
         X500Principal principal = new X500Principal(principalName);
         expect(session.getPeerPrincipal()).andStubReturn(principal);
 
-        replay(ex, session, cert);
+        replay(ex, session);
         return ex;
     }
 }
