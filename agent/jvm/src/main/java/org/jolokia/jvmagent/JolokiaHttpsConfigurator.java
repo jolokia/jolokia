@@ -30,8 +30,8 @@ final class JolokiaHttpsConfigurator extends HttpsConfigurator {
             // get the default parameters
             SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
 
-            params.setNeedClientAuth(config.useSslClientAuthentication());
-            defaultSSLParameters.setNeedClientAuth(config.useSslClientAuthentication());
+            params.setWantClientAuth(config.useSslClientAuthentication());
+            defaultSSLParameters.setWantClientAuth(config.useSslClientAuthentication());
 
             // Cipher Suites
             params.setCipherSuites(config.getSSLCipherSuites());
