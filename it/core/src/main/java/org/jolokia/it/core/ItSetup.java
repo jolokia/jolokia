@@ -134,6 +134,9 @@ public class ItSetup {
 
             // Chat MBean used for notifications
             ret.add(registerMBean(pServer, new Chat(), pDomain + ":type=Chat"));
+
+            // Generics MBean
+            ret.add(registerMBean(pServer, new StandardMBean(new GenericsChecking(), GenericsMXBean.class), isWebsphere ? null : pDomain + ":type=generic"));
         } catch (RuntimeException e) {
             throw new RuntimeException("Error",e);
         } catch (Exception exp) {
@@ -172,6 +175,11 @@ public class ItSetup {
     public String getMxBean() {
         return JOLOKIA_IT_DOMAIN + ":type=mxbean";
     }
+
+    public String getGenericMxBean() {
+        return JOLOKIA_IT_DOMAIN + ":type=generic";
+    }
+
 
     @SuppressWarnings("PMD.SystemPrintln")
     private void unregisterMBeans(List<ObjectName> pMBeanNames,MBeanServer pServer) {

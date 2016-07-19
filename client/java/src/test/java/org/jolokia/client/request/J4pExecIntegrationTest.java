@@ -62,6 +62,23 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     @Test
+    public void genericBeanSerialization() throws MalformedObjectNameException, J4pException {
+        JSONObject bean = retrieveDummyObject();
+        Assert.assertEquals(bean.get("name"), "dummy");
+        J4pExecRequest request = new J4pExecRequest(itSetup.getGenericMxBean(),
+                "update(org.jolokia.it.core.DummyObject)", "hello");
+        j4pClient.execute(request);
+        bean = retrieveDummyObject();
+        Assert.assertEquals(bean.get("name"), "hello");
+    }
+
+    private JSONObject retrieveDummyObject() throws MalformedObjectNameException, J4pException {
+        J4pExecRequest request = new J4pExecRequest(itSetup.getGenericMxBean(), "retrieve");
+        J4pExecResponse resp = j4pClient.execute(request);
+        return resp.getValue();
+    }
+
+    @Test
     public void failedOperation() throws MalformedObjectNameException, J4pException {
         for (J4pExecRequest request : execRequests("fetchNumber","bla")) {
             try {
