@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.regex.*;
 
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.EscapeUtil;
 
 /**
@@ -50,7 +51,7 @@ public final class OptionsAndArgs {
             "sslProtocol", "sslCipherSuite",
             // Jolokia options:
             "historyMaxEntries", "debug!", "debugMaxEntries",
-            "dispatcherClasses", "maxDepth", "maxCollectionSize",
+            "logHandlerClass", "dispatcherClasses", "maxDepth", "maxCollectionSize",
             "maxObjects", "restrictorClass", "policyLocation", "mbeanQualifier",
             "canonicalNaming", "includeStackTrace", "serializeException",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
@@ -202,6 +203,14 @@ public final class OptionsAndArgs {
      */
     public boolean isQuiet() {
         return quiet;
+    }
+
+    /**
+     * Get the configured port
+     */
+    public String getPort() {
+        String port = options.get("port");
+        return port != null ? port : "8778";
     }
 
     /**

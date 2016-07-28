@@ -32,6 +32,7 @@ import org.jolokia.restrictor.*;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
+import org.jolokia.util.QuietLogHandler;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
@@ -144,7 +145,7 @@ public class AgentServletTest {
         // Wait listening thread to warm up
         Thread.sleep(1000);
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test",LogHandler.QUIET);
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test", new QuietLogHandler());
             List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
             for (JSONObject json : in) {
                 if (json.get("url") != null && json.get("url").equals(url)) {
@@ -162,7 +163,7 @@ public class AgentServletTest {
         checkMulticastAvailable();
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test",LogHandler.QUIET);
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test", new QuietLogHandler());
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
             // At least one doesnt have an URL (remove this part if a way could be found for getting
@@ -199,7 +200,7 @@ public class AgentServletTest {
 
             assertTrue(sw.toString().contains("used"));
 
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test",LogHandler.QUIET);
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test",new QuietLogHandler());
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
             for (JSONObject json : in) {
@@ -549,7 +550,7 @@ public class AgentServletTest {
     void resetTestDetector() {
         TestDetector.reset();
     }
-    
+
     //@AfterMethod
     public void verifyMocks() {
         verify(config, context, request, response);
