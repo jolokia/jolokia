@@ -107,6 +107,9 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times\n" +
 "    --sslCipherSuite <suite>        SSL / TLS cipher suite to enable, can be provided multiple times\n" +
 "    --debug                         Switch on agent debugging\n" +
+"    --logHandlerClass <class>       Implementation of org.jolokia.util.LogHandler for logging\n" +
+"                                    Available classes: org.jolokia.util.LogHandler.Quiet " +
+"                                                       org.jolokia.util.LogHandler.Jul" +
 "    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response\n" +

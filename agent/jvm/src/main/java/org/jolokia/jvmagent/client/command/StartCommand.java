@@ -46,9 +46,16 @@ public class StartCommand extends AbstractBaseCommand {
         boolean quiet = pOpts.isQuiet();
         if (agentUrl == null) {
             loadAgent(pVm, pOpts);
+            agentUrl = checkAgentUrl(pVm);
+            if (agentUrl == null) {
+                System.err.println("Couldn't start agent for " + getProcessDescription(pOpts,pHandler));
+                System.err.println("Possible reason could be that port '" + pOpts.getPort() + "' is already occupied.");
+                System.err.println("Please check the standard output of the target process for a detailed error message.");
+                return 1;
+            }
             if (!quiet) {
                 System.out.println("Started Jolokia for " + getProcessDescription(pOpts,pHandler));
-                System.out.println(checkAgentUrl(pVm));
+                System.out.println(agentUrl);
             }
             return 0;
         } else {

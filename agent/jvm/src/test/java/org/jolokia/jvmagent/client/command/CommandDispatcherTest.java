@@ -105,7 +105,8 @@ public class CommandDispatcherTest {
 
         VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
         VirtualMachine vm = createMock(VirtualMachine.class);
-        expect(vm.getSystemProperties()).andReturn(getProperties(false)).anyTimes();
+        expect(vm.getSystemProperties()).andReturn(getProperties(false));
+        expect(vm.getSystemProperties()).andReturn(getProperties(true));
         // Agent should be loaded for successful switch
         vm.loadAgent(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
 
@@ -163,7 +164,10 @@ public class CommandDispatcherTest {
 
         VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
         VirtualMachine vm = createMock(VirtualMachine.class);
-        expect(vm.getSystemProperties()).andReturn(getProperties(pActive)).anyTimes();
+        expect(vm.getSystemProperties()).andReturn(getProperties(pActive)).times(pCommand.equals("toggle") ? 2 : 1);
+        if (!pActive && !pCommand.equals("stop")) {
+            expect(vm.getSystemProperties()).andReturn(getProperties(true));
+        }
         if (pRc == 0) {
             // Agent should be loaded for successful switch
             vm.loadAgent(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
