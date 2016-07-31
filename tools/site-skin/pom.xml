@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.3.3</version>
+    <version>1.3.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-site-skin</artifactId>
-  <version>1.3.3</version>
+  <version>1.3.4</version>
   <packaging>jar</packaging>
 
   <name>jolokia-site-skin</name>
