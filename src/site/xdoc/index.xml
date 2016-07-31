@@ -234,7 +234,7 @@ java -javaagent:jolokia.jar=\
 ]]></pre>
         <p>
           More about this can be found in the <a href="reference/html/agents.html#agents-jvm">reference manual</a>.
-          Note, that the parameter <literal>authenticationClass</literal> has been renamed to <literal>authClass</literal>
+          Note, that the parameter <code>authenticationClass</code> has been renamed to <code>authClass</code>
           for consistencies sake. Please raise an <a href="https://github.com/rhuss/jolokia/issues/new">issue</a> if this
           doesn't work for you.
         </p>
