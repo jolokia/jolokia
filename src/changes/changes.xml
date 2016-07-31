@@ -98,7 +98,7 @@
         Support for PEM certs and keys when using the JVM agent with
         TLS
       </action>
-      <action dev="zisili" type="update" date="2015-09-14" issue="214">
+      <action dev="zisisli" type="update" date="2015-09-14" issue="214">
         Enhanced 'GlassfishDetector' for Payara flavour of glassfish
       </action>
       <action dev="nevenr" type="add" date="2015-07-02" issue="199">
