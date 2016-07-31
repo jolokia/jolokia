@@ -149,7 +149,7 @@
       <action dev="roland" type="add" date="2015-01-13" issue="177">
         Added MBeanPlugin as a way to hook into the agent's lifecyle
       </action>
-      <action dev="erwelch" type="add" date="2015-01-03">
+      <action dev="elnkwelch" type="add" date="2015-01-03">
         OSGi agent can read properties from Configuration Admin service with PID org.jolokia.osgi
       </action>
       <action dev="roland" type="add" date="2014-12-23" issue="173">
@@ -494,7 +494,7 @@
       <action dev="roland" type="fix" date="2012-03-24">
         Fix for possible NPE when serializing a complex Java objects (#41)
       </action>
-      <action dev="gid79" type="add" date="2012-03-25">
+      <action dev="tempredirect" type="add" date="2012-03-25">
         New configuration property "httpServiceFilter" added for providing
         a OSGi filter expression which gets applied when selecting the HttpService
         to bind to. (#39)

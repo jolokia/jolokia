@@ -373,6 +373,11 @@
 
   <contributors>
     <contributor>
+      <name>Greg Bowyer</name>
+      <email>gbowyer@fastmail.co.uk</email>
+      <url>https://github.com/GregBowyer</url>
+    </contributor>
+    <contributor>
       <name>Arnab Biswas</name>
       <email>arnabbiswas1@outlook.com</email>
       <url>https://github.com/arnabbiswas1</url>
@@ -402,16 +407,13 @@
       <url>https://github.com/drcapulet</url>
     </contributor>
     <contributor>
-      <name>erwelch</name>
-      <url>https://github.com/erwelch</url>
+      <name>elnkwelch</name>
+      <url>https://github.com/elnkwelch</url>
     </contributor>
     <contributor>
       <name>Georgy Bolyuba</name>
       <email>georgy@bolyuba.com</email>
       <url>https://github.com/georgy</url>
-    </contributor>
-    <contributor>
-      <name>gid79</name>
     </contributor>
     <contributor>
       <name>Hemant Kumar</name>
@@ -471,21 +473,63 @@
       <url>https://github.com/ogis-nakagawa</url>
     </contributor>
     <contributor>
+      <name>Robert Gründler</name>
+      <email>robert@dubture.com</email>
+      <url>https://github.com/pulse00</url>
+    </contributor>
+    <contributor>
       <name>Roland Mai</name>
       <email>roland.mai@gmail.com</email>
       <url>https://github.com/roland</url>
+    </contributor>
+    <contributor>
+      <name>Ryan Goulding</name>
+      <email>ryandgoulding@gmail.com</email>
+      <url>https://github.com/ryandgoulding</url>
     </contributor>
     <contributor>
       <name>Senthil Supramaniam</name>
       <url>https://github.com/senthilnest</url>
     </contributor>
     <contributor>
+      <name>Stephan Beal</name>
+      <email>sgbeal@googlemail.com</email>
+      <url>https://github.com/sgbeal</url>
+    </contributor>
+    <contributor>
+      <name>Jean-Philippe Melanson</name>
+      <url>https://github.com/srirachapills</url>
+    </contributor>
+    <contributor>
+      <name>Tadayoshi Sato</name>
+      <url>https://github.com/tadayosi</url>
+    </contributor>
+    <contributor>
+      <name>Gareth Davis</name>
+      <email>gareth.davis@mac.com</email>
+      <url>https://github.com/tempredirect</url>
+    </contributor>
+    <contributor>
+      <name>Tokuhiro Matsuno</name>
+      <url>https://github.com/tokuhirom</url>
+    </contributor>
+    <contributor>
       <name>twhite</name>
       <url>https://github.com/twhite</url>
     </contributor>
     <contributor>
+      <name>Maciek Sakrejda</name>
+      <email>m.sakrejda@gmail.com</email>
+      <url>https://github.com/uhoh-itsmaciek</url>
+    </contributor>
+    <contributor>
       <name>Zisis Lianas</name>
       <url>https://github.com/zisisli</url>
+    </contributor>
+    <contributor>
+      <name>Gareth Davis</name>
+      <email>gareth.davis@mac.com</email>
+      <url>https://github.com/tempredirect</url>
     </contributor>
   </contributors>
 
