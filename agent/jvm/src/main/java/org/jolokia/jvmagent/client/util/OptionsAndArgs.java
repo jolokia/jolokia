@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.regex.*;
 
+import org.jolokia.server.core.util.EscapeUtil;
+
 /**
  * Class representing options and arguments known to the client launcher. It also knows how
  * to parse the command line.
