@@ -2,12 +2,12 @@ package org.jolokia.service.discovery;
 
 import java.io.IOException;
 import java.net.SocketException;
-import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
@@ -51,7 +51,7 @@ public class MulticastSocketListenerThreadTest {
                     new DiscoveryOutgoingMessage.Builder(QUERY)
                             .agentId(id)
                             .build();
-            List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
+            List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new StdoutLogHandler(true));
             int idCount = 0;
             int urlCount = 0;
             for (DiscoveryIncomingMessage in : discovered) {

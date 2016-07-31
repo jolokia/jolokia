@@ -1,4 +1,4 @@
-package org.jolokia.server.core.service.api;
+package org.jolokia.server.core.service.impl;
 /*
  *
  * Copyright 2016 Roland Huss
@@ -16,9 +16,48 @@ package org.jolokia.server.core.service.api;
  * limitations under the License.
  */
 
+import org.jolokia.server.core.service.api.LogHandler;
+
 /**
- * @author roland
- * @since 31/07/16
+ * Loghandler for printing to stdout
  */
-public class StdoutLogHandler {
+public class StdoutLogHandler implements LogHandler {
+    private boolean doDebug;
+
+    public StdoutLogHandler(boolean pDoDebug) {
+        doDebug = pDoDebug;
+    }
+
+    public StdoutLogHandler() {
+        this(false);
+    }
+
+    public StdoutLogHandler(String category) {
+        this(false);
+    }
+
+    public void debug(String message) {
+        if (doDebug) {
+            log("D> " + message);
+        }
+    }
+
+    public void info(String message) {
+        log("I> " + message);
+    }
+
+    public void error(String message, Throwable t) {
+        log("E> " + message);
+        if (t != null) {
+            t.printStackTrace();
+        }
+    }
+
+    public boolean isDebug() {
+        return doDebug;
+    }
+
+    private void log(String message) {
+        System.out.println(message); //NOSONAR
+    }
 }

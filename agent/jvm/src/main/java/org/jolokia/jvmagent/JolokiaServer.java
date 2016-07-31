@@ -35,6 +35,7 @@ import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.*;
 
 /**
@@ -294,7 +295,7 @@ public class JolokiaServer {
         if (pLogHandlerClass != null) {
             return ClassUtil.newInstance(pLogHandlerClass);
         } else {
-            return new LogHandler.StdoutLogHandler(pIsDebug);
+            return new StdoutLogHandler(pIsDebug);
         }
     }
 

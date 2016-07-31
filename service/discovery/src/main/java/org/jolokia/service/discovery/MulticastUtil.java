@@ -7,6 +7,7 @@ import java.util.concurrent.*;
 
 import org.jolokia.server.core.service.api.AgentDetails;
 import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.server.core.service.impl.QuietLogHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 
 /**
@@ -52,7 +53,7 @@ public final class MulticastUtil {
      * @throws IOException if something fails during the discovery request
      */
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout) throws IOException {
-        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, LogHandler.QUIET);
+        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, new QuietLogHandler());
     }
 
     /**

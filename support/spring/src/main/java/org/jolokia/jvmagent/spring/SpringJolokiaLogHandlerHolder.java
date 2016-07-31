@@ -60,7 +60,9 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
     // Enumeration for the various log handler which are looked up by reflection in order
     // to avoid hard dependencies on all those logging frameworks
     enum LogHandlerType {
-        JUL("jul","org.jolokia.jvmagent.spring.log.JulLogHandler"),
+        STDOUT("stdout","org.jolokia.server.core.service.impl.StdoutLogHandler"),
+        QUIET("stdout","org.jolokia.server.core.service.impl.QuietLogHandler"),
+        JUL("jul","org.jolokia.server.core.service.impl.JulLogHandler"),
         LOG4J("log4j","org.jolokia.jvmagent.spring.log.Log4jLogHandler"),
         LOG4J2("log4j2","org.jolokia.jvmagent.spring.log.Log4j2LogHandler"),
         SL4J("sl4j","org.jolokia.jvmagent.spring.log.Sl4jLogHandler"),

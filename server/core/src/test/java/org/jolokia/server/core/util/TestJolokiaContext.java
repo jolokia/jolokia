@@ -25,6 +25,7 @@ import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.jmx.*;
 
@@ -36,7 +37,7 @@ public class TestJolokiaContext implements JolokiaContext {
 
     // Switch on for more debuggin
     private static final boolean DEBUG = false;
-    
+
     Map<Class,SortedSet> services;
     LogHandler logHandler;
     Restrictor restrictor;

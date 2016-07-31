@@ -17,17 +17,15 @@ package org.jolokia.server.core.backend;
  */
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Map;
 
 import javax.management.*;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.request.*;
-import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
@@ -44,7 +42,7 @@ public class BackendManagerTest {
 
     private TestJolokiaContext ctx;
 
-    private LogHandler log = new LogHandler.StdoutLogHandler(false);
+    private LogHandler log = new StdoutLogHandler(false);
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
         TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder().services(Serializer.class,new TestSerializer());

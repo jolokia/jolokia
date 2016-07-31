@@ -1,4 +1,4 @@
-package org.jolokia.jvmagent.spring.log;
+package org.jolokia.server.core.service.impl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

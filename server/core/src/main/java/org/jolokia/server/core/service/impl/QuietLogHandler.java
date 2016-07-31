@@ -16,9 +16,18 @@ package org.jolokia.server.core.service.impl;
  * limitations under the License.
  */
 
+import org.jolokia.server.core.service.api.LogHandler;
+
 /**
+ * No-Op LogHandler
  * @author roland
  * @since 31/07/16
  */
-public class QuietLogHandler {
+public class QuietLogHandler implements LogHandler {
+    public QuietLogHandler() {}
+    public QuietLogHandler(String category) {}
+    public void debug(String message) { }
+    public void info(String message) { }
+    public void error(String message, Throwable t) { }
+    public boolean isDebug() { return false; }
 }
