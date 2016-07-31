@@ -1,4 +1,4 @@
-package org.jolokia.server.core.service.api;
+package org.jolokia.util;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -19,10 +19,6 @@ package org.jolokia.server.core.service.api;
 
 /**
  * Simple log handler for dispatching logging to e.g. a {@link javax.servlet.http.HttpServlet}
- *
- * This is a dedicated abstraction in order to allow multiple implementations for a log handler
- * independent from a certain logging API.
- *
  * @author roland
  * @since Nov 11, 2009
  */

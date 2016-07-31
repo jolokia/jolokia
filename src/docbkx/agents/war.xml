@@ -17,7 +17,7 @@
 
 <section id="agents-war">
   <title>JEE Agent (WAR)</title>
-  
+
   <section id="war-agent-installation">
     <title>Installation and Configuration</title>
     <para>
@@ -27,7 +27,7 @@
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <ulink
       url="http://www.jolokia.org/tutorial.html">quickstart</ulink>.
-    </sidebar>    
+    </sidebar>
     Often, installation is simply a matter of copying the agent WAR to
     a deployment directory. On other platforms an administrative Web
     GUI or a command line tool need to be used for
@@ -58,12 +58,12 @@
         but involves typically the editing of a configuration
         file. E.g. for <ulink
         url="http://tomcat.apache.org/tomcat-7.0-doc/config/context.html">Tomcat</ulink>,
-        the context for 
+        the context for
         the Jolokia agent can be adapted by putting a file
         <filename>jolokia.xml</filename> below
         <filename>$TC/conf/Catalina/localhost/</filename> with a
-        content like: <programlisting><![CDATA[<Context> 
-   <Parameter name="maxDepth" value="1"/> 
+        content like: <programlisting><![CDATA[<Context>
+   <Parameter name="maxDepth" value="1"/>
 </Context>]]></programlisting>
       </listitem>
     </varlistentry>
@@ -71,7 +71,7 @@
   <para>
     The configuration options <literal>discoveryEnabled</literal> and
     <literal>discoveryAgentUrl</literal> can be provied via environent
-    variables or system properties, too. See the below for details. 
+    variables or system properties, too. See the below for details.
   </para>
   <table id="agent-war-init-params">
     <title>Servlet init parameters</title>
@@ -80,7 +80,7 @@
           <td>Parameter</td>
           <td>Description</td>
           <td>Example</td>
-        </tr>        
+        </tr>
       </thead>
       <tr>
         <td><constant>dispatcherClasses</constant></td>
@@ -144,6 +144,32 @@
         </td>
         <td>
           Default: <constant>false</constant>
+        </td>
+      </tr>
+      <tr>
+        <td><constant>logHandlerClass</constant></td>
+        <td>
+          Loghandler to use for providing logging output. By default
+          logging is written to standard out and error but you can provide
+          here a Java class implementing <literal>org.jolokia.util.LogHandler</literal>
+          for an alternative log output. Two alternative implementations are included in
+          this agent:
+          <itemizedlist>
+            <listitem>
+              <para>
+                <classname>org.jolokia.util.QuietLogHandler</classname> which switches off
+                logging completely.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <classname>org.jolokia.util.JulLogHandler</classname> which uses a <literal>java.util.logging</literal> Logger with name <literal>org.jolokia</literal>
+              </para>
+            </listitem>
+          </itemizedlist>
+        </td>
+        <td>
+          Example: <constant>org.jolokia.util.LogHandler.Quiet</constant>
         </td>
       </tr>
       <tr>
@@ -287,9 +313,9 @@
         <td>
           Extra options passed to an detector after successful
           detection of an application server. See below for an
-          explanation. 
+          explanation.
         </td>
-        <td>          
+        <td>
         </td>
       </tr>
       <tr>
@@ -299,7 +325,7 @@
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
           avoid conflicts with an JEE standards (though this should't
-          harm anyways). This option can also be switched on with an 
+          harm anyways). This option can also be switched on with an
           environment variable
           <literal>JOLOKIA_DISCOVERY</literal> or the system
           property <literal>jolokia.discoveryEnabled</literal> set to
@@ -322,7 +348,7 @@
           by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
           <literal>${sys:property}</literal> environment and system properties can be referenced, respectively.
         </td>
-        <td>          
+        <td>
           <constant>http://10.9.11.87:8080/jolokia</constant>
         </td>
       </tr>
@@ -336,7 +362,7 @@
           this value. Within the <literal>agentId</literal> specification you
           can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
         </td>
-        <td>          
+        <td>
           <constant>my-unique-agent-id</constant>
         </td>
       </tr>
@@ -346,7 +372,7 @@
           An optional description which can be used for clients to
           present a human readable label for this agent.
         </td>
-        <td>          
+        <td>
           <constant>Intranet Timebooking Server</constant>
         </td>
       </tr>
@@ -370,7 +396,7 @@
           <td>Product</td>
           <td>Option</td>
           <td>Description</td>
-        </tr>        
+        </tr>
       </thead>
       <tr>
         <td>glassfish</td>
@@ -410,7 +436,7 @@
     <filename>$TOMCAT/config/tomcat-users.xml</filename>.
     </para>
   </section>
-  
+
   <section id="agent-war-programmatic">
     <title>Programmatic usage of the Jolokia agent servlet</title>
     <para>
@@ -435,7 +461,7 @@
     ]]></programlisting>
     <para>
       Of course, any init parameter as described in <xref
-      linkend="agent-war-init-params"/> can be used here as well. 
+      linkend="agent-war-init-params"/> can be used here as well.
     </para>
     <para>
       In order for this servlet definition to find the referenced
@@ -447,7 +473,7 @@
     </para>
     <programlisting language="xml"><![CDATA[
     <project>
-      <!-- ....  --> 
+      <!-- ....  -->
       <dependencies>
         <dependency>
           <groupId>org.jolokia</groupId>
@@ -480,7 +506,7 @@
       distinguish multiple Jolokia MBeans by adding an extra
       propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
-      the same JEE server. 
+      the same JEE server.
     </para>
   </section>
 </section>
