@@ -68,7 +68,7 @@
       in a servlet container just like any other JEE web application.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Tomcat example</b></p>
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jolokia.org/tutorial.html" target="_top">quickstart</a>.
-    </div></div><p>    
+    </div></div><p>
     Often, installation is simply a matter of copying the agent WAR to
     a deployment directory. On other platforms an administrative Web
     GUI or a command line tool need to be used for
@@ -89,16 +89,16 @@
         archive. This is done differently for each servlet container
         but involves typically the editing of a configuration
         file. E.g. for <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://tomcat.apache.org/tomcat-7.0-doc/config/context.html" target="_top">Tomcat</a>,
-        the context for 
+        the context for
         the Jolokia agent can be adapted by putting a file
         <code class="filename">jolokia.xml</code> below
         <code class="filename">$TC/conf/Catalina/localhost/</code> with a
-        content like: <pre class="programlisting">&lt;Context&gt; 
-   &lt;Parameter name="maxDepth" value="1"/&gt; 
+        content like: <pre class="programlisting">&lt;Context&gt;
+   &lt;Parameter name="maxDepth" value="1"/&gt;
 &lt;/Context&gt;</pre></dd></dl></div><p>
     The configuration options <code class="literal">discoveryEnabled</code> and
     <code class="literal">discoveryAgentUrl</code> can be provied via environent
-    variables or system properties, too. See the below for details. 
+    variables or system properties, too. See the below for details.
   </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.1.&nbsp;Servlet init parameters</b></p><div class="table-contents"><table id="agent-war-init-params"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Parameter</td>
           <td>Description</td>
@@ -161,6 +161,24 @@
         </td>
         <td>
           Default: <code class="constant">false</code>
+        </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">logHandlerClass</code></td>
+        <td>
+          Loghandler to use for providing logging output. By default
+          logging is written to standard out and error but you can provide
+          here a Java class implementing <code class="literal">org.jolokia.util.LogHandler</code>
+          for an alternative log output. Two alternative implementations are included in
+          this agent:
+          <div class="itemizedlist"><ul><li><p>
+                <code class="classname">org.jolokia.util.QuietLogHandler</code> which switches off
+                logging completely.
+              </p></li><li><p>
+                <code class="classname">org.jolokia.util.JulLogHandler</code> which uses a <code class="literal">java.util.logging</code> Logger with name <code class="literal">org.jolokia</code>
+              </p></li></ul></div>
+        </td>
+        <td>
+          Example: <code class="constant">org.jolokia.util.LogHandler.Quiet</code>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">historyMaxEntries</code></td>
@@ -292,9 +310,9 @@
         <td>
           Extra options passed to an detector after successful
           detection of an application server. See below for an
-          explanation. 
+          explanation.
         </td>
-        <td>          
+        <td>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">discoveryEnabled</code></td>
@@ -303,7 +321,7 @@
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
           avoid conflicts with an JEE standards (though this should't
-          harm anyways). This option can also be switched on with an 
+          harm anyways). This option can also be switched on with an
           environment variable
           <code class="literal">JOLOKIA_DISCOVERY</code> or the system
           property <code class="literal">jolokia.discoveryEnabled</code> set to
@@ -325,7 +343,7 @@
           by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
           <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
         </td>
-        <td>          
+        <td>
           <code class="constant">http://10.9.11.87:8080/jolokia</code>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -338,7 +356,7 @@
           this value. Within the <code class="literal">agentId</code> specification you
           can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
         </td>
-        <td>          
+        <td>
           <code class="constant">my-unique-agent-id</code>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -347,7 +365,7 @@
           An optional description which can be used for clients to
           present a human readable label for this agent.
         </td>
-        <td>          
+        <td>
           <code class="constant">Intranet Timebooking Server</code>
         </td>
       </tr></table></div></div><p>
@@ -412,7 +430,7 @@
       &lt;url-pattern&gt;/jolokia/*&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;
     </pre><p>
-      Of course, any init parameter as described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> can be used here as well. 
+      Of course, any init parameter as described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> can be used here as well.
     </p><p>
       In order for this servlet definition to find the referenced
       Java class, the JAR <code class="filename">jolokia-core.jar</code> must
@@ -421,7 +439,7 @@
       dependency on this jar artifact:
     </p><pre class="programlisting">
     &lt;project&gt;
-      &lt;!-- ....  --&gt; 
+      &lt;!-- ....  --&gt;
       &lt;dependencies&gt;
         &lt;dependency&gt;
           &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
@@ -434,7 +452,7 @@
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<sup>[<a name="d0e820" href="#ftn.d0e820">5</a>]</sup>
+      for details.<sup>[<a name="d0e858" href="#ftn.d0e858">5</a>]</sup>
     </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
@@ -445,7 +463,7 @@
       distinguish multiple Jolokia MBeans by adding an extra
       propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
-      the same JEE server. 
+      the same JEE server.
     </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-osgi"></a>3.2.&nbsp;OSGi Agents</h2></div></div></div><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b></b></p>There are several free implementations available of OSGi
     HttpService. This bundle has been tested with the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://wiki.ops4j.org/display/paxweb/Pax+Web" target="_top">Pax Web</a>
     and <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://felix.apache.org/site/apache-felix-http-service.html" target="_top">Apache
@@ -857,7 +875,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService. 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1559"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1597"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -1290,7 +1308,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">useSslClientAuthentication</code></td>
           <td>
             Whether client certificates should be used for
-            authentication. The presented certificate is validate whether signed by
+            authentication. The presented certificate is validated that it is signed by
             a known CA which must be in the keystore (https only). (<code class="constant">true</code> or
             <code class="constant">false</code>). 
           </td>        
@@ -1381,8 +1399,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             pairs (except for the <code class="constant">config</code> property
             of course :)
           </td>        
-          <td>
-        </td>
+          <td></td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">discoveryEnabled</code></td>
           <td>
@@ -1406,6 +1423,27 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>          
             <code class="constant">http://10.9.11.87:8778/jolokia</code>
           </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">sslProtocol</code></td>
+          <td>
+            The list of SSL / TLS protocols enabled. Valid options are available in the documentation
+            on SunJSSEProvider for your JDK version. Using only <code class="constant">TLSv1.1</code> and
+            <code class="constant">TLSv1.2</code> is recommended in Java 1.7 and Java 1.8. Using only
+            <code class="constant">TLSv1</code> is recommended in Java 1.6. Multiple protocols can be configured
+            by using additional options with consecutive index suffixes like in
+            <code class="code">sslProtocol.1</code>, <code class="code">sslProtocol.2</code>, ...
+          </td>
+          <td><code class="code">TLSv1.2</code></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">sslCipherSuite</code></td>
+          <td>
+            The list of SSL / TLS cipher suites to enable. The table of available cipher suites is
+            available under the "Default Enabled Cipher Suites" at the SunJSSEProvider documentation
+            <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJSSEProvider" target="_top">here</a>.
+            Multiple cipher suites can be configured by using additional options with consecutive index
+            suffixes like in <code class="code">sslCipherSuite.1</code>, <code class="code">sslCipherSuite.2</code>, ...
+          </td>
+          <td></td>
         </tr></table></div></div><p>
         Upon successful startup the agent will print out a success
         message with the full URL which can be used by clients for
@@ -1424,12 +1462,12 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
       <code class="literal">-jar</code> option. Call it with
       <code class="literal">--help</code> to get a short usage information:
     </p><pre class="programlisting">
-$ java -jar jolokia-jvm-1.3.1-agent.jar --help
+$ java -jar jolokia-jvm-1.3.4-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.3.1-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-jvm-1.3.4-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1441,53 +1479,70 @@ where &lt;command&gt; is one of
 
 [options] are used for providing runtime information for attaching the agent:
 
-    --host &lt;host&gt;                  Hostname or IP address to which to bind on
-                                   (default: InetAddress.getLocalHost())
-    --port &lt;port&gt;                  Port to listen on (default: 8778)
-    --agentContext &lt;context&gt;       HTTP Context under which the agent is reachable (default: /jolokia)
-    --agentId &lt;agent-id&gt;           VM unique identifier used by this agent (default: autogenerated)
-    --agentDescription &lt;desc&gt;      Agent description
-    --user &lt;user&gt;                  User used for Basic-Authentication
-    --password &lt;password&gt;          Password used for Basic-Authentication
-    --quiet                        No output. "status" will exit with code 0 if the agent is running, 
-                                   1 otherwise
-    --verbose                      Verbose output
-    --executor &lt;executor&gt;          Executor policy for HTTP Threads to use (default: single)
-                                    "fixed"  -- Thread pool with a fixed number of threads (default: 5)
-                                    "cached" -- Cached Thread Pool, creates threads on demand
-                                    "single" -- Single Thread
-    --threadNr &lt;nr threads&gt;        Number of fixed threads if "fixed" is used as executor
-    --backlog &lt;backlog&gt;            How many request to keep in the backlog (default: 10)
-    --protocol &lt;http|https&gt;        Protocol which must be either "http" or "https" (default: http)
-    --keystore &lt;keystore&gt;          Path to keystore (https only)
-    --keystorePassword &lt;pwd&gt;       Password to the keystore (https only)
-    --useSslClientAuthentication   Use client certificate authentication (https only)
-    --secureSocketProtocol &lt;name&gt;  Secure protocol (https only, default: TLS)
-    --keyStoreType &lt;name&gt;          Keystore type (https only, default: JKS)
-    --keyManagerAlgorithm &lt;name&gt;   Key manager algorithm (https only, default: SunX509)
-    --trustManagerAlgorithm &lt;name&gt; Trust manager algorithm (https only, default: SunX509)
-    --discoveryEnabled &lt;t|f&gt;       Enable/Disable discovery multicast responses (default: true)
-    --discoveryAgentUrl &lt;url&gt;      The URL to use for answering discovery requests. Will be autodetected 
-                                   if not given.
-    --debug                        Switch on agent debugging
-    --debugMaxEntries &lt;nr&gt;         Number of debug entries to keep in memory which can be fetched from the 
-                                   Jolokia MBean
-    --maxDepth &lt;depth&gt;             Maximum number of levels for serialization of beans (default: null)
-    --maxCollectionSize &lt;size&gt;     Maximum number of element in collections to keep when serializing the 
-                                   response (default: null)
-    --maxObjects &lt;nr&gt;              Maximum number of objects to consider for serialization 
-                                   (default: maxObjects)
-    --policyLocation &lt;url&gt;         Location of a Jolokia policy file
+    --host &lt;host&gt;                   Hostname or IP address to which to bind on
+                                    (default: InetAddress.getLocalHost())
+    --port &lt;port&gt;                   Port to listen on (default: 8778)
+    --agentContext &lt;context&gt;        HTTP Context under which the agent is reachable (default: /jolokia)
+    --agentId &lt;agent-id&gt;            VM unique identifier used by this agent (default: autogenerated)
+    --agentDescription &lt;desc&gt;       Agent description
+    --authMode &lt;mode&gt;               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
+    --authClass &lt;class&gt;             Classname of an custom Authenticator which must be loadable from
+                                    the classpath
+    --authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
+    --authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal
+                                    (authMode == delegate)
+    --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication
+                                    (authMode == delegate)
+    --user &lt;user&gt;                   User used for Basic-Authentication
+    --password &lt;password&gt;           Password used for Basic-Authentication
+    --quiet                         No output. "status" will exit with code 0 if the agent is running,
+                                    1 otherwise
+    --verbose                       Verbose output
+    --executor &lt;executor&gt;           Executor policy for HTTP Threads to use (default: single)
+                                     "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                     "cached" -- Cached Thread Pool, creates threads on demand
+                                     "single" -- Single Thread
+    --threadNr &lt;nr threads&gt;         Number of fixed threads if "fixed" is used as executor
+    --backlog &lt;backlog&gt;             How many request to keep in the backlog (default: 10)
+    --protocol &lt;http|https&gt;         Protocol which must be either "http" or "https" (default: http)
+    --keystore &lt;keystore&gt;           Path to keystore (https only)
+    --keystorePassword &lt;pwd&gt;        Password to the keystore (https only)
+    --useSslClientAuthentication    Use client certificate authentication (https only)
+    --secureSocketProtocol &lt;name&gt;   Secure protocol (https only, default: TLS)
+    --keyStoreType &lt;name&gt;           Keystore type (https only, default: JKS)
+    --keyManagerAlgorithm &lt;name&gt;    Key manager algorithm (https only, default: SunX509)
+    --trustManagerAlgorithm &lt;name&gt;  Trust manager algorithm (https only, default: SunX509)
+    --caCert &lt;path&gt;                 Path to a PEM encoded CA cert file (https &amp; sslClientAuth only)
+    --serverCert &lt;path&gt;             Path to a PEM encoded server cert file (https only)
+    --serverKey &lt;path&gt;              Path to a PEM encoded server key file (https only)
+    --serverKeyAlgorithm &lt;algo&gt;     Algorithm to use for decrypting the server key (https only, default: RSA)
+    --clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
+                                    If supplied multiple times, any one of the clientPrincipals must match
+    --extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage
+                                    (https &amp; sslClientAuth only)
+    --discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: true)
+    --discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected
+                                     if not given.
+    --sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
+    --sslCipherSuite &lt;suite&gt;        SSL / TLS cipher suite to enable, can be provided multiple times
+    --debug                         Switch on agent debugging
+    --debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the
+                                    Jolokia MBean
+    --maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
+    --maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the
+                                    response
+    --maxObjects &lt;nr&gt;               Maximum number of objects to consider for serialization
     --restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
-    --mbeanQualifier &lt;qualifier&gt;   Qualifier to use when registering Jolokia internal MBeans
-    --canonicalNaming &lt;t|f&gt;        whether to use canonicalName for ObjectNames in 'list' or 'search' 
-                                   (default: true)
-    --includeStackTrace &lt;t|f&gt;      whether to include StackTraces for error messages (default: true)
-    --serializeException &lt;t|f&gt;     whether to add a serialized version of the exception in the Jolokia 
-                                   response (default: false)
-    --config &lt;configfile&gt;          Path to a property file from where to read the configuration
-    --help                         This help documentation
-    --version                      Version of this agent
+    --policyLocation &lt;url&gt;          Location of a Jolokia policy file
+    --mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
+    --canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search'
+                                    (default: true)
+    --includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: true)
+    --serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia
+                                    response (default: false)
+    --config &lt;configfile&gt;           Path to a property file from where to read the configuration
+    --help                          This help documentation
+    --version                       Version of this agent (it's 1.3.4 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -1499,7 +1554,7 @@ If neither &lt;command&gt; nor &lt;pid&gt; is given, a list of Java processes al
 is printed
 
 There are several possible reasons, why attaching to a process can fail:
-   * The UID of this launcher must be the very *same*as the process to attach too. It not sufficient 
+   * The UID of this launcher must be the very *same* as the process to attach too. It not sufficient
      to be root.
    * The JVM must have HotSpot enabled and be a JVM 1.6 or larger.
    * It must be a Java process ;-)
@@ -1598,7 +1653,7 @@ java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
           You could even instrument a JEE application server this way,
           however this is not recommended.
-        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e820" href="#d0e820">5</a>] </sup>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e858" href="#d0e858">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use
