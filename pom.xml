@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia</artifactId>
@@ -83,7 +84,7 @@
               <goal>generate-pdf</goal>
             </goals>
             <configuration>
-               <imgSrcPath>file:///${project.basedir}/src/docbkx/images/</imgSrcPath>
+              <imgSrcPath>file:///${project.basedir}/src/docbkx/images/</imgSrcPath>
             </configuration>
             <phase>pre-site</phase>
           </execution>
@@ -116,19 +117,20 @@
           <postProcess>
             <copy todir="${project.basedir}/target/site/reference">
               <fileset dir="${project.basedir}/target/docbkx">
-                <include name="**/*.html" />
-                <include name="**/*.pdf" />
+                <include name="**/*.html"/>
+                <include name="**/*.pdf"/>
               </fileset>
             </copy>
             <copy todir="${project.basedir}/target/site/reference/html">
               <fileset dir="${project.basedir}/src/docbkx">
-                <include name="**/*.css" />
-                <include name="**/*.png" />
-                <include name="**/*.gif" />
-                <include name="**/*.jpg" />
+                <include name="**/*.css"/>
+                <include name="**/*.png"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.jpg"/>
               </fileset>
             </copy>
-            <move file="${project.basedir}/target/site/reference/pdf/index.pdf" tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf" failonerror="false" />
+            <move file="${project.basedir}/target/site/reference/pdf/index.pdf"
+                  tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf" failonerror="false"/>
           </postProcess>
         </configuration>
       </plugin>
@@ -362,6 +364,7 @@
       <name>Roland Huss</name>
       <id>roland</id>
       <email>roland@jolokia.org</email>
+      <url>https://github.com/rhuss</url>
       <roles>
         <role>Developer, Architect</role>
       </roles>
@@ -369,10 +372,121 @@
   </developers>
 
   <contributors>
-      <contributor>
-          <name>Georgy Bolyuba</name>
-          <email>georgy@bolyuba.com</email>
-      </contributor>
+    <contributor>
+      <name>Arnab Biswas</name>
+      <email>arnabbiswas1@outlook.com</email>
+      <url>https://github.com/arnabbiswas1</url>
+    </contributor>
+    <contributor>
+      <name>Benson Margulies</name>
+      <email>benson@basistech.com</email>
+      <url>https://github.com/benson-basis</url>
+    </contributor>
+    <contributor>
+      <name>Hiram Chirino</name>
+      <email>hiram@hiramchirino.com</email>
+      <url>https://github.com/chirino</url>
+    </contributor>
+    <contributor>
+      <name>Tom McMillen</name>
+      <email>tgmcmillen@yahoo.co.uk</email>
+      <url>https://github.com/cymantic</url>
+    </contributor>
+    <contributor>
+      <name>Dejan Bosanac</name>
+      <url>https://github.com/dejanb</url>
+    </contributor>
+    <contributor>
+      <name>Alex Coomans</name>
+      <email>alex@alexcoomans.com</email>
+      <url>https://github.com/drcapulet</url>
+    </contributor>
+    <contributor>
+      <name>erwelch</name>
+      <url>https://github.com/erwelch</url>
+    </contributor>
+    <contributor>
+      <name>Georgy Bolyuba</name>
+      <email>georgy@bolyuba.com</email>
+      <url>https://github.com/georgy</url>
+    </contributor>
+    <contributor>
+      <name>gid79</name>
+    </contributor>
+    <contributor>
+      <name>Hemant Kumar</name>
+      <email>hemant@codemancers.com</email>
+      <url>https://github.com/gnufied</url>
+    </contributor>
+    <contributor>
+      <name>Gerald Quintana</name>
+      <email>gerald.quintana@gmail.com</email>
+      <url>https://github.com/gquintana</url>
+    </contributor>
+    <contributor>
+      <name>Jochen Cordes</name>
+      <url>https://github.com/jcordes73</url>
+    </contributor>
+    <contributor>
+      <name>Jürgen Hermann</name>
+      <url>https://github.com/jhermann</url>
+    </contributor>
+    <contributor>
+      <name>jpamador</name>
+      <url>https://github.com/jpamador</url>
+    </contributor>
+    <contributor>
+      <name>James Strachan</name>
+      <email>james.strachan@gmail.com</email>
+      <url>https://github.com/jstrachan</url>
+    </contributor>
+    <contributor>
+      <name>Khai Nguyen</name>
+      <url>https://github.com/khaing211</url>
+    </contributor>
+    <contributor>
+      <name>Maros Marsalek</name>
+      <email>maros.mars@gmail.com</email>
+      <url>https://github.com/marosmars</url>
+    </contributor>
+    <contributor>
+      <name>Martin Vitez</name>
+      <url>https://github.com/matejj</url>
+    </contributor>
+    <contributor>
+      <name>mikael</name>
+      <url>https://github.com/Mikael</url>
+    </contributor>
+    <contributor>
+      <name>Michael Richards</name>
+      <url>https://github.com/mjr5749</url>
+    </contributor>
+    <contributor>
+      <name>Neven Radovanoviƒá</name>
+      <url>https://github.com/nevenr</url>
+    </contributor>
+    <contributor>
+      <name>ogis-nakagawa</name>
+      <email>Nakagawa_Michio@ogis-ri.co.jp</email>
+      <url>https://github.com/ogis-nakagawa</url>
+    </contributor>
+    <contributor>
+      <name>Roland Mai</name>
+      <email>roland.mai@gmail.com</email>
+      <url>https://github.com/roland</url>
+    </contributor>
+    <contributor>
+      <name>Senthil Supramaniam</name>
+      <url>https://github.com/senthilnest</url>
+    </contributor>
+    <contributor>
+      <name>twhite</name>
+      <url>https://github.com/twhite</url>
+    </contributor>
+    <contributor>
+      <name>Zisis Lianas</name>
+      <url>https://github.com/zisisli</url>
+    </contributor>
   </contributors>
 
   <!-- Overall version management -->
@@ -611,6 +725,6 @@
       <modules>
         <module>tools/roo-addon</module>
       </modules>
-  </profile>
+    </profile>
   </profiles>
 </project>
