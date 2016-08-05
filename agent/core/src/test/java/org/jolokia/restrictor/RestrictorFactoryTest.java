@@ -2,7 +2,9 @@ package org.jolokia.restrictor;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.restrictor.RestrictorFactory.URLConnectionResult;
 import org.jolokia.util.LogHandler;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -54,6 +56,35 @@ public class RestrictorFactoryTest {
 
     }
 
+    @DataProvider(name = "basicAuthTestDataProvider")
+    private static Object[][] provideBasicAuthData() {
+
+        return new Object[][] {
+                { "file:///some.file", "file:///some.file", null }, //
+                { "http://host", "http://host", null }, //
+                { "http://some.host", "http://some.host", null }, //
+                { "http://some.host.com", "http://some.host.com", null }, //
+                { "https://some.ho-st.com", "https://some.ho-st.com", null }, //
+                { "http://user:@some.host.com", "http://user:@some.host.com", null }, //
+                { "http://user:pass@some.host.com", "http://some.host.com", "Basic dXNlcjpwYXNz" }, //
+                { "http://:pass@some.host.com", "http://:pass@some.host.com", null }, //
+                { "http://user:pass@host", "http://host", "Basic dXNlcjpwYXNz" }, //
+                { "https://user:pass@host", "https://host", "Basic dXNlcjpwYXNz" }, //
+                { "https://user:pass@host:1234", "https://host:1234", "Basic dXNlcjpwYXNz" } //
+        };
+
+    }
+
+    @Test(dataProvider = "basicAuthTestDataProvider")
+    public void testUrlConnectionBuilder(String pLocation,
+            String expectedUrl, String expectedBasicAuthHeaderValue) throws Exception {
+
+        URLConnectionResult result = RestrictorFactory.buildUrlConnection(pLocation);
+        assertNotNull(result.urlConnection);
+        assertEquals(expectedUrl, result.url);
+        assertEquals(expectedBasicAuthHeaderValue, result.basicAuthHeaderValue);
+
+    }
 
     private Configuration getConfig(Object... extra) {
         ArrayList list = new ArrayList();

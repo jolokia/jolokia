@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
@@ -35,6 +40,27 @@ import org.jolokia.util.*;
  */
 public final class RestrictorFactory {
 
+    private static final Pattern URL_PATTERN = Pattern.compile("(http[s]?://)((.+):(.+)@)?(.+)");
+
+    /* default */ static class URLConnectionResult {
+
+        public final URLConnection urlConnection;
+
+        public final String url;
+
+        // URLConnection isn't queryable for "security headers";
+        // make this available for unit testing
+        public final String basicAuthHeaderValue;
+
+        private URLConnectionResult(URLConnection urlConnection, String url,
+                String basicAuthHeaderValue) {
+            this.urlConnection = Objects.requireNonNull(urlConnection);
+            this.url = Objects.requireNonNull(url);
+            this.basicAuthHeaderValue = basicAuthHeaderValue;
+        }
+
+    }
+
     private RestrictorFactory() { }
 
     public static Restrictor createRestrictor(Configuration pConfig, LogHandler logHandler) {
@@ -45,18 +71,19 @@ public final class RestrictorFactory {
             return customRestrictor;
         }
 
-        String location = NetworkUtil.replaceExpression(pConfig.get(ConfigKey.POLICY_LOCATION));
+        String rawLocation = pConfig.get(ConfigKey.POLICY_LOCATION);
+        String location = NetworkUtil.replaceExpression(rawLocation);
         try {
             Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
             if (ret != null) {
-                logHandler.info("Using policy access restrictor " + location);
+                logHandler.info("Using policy access restrictor " + rawLocation);
                 return ret;
             } else {
                 logHandler.info("No access restrictor found, access to any MBean is allowed");
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            logHandler.error("Error while accessing access restrictor at " + location +
+            logHandler.error("Error while accessing access restrictor at " + rawLocation +
                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
             return new DenyAllRestrictor();
         }
@@ -115,9 +142,35 @@ public final class RestrictorFactory {
                 is = RestrictorFactory.class.getResourceAsStream(path);
             }
         } else {
-            URL url = new URL(pLocation);
-            is = url.openStream();
+            URLConnectionResult urlConnectionResult = buildUrlConnection(pLocation);
+            is = urlConnectionResult.urlConnection.getInputStream();
         }
         return is != null ? new PolicyRestrictor(is) : null;
     }
+
+    /* default */ static URLConnectionResult buildUrlConnection(String pLocation)
+            throws MalformedURLException, IOException {
+        Objects.requireNonNull(pLocation);
+
+        Matcher matcher = URL_PATTERN.matcher(pLocation);
+
+        String url = pLocation;
+        String basicAuthHeaderValue = null;
+
+        // We got a basic-auth user and password
+        if (matcher.matches() && matcher.group(3) != null && matcher.group(4) != null) {
+            url = matcher.group(1) + matcher.group(5);
+            String auth = matcher.group(3) + ":" + matcher.group(4);
+            basicAuthHeaderValue = "Basic " + Base64Util.encode(auth.getBytes(
+                    "ISO-8859-1"));
+        }
+
+        URLConnection urlConnection = new URL(url).openConnection();
+        if (basicAuthHeaderValue != null) {
+            urlConnection.addRequestProperty("Authorization", basicAuthHeaderValue);
+        }
+
+        return new URLConnectionResult(urlConnection, url, basicAuthHeaderValue);
+    }
+
 }
