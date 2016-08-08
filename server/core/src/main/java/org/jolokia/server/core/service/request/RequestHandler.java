@@ -34,7 +34,7 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
     /**
      * Dispatch a {@link JolokiaRequest} to a certain backend
      * and return the result of the JMX action. Request can be divided can be in two categories:
-     * One which are dealt exclusively with a single handler within a single realm and others which response
+     * One which are dealt exclusively with a single handler within a single provider and others which response
      * is merged from the outcome from several request handlers.
      *
      * For non-exclusive requests, multiple request handlers are called in sequence,
@@ -77,9 +77,9 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
     boolean canHandle(JolokiaRequest pJolokiaRequest);
 
     /**
-     * Get the realm for which this handler is responsible
+     * Get the provider for which this handler is responsible
      *
-     * @return realm name for which this handler is responsible.
+     * @return provider name for which this handler is responsible.
      */
     String getProvider();
 

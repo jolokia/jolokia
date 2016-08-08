@@ -57,7 +57,7 @@ public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> 
         Collection ret = pPreviousResult != null ? (Collection) pPreviousResult : new ArrayList<String>();
         for (ObjectName name : names) {
             String oName = request.getOrderedObjectName(name);
-            ret.add(realm != null ? realm + "@" + oName : oName);
+            ret.add(pProvider != null ? pProvider + "@" + oName : oName);
         }
         return ret;
     }

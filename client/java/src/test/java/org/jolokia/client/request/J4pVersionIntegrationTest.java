@@ -54,8 +54,8 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
        assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
        assertEquals("Jetty", "jetty", pResp.getProduct());
        assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
-       Set<String> realms = pResp.getRealms();
-       assertTrue(realms.contains("jmx"));
+       Set<String> providers = pResp.getProviders();
+       assertTrue(providers.contains("jmx"));
        assertEquals(pResp.getExtraInfo("jmx").size(),0);
     }
 

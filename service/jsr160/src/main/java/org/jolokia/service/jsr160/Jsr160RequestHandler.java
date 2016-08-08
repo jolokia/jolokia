@@ -132,7 +132,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     }
 
     /**
-     * The request can be handled when a target configuration is given. The realm name space is optional
+     * The request can be handled when a target configuration is given. The provider name space is optional
      * here for backwards compatibility.
      *
      * {@inheritDoc}

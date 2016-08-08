@@ -106,6 +106,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         map.put("autoStart","" + autoStart);
         map.put("port", "0");
         map.put("host","127.0.0.1");
+        map.put("exposeApplicationContext", "true");
         for (int i = 0; i < extraArgs.length; i+=2) {
             if (extraArgs[i+1] != null) {
                 map.put(extraArgs[i],extraArgs[i+1]);

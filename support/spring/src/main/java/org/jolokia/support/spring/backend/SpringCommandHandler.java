@@ -23,9 +23,9 @@ public abstract class SpringCommandHandler<T extends JolokiaRequest> {
     private JolokiaContext context;
 
     protected SpringCommandHandler(ApplicationContext pAppContext, JolokiaContext pContext, RequestType pType) {
-        context = pContext;
-        type = pType;
-        applicationContext = pAppContext;
+        this.context = pContext;
+        this.type = pType;
+        this.applicationContext = pAppContext;
     }
 
     // Request type of this command

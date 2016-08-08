@@ -38,12 +38,12 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
     // Overall context, mostly used for checking restrictions
     protected JolokiaContext context;
 
-    // Realm used for this handler
-    protected String realm;
+    // Provider used for this handler
+    protected String pProvider;
 
-    public void init(JolokiaContext pContext, String pRealm) {
+    public void init(JolokiaContext pContext, String pProvider) {
         context = pContext;
-        realm = pRealm;
+        this.pProvider = pProvider;
     }
 
     /** {@inheritDoc} */

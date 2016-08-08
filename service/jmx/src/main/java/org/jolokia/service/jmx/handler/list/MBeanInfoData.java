@@ -111,8 +111,8 @@ public class MBeanInfoData {
         }
     }
 
-    // Realm to prepend (if not null)
-    private String realm;
+    // Provider to prepend (if not null)
+    private String pProvider;
 
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
@@ -124,12 +124,12 @@ public class MBeanInfoData {
      *                   and is left untouched.
      * @param pUseCanonicalName whether to use canonical name in listings
      */
-    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pRealm) {
+    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
         pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<String>();
         infoMap = new JSONObject();
-        realm = pRealm;
+        this.pProvider = pProvider;
     }
 
     /**
@@ -148,11 +148,11 @@ public class MBeanInfoData {
         if (maxDepth == 1 && pathStack.size() == 0) {
             // Only add domain names with a dummy value if max depth is restricted to 1
             // But only when used without path
-            infoMap.put(addRealmIfNeeded(pName.getDomain()), 1);
+            infoMap.put(addProviderIfNeeded(pName.getDomain()), 1);
             return true;
         } else if (maxDepth == 2 && pathStack.size() == 0) {
             // Add domain an object name into the map, final value is a dummy value
-            Map mBeansMap = getOrCreateJSONObject(infoMap, addRealmIfNeeded(pName.getDomain()));
+            Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
             mBeansMap.put(getKeyPropertyString(pName),1);
             return true;
         }
@@ -174,7 +174,7 @@ public class MBeanInfoData {
     public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
-        Map mBeansMap = getOrCreateJSONObject(infoMap, addRealmIfNeeded(pName.getDomain()));
+        Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
         Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         // Trim down stack to get rid of domain/property list
         Stack<String> stack = truncatePathStack(2);
@@ -187,13 +187,13 @@ public class MBeanInfoData {
         if (mBeanMap.size() == 0) {
             mBeansMap.remove(getKeyPropertyString(pName));
             if (mBeansMap.size() == 0) {
-                infoMap.remove(addRealmIfNeeded(pName.getDomain()));
+                infoMap.remove(addProviderIfNeeded(pName.getDomain()));
             }
         }
     }
 
-    private String addRealmIfNeeded(String pDomain) {
-        return realm != null ? realm + "@" + pDomain : pDomain;
+    private String addProviderIfNeeded(String pDomain) {
+        return pProvider != null ? pProvider + "@" + pDomain : pDomain;
     }
 
     /**
@@ -250,10 +250,10 @@ public class MBeanInfoData {
            throw new InstanceNotFoundException("InstanceNotFoundException for MBean " + pName + " (" + pExp.getMessage() + ")");
         }
     }
- 
+
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
-        Map mBeansMap = getOrCreateJSONObject(infoMap, addRealmIfNeeded(pName.getDomain()));
+        Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
         Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }

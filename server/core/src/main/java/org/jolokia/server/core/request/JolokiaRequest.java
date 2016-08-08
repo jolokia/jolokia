@@ -166,7 +166,7 @@ public abstract class JolokiaRequest {
 
     /**
      * Get an option from the request. Options are used to help request dispatchers in serving
-     * a request for a specific realm. E.g. the Jsr160 request dispatchers uses this in order to
+     * a request for a specific provider. E.g. the Jsr160 request dispatchers uses this in order to
      * obtain the JSR-160 target information.
      *
      * @param pKey get the option for this key

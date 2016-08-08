@@ -104,22 +104,22 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
     }
 
     /**
-     * Get all supported realms
+     * Get all supported providers
      *
-     * @return set of supported realms
+     * @return set of supported providers
      */
-    public Set<String> getRealms() {
+    public Set<String> getProviders() {
         return info.keySet();
     }
 
     /**
-     * Get extra information for a given realm
+     * Get extra information for a given provider
      *
-     * @param pRealm realm for which information is requested
-     * @return extra information for the realm, which might be null
+     * @param pProvider provider for which information is requested
+     * @return extra information for the provider, which might be null
      */
-    public Map getExtraInfo(String pRealm) {
-        return (Map) info.get(pRealm);
+    public Map getExtraInfo(String pProvider) {
+        return (Map) info.get(pProvider);
     }
 }
 

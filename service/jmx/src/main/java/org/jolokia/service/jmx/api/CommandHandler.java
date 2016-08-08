@@ -76,10 +76,10 @@ public interface CommandHandler<R extends JolokiaRequest> {
      * Lifecycle method in order to initialize the handler
      *
      * @param pContext the jolokia context
-     * @param pRealm realm to use for returned names. Handlers can use this  for returning meta
-     *               data with the proper realm prefixed.
+     * @param pProvider provider to use for returned names. Handlers can use this  for returning meta
+     *               data with the proper provider prefixed.
      */
-    void init(JolokiaContext pContext, String pRealm);
+    void init(JolokiaContext pContext, String pProvider);
 
    /**
      * Lifecycle method called when agent goes down. Should be overridden by

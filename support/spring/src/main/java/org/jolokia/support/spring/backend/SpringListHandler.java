@@ -34,7 +34,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     final static Map<Class,String> WRAPPER_TO_PRIMITIVE;
 
     public SpringListHandler(ApplicationContext pAppContext, JolokiaContext pJolokiaContext) {
-        super(pAppContext,pJolokiaContext, RequestType.LIST);
+        super(pAppContext, pJolokiaContext, RequestType.LIST);
     }
 
     @Override

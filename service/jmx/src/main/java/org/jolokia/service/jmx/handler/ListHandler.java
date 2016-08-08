@@ -79,14 +79,14 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
             oName = objectNameFromPath(pathStack);
 
             if (oName != null) {
-                if (RealmUtil.matchesRealm(realm, oName)) {
-                    oName = RealmUtil.extractRealm(oName).getObjectName();
+                if (ProviderUtil.matchesProvider(pProvider, oName)) {
+                    oName = ProviderUtil.extractProvider(oName).getObjectName();
                 } else {
                     return pPreviousResult != null ? pPreviousResult : new JSONObject();
                 }
             }
 
-            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth,pathStack,useCanonicalName,realm);
+            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider);
             return executeListAction(pServerManager, (Map) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
@@ -150,10 +150,10 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
          * @param pMaxDepth max depth for the list tree to return
          * @param pPathStack optional stack for picking out a certain path from the list tree
          * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
-         * @param pRealm realm to prepend to any domain (if not null)
+         * @param pProvider provider to prepend to any domain (if not null)
          */
-        public ListMBeanEachAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pRealm) {
-            infoData = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName,pRealm);
+        public ListMBeanEachAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
+            infoData = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName,pProvider);
         }
 
         /**

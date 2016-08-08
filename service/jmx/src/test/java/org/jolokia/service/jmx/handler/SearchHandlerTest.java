@@ -38,7 +38,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
 
     private SearchHandler handler;
-    private SearchHandler handlerWithRealm;
+    private SearchHandler handlerWithProvider;
 
     private MBeanServer server;
 
@@ -49,8 +49,8 @@ public class SearchHandlerTest extends BaseHandlerTest {
         ctx = new TestJolokiaContext();
         handler = new SearchHandler();
         handler.init(ctx, null);
-        handlerWithRealm = new SearchHandler();
-        handlerWithRealm.init(ctx,"proxy");
+        handlerWithProvider = new SearchHandler();
+        handlerWithProvider.init(ctx, "proxy");
     }
 
 
@@ -82,17 +82,17 @@ public class SearchHandlerTest extends BaseHandlerTest {
     }
 
     private void checkAllHandlers(String pSearch, Boolean pCanonical, String[] pNames) throws MalformedObjectNameException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, AttributeNotFoundException, MBeanException, EmptyResponseException {
-        for (SearchHandler h : new SearchHandler[] { handler, handlerWithRealm }) {
+        for (SearchHandler h : new SearchHandler[] {handler, handlerWithProvider}) {
             List<String> previousResults = new ArrayList<String>(Arrays.asList("jolokia:type=dummy", "bla:name=blub"));
             List<String> res = doSearch(h, pSearch, pCanonical, new ArrayList(previousResults), pNames);
-            verifyResult(res, previousResults, h == handlerWithRealm ? "proxy" : null, pNames);
+            verifyResult(res, previousResults, h == handlerWithProvider ? "proxy" : null, pNames);
         }
     }
 
-    private void verifyResult(List<String> pRes, List<String> pPrev, String pRealm, String[] pNames) {
+    private void verifyResult(List<String> pRes, List<String> pPrev, String pProvider, String[] pNames) {
         assertEquals(pRes.size(), pNames.length  + pPrev.size());
         for (String name : pNames) {
-            assertTrue(pRes.contains(pRealm != null ? pRealm + "@" + name : name));
+            assertTrue(pRes.contains(pProvider != null ? pProvider + "@" + name : name));
         }
         for (String name : pPrev) {
             assertTrue(pRes.contains(name));

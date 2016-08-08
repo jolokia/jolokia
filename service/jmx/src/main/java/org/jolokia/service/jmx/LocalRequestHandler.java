@@ -55,12 +55,12 @@ public class LocalRequestHandler extends AbstractRequestHandler {
         jolokiaContext = pCtx;
     }
 
-    // Can handle all request starting with "jmx" or with a null realm
+    // Can handle all request starting with "jmx" or with a null provider
     /** {@inheritDoc} */
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         if (pJolokiaRequest instanceof JolokiaObjectNameRequest) {
             JolokiaObjectNameRequest oReq = (JolokiaObjectNameRequest) pJolokiaRequest;
-            return oReq.getRealm() == null || checkProvider(oReq);
+            return oReq.getProvider() == null || checkProvider(oReq);
         } else {
             return true;
         }

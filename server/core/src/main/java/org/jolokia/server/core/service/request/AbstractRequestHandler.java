@@ -6,7 +6,7 @@ import org.jolokia.server.core.service.api.AbstractJolokiaService;
 
 /**
  * Base class for request handlers which provides some utilities methods like deciding on
- * a request based on a configured realm.
+ * a request based on a configured provider.
  *
  * @author roland
  * @since 21.11.13
@@ -14,7 +14,7 @@ import org.jolokia.server.core.service.api.AbstractJolokiaService;
 public abstract class AbstractRequestHandler extends AbstractJolokiaService<RequestHandler>
         implements RequestHandler {
 
-    // Realm of this request handler
+    // Provider of this request handler
     private String provider;
 
     /** {@inheritDoc} */
@@ -37,7 +37,7 @@ public abstract class AbstractRequestHandler extends AbstractJolokiaService<Requ
      */
     protected boolean checkProvider(JolokiaRequest pRequest) {
         return pRequest instanceof JolokiaObjectNameRequest &&
-               provider.equals(((JolokiaObjectNameRequest) pRequest).getRealm());
+               provider.equals(((JolokiaObjectNameRequest) pRequest).getProvider());
     }
 
     /** {@inheritDoc} */

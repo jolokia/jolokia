@@ -32,7 +32,7 @@ import static org.testng.Assert.assertTrue;
 public class JolokiaObjectNameRequestTest {
 
     @Test
-    public void realms() throws MalformedObjectNameException {
+    public void providers() throws MalformedObjectNameException {
 
         String[] testData = new String[] {
                 "spring@:name=propertyBean","spring","","name=propertyBean",
@@ -42,7 +42,7 @@ public class JolokiaObjectNameRequestTest {
         for (int i = 0; i < testData.length; i+= 4) {
             JolokiaReadRequest request =
                     new JolokiaRequestBuilder(RequestType.READ,testData[i]).build();
-            assertEquals(request.getRealm(), testData[i+1]);
+            assertEquals(request.getProvider(), testData[i + 1]);
             assertEquals(request.getObjectName().getDomain(),testData[i+2]);
             assertEquals(request.getObjectName().getKeyPropertyListString(),testData[i+3]);
             if (testData[i+1] != null) {

@@ -39,8 +39,8 @@ public class NotificationHandler extends AbstractCommandHandler<JolokiaNotificat
     private NotificationDispatcher dispatcher;
 
     @Override
-    public void init(JolokiaContext pContext, String pRealm) {
-        super.init(pContext, pRealm);
+    public void init(JolokiaContext pContext, String pProvider) {
+        super.init(pContext, pProvider);
         dispatcher = new NotificationDispatcher(pContext);
     }
 

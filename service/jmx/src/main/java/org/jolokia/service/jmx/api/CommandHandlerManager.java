@@ -54,14 +54,14 @@ public class CommandHandlerManager {
      * since it doesnt keep a reference to a request being processed
      *
      * @param pCtx jolokia context for retrieving various services
-     * @param pRealm realm to use for returned names. Certain handlers need this information for returning meta
-     *               data with the proper realm prefixed.
+     * @param pProvider provider to use for returned names. Certain handlers need this information for returning meta
+     *               data with the proper provider prefixed.
      */
-    public CommandHandlerManager(JolokiaContext pCtx, String pRealm) {
+    public CommandHandlerManager(JolokiaContext pCtx, String pProvider) {
         List<CommandHandler> handlers =
                 LocalServiceFactory.createServices (this.getClass().getClassLoader(),"META-INF/jolokia/command-handlers");
         for (CommandHandler handler : handlers) {
-            handler.init(pCtx,pRealm);
+            handler.init(pCtx,pProvider);
             requestHandlerMap.put(handler.getType(),handler);
         }
     }

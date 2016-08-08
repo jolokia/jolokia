@@ -23,7 +23,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.util.RealmUtil;
+import org.jolokia.server.core.util.ProviderUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.json.simple.JSONObject;
 
@@ -35,11 +35,11 @@ import org.json.simple.JSONObject;
  */
 public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
 
-    // object name without realm
+    // object name without provider
     private ObjectName objectName;
 
-    // realm for this request (since 2.0)
-    private String realm;
+    // provider for this request (since 2.0)
+    private String provider;
 
     /**
      * Constructor for GET requests
@@ -63,9 +63,9 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      *
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
-     * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only    
+     * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
      * @throws MalformedObjectNameException if the given name (key: "name")
-     *        is not a valid object name (with the realm part removed if given).
+     *        is not a valid object name (with the provider part removed if given).
      */
     protected JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams, boolean pExclusive)
             throws MalformedObjectNameException {
@@ -79,8 +79,8 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         ret.put("mbean",getOrderedObjectName(objectName));
-        if (realm != null) {
-            ret.put("realm",realm);
+        if (provider != null) {
+            ret.put("provider", provider);
         }
         return ret;
     }
@@ -88,8 +88,8 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     @Override
     protected String getInfo() {
         StringBuffer ret = new StringBuffer("objectName = ").append(objectName.getCanonicalName());
-        if (realm != null) {
-            ret.append(", realm = ").append(realm);
+        if (provider != null) {
+            ret.append(", provider = ").append(provider);
         }
         String baseInfo = super.getInfo();
         if (baseInfo != null) {
@@ -108,12 +108,12 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     }
 
     /**
-     * Get the realm of this request
+     * Get the provider to be used with this request
      *
-     * @return realm
+     * @return provider
      */
-    public String getRealm() {
-        return realm;
+    public String getProvider() {
+        return provider;
     }
 
     /**
@@ -147,8 +147,8 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
     }
 
     private void initObjectName(String pObjectName) throws MalformedObjectNameException {
-        RealmUtil.RealmObjectNamePair pair = RealmUtil.extractRealm(pObjectName);
-        realm = pair.getRealm();
+        ProviderUtil.ProviderObjectNamePair pair = ProviderUtil.extractProvider(pObjectName);
+        provider = pair.getProvider();
         objectName = pair.getObjectName();
     }
 }
