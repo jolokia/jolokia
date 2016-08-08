@@ -23,7 +23,7 @@
           http://www.jolokia.org/jolokia-spring/schema/config http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
           ">
 
-  <jolokia:agent id="jolokia" lookupConfig="true" systemPropertiesMode="override">
+  <jolokia:agent id="jolokia" lookupConfig="true" systemPropertiesMode="override" exposeApplicationContext="true">
     <jolokia:config autoStart="true"/>
   </jolokia:agent>
 </beans>

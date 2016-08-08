@@ -30,7 +30,7 @@
   <dependencySets>
     <dependencySet>
       <includes>
-        <include>org.jolokia:jolokia-spring</include>
+        <include>org.jolokia:jolokia-support-spring</include>
       </includes>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <unpack>true</unpack>

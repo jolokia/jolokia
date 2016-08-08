@@ -37,7 +37,7 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
 
             // Try get method first
             Method getter = ReflectionUtils.findMethod(
-                    clazz, "get" + attribute.substring(0, 1).toUpperCase() + attribute.substring(1));
+                clazz, "get" + attribute.substring(0, 1).toUpperCase() + attribute.substring(1));
             if (getter != null) {
                 return ReflectionUtils.invokeMethod(getter,bean);
             }

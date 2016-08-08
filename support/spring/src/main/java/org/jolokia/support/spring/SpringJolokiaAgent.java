@@ -71,7 +71,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
             config.putAll(configHolder.getConfig());
         }
 
-        if (lookupConfig) {
+        if (lookupConfig && context != null) {
             config.putAll(lookupConfigurationFromContext());
         }
 
@@ -85,7 +85,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         LogHandler logHandler = logHandlerHolder != null ? logHandlerHolder.getLogHandler() : null;
         init(new JolokiaServerConfig(config), logHandler);
 
-        if (exposeApplicationContext) {
+        if (exposeApplicationContext && context != null) {
             addService(new SpringRequestHandler(context, 100));
         }
 
@@ -196,9 +196,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      * @param pContext spring context containing the bean definition
      */
     public void setApplicationContext(ApplicationContext pContext)  {
-        if (lookupConfig) {
-            context = pContext;
-        }
+        context = pContext;
     }
 
     /**

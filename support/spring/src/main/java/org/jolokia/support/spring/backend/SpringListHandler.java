@@ -46,7 +46,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         }
         JSONObject ret = new JSONObject();
         JSONObject beans = getAllSpringBeans(getAsConfigurableApplicationContext());
-        ret.put(domain,beans);
+        ret.put(SpringRequestHandler.PROVIDER + "@" + domain,beans);
         return ret;
     }
 
@@ -55,6 +55,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     private JSONObject getAllSpringBeans(ConfigurableApplicationContext appCtx) {
         ConfigurableBeanFactory bdFactory = appCtx.getBeanFactory();
         JSONObject ret = new JSONObject();
+        // TODO: Fix for FactoryBeans
         for (String beanName : appCtx.getBeanDefinitionNames()) {
             BeanDefinition bd = bdFactory.getMergedBeanDefinition(beanName);
             ret.put("name=" + beanName, getSpringBeanInfo(bd));
@@ -137,15 +138,15 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     static {
         WRAPPER_TO_PRIMITIVE = new HashMap<Class, String>();
         Object[] p = {
-                Boolean.class, "boolean",
-                Character.class, "character",
-                Byte.class, "byte",
-                Short.class, "short",
-                Integer.class, "int",
-                Long.class, "long",
-                Float.class, "float",
-                Double.class, "double",
-                Void.class, "void"
+                Boolean.TYPE, "boolean",
+                Character.TYPE, "character",
+                Byte.TYPE, "byte",
+                Short.TYPE, "short",
+                Integer.TYPE, "int",
+                Long.TYPE, "long",
+                Float.TYPE, "float",
+                Double.TYPE, "double",
+                Void.TYPE, "void"
         };
 
         for (int i = 0; i < p.length; i += 2) {

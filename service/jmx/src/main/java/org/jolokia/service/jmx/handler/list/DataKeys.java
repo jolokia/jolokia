@@ -53,4 +53,10 @@ public enum DataKeys {
     public String getKey() {
         return key;
     }
+
+
+    @Override
+    public String toString() {
+        return getKey();
+    }
 }

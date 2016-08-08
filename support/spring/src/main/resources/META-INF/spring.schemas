@@ -1,1 +1,1 @@
-http\://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd=org/jolokia/support/spring/jolokia-config.xsd
+http\://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd=/org/jolokia/support/spring/jolokia-config.xsd
