@@ -28,9 +28,9 @@
     <entry key="jmx.jolokiaPort" value="${jolokia.port}"/>
   </util:map>
 
-  <bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent">
+  <bean name="server" id="jolokia" class="org.jolokia.support.spring.SpringJolokiaAgent">
     <property name="config">
-      <bean class="org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder">
+      <bean class="org.jolokia.support.spring.SpringJolokiaConfigHolder">
         <property name="config">
           <util:map>
             <entry key="autoStart" value="true"/>

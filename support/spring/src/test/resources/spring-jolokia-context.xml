@@ -48,5 +48,5 @@
     <jolokia:log type="sl4j"/>
   </jolokia:agent>
 
-  <bean class="org.jolokia.jvmagent.spring.DummyRequestHandler"/>
+  <bean class="org.jolokia.support.spring.DummyRequestHandler"/>
 </beans>

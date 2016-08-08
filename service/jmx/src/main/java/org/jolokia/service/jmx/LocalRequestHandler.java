@@ -60,7 +60,7 @@ public class LocalRequestHandler extends AbstractRequestHandler {
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         if (pJolokiaRequest instanceof JolokiaObjectNameRequest) {
             JolokiaObjectNameRequest oReq = (JolokiaObjectNameRequest) pJolokiaRequest;
-            return oReq.getRealm() == null || checkRealm(oReq);
+            return oReq.getRealm() == null || checkProvider(oReq);
         } else {
             return true;
         }

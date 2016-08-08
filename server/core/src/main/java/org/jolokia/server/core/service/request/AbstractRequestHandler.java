@@ -26,16 +26,16 @@ public abstract class AbstractRequestHandler extends AbstractJolokiaService<Requ
     /** {@inheritDoc} */
     // Returns if type matches
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
-        return !pJolokiaRequest.isExclusive() || checkRealm(pJolokiaRequest);
+        return !pJolokiaRequest.isExclusive() || checkProvider(pJolokiaRequest);
     }
 
     /**
-     * Check whether the given request match the realm for which this handler is responsible
+     * Check whether the given request match the provider for which this handler is responsible
      *
      * @param pRequest request to check
      * @return true if this handler can handle this.
      */
-    protected boolean checkRealm(JolokiaRequest pRequest) {
+    protected boolean checkProvider(JolokiaRequest pRequest) {
         return pRequest instanceof JolokiaObjectNameRequest &&
                provider.equals(((JolokiaObjectNameRequest) pRequest).getRealm());
     }
