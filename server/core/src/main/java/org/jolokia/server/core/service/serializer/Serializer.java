@@ -51,9 +51,10 @@ public interface Serializer extends JolokiaService<Serializer> {
      * @throws AttributeNotFoundException
      * @throws IllegalAccessException
      * @throws InvocationTargetException
+     * @throws UnsupportedOperationException
      */
-    WriteRequestValues setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
-            throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException;
+    Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
+            throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException, UnsupportedOperationException;
 
     /**
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either

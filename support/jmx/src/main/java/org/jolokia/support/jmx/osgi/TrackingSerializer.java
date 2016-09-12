@@ -9,7 +9,6 @@ import javax.management.openmbean.OpenType;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.server.core.service.serializer.WriteRequestValues;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -55,7 +54,7 @@ public class TrackingSerializer extends AbstractJolokiaService<Serializer> imple
     }
 
     /** {@inheritDoc} */
-    public WriteRequestValues setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         return getDelegate().setInnerValue(pOuterObject, pNewValue, pPathParts);
     }
 

@@ -10,7 +10,6 @@ import javax.management.openmbean.*;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.jolokia.server.core.service.serializer.WriteRequestValues;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -40,7 +39,7 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
         return pValue;
     }
 
-    public WriteRequestValues setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         return null;
     }
 
