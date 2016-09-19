@@ -479,6 +479,7 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
 

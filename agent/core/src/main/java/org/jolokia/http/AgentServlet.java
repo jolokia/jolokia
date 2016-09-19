@@ -47,7 +47,7 @@ import org.json.simple.JSONStreamAware;
  * request. See the <a href="http://www.jolokia.org/reference/index.html">reference documentation</a>
  * for a detailed description of this servlet's features.
  * </p>
- * 
+ *
  * @author roland@jolokia.org
  * @since Apr 18, 2009
  */
@@ -69,7 +69,7 @@ public class AgentServlet extends HttpServlet {
 
     // Restrictor to use as given in the constructor
     private Restrictor restrictor;
-    
+
     // Mime type used for returning the answer
     private String configMimeType;
 
@@ -80,7 +80,7 @@ public class AgentServlet extends HttpServlet {
     private boolean allowDnsReverseLookup;
 
     // wheter to allow streaming mode for response
-    private boolean streamingEnabled = true;
+    private boolean streamingEnabled;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -272,19 +272,10 @@ public class AgentServlet extends HttpServlet {
             setCorsHeader(pReq, pResp);
 
             String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
-            json = json != null ?
-                    json :
-                    requestHandler.handleThrowable(new Exception("Internal error while handling an exception"));
-
-            String mimeType;
-            if (callback != null) {
-                // Send a JSONP response
-                mimeType = "text/javascript";
-            } else {
-                mimeType = getMimeType(pReq);
+            if (json == null) {
+                json = requestHandler.handleThrowable(new Exception("Internal error while handling an exception"));
             }
-
-            sendResponse(pResp, mimeType, callback, json);
+            sendResponse(pResp, getMimeType(pReq), callback, json);
         }
     }
 
@@ -412,7 +403,7 @@ public class AgentServlet extends HttpServlet {
              }
         };
     }
-    
+
     // factory method for GET request handler
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
@@ -460,34 +451,33 @@ public class AgentServlet extends HttpServlet {
     }
 
     private void sendResponse(HttpServletResponse pResp, String mimeType, String callback, JSONAware pJson) throws IOException {
-        setContentType(pResp, mimeType);
+        setContentType(pResp, callback != null ? "text/javascript" : mimeType);
         pResp.setStatus(HttpServletResponse.SC_OK);
         setNoCacheHeaders(pResp);
-        if (streamingEnabled) {
-            JSONStreamAware jsonStream = (JSONStreamAware)pJson;
-            sendStreamingResponse(pResp, callback, jsonStream);
+        if (pJson == null) {
+            pResp.setContentLength(-1);
         } else {
-            // Fallback, send as one object
-            // TODO: Remove for 2.0
-            sendAllJSON(pResp, callback, pJson);
+            if (streamingEnabled) {
+                sendStreamingResponse(pResp, callback, (JSONStreamAware) pJson);
+            } else {
+                // Fallback, send as one object
+                // TODO: Remove for 2.0 where should support only streaming
+                sendAllJSON(pResp, callback, pJson);
+            }
         }
     }
 
     private void sendStreamingResponse(HttpServletResponse pResp, String callback, JSONStreamAware pJson) throws IOException {
         ChunkedWriter writer = null;
         try {
-            if (pJson != null) {
-                writer = new ChunkedWriter(pResp.getOutputStream(), "UTF-8");
-                if (callback == null) {
-                    pJson.writeJSONString(writer);
-                } else {
-                    writer.write(callback);
-                    writer.write("(");
-                    pJson.writeJSONString(writer);
-                    writer.write(");");
-                }
+            writer = new ChunkedWriter(pResp.getOutputStream(), "UTF-8");
+            if (callback == null) {
+                pJson.writeJSONString(writer);
             } else {
-                pResp.setContentLength(-1);
+                writer.write(callback);
+                writer.write("(");
+                pJson.writeJSONString(writer);
+                writer.write(");");
             }
         } finally {
             if (writer != null) {
@@ -502,18 +492,12 @@ public class AgentServlet extends HttpServlet {
     private void sendAllJSON(HttpServletResponse pResp, String callback, JSONAware pJson) throws IOException {
         OutputStream out = null;
         try {
-            if (pJson != null) {
-                String json = pJson.toJSONString();
-                String content = callback == null ? json : callback + "(" + json + ");";
-                byte[] response = content.getBytes("UTF8");
-                pResp.setStatus(HttpServletResponse.SC_OK);
-                pResp.setContentLength(response.length);
-                out = pResp.getOutputStream();
-                out.write(response);
-            } else {
-                pResp.setStatus(HttpServletResponse.SC_OK);
-                pResp.setContentLength(-1);
-            }
+            String json = pJson.toJSONString();
+            String content = callback == null ? json : callback + "(" + json + ");";
+            byte[] response = content.getBytes("UTF8");
+            pResp.setContentLength(response.length);
+            out = pResp.getOutputStream();
+            out.write(response);
         } finally {
             if (out != null) {
                 // Always close in order to finish the request.
