@@ -271,11 +271,11 @@ public class AgentServlet extends HttpServlet {
         } finally {
             setCorsHeader(pReq, pResp);
 
-            String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
             if (json == null) {
                 json = requestHandler.handleThrowable(new Exception("Internal error while handling an exception"));
             }
-            sendResponse(pResp, getMimeType(pReq), callback, json);
+
+            sendResponse(pResp, pReq, json);
         }
     }
 
@@ -379,6 +379,14 @@ public class AgentServlet extends HttpServlet {
         return configMimeType;
     }
 
+    private boolean isStreamingEnabled(HttpServletRequest pReq) {
+        String streamingFromReq = pReq.getParameter(ConfigKey.STREAMING.getKeyValue());
+        if (streamingFromReq != null) {
+            return Boolean.parseBoolean(streamingFromReq);
+        }
+        return streamingEnabled;
+    }
+
     private interface ServletRequestHandler {
         /**
          * Handle a request and return the answer as a JSON structure
@@ -450,14 +458,16 @@ public class AgentServlet extends HttpServlet {
         return config;
     }
 
-    private void sendResponse(HttpServletResponse pResp, String mimeType, String callback, JSONAware pJson) throws IOException {
-        setContentType(pResp, callback != null ? "text/javascript" : mimeType);
+    private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONAware pJson) throws IOException {
+        String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        setContentType(pResp, callback != null ? "text/javascript" : getMimeType(pReq));
+
         pResp.setStatus(HttpServletResponse.SC_OK);
         setNoCacheHeaders(pResp);
         if (pJson == null) {
             pResp.setContentLength(-1);
         } else {
-            if (streamingEnabled) {
+            if (isStreamingEnabled(pReq)) {
                 sendStreamingResponse(pResp, callback, (JSONStreamAware) pJson);
             } else {
                 // Fallback, send as one object

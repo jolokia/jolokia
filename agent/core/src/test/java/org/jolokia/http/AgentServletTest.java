@@ -325,6 +325,8 @@ public class AgentServletTest {
                         expect(request.getParameterNames()).andReturn(params.elements());
                         expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
                         expect(request.getAttribute("subject")).andReturn(null);
+                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
                     }
                 },
                 getStandardResponseSetup());
@@ -426,6 +428,7 @@ public class AgentServletTest {
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
+                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
                         expect(request.getHeader("Origin")).andStubReturn(in);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
@@ -479,7 +482,6 @@ public class AgentServletTest {
                         response.setStatus(200);
                     }
                 });
-        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
 
@@ -506,6 +508,7 @@ public class AgentServletTest {
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
 
         replay(request, response);
 
@@ -662,6 +665,8 @@ public class AgentServletTest {
                 setupAgentDetailsInitExpectations();
                 expect(request.getParameterMap()).andReturn(null);
                 expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
             }
         };
     }
@@ -693,6 +698,8 @@ public class AgentServletTest {
                 expect(request.getContextPath()).andReturn("/jolokia");
                 expect(request.getAuthType()).andReturn("BASIC");
                 expect(request.getAttribute("subject")).andReturn(null);
+                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
             }
         };
     }
