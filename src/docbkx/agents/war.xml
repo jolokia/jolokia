@@ -390,7 +390,7 @@
       startup. Currently the following extra options are supported:
     </para>
    <table id="agent-war-detector-options">
-      <title>Servlet init parameters</title>
+      <title>Detector Options</title>
       <thead>
         <tr>
           <td>Product</td>
