@@ -111,7 +111,7 @@ public class AgentServlet extends HttpServlet {
 
     /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link RestrictorFactory#createRestrictor(Configuration,LogHandler)} and {@link #createLogHandler(ServletConfig, boolean)}
+     * this step by overriding {@link #createRestrictor(Configuration)}} and {@link #createLogHandler(ServletConfig, boolean)}
      *
      * @param pServletConfig servlet configuration
      */
@@ -132,7 +132,7 @@ public class AgentServlet extends HttpServlet {
         httpPostHandler = newPostHttpRequestHandler();
 
         if (restrictor == null) {
-            restrictor = RestrictorFactory.createRestrictor(config,logHandler);
+            restrictor = createRestrictor(config);
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
@@ -143,6 +143,16 @@ public class AgentServlet extends HttpServlet {
         streamingEnabled = config.getAsBoolean(ConfigKey.STREAMING);
 
         initDiscoveryMulticast(config);
+    }
+
+    /**
+     * Hook for creating an own restrictor
+     *
+     * @param config configuration as given to the servlet
+     * @return return restrictor or null if no restrictor is needed.
+     */
+    protected Restrictor createRestrictor(Configuration config) {
+        return RestrictorFactory.createRestrictor(config, logHandler);
     }
 
     private void initDiscoveryMulticast(Configuration pConfig) {

@@ -103,7 +103,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @param pLazy whether initialisation should be done lazy.
      */
     public void start(boolean pLazy) {
-        Restrictor restrictor = RestrictorFactory.createRestrictor(configuration,logHandler);
+        Restrictor restrictor = createRestrictor();
         backendManager = new BackendManager(configuration, logHandler, restrictor, pLazy);
         requestHandler = new HttpRequestHandler(configuration, backendManager, logHandler);
         if (listenForDiscoveryMcRequests(configuration)) {
@@ -114,6 +114,15 @@ public class JolokiaHttpHandler implements HttpHandler {
                 logHandler.error("Cannot start discovery multicast handler: " + e, e);
             }
         }
+    }
+
+    /**
+     * Hook for creating an own restrictor
+     *
+     * @return return restrictor or null if no restrictor is needed.
+     */
+    protected Restrictor createRestrictor() {
+        return RestrictorFactory.createRestrictor(configuration, logHandler);
     }
 
     private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
@@ -161,7 +170,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     public void handle(final HttpExchange pHttpExchange) throws IOException {
         try {
             checkAuthentication(pHttpExchange);
-            
+
             Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
             if (subject != null)  {
                 doHandleAs(subject, pHttpExchange);
