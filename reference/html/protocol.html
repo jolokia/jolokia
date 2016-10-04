@@ -412,7 +412,7 @@ value: {
       ignored. 
     </li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-read"></a>6.2.1.1.&nbsp;GET read request</h4></div></div></div><p>
       The GET URL for a read request has the following format:
-    </p><pre class="synopsis">&lt;base-url&gt;/read/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;inner path&gt;</pre><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.2.&nbsp;GET Read Request</b></p><div class="table-contents"><table id="d0e3683"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><pre class="synopsis">&lt;base-url&gt;/read/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;inner path&gt;</pre><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.2.&nbsp;GET Read Request</b></p><div class="table-contents"><table id="d0e3686"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Part</td>
           <td>Description</td>
           <td>Example</td>
@@ -448,7 +448,7 @@ value: {
     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-read"></a>6.2.1.2.&nbsp;POST read request</h4></div></div></div><p>
       A the keys available for read POST requests are shown in the
       following table.
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.3.&nbsp;POST Read Request</b></p><div class="table-contents"><table id="d0e3761"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.3.&nbsp;POST Read Request</b></p><div class="table-contents"><table id="d0e3764"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Key</td>
           <td>Description</td>
           <td>Example</td>
@@ -553,7 +553,7 @@ value: {
   </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-write"></a>6.2.2.1.&nbsp;GET write request</h4></div></div></div><p>
         Writing an attribute wit an GET request, an URL with the following format has to be used:         
         </p><pre class="synopsis">&lt;base url&gt;/write/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;value&gt;/&lt;inner path&gt;</pre><p>    
-      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.4.&nbsp;GET Write Request</b></p><div class="table-contents"><table id="d0e3889"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.4.&nbsp;GET Write Request</b></p><div class="table-contents"><table id="d0e3892"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
             <td>Part</td>
             <td>Description</td>
             <td>Example</td>
@@ -589,7 +589,7 @@ value: {
         </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true</pre></div><p>
       </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-write"></a>6.2.2.2.&nbsp;POST write request</h4></div></div></div><p>
         The keys which are evaluated for a POST write request are:
-      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.5.&nbsp;POST Write Request</b></p><div class="table-contents"><table id="d0e3972"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.5.&nbsp;POST Write Request</b></p><div class="table-contents"><table id="d0e3975"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
             <td>Key</td>
             <td>Description</td>
             <td>Example</td>
@@ -649,7 +649,7 @@ value: {
   </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-exec"></a>6.2.3.1.&nbsp;GET exec request</h4></div></div></div><p>
       The format of an GET exec request is
       </p><pre class="synopsis">&lt;base url&gt;/exec/&lt;mbean name&gt;/&lt;operation name&gt;/&lt;arg1&gt;/&lt;arg2&gt;/....</pre><p>
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.6.&nbsp;GET Exec Request</b></p><div class="table-contents"><table id="d0e4087"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.6.&nbsp;GET Exec Request</b></p><div class="table-contents"><table id="d0e4090"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Part</td>
           <td>Description</td>
           <td>Example</td>
@@ -681,7 +681,7 @@ value: {
       </tr></table></div></div><p>
       The following request will trigger a garbage collection:
       </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/exec/java.lang:type=Memory/gc</pre></div><p>
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-exec"></a>6.2.3.2.&nbsp;POST exec request</h4></div></div></div><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.7.&nbsp;POST Exec Request</b></p><div class="table-contents"><table id="d0e4161"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-exec"></a>6.2.3.2.&nbsp;POST exec request</h4></div></div></div><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.7.&nbsp;POST Exec Request</b></p><div class="table-contents"><table id="d0e4164"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
             <td>Key</td>
             <td>Description</td>
             <td>Example</td>
@@ -756,7 +756,7 @@ value: {
       are returned as a list within the response.
     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-search"></a>6.2.4.2.&nbsp;POST search request</h4></div></div></div><p>
       A search POST request knows the following keys:
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.8.&nbsp;POST Search Request</b></p><div class="table-contents"><table id="d0e4293"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.8.&nbsp;POST Search Request</b></p><div class="table-contents"><table id="d0e4296"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Key</td>
           <td>Description</td>
           <td>Example</td>
@@ -813,7 +813,7 @@ value: {
       complete response.      
     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-list"></a>6.2.5.2.&nbsp;POST list request</h4></div></div></div><p>
       A list POST request has the following keys:
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.9.&nbsp;POST list Request</b></p><div class="table-contents"><table id="d0e4384"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.9.&nbsp;POST list Request</b></p><div class="table-contents"><table id="d0e4387"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Key</td>
           <td>Description</td>
           <td>Example</td>
@@ -947,7 +947,7 @@ value: {
      "type":"list",
      "path":"java.lang\/type=Memory"
    }
- }</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4480"></a>6.2.5.4.&nbsp;Restrict depth of depth</h4></div></div></div><p>
+ }</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4483"></a>6.2.5.4.&nbsp;Restrict depth of depth</h4></div></div></div><p>
       The optional parameter <code class="literal">maxDepth</code> can be used
       to restrict the depth of the return tree. Two value are
       possible: A <code class="literal">maxDepth</code> of 1 restricts the
@@ -1254,7 +1254,7 @@ value: {
           serialization of <code class="constant">Map</code>s, 
           <code class="constant">List</code>s and all <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html" target="_top">Open
           Types</a>. 
-        </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4954"></a>6.4.2.1.&nbsp;GET request values</h4></div></div></div><p>
+        </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4957"></a>6.4.2.1.&nbsp;GET request values</h4></div></div></div><p>
             Since parameters get encoded in the URL for GET request,
             only the following types can used for values and arguments
             in <code class="constant">write</code> and
@@ -1279,7 +1279,7 @@ value: {
             serialized as <code class="literal">[null]</code>, an empty String
             as <code class="literal">""</code>. Tag values are not required for
             POST requests.
-          </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5013"></a>6.4.2.2.&nbsp;POST request values</h4></div></div></div><p>
+          </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5016"></a>6.4.2.2.&nbsp;POST request values</h4></div></div></div><p>
             POST request take advantage of the JSON type of the value
             transfered. These are basic types for numbers
             (<code class="literal">42</code> or <code class="literal">23.5</code>),

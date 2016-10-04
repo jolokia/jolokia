@@ -379,7 +379,7 @@
       configuration. This configuration is feed to a successful
       detector which can do some extra initialization on agent
       startup. Currently the following extra options are supported:
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.2.&nbsp;Servlet init parameters</b></p><div class="table-contents"><table id="agent-war-detector-options"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.2.&nbsp;Detector Options</b></p><div class="table-contents"><table id="agent-war-detector-options"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Product</td>
           <td>Option</td>
           <td>Description</td>
@@ -590,14 +590,14 @@
           by the discovery mechanism. It is recommended not to set
           this value. Within the <code class="literal">agentId</code> specification you
           can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
-        </td>        
+        </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.agentDescription</td>
         <td></td>
         <td>
           An optional description which can be used for clients to
           present a humand readable label for this agent.
-        </td>        
+        </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.dispatcherClasses</td>
         <td></td>
@@ -662,7 +662,7 @@
         <td>
           If <code class="literal">true</code> the bundle listens for an OSGi
           <code class="literal">HttpService</code> and if available registers an
-          agent servlet to it. 
+          agent servlet to it.
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.httpServiceFilter</td>
@@ -728,8 +728,9 @@
         <td></td>
         <td>
           An optional JSON representation for application specific
-          options used by detectors for post-initialization steps. See
-          <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> for details. 
+          options used by detectors for post-initialization steps. See the description of
+          <code class="literal">detectorOptions</code> in
+          <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> for details.
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.discoveryEnabled</td>
@@ -739,7 +740,7 @@
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
           avoid conflicts with an JEE standards (though this should't
-          harm anyways). This option can also be switched on with an 
+          harm anyways). This option can also be switched on with an
           environment variable
           <code class="literal">JOLOKIA_DISCOVERY</code> or the system
           property <code class="literal">jolokia.discoveryEnabled</code> set to
@@ -786,7 +787,7 @@
       <code class="classname">org.osgi.service.http.HttpContext</code>, which
       is used for authentication. Note that this service is only
       available when the agent servlet is active (i.e. when an
-      HttpService is registered). 
+      HttpService is registered).
     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="running-on-glassfish"></a>3.2.2.&nbsp;Running on Glassfish v3 upwards</h3></div></div></div><p>
         You have a couple of choices when running jolokia on
         Glassfish v3 and up, since Glassfish is a both a fully
@@ -874,8 +875,8 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       want. Alternatively, the bundle property
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
-      automatic servlet registration to an HttpService. 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1597"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+      automatic servlet registration to an HttpService.
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1600"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -891,7 +892,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       restrictor service is available, access is ony granted if all of
       them individually grant access. A sample restrictor service as a
       maven project can be found in the Jolokia source at
-      <code class="filename">agent/osgi/restrictor-sample</code>. 
+      <code class="filename">agent/osgi/restrictor-sample</code>.
     </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-mule"></a>3.3.&nbsp;Mule Agent</h2></div></div></div><p>
     Jolokia's <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.mulesoft.org" target="_top">Mule</a> agent
     uses Mule's own agent interface for plugging into the ESB running
