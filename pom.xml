@@ -15,12 +15,11 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia</artifactId>
-  <version>1.3.5-SNAPSHOT</version>
+  <version>1.3.5</version>
   <name>jolokia-parent</name>
   <description>jolokia parent pom</description>
 
@@ -117,20 +116,19 @@
           <postProcess>
             <copy todir="${project.basedir}/target/site/reference">
               <fileset dir="${project.basedir}/target/docbkx">
-                <include name="**/*.html"/>
-                <include name="**/*.pdf"/>
+                <include name="**/*.html" />
+                <include name="**/*.pdf" />
               </fileset>
             </copy>
             <copy todir="${project.basedir}/target/site/reference/html">
               <fileset dir="${project.basedir}/src/docbkx">
-                <include name="**/*.css"/>
-                <include name="**/*.png"/>
-                <include name="**/*.gif"/>
-                <include name="**/*.jpg"/>
+                <include name="**/*.css" />
+                <include name="**/*.png" />
+                <include name="**/*.gif" />
+                <include name="**/*.jpg" />
               </fileset>
             </copy>
-            <move file="${project.basedir}/target/site/reference/pdf/index.pdf"
-                  tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf" failonerror="false"/>
+            <move file="${project.basedir}/target/site/reference/pdf/index.pdf" tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf" failonerror="false" />
           </postProcess>
         </configuration>
       </plugin>
@@ -341,7 +339,7 @@
   <scm>
     <connection>scm:git:git://github.com/rhuss/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/rhuss/jolokia.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v1.3.5</tag>
     <url>git://github.com/rhuss/jolokia.git</url>
   </scm>
 
