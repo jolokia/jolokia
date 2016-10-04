@@ -23,12 +23,18 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.3.5" description="Release 1.3.5" date="2016-09-19">
+    <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
       <action dev="paoloantinori" type="add" date="2016-09-18" issue="283">
         Support JSON streaming also for AgentServlet (WAR and OSGi agent)
       </action>
       <action dev="rhuss" type="fix" date="2016-09-20">
         Avoid NPE in Websphere detector
+      </action>
+      <action dev="rhuss" type="fix" issue="284" date="2016-10-1">
+        Re-add hooks for creating custom restrictors
+      </action>
+      <action dev="savage-engineer" type="add" issue="281" date="2016-10-1">
+        Added better version detection of Payara Server
       </action>
     </release>
     <release version="1.3.4" description="Release 1.3.4" date="2016-07-31">
