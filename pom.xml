@@ -755,6 +755,26 @@
         </pluginManagement>
       </build>
     </profile>
+    <profile>
+      <id>disable-javadoc-lint</id>
+      <activation>
+        <jdk>[1.8,2.0)</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.10.1</version>
+              <configuration>
+                <additionalparam>-Xdoclint:none</additionalparam>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
 
     <!-- Include Roo, which is not build by default -->
     <profile>
