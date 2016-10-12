@@ -88,12 +88,7 @@ public class TestDetector implements ServerDetector {
         }
     }
 
-    public boolean earlyDetect(Instrumentation instrumentation) {
-        return false;
-    }    
-
-    public void awaitServerInitialization(Instrumentation instrumentation) {
-    }
+    public void jvmAgentStartup(Instrumentation instrumentation) {}
 
     public static void setThrowAddException(boolean b) {
         throwAddException = b;

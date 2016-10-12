@@ -113,22 +113,15 @@ public final class JvmAgent {
     }
 
     /**
-     * Lookup the server detectors and await the server initialization.
+     * Lookup the server detectors and notify detector about the JVM startup
      *
      * @param instrumentation
-     * @see ServerDetector#earlyDetect(Instrumentation)
-     * @see ServerDetector#awaitServerInitialization(Instrumentation)
+     * @see ServerDetector#jvmAgentStartup(Instrumentation)
      */
     private static void awaitServerInitialization(JvmAgentConfig pConfig, final Instrumentation instrumentation) {
         List<ServerDetector> detectors = MBeanServerHandler.lookupDetectors();
-        for (ServerDetector detector:detectors) {
-            // TODO add feature to JvmAgentConfig to be able to skip earlyDetect & awaitServerInitialization
-            // for a detector.
-            if (detector.earlyDetect(instrumentation)) {
-                System.out.format("Jolokia: await server initialization using %s%n", detector.getClass().getName());
-                detector.awaitServerInitialization(instrumentation);
-                System.out.format("Jolokia: await server initialization done%n");
-            }
+        for (ServerDetector detector : detectors) {
+            detector.jvmAgentStartup(instrumentation);
         }
     };
 

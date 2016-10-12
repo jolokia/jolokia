@@ -174,40 +174,31 @@ public class JBossDetectorTest extends BaseDetectorTest {
     }
 
     @Test
-    public void verifyEarlyDetectForJBossModulesBasedContainer() throws MalformedURLException {
-        ClassLoader cl = createMock(ClassLoader.class);
-        expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).once();
-        replay(cl);
-        String prevValue = System.setProperty("jboss.modules.system.pkgs", "blah");
-        try {
-            assertTrue(detector.earlyDetectForJBossModulesBasedContainer(cl));
-        } finally {
-            if (prevValue == null) {
-                System.getProperties().remove("jboss.modules.system.pkgs");
-            } else {
-                System.setProperty("org.jboss.boot.log.file", prevValue);
-            }
-        }
-        verify(cl);
-    }
-
-    @Test
-    public void verifyAwaitServerInitialization() throws MalformedURLException {
+    public void verifyJvmAgentStartup() throws MalformedURLException {
         Instrumentation inst = createMock(Instrumentation.class);
         expect(inst.getAllLoadedClasses()).andReturn(new Class[] {}).times(3);
         expect(inst.getAllLoadedClasses()).andReturn(new Class[] {JBossDetectorTest.class}).atLeastOnce();
-        replay(inst);
-        String prevValue = System.setProperty("java.util.logging.manager", JBossDetectorTest.class.getName());
+        ClassLoader cl = createMock(ClassLoader.class);
+        expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).once();
+        String prevPkgValue = System.setProperty("jboss.modules.system.pkgs", "blah");
+        String prevLogValue = System.setProperty("java.util.logging.manager", JBossDetectorTest.class.getName());
+        replay(inst,cl);
+
         try {
-            detector.awaitServerInitialization(inst);
+            detector.jvmAgentStartup(inst, cl);
         } finally {
-            if (prevValue == null) {
-                System.getProperties().remove("java.util.logging.manager");
-            } else {
-                System.setProperty("java.util.logging.manager", prevValue);
-            }
+            resetSysProp(prevLogValue, "java.util.logging.manager");
+            resetSysProp(prevPkgValue, "jboss.modules.system.pkgs");
         }
         verify(inst);
+    }
+
+    protected void resetSysProp(String prevValue, String key) {
+        if (prevValue == null) {
+            System.getProperties().remove(key);
+        } else {
+            System.setProperty(key, prevValue);
+        }
     }
 
 }

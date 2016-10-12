@@ -123,13 +123,9 @@ public class MBeanServersTest implements NotificationListener {
                 pMBeanServers.add(ownServer);
             }
 
-            public boolean earlyDetect(Instrumentation instrumentation) {
-                return false;
-            }            
-
-            public void awaitServerInitialization(Instrumentation instrumentation) {
+            public void jvmAgentStartup(Instrumentation instrumentation) {
             }
-            
+
         });
         return ret;
     }

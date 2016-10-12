@@ -145,13 +145,7 @@ public class JolokiaServletTest {
         public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
         }
 
-        public boolean earlyDetect(Instrumentation instrumentation) {
-            return false;
-        }
-
-        public void awaitServerInitialization(Instrumentation instrumentation) {
-        }
-
+        public void jvmAgentStartup(Instrumentation instrumentation) {}
     }
 
 }

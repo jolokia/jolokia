@@ -27,7 +27,7 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
  * Base class for server detectors
- * 
+ *
  * @author roland
  * @since 05.11.10
  */
@@ -164,30 +164,19 @@ public abstract class AbstractServerDetector implements ServerDetector {
     }
 
     /**
-     * There is no default early detection mechanism.
-     * 
-     * @return by default there the early detection returns false
+     * By default do nothing during JVM agent startup
      */
-    public boolean earlyDetect(Instrumentation instrumentation) {
-        return false;
-    }    
-
-    /**
-     * Do nothing by default, leaving the implementation
-     * optional for each specific detector
-     *
-     * @param instrumentation the Instrumentation implementation
-     */
-    public void awaitServerInitialization(Instrumentation instrumentation) {
+    public void jvmAgentStartup(Instrumentation instrumentation) {
     }
-    
-    
+
+
+
     /**
      * Tests if the given class name has been loaded by the JVM. Don't use this method
      * in case you have access to the class loader which will be loading the class
      * because the used approach is not very efficient.
      * @param className the name of the class to check
-     * @param instrumentation 
+     * @param instrumentation
      * @return true if the class has been loaded by the JVM
      * @throws IllegalArgumentException in case instrumentation or the provided class is null
      */
@@ -203,5 +192,5 @@ public abstract class AbstractServerDetector implements ServerDetector {
         }
         return false;
     }
-    
+
 }

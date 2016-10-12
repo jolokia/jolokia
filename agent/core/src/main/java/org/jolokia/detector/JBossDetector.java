@@ -36,36 +36,38 @@ public class JBossDetector extends AbstractServerDetector {
     }
 
     /**
-     * Attempts to return true in case the JVM will start a JBoss modules based application server. Because getting
+     * Attempts to detect a JBoss modules based application server. Because getting
      * access to the main arguments is not possible, it returns true in case the system property
      * {@code jboss.modules.system.pkgs} is set and the {@code org/jboss/modules/Main.class} resource can be found
      * using the class loader of this class.
-     */
-    @Override
-    public boolean earlyDetect(Instrumentation instrumentation) {
-        return earlyDetectForJBossModulesBasedContainer(JBossDetector.class.getClassLoader());
-    }
-
-    protected boolean earlyDetectForJBossModulesBasedContainer(ClassLoader classLoader) {
-        URL jbossModulesUrl = classLoader.getResource("org/jboss/modules/Main.class");
-        if (System.getProperty("jboss.modules.system.pkgs") != null && jbossModulesUrl != null) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Awaits the early initialization of a JBoss modules based application server by polling the system property
+     *
+     * If so, it awaits the early initialization of a JBoss modules based application server by polling the system property
      * {@code java.util.logging.manager} and waiting until the specified class specified by this property has been
      * loaded by the JVM.
      */
     @Override
-    public void awaitServerInitialization(Instrumentation instrumentation) {
-        awaitServerInitializationForJBossModulesBasedContainer(instrumentation);
+    public void jvmAgentStartup(Instrumentation instrumentation) {
+        jvmAgentStartup(instrumentation, this.getClass().getClassLoader());
     }
 
+    void jvmAgentStartup(Instrumentation instrumentation, ClassLoader classLoader) {
+        if (earlyDetectForJBossModulesBasedContainer(classLoader)) {
+            awaitServerInitializationForJBossModulesBasedContainer(instrumentation);
+        }
+    }
+
+    protected boolean earlyDetectForJBossModulesBasedContainer(ClassLoader classLoader) {
+        return System.getProperty("jboss.modules.system.pkgs") != null &&
+               classLoader.getResource("org/jboss/modules/Main.class") != null;
+    }
+
+    // Wait a max 5 Minutes
+    public static final int LOGGING_DETECT_TIMEOUT = 5 * 60 * 1000;
+    public static final int LOGGING_DETECT_INTERVAL = 200;
+
     private void awaitServerInitializationForJBossModulesBasedContainer(Instrumentation instrumentation) {
-        while (true) {
+        int count = 0;
+        while (count * LOGGING_DETECT_INTERVAL < LOGGING_DETECT_TIMEOUT) {
             String loggingManagerClassName = System.getProperty("java.util.logging.manager");
             if (loggingManagerClassName != null) {
                 if (isClassLoaded(loggingManagerClassName, instrumentation)) {
@@ -77,15 +79,17 @@ public class JBossDetector extends AbstractServerDetector {
                     // https://github.com/jboss-modules/jboss-modules/blob/1.5.1.Final/src/main/java/org/jboss/modules/Main.java#L482
                     // Therefore the steps 3-6 of the proposal for option 2 don't need to be performed,
                     // see https://github.com/rhuss/jolokia/issues/258 for details.
-                    break;
+                    return;
                 }
             }
             try {
-                Thread.sleep(200);
+                Thread.sleep(LOGGING_DETECT_INTERVAL);
+                count++;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+        throw new IllegalStateException(String.format("Detected JBoss Module loader, but property java.util.logging.manager is not set after %d seconds", LOGGING_DETECT_TIMEOUT / 1000));
     }
 
     private ServerHandle checkFromJSR77(MBeanServerExecutor pMBeanServerExecutor) {
