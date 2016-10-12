@@ -57,8 +57,22 @@ public class JBossDetector extends AbstractServerDetector {
     }
 
     protected boolean earlyDetectForJBossModulesBasedContainer(ClassLoader classLoader) {
-        return System.getProperty("jboss.modules.system.pkgs") != null &&
+        return hasWildflyProperties() &&
+               // Contained in any JBoss modules app:
                classLoader.getResource("org/jboss/modules/Main.class") != null;
+    }
+
+    private boolean hasWildflyProperties() {
+        // For Wildfly AS:
+        if (System.getProperty("jboss.modules.system.pkgs") != null) {
+            return true;
+        }
+        // For Wildfly Swarm:
+        String bootModuleLoader = System.getProperty("boot.module.loader");
+        if (bootModuleLoader != null) {
+            return bootModuleLoader.contains("wildfly");
+        }
+        return false;
     }
 
     // Wait a max 5 Minutes

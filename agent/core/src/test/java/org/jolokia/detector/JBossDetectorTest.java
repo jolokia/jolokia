@@ -179,7 +179,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
         expect(inst.getAllLoadedClasses()).andReturn(new Class[] {}).times(3);
         expect(inst.getAllLoadedClasses()).andReturn(new Class[] {JBossDetectorTest.class}).atLeastOnce();
         ClassLoader cl = createMock(ClassLoader.class);
-        expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).once();
+        expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).anyTimes();
         String prevPkgValue = System.setProperty("jboss.modules.system.pkgs", "blah");
         String prevLogValue = System.setProperty("java.util.logging.manager", JBossDetectorTest.class.getName());
         replay(inst,cl);
