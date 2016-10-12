@@ -127,7 +127,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                         ret.put(pRequest.getOrderedObjectName(name),values);
                     }
                 } else {
-                    List<String> filteredAttributeNames = filterAttributeNames(pServerManager,name,attributeNames);
+                    List<String> filteredAttributeNames = filterAttributeNames(pServerManager, name, attributeNames);
                     if (filteredAttributeNames.size() == 0) {
                         continue;
                     }
