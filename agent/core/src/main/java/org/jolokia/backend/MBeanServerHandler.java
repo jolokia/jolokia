@@ -268,7 +268,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     }
 
     // Lookup all registered detectors + a default detector
-    private List<ServerDetector> lookupDetectors() {
+    public static List<ServerDetector> lookupDetectors() {
         List<ServerDetector> detectors =
                 ServiceObjectFactory.createServiceObjects("META-INF/detectors-default", "META-INF/detectors");
         // An detector at the end of the chain in order to get a default handle

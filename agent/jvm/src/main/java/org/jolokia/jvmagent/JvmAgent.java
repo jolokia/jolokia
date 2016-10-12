@@ -17,6 +17,11 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
+import java.util.List;
+
+import org.jolokia.backend.MBeanServerHandler;
+import org.jolokia.detector.ServerDetector;
 
 
 /**
@@ -63,8 +68,8 @@ public final class JvmAgent {
      *
      * @param agentArgs arguments as given on the command line
      */
-    public static void premain(String agentArgs) {
-        startAgent(new JvmAgentConfig(agentArgs), true /* register and detect lazy */);
+    public static void premain(String agentArgs, Instrumentation inst) {
+        startAgent(new JvmAgentConfig(agentArgs), true /* register and detect lazy */, inst);
     }
 
     /**
@@ -73,29 +78,60 @@ public final class JvmAgent {
      *
      * @param agentArgs arguments as given on the command line
      */
-    public static void agentmain(String agentArgs) {
+    public static void agentmain(String agentArgs, Instrumentation instrumentation) {
         JvmAgentConfig config = new JvmAgentConfig(agentArgs);
         if (!config.isModeStop()) {
-            startAgent(config,false);
+            startAgent(config,false, instrumentation);
         } else {
             stopAgent();
         }
     }
 
-    private static void startAgent(JvmAgentConfig pConfig, boolean pLazy)  {
-        try {
-            server = new JolokiaServer(pConfig,pLazy);
+    private static void startAgent(final JvmAgentConfig pConfig, final boolean pLazy, final Instrumentation instrumentation)  {
+        // start the JolokiaServer in a new daemon thread
+        Thread jolokiaStartThread = new Thread("JolokiaStart") {
+            public void run() {
+                try {
+                    // block until the server supporting early detection is initialized
+                    awaitServerInitialization(pConfig, instrumentation);
 
-            server.start();
-            setStateMarker();
+                    server = new JolokiaServer(pConfig,pLazy);
 
-            System.out.println("Jolokia: Agent started with URL " + server.getUrl());
-        } catch (RuntimeException exp) {
-            System.err.println("Could not start Jolokia agent: " + exp);
-        } catch (IOException exp) {
-            System.err.println("Could not start Jolokia agent: " + exp);
-        }
+                    server.start();
+                    setStateMarker();
+
+                    System.out.println("Jolokia: Agent started with URL " + server.getUrl());
+                } catch (RuntimeException exp) {
+                    System.err.println("Could not start Jolokia agent: " + exp);
+                } catch (IOException exp) {
+                    System.err.println("Could not start Jolokia agent: " + exp);
+                }
+            }
+        };
+        jolokiaStartThread.setDaemon(true);
+        jolokiaStartThread.start();
     }
+
+    /**
+     * Lookup the server detectors and await the server initialization.
+     *
+     * @param instrumentation
+     * @see ServerDetector#earlyDetect(Instrumentation)
+     * @see ServerDetector#awaitServerInitialization(Instrumentation)
+     */
+    private static void awaitServerInitialization(JvmAgentConfig pConfig, final Instrumentation instrumentation) {
+        List<ServerDetector> detectors = MBeanServerHandler.lookupDetectors();
+        for (ServerDetector detector:detectors) {
+            // TODO add feature to JvmAgentConfig to be able to skip earlyDetect & awaitServerInitialization
+            // for a detector.
+            if (detector.earlyDetect(instrumentation)) {
+                System.out.format("Jolokia: await server initialization using %s%n", detector.getClass().getName());
+                detector.awaitServerInitialization(instrumentation);
+                System.out.format("Jolokia: await server initialization done%n");
+            }
+        }
+    };
+
 
     private static void stopAgent() {
         try {

@@ -16,6 +16,7 @@ package org.jolokia.detector;
  * limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
 import java.util.Set;
 
 import javax.management.MBeanServerConnection;
@@ -24,9 +25,14 @@ import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting
- * the runtime environment e.g. for the existance of certain classes. If a detector
+ * the runtime environment e.g. for the existence of certain classes. If a detector
  * successfully detect 'its' server, it return a {@link ServerHandle} containing type, version
- * and some optional information
+ * and some optional information. For the early detection of a server by the JVM agent,
+ * {@link #earlyDetect(Instrumentation)} and {@link #awaitServerInitialization} can  
+ * be used. Using these methods is useful in case the server is using its own class 
+ * loaders to load components used by Jolokia (e.g jmx, Java logging which is
+ * indirectly required by the sun.net.httpserver).
+ *
  * @author roland
  * @since 05.11.10
  */
@@ -47,4 +53,21 @@ public interface ServerDetector {
      * @param pMBeanServers set to add detected MBeanServers to
      */
     void addMBeanServers(Set<MBeanServerConnection> pMBeanServers);
+
+    /**
+     * Test if it is very likely that the JVM is hosting the particular server. This check is executed 
+     * in a very early stage (premain of the Jolokia JVM agent) before the main class of the Server is executed.
+     * @param instrumentation the Instrumentation implementation
+     * @return true in case the it is very likely that the JVM is running the server
+     */
+    boolean earlyDetect(Instrumentation instrumentation);
+
+    /**
+     * Blocks until the server has initialized components which must be available before Jolokia
+     * is running. This operation is normally invoked by the Jolokia JVM agent in a background
+     * thread in case {@link #earlyDetect(Instrumentation)} returns true.
+     * @param instrumentation the Instrumentation implementation
+     */
+    void awaitServerInitialization(Instrumentation instrumentation);
+
 }

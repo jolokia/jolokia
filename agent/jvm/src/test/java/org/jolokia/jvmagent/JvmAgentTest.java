@@ -30,24 +30,24 @@ public class JvmAgentTest {
 
     @Test
     public void premain() throws IOException {
-        JvmAgent.premain("port=" + EnvTestUtil.getFreePort());
-        JvmAgent.agentmain("mode=stop");
+        JvmAgent.premain("port=" + EnvTestUtil.getFreePort(), null);
+        JvmAgent.agentmain("mode=stop", null);
     }
 
     @Test
     public void agentmain() throws IOException {
-        JvmAgent.agentmain("mode=start,port=" + EnvTestUtil.getFreePort());
-        JvmAgent.agentmain("mode=stop");
+        JvmAgent.agentmain("mode=start,port=" + EnvTestUtil.getFreePort(), null);
+        JvmAgent.agentmain("mode=stop", null);
     }
 
     @Test
     public void startException() throws IOException {
         int port = EnvTestUtil.getFreePort();
-        JvmAgent.agentmain("port=" + port);
+        JvmAgent.agentmain("port=" + port, null);
         try {
-            JvmAgent.agentmain("port=" + port);
+            JvmAgent.agentmain("port=" + port, null);
         } finally {
-         JvmAgent.agentmain("mode=stop");
+         JvmAgent.agentmain("mode=stop", null);
         }
     }
 
