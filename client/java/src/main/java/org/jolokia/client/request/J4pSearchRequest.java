@@ -34,7 +34,7 @@ public class J4pSearchRequest extends AbtractJ4pMBeanRequest {
      *
      * @param pMBeanPattern pattern to use for a search
      */
-    protected J4pSearchRequest(ObjectName pMBeanPattern) {
+    public J4pSearchRequest(ObjectName pMBeanPattern) {
         this(null,pMBeanPattern);
     }
 
@@ -44,7 +44,7 @@ public class J4pSearchRequest extends AbtractJ4pMBeanRequest {
      * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
      * @param pMBeanPattern pattern to use for a search
      */
-    protected J4pSearchRequest(J4pTargetConfig pTargetConfig,ObjectName pMBeanPattern) {
+    public J4pSearchRequest(J4pTargetConfig pTargetConfig,ObjectName pMBeanPattern) {
         super(J4pType.SEARCH,pMBeanPattern,pTargetConfig);
     }
 

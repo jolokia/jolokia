@@ -94,8 +94,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void withEscapedWildcards() throws Exception {
-        ObjectName searchName = new ObjectName("jboss.as.expr:*");
-        J4pSearchRequest searchRequest = new J4pSearchRequest(searchName);
+        J4pSearchRequest searchRequest = new J4pSearchRequest("jboss.as.expr:*");
         J4pSearchResponse searchResp = j4pClient.execute(searchRequest);
 
         for (ObjectName oName : searchResp.getObjectNames()) {
