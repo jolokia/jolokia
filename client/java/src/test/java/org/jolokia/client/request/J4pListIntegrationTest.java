@@ -16,13 +16,13 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
+import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -88,6 +88,20 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pListRequest req : reqs) {
             J4pListResponse resp = j4pClient.execute(req);
             Map val = resp.getValue();
+            assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
+        }
+    }
+
+    @Test
+    public void withEscapedWildcards() throws Exception {
+        ObjectName searchName = new ObjectName("jboss.as.expr:*");
+        J4pSearchRequest searchRequest = new J4pSearchRequest(searchName);
+        J4pSearchResponse searchResp = j4pClient.execute(searchRequest);
+
+        for (ObjectName oName : searchResp.getObjectNames()) {
+            J4pListRequest listRequest = new J4pListRequest(oName);
+            J4pListResponse listResp = j4pClient.execute(listRequest);
+            Map val = listResp.getValue();
             assertEquals( ((Map) ((Map) val.get("attr")).get("Ok")).get("type"),"java.lang.String");
         }
     }
