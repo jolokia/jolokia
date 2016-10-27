@@ -24,6 +24,11 @@
   </properties>
   <body>
     <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
+      <action dev="rraez" type="fix" date="2016-09-18" issue="258">
+        Add support for JBoss modules for the  Jolokia JVM manager
+      </action>
+    </release>
+    <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
       <action dev="paoloantinori" type="add" date="2016-09-18" issue="283">
         Support JSON streaming also for AgentServlet (WAR and OSGi agent)
       </action>
