@@ -87,9 +87,9 @@ public class JolokiaDemo {
         J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
                                                 "HeapMemoryUsage");
         J4pReadResponse resp = j4pClient.execute(req);
-        Map<String,String> vals = resp.getValue();
-        int used = Integer.parseInt(vals.get("used"));
-        int max = Integer.parseInt(vals.get("max"));
+        Map<String,Long> vals = resp.getValue();
+        long used = vals.get("used");
+        long max = vals.get("max");
         int usage = (int) (used * 100 / max);
         System.out.println("Memory usage: used: " + used + 
                            " / max: " + max + " = " + usage + "%");
