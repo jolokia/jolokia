@@ -124,8 +124,8 @@ public class JolokiaDemo {
           class. Finally, compile the demo and let it run:
         </p>
         <pre class="prettyprint lang-bash"><![CDATA[
-$ export CLASSPATH=json_simple-1.1.jar:jolokia-client-java-1.0.0.jar:\
-httpcore-4.1.2.jar:httpclient-4.1.2.jar:commons-logging-1.1.1.jar:.
+$ export CLASSPATH=json-simple-1.1.1.jar:jolokia-client-java-1.2.3.jar:\
+httpcore-4.3.3.jar:httpclient-osgi-4.3.3.jar:commons-logging-1.1.1.jar:.
 ]]>
 $ javac JolokiaDemo.java
 $ java JolokiaDemo
