@@ -195,7 +195,7 @@ public class JmxReadRequest extends JmxObjectNameRequest {
                 multiAttributeMode = false;
             } else {
                 attributeNames = new ArrayList<String>(attributes);
-                multiAttributeMode = true;
+                multiAttributeMode = attributeNames.size() > 1;
             }
         } else if (pAttrval == null) {
             attributeNames = null;
