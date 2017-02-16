@@ -187,7 +187,6 @@ public class JolokiaServer {
         final String contextPath = pConfig.getContextPath();
         jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig());
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
-
         // Add authentication if configured
         final Authenticator authenticator = pConfig.getAuthenticator();
         if (authenticator != null) {
@@ -240,7 +239,6 @@ public class JolokiaServer {
         HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
-
         // Prepare executor pool
         Executor executor;
         String mode = pConfig.getExecutor();

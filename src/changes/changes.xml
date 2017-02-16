@@ -23,9 +23,9 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
+    <release version="1.3.6" description="Release 1.3.6" date="">
       <action dev="rraez" type="fix" date="2016-09-18" issue="258">
-        Add support for JBoss modules for the  Jolokia JVM manager
+        Add support for JBoss modules for the Jolokia JVM agent
       </action>
     </release>
     <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
