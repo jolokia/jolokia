@@ -180,7 +180,7 @@ public class AgentServletTest {
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
             String url = "http://10.9.11.1:9876/jolokia";
-            StringWriter sw = initRequestResponseMocks(
+            ByteArrayOutputStream sw = initRequestResponseMocks(
                     getDiscoveryRequestSetup(url),
                     getStandardResponseSetup());
             replay(request, response);
@@ -225,7 +225,7 @@ public class AgentServletTest {
     public void simpleGet() throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks();
+        ByteArrayOutputStream sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -253,7 +253,7 @@ public class AgentServletTest {
                 ConfigKey.RESTRICTOR_CLASS.getKeyValue(),NoDnsLookupRestrictorChecker.class.getName(),
                 ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(),Boolean.toString(enabled));
         NoDnsLookupRestrictorChecker.expectedHosts = expectedHosts;
-        StringWriter sw = initRequestResponseMocks();
+        ByteArrayOutputStream sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -294,7 +294,7 @@ public class AgentServletTest {
     @Test
     public void simpleGetWithUnsupportedGetParameterMapCall() throws ServletException, IOException {
         prepareStandardInitialisation();
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
                         expect(request.getHeader("Origin")).andStubReturn(null);
@@ -311,6 +311,8 @@ public class AgentServletTest {
                         expect(request.getParameterNames()).andReturn(params.elements());
                         expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
                         expect(request.getAttribute("subject")).andReturn(null);
+                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
                     }
                 },
                 getStandardResponseSetup());
@@ -326,7 +328,7 @@ public class AgentServletTest {
     public void simplePost() throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter responseWriter = initRequestResponseMocks();
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -345,7 +347,7 @@ public class AgentServletTest {
     public void unknownMethodWhenSettingContentType() throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 getStandardRequestSetup(),
                 new Runnable() {
                     public void run() {
@@ -409,9 +411,10 @@ public class AgentServletTest {
     private void checkCorsGetOrigin(final String in, final String out) throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
+                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
                         expect(request.getHeader("Origin")).andStubReturn(in);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
@@ -455,7 +458,7 @@ public class AgentServletTest {
     public void withCallback() throws IOException, ServletException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 "myCallback",
                 getStandardRequestSetup(),
                 new Runnable() {
@@ -483,8 +486,7 @@ public class AgentServletTest {
         initConfigMocks(new String[] { ConfigKey.DEBUG.getKeyValue(), "true" }, null,"500", IllegalStateException.class);
         replay(config, context);
         servlet.init(config);
-
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
                         expect(request.getHeader("Origin")).andReturn(null);
@@ -493,6 +495,8 @@ public class AgentServletTest {
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
         replay(request, response);
 
         servlet.doGet(request, response);
@@ -520,7 +524,7 @@ public class AgentServletTest {
 
         servlet.init(config);
 
-        StringWriter sw = initRequestResponseMocks();
+        ByteArrayOutputStream sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
@@ -584,17 +588,17 @@ public class AgentServletTest {
         return params;
     }
 
-    private StringWriter initRequestResponseMocks() throws IOException {
+    private ByteArrayOutputStream initRequestResponseMocks() throws IOException {
         return initRequestResponseMocks(
                 getStandardRequestSetup(),
                 getStandardResponseSetup());
     }
 
-    private StringWriter initRequestResponseMocks(Runnable requestSetup,Runnable responseSetup) throws IOException {
+    private ByteArrayOutputStream initRequestResponseMocks(Runnable requestSetup,Runnable responseSetup) throws IOException {
         return initRequestResponseMocks(null,requestSetup,responseSetup);
     }
 
-    private StringWriter initRequestResponseMocks(String callback,Runnable requestSetup,Runnable responseSetup) throws IOException {
+    private ByteArrayOutputStream initRequestResponseMocks(String callback,Runnable requestSetup,Runnable responseSetup) throws IOException {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
         setNoCacheHeaders(response);
@@ -603,10 +607,22 @@ public class AgentServletTest {
         requestSetup.run();
         responseSetup.run();
 
-        StringWriter sw = new StringWriter();
-        PrintWriter writer = new PrintWriter(sw);
-        expect(response.getWriter()).andReturn(writer);
-        return sw;
+        class MyServletOutputStream extends ServletOutputStream {
+            ByteArrayOutputStream baos;
+            public void write(int b) throws IOException {
+                baos.write(b);
+            }
+
+            public void setBaos(ByteArrayOutputStream baos){
+                this.baos = baos;
+            }
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        MyServletOutputStream sos = new MyServletOutputStream();
+        sos.setBaos(baos);
+        expect(response.getOutputStream()).andReturn(sos);
+
+        return baos;
     }
 
     private void preparePostRequest(String pReq) throws IOException {
@@ -646,6 +662,8 @@ public class AgentServletTest {
                 setupAgentDetailsInitExpectations();
                 expect(request.getParameterMap()).andReturn(null);
                 expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
             }
         };
     }
@@ -677,6 +695,8 @@ public class AgentServletTest {
                 expect(request.getContextPath()).andReturn("/jolokia");
                 expect(request.getAuthType()).andReturn("BASIC");
                 expect(request.getAttribute("subject")).andReturn(null);
+                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
             }
         };
     }

@@ -45,6 +45,17 @@ public class GlassfishDetector extends AbstractServerDetector {
     private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*(?:Glassfish|Payara).*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
     private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^.*(?:Glassfish|Payara).*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
 
+     private static final Pattern PAYARA_VERSION = Pattern.compile("^.*Payara.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAYARA_FULL_VERSION = Pattern.compile("^.*Payara.*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
+
+    private static final String GLASSFISH_NAME = "glassfish";
+    private static final String GLASSFISH_VENDOR_NAME = "Oracle";
+    private static final String PAYARA_NAME = "Payara Server";
+    private static final String PAYARA_VENDOR_NAME = "Payara Foundation";
+
+    private String serverName;
+    private String vendorName;
+
      /**
      * Create a server detector
      *
@@ -93,11 +104,20 @@ public class GlassfishDetector extends AbstractServerDetector {
         return version;
     }
 
+    // Tries to match Glassfish first, then Payara Server, updating server and vendor name
     private String extractVersionFromFullVersion(String pFullVersion) {
         if (pFullVersion != null) {
             Matcher matcher = GLASSFISH_VERSION.matcher(pFullVersion);
             if (matcher.matches()) {
-               return matcher.group(1);
+                serverName = GLASSFISH_NAME;
+                vendorName = GLASSFISH_VENDOR_NAME;
+                return matcher.group(1);
+            }
+            matcher = PAYARA_VERSION.matcher(pFullVersion);
+            if (matcher.matches()) {
+                serverName = PAYARA_NAME;
+                vendorName = PAYARA_VENDOR_NAME;
+                return matcher.group(1);
             }
         }
         return null;
@@ -120,8 +140,15 @@ public class GlassfishDetector extends AbstractServerDetector {
             return pOriginalVersion;
         }
         Matcher v3Matcher = GLASSFISH_FULL_VERSION.matcher(pFullVersion);
+        Matcher payaraMatcher = PAYARA_FULL_VERSION.matcher(pFullVersion);
         if (v3Matcher.matches()) {
+            serverName = GLASSFISH_NAME;
+            vendorName = GLASSFISH_VENDOR_NAME;
             return v3Matcher.group(1);
+        } else if (payaraMatcher.matches()) {
+            serverName = PAYARA_NAME;
+            vendorName = PAYARA_VENDOR_NAME;
+            return payaraMatcher.group(1);
         } else {
             return pOriginalVersion;
         }
@@ -132,7 +159,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     private class GlassfishServerHandle extends DefaultServerHandle {
 
         public GlassfishServerHandle(String version) {
-            super("Oracle", "glassfish", version);
+            super(vendorName, serverName, version);
         }
 
         @Override

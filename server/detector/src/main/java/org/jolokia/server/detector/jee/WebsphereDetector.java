@@ -91,8 +91,10 @@ public class WebsphereDetector extends AbstractServerDetector {
             if (adminServiceClass != null) {
                 Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
                 Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
-                Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
-                return Collections.singleton((MBeanServerConnection) getMBeanServerMethod.invoke(mbeanFactory));
+                if (mbeanFactory != null) {
+                    Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
+                    return Collections.singleton((MBeanServerConnection) getMBeanServerMethod.invoke(mbeanFactory));
+                }
             }
         }
         catch (InvocationTargetException ex) {

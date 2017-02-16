@@ -72,7 +72,7 @@
           <td>SB</td>
           <td>Package</td>
           <td>SB</td>
-        </tr>          
+        </tr>
       </thead>
       <tr>
         <td>org.osgi.framework</td>
@@ -176,7 +176,7 @@
           by the discovery mechanism. It is recommended not to set
           this value. Within the <literal>agentId</literal> specification you
           can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
-        </td>        
+        </td>
       </tr>
       <tr>
         <td>org.jolokia.agentDescription</td>
@@ -184,7 +184,7 @@
         <td>
           An optional description which can be used for clients to
           present a humand readable label for this agent.
-        </td>        
+        </td>
       </tr>
       <tr>
         <td>org.jolokia.dispatcherClasses</td>
@@ -257,7 +257,7 @@
         <td>
           If <literal>true</literal> the bundle listens for an OSGi
           <literal>HttpService</literal> and if available registers an
-          agent servlet to it. 
+          agent servlet to it.
         </td>
       </tr>
       <tr>
@@ -330,8 +330,9 @@
         <td></td>
         <td>
           An optional JSON representation for application specific
-          options used by detectors for post-initialization steps. See
-          <xref linkend="agent-war-init-params"/> for details. 
+          options used by detectors for post-initialization steps. See the description of
+          <literal>detectorOptions</literal> in
+          <xref linkend="agent-war-init-params"/> for details.
         </td>
       </tr>
       <tr>
@@ -342,7 +343,7 @@
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
           avoid conflicts with an JEE standards (though this should't
-          harm anyways). This option can also be switched on with an 
+          harm anyways). This option can also be switched on with an
           environment variable
           <literal>JOLOKIA_DISCOVERY</literal> or the system
           property <literal>jolokia.discoveryEnabled</literal> set to
@@ -394,7 +395,7 @@
       <classname>org.osgi.service.http.HttpContext</classname>, which
       is used for authentication. Note that this service is only
       available when the agent servlet is active (i.e. when an
-      HttpService is registered). 
+      HttpService is registered).
     </para>
   </section>
   <section id="running-on-glassfish">
@@ -506,7 +507,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       want. Alternatively, the bundle property
       <literal>org.jolokia.listenForHttpService</literal> can be set
       to <literal>false</literal> in which case there will be never an
-      automatic servlet registration to an HttpService. 
+      automatic servlet registration to an HttpService.
     </para>
   </section>
   <section>
@@ -527,7 +528,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       restrictor service is available, access is ony granted if all of
       them individually grant access. A sample restrictor service as a
       maven project can be found in the Jolokia source at
-      <filename>agent/osgi/restrictor-sample</filename>. 
+      <filename>agent/osgi/restrictor-sample</filename>.
     </para>
   </section>
 </section>

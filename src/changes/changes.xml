@@ -34,7 +34,20 @@
         Second milestone, rebased with latest 1.x branch
       </action>
     </release>
-
+    <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
+      <action dev="paoloantinori" type="add" date="2016-09-18" issue="283">
+        Support JSON streaming also for AgentServlet (WAR and OSGi agent)
+      </action>
+      <action dev="rhuss" type="fix" date="2016-09-20">
+        Avoid NPE in Websphere detector
+      </action>
+      <action dev="rhuss" type="fix" issue="284" date="2016-10-1">
+        Re-add hooks for creating custom restrictors
+      </action>
+      <action dev="savage-engineer" type="add" issue="281" date="2016-10-1">
+        Added better version detection of Payara Server
+      </action>
+    </release>
     <release version="1.3.4" description="Release 1.3.4" date="2016-07-31">
       <action dev="rhuss" type="add" date="2016-07-28" issue="278">
         Add a quite and java.util.logging LogHandler implementations which can be used
@@ -118,7 +131,7 @@
         Support for PEM certs and keys when using the JVM agent with
         TLS
       </action>
-      <action dev="zisili" type="update" date="2015-09-14" issue="214">
+      <action dev="zisisli" type="update" date="2015-09-14" issue="214">
         Enhanced 'GlassfishDetector' for Payara flavour of glassfish
       </action>
       <action dev="nevenr" type="add" date="2015-07-02" issue="199">
@@ -169,7 +182,7 @@
       <action dev="roland" type="add" date="2015-01-13" issue="177">
         Added MBeanPlugin as a way to hook into the agent's lifecyle
       </action>
-      <action dev="erwelch" type="add" date="2015-01-03">
+      <action dev="elnkwelch" type="add" date="2015-01-03">
         OSGi agent can read properties from Configuration Admin service with PID org.jolokia.osgi
       </action>
       <action dev="roland" type="add" date="2014-12-23" issue="173">
@@ -514,7 +527,7 @@
       <action dev="roland" type="fix" date="2012-03-24">
         Fix for possible NPE when serializing a complex Java objects (#41)
       </action>
-      <action dev="gid79" type="add" date="2012-03-25">
+      <action dev="tempredirect" type="add" date="2012-03-25">
         New configuration property "httpServiceFilter" added for providing
         a OSGi filter expression which gets applied when selecting the HttpService
         to bind to. (#39)
