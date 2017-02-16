@@ -26,7 +26,7 @@ class NotificationSubscriptionImpl implements NotificationSubscription {
     // A handback object
     private Object handback;
 
-    // Extra onfiguration used for the registration
+    // Extra configuration used for the registration
     private Map<String, ?> config;
 
     // Used for updating freshness
