@@ -345,7 +345,7 @@
 
   <ciManagement>
     <system>jenkins</system>
-    <url>http://labs.consol.de/jenkins/job/jolokia</url>
+    <url>https://travis-ci.org/rhuss/jolokia</url>
   </ciManagement>
 
   <licenses>
