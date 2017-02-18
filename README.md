@@ -22,6 +22,7 @@ Multiple agents are provided for different environments:
   Version 6 or later and which is able to attach to a running Java process 
   dynamically. 
 
+
 ## Features
 
 The agent approach as several advantages:
