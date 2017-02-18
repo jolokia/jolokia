@@ -617,7 +617,6 @@
             if (result.path) {
                 url += (result.path[0] == '/' ? "" : "/") + result.path;
             }
-            //console.log(url);
             return url;
         }
 
