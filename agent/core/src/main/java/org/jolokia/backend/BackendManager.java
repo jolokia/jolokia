@@ -332,7 +332,7 @@ public class BackendManager implements AgentDetailsHolder {
                                                      pConfig,
                                                      logHandler);
         ServerHandle serverHandle = localDispatcher.getServerHandle();
-        requestDispatchers = createRequestDispatchers(pConfig.get(DISPATCHER_CLASSES),
+        requestDispatchers = createRequestDispatchers(pConfig != null ? pConfig.get(DISPATCHER_CLASSES) : null,
                                                       converters,serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);
 

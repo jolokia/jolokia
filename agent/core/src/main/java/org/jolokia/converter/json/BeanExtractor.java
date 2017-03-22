@@ -151,7 +151,7 @@ public class BeanExtractor implements Extractor {
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
             List<String> attributes = extractBeanAttributes(pValue);
-            if (attributes != null && attributes.size() > 0) {
+            if (attributes.size() > 0) {
                 return extractBeanValues(pConverter, pValue, pPathParts, attributes);
             } else {
                 // No further attributes, return string representation
