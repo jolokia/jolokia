@@ -64,7 +64,7 @@
         <td>
           String representation for the arguments required to execute this
           operation. Only certain data types can be used here as
-          desribed in <xref linkend="serialization-request"/>.
+          described in <xref linkend="serialization-request"/>.
         </td>
         <td><literal>"true","true"</literal></td>
       </tr>

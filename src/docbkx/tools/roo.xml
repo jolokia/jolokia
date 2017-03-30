@@ -32,7 +32,7 @@
 roo> osgi obr url add --url http://labs.consol.de/maven/repository/roo-repository.xml
 roo> osgi obr start --bundleSymbolicName org.jolokia.roo]]></programlisting>
     <para>
-      Alteratively, if there are problems with the approach above
+      Alternatively, if there are problems with the approach above
       (which is currently the case because the hard coded public PGP
       keyserver which is used by Roo 1.1.1 is down) and you don't need
       PGP verification, you can install the addon bundle directly from
@@ -87,7 +87,7 @@ roo> osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolokia
     <tr>
       <td><literal>--addDefaultInitParams</literal></td>
       <td>By default, the servlet gets registered without any init
-      parametes. With this option, all available
+      parameters. With this option, all available
       <literal>init-param</literal> are added to the servlet
       definition with their default values.</td>
     </tr>      
