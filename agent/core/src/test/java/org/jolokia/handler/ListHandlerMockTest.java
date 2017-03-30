@@ -22,6 +22,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.handler.list.DataKeys;
 import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
@@ -82,10 +83,10 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         assertTrue(inner.containsKey("type=Runtime"));
         assertEquals(inner.size(), 2);
         inner = (Map) inner.get("type=Memory");
-        for (String k : new String[] { "desc", "op", "attr"}) {
+        for (String k : new String[] { DataKeys.DESCRIPTION.getKey(), DataKeys.OPERATIONS.getKey(), DataKeys.ATTRIBUTES.getKey(), DataKeys.CLASSNAME.getKey()}) {
             assertTrue(inner.containsKey(k));
         }
-        assertEquals(inner.size(), 3);
+        assertEquals(inner.size(), 4);
         verify(connection);
     }
 

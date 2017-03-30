@@ -164,6 +164,7 @@
          "desc":"gc"
        }
      },
+     "class":"sun.management.MemoryImpl",
      "attr":
      {
        "NonHeapMemoryUsage":
@@ -202,7 +203,7 @@
   </section>
 
   <section>
-    <title>Restrict depth of depth</title>
+    <title>Restrict depth of the returned tree</title>
     <para>
       The optional parameter <literal>maxDepth</literal> can be used
       to restrict the depth of the return tree. Two value are

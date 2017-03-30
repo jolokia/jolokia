@@ -103,6 +103,7 @@ public class MBeanInfoData {
     static {
         for (DataUpdater updater : new DataUpdater[] {
                 new DescriptionDataUpdater(),
+                new ClassNameDataUpdater(),
                 new AttributeDataUpdater(),
                 new OperationDataUpdater(),
                 new NotificationDataUpdater()
