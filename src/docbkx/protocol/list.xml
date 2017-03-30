@@ -20,7 +20,7 @@
   <para>
       The list operation collects information about accessible
       MBeans. This information includes the MBean names, their
-      attributes, operations and noticifactions along with type
+      attributes, operations and notifications along with type
       information and description (as far as they are provided by the
       MBean author which doesn't seem to be often the case).
   </para>

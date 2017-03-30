@@ -836,7 +836,7 @@ java -javaagent:jolokia.jar=\
           will be spent now on <a
           href="https://github.com/rhuss/aji">Ají</a>, Jolokia's new
           fancy sister. Sorry for pushing thinks like notifications
-          down the Jonlokia back-log, but it's not forgotten.
+          down the Jolokia back-log, but it's not forgotten.
         </p>
       </subsection>
   </section>
