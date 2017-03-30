@@ -46,7 +46,7 @@ public class Converters {
     }
 
     /**
-     * Get the converter which is repsonsible for converting objects to JSON
+     * Get the converter which is responsible for converting objects to JSON
      *
      * @return converter
      */

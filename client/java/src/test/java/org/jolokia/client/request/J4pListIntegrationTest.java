@@ -22,7 +22,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
-import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;

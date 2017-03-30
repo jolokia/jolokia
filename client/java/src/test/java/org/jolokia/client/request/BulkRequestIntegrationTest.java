@@ -71,7 +71,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
 
         List<J4pReadRequest> requests = createBulkRequests();
         try {
-            List<J4pReadResponse> resp = j4pClient.execute(requests);
+            j4pClient.execute(requests);
             fail();
         } catch (J4pBulkRemoteException e) {
             List results = e.getResults();
