@@ -21,7 +21,6 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.json.simple.JSONArray;

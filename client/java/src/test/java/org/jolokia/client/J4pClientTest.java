@@ -18,7 +18,6 @@ package org.jolokia.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -31,7 +30,6 @@ import org.apache.http.message.BasicHeader;
 import org.easymock.EasyMock;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
-import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.testng.collections.Maps;
@@ -130,7 +128,7 @@ public class J4pClientTest {
         HttpClient client = prepareMocks(null,MEMORY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
-        List<J4pReadResponse> resp = j4p.execute(TEST_REQUEST,TEST_REQUEST_2);
+        j4p.execute(TEST_REQUEST,TEST_REQUEST_2);
     }
 
     @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*Invalid.*")
@@ -167,8 +165,7 @@ public class J4pClientTest {
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         if (bulk) {
-            // Assignment required for type inference
-            List<J4pReadResponse> resps = j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
+            j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
         } else {
             j4p.execute(TEST_REQUEST);
         }

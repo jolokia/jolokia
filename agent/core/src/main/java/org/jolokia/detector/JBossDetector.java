@@ -2,7 +2,6 @@ package org.jolokia.detector;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.*;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
