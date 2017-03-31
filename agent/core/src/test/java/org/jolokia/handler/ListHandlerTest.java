@@ -30,6 +30,7 @@ import org.jolokia.request.JmxListRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.handler.list.DataKeys;
 import org.jolokia.util.RequestType;
 import org.testng.annotations.*;
 
@@ -78,10 +79,10 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void propertiesPath() throws Exception {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
         Map res = execute(request);
-        for (String k : new String[]{"desc", "op", "attr"}) {
+        for (String k : new String[]{DataKeys.DESCRIPTION.getKey(), DataKeys.OPERATIONS.getKey(), DataKeys.ATTRIBUTES.getKey(), DataKeys.CLASSNAME.getKey()}) {
             assertTrue(res.containsKey(k));
         }
-        assertEquals(res.size(), 3);
+        assertEquals(res.size(), 4);
     }
 
     @Test
@@ -139,7 +140,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
                 .option(ConfigKey.MAX_DEPTH, "3").build();
         Map res =  execute(request);
-        assertEquals(res.size(), 3);
+        assertEquals(res.size(), 4);
         Map ops = (Map) res.get("op");
         assertTrue(ops.containsKey("gc"));
         assertTrue(ops.get("gc") instanceof Map);
@@ -168,7 +169,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JmxListRequest request = new JmxRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
         Map res = execute(request);
         assertFalse(res.containsKey("op"));
-        assertEquals(res.size(),2);
+        assertEquals(res.size(),3);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
