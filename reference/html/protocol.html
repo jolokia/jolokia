@@ -377,7 +377,7 @@
     skip the extra value levels introduced by a pattern read, the wildcard
     <code class="constant">*</code> can be used. For example, a read request for the MBean Pattern
     <code class="literal">java.lang:type=GarbageCollector,*</code> for the Attribute <code class="literal">LastGcInfo</code>
-    returns a complext structure holding information about the last garbage collection. If one is
+    returns a complex structure holding information about the last garbage collection. If one is
     interested only for the duration of the garbage collection, a path <code class="literal">used</code> could be used if
     this request wouldn't be a pattern request (i.e. refers a specific, single MBean). But in this case since a
     nested map with MBean and Attribute names is returned, the path <code class="literal">*/*/used</code> has to be used
@@ -399,13 +399,13 @@ value: {
       matched. The next path parts are used to match from there
       on. All the values on this level are included.
     </li><li>
-      Every other path part is litterally compared against the values
+      Every other path part is literally compared against the values
       on that level. If there is a match, this value is
       <span class="emphasis"><em>removed</em></span> in the answer so that at the end
       you get back a structure with the values on the wildcard levels
       and the leaves of the matched parts. 
     </li><li>
-      If used with wildcards, pathes behave also like
+      If used with wildcards, paths behave also like
       filters. E.g. you can use a path <code class="literal">*/*/used</code> on
       the MBean pattern <code class="literal">java.lang:*</code> and get back
       only that portions which contains "used" as key, all others are
@@ -675,7 +675,7 @@ value: {
         <td>
           String representation for the arguments required to execute this
           operation. Only certain data types can be used here as
-          desribed in <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+          described in <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
         </td>
         <td><code class="literal">"true","true"</code></td>
       </tr></table></div></div><p>
@@ -800,7 +800,7 @@ value: {
     </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="list"></a>6.2.5.&nbsp;Listing MBeans (list)</h3></div></div></div><p>
       The list operation collects information about accessible
       MBeans. This information includes the MBean names, their
-      attributes, operations and noticifactions along with type
+      attributes, operations and notifications along with type
       information and description (as far as they are provided by the
       MBean author which doesn't seem to be often the case).
   </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-list"></a>6.2.5.1.&nbsp;GET list request</h4></div></div></div><p>
@@ -913,6 +913,7 @@ value: {
          "desc":"gc"
        }
      },
+     "class":"sun.management.MemoryImpl",
      "attr":
      {
        "NonHeapMemoryUsage":
@@ -947,7 +948,7 @@ value: {
      "type":"list",
      "path":"java.lang\/type=Memory"
    }
- }</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4483"></a>6.2.5.4.&nbsp;Restrict depth of depth</h4></div></div></div><p>
+ }</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4483"></a>6.2.5.4.&nbsp;Restrict depth of the returned tree</h4></div></div></div><p>
       The optional parameter <code class="literal">maxDepth</code> can be used
       to restrict the depth of the return tree. Two value are
       possible: A <code class="literal">maxDepth</code> of 1 restricts the
@@ -995,9 +996,9 @@ value: {
              }
  }</pre></div><p>
     <code class="literal">protocol</code> in the response value contains the
-    protocol version used, <code class="literal">agent</code> ist the version of
+    protocol version used, <code class="literal">agent</code> is the version of
     the Jolokia agent. See <a href="protocol.html#versions">Section&nbsp;6.8, &#8220;Jolokia protocol versions&#8221;</a> for the various
-    protocol versions and the interoperatibility. If the agent is able
+    protocol versions and the interoperability. If the agent is able
     to detect the server, additional meta information about this
     server is returned (i.e. the product name, the vendor and
     optionally some extra information added by the server detector).

@@ -155,7 +155,7 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
       Maven module <code class="constant">jolokia-jmx</code>.
     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="jvm-spring"></a>9.3.&nbsp;Spring Support</h2></div></div></div><p>
       A Jolokia agent can be easily integrated into a Spring application
-      context. A dedicated artefact
+      context. A dedicated artifact
       <code class="constant">jolokia-spring</code> can be used, which
       comes with a custom Spring configuration syntax.
     </p><p>
@@ -237,7 +237,7 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
             Spring application
             context. E.g. <code class="constant">jolokia.port=8888</code> will
             change the port on which the agent is listening to 8888 if
-            the port is not explicitily specified in the
+            the port is not explicitly specified in the
             configuration. 
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -350,7 +350,7 @@ MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         has to be configured here. Otherwise this
         application context path has to be added manually, but in this case it is
         probably easier to use the non-plugin version (without
-        classifier) and declare the Jolokia server explicitily in an
+        classifier) and declare the Jolokia server explicitly in an
         existing Spring configuration file as described above.
       </p><p>
         By default, the Jolokia agent starts on port 8778 on every

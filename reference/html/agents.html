@@ -1083,7 +1083,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       The JVM agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
       Agent interface</a> for linking into any JVM. Under the
       hood it uses an HTTP-Server, which is available on every
-      Oracle/Sun JVM from verison 1.6 upwards.
+      Oracle/Sun JVM from version 1.6 upwards.
     </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b></b></p>
       The JDK embedded HTTP-Server is not the fastest one (it is used
       e.g. for the JAXWS reference implementation), but for our
@@ -1135,7 +1135,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">agentDescription</code></td>
           <td>
             An optional description which can be used for clients to
-            present a humand readable label for this agent.
+            present a human readable label for this agent.
           </td>        
           <td>
             <code class="constant">Intranet Timebooking Server</code>
@@ -1355,7 +1355,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td></td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">serverKeyAlgorithm</code></td>
-          <td>Encryption algorithm to use for descrypting the key given with <code class="constant">serverKey</code>
+          <td>Encryption algorithm to use for decrypting the key given with <code class="constant">serverKey</code>
             (https only)</td>
           <td><code class="constant">RSA</code></td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -1416,10 +1416,10 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>
             Sets the URL to respond for multicast discovery requests. If
             given, <code class="constant">discoveryEnabled</code> is set
-            implicetly to true. Within the value you can use the
+            implicitly to true. Within the value you can use the
             placeholders <code class="literal">${host}</code> and <code class="literal">${ip}</code> which gets replaced
             by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
-            <code class="literal">${sys:property}</code> envirnoment and system properties can be referenced, respectively.
+            <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
           </td>
           <td>          
             <code class="constant">http://10.9.11.87:8778/jolokia</code>
@@ -1593,10 +1593,10 @@ For more documentation please visit www.jolokia.org
               there was no agent running.
           </p></dd><dt><span class="term"><code class="literal">toggle</code></span></dt><dd><p>
             Starts or stops an dynamically attached agent,
-            dependening on its current state. The Java process ID is
+            depending on its current state. The Java process ID is
             required as an additional argument. If an agent is
             running, <code class="literal">toggle</code> will stop it (and
-            vice versa). The launcer returns with an exit code of 0
+            vice versa). The launcher returns with an exit code of 0
             except when the operation fails. When the agent is
             started, the full agent's URL is printed to standard
             out. <code class="literal">toggle</code> is the default command
@@ -1605,8 +1605,8 @@ For more documentation please visit www.jolokia.org
             as a known command.
           </p></dd><dt><span class="term"><code class="literal">status</code></span></dt><dd><p>
             Command for showing the current agent status for a given
-            process. The process id or a regular expresssion is
-            required. The launcer will return with 0 when the agent is
+            process. The process id or a regular expression is
+            required. The launcher will return with 0 when the agent is
             running, otherwise with 1.
           </p></dd><dt><span class="term"><code class="literal">list</code></span></dt><dd><p>
             List all local Java processes in a table with the

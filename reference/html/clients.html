@@ -798,7 +798,7 @@ d3.select("#charts").call(function(div) {
         <code class="filename">client/javascript/test-app/pom.xml</code>.
       </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="client-java"></a>8.2.&nbsp;Java Client Library</h2></div></div></div><p>
     The Java client library provides an easy access to the Jolokia
-    agent from within Java. Since JSR-160 connectors themselved
+    agent from within Java. Since JSR-160 connectors themselves
     provide Java based remote access to MBeans one might wonder about
     the benefits of  a Jolokia Java binding. There are several,
     though: 
@@ -810,7 +810,7 @@ d3.select("#charts").call(function(div) {
     </li><li>
       Jolokia can be used in setups where JSR-160 connectors can not
       be used. I.e. in firewall secured environments it is much easier
-      to get through to a Jolokia Agent than to an JSR-160 connetor
+      to get through to a Jolokia Agent than to an JSR-160 connector
       using RMI as transport protocol.
     </li><li><span class="emphasis"><em>Remoteness</em></span> is explicit in this API instead
       of JSR-160 connector's seeked <span class="emphasis"><em>transparent
@@ -1016,8 +1016,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           to determine if the origin server is willing to accept the
           request (based on the request headers) before the client
           sends the request body.  The use of the <code class="literal">Expect:
-          100-continue</code> handshake can result in noticable
-          peformance improvement for entity enclosing requests that
+          100-continue</code> handshake can result in noticeable
+          performance improvement for entity enclosing requests that
           require the target server's authentication.
         </td>
         <td>true</td>
@@ -1073,7 +1073,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           <code class="classname">ValidatingResponseExtractor</code> can be
           used, which instead of throwing an exception returns a
           <code class="code">null</code> object when the response has a status of
-          404. An extractor can be speficied as extra argument to the
+          404. An extractor can be specified as extra argument to the
           execute method, too.
         </td>
         <td></td>
@@ -1081,9 +1081,9 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
       The <code class="classname">J4pClient</code> provides various variants
       of a <code class="methodname">execute()</code> method, which takes
       either one single request or a list of requests. For a single
-      request, the preffered HTTP method (GET or POST) can be
+      request, the preferred HTTP method (GET or POST) can be
       specified optionally. The <code class="classname">List&lt;R&gt;</code>
-      argument can be used type only for a homogenous bulk request,
+      argument can be used type only for a homogeneous bulk request,
       i.e. for multiple requests of the same time. Otherwise an
       untyped list must be used. 
     </p><p>
@@ -1243,10 +1243,10 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             The <code class="classname">J4pVersionResponse</code> returns the
             agent's version (<code class="varname">agentVersion</code>), the
             protocol version (<code class="varname">protocolVersion</code>), the
-            applicaton server product name
+            application server product name
             (<code class="varname">product</code>), the vendor name
             (<code class="varname">vendor</code>) and any extra info
-            (<code class="varname">extraInfo</code>) specific to the plattform
+            (<code class="varname">extraInfo</code>) specific to the platform
             the Jolokia is running on.
           </p></dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-execptions"></a>8.2.4.&nbsp;Exceptions</h3></div></div></div><p>
       In case of an error when executing a request a
@@ -1261,7 +1261,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             exception is of type
             <code class="classname">ConnectTimeoutException</code>. 
           </p></dd><dt><span class="term"><code class="classname">J4pRemoteException</code></span></dt><dd><p>
-            Generic exception thrown when an exception occured on the
+            Generic exception thrown when an exception occurred on the
             remote side. This is the case when the JSON response
             obtained is an error response as described in <a href="protocol.html#responses">Section&nbsp;6.1.3, &#8220;Responses&#8221;</a>. The error type, error value, the 
 			status, the request leading to this error and the remote 
@@ -1269,13 +1269,13 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           </p></dd><dt><span class="term"><code class="classname">J4pBulkRemoteException</code></span></dt><dd><p>
             Exception thrown when a bulk request fails on the remote
             side. This contains a mixed list which contains the
-            <code class="classname">J4pRemoteException</code> occured as well
+            <code class="classname">J4pRemoteException</code> occurred as well
             as the <code class="classname">J4pResponse</code> objects for the
-            requests, which suceeded. The list obtained by
+            requests, which succeeded. The list obtained by
             <code class="methodname">getResults()</code> contains these
             objects in the same order as the list of requests given to
-            <code class="methodname">execute</code>. All responses und remote
-            exceptions can also be obtained seperately in homogenous
+            <code class="methodname">execute</code>. All responses and remote
+            exceptions can also be obtained separately in homogeneous
             lists. 
           </p></dd><dt><span class="term"><code class="classname">J4pException</code></span></dt><dd><p>
             Base exception thrown, when no other exception fits,
