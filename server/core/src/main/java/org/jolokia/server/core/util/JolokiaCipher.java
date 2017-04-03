@@ -23,7 +23,7 @@ public class JolokiaCipher {
 
     private static final int SALT_SIZE = 8;
     private static final int CHUNK_SIZE = 16;
-    public static final String JOLOKIA_CYPHER_PASSWORD = "META-INF/jolokia-password";
+    static final String JOLOKIA_CYPHER_PASSWORD_FILE = "META-INF/jolokia-password";
 
     private MessageDigest digest;
     private Random random;
@@ -155,12 +155,16 @@ public class JolokiaCipher {
     private static class KeyHolderImpl implements KeyHolder {
 
         public String getKey() {
-            InputStream in = ClassUtil.getResourceAsStream(JOLOKIA_CYPHER_PASSWORD);
+            InputStream in = ClassUtil.getResourceAsStream(JOLOKIA_CYPHER_PASSWORD_FILE);
             if (in != null) {
                 try {
                     return new BufferedReader(new InputStreamReader(in)).readLine();
                 } catch (IOException e) {
-                    throw new IllegalStateException("Can not read password from " + JOLOKIA_CYPHER_PASSWORD + ": " + e,e);
+                    throw new IllegalStateException("Can not read password from " + JOLOKIA_CYPHER_PASSWORD_FILE + ": " + e, e);
+                } finally {
+                    try {
+                        in.close();
+                    } catch (IOException e) { }
                 }
             } else {
                 return "`x%_rDL9T'&ENuyA{LPcc(UDv`NzzY6NZF\"F=rba-9Ftg,HJr.y@E;amfr>B4z<UqQg}2_4kq\\Y@6mNJEpwGx#CT;&?%%.$T_br`(&%3)2vC:5?3f9ptX?KR9kYQu2;#".substring(40, 72);
