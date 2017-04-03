@@ -50,7 +50,7 @@ public class ItSetup {
 
     private String[] fullNames = {
             "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor",
-            "jboss.as.expr:access=authorization,applies-to=\"/subsystem=undertow/server=\\*/ajp-listener=\\*\",classification=socket-binding-ref,constraint=sensitivity-classification,core-service=management,type=core"
+            "jolokia.jboss.as.expr:access=authorization,applies-to=\"/subsystem=undertow/server=\\*/ajp-listener=\\*\",classification=socket-binding-ref,constraint=sensitivity-classification,core-service=management,type=core"
     };
 
     private String[]     escapedNamesShort = {

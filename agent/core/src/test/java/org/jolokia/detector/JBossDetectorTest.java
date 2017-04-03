@@ -96,12 +96,31 @@ public class JBossDetectorTest extends BaseDetectorTest {
         expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.as:*");
         ObjectName oName = new ObjectName("jboss.as:management-root=server");
+        expect(server.getAttribute(oName,"productVersion")).andReturn(null);
         expect(server.getAttribute(oName,"releaseVersion")).andReturn("7.1.1.Final");
+        expect(server.getAttribute(oName,"productName")).andReturn(null);
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"7.1.1.Final");
         assertEquals(handle.getVendor(),"RedHat");
         assertEquals(handle.getProduct(),"jboss");
+        verifyNoWorkaround(handle);
+
+    }
+
+    @Test
+    public void version101() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
+
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        prepareQuery("jboss.as:*");
+        ObjectName oName = new ObjectName("jboss.as:management-root=server");
+        expect(server.getAttribute(oName,"productVersion")).andReturn("10.1.0.Final");
+        expect(server.getAttribute(oName,"productName")).andReturn("WildFly Full");
+        replay(server);
+        ServerHandle handle = detector.detect(servers);
+        assertEquals(handle.getVersion(),"10.1.0.Final");
+        assertEquals(handle.getVendor(),"RedHat");
+        assertEquals(handle.getProduct(),"WildFly Full");
         verifyNoWorkaround(handle);
 
 

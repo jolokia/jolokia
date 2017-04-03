@@ -19,6 +19,8 @@ import org.jolokia.util.ClassUtil;
  */
 public class JBossDetector extends AbstractServerDetector {
 
+    public static final String JBOSS_AS_MANAGEMENT_ROOT_SERVER = "jboss.as:management-root=server";
+
     /** {@inheritDoc} */
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
         ServerHandle handle = checkFromJSR77(pMBeanServerExecutor);
@@ -26,12 +28,25 @@ public class JBossDetector extends AbstractServerDetector {
             handle = checkFor5viaJMX(pMBeanServerExecutor);
             if (handle == null) {
                 handle = checkForManagementRootServerViaJMX(pMBeanServerExecutor);
-                if (handle == null) {
-                    handle = fallbackForVersion7Check(pMBeanServerExecutor);
-                }
+            }
+            if (handle == null) {
+                handle = checkForWildflySwarm();
+            }
+            if (handle == null) {
+                handle = fallbackForVersion7Check(pMBeanServerExecutor);
             }
         }
         return handle;
+    }
+
+    private ServerHandle checkForWildflySwarm() {
+        if (isJBossModulesBasedContainer(this.getClass().getClassLoader())) {
+            if (System.getProperties().containsKey("swarm.app.artifact")) {
+                String version = System.getProperty("swarm.version");
+                return new JBossServerHandle(version != null ? version : "unknown", "Wildfly Swarm", null);
+            }
+        }
+        return null;
     }
 
     /**
@@ -50,12 +65,12 @@ public class JBossDetector extends AbstractServerDetector {
     }
 
     void jvmAgentStartup(Instrumentation instrumentation, ClassLoader classLoader) {
-        if (earlyDetectForJBossModulesBasedContainer(classLoader)) {
+        if (isJBossModulesBasedContainer(classLoader)) {
             awaitServerInitializationForJBossModulesBasedContainer(instrumentation);
         }
     }
 
-    protected boolean earlyDetectForJBossModulesBasedContainer(ClassLoader classLoader) {
+    protected boolean isJBossModulesBasedContainer(ClassLoader classLoader) {
         return hasWildflyProperties() &&
                // Contained in any JBoss modules app:
                classLoader.getResource("org/jboss/modules/Main.class") != null;
@@ -88,7 +103,7 @@ public class JBossDetector extends AbstractServerDetector {
                     // is loaded by the static initializer of java.util.logging.LogManager (and not by
                     // other code), we know now that either the java.util.logging.LogManager singleton
                     // is or will be initialized.
-                    // Here where trigger to for load the class:
+                    // Here is the trigger for loading the class:
                     // https://github.com/jboss-modules/jboss-modules/blob/1.5.1.Final/src/main/java/org/jboss/modules/Main.java#L482
                     // Therefore the steps 3-6 of the proposal for option 2 don't need to be performed,
                     // see https://github.com/rhuss/jolokia/issues/258 for details.
@@ -137,9 +152,13 @@ public class JBossDetector extends AbstractServerDetector {
         // Bug (or not ?) in Wildfly 8.0: Search for jboss.as:management-root=server return null but accessing this
         // MBean works. So we are looking, whether the JMX domain jboss.as exists and fetch the version directly.
         if (searchMBeans(pMBeanServerExecutor,"jboss.as:*").size() != 0) {
-            String version = getAttributeValue(pMBeanServerExecutor, "jboss.as:management-root=server", "releaseVersion");
+            String version = getAttributeValue(pMBeanServerExecutor, JBOSS_AS_MANAGEMENT_ROOT_SERVER, "productVersion");
+            if (version == null) {
+                version = getAttributeValue(pMBeanServerExecutor, JBOSS_AS_MANAGEMENT_ROOT_SERVER, "releaseVersion");
+            }
             if (version != null) {
-                return new JBossServerHandle(version, null);
+                String product = getAttributeValue(pMBeanServerExecutor, JBOSS_AS_MANAGEMENT_ROOT_SERVER, "productName");
+                return new JBossServerHandle(version, product != null ? product : "jboss", null);
             }
         }
         return null;
@@ -171,13 +190,24 @@ public class JBossDetector extends AbstractServerDetector {
     // ========================================================================
     private static class JBossServerHandle extends ServerHandle {
         /**
-         * JBoss server handle
+         * JBoss server handle, with custom name
          *
          * @param version             JBoss version
-         * @param extraInfo           extra ifo to return
+         * @param name                Product name to use
+         * @param extraInfo           extra info to return
+         */
+        JBossServerHandle(String version, String name, Map<String, String> extraInfo) {
+            super("RedHat", name, version, extraInfo);
+        }
+
+        /**
+         * JBoss server handle, using "jboss" as product name
+         *
+         * @param version             JBoss version
+         * @param extraInfo           extra info to return
          */
         JBossServerHandle(String version, Map<String, String> extraInfo) {
-            super("RedHat", "jboss", version, extraInfo);
+            this(version, "jboss", extraInfo);
         }
     }
 }
