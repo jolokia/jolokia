@@ -73,9 +73,9 @@
   </section>
   <para>
     <literal>protocol</literal> in the response value contains the
-    protocol version used, <literal>agent</literal> ist the version of
+    protocol version used, <literal>agent</literal> is the version of
     the Jolokia agent. See <xref linkend="versions"/> for the various
-    protocol versions and the interoperatibility. If the agent is able
+    protocol versions and the interoperability. If the agent is able
     to detect the server, additional meta information about this
     server is returned (i.e. the product name, the vendor and
     optionally some extra information added by the server detector).

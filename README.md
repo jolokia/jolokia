@@ -2,8 +2,8 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/)
 [![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
-[![Coverage](https://img.shields.io/sonar/https/nemo.sonarqube.org/org.jolokia:jolokia/coverage.svg)](https://nemo.sonarqube.org/overview?id=org.jolokia%3Ajolokia)
-[![Technical Debt](https://img.shields.io/sonar/https/nemo.sonarqube.org/org.jolokia:jolokia/tech_debt.svg)](https://nemo.sonarqube.org/overview?id=org.jolokia%3Ajolokia)
+[![Coverage](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=coverage)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
+[![Technical Debt](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
 [![Gitter](https://badges.gitter.im/Join+Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
@@ -21,6 +21,7 @@ Multiple agents are provided for different environments:
 * **JVM JDK6 Agent** which can be used with any Oracle/Sun JVM,
   Version 6 or later and which is able to attach to a running Java process 
   dynamically. 
+
 
 ## Features
 

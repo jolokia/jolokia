@@ -1,11 +1,13 @@
 package org.jolokia.server.core.util.jmx;
 
+import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

@@ -129,7 +129,7 @@ public class J4pClientTest {
         HttpClient client = prepareMocks(null,MEMORY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
-        List<J4pReadResponse> resp = j4p.execute(TEST_REQUEST,TEST_REQUEST_2);
+        j4p.execute(TEST_REQUEST,TEST_REQUEST_2);
     }
 
     @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*Invalid.*")
@@ -139,7 +139,7 @@ public class J4pClientTest {
         J4pClient j4p = new J4pClient(TEST_URL,client);
         j4p.execute(TEST_REQUEST);
     }
-    
+
     @Test(expectedExceptions = J4pRemoteException.class)
     public void remoteExceptionErrorValue() throws IOException, J4pException {
         HttpClient client = prepareMocks("utf-8", ERROR_VALUE_RESPONSE);
@@ -155,7 +155,7 @@ public class J4pClientTest {
 			assertEquals(e.getErrorValue().toJSONString(), "{\"test\":\"ok\"}");
 			throw e;
 		}
-		
+
 		fail("No exception was thrown");
     }
 
@@ -166,8 +166,7 @@ public class J4pClientTest {
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         if (bulk) {
-            // Assignment required for type inference
-            List<J4pReadResponse> resps = j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
+            j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
         } else {
             j4p.execute(TEST_REQUEST);
         }

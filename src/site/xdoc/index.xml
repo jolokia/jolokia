@@ -75,7 +75,42 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
-      <subsection name="Polishing with 1.3.5">
+      <subsection name="Let's kickoff 2017 with 1.3.6">
+        <div class="news-date">2017-04-03</div>
+        <p>
+          Wow, already April and half a year after the last release. Yes, it has been calm around Jolokia the last
+          time. It's not because it lost its relevance, it's just because things are as they are. As much as I would
+          love to progress faster, other exciting projects are eating up my time massively. Luckily Jolokia 1.x is really
+          stable these days and used in a lot of products as their major monitoring interface. And as much I would love to
+          finally kick off 2.0, there does not seem too much demand for it yet ;-(. Which is also a good thing as it proves
+          that Jolokia 1.x is still absolutely sufficient for day to day needs. And it's even so that Jolokia stays even more
+          relevant as <a href="https://ro14nd.de/java-management-is-dead">Java EE Management</a> (JSR-373) will never come.
+          Of course, as times goes by, alternative monitoring interfaces for Java (like to <a href="https://prometheus.io/">Prometheus</a>)
+          gain in importance. But as long JMX has some meaning for monitoring in the Java world, Jolokia is here to stay.
+        </p>
+        <p>
+          So, what's new in 1.3.6 ?
+        </p>
+        <ul>
+          <li>
+            The <a href="https://github.com/rhuss/jolokia/issues/258">annoying issue</a> with the Jolokia agent when running
+            under Wildfly and Wildfly Swarm has been tackled
+            and solved. It was a bit tricky because of the special way how wildfly loads classes which makes it hard
+            for any agent based approach to work within. Please try it, if there are still any issues with Wildfly
+            based system, <a href="https://github.com/rhuss/jolokia/issues/new">let us know</a>.
+          </li>
+          <li>
+            The <code>list</code> command now adds the class name of the MBean to the list of meta data returned.
+          </li>
+        </ul>
+        <p>
+          Although Jolokia 2 is not here yet, it's not dead. Branch 2.0 is fully rebase on the 1.3 line and the 2.0.0 milestone
+          releases are still recommended support for notifications is required. It's quite stable, just not yet released.
+          For Jolokia 1.x I don't expect any revolutionary changes in 2017, so you probably can expect a next 1.3.7 release
+          in autumn, collecting all the bug fixes on the way.
+        </p>
+      </subsection>
+      <subsection name="Polished with 1.3.5">
         <div class="news-date">2016-10-04</div>
         <p>
           Here comes a minor update with some smaller goodies:
@@ -836,7 +871,7 @@ java -javaagent:jolokia.jar=\
           will be spent now on <a
           href="https://github.com/rhuss/aji">Ají</a>, Jolokia's new
           fancy sister. Sorry for pushing thinks like notifications
-          down the Jonlokia back-log, but it's not forgotten.
+          down the Jolokia back-log, but it's not forgotten.
         </p>
       </subsection>
   </section>

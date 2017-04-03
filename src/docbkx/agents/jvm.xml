@@ -37,7 +37,7 @@
       url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
       Agent interface</ulink> for linking into any JVM. Under the
       hood it uses an HTTP-Server, which is available on every
-      Oracle/Sun JVM from verison 1.6 upwards.
+      Oracle/Sun JVM from version 1.6 upwards.
     </para>
     <sidebar>
       The JDK embedded HTTP-Server is not the fastest one (it is used
@@ -104,7 +104,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>agentDescription</constant></td>
           <td>
             An optional description which can be used for clients to
-            present a humand readable label for this agent.
+            present a human readable label for this agent.
           </td>        
           <td>
             <constant>Intranet Timebooking Server</constant>
@@ -381,7 +381,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         </tr>
         <tr>
           <td><constant>serverKeyAlgorithm</constant></td>
-          <td>Encryption algorithm to use for descrypting the key given with <constant>serverKey</constant>
+          <td>Encryption algorithm to use for decrypting the key given with <constant>serverKey</constant>
             (https only)</td>
           <td><constant>RSA</constant></td>
         </tr>
@@ -448,10 +448,10 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td>
             Sets the URL to respond for multicast discovery requests. If
             given, <constant>discoveryEnabled</constant> is set
-            implicetly to true. Within the value you can use the
+            implicitly to true. Within the value you can use the
             placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
             by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
-            <literal>${sys:property}</literal> envirnoment and system properties can be referenced, respectively.
+            <literal>${sys:property}</literal> environment and system properties can be referenced, respectively.
           </td>
           <td>          
             <constant>http://10.9.11.87:8778/jolokia</constant>
@@ -656,10 +656,10 @@ For more documentation please visit www.jolokia.org
         <listitem>
           <para>
             Starts or stops an dynamically attached agent,
-            dependening on its current state. The Java process ID is
+            depending on its current state. The Java process ID is
             required as an additional argument. If an agent is
             running, <literal>toggle</literal> will stop it (and
-            vice versa). The launcer returns with an exit code of 0
+            vice versa). The launcher returns with an exit code of 0
             except when the operation fails. When the agent is
             started, the full agent's URL is printed to standard
             out. <literal>toggle</literal> is the default command
@@ -674,8 +674,8 @@ For more documentation please visit www.jolokia.org
         <listitem>
           <para>
             Command for showing the current agent status for a given
-            process. The process id or a regular expresssion is
-            required. The launcer will return with 0 when the agent is
+            process. The process id or a regular expression is
+            required. The launcher will return with 0 when the agent is
             running, otherwise with 1.
           </para>
         </listitem>

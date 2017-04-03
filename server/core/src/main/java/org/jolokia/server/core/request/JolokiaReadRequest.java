@@ -165,7 +165,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
     // =================================================================
 
     private void appendReadParameters(StringBuffer pRet) {
-        if (attributeNames != null && attributeNames.size() > 1) {
+        if (isMultiAttributeMode()) {
             pRet.append("attribute=[");
             for (int i = 0;i<attributeNames.size();i++) {
                 pRet.append(attributeNames.get(i));

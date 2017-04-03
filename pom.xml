@@ -367,7 +367,7 @@
 
   <ciManagement>
     <system>jenkins</system>
-    <url>http://labs.consol.de/jenkins/job/jolokia</url>
+    <url>https://travis-ci.org/rhuss/jolokia</url>
   </ciManagement>
 
   <licenses>
@@ -652,9 +652,7 @@
     <additionalparam>-Xdoclint:none</additionalparam>
     <currentStableVersion>2.0.0-M3</currentStableVersion>
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
-    <sonar.host.url>https://nemo.sonarqube.org</sonar.host.url>
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
-    <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
     <github.global.server>github</github.global.server>
   </properties>
 

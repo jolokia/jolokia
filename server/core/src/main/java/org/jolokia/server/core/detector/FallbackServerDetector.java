@@ -1,5 +1,6 @@
 package org.jolokia.server.core.detector;
 
+import java.lang.instrument.Instrumentation;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,6 +47,9 @@ class FallbackServerDetector implements ServerDetector {
     public int getOrder() {
         return Integer.MAX_VALUE;
     }
+
+    /** {@inheritDoc} */
+    public void jvmAgentStartup(Instrumentation instrumentation) { }
 
     /** {@inheritDoc} */
     public int compareTo(ServerDetector pDetector) {

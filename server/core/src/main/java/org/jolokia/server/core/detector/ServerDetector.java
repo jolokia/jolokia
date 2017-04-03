@@ -16,6 +16,7 @@ package org.jolokia.server.core.detector;
  * limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,9 +28,13 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
  * A detector identifies a specific server. This is typically done by inspecting
- * the runtime environment e.g. for the existance of certain classes. If a detector
+ * the runtime environment e.g. for the existence of certain classes. If a detector
  * successfully detect 'its' server, it return a {@link ServerHandle} containing type, version
- * and some optional information
+ * and some optional information. For the early detection of a server by the JVM agent,
+ * {@link #jvmAgentStartup(Instrumentation)} can be used. Using these methods is useful in case
+ * the server is using its own class loaders to load components used by Jolokia (e.g jmx, Java logging
+ * which is indirectly required by the sun.net.httpserver).
+ *
  * @author roland
  * @since 05.11.10
  */
@@ -80,6 +85,14 @@ public interface ServerDetector extends Comparable<ServerDetector> {
      * @return the order of this service
      */
     int getOrder();
+
+    /**
+     * Notify detector that the JVM is about to start. A detector can, if needed, block and wait for some condition but
+     * should ultimatevely return at some point or throw an exception. This notification is executed
+     * in a very early stage (premain of the Jolokia JVM agent) before the main class of the Server is executed.
+     * @param instrumentation the Instrumentation implementation
+     */
+    void jvmAgentStartup(Instrumentation instrumentation);
 
     // ==================================================================================
 

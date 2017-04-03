@@ -16,6 +16,9 @@ package org.jolokia.server.detector.jee;
  *  limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import javax.management.*;
@@ -90,12 +93,31 @@ public class JBossDetectorTest extends BaseDetectorTest {
         expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
         prepareQuery("jboss.as:*");
         ObjectName oName = new ObjectName("jboss.as:management-root=server");
+        expect(server.getAttribute(oName,"productVersion")).andReturn(null);
         expect(server.getAttribute(oName,"releaseVersion")).andReturn("7.1.1.Final");
+        expect(server.getAttribute(oName,"productName")).andReturn(null);
         replay(server);
         ServerHandle handle = detector.detect(servers);
         assertEquals(handle.getVersion(),"7.1.1.Final");
         assertEquals(handle.getVendor(),"RedHat");
         assertEquals(handle.getProduct(),"jboss");
+        verifyNoWorkaround(handle);
+
+    }
+
+    @Test
+    public void version101() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
+
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        prepareQuery("jboss.as:*");
+        ObjectName oName = new ObjectName("jboss.as:management-root=server");
+        expect(server.getAttribute(oName,"productVersion")).andReturn("10.1.0.Final");
+        expect(server.getAttribute(oName,"productName")).andReturn("WildFly Full");
+        replay(server);
+        ServerHandle handle = detector.detect(servers);
+        assertEquals(handle.getVersion(),"10.1.0.Final");
+        assertEquals(handle.getVendor(),"RedHat");
+        assertEquals(handle.getProduct(),"WildFly Full");
         verifyNoWorkaround(handle);
 
 
@@ -130,6 +152,62 @@ public class JBossDetectorTest extends BaseDetectorTest {
         Set<ObjectName> oNames = new HashSet<ObjectName>(Arrays.asList(oName));
         expect(server.queryNames(oName,null)).andReturn(oNames);
         return oName;
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void verifyIsClassLoadedArgumentChecksNullInstrumentation() {
+        detector.isClassLoaded("xx", null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void verifyIsClassLoadedArgumentChecks2NullClassname() {
+        detector.isClassLoaded(null, createMock(Instrumentation.class));
+    }
+
+    @Test
+    public void verifyIsClassLoadedNotLoaded() {
+        Instrumentation inst = createMock(Instrumentation.class);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {}).once();
+        replay(inst);
+        assertFalse(detector.isClassLoaded("org.Dummy", inst));
+        verify(inst);
+    }
+
+    @Test
+    public void verifyIsClassLoadedLoaded() {
+        Instrumentation inst = createMock(Instrumentation.class);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {JBossDetectorTest.class}).once();
+        replay(inst);
+        assertTrue(detector.isClassLoaded(JBossDetectorTest.class.getName(), inst));
+        verify(inst);
+    }
+
+    @Test
+    public void verifyJvmAgentStartup() throws MalformedURLException {
+        Instrumentation inst = createMock(Instrumentation.class);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {}).times(3);
+        expect(inst.getAllLoadedClasses()).andReturn(new Class[] {JBossDetectorTest.class}).atLeastOnce();
+        ClassLoader cl = createMock(ClassLoader.class);
+        expect(cl.getResource("org/jboss/modules/Main.class")).andReturn(new URL("http", "dummy", "")).anyTimes();
+        String prevPkgValue = System.setProperty("jboss.modules.system.pkgs", "blah");
+        String prevLogValue = System.setProperty("java.util.logging.manager", JBossDetectorTest.class.getName());
+        replay(inst,cl);
+
+        try {
+            detector.jvmAgentStartup(inst, cl);
+        } finally {
+            resetSysProp(prevLogValue, "java.util.logging.manager");
+            resetSysProp(prevPkgValue, "jboss.modules.system.pkgs");
+        }
+        verify(inst);
+    }
+
+    protected void resetSysProp(String prevValue, String key) {
+        if (prevValue == null) {
+            System.getProperties().remove(key);
+        } else {
+            System.setProperty(key, prevValue);
+        }
     }
 
 }

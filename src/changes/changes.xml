@@ -34,6 +34,17 @@
         Second milestone, rebased with latest 1.x branch
       </action>
     </release>
+    <release version="1.3.6" description="Release 1.3.6" date="2017-04-03">
+      <action dev="rraez" type="fix" date="2016-09-18" issue="258">
+        Add support for JBoss modules for the Jolokia JVM agent
+      </action>
+      <action dev="rhuss" type="fix" date="2017-02-16" issue="305">
+        Fix issue for read request with a single attribute in an array
+      </action>
+      <action dev="apupier" type="add" date="2017-03-31" issue="317">
+        Provide classname MBeanInfo on List request
+      </action>
+    </release>
     <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
       <action dev="paoloantinori" type="add" date="2016-09-18" issue="283">
         Support JSON streaming also for AgentServlet (WAR and OSGi agent)

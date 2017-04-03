@@ -25,6 +25,7 @@ package org.jolokia.service.jmx.handler.list;
 public enum DataKeys {
 
     DESCRIPTION("desc"),
+    CLASSNAME("class"),
     ERROR("error"),
     NAME("name"),
     TYPES("types"),

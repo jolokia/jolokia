@@ -191,7 +191,7 @@ public class JolokiaServer {
      */
     protected final void init(JolokiaServerConfig pConfig,LogHandler pLogHandler) throws IOException {
         // We manage it on our own
-        init(createHttpServer(pConfig),pConfig,pLogHandler);
+        init(createHttpServer(pConfig), pConfig, pLogHandler);
         useOwnServer = true;
     }
 
@@ -233,7 +233,7 @@ public class JolokiaServer {
         // Get own URL for later reference
         serverAddress = pServer.getAddress();
         url = detectAgentUrl(pServer, pConfig, pConfig.getContextPath());
-    }
+       }
 
     // Create the JolokiaHttpHandler either directly or lazily
     private HttpHandler createJolokiaHttpHandler(boolean pLazy) {
@@ -250,7 +250,7 @@ public class JolokiaServer {
         JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
         updateAgentUrl(jolokiaContext);
         return jolokiaHttpHandler;
-    }
+}
 
     // Update the Agent URL from the configuration or own URL
     private void updateAgentUrl(JolokiaContext pJolokiaContext) {
@@ -341,7 +341,6 @@ public class JolokiaServer {
         HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
-
         // Prepare executor pool
         Executor executor;
         String mode = pConfig.getExecutor();

@@ -99,7 +99,13 @@ public class JolokiaRequestTest {
                         "path", "used/*"), procParams);
     }
 
-
+    @Test
+    public void testToStringFix() {
+        JolokiaReadRequest req = JolokiaRequestFactory.createPostRequest(
+            createMap("type", "read", "mbean", "java.lang:type=Memory",
+                      "attribute",Arrays.asList("NonHeapMemoryUsage")),procParams);
+        assertTrue(req.toString().contains("NonHeapMemoryUsage"));
+    }
 
     @Test
     public void readRequestMultiAttributes() {

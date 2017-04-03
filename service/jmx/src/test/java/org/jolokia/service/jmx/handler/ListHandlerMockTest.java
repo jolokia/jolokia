@@ -26,6 +26,7 @@ import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.jolokia.service.jmx.handler.list.DataKeys;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -83,10 +84,10 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         assertTrue(inner.containsKey("type=Runtime"));
         assertEquals(inner.size(), 2);
         inner = (Map) inner.get("type=Memory");
-        for (String k : new String[] { "desc", "op", "attr"}) {
+        for (String k : new String[] {DataKeys.DESCRIPTION.getKey(), DataKeys.OPERATIONS.getKey(), DataKeys.ATTRIBUTES.getKey(), DataKeys.CLASSNAME.getKey()}) {
             assertTrue(inner.containsKey(k));
         }
-        assertEquals(inner.size(), 3);
+        assertEquals(inner.size(), 4);
         verify(connection);
     }
 

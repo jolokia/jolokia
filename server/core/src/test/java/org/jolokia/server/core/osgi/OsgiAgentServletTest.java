@@ -16,6 +16,10 @@ package org.jolokia.server.core.osgi;
  *  limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
+import java.util.Set;
+
+import javax.management.MBeanServerConnection;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;

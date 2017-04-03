@@ -17,8 +17,12 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
+import java.util.Set;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 
 
 /**
@@ -67,8 +71,8 @@ public final class JvmAgent {
      *
      * @param agentArgs arguments as given on the command line
      */
-    public static void premain(String agentArgs) {
-        startAgent(new JvmAgentConfig(agentArgs),true /* lazy */);
+    public static void premain(String agentArgs, Instrumentation inst) {
+        startAgent(new JvmAgentConfig(agentArgs),true /* lazy */, inst);
     }
 
     /**
@@ -77,29 +81,53 @@ public final class JvmAgent {
      *
      * @param agentArgs arguments as given on the command line
      */
-    public static void agentmain(String agentArgs) {
+    public static void agentmain(String agentArgs, Instrumentation instrumentation) {
         JvmAgentConfig config = new JvmAgentConfig(agentArgs);
         if (!config.isModeStop()) {
-            startAgent(config,false);
+            startAgent(config,false, instrumentation);
         } else {
             stopAgent();
         }
     }
 
-    private static void startAgent(JvmAgentConfig pConfig, boolean pLazy)  {
-        try {
-            server = new JolokiaServer(pConfig);
+    private static void startAgent(final JvmAgentConfig pConfig, final boolean pLazy, final Instrumentation instrumentation)  {
+        // start the JolokiaServer in a new daemon thread
+        Thread jolokiaStartThread = new Thread("JolokiaStart") {
+            public void run() {
+                try {
+                    // block until the server supporting early detection is initialized
+                    awaitServerInitialization(instrumentation);
 
-            server.start(pLazy);
-            setStateMarker();
+                    server = new JolokiaServer(pConfig);
 
-            System.out.println("Jolokia: Agent started with URL " + server.getUrl());
-        } catch (RuntimeException exp) {
-            System.err.println("Could not start Jolokia agent: " + exp);
-        } catch (IOException exp) {
-            System.err.println("Could not start Jolokia agent: " + exp);
+                    server.start(pLazy);
+                    setStateMarker();
+
+                    System.out.println("Jolokia: Agent started with URL " + server.getUrl());
+                } catch (RuntimeException exp) {
+                    System.err.println("Could not start Jolokia agent: " + exp);
+                } catch (IOException exp) {
+                    System.err.println("Could not start Jolokia agent: " + exp);
+                }
+            }
+        };
+        jolokiaStartThread.setDaemon(true);
+        jolokiaStartThread.start();
+    }
+
+    /**
+     * Lookup the server detectors and notify detector about the JVM startup
+     *
+     * @param instrumentation instrumentation used for accessing services
+     * @see ServerDetector#jvmAgentStartup(Instrumentation)
+     */
+    private static void awaitServerInitialization(final Instrumentation instrumentation) {
+        Set<ServerDetector> detectors = new ClasspathServerDetectorLookup().lookup();
+        for (ServerDetector detector : detectors) {
+            detector.jvmAgentStartup(instrumentation);
         }
     }
+
 
     private static void stopAgent() {
         try {

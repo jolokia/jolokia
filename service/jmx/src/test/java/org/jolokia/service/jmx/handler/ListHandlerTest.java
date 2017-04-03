@@ -93,7 +93,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
         Map res = execute(handler, request);
         assertTrue(res.containsKey("type=Memory"));
-        assertTrue(res.get("type=Memory") instanceof Map); 
+        assertTrue(res.get("type=Memory") instanceof Map);
 
         res = execute(handlerWithRealm,request);
         assertEquals(res.size(),0);
@@ -107,7 +107,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void propertiesPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
         Map res = execute(handler, request);
-        checkKeys(res, DESCRIPTION, OPERATIONS, ATTRIBUTES);
+        checkKeys(res, DESCRIPTION, OPERATIONS, ATTRIBUTES, CLASSNAME);
 
         res = execute(handlerWithRealm,request);
         checkKeys(res);
@@ -187,7 +187,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
                 .option(ConfigKey.MAX_DEPTH, "3").build();
         Map res =  execute(handler, request);
-        assertEquals(res.size(), 3);
+        assertEquals(res.size(), 4);
         Map ops = (Map) res.get(OPERATIONS.getKey());
         assertTrue(ops.containsKey("gc"));
         assertTrue(ops.get("gc") instanceof Map);
@@ -230,7 +230,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
         Map res = execute(handler, request);
         assertFalse(res.containsKey(OPERATIONS.getKey()));
-        assertEquals(res.size(),2);
+        assertEquals(res.size(),3);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
