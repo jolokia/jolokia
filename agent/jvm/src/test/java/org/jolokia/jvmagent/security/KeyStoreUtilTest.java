@@ -1,5 +1,5 @@
 package org.jolokia.jvmagent.security;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 import java.util.Enumeration;
 
 import org.jolokia.server.core.Version;
@@ -122,6 +123,12 @@ public class KeyStoreUtilTest {
     @Test
     public void testSelfSignedCertificate() throws Exception {
         KeyStore keystore = createKeyStore();
+        long millis = System.currentTimeMillis();
+        updateKeyStoreWithSelfSignedCert(keystore);
+        System.out.println(String.format("SelfSigned Cert: Duration = %d ms", System.currentTimeMillis() - millis));
+    }
+
+    private void updateKeyStoreWithSelfSignedCert(KeyStore keystore) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeyException, CertificateException, SignatureException, KeyStoreException {
         KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
         X509Certificate cert = (X509Certificate) keystore.getCertificate("jolokia-agent");
         assertNotNull(cert);
