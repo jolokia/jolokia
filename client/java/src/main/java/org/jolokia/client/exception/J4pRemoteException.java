@@ -60,16 +60,25 @@ public class J4pRemoteException extends J4pException {
     }
 
     public J4pRemoteException(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
-        super(pJsonRespObject.get("error") != null ?
-                      (String) pJsonRespObject.get("error") :
-                      "Invalid response received: " + pJsonRespObject.toJSONString()
-             );
-        Long statusL = (Long) pJsonRespObject.get("status");
+        super(generateErrorMessage(pJ4pRequest, pJsonRespObject));
+	Object statusO = pJsonRespObject.get("status");
+        Long statusL = statusO instanceof Long ? (Long) statusO : null;
         status = statusL != null ? statusL.intValue() : 500;
         request = pJ4pRequest;
         errorType = (String) pJsonRespObject.get("error_type");
         remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
         errorValue = (JSONObject) pJsonRespObject.get("error_value");
+    }
+
+    private static String generateErrorMessage(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
+	if( pJsonRespObject.get("error") != null ) {
+		return (String) pJsonRespObject.get("error");
+	}
+	Object o = pJsonRespObject.get("status");
+	if( o != null && !(o instanceof Long)) {
+		return "Invalid status of type " + o.getClass().getName() + "('" + o.toString() + "') received";
+	}
+	return "Invalid response received: " + pJsonRespObject.toJSONString();
     }
 
     /**
