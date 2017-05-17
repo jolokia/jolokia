@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.3.7-SNAPSHOT" description="Release 1.3.7-SNAPSHOT">
+      <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
+        Support attaching to running JVM even when -XX:+PerfDisableSharedMem is given
+      </action>
+    </release>
     <release version="1.3.6" description="Release 1.3.6" date="2017-04-03">
       <action dev="rraez" type="fix" date="2016-09-18" issue="258">
         Add support for JBoss modules for the Jolokia JVM agent

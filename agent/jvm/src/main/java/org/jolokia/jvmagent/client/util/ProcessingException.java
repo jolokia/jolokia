@@ -28,7 +28,7 @@ public class ProcessingException extends RuntimeException {
     private String command;
 
     /**
-     * Constructor  
+     * Constructor
      *
      * @param pErrMsg error message
      * @param pStoredExp the original exception
@@ -48,7 +48,8 @@ public class ProcessingException extends RuntimeException {
     @SuppressWarnings({"PMD.SystemPrintln"})
     public void printErrorMessage() {
         if (!quiet) {
-            System.err.println(getMessage() + " (command: " + command + ") : " + getCause().getMessage());
+            String msg = getCause().getMessage();
+            System.err.println(getMessage() + " (command: " + command + ")" + (msg != null ? " : " + msg : ""));
         }
         if (verbose) {
             getCause().printStackTrace(System.err);

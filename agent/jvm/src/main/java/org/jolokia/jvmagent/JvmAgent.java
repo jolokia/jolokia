@@ -64,7 +64,7 @@ public final class JvmAgent {
 
     /**
      * Entry point for the agent, using command line attach
-     * (that is via -javagent command line argument)
+     * (that is via -javaagent command line argument)
      *
      * @param agentArgs arguments as given on the command line
      */
