@@ -307,7 +307,10 @@ public enum ConfigKey {
      * this can be used by clients to provide additional information to
      * the user.
      */
-    AGENT_DESCRIPTION("agentDescription",true,false);
+    AGENT_DESCRIPTION("agentDescription",true,false),
+
+    HOT_THREADS_INTERVAL("thread_duration", false, true, "500"),
+    HOT_THREADS_COUNT("number_of_threads", false, true, "10");
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.
