@@ -42,6 +42,9 @@ public class J4pRemoteException extends J4pException {
     // JSONObject containing value of the remote error
     private JSONObject errorValue;
 
+    // String containing the entire response
+    private JSONObject response;
+
     /**
      * Constructor for a remote exception
      *
@@ -65,6 +68,7 @@ public class J4pRemoteException extends J4pException {
         Long statusL = statusO instanceof Long ? (Long) statusO : null;
         status = statusL != null ? statusL.intValue() : 500;
         request = pJ4pRequest;
+	response = pJsonRespObject;
         errorType = (String) pJsonRespObject.get("error_type");
         remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
         errorValue = (JSONObject) pJsonRespObject.get("error_value");
@@ -72,13 +76,13 @@ public class J4pRemoteException extends J4pException {
 
     private static String generateErrorMessage(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
 	if( pJsonRespObject.get("error") != null ) {
-		return (String) pJsonRespObject.get("error");
+		return "Error: " + (String) pJsonRespObject.get("error");
 	}
 	Object o = pJsonRespObject.get("status");
 	if( o != null && !(o instanceof Long)) {
 		return "Invalid status of type " + o.getClass().getName() + "('" + o.toString() + "') received";
 	}
-	return "Invalid response received: " + pJsonRespObject.toJSONString();
+	return "Invalid response received";
     }
 
     /**
@@ -124,8 +128,17 @@ public class J4pRemoteException extends J4pException {
      * 
      * @return value of the remote error as JSON
      */
-	public JSONObject getErrorValue() {
-		return errorValue;
-	}
-    
+    public JSONObject getErrorValue() {
+        return errorValue;
+    }
+
+
+    /**
+     * Get the response string, or null if unavailable
+     *
+     * @return value of the json response string
+     */
+    public JSONObject getResponse() {
+        return response;
+    }
 }
