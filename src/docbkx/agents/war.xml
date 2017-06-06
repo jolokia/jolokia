@@ -412,7 +412,7 @@
   <section id="agent-war-security">
     <title>Security Setup</title>
     <para>
-      In order use JEE security within the war, some extrat
+      In order use JEE security within the war, some extra
       configuration steps are required within
       <filename>web.xml</filename>.<sidebar>
       <title>Using jmx4perl's <literal>jolokia</literal> tool</title>
