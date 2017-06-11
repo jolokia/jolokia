@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.apache.http.*;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -161,7 +162,7 @@ public class J4pRequestHandler {
             }
         } finally {
             if (entity != null) {
-                entity.consumeContent();
+                EntityUtils.consume(entity);
             }
         }
     }
