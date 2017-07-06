@@ -6,6 +6,9 @@
       "https://oss.sonatype.org/content/repositories/snapshots"
    ],
    "versions" : {
+      "1.3.7" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
       "1.3.6" : {
          "jmx4perl" : "[1.00,2.00)"
       },
