@@ -75,6 +75,15 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+      <subsection name="Small 1.3.7">
+        <div class="news-date">2017-07-06</div>
+        <p>
+          As a small sign of life, here's is 1.3.7 with some very minor fixes for the Java client and the JVM agent.
+        </p>
+        <p>
+          Not much more to tell for now. Enjoy summer ;-) !
+        </p>
+      </subsection>
       <subsection name="Let's kickoff 2017 with 1.3.6">
         <div class="news-date">2017-04-03</div>
         <p>
@@ -878,4 +887,3 @@ java -javaagent:jolokia.jar=\
 </body>
 
 </document>
-

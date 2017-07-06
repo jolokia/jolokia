@@ -23,9 +23,12 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.3.7-SNAPSHOT" description="Release 1.3.7-SNAPSHOT">
+    <release version="1.3.7" description="Release 1.3.7" date="2017-07-06">
       <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
         Support attaching to running JVM even when -XX:+PerfDisableSharedMem is given
+      </action>
+      <action dev="robstryker" type="fix" date="2017-05-31" issue="326">
+        Better error message for Java client
       </action>
     </release>
     <release version="1.3.6" description="Release 1.3.6" date="2017-04-03">
