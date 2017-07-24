@@ -66,11 +66,13 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     private JSONObject getSpringBeanInfo(BeanDefinition pBeanDef) {
         JSONObject ret = new JSONObject();
         ret.put(DESCRIPTION,pBeanDef.getDescription());
-        String beanClassName = pBeanDef.getBeanClassName();
-        Class beanClass = ClassUtil.classForName(beanClassName);
-        if (beanClass != null) {
-            ret.put(ATTRIBUTES, getAttributes(pBeanDef, beanClass));
-            ret.put(OPERATIONS, getOperations(beanClass));
+        final String beanClassName = pBeanDef.getBeanClassName();
+        if (beanClassName != null) {
+            Class beanClass = ClassUtil.classForName(beanClassName);
+            if (beanClass != null) {
+                ret.put(ATTRIBUTES, getAttributes(pBeanDef, beanClass));
+                ret.put(OPERATIONS, getOperations(beanClass));
+            }
         }
         return ret;
     }

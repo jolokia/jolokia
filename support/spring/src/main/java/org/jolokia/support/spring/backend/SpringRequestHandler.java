@@ -61,4 +61,9 @@ public class SpringRequestHandler extends AbstractRequestHandler
             commandHandlerMap.put(handler.getType(), handler);
         }
     }
+
+    @Override
+    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
+        return super.canHandle(pJolokiaRequest) && this.commandHandlerMap.containsKey(pJolokiaRequest.getType());
+    }
 }
