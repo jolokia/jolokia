@@ -44,4 +44,8 @@ public abstract class SpringCommandHandler<T extends JolokiaRequest> {
     }
 
     public abstract Object handleRequest(T pJmxReq, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException;
+
+    protected boolean isLiteralType(Class<?> type) {
+        return type != null && (type.isAssignableFrom(Number.class) || type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(String.class) || type.isAssignableFrom(Class.class));
+    }
 }

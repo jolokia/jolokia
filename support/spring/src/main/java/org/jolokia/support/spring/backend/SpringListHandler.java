@@ -58,7 +58,9 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         // TODO: Fix for FactoryBeans
         for (String beanName : appCtx.getBeanDefinitionNames()) {
             BeanDefinition bd = bdFactory.getMergedBeanDefinition(beanName);
-            ret.put("name=" + beanName, getSpringBeanInfo(bd));
+            if(!bd.isAbstract()) {// avoid abstract beans as they are not actual beans in the context
+                ret.put("name=" + beanName, getSpringBeanInfo(bd));
+            }
         }
         return ret;
     }
@@ -112,7 +114,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         addIfNotNull(ret, DESCRIPTION, pBeanDef.getDescription());
         for (PropertyDescriptor propDesc : BeanUtils.getPropertyDescriptors(pBeanClass)) {
             JSONObject aMap = new JSONObject();
-            Class propType = propDesc.getPropertyType();
+            Class<?> propType = propDesc.getPropertyType();
             addIfNotNull(aMap, TYPE, propType != null ? classToString(propType) : null);
             addIfNotNull(aMap, DESCRIPTION, propDesc.getShortDescription());
             aMap.put(READ_WRITE, propDesc.getReadMethod() != null && propDesc.getWriteMethod() != null);
