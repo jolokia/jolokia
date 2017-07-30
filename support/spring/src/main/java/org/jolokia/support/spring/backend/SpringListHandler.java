@@ -29,9 +29,10 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.*;
  * @author roland
  * @since 17.12.13
  */
+@SuppressWarnings("unchecked")//due to use of JSONObject
 public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> {
 
-    final static Map<Class,String> WRAPPER_TO_PRIMITIVE;
+    final static Map<Class<?>,String> WRAPPER_TO_PRIMITIVE;
 
     public SpringListHandler(ApplicationContext pAppContext, JolokiaContext pJolokiaContext) {
         super(pAppContext, pJolokiaContext, RequestType.LIST);
@@ -70,7 +71,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         ret.put(DESCRIPTION,pBeanDef.getDescription());
         final String beanClassName = pBeanDef.getBeanClassName();
         if (beanClassName != null) {
-            Class beanClass = ClassUtil.classForName(beanClassName);
+            Class<?> beanClass = ClassUtil.classForName(beanClassName);
             if (beanClass != null) {
                 ret.put(ATTRIBUTES, getAttributes(pBeanDef, beanClass));
                 ret.put(OPERATIONS, getOperations(beanClass));
@@ -79,7 +80,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         return ret;
     }
 
-    private JSONObject getOperations(Class pBeanClass) {
+    private JSONObject getOperations(Class<?> pBeanClass) {
         JSONObject ret = new JSONObject();
         for (Method method : pBeanClass.getMethods()) {
             int modifier = method.getModifiers();
@@ -97,7 +98,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     private JSONArray extractArguments(Method method) {
         JSONArray ret = new JSONArray();
         int i = 0;
-        for (Class paramType : method.getParameterTypes()) {
+        for (Class<?> paramType : method.getParameterTypes()) {
             JSONObject params = new JSONObject();
             params.put(TYPE,classToString(paramType));
             // Maybe extract real name when running under Java 8 with reflection and Method.getParameters()
@@ -108,7 +109,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         return ret;
     }
 
-    private JSONObject getAttributes(BeanDefinition pBeanDef, Class pBeanClass) {
+    private JSONObject getAttributes(BeanDefinition pBeanDef, Class<?> pBeanClass) {
         JSONObject ret = new JSONObject();
 
         addIfNotNull(ret, DESCRIPTION, pBeanDef.getDescription());
@@ -117,7 +118,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
             Class<?> propType = propDesc.getPropertyType();
             addIfNotNull(aMap, TYPE, propType != null ? classToString(propType) : null);
             addIfNotNull(aMap, DESCRIPTION, propDesc.getShortDescription());
-            aMap.put(READ_WRITE, propDesc.getReadMethod() != null && propDesc.getWriteMethod() != null);
+            aMap.put(READ_WRITE, propDesc.getWriteMethod() != null && isLiteralType(propType));
             ret.put(propDesc.getName(),aMap);
         }
         return ret;
@@ -140,7 +141,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
 
     // Class mapping for primitive values
     static {
-        WRAPPER_TO_PRIMITIVE = new HashMap<Class, String>();
+        WRAPPER_TO_PRIMITIVE = new HashMap<Class<?>, String>();
         Object[] p = {
                 Boolean.TYPE, "boolean",
                 Character.TYPE, "character",
@@ -154,11 +155,11 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         };
 
         for (int i = 0; i < p.length; i += 2) {
-            WRAPPER_TO_PRIMITIVE.put((Class) p[i],(String) p[i+1]);
+            WRAPPER_TO_PRIMITIVE.put((Class<?>) p[i],(String) p[i+1]);
         }
     }
 
-    private String classToString(Class pClass) {
+    private String classToString(Class<?> pClass) {
         if (pClass.isPrimitive()) {
             String ret = WRAPPER_TO_PRIMITIVE.get(pClass);
             if (ret == null) {
