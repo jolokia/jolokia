@@ -118,7 +118,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
             Class<?> propType = propDesc.getPropertyType();
             addIfNotNull(aMap, TYPE, propType != null ? classToString(propType) : null);
             addIfNotNull(aMap, DESCRIPTION, propDesc.getShortDescription());
-            aMap.put(READ_WRITE, propDesc.getWriteMethod() != null && isLiteralType(propType));
+            aMap.put(READ_WRITE, propDesc.getWriteMethod() != null);
             ret.put(propDesc.getName(),aMap);
         }
         return ret;
