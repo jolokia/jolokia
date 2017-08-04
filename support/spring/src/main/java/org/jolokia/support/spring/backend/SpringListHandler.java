@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.AttributeNotFoundException;
@@ -44,10 +45,34 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         if (domain == null || domain.length() == 0) {
             domain = "default";
         }
-        JSONObject ret = new JSONObject();
-        JSONObject beans = getAllSpringBeans(getAsConfigurableApplicationContext());
-        ret.put(SpringRequestHandler.PROVIDER + "@" + domain,beans);
-        return ret;
+        String providerAndDomain = SpringRequestHandler.PROVIDER + "@" + domain;
+        final BeanDefinition requestedBean=beanFromRequest(pJmxReq, providerAndDomain);
+        if(requestedBean != null) {
+            return getSpringBeanInfo(requestedBean);
+        }
+        else {
+            JSONObject ret = new JSONObject();
+            JSONObject beans = getAllSpringBeans(getAsConfigurableApplicationContext());
+            ret.put(providerAndDomain, beans);
+            return ret;
+        }
+    }
+
+    /**
+     * Try to match up the path segment of the request to a spring bean
+     * @return Bean definition corresponding to request, null if none
+     */
+    private BeanDefinition beanFromRequest(JolokiaListRequest pJmxReq, String providerAndDomain) {
+        List<String> pathParts = pJmxReq.getPathParts();
+        if(pathParts != null && pathParts.size() == 2 && providerAndDomain.equals(
+                pathParts.get(0))) {
+           final String beanAndName = pathParts.get(1);
+           if(beanAndName.startsWith("name=")) {
+               final String beanName=beanAndName.substring(5);
+               return getAsConfigurableApplicationContext().getBeanFactory().getMergedBeanDefinition(beanName);
+           }
+        }
+        return null;
     }
 
     // ====================================================================================
