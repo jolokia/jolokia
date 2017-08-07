@@ -32,6 +32,7 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.*;
  */
 public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> {
 
+    private static final String NAME_PREFIX = "name=";
     final static Map<Class,String> WRAPPER_TO_PRIMITIVE;
 
     public SpringListHandler(ApplicationContext pAppContext, JolokiaContext pJolokiaContext) {
@@ -67,8 +68,8 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         if(pathParts != null && pathParts.size() == 2 && providerAndDomain.equals(
                 pathParts.get(0))) {
            final String beanAndName = pathParts.get(1);
-           if(beanAndName.startsWith("name=")) {
-               final String beanName=beanAndName.substring(5);
+           if(beanAndName.toLowerCase().startsWith(NAME_PREFIX)) {
+               final String beanName=beanAndName.substring(NAME_PREFIX.length());
                return getAsConfigurableApplicationContext().getBeanFactory().getMergedBeanDefinition(beanName);
            }
         }
@@ -83,7 +84,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         // TODO: Fix for FactoryBeans
         for (String beanName : appCtx.getBeanDefinitionNames()) {
             BeanDefinition bd = bdFactory.getMergedBeanDefinition(beanName);
-            ret.put("name=" + beanName, getSpringBeanInfo(bd));
+            ret.put(NAME_PREFIX + beanName, getSpringBeanInfo(bd));
         }
         return ret;
     }
@@ -125,7 +126,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
             params.put(TYPE,classToString(paramType));
             // Maybe extract real name when running under Java 8 with reflection and Method.getParameters()
             // or by extracting debugging info (like Spring MVC does). For now we simply add dummy values;
-            params.put(NAME,"arg" + i++);
+            params.put(NAME_PREFIX,"arg" + i++);
             ret.add(params);
         }
         return ret;
