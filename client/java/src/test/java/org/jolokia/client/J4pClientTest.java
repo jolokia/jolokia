@@ -184,7 +184,6 @@ public class J4pClientTest {
         final ByteArrayInputStream bis =
                 new ByteArrayInputStream(jsonResp.getBytes());
         expect(entity.getContent()).andReturn(bis);
-        //EntityUtils.consume(entity);
         replay(client, response, entity);
         return client;
     }
