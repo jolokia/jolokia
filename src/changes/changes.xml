@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.3.8" description="Release 1.3.8">
+      <action dev="bcubk" type="fix" issue="309">
+        Support "max connection per route" setting for J4pClientBuilder to prevent a ConnectionPoolTimeoutException
+      </action>
+    </release>
     <release version="1.3.7" description="Release 1.3.7" date="2017-07-06">
       <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
         Support attaching to running JVM even when -XX:+PerfDisableSharedMem is given

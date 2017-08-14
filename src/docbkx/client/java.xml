@@ -254,6 +254,15 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <td>20</td>
       </tr>
       <tr>
+        <td><constant>defaultMaxConnectionsPerRoute</constant></td>
+        <td>
+          Defines the number of total connections per route. It
+          is only used when <constant>pooledConnection</constant> is
+          used.
+        </td>
+        <td>20</td>
+      </tr>
+      <tr>
         <td><constant>maxConnectionPoolTimeout</constant></td>
         <td>
           Defines the timeout for waiting to obtain a connection

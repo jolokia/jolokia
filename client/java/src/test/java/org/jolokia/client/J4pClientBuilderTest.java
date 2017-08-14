@@ -45,6 +45,7 @@ public class J4pClientBuilderTest {
                         .contentCharset("utf-8")
                         .maxConnectionPoolTimeout(3000)
                         .maxTotalConnections(500)
+                        .defaultMaxConnectionsPerRoute(500)
                         .pooledConnections()
                         .socketBufferSize(8192)
                         .socketTimeout(5000)
@@ -68,6 +69,7 @@ public class J4pClientBuilderTest {
         assertNotNull(J4pClient.socketBufferSize(8192));
         assertNotNull(J4pClient.socketTimeout(5000));
         assertNotNull(J4pClient.cookieStore(new BasicCookieStore()));
+        assertNotNull(J4pClient.defaultMaxConnectionsPerRoute(100));
     }
 
     @Test
