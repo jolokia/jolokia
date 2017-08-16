@@ -270,7 +270,7 @@ public class JolokiaHttpHandlerTest {
         handler.doHandle(exchange);
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
         assertEquals(header.getFirst("Access-Control-Allow-Headers"),"X-Bla, X-Blub");
-        assertNotNull(header.getFirst("Access-Control-Allow-Max-Age"));
+        assertNotNull(header.getFirst("Access-Control-Max-Age"));
     }
 
     @Test
