@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="1.3.8" description="Release 1.3.8">
+      <action dev="seryckd-jda" type="fix" issue="338">
+        Fix incorrect CORS header
+      </action>
       <action dev="bcubk" type="fix" issue="309">
         Support "max connection per route" setting for J4pClientBuilder to prevent a ConnectionPoolTimeoutException
       </action>
