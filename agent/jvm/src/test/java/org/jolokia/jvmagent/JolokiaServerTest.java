@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.HttpServer;
@@ -294,7 +293,20 @@ public class JolokiaServerTest {
 
                 try {
                     TrustManager tms[] = getTrustManagers(true);
-                    SSLContext sc = SSLContext.getInstance(protocol);
+                    SSLContext sc;
+                    try {
+                        sc = SSLContext.getInstance(protocol);
+                    } catch (NoSuchAlgorithmException e) {
+                        // on the IBM JVM v8 we get an exception on SSLv3 which fails the entire test, safe-guarding for it.
+                        if ("SSLv3".equals(protocol)) {
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Oops! Our assumption on missing SSLv3 didn't work out, check what your JVM supports!",
+                                    e);
+                        }
+                    }
+
                     sc.init(new KeyManager[0], tms, new java.security.SecureRandom());
 
                     HttpsURLConnection.setDefaultHostnameVerifier(verifier);
@@ -466,7 +478,12 @@ public class JolokiaServerTest {
                     KeyStore ks = KeyStore.getInstance("PKCS12");
                     InputStream fis = getClass().getResourceAsStream("/certs/" + pClientCert + "/cert.p12");
                     ks.load(fis, "1234".toCharArray());
-                    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                    KeyManagerFactory kmf;
+                    if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
+                        kmf = KeyManagerFactory.getInstance("IBMX509");
+                    } else {
+                        kmf = KeyManagerFactory.getInstance("SunX509");
+                    }
                     kmf.init(ks, "1234".toCharArray());
                     kms = kmf.getKeyManagers() ;
                 }
