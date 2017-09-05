@@ -1,5 +1,5 @@
 package org.jolokia.jvmagent.security;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@ package org.jolokia.jvmagent.security;/*
  */
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
@@ -25,7 +27,6 @@ import java.util.Date;
 import org.jolokia.Version;
 import org.jolokia.util.Base64Util;
 import org.jolokia.util.ClassUtil;
-import sun.security.x509.X500Name;
 
 /**
  * Utility class for handling keystores
@@ -35,8 +36,12 @@ import sun.security.x509.X500Name;
  */
 public class KeyStoreUtil {
 
-    private final static String KEYGEN_CLASS_JDK8 = "sun.security.tools.keytool.CertAndKeyGen";
-    private final static String KEYGEN_CLASS_JDK7 = "sun.security.x509.CertAndKeyGen";
+    private final static String KEYGEN_CLASS_JDK8_SUN = "sun.security.tools.keytool.CertAndKeyGen";
+    private final static String KEYGEN_CLASS_JDK7_SUN = "sun.security.x509.CertAndKeyGen";
+    private final static String KEYGEN_CLASS_JDK8_IBM = "com.ibm.security.tools.CertAndKeyGen";
+    private final static String KEYGEN_CLASS_JDK7_IBM = "com.ibm.security.x509.CertAndKeyGen";
+    private static final String X500_NAME_SUN = "sun.security.x509.X500Name";
+    private static final String X500_NAME_IBM = "com.ibm.security.x509.X500Name";
 
     private KeyStoreUtil() {
     }
@@ -108,22 +113,27 @@ public class KeyStoreUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, IOException,
                    InvalidKeyException, CertificateException, SignatureException, KeyStoreException {
 
-        X500Name x500Name =
-            new X500Name(
-                    "Jolokia Agent " + Version.getAgentVersion(), // CN
-                    "JVM",                                        // OU
-                    "jolokia.org",                                // O
-                    "Pegnitz",                                    // L
-                    "Franconia",                                  // ST
-                    "DE"                                          // C
-            );
+        final Object x500Name;
+        final Object[] certAttributes = { "Jolokia Agent " + Version.getAgentVersion(), // CN
+                                          "JVM",                                        // OU
+                                          "jolokia.org",                                // O
+                                          "Pegnitz",                                    // L
+                                          "Franconia",                                  // ST
+                                          "DE" };
+        if (ClassUtil.checkForClass(X500_NAME_SUN)) {
+            x500Name = ClassUtil.newInstance(X500_NAME_SUN, certAttributes);
+        } else if (ClassUtil.checkForClass(X500_NAME_IBM)) {
+            x500Name = ClassUtil.newInstance(X500_NAME_IBM, certAttributes);
+        } else {
+            throw new IllegalStateException("Neither Sun- nor IBM-style JVM found.");
+        }
 
         // Need to do it via reflection because Java8 moved class to a different package
         Object keypair = createKeyPair();
         PrivateKey privKey = getPrivateKey(keypair);
 
         X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = getSelfCertificate(keypair,x500Name, new Date(), (long) 3650 * 24 * 60 * 60);
+        chain[0] = getSelfCertificate(keypair, x500Name, new Date(), (long) 3650 * 24 * 60 * 60);
         pKeyStore.setKeyEntry("jolokia-agent", privKey, new char[0], chain);
     }
 
@@ -137,8 +147,26 @@ public class KeyStoreUtil {
         return keypair;
     }
 
-    private static X509Certificate getSelfCertificate(Object keypair, X500Name x500Name, Date date, long l) {
-        return (X509Certificate) ClassUtil.applyMethod(keypair, "getSelfCertificate", x500Name, date, l);
+    private static X509Certificate getSelfCertificate(Object keypair, Object x500Name, Date date, long l) {
+        final Class<?> clazz;
+        if (ClassUtil.checkForClass(X500_NAME_SUN)) {
+            clazz = ClassUtil.classForName(X500_NAME_SUN, false);
+        } else {
+            clazz = ClassUtil.classForName(X500_NAME_IBM, false);
+        }
+
+        try {
+            final Method selfCertMethod = keypair.getClass().getDeclaredMethod("getSelfCertificate", clazz, Date.class, long.class);
+            selfCertMethod.setAccessible(true);
+
+            return (X509Certificate) selfCertMethod.invoke(keypair, x500Name, date, l);
+        } catch (final NoSuchMethodException e) {
+            throw new IllegalStateException("Found no getSelfCertificate-method with the expected signature.", e);
+        } catch (final IllegalAccessException e) {
+            throw new IllegalStateException("Not allowed to access getSelfCertificate-method.", e);
+        } catch (final InvocationTargetException e) {
+            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
+        }
     }
 
     private static PrivateKey getPrivateKey(Object keypair) {
@@ -146,15 +174,21 @@ public class KeyStoreUtil {
     }
 
     private static Class lookupKeyGenClass() {
-        Class keyGenClass = ClassUtil.classForName(KEYGEN_CLASS_JDK8);
-        if (keyGenClass == null) {
-            keyGenClass = ClassUtil.classForName(KEYGEN_CLASS_JDK7);
+        final Class keyGenClass;
+        if (ClassUtil.checkForClass(KEYGEN_CLASS_JDK8_SUN)) {
+            keyGenClass = ClassUtil.classForName(KEYGEN_CLASS_JDK8_SUN);
+        } else if (ClassUtil.checkForClass(KEYGEN_CLASS_JDK7_SUN)) {
+            keyGenClass = ClassUtil.classForName(KEYGEN_CLASS_JDK7_SUN);
+        } else if (ClassUtil.checkForClass(KEYGEN_CLASS_JDK8_IBM)) {
+            keyGenClass = ClassUtil.classForName(KEYGEN_CLASS_JDK8_IBM);
+        } else if (ClassUtil.checkForClass(KEYGEN_CLASS_JDK7_IBM)) {
+            keyGenClass = ClassUtil.classForName(KEYGEN_CLASS_JDK7_IBM);
+        } else {
+            throw new IllegalStateException(
+                    "Cannot find any key-generator class: Tried Sun Java 8's " + KEYGEN_CLASS_JDK8_SUN + ", Sun Java 7's "
+                    + KEYGEN_CLASS_JDK7_SUN + ", IBM Java 8's " + KEYGEN_CLASS_JDK8_IBM + " and IBM Java 7's " + KEYGEN_CLASS_JDK7_IBM);
         }
-        if (keyGenClass == null) {
-            throw new IllegalStateException("Cannot lookup key-generator class: Neither Java8's " + KEYGEN_CLASS_JDK8 +
-                                            " nor " + KEYGEN_CLASS_JDK7 + " can be looked up with the context class loader");
 
-        }
         return keyGenClass;
     }
 
