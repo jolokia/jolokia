@@ -94,6 +94,7 @@ public class VirtualMachineHandler {
             if (pVm != null) {
                 Class clazz = pVm.getClass();
                 Method method = clazz.getMethod("detach");
+                method.setAccessible(true); // on J9 you get IllegalAccessException otherwise.
                 method.invoke(pVm);
             }
         } catch (InvocationTargetException e) {
