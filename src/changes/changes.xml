@@ -30,6 +30,9 @@
       <action dev="bcubk" type="fix" issue="309">
         Support "max connection per route" setting for J4pClientBuilder to prevent a ConnectionPoolTimeoutException
       </action>
+      <action dev="pgier" type="update" issue="323">
+        Update to httpcore 4.4.7 for the Java client
+      </action>
     </release>
     <release version="1.3.7" description="Release 1.3.7" date="2017-07-06">
       <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
