@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.AttributeNotFoundException;
@@ -31,6 +32,7 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.*;
  */
 public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> {
 
+    private static final String NAME_PREFIX = "name=";
     final static Map<Class,String> WRAPPER_TO_PRIMITIVE;
 
     public SpringListHandler(ApplicationContext pAppContext, JolokiaContext pJolokiaContext) {
@@ -44,10 +46,34 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         if (domain == null || domain.length() == 0) {
             domain = "default";
         }
-        JSONObject ret = new JSONObject();
-        JSONObject beans = getAllSpringBeans(getAsConfigurableApplicationContext());
-        ret.put(SpringRequestHandler.PROVIDER + "@" + domain,beans);
-        return ret;
+        String providerAndDomain = SpringRequestHandler.PROVIDER + "@" + domain;
+        final BeanDefinition requestedBean=beanFromRequest(pJmxReq, providerAndDomain);
+        if(requestedBean != null) {
+            return getSpringBeanInfo(requestedBean);
+        }
+        else {
+            JSONObject ret = new JSONObject();
+            JSONObject beans = getAllSpringBeans(getAsConfigurableApplicationContext());
+            ret.put(providerAndDomain, beans);
+            return ret;
+        }
+    }
+
+    /**
+     * Try to match up the path segment of the request to a spring bean
+     * @return Bean definition corresponding to request, null if none
+     */
+    private BeanDefinition beanFromRequest(JolokiaListRequest pJmxReq, String providerAndDomain) {
+        List<String> pathParts = pJmxReq.getPathParts();
+        if(pathParts != null && pathParts.size() == 2 && providerAndDomain.equals(
+                pathParts.get(0))) {
+           final String beanAndName = pathParts.get(1);
+           if(beanAndName.toLowerCase().startsWith(NAME_PREFIX)) {
+               final String beanName=beanAndName.substring(NAME_PREFIX.length());
+               return getAsConfigurableApplicationContext().getBeanFactory().getMergedBeanDefinition(beanName);
+           }
+        }
+        return null;
     }
 
     // ====================================================================================
@@ -58,7 +84,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         // TODO: Fix for FactoryBeans
         for (String beanName : appCtx.getBeanDefinitionNames()) {
             BeanDefinition bd = bdFactory.getMergedBeanDefinition(beanName);
-            ret.put("name=" + beanName, getSpringBeanInfo(bd));
+            ret.put(NAME_PREFIX + beanName, getSpringBeanInfo(bd));
         }
         return ret;
     }
@@ -100,7 +126,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
             params.put(TYPE,classToString(paramType));
             // Maybe extract real name when running under Java 8 with reflection and Method.getParameters()
             // or by extracting debugging info (like Spring MVC does). For now we simply add dummy values;
-            params.put(NAME,"arg" + i++);
+            params.put(NAME_PREFIX,"arg" + i++);
             ret.add(params);
         }
         return ret;
