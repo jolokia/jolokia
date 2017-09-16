@@ -781,5 +781,6 @@
         <module>tools/roo-addon</module>
       </modules>
     </profile>
+
   </profiles>
 </project>

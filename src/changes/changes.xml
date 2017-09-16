@@ -33,6 +33,9 @@
       <action dev="pgier" type="update" issue="323">
         Update to httpcore 4.4.7 for the Java client
       </action>
+      <action dev="xiu" type="add" issue="307">
+        Add debian package generation to the JVM agent
+      </action>
     </release>
     <release version="1.3.7" description="Release 1.3.7" date="2017-07-06">
       <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
