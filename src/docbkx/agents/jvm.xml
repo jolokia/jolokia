@@ -480,11 +480,18 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
           <td></td>
         </tr>
-      </table>      
+        <tr>
+          <td><constant>policyLocation</constant></td>
+          <td>
+            Path to the XML policy file
+          </td>
+          <td></td>
+        </tr>
+      </table>
       <para>
         Upon successful startup the agent will print out a success
         message with the full URL which can be used by clients for
-        contacting the agent. 
+        contacting the agent.
       </para>
     </section>
   </section>
