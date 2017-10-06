@@ -48,7 +48,8 @@ class MulticastSocketListenerThread extends Thread {
      *                    the address from which the packet was received.
      * @param pLogHandler log handler used for logging
      */
-    MulticastSocketListenerThread(InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) throws IOException {
+    MulticastSocketListenerThread(String name, InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) throws IOException {
+        super(name);
         address = pHostAddress != null ? pHostAddress : NetworkUtil.getLocalAddressWithMulticast();
         agentDetailsHolder = pAgentDetailsHolder;
         restrictor = pRestrictor;
