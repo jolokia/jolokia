@@ -26,7 +26,9 @@ import java.util.regex.Pattern;
 
 import org.apache.http.*;
 import org.apache.http.client.methods.*;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -103,6 +105,7 @@ public class J4pRequestHandler {
         JSONObject requestContent = getJsonRequestContent(pRequest);
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
+        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         return postReq;
     }
 
@@ -114,13 +117,12 @@ public class J4pRequestHandler {
         String base = pUri.getPath();
         if (base == null) {
             return "/";
-        } else if (!base.endsWith("/")) {
-            return base + "/";
-        } else {
-            return base;
         }
+        if (!base.endsWith("/")) {
+            return base + "/";
+        }
+        return base;
     }
-
 
     /**
      * Get an HTTP Request for requesting multiples requests at once
@@ -138,6 +140,7 @@ public class J4pRequestHandler {
             bulkRequest.add(requestContent);
         }
         postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
+        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         return postReq;
     }
 
