@@ -16,35 +16,39 @@ package org.jolokia.jvmagent.handler;
  * limitations under the License.
  */
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
-
-import com.sun.net.httpserver.*;
 import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.http.BackChannelHolder;
 import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.util.ChunkedWriter;
-import org.jolokia.service.discovery.DiscoveryMulticastResponder;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONStreamAware;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -166,7 +170,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
             }
             if (jolokiaContext.isDebug()) {
-                jolokiaContext.info("Response: " + json);
+                jolokiaContext.debug("Response: " + json);
             }
         } catch (EmptyResponseException exp) {
             // No response needed, will answer later ..
