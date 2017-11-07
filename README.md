@@ -147,7 +147,7 @@ If you set your `user.name` and `user.email` git configs, you can sign your
 commit automatically with `git commit -s`.
 
 If you fix some documentation (typos, formatting, ...) you are not required to sign-off. 
-It is possible to sign you commits in retrospective, [too](http://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
+It is possible to sign your commits in retrospective, [too](http://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
 if you forgot it the first time. 
 
  [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"
