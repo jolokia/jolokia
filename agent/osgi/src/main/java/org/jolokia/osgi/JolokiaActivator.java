@@ -128,6 +128,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             configAdminTracker = null;
         }
 
+        if (jolokiaHttpContext instanceof ServiceAuthenticationHttpContext) {
+            final ServiceAuthenticationHttpContext context =
+                    (ServiceAuthenticationHttpContext) jolokiaHttpContext;
+            context.close();
+        }
+
         restrictor = null;
         bundleContext = null;
     }
@@ -141,11 +147,16 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     public synchronized HttpContext getHttpContext() {
         if (jolokiaHttpContext == null) {
             final String user = getConfiguration(USER);
+            final String authMode = getConfiguration(AUTH_MODE);
             if (user == null) {
-                jolokiaHttpContext = new DefaultHttpContext();
+                if (!authMode.equalsIgnoreCase("service")) {
+                    jolokiaHttpContext = new DefaultHttpContext();
+                } else {
+                    jolokiaHttpContext = new ServiceAuthenticationHttpContext(bundleContext);
+                }
             } else {
                 jolokiaHttpContext = new BasicAuthenticationHttpContext(getConfiguration(REALM),
-                                                                        createAuthenticator());
+                        createAuthenticator());
             }
         }
         return jolokiaHttpContext;
@@ -351,6 +362,5 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         }
         System.err.println("Jolokia-Error: " + message + " : " + throwable.getMessage());
     }
-
 
 }

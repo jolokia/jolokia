@@ -210,7 +210,7 @@ public enum ConfigKey {
 
     /**
      * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
-     * JaaS authentication.
+     * JaaS authentication, "service" to use Authenticator provided via Service Registry
      */
     AUTH_MODE("authMode", true, false, "basic"),
 
