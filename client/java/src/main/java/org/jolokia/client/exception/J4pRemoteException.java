@@ -20,7 +20,7 @@ import org.jolokia.client.request.J4pRequest;
 import org.json.simple.JSONObject;
 
 /**
- * Exception occured on the remote side (i.e the server).
+ * Exception occurred on the remote side (i.e the server).
  *
  * @author roland
  * @since Jun 9, 2010

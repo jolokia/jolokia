@@ -184,7 +184,7 @@ public abstract class J4pRequest {
      *    </li>
      *    <li>
      *      If the argument is a {@link Collection}, it is transformed into a {@see JSONArray} with
-     *      the values recursively serialized to their JSON representaion.
+     *      the values recursively serialized to their JSON representation.
      *    </li>
      *    <li>
      *      Otherwise the object is used directly.
