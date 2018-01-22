@@ -498,6 +498,7 @@ public class AgentServlet extends HttpServlet {
                 writer.write("(");
                 pJson.writeJSONString(writer);
                 writer.write(");");
+                writer.write(ChunkedWriter.UTF8_TERMINATE_CHUNK);
             }
         } finally {
             if (writer != null) {

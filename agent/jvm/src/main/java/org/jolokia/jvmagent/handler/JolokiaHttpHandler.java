@@ -355,6 +355,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                     pJson.writeJSONString(writer);
                     writer.write(");");
                 }
+                writer.write(ChunkedWriter.UTF8_TERMINATE_CHUNK);
             } else {
                 headers.set("Content-Type", "text/plain");
                 pExchange.sendResponseHeaders(200,-1);
