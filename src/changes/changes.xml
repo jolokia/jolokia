@@ -40,6 +40,10 @@
       <action dev="xiu" type="add" issue="307">
         Add debian package generation to the JVM agent
       </action>
+      <action dev="rhuss" type="add">
+        Print all configuration value for the <code>/version</code> command: When not set explicitly then print the
+        default value (if any).
+      </action>
       <action dev="danpfe" type="add" issue="343">
         Modifications to make JVM Agent work on IBM JVM 8.
       </action>
