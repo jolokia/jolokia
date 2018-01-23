@@ -75,6 +75,33 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+      <subsection name="2018 Kick-Off with Jolokia 1.4.0">
+        <div class="news-date">2018-01-23</div>
+        <p>
+          Jolokia 1.3.8 is the first release in 2018 (happy new year to everyone btw ;-) and brings some small new
+          features and fixes:
+        </p>
+        <ul>
+          <li>CORS header 'Access-Control-Max-Age' fixed</li>
+          <li>Update of HTTP client libraries for the Java client</li>
+          <li>Add debian package generation for the agent</li>
+          <li>
+            Removed internal class <code>ChunkedWriter</code> which accidentally includes parts of the internal Java class
+            <code>StreamEncoder</code>
+          </li>
+        </ul>
+        <p>
+          Even when the minor bug fixes or feature changes might not make you considering an upgrade, the last point
+          is important. The Jolokia version from 1.3.4 to 1.3.7 included a class <code>ChunkedWriter</code> which in
+          turn included some parts of the Java internal class <code>StreamEncoder</code>, which is released under the
+          GPL. As you might know Jolokia is released under the APL which is not compatible to the GPL. The affected
+          class has been removed so everything is clean again (to the best of my knowledge).
+        </p>
+        <p>
+          Sorry for any inconvenience. If you any questions to this version or implication, please create an
+          issue at the <a href="https://github.com/rhuss/jolokia">GitHub</a> project.
+        </p>
+      </subsection>
       <subsection name="Small 1.3.7">
         <div class="news-date">2017-07-06</div>
         <p>
