@@ -79,7 +79,7 @@ public class AgentServlet extends HttpServlet {
     // whether to allow reverse DNS lookup for checking the remote host
     private boolean allowDnsReverseLookup;
 
-    // wheter to allow streaming mode for response
+    // whether to allow streaming mode for response
     private boolean streamingEnabled;
 
     /**
@@ -487,26 +487,9 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private void sendStreamingResponse(HttpServletResponse pResp, String callback, JSONStreamAware pJson) throws IOException {
-        ChunkedWriter writer = null;
-        try {
-            writer = new ChunkedWriter(pResp.getOutputStream(), "UTF-8");
-            if (callback == null) {
-                pJson.writeJSONString(writer);
-            } else {
-                writer.write(callback);
-                writer.write("(");
-                pJson.writeJSONString(writer);
-                writer.write(");");
-            }
-        } finally {
-            if (writer != null) {
-                // Always close in order to finish the request.
-                // Otherwise the thread blocks.
-                writer.flush();
-                writer.close();
-            }
-        }
+    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
+        Writer writer = new OutputStreamWriter(pResp.getOutputStream(), "UTF-8");
+        IoUtil.streamResponseAndClose(writer, pJson, pCallback);
     }
 
     private void sendAllJSON(HttpServletResponse pResp, String callback, JSONAware pJson) throws IOException {

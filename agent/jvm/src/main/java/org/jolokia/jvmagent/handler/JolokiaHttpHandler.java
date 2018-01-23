@@ -339,33 +339,16 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStreamAware pJson) throws IOException {
-        ChunkedWriter writer = null;
-        try {
-            Headers headers = pExchange.getResponseHeaders();
-            if (pJson != null) {
-                headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
-                String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
-                pExchange.sendResponseHeaders(200, 0);
-                writer = new ChunkedWriter(pExchange.getResponseBody(), "UTF-8");
-                if (callback == null) {
-                    pJson.writeJSONString(writer);
-                } else {
-                    writer.write(callback);
-                    writer.write("(");
-                    pJson.writeJSONString(writer);
-                    writer.write(");");
-                }
-            } else {
-                headers.set("Content-Type", "text/plain");
-                pExchange.sendResponseHeaders(200,-1);
-            }
-        } finally {
-            if (writer != null) {
-                // Always close in order to finish the request.
-                // Otherwise the thread blocks.
-                writer.flush();
-                writer.close();
-            }
+        Headers headers = pExchange.getResponseHeaders();
+        if (pJson != null) {
+            headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+            String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
+            pExchange.sendResponseHeaders(200, 0);
+            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), "UTF-8");
+            IoUtil.streamResponseAndClose(writer, pJson, callback);
+        } else {
+            headers.set("Content-Type", "text/plain");
+            pExchange.sendResponseHeaders(200,-1);
         }
     }
 
