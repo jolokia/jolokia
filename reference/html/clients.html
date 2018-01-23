@@ -895,7 +895,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
 </pre><p>
       The builder supports the following parameters with the given
       defaults: 
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;8.2.&nbsp;J4pClient parameters</b></p><div class="table-contents"><table id="d0e6877"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;8.2.&nbsp;J4pClient parameters</b></p><div class="table-contents"><table id="d0e6888"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Parameter</td>
           <td>Description</td>
           <td>Default</td>
@@ -978,6 +978,14 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <td><code class="constant">maxTotalConnections</code></td>
         <td>
           Defines the number of total connections to be pooled. It
+          is only used when <code class="constant">pooledConnection</code> is
+          used.
+        </td>
+        <td>20</td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">defaultMaxConnectionsPerRoute</code></td>
+        <td>
+          Defines the number of total connections per route. It
           is only used when <code class="constant">pooledConnection</code> is
           used.
         </td>

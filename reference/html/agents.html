@@ -1445,10 +1445,16 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             suffixes like in <code class="code">sslCipherSuite.1</code>, <code class="code">sslCipherSuite.2</code>, ...
           </td>
           <td></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">policyLocation</code></td>
+          <td>
+            Path to the XML policy file
+          </td>
+          <td></td>
         </tr></table></div></div><p>
         Upon successful startup the agent will print out a success
         message with the full URL which can be used by clients for
-        contacting the agent. 
+        contacting the agent.
       </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-attach"></a>3.4.2.&nbsp;Attaching a Jolokia agent on the fly</h3></div></div></div><p>
       A Jolokia agent can be attached to any running Java process as
       long as the user has sufficient access privileges for
