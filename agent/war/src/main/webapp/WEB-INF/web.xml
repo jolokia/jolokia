@@ -50,7 +50,7 @@
     </init-param>
     <init-param>
       <description>
-        Maximum number of entries to keed in the local
+        Maximum number of entries to keep in the local
         debug history if switched on. Can be change via
         the config MBean during runtime.
       </description>
