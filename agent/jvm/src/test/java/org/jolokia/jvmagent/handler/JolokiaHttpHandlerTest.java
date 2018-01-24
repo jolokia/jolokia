@@ -74,6 +74,67 @@ public class JolokiaHttpHandlerTest {
         assertTrue(result.startsWith("data({"));
     }
 
+
+    @Test
+    public void testInvalidMimeType() throws IOException, URISyntaxException {
+        checkMimeType("text/html", "text/plain");
+    }
+
+    @Test
+    public void testMimeTypeApplicationJson() throws IOException, URISyntaxException {
+        checkMimeType("application/json", "application/json");
+    }
+
+    private void checkMimeType(String given, String expected) throws IOException, URISyntaxException {
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage?mimeType=" + given);
+
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+
+        handler.doHandle(exchange);
+
+        assertEquals(header.getFirst("content-type"),expected + "; charset=utf-8");
+    }
+
+    @Test
+    public void testInvalidCallbackGetStreaming() throws IOException, URISyntaxException, ParseException {
+        checkInvalidCallback(true);
+    }
+
+    @Test
+    public void testInvalidCallbackGetNonStreaming() throws IOException, URISyntaxException, ParseException {
+        checkInvalidCallback(false);
+    }
+
+    private void checkInvalidCallback(boolean streaming) throws URISyntaxException, IOException, ParseException {
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.SERIALIZE_EXCEPTION, Boolean.toString(streaming)));
+        handler.start(false);
+
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage?callback=evilCallback();data");
+
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+
+        Headers header = new Headers();
+        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+
+        handler.doHandle(exchange);
+
+        assertEquals(header.getFirst("content-type"),"text/plain; charset=utf-8");
+        String result = out.toString("utf-8");
+        JSONObject resp = (JSONObject) new JSONParser().parse(result);
+        assertTrue(resp.containsKey("error"));
+        assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
+        assertTrue(((String) resp.get("error")).contains("callback"));
+        assertFalse(((String) resp.get("error")).contains("evilCallback"));
+
+        handler.stop();
+    }
+
+
     @Test
     public void testCallbackPost() throws URISyntaxException, IOException, java.text.ParseException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data",
@@ -81,7 +142,6 @@ public class JolokiaHttpHandlerTest {
                                                 "Origin",null
                                                );
 
-        // Simple GET method
         prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(handler, exchange, header);

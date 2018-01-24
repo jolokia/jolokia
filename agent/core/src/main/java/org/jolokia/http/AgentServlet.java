@@ -264,11 +264,15 @@ public class AgentServlet extends HttpServlet {
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     private void handle(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONAware json = null;
+
         try {
             // Check access policy
             requestHandler.checkAccess(allowDnsReverseLookup ? pReq.getRemoteHost() : null,
                                        pReq.getRemoteAddr(),
                                        getOriginOrReferer(pReq));
+
+            // If a callback is given, check this is a valid javascript function name
+            validateCallbackIfGiven(pReq);
 
             // Remember the agent URL upon the first request. Needed for discovery
             updateAgentDetailsIfNeeded(pReq);
@@ -276,8 +280,12 @@ public class AgentServlet extends HttpServlet {
             // Dispatch for the proper HTTP request method
             json = handleSecurely(pReqHandler, pReq, pResp);
         } catch (Throwable exp) {
-            json = requestHandler.handleThrowable(
+            try {
+                json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
+            } catch (Throwable exp2) {
+                exp2.printStackTrace();
+            }
         } finally {
             setCorsHeader(pReq, pResp);
 
@@ -288,6 +296,7 @@ public class AgentServlet extends HttpServlet {
             sendResponse(pResp, pReq, json);
         }
     }
+
 
     private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp) throws IOException, PrivilegedActionException {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
@@ -380,15 +389,6 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    // Extract mime type for response (if not JSONP)
-    private String getMimeType(HttpServletRequest pReq) {
-        String requestMimeType = pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue());
-        if (requestMimeType != null) {
-            return requestMimeType;
-        }
-        return configMimeType;
-    }
-
     private boolean isStreamingEnabled(HttpServletRequest pReq) {
         String streamingFromReq = pReq.getParameter(ConfigKey.STREAMING.getKeyValue());
         if (streamingFromReq != null) {
@@ -470,8 +470,12 @@ public class AgentServlet extends HttpServlet {
 
     private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONAware pJson) throws IOException {
         String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
-        setContentType(pResp, callback != null ? "text/javascript" : getMimeType(pReq));
 
+        setContentType(pResp,
+                       MimeTypeUtil.getResponseMimeType(
+                           pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
+                           configMimeType, callback
+                                                       ));
         pResp.setStatus(HttpServletResponse.SC_OK);
         setNoCacheHeaders(pResp);
         if (pJson == null) {
@@ -487,6 +491,12 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
+    private void validateCallbackIfGiven(HttpServletRequest pReq) {
+        String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        if (callback != null && !MimeTypeUtil.isValidCallback(callback)) {
+            throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
+        }
+    }
     private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
         Writer writer = new OutputStreamWriter(pResp.getOutputStream(), "UTF-8");
         IoUtil.streamResponseAndClose(writer, pJson, pCallback);
