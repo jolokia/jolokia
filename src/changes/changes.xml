@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.4.1-SNAPSHOT" description="Release 1.4.1-SNAPSHOT">
+      <action dev="rhuss" type="fix">
+        Restrict allowed mime types to "text/plain" and "application/json" for the response.
+      </action>
+    </release>
     <release version="1.4.0" description="Release 1.4.0" date="2018-01-23">
       <action dev="rhuss" type="fix" issue="366">
         Removed ChunkedWriter to avoid references and inclusion of parts of StreamEncoder
