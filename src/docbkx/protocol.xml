@@ -59,7 +59,7 @@
       operations</emphasis> are methods which can be invoked on an JMX
       MBean. Whenever the context requires it, this documents uses
       <emphasis>Jolokia</emphasis> or <emphasis>JMX</emphasis> as
-      prefix.  
+      prefix.
     </note>
     <section id="request-response">
       <title>Requests and Responses</title>
@@ -107,7 +107,7 @@
           attribute <literal>HeapMemoryUsage</literal> (see <xref
           linkend="read"/>). It is assumed, that the agent is
           reachable under the base URL
-          <uri>http://localhost:8080/jolokia</uri>: 
+          <uri>http://localhost:8080/jolokia</uri>:
           <informalexample>
             <literallayout class="monospaced">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</literallayout>
           </informalexample>
@@ -125,7 +125,7 @@
           behaviour is security related, slashes get decoded on the
           agent side before the agent-servlet gets the
           request. Other appservers might exhibit a similar
-          behaviour, so Jolokia uses an own escaping mechanism. 
+          behaviour, so Jolokia uses an own escaping mechanism.
         </sidebar>
         <para>
           If one of the request parts contain a slash
@@ -136,7 +136,7 @@
           <para>
             A backslash (<literal>\</literal>) can not be used, since
             most servlet container translate a backslash into a forward
-            slash on the fly when given in an URL. 
+            slash on the fly when given in an URL.
           </para>
           </footnote>. An exclamation mark itself needs to be doubled
           for escaping. Any other characted preceded by an exclamation
@@ -144,7 +144,7 @@
           linkend="escape-rules"/> illustrates the escape rules as
           used in GET requests. Also, if quotes are part of an GET
           request the need to be escaped  with
-          <constant>!"</constant>. 
+          <constant>!"</constant>.
         </para>
         <table id="escape-rules">
           <title>Escaping rules</title>
@@ -152,7 +152,7 @@
             <tr>
               <td>Escaped</td>
               <td>Unescaped</td>
-            </tr>        
+            </tr>
           </thead>
           <tr>
             <td><constant>!/</constant></td>
@@ -176,14 +176,14 @@
           on the MBean named
           <literal>jboss.jmx:alias=jmx/rmi/RMIAdaptor</literal>, an
           access URL like this has to be constructed:
-        </para>        
+        </para>
         <informalexample>
           <literallayout class="monospaced">.../read/jboss.jmx:alias=jmx!/rmi!/RMIAdaptor/State</literallayout>
         </informalexample>
         <para>
           Client libraries like <ulink
           url="http://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</ulink>
-          do this sort of escaping transparently. 
+          do this sort of escaping transparently.
         </para>
        <para>
           Escaping can be avoided alltogether if a slightly different
@@ -197,7 +197,7 @@
           </informalexample>
           This format <emphasis>must</emphasis> be used for GET
           requests containing backslashes (<literal>\</literal>) since
-          backslashes can not be sent as part of an URL at all.          
+          backslashes can not be sent as part of an URL at all.
         </para>
       </section>
 
@@ -236,7 +236,7 @@
           (case doesn't matter) and the three attributes
           <constant>mbean</constant>, <constant>attribute</constant>
           and <constant>path</constant> which are specific to a read
-          request. 
+          request.
         </para>
         <example id="request-example">
           <title>JSON Request</title>
@@ -263,7 +263,7 @@
     "mbean" : "java.lang:type=Memory",
     "path" : "used",
   },
-  { 
+  {
     "type" : "search"
     "mbean" : "*:type=Memory,*",
   }
@@ -274,7 +274,7 @@
           in same order as the requests in the initial bulk request.
         </para>
       </section>
-      
+
       <section id="responses">
         <title>Responses</title>
         <para>
@@ -297,7 +297,7 @@
           In the non-error case a JSON response looks mostly the same
           for each request type except for the
           <constant>value</constant> attribute which is request type
-          specific. 
+          specific.
         </para>
         <para>
           The format of a single Jolokia response is
@@ -395,7 +395,7 @@
           <xref linkend="jolokia-operations"/>
         </para>
       </section>
-      
+
       <section id="paths">
         <title>Paths</title>
         <para>
@@ -405,9 +405,9 @@
           is best explained by an example:
         </para>
         <para>
-          The attribute <literal>HeapMemoryUsage</literal> of the MBean 
+          The attribute <literal>HeapMemoryUsage</literal> of the MBean
           <literal>java.lang:type=Memory</literal> can be
-          requested with the URL 
+          requested with the URL
           <literal>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</literal>
           which returns a complex JSON structure like
           <programlisting language="json"><![CDATA[
@@ -440,7 +440,7 @@
         <para> If the attribute contains arrays at some level, use a numeric
           index (0 based) as part of the inner path if you want to
           traverse into this array.
-        </para>    
+        </para>
         <para>
           For both, GET and POST requests, paths must be escaped as
           described in <xref linkend="escape-rules"/> when they
@@ -455,7 +455,7 @@
         </para>
       </section>
     </section>
-    
+
     <section id="jolokia-operations">
       <title>Jolokia operations</title>
 
@@ -467,7 +467,7 @@
       <xi:include href='protocol/version.xml'/>
 
     </section>
-        
+
     <section id="processing-parameters">
       <title>Processing parameters</title>
       <para>
@@ -490,9 +490,9 @@
         <programlisting><![CDATA[
   {
     "type" : "list"
-    "config" : { 
+    "config" : {
                  "maxObjects" : 100
-               } 
+               }
   }]]></programlisting>
       <para>
         If a POST request carries also query parameters in the URL, these processing parameters
@@ -519,7 +519,7 @@
           <listitem>
             <para>
               For collections (lists, maps) this is the maximum
-              size. 
+              size.
             </para>
           </listitem>
         </varlistentry>
@@ -528,7 +528,7 @@
           <listitem>
             <para>
               Number of objects to visit in total. A hard limit
-              can be configured in the agent's configuration. 
+              can be configured in the agent's configuration.
             </para>
           </listitem>
         </varlistentry>
@@ -540,7 +540,7 @@
               error if an JMX operation fails, but includes the
               exception message as value. This is useful for e.g. the
               read operation when requesting multiple attributes'
-              values. Default: false 
+              values. Default: false
             </para>
           </listitem>
         </varlistentry>
@@ -549,10 +549,12 @@
           <listitem>
             <para>
               The MIME type to return for the response. By default,
-              this is <literal>text/plain</literal>, but it can be
+              this is <constant>text/plain</constant>, but it can be
               useful for some tools to change it to
-              <literal>application/json</literal>. Init parameters can
+              <constant>application/json</constant>. Init parameters can
               be used to change the default mime type.
+              Only <constant>text/plain</constant> and <constant>application/json</constant> are allowed.
+              For any other value Jolokia will fallback to <constant>text/plain</constant>.
             </para>
           </listitem>
         </varlistentry>
@@ -569,9 +571,9 @@
           <term><literal>includeStackTrace</literal></term>
           <listitem>
             <para>
-              If set to <constant>true</constant>, then in case of an error the stack trace is included. 
+              If set to <constant>true</constant>, then in case of an error the stack trace is included.
               With <constant>false</constant> no stack trace will be returned, and when this parameter
-              is set to <constant>runtime</constant> only for RuntimeExceptions a stack trace is put into 
+              is set to <constant>runtime</constant> only for RuntimeExceptions a stack trace is put into
               the error response. Default is <constant>true</constant> if not set otherwise in the global
               agent configuration.
             </para>
@@ -604,7 +606,7 @@
         </varlistentry>
       </variablelist>
     </section>
-    
+
     <section id="serialization">
       <title>Object serialization</title>
       <para>
@@ -620,10 +622,10 @@
         serialization. For certain types (like
         <classname>File</classname> or
         <classname>ObjectName</classname>) it uses simplifier to not
-        expose internal and redundant information. 
+        expose internal and redundant information.
       </para>
       <para>
-        Object values used for values in 
+        Object values used for values in
         <emphasis>write</emphasis> operations and arguments in
         <emphasis>exec</emphasis>, type support is limited to a
         handful of data types.
@@ -691,7 +693,7 @@
             <listitem>
               <classname>javax.management.ObjectName</classname> is
               converted into a JSON object with the single key
-              <literal>objectName</literal>. 
+              <literal>objectName</literal>.
             </listitem>
             <listitem>
               <classname>java.net.URL</classname> becomes a JSON
@@ -748,7 +750,7 @@
          <classname>TabularData</classname>'s indexes as names and
          <constant>values</constant> is the array containing the
          values as JSON object with the corresponding rows as values
-         (including the indexes).          
+         (including the indexes).
         </para>
         <para>
           For example if there is a single valued key
@@ -815,7 +817,7 @@
             <term><constant>[this]</constant></term>
             <listitem>
               <para>
-                This label is used when a property contains a self reference 
+                This label is used when a property contains a self reference
               </para>
             </listitem>
           </varlistentry>
@@ -836,7 +838,7 @@
             <listitem>
               <para>
                 If during the traversal an object is visited a second time, this label is
-                used in order to break the cycle. 
+                used in order to break the cycle.
               </para>
             </listitem>
           </varlistentry>
@@ -852,9 +854,9 @@
               </para>
             </listitem>
           </varlistentry>
-        </variablelist>  
+        </variablelist>
       </section>
-      
+
       <section id="serialization-request">
         <title>Request parameter serialization</title>
         <para>
@@ -878,10 +880,10 @@
           <literal>GET</literal> upstream serialization is limited to
           basic types and simple arrays. POST requests on the other
           support a much large set of types, including the
-          serialization of <constant>Map</constant>s, 
+          serialization of <constant>Map</constant>s,
           <constant>List</constant>s and all <ulink
           url="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">Open
-          Types</ulink>. 
+          Types</ulink>.
         </para>
         <section>
           <title>GET request values</title>
@@ -952,7 +954,7 @@
             Arrays (of a basic type) or Lists, depending on the
             requirement as dictated by the MBeans operation or
             attribute signature. Numbers in JSON are always transfered
-            as long or double values and are as well tried to fit 
+            as long or double values and are as well tried to fit
             to the MBean's signature. In case of an overflow
             (e.g. when trying to treat a long with a too large value
             as int), an exception is raised.
@@ -972,12 +974,12 @@
             url="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">OpenType</ulink>s.
             If the signature of JMX exec operation or the value type
             of a JMX attribute is a <classname>OpenType</classname>,
-            they are serialized as follows:            
+            they are serialized as follows:
           </para>
           <itemizedlist>
             <listitem>
               <classname>SimpleType</classname>s are extracted from
-              their corresponding JSON type. 
+              their corresponding JSON type.
             </listitem>
             <listitem>
               <classname>ArrayType</classname> is extracted from a
@@ -985,7 +987,7 @@
               serialized recursively with this algorithms. Only
               <classname>ArrayType</classname>s with element type
               <classname>CompositeType</classname> or
-              <classname>SimpleType</classname> are supported. 
+              <classname>SimpleType</classname> are supported.
             </listitem>
             <listitem>
               <classname>CompositeType</classname> is extracted
@@ -1006,12 +1008,12 @@
                 than one index name, the incoming
                 <classname>JSONObjecct</classname> must be a nested
                 object with each index as an additional
-                layer. E.g. the following JSON object works for 
+                layer. E.g. the following JSON object works for
                 a <classname>TabularType</classname> with the two
                 index names <literal>lastname</literal> and
                 <literal>firstname</literal>, which are both of type <classname>SimpleType.STRING</classname>:
               </para>
-        <programlisting language="perl"><![CDATA[{ 
+        <programlisting language="perl"><![CDATA[{
   "Mann": {
            "Thomas": {
                       "lastname": "Mann",
@@ -1052,7 +1054,7 @@
                 the JSON structure for setting the <classname>TabularData</classname> should
                 look like
               </para>
-        <programlisting language="perl"><![CDATA[{ 
+        <programlisting language="perl"><![CDATA[{
   "indexNames": [ "user" ],
   "values" : [
      { "user" : { "lastname": "Mann", "firstname": "Thomas" }, "birth": 1875 },
@@ -1061,7 +1063,7 @@
 }]]></programlisting>
             </listitem>
           </itemizedlist>
-          
+
         </section>
       </section>
 
@@ -1082,7 +1084,7 @@
           data types. The framework will translate forth and back
           between the custom and open types according to certain rules
           as declared in the MXBean <ulink
-          url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">specification</ulink>. 
+          url="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">specification</ulink>.
           Most of the translations to open types fits naturally to
           Jolokia's serialization, except for the translation of Map.
         </para>
@@ -1093,17 +1095,17 @@
           structure, i.e. with an index <literal>key</literal> and
           rows with keys <literal>key</literal> and
           <literal>value</literal>. This leads directly to a JSON
-          representation which is quite artificial. E.g a map with 
+          representation which is quite artificial. E.g a map with
           two keys <literal>kind</literal> and
           <literal>hotness</literal> will be converted by the MXBean
           framework to a TabularData object which in turn would be
           translated by Jolokia to the following JSON struture
         </para>
       <programlisting><![CDATA[{
-  "kind" : { 
+  "kind" : {
              "key": "kind",
              "value": "Habanero"
-           }, 
+           },
   "hotness" : {
                 "key": "hotness",
                 "value": 10
@@ -1118,11 +1120,11 @@
         back (and forth) to
       </para>
       <programlisting><![CDATA[{
-  "kind" : "Habanero", 
+  "kind" : "Habanero",
   "hotness" : 10
-}]]></programlisting>            
+}]]></programlisting>
       </section>
-      
+
     </section>
 
     <section id="history">
@@ -1149,7 +1151,7 @@
         <constant>timestamp</constant> indicating the time when this
         value was current (as measured by the server). <xref
         linkend="response-example"/> has an example of a response
-        containing historical values. 
+        containing historical values.
       </para>
       <para>
         For multi attribute read requests, the history entry in the
@@ -1172,11 +1174,11 @@
     "type" : "read",
     "mbean" : "java.lang:type=Memory",
     "attribute" : "HeapMemoryUsage",
-    "target" : { 
+    "target" : {
          "url" : "service:jmx:rmi:///jndi/rmi://targethost:9999/jmxrmi",
          "user" : "jolokia",
          "password" : "s!cr!t"
-    } 
+    }
   }]]></programlisting>
       <para>
         <literal>url</literal> within the <literal>target</literal>
@@ -1186,7 +1188,7 @@
         for the JSR-160 communication.
       </para>
     </section>
-    
+
     <section id="discovery">
       <title>Agent Discovery</title>
       <para>
@@ -1205,13 +1207,13 @@
         to be discovered. The configuration options for enabling
         multicast requests are described in the <xref
         linkend="agent-jvm-config">JVM</xref> and <xref
-        linkend="agent-war-init-params">WAR</xref> agent configuration 
-        sections.         
+        linkend="agent-war-init-params">WAR</xref> agent configuration
+        sections.
       </para>
       <para>
         A agent which is enabled for multicast discovery will only
         respond to a multicast request if the <xref
-        linkend="security-policy">restrictor</xref> allows 
+        linkend="security-policy">restrictor</xref> allows
         connections from the source IP. Otherwise a multicast request
         will be simply ignored. For example, if you have configured
         your agent to only allow request from a central monitoring
@@ -1237,8 +1239,8 @@
         For sending a multicast request discovery message, an UDP
         message should be send to the address <literal>239.192.48.84</literal>, port
         <literal>24884</literal> which contains a JSON message encoded in UTF-8 with
-        the following format 
-      </para>      
+        the following format
+      </para>
       <programlisting><![CDATA[
   {
     "type": "query"
@@ -1252,10 +1254,10 @@
     "agent_description" : "Atlantis Tomcat",
     "agent_id" : "10.9.11.18-58613-81b087d-servlet",
     "url": "http://10.9.11.25:8778/jolokia",
-    "server_vendor" : "Apache", 
+    "server_vendor" : "Apache",
     "server_product" : "Tomcat",
     "server_version" : "7.0.35"
-  }]]></programlisting>      
+  }]]></programlisting>
       <para>
         The response itself is a JSON object and is restricted to 8192
         bytes maximum. The request type is either
@@ -1277,13 +1279,13 @@
           <td>Property</td>
           <td>Description</td>
           <td>Example</td>
-        </tr>        
+        </tr>
       </thead>
       <tr>
         <td><constant>type</constant></td>
         <td>
           Request type, either <constant>query</constant> or
-          <constant>response</constant>. 
+          <constant>response</constant>.
         </td>
         <td>
           <constant>query</constant> or <constant>response</constant>
@@ -1306,7 +1308,7 @@
         <td><constant>agent_description</constant></td>
         <td>
           An optional description which can be used as a UI label if
-          given. 
+          given.
         </td>
         <td>
           ServiceMix ESB
@@ -1331,7 +1333,7 @@
       <tr>
         <td><constant>secured</constant></td>
         <td>
-          Whether the agent was configured for authentication or not. 
+          Whether the agent was configured for authentication or not.
         </td>
         <td>
           false
@@ -1472,7 +1474,7 @@
               (i.e. with <literal>key</literal> and
               <literal>value</literal> columns), the
               <classname>TabularData</classname> is transformed to an
-              appropriate map.. 
+              appropriate map..
             </para>
           </listitem>
           <listitem>
@@ -1481,7 +1483,7 @@
               the serialized JSON representation of a File return
               value since it duplicated the
               <literal>lastModified</literal> property on the same
-              object. 
+              object.
             </para>
           </listitem>
         </varlistentry>
@@ -1491,7 +1493,7 @@
             <para>
               The <literal>list</literal> operation supports a
               <literal>maxDepth</literal> option for truncating the
-              answer. 
+              answer.
             </para>
           </listitem>
         </varlistentry>

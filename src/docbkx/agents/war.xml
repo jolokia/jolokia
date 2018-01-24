@@ -244,7 +244,9 @@
       <tr>
         <td><constant>mimeType</constant></td>
         <td>
-          MIME to use for the JSON responses
+          MIME to use for the JSON responses. Only <constant>application/json</constant> and
+          <constant>text/plain</constant> are allowed.
+          If any other type is given, Jolokia falls back to <constant>text/plain</constant>.
         </td>
         <td>
           Default: <constant>text/plain</constant>
