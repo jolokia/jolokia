@@ -41,7 +41,7 @@
         Add debian package generation to the JVM agent
       </action>
       <action dev="rhuss" type="add">
-        Print all configuration value for the <code>/version</code> command: When not set explicitly then print the
+        Print all configuration value for the /version  command: When not set explicitly then print the
         default value (if any).
       </action>
       <action dev="danpfe" type="add" issue="343">
