@@ -1,13 +1,13 @@
-Webarchive (WAR) Agent 
+Webarchive (WAR) Agent
 
-  This agent is most suitable for JEE environments. It gets deployed
+  This agent is most suitable for Java EE environments. It gets deployed
   as a usual web archive. The specific deployment procedure depends on
-  the JEE server in used. E.g. for Tomcat, its not more than a copy of
-  <<jolokia.war>> into the the <<<webapps/>>> directory. 
+  the Java EE server in used. E.g. for Tomcat, its not more than a copy of
+  <<jolokia.war>> into the the <<<webapps/>>> directory.
 
   As soon as it is deployed, the agents offers its services under the
   URL of the deployed web application. For Tomcat running with its
-  standard configuration the agent is then reachable under 
+  standard configuration the agent is then reachable under
 
 ------
 http://localhost:8080/jolokia

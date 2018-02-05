@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Overview</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -32,13 +32,13 @@
       <p>
         Jolokia is an agent based approach for remote JMX access. It
         is an alternative to standard <a
-        href="http://jcp.org/en/jsr/detail?id=160">JSR 160</a> 
+        href="http://jcp.org/en/jsr/detail?id=160">JSR 160</a>
         connectors. The communication between client and agent goes
         over HTTP (either GET or POST), where the request and response
         payload is represented in JSON.
       </p>
       <p>
-        The Jolokia protocol supports the following operations: 
+        The Jolokia protocol supports the following operations:
       </p>
       <ul>
         <li>Reading and writing JMX attributes</li>
@@ -61,7 +61,7 @@
         <img src="../images/jolokia_architecture.png" alt="Architecture"/>
       </div>
       <p>
-        This approach has some advantages: 
+        This approach has some advantages:
       </p>
       <ul>
         <li>
@@ -75,7 +75,7 @@
             <li>
               Fine grained <a href="security.html">security</a> with
               access restriction on MBean operation and attribute
-              level. 
+              level.
             </li>
             <li>
               Merging of multiple <code>MBeanServer</code> into one
@@ -95,7 +95,7 @@
               href="polyglot.html">client</a> side due to the platform
               neutral nature of HTTP and JSON.
             </li>
-            <li> 
+            <li>
               JSON serialization allows for deep access into returned
               objects without having custom type definitions installed
               on the client side.
@@ -107,7 +107,7 @@
           <a href="firewall.html">firewall</a> configuration. The
           JSR-160 default connector in contrast is not that smart
           since RMI uses a random port for its communication by
-          default. 
+          default.
         </li>
         <li>
           As paradox as it might sound, setting up an agent is often
@@ -127,13 +127,13 @@
         export so an extra installation step is not welcome. Also,
         updating Jolokia normally implies a redeployment of the
         agent. These are all good reasons, for which Jolokia has an
-        answer, too. By installing a dedicated JEE-Server with an
+        answer, too. By installing a dedicated Java EE-Server with an
         deployed agent, Jolokia can operate in  <a
         href="proxy.html">proxy mode</a>, in which case it translate
         Jolokia JSON request into JSR-160 client request for operation
         on the target server. Vice versa, the result over a JSR-160
         connector then gets translated into a JSON response which is
-        returned to Jolokia client. 
+        returned to Jolokia client.
       </p>
       <subsection name="Example">
         <p>
@@ -169,7 +169,7 @@
                  "mbean":"java.lang:type=Memory",
                  "attribute":"HeapMemoryUsage",
                  "type":"read"
-               }, 
+               },
      "value": {
                 "max":"129957888",
                 "committed":"85000192",
@@ -184,7 +184,7 @@
             Learn something about <a href="bulk-requests.html">bulk JMX requests</a>.
           </li>
           <li>
-            See why jolokia is the <a href="polyglot.html">perfect choice</a> for non-Java environments 
+            See why jolokia is the <a href="polyglot.html">perfect choice</a> for non-Java environments
             to access Java servers via JMX.
           </li>
           <li>
@@ -193,6 +193,6 @@
         </ul>
       </subsection>
     </section>
-  </body>    
+  </body>
 </document>
 

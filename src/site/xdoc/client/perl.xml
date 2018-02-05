@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Jmx4Perl</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -29,7 +29,7 @@
       <p>
         As described in this <a href="../about.html">story</a>, Jolokia has its origins
         in the Perl world where it starts as a simple solution for monitoring
-        Java JEE applications with
+        Java Java EE applications with
         <a href="http://www.nagios.org">Nagios</a>. <a href="http://www.jmx4perl.org">Jmx4perl</a>
         was its former name, which in addition the agents contains
         powerfule Perl modules for accessing Jolokia instrumented
@@ -44,7 +44,7 @@
       <pre class="prettyprint lang-perl">
    use strict;
    use JMX::Jmx4Perl;
-   use JMX::Jmx4Perl::Alias;   # Import MBean aliases 
+   use JMX::Jmx4Perl::Alias;   # Import MBean aliases
 
    # Basic usage
    print "Memory Used: ",

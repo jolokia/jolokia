@@ -16,13 +16,13 @@
   -->
 
 <section id="agents-war">
-  <title>JEE Agent (WAR)</title>
+  <title>Java EE Agent (WAR)</title>
 
   <section id="war-agent-installation">
     <title>Installation and Configuration</title>
     <para>
       The WAR agent is the most popular variant, and can be deployed
-      in a servlet container just like any other JEE web application.<sidebar>
+      in a servlet container just like any other Java EE web application.<sidebar>
       <title>Tomcat example</title>
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <ulink
@@ -70,7 +70,7 @@
   </variablelist>
   <para>
     The configuration options <literal>discoveryEnabled</literal> and
-    <literal>discoveryAgentUrl</literal> can be provied via environent
+    <literal>discoveryAgentUrl</literal> can be provided via environment
     variables or system properties, too. See the below for details.
   </para>
   <table id="agent-war-init-params">
@@ -89,11 +89,25 @@
           to the
           <constant>LocalRequestDispatcher</constant>. Dispatchers are
           a technique used by the JSR-160 proxy to dispatch (or
-          'route') a request to a different destination.
+          'route') a request to a different destination. By default no extract dispatchers are enabled (changed in 1.5.0)
+          You can use the system property <literal>org.jolokia.jsr160ProxyEnabled</literal> or the
+          environment variable <literal>JOLOKIA_JSR160_PROXY_ENABLED</literal> to enable the the JSR-160 proxy.
+          In that case you should be sure that you enable authentication for the web application to protect access
+          to the proxy.
         </td>
         <td>
           <literal>org.jolokia.jsr160.Jsr160RequestDispatcher</literal>
           (this is the dispatcher for the JSR-160 proxy)
+        </td>
+      </tr>
+      <tr>
+        <td><constant>jsr160ProxyAllowedTargets</constant></td>
+        <td>
+          Path to a white list of patterns which are matched against possible
+          JMX service URL for incoming requests
+        </td>
+        <td>
+          <literal>/opt/jolokia/jsr160-proxy-allowed-patterns.txt</literal>
         </td>
       </tr>
       <tr>
@@ -326,7 +340,7 @@
           Is set to <literal>true</literal> then this servlet will
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
-          avoid conflicts with an JEE standards (though this should't
+          avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
           <literal>JOLOKIA_DISCOVERY</literal> or the system
@@ -414,7 +428,7 @@
   <section id="agent-war-security">
     <title>Security Setup</title>
     <para>
-      In order use JEE security within the war, some extra
+      In order use Java EE security within the war, some extra
       configuration steps are required within
       <filename>web.xml</filename>.<sidebar>
       <title>Using jmx4perl's <literal>jolokia</literal> tool</title>
@@ -508,7 +522,7 @@
       distinguish multiple Jolokia MBeans by adding an extra
       propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
-      the same JEE server.
+      the same Java EE server.
     </para>
   </section>
 </section>

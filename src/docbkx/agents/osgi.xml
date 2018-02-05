@@ -138,7 +138,7 @@
       <literal>org.jolokia</literal> and are listed in <xref
       linkend="table-agents-osgi-properties"/>. They are mostly the
       same as the <literal>init-param</literal> options for
-      a Jolokia servlet when used in a JEE WAR artifact.
+      a Jolokia servlet when used in a Java EE WAR artifact.
     </para>
     <table id="table-agents-osgi-properties">
       <title>Jolokia Bundle Properties</title>
@@ -195,6 +195,11 @@
           of
           <classname>org.jolokia.jsr160.Jsr160RequestDispatcher</classname>
           allows the agent to play the role of a JSR-160 proxy.
+          By default no extract dispatchers are enabled.
+          You can use the system property <literal>org.jolokia.jsr160ProxyEnabled</literal> or the
+          environment variable <literal>JOLOKIA_JSR160_PROXY_ENABLED</literal> to enable the the JSR-160 proxy.
+          In that case you should be sure that you enable authentication for the web application to protect access
+          to the proxy.
         </td>
       </tr>
       <tr>
@@ -342,7 +347,7 @@
           Is set to <literal>true</literal> then this servlet will
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
-          avoid conflicts with an JEE standards (though this should't
+          avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
           <literal>JOLOKIA_DISCOVERY</literal> or the system
@@ -409,7 +414,7 @@
      <para>
         You have a couple of choices when running jolokia on
         Glassfish v3 and up, since Glassfish is a both a fully
-        fledged JEE container and an OSGi container. If you
+        fledged Java EE container and an OSGi container. If you
         choose to run the <xref linkend="agents-war"/> then it
         is completely straight forward just deploy the war
         in the normal way. If you choose to deploy

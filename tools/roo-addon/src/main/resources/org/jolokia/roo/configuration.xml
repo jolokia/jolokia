@@ -92,14 +92,6 @@
         <artifactId>jolokia-jsr160</artifactId>
         <version>${jolokia.version}</version>
       </dependency>
-      <init-param>
-        <description>
-          Class names (comma separated) of RequestDispatcher used in addition
-          to the LocalRequestDispatcher
-        </description>
-        <param-name>dispatcherClasses</param-name>
-        <param-value>org.jolokia.jsr160.Jsr160RequestDispatcher</param-value>
-      </init-param>
     </jsr160Proxy>
   </jolokia>
 </configuration>

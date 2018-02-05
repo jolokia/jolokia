@@ -13,7 +13,7 @@ REST-stylish way.
 
 Multiple agents are provided for different environments:
 
-* **WAR Agent** for deployment as web application in a JEE Server. 
+* **WAR Agent** for deployment as web application in a Java EE Server. 
 * **OSGi Agent** for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).

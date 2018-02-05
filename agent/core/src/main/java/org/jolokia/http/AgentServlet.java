@@ -137,12 +137,40 @@ public class AgentServlet extends HttpServlet {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
-        backendManager = new BackendManager(config,logHandler, restrictor);
-        requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
+
+        addJsr160DispatcherIfExternallyConfigured(config);
+        backendManager = new BackendManager(config, logHandler, restrictor);
+
+        requestHandler = new HttpRequestHandler(config, backendManager, logHandler);
         allowDnsReverseLookup = config.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP);
         streamingEnabled = config.getAsBoolean(ConfigKey.STREAMING);
 
         initDiscoveryMulticast(config);
+    }
+
+
+    /**
+     * Add the JsrRequestDispatcher if configured via a system property or env variable.
+     * The JSR160 dispatcher is disabled by default, but this allows to enable it again
+     * without reconfiguring the servlet
+     *
+     * @param pConfig configuration to update
+     */
+    private void addJsr160DispatcherIfExternallyConfigured(Configuration pConfig) {
+        for (String param : new String[] {
+            System.getProperty("org.jolokia.jsr160ProxyEnabled"),
+            System.getenv("JOLOKIA_JSR160_PROXY_ENABLED")
+        }) {
+            if (param !=null && (param.isEmpty() || Boolean.parseBoolean(param))){
+                String dispatchers = pConfig.get(ConfigKey.DISPATCHER_CLASSES);
+
+                pConfig.updateGlobalConfiguration(
+                    Collections.singletonMap(
+                        ConfigKey.DISPATCHER_CLASSES.getKeyValue(),
+                        (dispatchers != null ? dispatchers + "," : "") + "org.jolokia.jsr160.Jsr160RequestDispatcher"));
+                return;
+            }
+        }
     }
 
     /**
@@ -474,8 +502,7 @@ public class AgentServlet extends HttpServlet {
         setContentType(pResp,
                        MimeTypeUtil.getResponseMimeType(
                            pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
-                           configMimeType, callback
-                                                       ));
+                           configMimeType, callback));
         pResp.setStatus(HttpServletResponse.SC_OK);
         setNoCacheHeaders(pResp);
         if (pJson == null) {

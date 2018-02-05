@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Simple</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -36,12 +36,12 @@
       <ul>
         <li>
           The <a href="../agent/war.html">WAR Agent</a> gets deployed as any other
-          JEE web application. Often this is as simpe as a simple
+          Java EE web application. Often this is as simpe as a simple
           copy of the agent war-artifact into a certain directory
           (like for Tomcat). Or it gets deployed via an administrative
           user interface (web GUI or command line tool). In any case,
           the procedure should be familar to any Java developer or
-          administrator dealing with JEE applications.
+          administrator dealing with Java EE applications.
         </li>
         <li>
           The <a href="../agent/osgi.html">OSGi Agent</a> gets deployed as any other
@@ -71,7 +71,7 @@
         <code>PlatformMBeanServer</code>. On our blog, detailed analysis for
         JSR-160 setup for <a
         href="http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic/">Weblogic</a>
-        and <a 
+        and <a
           href="http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx/">JBoss</a> has been posted.
       </p>
       <p>
@@ -96,7 +96,7 @@
         example, a so called <em>path</em> (i.e. <code>used</code>)
         is appended to the URL which allows for deep access in more
         complex Java types (<code>CompositeData</code> in this
-        case). 
+        case).
       </p>
       <subsection name="Next">
         <ul>
@@ -112,6 +112,6 @@
         </ul>
       </subsection>
     </section>
-  </body>    
+  </body>
 </document>
 

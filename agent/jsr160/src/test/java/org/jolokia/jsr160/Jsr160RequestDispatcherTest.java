@@ -21,8 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.*;
+import javax.naming.CommunicationException;
+import javax.naming.NamingException;
 
 import org.jolokia.backend.executor.NotChangedException;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.config.ProcessingParameters;
 import org.jolokia.converter.Converters;
@@ -46,7 +49,7 @@ public class Jsr160RequestDispatcherTest {
 
     @BeforeTest
     private void setup() {
-        dispatcher = createDispatcherPointingToLocalMBeanServer();
+        dispatcher = createDispatcherPointingToLocalMBeanServer(null);
         procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
     }
 
@@ -98,13 +101,98 @@ public class Jsr160RequestDispatcherTest {
         }
     }
 
+    @Test
+    public void simpleWhiteListWithConfig() throws Exception {
+
+        String whiteListPath = getFilePathFor("/org/jolokia/jsr160/pattern-whitelist.txt");
+        Configuration config = new Configuration(
+            ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, whiteListPath);
+        runWhiteListTest(config);
+    }
+
+    @Test
+    public void simpleWhiteListWithSysProp() throws Exception {
+        String whiteListPath = getFilePathFor("/org/jolokia/jsr160/pattern-whitelist.txt");
+        try {
+            System.setProperty(Jsr160RequestDispatcher.ALLOWED_TARGETS_SYSPROP, whiteListPath);
+            runWhiteListTest(null);
+        } finally {
+            System.getProperties().remove(Jsr160RequestDispatcher.ALLOWED_TARGETS_SYSPROP);
+        }
+    }
+
+    @Test
+    public void whiteListWithIllegalPath() throws Exception {
+        String invalidPath = "/very/unlikely/path";
+        Configuration config = new Configuration(
+            ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, invalidPath);
+        try {
+            createDispatcherPointingToLocalMBeanServer(config);
+            fail();
+        } catch (IllegalArgumentException exp) {
+            assertTrue(exp.getMessage().contains(invalidPath));
+        }
+    }
+
+    @Test
+    public void defaultBlackList() throws Exception {
+        String blackListedUrl = "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi";
+        JmxReadRequest req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.dispatchRequest(req);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+    }
+
+    private void runWhiteListTest(Configuration config) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException {
+        Jsr160RequestDispatcher dispatcher = createDispatcherPointingToLocalMBeanServer(config);
+
+        Object[] testData = new Object[] {
+            "service:jmx:test:///jndi/rmi://devil.com:6666/jmxrmi", false,
+            "service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", true,
+            "service:jmx:test:///jndi/rmi://jolokia.org:8888/jmxrmi", true,
+            "service:jmx:rmi:///jndi/ldap://localhost:9999/jmxrmi", true,
+            "service:jmx:test:///jndi/ad://localhost:9999/jmxrmi", false,
+            "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi", true
+        };
+
+        for (int i = 0; i < testData.length; i +=2) {
+            JmxReadRequest req = preparePostReadRequestWithServiceUrl((String) testData[i], null);
+            try {
+                dispatcher.dispatchRequest(req);
+                if (!(Boolean) testData[i+1]) {
+                    fail("Exception should have been thrown for " + testData[i]);
+                }
+            } catch (SecurityException exp) {
+                if ((Boolean) testData[i+1]) {
+                    fail("Security exception for pattern " + testData[i]);
+                }
+            } catch (IOException exp) {
+                // That's fine if allowed to pass
+                assertTrue(exp.getCause() instanceof CommunicationException);
+                if (!(Boolean) testData[i+1]) {
+                    fail("Should not come that fat " + testData[i]);
+                }
+            }
+        }
+    }
+
+    private String getFilePathFor(String resource) {
+        return this.getClass().getResource(resource).getFile();
+    }
 
     // =========================================================================================================
 
     private JmxReadRequest preparePostReadRequest(String pUser, String... pAttribute) {
+        return preparePostReadRequestWithServiceUrl("service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", pUser, pAttribute);
+    }
+
+    private JmxReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
-        target.put("url","service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi");
+        target.put("url",pJmxServiceUrl);
         if (pUser != null) {
             target.put("user","roland");
             target.put("password","s!cr!et");
@@ -119,10 +207,10 @@ public class Jsr160RequestDispatcherTest {
         return (JmxReadRequest) JmxRequestFactory.createPostRequest(params, procParams);
     }
 
-    private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer() {
+    private Jsr160RequestDispatcher createDispatcherPointingToLocalMBeanServer(Configuration pConfig) {
         Converters converters = new Converters();
         ServerHandle handle = new ServerHandle(null,null,null, null);
-        return  new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor()) {
+        return  new Jsr160RequestDispatcher(converters,handle,new AllowAllRestrictor(), pConfig) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
                 Map ret = super.prepareEnv(pTargetConfig);
@@ -138,7 +226,8 @@ public class Jsr160RequestDispatcherTest {
     private Jsr160RequestDispatcher getOriginalDispatcher() {
         return new Jsr160RequestDispatcher(new Converters(),
                                            new ServerHandle(null,null,null, null),
-                                           new AllowAllRestrictor());
+                                           new AllowAllRestrictor(),
+                                           null);
     }
 
 }

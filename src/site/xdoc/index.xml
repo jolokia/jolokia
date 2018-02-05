@@ -63,7 +63,7 @@
         </li>
         <li>
           <a href="agent.html">Agents</a> exist for many
-          platforms (JEE, OSGi, Mule, JVM).
+          platforms (Java EE, OSGi, Mule, JVM).
         </li>
         <li>
           <a href="support.html">Support</a> is available through various channels.
@@ -75,6 +75,66 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+<subsection name="Security fixes with 1.5.0">
+       <div class="news-date"></div>
+        <p>
+          Two security issues for Jolokia have recently been discovered by Olga Barinova of
+          <a href="https://www.gdssecurity.com/">Gotham Digital Science</a>:
+        </p>
+        <ul>
+          <li>The Jolokia <a href="https://jolokia.org/reference/html/proxy.html">JMX proxy mode</a> is vulnerable
+            to remote code execution in a specific scenario. Note that this
+          only affects the <a href="https://jolokia.org/reference/html/agents.html#agents-war">WAR agent</a>, which has the proxy mode enabled by default.
+            The <a href="https://jolokia.org/reference/html/agents.html#agents-jvm">JVM agent</a> is not affected as it does not support the JMX proxy mode</li>
+          <li>An XSS attack can be performed by manipulating the <code>mimeType</code> query parameter to coerce the Web browser to
+            display the JSON response directly. However, we consider the impact quite low, as Jolokia responses are <em>not</em>
+            shown directly in the browser but used by a JavaScript library, which has to perform its own escaping of user
+            provided response data. Jolokia 1.5.0 fixes this hole nevertheless.
+          </li>
+        </ul>
+        <p>
+          Jolokia 1.5.0 now fixes these issue in the following way:
+        </p>
+        <p>
+          As a first measure, the JMX proxy mode is <strong>disabled by default</strong> for the WAR agent.
+          You can switch it on if you need as usual by adding the relevant configuration to <code>web.xml</code>.
+          But you can now also enable the proxy mode without touching <code>jolokia.war</code>:
+          By setting a Java system property or an environment variable, the proxy mode
+          can be switched on again, too.
+          These parameters can be easily added to the startup script of your servlet container.
+        </p>
+        <p>
+          Also, you can now configure a whitelist with allowed patterns for the JMX service URL used as
+          the target URL of the proxy.
+          These patterns are supposed to be contained in a plain text file, line by line.
+          This file then can be referenced by a system property, an env variable or directly configured in <code>web.xml</code>
+          in the war file.
+        </p>
+        <p>
+          For the configuration options of the Jolokia proxy please refer to
+          the <a href="https://jolokia.org/reference/html/proxy.html">Proxy Mode</a> section of the reference manual.
+        </p>
+        <p>
+          Finally, we always recommend using a dedicated server when using the JMX proxy mode, e.g. a Jetty or Tomcat servlet container.
+          These servers should be protected by requiring some authentication. The authentication setup is specific to the
+          Java EE server but you have to edit the Jolokia WAR agent to enable authentication as described in the <a href="https://jolokia.org/reference/html/agents.html#agent-war-security">Security Setup</a> chapter in the reference manual.
+        </p>
+        <p>
+          For closing the XSS vulnerability, nothing extra needs to be configured.
+          Jolokia now just verifies that only <code>text/plain</code> and <code>application/json</code> is allowed as the
+          value of the query parameter <code>mimeType</code> and falls back to plain <code>text/plain</code> if something
+          different is provided.
+        </p>
+        <p>
+          It is <strong>highly recommended</strong> to upgrade to Jolokia 1.5.0 if you are relying on the JMX proxy feature and to
+          revisit your security setup around the proxy server.
+        </p>
+        <p>
+          Big Kudos go out to GDS (and especially to Olga Barinova and Martin Hopkins) for openly reporting this issue in deep
+          detail to me and being very cooperative in helping to fix these. Also to R3, for whom GDS was working when these issues
+          were discovered, who encouraged GDS to report them. Highly appreciated!
+        </p>
+      </subsection>
       <subsection name="2018 Kick-Off with Jolokia 1.4.0">
         <div class="news-date">2018-01-23</div>
         <p>
@@ -528,11 +588,11 @@ java -javaagent:jolokia.jar=\
           request</a> from <a href="https://github.com/mplonka">Marcin
           Płonka</a> (Thanks a lot and sorry for the long, long delay,
           BTW). It's all about simplifying access to JSR-77 enabled
-          JEE-Servers. You should know that <a
+          Java EE-Servers. You should know that <a
           href="https://jcp.org/en/jsr/detail?id=77">JSR 77: J2EE
           Management</a> was a cool attempt to standardize naming and
-          JMX exposed metrics for JEE. Unfortunately it was abandoned,
-          but still lives in quite a bunch of JEE servers. Not at its
+          JMX exposed metrics for Java EE. Unfortunately it was abandoned,
+          but still lives in quite a bunch of Java EE servers. Not at its
           full beauty, but still valuable enough to be
           supported. Astonishingly, WebSphere, even the latest 8.5
           versions, has the best support for it. Using JSR-77 conform

@@ -26,14 +26,6 @@
     <servlet-class>org.jolokia.http.AgentServlet</servlet-class>
     <init-param>
       <description>
-        Class names (comma separated) of RequestDispatcher used in addition
-        to the LocalRequestDispatcher
-      </description>
-      <param-name>dispatcherClasses</param-name>
-      <param-value>org.jolokia.jsr160.Jsr160RequestDispatcher</param-value>
-    </init-param>
-    <init-param>
-      <description>
         Debugging state after startup. Can be changed via
         the Config MBean during runtime
       </description>

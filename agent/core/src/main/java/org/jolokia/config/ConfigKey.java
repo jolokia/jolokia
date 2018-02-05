@@ -52,6 +52,12 @@ public enum ConfigKey {
     DISPATCHER_CLASSES("dispatcherClasses", true, false),
 
     /**
+     * Path to a white list of patterns which are matched against possible
+     * JMX service URL for incoming requests
+     */
+    JSR160_PROXY_ALLOWED_TARGETS("jsr160ProxyAllowedTargets", true, false),
+
+    /**
      * Log handler class to use, which must have an empty constructor.
      * If not set, then a default logging mechanism is used.
      */
