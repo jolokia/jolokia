@@ -31,7 +31,7 @@
     <filename>jolokia-osgi.jar</filename> declaring all its package
     dependencies as imports in its Manifest and an all-in-one bundle
     <filename>jolokia-osgi-bundle.jar</filename> with minimal
-    dependecies. The pure bundle fits best with the OSGi philosophy and is
+    dependencies. The pure bundle fits best with the OSGi philosophy and is
     hence the recommended bundle. The all-in-one monster is good for a
     quick start since normally no additional bundles are required.
   </para>
@@ -379,10 +379,16 @@
          <td>org.jolokia.authMode</td>
          <td>basic</td>
          <td>
-           Can be either <literal>basic</literal> (the default) or <literal>jaas</literal>. If
+           Can be either <literal>basic</literal> (the default), <literal>jaas</literal>,
+           <literal>service-all</literal> or <literal>service-any</literal>. If
            <literal>jaas</literal> is used, the user and password given in the <literal>Authorization:</literal>
-           header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-           This has only an effect, if user is set.
+           header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+           This has only an effect, if a user is set.
+           When no user is set and the <literal>authMode</literal> is either <literal>service-all</literal> or
+           <literal>service-any</literal> then a <litera>org.jolokia.osgi.security.Authenticator</litera> service is looked up in the
+           OSGi service registry. If more then one of such service is registered, <literal>service-all</literal> requires
+           that all authenticators succeed, for <literal>service-any</literal> it is sufficient that one authenticator
+           successfully authenticates.
          </td>
         </tr>
     </table>

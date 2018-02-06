@@ -12,7 +12,7 @@ import org.osgi.service.http.HttpContext;
  * @author roland
  * @since 26.05.14
  */
-public class JaasAuthenticator extends Authenticator {
+public class JaasAuthenticator extends BaseAuthenticator {
 
     private final String realm;
 

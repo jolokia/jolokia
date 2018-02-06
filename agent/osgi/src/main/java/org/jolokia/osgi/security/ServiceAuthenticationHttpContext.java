@@ -1,9 +1,8 @@
 package org.jolokia.osgi.security;
 
+import org.jolokia.osgi.util.LogHelper;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -34,13 +33,25 @@ import java.util.Set;
  */
 public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
 
-    private volatile Set<Authenticator> authenticators = new HashSet();
+    // Possible authentication mode when looking up a authenticator as service
+    static final String AUTHMODE_SERVICE_ALL = "service-all";
+    static final String AUTHMODE_SERVICE_ANY = "service-any";
+
+    private final Set<Authenticator> authenticators = new HashSet<Authenticator>();
 
     private ServiceTracker authenticatorServiceTracker;
 
-    public ServiceAuthenticationHttpContext(final BundleContext bundleContext) {
-        authenticatorServiceTracker = new ServiceTracker(bundleContext, Authenticator.class.getName(),
-                new AuthenticatorServiceCustomizer(bundleContext));
+    // whether a single authenticator is sufficient to succeed
+    private final boolean checkModeAny;
+
+    public ServiceAuthenticationHttpContext(final BundleContext bundleContext, final String authMode) {
+        if (!shouldBeUsed(authMode)) {
+            throw new IllegalArgumentException(String.format("Internal: Invalid authMode %s given", authMode));
+        }
+        checkModeAny = authMode.equalsIgnoreCase(AUTHMODE_SERVICE_ANY);
+        authenticatorServiceTracker =
+            new ServiceTracker(bundleContext, Authenticator.class.getName(),
+                               new AuthenticatorServiceCustomizer(bundleContext));
         authenticatorServiceTracker.open();
     }
 
@@ -58,12 +69,19 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
                 return false;
             }
             for (final Authenticator authenticator : authenticators) {
-                if (!authenticator.authenticate(request)) {
+                boolean authenticated = authenticator.authenticate(request);
+                if (checkModeAny && authenticated) {
+                    // One successful authenticator is good enough
+                    return true;
+                }
+                else if (!checkModeAny && !authenticated) {
+                    // All must succeed, so any negative respond will kill the authentication
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     return false;
                 }
             }
-            return true;
+            // if checkModeAny: Not a single succeeded, if checkModeAll: All have succeeded
+            return !checkModeAny;
         }
     }
 
@@ -72,6 +90,18 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
             authenticatorServiceTracker.close();
             authenticatorServiceTracker = null;
         }
+    }
+
+    /**
+     * Check whether for the given authmode an instance of this context should be used (i.e. when the
+     * auth-mode is "service-any" or "service-all"
+     *
+     * @param authMode authmode to check
+     * @return true if this context should be used for the agent, false otherwise
+     */
+    public static boolean shouldBeUsed(String authMode) {
+        return authMode != null &&
+               (authMode.equalsIgnoreCase(AUTHMODE_SERVICE_ALL) || authMode.equalsIgnoreCase(AUTHMODE_SERVICE_ANY));
     }
 
 
@@ -96,7 +126,7 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
                     return authenticators;
                 }
             } catch (final ClassCastException e) {
-                logError("Unable to use provided Authenticator", e);
+                LogHelper.logError("Unable to use provided Authenticator", e);
             }
             return null;
         }
@@ -117,24 +147,5 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
             }
         }
 
-        @SuppressWarnings("PMD.SystemPrintln")
-        private void logError(final String message, final Throwable throwable) {
-            final BundleContext bundleContext = FrameworkUtil
-                    .getBundle(ServiceAuthenticationHttpContext.class)
-                    .getBundleContext();
-            final ServiceReference lRef = bundleContext.getServiceReference(LogService.class.getName());
-            if (lRef != null) {
-                try {
-                    final LogService logService = (LogService) bundleContext.getService(lRef);
-                    if (logService != null) {
-                        logService.log(LogService.LOG_ERROR, message, throwable);
-                        return;
-                    }
-                } finally {
-                    bundleContext.ungetService(lRef);
-                }
-            }
-            System.err.println("Jolokia-Error: " + message + " : " + throwable.getMessage());
-        }
     }
 }

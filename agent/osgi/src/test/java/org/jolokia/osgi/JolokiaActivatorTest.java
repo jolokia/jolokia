@@ -29,19 +29,38 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.osgi.security.Authenticator;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
-import org.jolokia.config.ConfigKey;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.http.*;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.service.log.LogService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.find;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reportMatcher;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
@@ -54,7 +73,7 @@ public class JolokiaActivatorTest {
     private static final String HTTP_SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
     private static final String CONFIG_SERVICE_FILTER = "(objectClass=org.osgi.service.cm.ConfigurationAdmin)";
     private static final String AUTHENTICATOR_SERVICE_FILTER =
-            "(objectClass=" + Authenticator.class.getName() + ")";
+        "(objectClass=" + Authenticator.class.getName() + ")";
 
     private BundleContext context;
     private JolokiaActivator activator;
@@ -198,7 +217,7 @@ public class JolokiaActivatorTest {
     @Test
     public void testServiceAuthModeFromConfigAdmin() throws Exception {
         final Dictionary<String, String> dict = new Hashtable<String, String>();
-        dict.put("org.jolokia.authMode", "service");
+        dict.put("org.jolokia.authMode", "service-all");
         startActivator(true, AUTHENTICATOR_SERVICE_FILTER, dict);
         startupHttpServiceWithConfigAdminProps(true);
         unregisterJolokiaServlet();
@@ -211,7 +230,7 @@ public class JolokiaActivatorTest {
         final HttpServletRequest request = createMock(HttpServletRequest.class);
         final HttpServletResponse response = createNiceMock(HttpServletResponse.class);
         final Dictionary<String, String> dict = new Hashtable<String, String>();
-        dict.put("org.jolokia.authMode", "service");
+        dict.put("org.jolokia.authMode", "service-all");
         startActivator(true, AUTHENTICATOR_SERVICE_FILTER, dict);
         startupHttpServiceWithConfigAdminProps(true);
 
@@ -317,7 +336,7 @@ public class JolokiaActivatorTest {
         for (ConfigKey key : ConfigKey.values()) {
             if (!serviceAuthentication && (key == ConfigKey.USER || key == ConfigKey.PASSWORD || key == ConfigKey.AUTH_MODE)) {
                 //ignore these, they will be provided from config admin service
-            } else if(serviceAuthentication && (key == ConfigKey.AUTH_MODE)) {
+            } else if (serviceAuthentication && (key == ConfigKey.AUTH_MODE)) {
                 //ignore these, they will be provided from config admin service
             } else {
                 expect(context.getProperty("org.jolokia." + key.getKeyValue())).andStubReturn(
