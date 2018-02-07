@@ -210,7 +210,9 @@ public enum ConfigKey {
 
     /**
      * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
-     * JaaS authentication.
+     * JaaS authentication, "delegate" for delegating to another HTTP service.
+     * For OSGi agent there are the additional modes "service-all" and "service-any" to use Authenticator services
+     * provided via an OSGi service registry.
      */
     AUTH_MODE("authMode", true, false, "basic"),
 

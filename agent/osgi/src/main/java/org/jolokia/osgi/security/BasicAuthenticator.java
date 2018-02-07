@@ -9,7 +9,7 @@ import org.osgi.service.http.HttpContext;
 * @since 26.05.14
 */
 
-public class BasicAuthenticator extends Authenticator {
+public class BasicAuthenticator extends BaseAuthenticator {
 
     private final String userToCheck;
     private final String passwordToCheck;

@@ -23,9 +23,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.4.1-SNAPSHOT" description="Release 1.4.1-SNAPSHOT">
+    <release version="1.5.0-SNAPSHOT" description="Release 1.5.0-SNAPSHOT">
       <action dev="rhuss" type="fix">
         Restrict allowed mime types to "text/plain" and "application/json" for the response.
+      </action>
+      <action dev="rysndgoulding" type="add" issue="358">
+        New authMode "service-any" and "service-all" to allow to lookup an
+        org.jolokia.osgi.security.Authenticator used for authentication. Note that this class has
+        been changed from an abstract base class to an interface for ease of customization.
       </action>
     </release>
     <release version="1.4.0" description="Release 1.4.0" date="2018-01-23">

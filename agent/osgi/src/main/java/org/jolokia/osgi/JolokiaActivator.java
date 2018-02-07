@@ -12,13 +12,13 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.osgi.security.*;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
+import org.jolokia.osgi.util.LogHelper;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -128,6 +128,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             configAdminTracker = null;
         }
 
+        if (jolokiaHttpContext instanceof ServiceAuthenticationHttpContext) {
+            final ServiceAuthenticationHttpContext context =
+                    (ServiceAuthenticationHttpContext) jolokiaHttpContext;
+            context.close();
+        }
+
         restrictor = null;
         bundleContext = null;
     }
@@ -141,11 +147,17 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     public synchronized HttpContext getHttpContext() {
         if (jolokiaHttpContext == null) {
             final String user = getConfiguration(USER);
+            final String authMode = getConfiguration(AUTH_MODE);
             if (user == null) {
-                jolokiaHttpContext = new DefaultHttpContext();
+                if (ServiceAuthenticationHttpContext.shouldBeUsed(authMode)) {
+                    jolokiaHttpContext = new ServiceAuthenticationHttpContext(bundleContext, authMode);
+                } else {
+                    jolokiaHttpContext = new DefaultHttpContext();
+                }
             } else {
-                jolokiaHttpContext = new BasicAuthenticationHttpContext(getConfiguration(REALM),
-                                                                        createAuthenticator());
+                jolokiaHttpContext =
+                    new BasicAuthenticationHttpContext(getConfiguration(REALM),
+                                                       createAuthenticator(authMode));
             }
         }
         return jolokiaHttpContext;
@@ -224,12 +236,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         }
     }
 
-    private Authenticator createAuthenticator() {
+    private Authenticator createAuthenticator(String authMode) {
         Authenticator authenticator = createCustomAuthenticator();
-        if (authenticator == null) {
-            authenticator = createAuthenticatorFromAuthMode();
+        if (authenticator != null) {
+            return authenticator;
         }
-        return authenticator;
+        return createAuthenticatorFromAuthMode(authMode);
     }
 
     private Authenticator createCustomAuthenticator() {
@@ -286,17 +298,14 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         }
     }
 
-    private Authenticator createAuthenticatorFromAuthMode() {
-        Authenticator authenticator;
-        final String authMode = getConfiguration(AUTH_MODE);
-        if ("basic".equalsIgnoreCase(authMode)) {
-            authenticator = new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
-        } else if ("jaas".equalsIgnoreCase(authMode)) {
-            authenticator = new JaasAuthenticator(getConfiguration(REALM));
+    private Authenticator createAuthenticatorFromAuthMode(String pAuthMode) {
+        if ("basic".equalsIgnoreCase(pAuthMode)) {
+            return new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
+        } else if ("jaas".equalsIgnoreCase(pAuthMode)) {
+            return new JaasAuthenticator(getConfiguration(REALM));
         } else {
-            throw new IllegalArgumentException("Unknown authentication method '" + authMode + "' configured");
+            throw new IllegalArgumentException("Unknown authentication method '" + pAuthMode + "' configured");
         }
-        return authenticator;
     }
 
     // =============================================================================
@@ -317,9 +326,9 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
                                         getConfiguration(),
                                         getHttpContext());
             } catch (ServletException e) {
-                logError("Servlet Exception: " + e, e);
+                LogHelper.logError(bundleContext, "Servlet Exception: " + e, e);
             } catch (NamespaceException e) {
-                logError("Namespace Exception: " + e, e);
+                LogHelper.logError(bundleContext, "Namespace Exception: " + e, e);
             }
             return service;
         }
@@ -334,23 +343,5 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             httpService.unregister(getServletAlias());
         }
     }
-
-    @SuppressWarnings("PMD.SystemPrintln")
-    private void logError(String message,Throwable throwable) {
-        ServiceReference lRef = bundleContext.getServiceReference(LogService.class.getName());
-        if (lRef != null) {
-            try {
-                LogService logService = (LogService) bundleContext.getService(lRef);
-                if (logService != null) {
-                    logService.log(LogService.LOG_ERROR,message,throwable);
-                    return;
-                }
-            } finally {
-                bundleContext.ungetService(lRef);
-            }
-        }
-        System.err.println("Jolokia-Error: " + message + " : " + throwable.getMessage());
-    }
-
 
 }
