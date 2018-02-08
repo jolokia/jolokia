@@ -24,13 +24,13 @@
     JMX (<a href="architecture.html#agent-mode">Section&nbsp;2.1, &#8220;Agent mode&#8221;</a>), or it can be installed on a
     dedicated proxy server (<a href="architecture.html#proxy-mode">Section&nbsp;2.2, &#8220;Proxy Mode&#8221;</a>). For both
     operational modes, there are four different kind of
-    agents<sup>[<a name="d0e153" href="#ftn.d0e153">1</a>]</sup>.    
+    agents<sup>[<a name="d0e153" href="#ftn.d0e153">1</a>]</sup>.
   </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>Webarchive (War) agent</strong></span></span></dt><dd>
-        This agent is packaged as a JEE Webarchive (War). It is the
+        This agent is packaged as a Java EE Webarchive (War). It is the
         standard installation artifact for Java webapplications and
         probably one of the best known deployment formats. Jolokia ships
         with a war-agent which can be deployed like any other web
-        application. This agent has been tested on many JEE
+        application. This agent has been tested on many Java EE
         servers, from well-known market leaders to rarer species.
       </dd><dt><span class="term"><span class="bold"><strong>OSGi agent</strong></span></span></dt><dd><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.osgi.org" target="_top">OSGi</a> is a middleware specification
         focusing on modularity and a well defined dynamic lifecycle
@@ -51,21 +51,21 @@
       </dd><dt><span class="term"><span class="bold"><strong>JVM agent</strong></span></span></dt><dd>
         Starting with Java 6 the JDK provided by Oracle contains a
         lightweight HTTP-Server which is used e.g. for the reference
-        WebService stack implementation included in Java 6. Using 
+        WebService stack implementation included in Java 6. Using
         the Java-agent API (normally used by profilers and other
         development tools requiring the instrumentation during the
         class loading phase), the JVM 6 Jolokia agent is the most
         generic one. It is able to instrument <span class="emphasis"><em>any</em></span>
         Java application running on a Oracle JDK 6<sup>[<a name="d0e209" href="#ftn.d0e209">4</a>]</sup>.
         This Jolokia agent variant is fully featured, however tends to
-        be a bit slow since the 
+        be a bit slow since the
         provided HTTP-Server is not optimized for performance. However
         it is useful for servers like Hadoop or Teracotta, which do
         not provide convenient hooks for an HTTP-exporting agent on
         their own.
-      </dd></dl></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-war"></a>3.1.&nbsp;JEE Agent (WAR)</h2></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="war-agent-installation"></a>3.1.1.&nbsp;Installation and Configuration</h3></div></div></div><p>
+      </dd></dl></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-war"></a>3.1.&nbsp;Java EE Agent (WAR)</h2></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="war-agent-installation"></a>3.1.1.&nbsp;Installation and Configuration</h3></div></div></div><p>
       The WAR agent is the most popular variant, and can be deployed
-      in a servlet container just like any other JEE web application.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Tomcat example</b></p>
+      in a servlet container just like any other Java EE web application.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Tomcat example</b></p>
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jolokia.org/tutorial.html" target="_top">quickstart</a>.
     </div></div><p>
@@ -97,7 +97,7 @@
    &lt;Parameter name="maxDepth" value="1"/&gt;
 &lt;/Context&gt;</pre></dd></dl></div><p>
     The configuration options <code class="literal">discoveryEnabled</code> and
-    <code class="literal">discoveryAgentUrl</code> can be provied via environent
+    <code class="literal">discoveryAgentUrl</code> can be provided via environment
     variables or system properties, too. See the below for details.
   </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.1.&nbsp;Servlet init parameters</b></p><div class="table-contents"><table id="agent-war-init-params"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Parameter</td>
@@ -110,11 +110,24 @@
           to the
           <code class="constant">LocalRequestDispatcher</code>. Dispatchers are
           a technique used by the JSR-160 proxy to dispatch (or
-          'route') a request to a different destination.
+          'route') a request to a different destination. By default no extract dispatchers are enabled (changed in 1.5.0)
+          You can use the system property <code class="literal">org.jolokia.jsr160ProxyEnabled</code> or the
+          environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ENABLED</code> to enable the the JSR-160 proxy.
+          In that case you should be sure that you enable authentication for the web application to protect access
+          to the proxy.
         </td>
         <td>
           <code class="literal">org.jolokia.jsr160.Jsr160RequestDispatcher</code>
           (this is the dispatcher for the JSR-160 proxy)
+        </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">jsr160ProxyAllowedTargets</code></td>
+        <td>
+          Path to a white list of patterns which are matched against possible
+          JMX service URL for incoming requests
+        </td>
+        <td>
+          <code class="literal">/opt/jolokia/jsr160-proxy-allowed-patterns.txt</code>
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">policyLocation</code></td>
@@ -246,7 +259,9 @@
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">mimeType</code></td>
         <td>
-          MIME to use for the JSON responses
+          MIME to use for the JSON responses. Only <code class="constant">application/json</code> and
+          <code class="constant">text/plain</code> are allowed.
+          If any other type is given, Jolokia falls back to <code class="constant">text/plain</code>.
         </td>
         <td>
           Default: <code class="constant">text/plain</code>
@@ -320,7 +335,7 @@
           Is set to <code class="literal">true</code> then this servlet will
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
-          avoid conflicts with an JEE standards (though this should't
+          avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
           <code class="literal">JOLOKIA_DISCOVERY</code> or the system
@@ -392,7 +407,7 @@
         MBeans for monitoring Glassfish is booted.
         </td>
       </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agent-war-security"></a>3.1.2.&nbsp;Security Setup</h3></div></div></div><p>
-      In order use JEE security within the war, some extra
+      In order use Java EE security within the war, some extra
       configuration steps are required within
       <code class="filename">web.xml</code>.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Using jmx4perl's <code class="literal">jolokia</code> tool</b></p><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jmx4perl.org" target="_top">jmx4perl</a> comes
       with a nice command line utility called <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia" target="_top">jolokia</a>
@@ -452,7 +467,7 @@
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<sup>[<a name="d0e858" href="#ftn.d0e858">5</a>]</sup>
+      for details.<sup>[<a name="d0e888" href="#ftn.d0e888">5</a>]</sup>
     </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
@@ -463,7 +478,7 @@
       distinguish multiple Jolokia MBeans by adding an extra
       propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
-      the same JEE server.
+      the same Java EE server.
     </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-osgi"></a>3.2.&nbsp;OSGi Agents</h2></div></div></div><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b></b></p>There are several free implementations available of OSGi
     HttpService. This bundle has been tested with the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://wiki.ops4j.org/display/paxweb/Pax+Web" target="_top">Pax Web</a>
     and <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://felix.apache.org/site/apache-felix-http-service.html" target="_top">Apache
@@ -474,7 +489,7 @@
     <code class="filename">jolokia-osgi.jar</code> declaring all its package
     dependencies as imports in its Manifest and an all-in-one bundle
     <code class="filename">jolokia-osgi-bundle.jar</code> with minimal
-    dependecies. The pure bundle fits best with the OSGi philosophy and is
+    dependencies. The pure bundle fits best with the OSGi philosophy and is
     hence the recommended bundle. The all-in-one monster is good for a
     quick start since normally no additional bundles are required.
   </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-pure"></a>3.2.1.&nbsp;jolokia-osgi.jar</h3></div></div></div><p>
@@ -561,7 +576,7 @@
       the OSGi container. All properties start with the prefix
       <code class="literal">org.jolokia</code> and are listed in <a href="agents.html#table-agents-osgi-properties" title="Table&nbsp;3.4.&nbsp;Jolokia Bundle Properties">Table&nbsp;3.4, &#8220;Jolokia Bundle Properties&#8221;</a>. They are mostly the
       same as the <code class="literal">init-param</code> options for
-      a Jolokia servlet when used in a JEE WAR artifact.
+      a Jolokia servlet when used in a Java EE WAR artifact.
     </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.4.&nbsp;Jolokia Bundle Properties</b></p><div class="table-contents"><table id="table-agents-osgi-properties"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Property</td>
           <td>Default</td>
@@ -607,6 +622,11 @@
           of
           <code class="classname">org.jolokia.jsr160.Jsr160RequestDispatcher</code>
           allows the agent to play the role of a JSR-160 proxy.
+          By default no extract dispatchers are enabled.
+          You can use the system property <code class="literal">org.jolokia.jsr160ProxyEnabled</code> or the
+          environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ENABLED</code> to enable the the JSR-160 proxy.
+          In that case you should be sure that you enable authentication for the web application to protect access
+          to the proxy.
         </td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.debug</td>
@@ -739,7 +759,7 @@
           Is set to <code class="literal">true</code> then this servlet will
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
-          avoid conflicts with an JEE standards (though this should't
+          avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
           <code class="literal">JOLOKIA_DISCOVERY</code> or the system
@@ -773,10 +793,16 @@
          <td>org.jolokia.authMode</td>
          <td>basic</td>
          <td>
-           Can be either <code class="literal">basic</code> (the default) or <code class="literal">jaas</code>. If
+           Can be either <code class="literal">basic</code> (the default), <code class="literal">jaas</code>,
+           <code class="literal">service-all</code> or <code class="literal">service-any</code>. If
            <code class="literal">jaas</code> is used, the user and password given in the <code class="literal">Authorization:</code>
-           header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-           This has only an effect, if user is set.
+           header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+           This has only an effect, if a user is set.
+           When no user is set and the <code class="literal">authMode</code> is either <code class="literal">service-all</code> or
+           <code class="literal">service-any</code> then a <font color="red">&lt;litera&gt;org.jolokia.osgi.security.Authenticator&lt;/litera&gt;</font> service is looked up in the
+           OSGi service registry. If more then one of such service is registered, <code class="literal">service-all</code> requires
+           that all authenticators succeed, for <code class="literal">service-any</code> it is sufficient that one authenticator
+           successfully authenticates.
          </td>
         </tr></table></div></div><p>
       This bundle also exports the service
@@ -791,8 +817,8 @@
     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="running-on-glassfish"></a>3.2.2.&nbsp;Running on Glassfish v3 upwards</h3></div></div></div><p>
         You have a couple of choices when running jolokia on
         Glassfish v3 and up, since Glassfish is a both a fully
-        fledged JEE container and an OSGi container. If you
-        choose to run the <a href="agents.html#agents-war">Section&nbsp;3.1, &#8220;JEE Agent (WAR)&#8221;</a> then it
+        fledged Java EE container and an OSGi container. If you
+        choose to run the <a href="agents.html#agents-war">Section&nbsp;3.1, &#8220;Java EE Agent (WAR)&#8221;</a> then it
         is completely straight forward just deploy the war
         in the normal way. If you choose to deploy
         the <a href="agents.html#agents-osgi">Section&nbsp;3.2, &#8220;OSGi Agents&#8221;</a> then you will need
@@ -876,7 +902,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1600"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1660"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -1658,9 +1684,9 @@ java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e193" href="#d0e193">3</a>] </sup>
            <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://answers.yahoo.com/question/index?qid=20071216082739AAfkxnm" target="_top">What is the proper plural form of "bus"?</a>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
-          You could even instrument a JEE application server this way,
+          You could even instrument a Java EE application server this way,
           however this is not recommended.
-        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e858" href="#d0e858">5</a>] </sup>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e888" href="#d0e888">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use

@@ -56,7 +56,7 @@
       are available for exporting its protocol via HTTP. The most
       prominent being to put the agent into a servlet container. This
       can be a lightweight one like Tomcat or Jetty or a full-blown
-      JEE Server. Since it acts like a usual web application the
+      Java EE Server. Since it acts like a usual web application the
       deployment of the agent is well understood and should pose no
       entry barrier for any developer who has ever dealt with Java web
       applications.
@@ -87,17 +87,17 @@
       <code class="literal">jolokia.war</code>, which by default supports both
       the <span class="emphasis"><em>agent mode</em></span> and the <span class="emphasis"><em>proxy
       mode</em></span>. A lightweight container like Tomcat or Jetty is
-      a perfect choice for this kind of setup. 
+      a perfect choice for this kind of setup.
     </p><p>
       Figure <a href="architecture.html#fig-architecture-proxy" title="Figure&nbsp;2.2.&nbsp;Jolokia as JMX Proxy">Figure&nbsp;2.2, &#8220;Jolokia as JMX Proxy&#8221;</a> describes  a typical setup for the proxy mode. A
       client sends a usual Jolokia request containing an extra section
       for specifying the target which should be queried. All routing
       information is contained in the request itself so that the proxy
       can act universally without the need of a specific
-      configuration. 
+      configuration.
     </p><div class="figure"><a name="fig-architecture-proxy"></a><p class="title"><b>Figure&nbsp;2.2.&nbsp;Jolokia as JMX Proxy</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/proxy.png" alt="Jolokia as JMX Proxy"></div></div></div><br class="figure-break"><p>
       Having said all that, the proxy mode has some limitations which are
-      listed in <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>. 
+      listed in <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>.
     </p><p>
       To summarize, the proxy mode should be used only when
       required. The agent servlet on its own is more powerful than the
