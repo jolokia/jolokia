@@ -33,7 +33,7 @@
         it is now possible to configure a whitelist with patterns which are allowed as targets in the
         proxy mode. See the reference manual section on "Proxy mode" for details.
       </action>
-      <action dev="rysndgoulding" type="add" issue="358">
+      <action dev="ryandgoulding" type="add" issue="358">
         New authMode "service-any" and "service-all" to allow to lookup an
         org.jolokia.osgi.security.Authenticator used for authentication. Note that this class has
         been changed from an abstract base class to an interface for ease of customization.

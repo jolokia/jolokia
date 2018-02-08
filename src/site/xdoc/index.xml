@@ -76,7 +76,7 @@
     </subsection>
     <section name="News">
 <subsection name="Security fixes with 1.5.0">
-       <div class="news-date"></div>
+       <div class="news-date">2018-02-08</div>
         <p>
           Two security issues for Jolokia have recently been discovered by Olga Barinova of
           <a href="https://www.gdssecurity.com/">Gotham Digital Science</a>:
@@ -126,11 +126,11 @@
           different is provided.
         </p>
         <p>
-          It is <strong>highly recommended</strong> to upgrade to Jolokia 1.5.0 if you are relying on the JMX proxy feature and to
+          It is <strong>highly recommended</strong> to upgrade to Jolokia 1.5.0 if you are relying on the <strong>JMX JSR-160 proxy</strong> feature and to
           revisit your security setup around the proxy server.
         </p>
         <p>
-          Big Kudos go out to GDS (and especially to Olga Barinova and Martin Hopkins) for openly reporting this issue in deep
+          Big Kudos go out to GDS (and especially to Olga Barinova and Martin Hopkins) for openly reporting these issues in deep
           detail to me and being very cooperative in helping to fix these. Also to R3, for whom GDS was working when these issues
           were discovered, who encouraged GDS to report them. Highly appreciated!
         </p>

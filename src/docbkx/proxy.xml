@@ -150,9 +150,9 @@ service:jmx:rmi:///jndi/ldap:.*
           (e.g. JDK 1.5 and JBoss 5).
         </listitem>
         <listitem>
-          The proxy mode can be exploited for local code execution if not secured properly.
+          The proxy mode can theoretically be exploited for local code execution if not secured properly.
           So its is highly recommended to not make the agent available without any authentication to any
-          non trusted environment.
+          non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.
         </listitem>
       </itemizedlist>
     </section>
