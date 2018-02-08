@@ -23,9 +23,15 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.5.0-SNAPSHOT" description="Release 1.5.0-SNAPSHOT">
+    <release version="1.5.0" description="Release 1.5.0" date="2018-02-08">
       <action dev="rhuss" type="fix">
         Restrict allowed mime types to "text/plain" and "application/json" for the response.
+      </action>
+      <action dev="rhuss" type="add">
+        Because of security reasion, the JSR-160 proxy mode is disabled by default int the Java EE agent.
+        It can be enabled via web.xml configuration, a system property or an environment variable. In addition
+        it is now possible to configure a whitelist with patterns which are allowed as targets in the
+        proxy mode. See the reference manual section on "Proxy mode" for details.
       </action>
       <action dev="rysndgoulding" type="add" issue="358">
         New authMode "service-any" and "service-all" to allow to lookup an
