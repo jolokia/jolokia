@@ -114,7 +114,7 @@ service:jmx:rmi:///jndi/ldap:.*
           JDK and AppServer Version) which don't work at all properly
           (e.g. JDK 1.5 and JBoss 5).
         </li><li>
-          The proxy mode can be exploited for local code execution if not secured properly.
+          The proxy mode can theoretically be exploited for local code execution if not secured properly.
           So its is highly recommended to not make the agent available without any authentication to any
-          non trusted environment.
+          non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.
         </li></ul></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Next</a></div></div></div></body></html>
