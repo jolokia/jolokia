@@ -795,14 +795,14 @@
          <td>
            Can be either <code class="literal">basic</code> (the default), <code class="literal">jaas</code>,
            <code class="literal">service-all</code> or <code class="literal">service-any</code>. If
-           <code class="literal">jaas</code> is used, the user and password given in the <code class="literal">Authorization:</code>
+           <code class="literal">jaas</code> is used, the user and password are given in the <code class="literal">Authorization:</code>
            header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-           This has only an effect, if a user is set.
+           This has only an effect if a user is set.
            When no user is set and the <code class="literal">authMode</code> is either <code class="literal">service-all</code> or
-           <code class="literal">service-any</code> then a <font color="red">&lt;litera&gt;org.jolokia.osgi.security.Authenticator&lt;/litera&gt;</font> service is looked up in the
+           <code class="literal">service-any</code> then a <code class="literal">org.jolokia.osgi.security.Authenticator</code> service is looked up in the
            OSGi service registry. If more then one of such service is registered, <code class="literal">service-all</code> requires
            that all authenticators succeed, for <code class="literal">service-any</code> it is sufficient that one authenticator
-           successfully authenticates.
+           successfully authenticates. In any case if no such Authenticator service can be found, the request is rejected.
          </td>
         </tr></table></div></div><p>
       This bundle also exports the service
