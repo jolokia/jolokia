@@ -2,6 +2,7 @@ package org.jolokia.restrictor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -65,8 +66,7 @@ public class PolicyRestrictor implements Restrictor {
             throw new SecurityException("No policy file given");
         }
         try {
-            Document doc =
-                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pInput);
+            Document doc = createDocument(pInput);
             requestTypeChecker = new RequestTypeChecker(doc);
             httpChecker = new HttpMethodChecker(doc);
             networkChecker = new NetworkChecker(doc);
@@ -81,6 +81,24 @@ public class PolicyRestrictor implements Restrictor {
         if (exp != null) {
             throw new SecurityException("Cannot parse policy file: " + exp,exp);
         }
+    }
+
+    private Document createDocument(InputStream pInput) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        String[] features = new String[] {
+            "http://xml.org/sax/features/external-general-entities",
+            "http://xml.org/sax/features/external-parameter-entities",
+            "http://apache.org/xml/features/nonvalidating/load-external-dtd"
+        };
+        for (String feature : features) {
+            try {
+                factory.setFeature(feature, false);
+            } catch (ParserConfigurationException exp) {
+                // Silently ignore as the feature might not be available for the
+                // given parser
+            }
+        }
+        return factory.newDocumentBuilder().parse(pInput);
     }
 
     /** {@inheritDoc} */
