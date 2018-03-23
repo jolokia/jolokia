@@ -2,14 +2,17 @@ package org.jolokia.restrictor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jolokia.restrictor.policy.*;
+import org.jolokia.restrictor.policy.CorsChecker;
+import org.jolokia.restrictor.policy.HttpMethodChecker;
+import org.jolokia.restrictor.policy.MBeanAccessChecker;
+import org.jolokia.restrictor.policy.NetworkChecker;
+import org.jolokia.restrictor.policy.RequestTypeChecker;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.w3c.dom.Document;
