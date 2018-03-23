@@ -244,7 +244,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     private Set<String> extractBlackList(Configuration pConfig) {
         // Bad, bad ....
-        return Collections.singleton("service:jmx:rmi:///jndi.*");
+        return Collections.singleton("service:jmx:rmi:///jndi/ldap:.*");
     }
 
 
