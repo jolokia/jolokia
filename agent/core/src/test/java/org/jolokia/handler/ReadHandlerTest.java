@@ -26,6 +26,7 @@ import org.jolokia.request.JmxReadRequest;
 import org.jolokia.request.JmxRequestBuilder;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.HttpMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -380,10 +381,11 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
     // ==============================================================================================================
 
-    @Test
+   @Test
     public void restrictAccess() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
+        expect(restrictor.isHttpMethodAllowed(HttpMethod.POST)).andReturn(true);
         handler = new ReadHandler(restrictor);
 
         JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
@@ -394,6 +396,24 @@ public class ReadHandlerTest extends BaseHandlerTest {
         try {
             handler.handleRequest(getMBeanServerManager(server),request);
             fail("Restrictor should forbid access");
+        } catch (SecurityException exp) {}
+        verify(restrictor,server);
+    }
+
+    @Test
+    public void restrictHttpMethodAccess() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isHttpMethodAllowed(HttpMethod.POST)).andReturn(false);
+        handler = new ReadHandler(restrictor);
+
+        JmxReadRequest request = new JmxRequestBuilder(READ, testBeanName).
+                attribute("attr").
+                build();
+        MBeanServer server = createMock(MBeanServer.class);
+        replay(restrictor,server);
+        try {
+            handler.handleRequest(getMBeanServerManager(server),request);
+            fail("Restrictor should forbid HTTP Method Access");
         } catch (SecurityException exp) {}
         verify(restrictor,server);
     }

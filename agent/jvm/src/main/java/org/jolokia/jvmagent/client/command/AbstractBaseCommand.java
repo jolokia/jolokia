@@ -69,7 +69,7 @@ public abstract class AbstractBaseCommand {
         if (pAdditionalOpts.length > 0) {
             args = args.length() != 0 ? args + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
         }
-        method.invoke(pVm, pOpts.getJarFilePath(),args);
+        method.invoke(pVm, pOpts.getJarFilePath(),args.length() > 0 ? args : null);
     }
 
     /**
@@ -81,6 +81,26 @@ public abstract class AbstractBaseCommand {
      * @return the agent URL if it is was set by a previous 'start' command.
      */
     protected String checkAgentUrl(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        return checkAgentUrl(pVm, 0);
+    }
+
+    /**
+     * Check whether an agent is registered by checking the existance of the system property
+     * {@link JvmAgent#JOLOKIA_AGENT_URL}. This can be used to check, whether a Jolokia agent
+     * has been already attached and started. ("start" will set this property, "stop" will remove it).
+     *
+     * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless
+     * @param delayInMs wait that many ms before fetching the properties
+     ** @return the agent URL if it is was set by a previous 'start' command.
+     */
+    protected String checkAgentUrl(Object pVm, int delayInMs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (delayInMs != 0) {
+            try {
+                Thread.sleep(delayInMs);
+            } catch (InterruptedException e) {
+                // just continue
+            }
+        }
         Properties systemProperties = getAgentSystemProperties(pVm);
         return systemProperties.getProperty(JvmAgent.JOLOKIA_AGENT_URL);
     }

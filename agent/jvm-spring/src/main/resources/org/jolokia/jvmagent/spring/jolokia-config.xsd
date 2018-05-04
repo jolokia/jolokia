@@ -115,7 +115,7 @@
           &lt;jolokia:config&gt; config objects exist, they get applied in the provided
           order. This attribute is ignored when using &lt;jolokia:config&gt; within a
           &lt;jolokia:server&gt; configuration. Embedded configuration always serves as
-          default value with the lowese precedence. The higher the
+          default value with the lowest precedence. The higher the
           order the higher the importance/precedence configuration is.
         </xs:documentation>
       </xs:annotation>
@@ -219,6 +219,37 @@
       </xs:annotation>
     </xs:attribute>
 
+    <xs:attribute name="secureSocketProtocol" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Secure protocol (https only, default: TLS)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="keyStoreType" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Keystore type (https only, default: JKS)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="keyManagerAlgorithm" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Key manager algorithm (https only, default: SunX509)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="trustManagerAlgorithm" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Trust manager algorithm (https only, default: SunX509)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
 
     <!-- Jolokia generic config (see enum ConfigKey) -->
     <xs:attribute name="user" type="xs:string">
@@ -400,6 +431,14 @@
           "error_value". No stack trace information
           will be included, though. This global option can be
           overridden by a query parameter of the same name.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="restrictorClass" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Classname of an custom restrictor which must be loadable from the classpath
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>

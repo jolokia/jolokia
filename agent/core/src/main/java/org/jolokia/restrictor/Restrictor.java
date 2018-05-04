@@ -81,7 +81,7 @@ public interface Restrictor {
      * one of the given parameters matches, then this method returns true.
      *
      * @return true is access is allowed
-     * @param pHostOrAddress one or more host or address names
+     * @param pHostOrAddress one or more host or address names.
      */
     boolean isRemoteAccessAllowed(String ... pHostOrAddress);
 

@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Support</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -55,7 +55,7 @@
             Feel free to join us on <a
             href="http://freenode.net">Freenode</a>, and discuss on
             <strong><code>#jolokia</code></strong> about JMX and the
-            world. You can use this <a href="./irc.html">web chat</a> 
+            world. You can use this <a href="./irc.html">web chat</a>
             for a quick contact.
           </dd>
           <dt>Bug Reports and Feature Requests</dt>
@@ -89,13 +89,13 @@
           <li>
             Fork Jolokia by visiting the <a
             href="http://github.com/rhuss/jolokia">project page</a>
-            (use "Fork" from the menu). 
+            (use "Fork" from the menu).
           </li>
           <li>
             Your contribution must be donated under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Public License</a> and you
             should sign-off your commits that you conform to the <a href="http://developercertificate.org/">Developer Certificate of Origin</a>
-            (i.e. that you have written the code on your own). To do so, add a line <literal>Signed-off-by: Your Name
-            &lt;your.name@example.com&gt;</literal> to your commit message. (<literal>git -s</literal> will do this for you).
+            (i.e. that you have written the code on your own). To do so, add a line <code>Signed-off-by: Your Name
+            &lt;your.name@example.com&gt;</code> to your commit message. (<code>git -s</code> will do this for you).
             Only real names are allowed here.
           </li>
           <li>
@@ -123,8 +123,8 @@
       <subsection name="Your Support for Jolokia">
         <div style="float:right; margin-right: 50px; margin-top: 20px;">
           <a class="FlattrButton" style="display:none;"
-             href="http://www.jolokia.org"></a> 
-        </div>                
+             href="http://www.jolokia.org"></a>
+        </div>
         <p>
           Jolokia is free software, released under the business friendly
           Apache License. That's mostly because I believe that open

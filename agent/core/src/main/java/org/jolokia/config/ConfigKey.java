@@ -52,6 +52,12 @@ public enum ConfigKey {
     DISPATCHER_CLASSES("dispatcherClasses", true, false),
 
     /**
+     * Path to a white list of patterns which are matched against possible
+     * JMX service URL for incoming requests
+     */
+    JSR160_PROXY_ALLOWED_TARGETS("jsr160ProxyAllowedTargets", true, false),
+
+    /**
      * Log handler class to use, which must have an empty constructor.
      * If not set, then a default logging mechanism is used.
      */
@@ -74,6 +80,11 @@ public enum ConfigKey {
     MAX_OBJECTS("maxObjects",true, true),
 
     /**
+     * Custom restrictor to be used instead of default one
+     */
+    RESTRICTOR_CLASS("restrictorClass", true, false),
+
+    /**
      * Init parameter for the location of the policy file. This should be an URL pointing to
      * the policy file. If this URL uses a scheme <code>classpath</code> then do a class lookup.
      *
@@ -88,6 +99,13 @@ public enum ConfigKey {
     POLICY_LOCATION("policyLocation",true,false,"classpath:/jolokia-access.xml"),
 
     /**
+     * Whether a reverse DNS lookup is allowed or not. Reverse DNS lookups might happen for checking
+     * host based restrictions, but might be costly.
+     */
+    // 2.0 : Default to 'false'
+    ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, "true"),
+
+    /**
      * Runtime configuration (i.e. must come in with a request)
      * for ignoring errors during JMX operations and JSON serialization.
      * This works only for certain operations like pattern reads.
@@ -100,6 +118,7 @@ public enum ConfigKey {
      * should be included or "runtime" if only {@link RuntimeException}s should
      * be included. Default is "true"
      */
+    // 2.0: Default to 'false'
     INCLUDE_STACKTRACE("includeStackTrace", true, true, "true"),
 
     /**
@@ -108,6 +127,14 @@ public enum ConfigKey {
      * the response. Default is false.
      */
     SERIALIZE_EXCEPTION("serializeException", true, true, "false"),
+
+    /**
+     * Whether expose extended error information like stacktraces or serialized exception
+     * at all. INCLUDE_STACKTRACE and SERIALIZE_EXCEPTION take effect only when ALLOW_ERROR_DETAILS
+     * is set to true. This could be set to false to avoid exposure of internal data.
+     */
+    ALLOW_ERROR_DETAILS("allowErrorDetails", true, false, "true"),
+
     /**
      * Whether  property keys of ObjectNames should be ordered in the canonical way or in the way that they
      * are created.
@@ -115,6 +142,11 @@ public enum ConfigKey {
      * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
     CANONICAL_NAMING("canonicalNaming", true, true, "true"),
+
+    /**
+     * Whether to use streaming json responses. Default is "true"
+     */
+    STREAMING("streaming", true, false, "true"),
 
     /**
      * Optional domain name for registering own MBeans
@@ -184,14 +216,31 @@ public enum ConfigKey {
 
     /**
      * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
-     * JaaS authentication.
+     * JaaS authentication, "delegate" for delegating to another HTTP service.
+     * For OSGi agent there are the additional modes "service-all" and "service-any" to use Authenticator services
+     * provided via an OSGi service registry.
      */
     AUTH_MODE("authMode", true, false, "basic"),
 
     /**
-     * Custom authenticator to be used instead of default user/password one
+     * Custom authenticator to be used instead of default user/password one (JVM agent)
      */
-    AUTHENTICATOR_CLASS("authenticatorClass", true, false),
+    AUTH_CLASS("authClass", true, false),
+
+    /**
+     * URL used for a dispatcher authentication (authMode == delegate)
+     */
+    AUTH_URL("authUrl",true,false),
+
+    /**
+     * Extractor specification for getting the principal (authMode == delegate)
+     */
+    AUTH_PRINCIPAL_SPEC("authPrincipalSpec",true,false),
+
+    /**
+     * Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+     */
+    AUTH_IGNORE_CERTS("authIgnoreCerts",true,false,"false"),
 
     /**
      * Context used for agent, used e.g. in the OSGi activator

@@ -34,7 +34,9 @@ mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVe
 * Upload tar.gz and zip files from target/checkout/target
 * Upload all JavaScript folies in client/javascript/target:
   - compressed/jolokia-*.js
-  - scripts/jplokia*.js
+  - scripts/jolokia*.js
+* Upload JVM debian packahe from
+  - agent/jvm/target/*.deb
 
 # Deploy to Sonatype staging
 cd target/checkout
@@ -48,7 +50,7 @@ cd ../..
 # 1. Login into https://oss.sonatype.org/
 # 2. "Staging Repositories"
 # 3. Select staging repository
-# 4. Click "Close" in menu 
+# 4. Click "Close" in menu
 # 5. Check the artifacts in the "closed" repository
 # 6. If ok --> click "Release" in menu
 
@@ -61,7 +63,7 @@ vi src/site/resources/jolokia.meta
 gpg --allow-weak-digest-algos --digest-algo=SHA1 --local-user roland@jolokia.org -a -b src/site/resources/jolokia.meta
 shasum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.sha1
 md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
- 
+
 
 # ========================================================================
 # Recreate Website (~/jolokia)
@@ -73,16 +75,16 @@ vi tools/site-skin/pom.xml
 git commit -a
 
 # Adapted tracking code
-git co piwik
+git co analytics
 git rebase master
 cd tools/site-skin; mvn clean install;
 cd ../..
 mvn clean install
-mvn -N site
+mvn -N -Pdist site
 
 # Roo-Plugin:
-# Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http 
-# /home/maven-repository/www/htdocs/repository/roo-repository.xml  
+# Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http
+# /home/maven-repository/www/htdocs/repository/roo-repository.xml
 # URL
 
 # =============================================================================

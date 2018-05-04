@@ -19,8 +19,8 @@ package org.jolokia.detector;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 
 /**
- * Detector for the Geronimo JEE Server
- * 
+ * Detector for the Geronimo Java EE Server
+ *
  * @author roland
  * @since 05.12.10
  */

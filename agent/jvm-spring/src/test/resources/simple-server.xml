@@ -16,8 +16,9 @@
   -->
 
 <agent id="jolokiaServer"
-        xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.jolokia.org/jolokia-spring/schema/config"
+       xsi:schemaLocation="http://www.jolokia.org/jolokia-spring/schema/config http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd">
   <config
           host="127.0.0.1"
           port="8778"

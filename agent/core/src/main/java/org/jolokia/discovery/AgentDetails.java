@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jolokia.Version;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.util.NetworkUtil;
 import org.json.simple.JSONObject;
 
 import static org.jolokia.discovery.AbstractDiscoveryMessage.Payload;
@@ -40,16 +41,20 @@ public class AgentDetails {
     // Description for the agent
     private String agentDescription;
 
+    // Whether initialization is done and no further update is allowed
+    private boolean sealed;
+
     public AgentDetails(String pAgentId) {
         agentVersion = Version.getAgentVersion();
         agentId = pAgentId;
         if (agentId == null) {
             throw new IllegalArgumentException("No agent id given");
         }
+        sealed = false;
     }
 
     public AgentDetails(Configuration pConfig) {
-        this(pConfig.get(ConfigKey.AGENT_ID));
+        this(NetworkUtil.replaceExpression(pConfig.get(ConfigKey.AGENT_ID)));
         agentDescription = pConfig.get(ConfigKey.AGENT_DESCRIPTION);
     }
 
@@ -72,6 +77,7 @@ public class AgentDetails {
         if (agentId == null) {
             throw new IllegalArgumentException("No agent id given");
         }
+        sealed = true;
     }
 
     /**
@@ -82,14 +88,49 @@ public class AgentDetails {
      * @param pVersion server version (not Jolokia's version!)
      */
     public void setServerInfo(String pVendor, String pProduct, String pVersion) {
+        checkSeal();
         serverVendor = pVendor;
         serverProduct = pProduct;
         serverVersion = pVersion;
     }
 
-    public void updateAgentParameters(String pUrl, Boolean pSecured) {
+    public void setUrl(String pUrl) {
+        checkSeal();
         url = pUrl;
+    }
+
+    public void setSecured(Boolean pSecured) {
+        checkSeal();
         secured = pSecured;
+    }
+
+    private void checkSeal() {
+        if (sealed) {
+            throw new IllegalStateException("Cannot update agent details because it is already initialized and sealed");
+        }
+    }
+
+    /**
+     * Check if either url or security information is missing.
+     * @return true if url or security information is missing and the initialization has not already be done
+     */
+    public boolean isInitRequired() {
+        return !sealed && (isUrlMissing() || isSecuredMissing());
+    }
+
+    public boolean isUrlMissing() {
+        return url == null;
+    }
+
+    public boolean isSecuredMissing() {
+        return secured == null;
+    }
+
+    /**
+     * Seal this details so that no further updates are possible
+     */
+    public void seal() {
+        sealed = true;
     }
 
     /**
@@ -132,6 +173,4 @@ public class AgentDetails {
             pResp.put(pKey.toString().toLowerCase(),pValue);
         }
     }
-
-
 }

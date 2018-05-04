@@ -132,9 +132,9 @@ public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
     private boolean debug = false;
     private int historyMaxEntries = 10;
     private int debugMaxEntries = 100;
-    private int maxDepth = 5;
+    private int maxDepth = 15;
     private int maxCollectionSize = 0;
-    private int maxObjects = 10000;
+    private int maxObjects = 0;
 
     public String getHost() {
         return host;
@@ -215,5 +215,4 @@ public class JolokiaMuleAgent extends AbstractAgent implements MuleAgentConfig {
     public void setMaxObjects(int pMaxObjects) {
         maxObjects = pMaxObjects;
     }
-
 }

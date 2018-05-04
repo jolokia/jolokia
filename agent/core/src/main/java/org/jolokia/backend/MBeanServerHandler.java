@@ -136,7 +136,9 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
      */
     private void initServerHandle(Configuration pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
         serverHandle = detectServers(pDetectors, pLogHandler);
-        serverHandle.postDetect(mBeanServerManager, pConfig, pLogHandler);
+        if (serverHandle != null) {
+            serverHandle.postDetect(mBeanServerManager, pConfig, pLogHandler);
+        }
     }
 
     /**
@@ -217,7 +219,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
                 StringBuilder ret = new StringBuilder();
                 for (JMException e : exceptions) {
                     ret.append(e.getMessage()).append(", ");
-                }                
+                }
                 throw new JMException(ret.substring(0, ret.length() - 2));
             }
         }
@@ -268,7 +270,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     }
 
     // Lookup all registered detectors + a default detector
-    private List<ServerDetector> lookupDetectors() {
+    public static List<ServerDetector> lookupDetectors() {
         List<ServerDetector> detectors =
                 ServiceObjectFactory.createServiceObjects("META-INF/detectors-default", "META-INF/detectors");
         // An detector at the end of the chain in order to get a default handle
@@ -299,7 +301,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
         }
         return null;
     }
-    
+
     // =====================================================================================
 
     // MBean exported debugging method

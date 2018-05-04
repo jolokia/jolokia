@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-osgi</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.5.0</version>
   <name>jolokia-osgi</name>
   <packaging>bundle</packaging>
   <description>osgi agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.5.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -116,6 +116,7 @@
               jolokia-jsr160;inline=true
             </Embed-Dependency>
             <Export-Package>
+              org.jolokia.osgi.security;version="${project.version}",
               org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.util;version="${project.version}",
@@ -129,6 +130,7 @@
               org.jolokia.util;version="${project.version}",
               org.osgi.framework;version="[1.0.0,2.0.0)",
               org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
+              org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
               org.osgi.service.log;version="[1.0.0,2.0.0)",
               org.osgi.util.tracker;version="[1.0.0,2.0.0)",
               *

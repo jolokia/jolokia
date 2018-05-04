@@ -225,8 +225,8 @@
 </cors>
 ]]></programlisting>
         <para>
-          If the option <literal>&lt;strict-checking/&gt;</literal> is given in this section, too, then the given pattern
-          are not only used for CORS checking but also every request ist checked on th server side whether the
+          If the option <literal>&lt;strict-checking/&gt;</literal> is given in this section, too, then the given patterns
+          are not only used for CORS checking but also every request is checked on the server side whether the
           <literal>Origin:</literal> or <literal>Referer:</literal> header matches one of the given patterns.
           This useful for protecting against Cross-Site Request Forgery.
         </para>
@@ -312,7 +312,7 @@
           But how do the agents lookup the policy file ? By default,
           the agents will lookup for a policy file top-level in the
           classpath under the name
-          <filename>jolokia-access.html</filename>. Hence for the war
+          <filename>jolokia-access.xml</filename>. Hence for the war
           agent, the policy file must be packaged within the war at
           <filename>WEB-INF/classes/jolokia-access.xml</filename>, for
           all other agents at

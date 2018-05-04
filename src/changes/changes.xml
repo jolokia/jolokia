@@ -23,7 +23,191 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.2.4-SNAPSHOT" description="Release 1.2.4-SNAPSHOT">
+    <release version="1.5.0" description="Release 1.5.0" date="2018-02-08">
+      <action dev="rhuss" type="fix">
+        Restrict allowed mime types to "text/plain" and "application/json" for the response.
+      </action>
+      <action dev="rhuss" type="add">
+        Because of security reasion, the JSR-160 proxy mode is disabled by default int the Java EE agent.
+        It can be enabled via web.xml configuration, a system property or an environment variable. In addition
+        it is now possible to configure a whitelist with patterns which are allowed as targets in the
+        proxy mode. See the reference manual section on "Proxy mode" for details.
+      </action>
+      <action dev="rysndgoulding" type="add" issue="358">
+        New authMode "service-any" and "service-all" to allow to lookup an
+        org.jolokia.osgi.security.Authenticator used for authentication. Note that this class has
+        been changed from an abstract base class to an interface for ease of customization.
+      </action>
+    </release>
+    <release version="1.4.0" description="Release 1.4.0" date="2018-01-23">
+      <action dev="rhuss" type="fix" issue="366">
+        Removed ChunkedWriter to avoid references and inclusion of parts of StreamEncoder
+        which is a Java internal class
+      </action>
+      <action dev="seryckd-jda" type="fix" issue="338">
+        Fix incorrect CORS header
+      </action>
+      <action dev="bcubk" type="fix" issue="309">
+        Support "max connection per route" setting for J4pClientBuilder to prevent a ConnectionPoolTimeoutException
+      </action>
+      <action dev="pgier" type="update" issue="323">
+        Update to httpcore 4.4.7 for the Java client
+      </action>
+      <action dev="xiu" type="add" issue="307">
+        Add debian package generation to the JVM agent
+      </action>
+      <action dev="rhuss" type="add">
+        Print all configuration value for the /version  command: When not set explicitly then print the
+        default value (if any).
+      </action>
+      <action dev="danpfe" type="add" issue="343">
+        Modifications to make JVM Agent work on IBM JVM 8.
+      </action>
+    </release>
+    <release version="1.3.7" description="Release 1.3.7" date="2017-07-06">
+      <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
+        Support attaching to running JVM even when -XX:+PerfDisableSharedMem is given
+      </action>
+      <action dev="robstryker" type="fix" date="2017-05-31" issue="326">
+        Better error message for Java client
+      </action>
+    </release>
+    <release version="1.3.6" description="Release 1.3.6" date="2017-04-03">
+      <action dev="rraez" type="fix" date="2016-09-18" issue="258">
+        Add support for JBoss modules for the Jolokia JVM agent
+      </action>
+      <action dev="rhuss" type="fix" date="2017-02-16" issue="305">
+        Fix issue for read request with a single attribute in an array
+      </action>
+      <action dev="apupier" type="add" date="2017-03-31" issue="317">
+        provide classname MBeanInfo on List request
+      </action>
+    </release>
+    <release version="1.3.5" description="Release 1.3.5" date="2016-10-4">
+      <action dev="paoloantinori" type="add" date="2016-09-18" issue="283">
+        Support JSON streaming also for AgentServlet (WAR and OSGi agent)
+      </action>
+      <action dev="rhuss" type="fix" date="2016-09-20">
+        Avoid NPE in Websphere detector
+      </action>
+      <action dev="rhuss" type="fix" issue="284" date="2016-10-1">
+        Re-add hooks for creating custom restrictors
+      </action>
+      <action dev="savage-engineer" type="add" issue="281" date="2016-10-1">
+        Added better version detection of Payara Server
+      </action>
+    </release>
+    <release version="1.3.4" description="Release 1.3.4" date="2016-07-31">
+      <action dev="rhuss" type="add" date="2016-07-28" issue="278">
+        Add a quite and java.util.logging LogHandler implementations which can be used
+        with 'logHandlerClass'
+      </action>
+      <action dev="chirino" type="add" date="2016-07-18" issue="273">
+        Allow a basic auth as alternative to client cert authentication when both --user and
+        --useSslClientAuthentication is used.
+      </action>
+      <action dev="drcapulet" type="add" date="2016-07-04" issue="257">
+        Allow user-specifiable SSL / TLS protocols and ciphers to the JVM agent
+      </action>
+      <action dev="gnufied" type="add" date="2016-05-19" issue="243">
+        JSON response is streamed by default for the JVM agent to reduce memory activity
+      </action>
+      <action dev="gquintana" type="add" date="2016-05-04" issue="247">
+        Add the possibility to add a SSL connection factory the J4pClient
+      </action>
+      <action dev="rhuss" type="fix" date="2016-04-13" issue="251">
+        Fixed TomcatDetector to match more flexibly
+      </action>
+      <action dev="rhuss" type="fix" date="2016-04-13" issue="249">
+        Removed Java 1.7 exception class, make the agent working with Java 1.6 again.
+      </action>
+    </release>
+    <release version="1.3.3" description="Release 1.3.3" date="2016-02-16">
+      <action dev="dejanb" type="add" date="2016-01-15" issue="239">
+        Ignoring transient values during serialization when annotated
+        with @Transient
+      </action>
+      <action dev="arnabbiswas1" type="fix" date="2016-01-15" issue="150">
+        Treat null and empty paths the same when using HistoryKey
+      </action>
+      <action dev="arnabbiswas1" type="fix" date="2016-01-15" issue="221">
+        Fix race condition when initializing the agent details
+      </action>
+      <action dev="nevenr" type="fix" date="2016-01-17" issue="200">
+        Fix serialization of empty TabularData
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-17" issue="224">
+        Allow custom restrictors for the JVM and WAR agent.
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-17" issue="218">
+        Add missing SSL config options to Spring's jolokia-config.xsd
+      </action>
+      <action dev="nevenr" type="add" date="2016-01-18" issue="164">
+        Allow encrypted keystore passwords which can be created with
+        the "encrypt" command of the JVM agent.
+      </action>
+      <action dev="rhuss" type="add" date="2016-01-23" issue="234">
+        Add configuration option "allowDnsReverseLookup" which, if set
+        to false, will omit reverse DNS lookups during restrictor checking.
+        Default is "true" (for backwards compatibility).
+      </action>
+      <action dev="rhuss" type="add" date="2016-01-23" issue="240">
+        Add global configuration option "allowErrorDetails" which allows to avoid
+        the inclusion of stack traces and error details when set.
+      </action>
+    </release>
+    <release version="1.3.2" description="Release 1.3.2" date="2015-10-5">
+      <action dev="roland" type="add" date="2015-10-04">
+        Support for dynamically created, self-signed server
+        certificates when no server certificate is configured
+      </action>
+      <action dev="arnabbiswas1" type="fix" date="2015-09-30" issue="204">
+        Add missing check for HTTP method in request handler.
+      </action>
+      <action dev="roland" type="add" date="2015-10-02">
+        Support for SSL authentication with restricting to given
+        client cert's  principals
+      </action>
+      <action dev="roland" type="add" date="2015-10-01">
+        Support for PEM certs and keys when using the JVM agent with
+        TLS
+      </action>
+      <action dev="zisisli" type="update" date="2015-09-14" issue="214">
+        Enhanced 'GlassfishDetector' for Payara flavour of glassfish
+      </action>
+      <action dev="nevenr" type="add" date="2015-07-02" issue="199">
+        Allow environment placeholders in "agentId"
+      </action>
+    </release>
+    <release version="1.3.1" description="Release 1.3.1" date="2015-05-28">
+      <action dev="roland" type="add" date="2015-05-27" issue="197">
+        Added a DelegatingAuthenticator which passes a request's Authorization: header to a delegate URL for
+        verification (like it is done for OAuth2 resource verification in OpenShift)
+      </action>
+      <action dev="roland" type="fix" date="2015-05-27">
+        Update Mule dependency to mule-core:2.6.0 since some older transitive dependencies has been vanished from
+        Maven central
+      </action>
+      <action dev="roland" type="fix" date="2015-05-27" issue="187">
+        Fixed default for 'maxCollections' to unlimited (was still set to 1000)
+      </action>
+      <action dev="roland" type="update" date="2015-05-27">
+        Changed config parameter 'authenticatorClass' to 'authClass' for consistencies sake.
+      </action>
+    </release>
+    <release version="1.3.0" description="Release 1.3.0" date="2015-05-07">
+      <action dev="roland" type="fix" date="2015-05-06" issue="187">
+        Removed default truncation on 1000 collection elements as defined for the WAR agent in web.xml. Truncation
+        can be enabled by setting the config parameter maxCollectionSize in web.xml to a value greater than 0.
+      </action>
+      <action dev="roland" type="fix" date="2015-05-06" issue="193">
+        Fixed setting of "secured" flag when doing autodiscovery with the servlet agent. It will be now
+        always be set after the first HTTP request has been served.
+      </action>
+      <action dev="roland" type="fix" date="2015-05-05" issue="192">
+        Fixed resolving of Spring EL expressions (#{ ... }) when Jolokia's Spring configuration
+        schema is used
+      </action>
       <action dev="roland" type="add" date="2015-03-05" issue="182">
         Added support for Mule 3.6 (which contains Jetty 9)
       </action>
@@ -34,20 +218,20 @@
         Support for constructor based serialization conversion
       </action>
       <action dev="jcordes73" type="fix" date="2015-01-10" issue="178">
-       Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list" 
+       Fix for weird InstanceNotFoundException on JBoss EAP 6.3 when doing a "list"
       </action>
       <action dev="roland" type="add" date="2015-01-13" issue="177">
         Added MBeanPlugin as a way to hook into the agent's lifecyle
       </action>
+      <action dev="elnkwelch" type="add" date="2015-01-03">
+        OSGi agent can read properties from Configuration Admin service with PID org.jolokia.osgi
+      </action>
       <action dev="roland" type="add" date="2014-12-23" issue="173">
         Added the possibility to hook into the deserialization process
-        for responses.
+        for responses (Java client).
       </action>
       <action dev="nevenr" type="add" date="2014-12-11" issue="169">
         Allow a proxy to be specified in J4pClientBuilder
-      </action>
-      <action dev="erwelch" type="add" date="2015-01-03">
-        OSGi agent can read properties from Configuration Admin service with PID org.jolokia.osgi
       </action>
     </release>
     <release version="1.2.3" description="Release 1.2.3" date="2014-11-08">
@@ -312,10 +496,10 @@
         proper server detection.
       </action>
       <action dev="mikael,jstrachan,roland" type="add" date="2012-10-10">
-        One can now change the key property order for MBeans names with the query parameter "canonicalNaming" 
+        One can now change the key property order for MBeans names with the query parameter "canonicalNaming"
         for read, list and search operations. By default this is set to "true" in which case
         an alphabetical ordering for the keys is used. If set to "false", then the original name as registered
-        is used. 
+        is used.
       </action>
       <action dev="roland" type="add" date="2012-11-23">
         Added a method "jobs()" to the JavaScript Jolokia agent to get all handles for all currently registered
@@ -358,7 +542,7 @@
       </action>
       <action dev="roland" type="add" date="2012-06-05">
         Added a page showing the Jolokia-Cubism integration including
-        live demos. 
+        live demos.
       </action>
       <action dev="roland" type="add" date="2012-05-16">
         Added a scheduler to the JavaScript client library.
@@ -368,7 +552,7 @@
       </action>
       <action dev="roland" type="fix" date="2012-04-26">
         Fixed fallback when registering ConfigMBean which didn't
-        properly work (see pull request #42)  
+        properly work (see pull request #42)
       </action>
     </release>
     <release version="1.0.3" description="Release 1.0.3" date="2012-04-11">
@@ -384,7 +568,7 @@
       <action dev="roland" type="fix" date="2012-03-24">
         Fix for possible NPE when serializing a complex Java objects (#41)
       </action>
-      <action dev="gid79" type="add" date="2012-03-25">
+      <action dev="tempredirect" type="add" date="2012-03-25">
         New configuration property "httpServiceFilter" added for providing
         a OSGi filter expression which gets applied when selecting the HttpService
         to bind to. (#39)
@@ -558,18 +742,18 @@
       <action dev="roland" type="add" date="2011-03-24">
         The activator in jolokia-osgi and jolokia-osgi-bundle can now
         use an OSGi restrictor service implementing
-        org.jolokia.restrictor.Restrictor when bundle property 
+        org.jolokia.restrictor.Restrictor when bundle property
         org.jolokia.useRestrictorService is set to true.
       </action>
       <action dev="roland" type="add" date="2011-03-24">
         Added a servlet init parameter "policyLocation" for specifying
         the location of the policy file. This can be an URL or an
         string with prefix "classpath:". Default:
-        "classpath:/jolokia-access.xml" 
+        "classpath:/jolokia-access.xml"
       </action>
       <action dev="roland" type="update" date="2011-03-24">
         Refactored restrictor handling and exported
-        org.jolokia.restrictor in the OSGi bundles. JolokiaServlet can 
+        org.jolokia.restrictor in the OSGi bundles. JolokiaServlet can
         take now an Restrictor object as constructor parameter.
       </action>
       <action dev="roland" type="update" date="2011-03-24">
@@ -578,7 +762,7 @@
         loader added.
       </action>
       <action dev="roland" type="update" date="2011-03-16">
-        jolokia.js: Works now with jQuery 1.5.1, too (but still doesn't use 
+        jolokia.js: Works now with jQuery 1.5.1, too (but still doesn't use
         the advanced Ajax features)
       </action>
       <action dev="roland" type="update" date="2011-03-16">
@@ -647,7 +831,7 @@
         Fixed MBean registration issue with Websphere AS 7.0 where
         MBean registration via the MBeanRegistration intefaces causes
         the WAS MBeanServer to raise a NPE (but register the MBean
-        nevertheless, so no rollback here). 
+        nevertheless, so no rollback here).
       </action>
       <action dev="roland" type="add" date="2010-10-24">
         New request parameter "callback" allows for sending a response

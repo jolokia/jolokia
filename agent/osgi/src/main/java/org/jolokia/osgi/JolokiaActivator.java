@@ -1,6 +1,8 @@
 package org.jolokia.osgi;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -10,13 +12,13 @@ import org.jolokia.config.ConfigKey;
 import org.jolokia.osgi.security.*;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
+import org.jolokia.osgi.util.LogHelper;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.*;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -82,7 +84,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
 
         //Track ConfigurationAdmin service
         configAdminTracker = new ServiceTracker(pBundleContext,
-                                                ConfigurationAdmin.class.getCanonicalName(),
+                                                "org.osgi.service.cm.ConfigurationAdmin",
                                                 null);
         configAdminTracker.open();
 
@@ -102,8 +104,6 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             // Register us as JolokiaContext
             jolokiaServiceRegistration = pBundleContext.registerService(JolokiaContext.class.getCanonicalName(), this, null);
         }
-
-
     }
 
     /** {@inheritDoc} */
@@ -128,6 +128,12 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             configAdminTracker = null;
         }
 
+        if (jolokiaHttpContext instanceof ServiceAuthenticationHttpContext) {
+            final ServiceAuthenticationHttpContext context =
+                    (ServiceAuthenticationHttpContext) jolokiaHttpContext;
+            context.close();
+        }
+
         restrictor = null;
         bundleContext = null;
     }
@@ -141,18 +147,24 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     public synchronized HttpContext getHttpContext() {
         if (jolokiaHttpContext == null) {
             final String user = getConfiguration(USER);
+            final String authMode = getConfiguration(AUTH_MODE);
             if (user == null) {
-                jolokiaHttpContext = new DefaultHttpContext();
+                if (ServiceAuthenticationHttpContext.shouldBeUsed(authMode)) {
+                    jolokiaHttpContext = new ServiceAuthenticationHttpContext(bundleContext, authMode);
+                } else {
+                    jolokiaHttpContext = new DefaultHttpContext();
+                }
             } else {
-                jolokiaHttpContext = new BasicAuthenticationHttpContext(getConfiguration(REALM),
-                                                                        createAuthenticator());
+                jolokiaHttpContext =
+                    new BasicAuthenticationHttpContext(getConfiguration(REALM),
+                                                       createAuthenticator(authMode));
             }
         }
         return jolokiaHttpContext;
     }
 
     /**
-     * Get the servlet alias under which the agen servlet is registered
+     * Get the servlet alias under which the agent servlet is registered
      * @return get the servlet alias
      */
     public String getServletAlias() {
@@ -170,7 +182,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
                 config.put(key.getKeyValue(),value);
             }
         }
-        String jolokiaId = config.get(ConfigKey.AGENT_ID.getKeyValue());
+        String jolokiaId = NetworkUtil.replaceExpression(config.get(ConfigKey.AGENT_ID.getKeyValue()));
         if (jolokiaId == null) {
             config.put(ConfigKey.AGENT_ID.getKeyValue(),
                        NetworkUtil.getAgentId(hashCode(),"osgi"));
@@ -202,7 +214,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             if (config == null) {
                 return null;
             }
-            Dictionary props = config.getProperties();
+            Dictionary<?, ?> props = config.getProperties();
             if (props == null) {
                 return null;
             }
@@ -224,17 +236,76 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
         }
     }
 
-    private Authenticator createAuthenticator() {
-        Authenticator authenticator;
-        String authMode = getConfiguration(AUTH_MODE);
-        if ("basic".equalsIgnoreCase(authMode)) {
-            authenticator = new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
-        } else if ("jaas".equalsIgnoreCase(authMode)) {
-            authenticator = new JaasAuthenticator(getConfiguration(REALM));
-        } else {
-            throw new IllegalArgumentException("Unknown authentication method '" + authMode + "' configured");
+    private Authenticator createAuthenticator(String authMode) {
+        Authenticator authenticator = createCustomAuthenticator();
+        if (authenticator != null) {
+            return authenticator;
+        }
+        return createAuthenticatorFromAuthMode(authMode);
+    }
+
+    private Authenticator createCustomAuthenticator() {
+        final String authenticatorClass = getConfiguration(ConfigKey.AUTH_CLASS);
+        if (authenticatorClass != null) {
+            try {
+                Class<?> authClass = Class.forName(authenticatorClass);
+                if (!Authenticator.class.isAssignableFrom(authClass)) {
+                    throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
+                                                       "] is not a subclass of Authenticator");
+                }
+                return lookupAuthenticator(authClass);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Cannot find authenticator class", e);
+            }
+        }
+        return null;
+    }
+
+    private Authenticator lookupAuthenticator(final Class<?> pAuthClass) {
+        Authenticator authenticator = null;
+        try {
+            // prefer constructor that takes configuration
+            try {
+                final Constructor<?> constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+                authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(getConfiguration());
+            } catch (NoSuchMethodException ignore) {
+                // Next try
+                authenticator = lookupAuthenticatorWithDefaultConstructor(pAuthClass, ignore);
+            } catch (InvocationTargetException e) {
+                throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
+            }
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
         }
         return authenticator;
+    }
+
+    private Authenticator lookupAuthenticatorWithDefaultConstructor(final Class<?> pAuthClass, final NoSuchMethodException ignore)
+            throws InstantiationException, IllegalAccessException {
+
+        // fallback to default constructor
+        try {
+            final Constructor<?> defaultConstructor = pAuthClass.getConstructor();
+            return (Authenticator) defaultConstructor.newInstance();
+        } catch (NoSuchMethodException e) {
+            e.initCause(ignore);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
+        } catch (InvocationTargetException e) {
+            e.initCause(ignore);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
+        }
+    }
+
+    private Authenticator createAuthenticatorFromAuthMode(String pAuthMode) {
+        if ("basic".equalsIgnoreCase(pAuthMode)) {
+            return new BasicAuthenticator(getConfiguration(USER),getConfiguration(PASSWORD));
+        } else if ("jaas".equalsIgnoreCase(pAuthMode)) {
+            return new JaasAuthenticator(getConfiguration(REALM));
+        } else {
+            throw new IllegalArgumentException("Unknown authentication method '" + pAuthMode + "' configured");
+        }
     }
 
     // =============================================================================
@@ -255,9 +326,9 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
                                         getConfiguration(),
                                         getHttpContext());
             } catch (ServletException e) {
-                logError("Servlet Exception: " + e, e);
+                LogHelper.logError(bundleContext, "Servlet Exception: " + e, e);
             } catch (NamespaceException e) {
-                logError("Namespace Exception: " + e, e);
+                LogHelper.logError(bundleContext, "Namespace Exception: " + e, e);
             }
             return service;
         }
@@ -272,23 +343,5 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
             httpService.unregister(getServletAlias());
         }
     }
-
-    @SuppressWarnings("PMD.SystemPrintln")
-    private void logError(String message,Throwable throwable) {
-        ServiceReference lRef = bundleContext.getServiceReference(LogService.class.getName());
-        if (lRef != null) {
-            try {
-                LogService logService = (LogService) bundleContext.getService(lRef);
-                if (logService != null) {
-                    logService.log(LogService.LOG_ERROR,message,throwable);
-                    return;
-                }
-            } finally {
-                bundleContext.ungetService(lRef);
-            }
-        }
-        System.err.println("Jolokia-Error: " + message + " : " + throwable.getMessage());
-    }
-
 
 }

@@ -22,13 +22,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sun.net.httpserver.Authenticator;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.jvmagent.security.JaasAuthenticator;
-import org.jolokia.jvmagent.security.UserPasswordAuthenticator;
+import org.jolokia.jvmagent.security.*;
+import org.jolokia.util.JolokiaCipher;
 import org.jolokia.util.NetworkUtil;
 
 /**
@@ -59,6 +64,14 @@ public class JolokiaServerConfig {
     private String keyManagerAlgorithm;
     private String trustManagerAlgorithm;
     private String keyStoreType;
+    private String caCert;
+    private String serverCert;
+    private String serverKey;
+    private String serverKeyAlgorithm;
+    private List<String> clientPrincipals;
+    private boolean extendedClientCheck;
+    private String[] sslProtocols;
+    private String[] sslCipherSuites;
 
     /**
      * Constructor which prepares the server configuration from a map
@@ -102,7 +115,7 @@ public class JolokiaServerConfig {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
             pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), NetworkUtil.getAgentId(hashCode(),"jvm"));
         }
-        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(),"jvm");
+        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(), "jvm");
     }
 
     protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
@@ -125,6 +138,15 @@ public class JolokiaServerConfig {
      */
     public String getProtocol() {
         return protocol;
+    }
+
+    /**
+     * Whether or not to use https as the procol
+     *
+     * @return true when using https as the protocol
+     */
+    public boolean useHttps() {
+        return protocol.equalsIgnoreCase("https");
     }
 
     /**
@@ -209,7 +231,9 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * Password for keystore if a keystore is used. If not given, no password is assumed.
+     * Password for keystore if a keystore is used. If not given, no password is assumed. If certs are not
+     * loaded from a keystore but from PEM files directly, then this password is used for the private
+     * server key
      *
      * @return the keystore password as char array or an empty array of no password is given
      */
@@ -217,10 +241,109 @@ public class JolokiaServerConfig {
         return keystorePassword;
     }
 
+    /**
+     * Get a path to a CA PEM file which is used to verify client certificates. This path
+     * is only used when {@link #getKeystore()} is not set.
+     *
+     * @return the file path where the ca cert is located.
+     */
+    public String getCaCert() {
+        return caCert;
+    }
+
+    /**
+     * Get the path to a server cert which is presented clients when using TLS.
+     * This is only used when {@link #getKeystore()} is not set.
+     *
+     * @return the file path where the server cert is located.
+     */
+    public String getServerCert() {
+        return serverCert;
+    }
+
+    /**
+     * Get the path to a the cert which has the private server key.
+     * This is only used when {@link #getKeystore()} is not set.
+     *
+     * @return the file path where the private server cert is located.
+     */
+    public String getServerKey() {
+        return serverKey;
+    }
+
+    /**
+     * The algorithm to use for extracting the private server key.
+     *
+     * @return the server key algorithm
+     */
+    public String getServerKeyAlgorithm() {
+        return serverKeyAlgorithm;
+    }
+
+    /**
+     * The list of enabled SSL / TLS protocols to serve with
+     *
+     * @return the list of enabled protocols
+     */
+    public String[] getSSLProtocols() { return sslProtocols; }
+
+    /**
+     * The list of enabled SSL / TLS cipher suites
+     *
+     * @return the list of cipher suites
+     */
+    public String[] getSSLCipherSuites() {
+        return sslCipherSuites;
+    }
+
+    /**
+     * Filter the list of protocols and ciphers to those supported by the given SSLContext
+     *
+     * @param sslContext the SSLContext to pull information from
+     */
+    public void updateHTTPSSettingsFromContext(SSLContext sslContext) {
+        SSLParameters parameters = sslContext.getSupportedSSLParameters();
+
+        // Protocols
+        if (sslProtocols == null) {
+            sslProtocols = parameters.getProtocols();
+        } else {
+            List<String> supportedProtocols = Arrays.asList(parameters.getProtocols());
+            List<String> sslProtocolsList = new ArrayList<String>(Arrays.asList(sslProtocols));
+
+            Iterator<String> pit = sslProtocolsList.iterator();
+            while (pit.hasNext()) {
+                String protocol = pit.next();
+                if (!supportedProtocols.contains(protocol)) {
+                    System.out.println("Jolokia: Discarding unsupported protocol: " + protocol);
+                    pit.remove();
+                }
+            }
+            sslProtocols = sslProtocolsList.toArray(new String[0]);
+        }
+
+        // Cipher Suites
+        if (sslCipherSuites == null) {
+            sslCipherSuites = parameters.getCipherSuites();
+        } else {
+            List<String> supportedCipherSuites = Arrays.asList(parameters.getCipherSuites());
+            List<String> sslCipherSuitesList = new ArrayList<String>(Arrays.asList(sslCipherSuites));
+
+            Iterator<String> cit = sslCipherSuitesList.iterator();
+            while (cit.hasNext()) {
+                String cipher = cit.next();
+                if (!supportedCipherSuites.contains(cipher)) {
+                    System.out.println("Jolokia: Discarding unsupported cipher suite: " + cipher);
+                    cit.remove();
+                }
+            }
+            sslCipherSuites = sslCipherSuitesList.toArray(new String[0]);
+        }
+    }
+
     // Initialise and validate early in order to fail fast in case of an configuration error
     protected void initConfigAndValidate(Map<String,String> agentConfig) {
         initContext();
-        initAuthenticator();
         initProtocol(agentConfig);
         initAddress(agentConfig);
         port = Integer.parseInt(agentConfig.get("port"));
@@ -228,17 +351,18 @@ public class JolokiaServerConfig {
         initExecutor(agentConfig);
         initThreadNr(agentConfig);
         initHttpsRelatedSettings(agentConfig);
+        initAuthenticator();
     }
 
     private void initAuthenticator() {
         initCustomAuthenticator();
         if (authenticator == null) {
-            initDefaultAuthenticator();
+            initAuthenticatorFromAuthMode();
         }
     }
 
     private void initCustomAuthenticator() {
-        String authenticatorClass = jolokiaConfig.get(ConfigKey.AUTHENTICATOR_CLASS);
+        String authenticatorClass = jolokiaConfig.get(ConfigKey.AUTH_CLASS);
 
         if (authenticatorClass != null) {
             try {
@@ -287,23 +411,47 @@ public class JolokiaServerConfig {
         }
     }
 
-    private void initDefaultAuthenticator() {
+    private void initAuthenticatorFromAuthMode() {
         String user = jolokiaConfig.get(ConfigKey.USER);
         String password = jolokiaConfig.get(ConfigKey.PASSWORD);
 
-        if (user != null) {
-            String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
-            String realm = jolokiaConfig.get(ConfigKey.REALM);
-            if ("basic".equalsIgnoreCase(authMode)) {
-                authenticator = new UserPasswordAuthenticator(realm,user,password);
-            } else if ("jaas".equalsIgnoreCase(authMode)) {
-                authenticator = new JaasAuthenticator(realm);
-            } else {
-                throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
-                                                   "Must be either 'basic' or 'jaas'");
+        String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
+        String realm = jolokiaConfig.get(ConfigKey.REALM);
+
+        ArrayList<Authenticator> authenticators = new ArrayList<Authenticator>();
+
+        if (useHttps() && useSslClientAuthentication()) {
+            authenticators.add(new ClientCertAuthenticator(this));
+        }
+
+        if ("basic".equalsIgnoreCase(authMode)) {
+            if (user != null) {
+                if (password == null) {
+                    throw new IllegalArgumentException("'password' must be set if a 'user' (here: '" + user + "') is given");
+                }
+
+                authenticators.add(new UserPasswordAuthenticator(realm,user,password));
             }
+        } else if ("jaas".equalsIgnoreCase(authMode)) {
+            authenticators.add(new JaasAuthenticator(realm));
+        } else if ("delegate".equalsIgnoreCase(authMode)) {
+            authenticators.add(new DelegatingAuthenticator(realm,
+                                                        jolokiaConfig.get(ConfigKey.AUTH_URL),
+                                                        jolokiaConfig.get(ConfigKey.AUTH_PRINCIPAL_SPEC),
+                                                        jolokiaConfig.getAsBoolean(ConfigKey.AUTH_IGNORE_CERTS)));
         } else {
+            throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
+                                               "Must be either 'basic' or 'jaas'");
+        }
+
+        if (authenticators.isEmpty()) {
             authenticator = null;
+        } else if (authenticators.size() == 1) {
+            authenticator = authenticators.get(0);
+        } else {
+            // Multiple auth strategies were configured, pass auth if any of them
+            // succeed.
+            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.ANY, authenticators);
         }
     }
 
@@ -327,10 +475,9 @@ public class JolokiaServerConfig {
     private void initHttpsRelatedSettings(Map<String, String> agentConfig) {
         // keystore
         keystore = agentConfig.get("keystore");
-        if (protocol.equals("https") && keystore == null) {
-            throw new IllegalArgumentException("No keystore defined for HTTPS protocol. " +
-                                               "Please use the 'keystore' option to point to a valid keystore");
-        }
+        caCert = agentConfig.get("caCert");
+        serverCert = agentConfig.get("serverCert");
+        serverKey = agentConfig.get("serverKey");
 
         secureSocketProtocol = agentConfig.get("secureSocketProtocol");
         keyStoreType = agentConfig.get("keyStoreType");
@@ -341,13 +488,58 @@ public class JolokiaServerConfig {
         useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
 
         String password = agentConfig.get("keystorePassword");
-        keystorePassword =  password != null ? password.toCharArray() : new char[0];
+        keystorePassword =  password != null ? decipherPasswordIfNecessary(password) : new char[0];
 
+        serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
+        clientPrincipals = extractList(agentConfig, "clientPrincipal");
+        String xCheck = agentConfig.get("extendedClientCheck");
+        extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
+
+        List<String> sslProtocolsList = extractList(agentConfig, "sslProtocol");
+        if (sslProtocolsList != null) {
+            sslProtocols = sslProtocolsList.toArray(new String[0]);
+        }
+        List<String> sslCipherSuitesList = extractList(agentConfig, "sslCipherSuite");
+        if (sslCipherSuitesList != null) {
+            sslCipherSuites = sslCipherSuitesList.toArray(new String[0]);
+        }
     }
 
-    private void initThreadNr(Map<String, String> agentConfig) {
+    private char[] decipherPasswordIfNecessary(String password) {
+        Matcher encryptedPasswordMatcher = Pattern.compile("^\\[\\[(.*)]]$").matcher(password);
+        if (encryptedPasswordMatcher.matches()) {
+            String encryptedPassword = encryptedPasswordMatcher.group(1);
+            try {
+                JolokiaCipher jolokiaCipher = new JolokiaCipher();
+                return jolokiaCipher.decrypt(encryptedPassword).toCharArray();
+            } catch (GeneralSecurityException e) {
+                throw new IllegalArgumentException("Cannot decrypt password " + encryptedPassword);
+            }
+        } else {
+            return password.toCharArray();
+        }
+    }
+
+    // Extract list from multiple string entries. <code>null</code> if no such config is given
+    // The first element is one without extensions
+    // More elements can be given with ".1", ".2", ... added.
+    private List<String> extractList(Map<String, String> pAgentConfig, String pKey) {
+        List<String> ret = new ArrayList<String>();
+        if (pAgentConfig.containsKey(pKey)) {
+            ret.add(pAgentConfig.get(pKey));
+        }
+        int idx = 1;
+        String keyIdx = pKey + "." + idx;
+        while (pAgentConfig.containsKey(keyIdx)) {
+            ret.add(pAgentConfig.get(keyIdx));
+            keyIdx = pKey + "." + ++idx;
+        }
+        return ret.size() > 0 ? ret : null;
+    }
+
+    private void initThreadNr(Map<String, String> pAgentConfig) {
         // Thread-Nr
-        String threadNrS =  agentConfig.get("threadNr");
+        String threadNrS =  pAgentConfig.get("threadNr");
         threadNr = threadNrS != null ? Integer.parseInt(threadNrS) : 5;
     }
 
@@ -360,7 +552,6 @@ public class JolokiaServerConfig {
                                                "' but most be either 'single', 'fixed' or 'cached'");
         }
     }
-
 
     private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
@@ -418,5 +609,13 @@ public class JolokiaServerConfig {
 
     public String getKeyStoreType() {
         return keyStoreType;
+    }
+
+    public List<String> getClientPrincipals() {
+        return clientPrincipals;
+    }
+
+    public boolean getExtendedClientCheck() {
+        return extendedClientCheck;
     }
 }

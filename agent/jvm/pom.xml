@@ -16,11 +16,11 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-jvm</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.5.0</version>
   <name>jolokia-jvm</name>
   <packaging>jar</packaging>
   <description>JVM-agent</description>
@@ -28,9 +28,13 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.5.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
+
+  <properties>
+    <jvm.algorithm>SunX509</jvm.algorithm>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -38,7 +42,7 @@
       <artifactId>jolokia-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
@@ -57,6 +61,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-test-util</artifactId>
       <version>${project.version}</version>
@@ -65,6 +75,23 @@
   </dependencies>
 
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -107,6 +134,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <forkMode>always</forkMode>
+          <!--<argLine>-Djava.security.debug=certpath,Provider</argLine>-->
         </configuration>
       </plugin>
     </plugins>
@@ -177,6 +205,93 @@
         </dependency>
       </dependencies>
     </profile>
+    <profile>
+      <id>testing-on-ibm-jvm</id>
+      <activation>
+        <property>
+          <name>java.vendor</name>
+          <value>IBM Corporation</value>
+        </property>
+      </activation>
+      <properties>
+        <jvm.algorithm>IBMX509</jvm.algorithm>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-jmockit-before-test</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <stripVersion>true</stripVersion>
+                  <includeArtifactIds>jmockit</includeArtifactIds>
+                  <includeGroupIds>org.jmockit</includeGroupIds>
+                  <includeScope>test</includeScope>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <forkMode>always</forkMode>
+              <argLine>-javaagent:${project.build.directory}/dependency/jmockit.jar</argLine>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>dist</id>
+      <build>
+        <plugins>
+
+          <plugin>
+            <artifactId>jdeb</artifactId>
+            <groupId>org.vafer</groupId>
+            <version>1.0</version>
+
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>jdeb</goal>
+                </goals>
+                <configuration>
+                  <dataSet>
+
+                    <data>
+                      <src>${project.build.directory}/${project.build.finalName}-agent.jar</src>
+                      <type>file</type>
+                      <mapper>
+                        <type>perm</type>
+                        <prefix>/usr/share/jolokia</prefix>
+                        <filemode>644</filemode>
+                      </mapper>
+                    </data>
+
+                    <data>
+                      <type>link</type>
+                      <symlink>true</symlink>
+                      <linkName>/usr/share/jolokia/jolokia-jvm-agent.jar</linkName>
+                      <linkTarget>/usr/share/jolokia/${project.build.finalName}-agent.jar</linkTarget>
+                    </data>
+
+                  </dataSet>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
-  
+
 </project>

@@ -211,12 +211,14 @@ public class BackendManager implements AgentDetailsHolder {
     /**
      * Check whether remote access from the given client is allowed.
      *
-     * @param pRemoteHost remote host to check against
+     * @param pRemoteHost remote host to check against. Can be null if no reverse lookup is configured.
      * @param pRemoteAddr alternative IP address
      * @return true if remote access is allowed
      */
     public boolean isRemoteAccessAllowed(String pRemoteHost, String pRemoteAddr) {
-        return restrictor.isRemoteAccessAllowed(pRemoteHost, pRemoteAddr);
+        return restrictor.isRemoteAccessAllowed(pRemoteHost != null ?
+                                                        new String[] { pRemoteHost, pRemoteAddr } :
+                                                        new String[] { pRemoteAddr });
     }
 
     /**
@@ -330,8 +332,7 @@ public class BackendManager implements AgentDetailsHolder {
                                                      pConfig,
                                                      logHandler);
         ServerHandle serverHandle = localDispatcher.getServerHandle();
-        requestDispatchers = createRequestDispatchers(pConfig.get(DISPATCHER_CLASSES),
-                                                      converters,serverHandle,restrictor);
+        requestDispatchers = createRequestDispatchers(pConfig, converters,serverHandle,restrictor);
         requestDispatchers.add(localDispatcher);
 
         // Backendstore for remembering agent state
@@ -359,15 +360,16 @@ public class BackendManager implements AgentDetailsHolder {
 
     // Construct configured dispatchers by reflection. Returns always
     // a list, an empty one if no request dispatcher should be created
-    private List<RequestDispatcher> createRequestDispatchers(String pClasses,
+    private List<RequestDispatcher> createRequestDispatchers(Configuration pConfig,
                                                              Converters pConverters,
                                                              ServerHandle pServerHandle,
                                                              Restrictor pRestrictor) {
         List<RequestDispatcher> ret = new ArrayList<RequestDispatcher>();
-        if (pClasses != null && pClasses.length() > 0) {
-            String[] names = pClasses.split("\\s*,\\s*");
+        String classes = pConfig != null ? pConfig.get(DISPATCHER_CLASSES) : null;
+        if (classes != null && classes.length() > 0) {
+            String[] names = classes.split("\\s*,\\s*");
             for (String name : names) {
-                ret.add(createDispatcher(name, pConverters, pServerHandle, pRestrictor));
+                ret.add(createDispatcher(name, pConverters, pServerHandle, pRestrictor, pConfig));
             }
         }
         return ret;
@@ -376,19 +378,34 @@ public class BackendManager implements AgentDetailsHolder {
     // Create a single dispatcher
     private RequestDispatcher createDispatcher(String pDispatcherClass,
                                                Converters pConverters,
-                                               ServerHandle pServerHandle, Restrictor pRestrictor) {
+                                               ServerHandle pServerHandle,
+                                               Restrictor pRestrictor,
+                                               Configuration pConfig) {
         try {
             Class clazz = ClassUtil.classForName(pDispatcherClass, getClass().getClassLoader());
             if (clazz == null) {
                 throw new IllegalArgumentException("Couldn't lookup dispatcher " + pDispatcherClass);
             }
-            Constructor constructor = clazz.getConstructor(Converters.class,
-                                                           ServerHandle.class,
-                                                           Restrictor.class);
-            return (RequestDispatcher)
+            try {
+                Constructor constructor = clazz.getConstructor(Converters.class,
+                                                               ServerHandle.class,
+                                                               Restrictor.class,
+                                                               Configuration.class);
+                return (RequestDispatcher)
+                    constructor.newInstance(pConverters,
+                                            pServerHandle,
+                                            pRestrictor,
+                                            pConfig);
+            } catch (NoSuchMethodException exp) {
+                // Try without configuration as fourth parameter
+                Constructor constructor = clazz.getConstructor(Converters.class,
+                                                               ServerHandle.class,
+                                                               Restrictor.class);
+                return (RequestDispatcher)
                     constructor.newInstance(pConverters,
                                             pServerHandle,
                                             pRestrictor);
+            }
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Class " + pDispatcherClass + " has invalid constructor: " + e,e);
         } catch (IllegalAccessException e) {

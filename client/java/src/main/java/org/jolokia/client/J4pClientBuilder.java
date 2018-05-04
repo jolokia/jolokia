@@ -55,11 +55,15 @@ public class J4pClientBuilder {
     private int connectionTimeout;
     private int socketTimeout;
     private int maxTotalConnections;
+    private int defaultMaxConnectionsPerRoute;
     private int maxConnectionPoolTimeout;
     private Charset contentCharset;
     private boolean expectContinue;
     private boolean tcpNoDelay;
     private int socketBufferSize;
+
+    // Add socket factories to tune
+    private ConnectionSocketFactory sslConnectionSocketFactory;
 
     // whether to use thread safe, pooled connections
     private boolean pooledConnections;
@@ -102,6 +106,7 @@ public class J4pClientBuilder {
         connectionTimeout(20 * 1000);
         socketTimeout(-1);
         maxTotalConnections(20);
+        defaultMaxConnectionsPerRoute(20);
         maxConnectionPoolTimeout(500);
         contentCharset(HTTP.DEF_CONTENT_CHARSET.name());
         expectContinue(true);
@@ -187,7 +192,7 @@ public class J4pClientBuilder {
 
     /**
      * Use a pooled connection manager for connecting to the agent, which
-     * uses a pool of connections (see {@link #maxTotalConnections(int) and {@link #maxConnectionPoolTimeout(int)} for
+     * uses a pool of connections (see {@link #maxTotalConnections(int), {@link #maxConnectionPoolTimeout(int) {@link #defaultMaxConnectionsPerRoute}} for
      * tuning the pool}
      */
     public final J4pClientBuilder pooledConnections() {
@@ -225,6 +230,15 @@ public class J4pClientBuilder {
      */
     public final J4pClientBuilder maxTotalConnections(int pConnections) {
         maxTotalConnections = pConnections;
+        return this;
+    }
+
+    /**
+     * Sets the maximum number of connections per route allowed when using {@link #pooledConnections()}
+     * @param pDefaultMaxConnectionsPerRoute number of max connections per route.
+     */
+    public final J4pClientBuilder defaultMaxConnectionsPerRoute(int pDefaultMaxConnectionsPerRoute) {
+        defaultMaxConnectionsPerRoute = pDefaultMaxConnectionsPerRoute;
         return this;
     }
 
@@ -378,6 +392,18 @@ public class J4pClientBuilder {
         return this;
     }
 
+    /**
+     * Set the SSL connection factory to use when connecting via SSL. This can be used to tune
+     * the SSL setup (SSLv3, TLSv1.2...),
+     *
+     * @param pSslConnectionSocketFactory the SSL connection factory to use
+     * @return this builder object
+     */
+    public final J4pClientBuilder sslConnectionSocketFactory(ConnectionSocketFactory pSslConnectionSocketFactory) {
+        this.sslConnectionSocketFactory = pSslConnectionSocketFactory;
+        return this;
+    }
+
     // =====================================================================================
 
     /**
@@ -409,8 +435,6 @@ public class J4pClientBuilder {
 
         return builder.build();
     }
-
-
 
     /**
      * Parse proxy specification and return a proxy object representing the proxy configuration.
@@ -481,8 +505,17 @@ public class J4pClientBuilder {
         connManager.setDefaultConnectionConfig(createConnectionConfig());
         if (maxTotalConnections != 0) {
             connManager.setMaxTotal(maxTotalConnections);
+            connManager.setDefaultMaxPerRoute(defaultMaxConnectionsPerRoute);
         }
+
         return connManager;
+    }
+
+
+    private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
+        SSLContext sslcontext = SSLContexts.createSystemDefault();
+        X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
+        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
     }
 
     private ConnectionConfig createConnectionConfig() {
@@ -502,12 +535,11 @@ public class J4pClientBuilder {
     }
 
     private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
-        SSLContext sslcontext = SSLContexts.createSystemDefault();
-        X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
-
         return RegistryBuilder.<ConnectionSocketFactory>create()
                               .register("http", PlainConnectionSocketFactory.INSTANCE)
-                              .register("https", new SSLConnectionSocketFactory(sslcontext, hostnameVerifier))
+                              .register("https", sslConnectionSocketFactory != null ?
+                                  sslConnectionSocketFactory :
+                                  createDefaultSSLConnectionSocketFactory())
                               .build();
     }
 

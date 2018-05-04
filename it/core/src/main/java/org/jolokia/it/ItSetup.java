@@ -49,7 +49,8 @@ public class ItSetup {
     private List<String> strangeNames      = new ArrayList<String>();
 
     private String[] fullNames = {
-            "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor"
+            "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor",
+            "jolokia.jboss.as.expr:access=authorization,applies-to=\"/subsystem=undertow/server=\\*/ajp-listener=\\*\",classification=socket-binding-ref,constraint=sensitivity-classification,core-service=management,type=core"
     };
 
     private String[]     escapedNamesShort = {
@@ -118,7 +119,7 @@ public class ItSetup {
             for (String name : fullNames) {
                 ret.add(registerMBean(pServer, new ObjectNameChecking(name), name));
             }
-                        
+
             // Other MBeans
             boolean isWebsphere = checkForClass("com.ibm.websphere.management.AdminServiceFactory");
             ret.add(registerMBean(pServer,new OperationChecking(JOLOKIA_IT_DOMAIN),isWebsphere ? null : pDomain + ":type=operation"));

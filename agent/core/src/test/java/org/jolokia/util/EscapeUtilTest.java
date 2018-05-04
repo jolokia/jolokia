@@ -49,7 +49,10 @@ public class EscapeUtilTest {
             "hello\\,\\/world,yeah",asList("hello,/world","yeah"),
     };
 
-
+    @Test
+    public void escaping() {
+        assertEquals(EscapeUtil.escape("hello\\world,how are you?",CSV_ESCAPE,","),"hello\\\\world\\,how are you?");
+    }
 
     @Test
     public void pathSplitting() {

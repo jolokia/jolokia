@@ -20,14 +20,14 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.5.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-agent-parent</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.5.0</version>
   <name>jolokia-agent-parent</name>
   <description>jolokia agent parent pom</description>
   <url>http://www.jolokia.org/jolokia-agent-parent/</url>
@@ -38,33 +38,24 @@
     <module>core</module>
     <module>war</module>
     <module>jsr160</module>
-    <module>mule</module>
     <module>osgi</module>
     <module>osgi-bundle</module>
     <module>jmx</module>
     <module>wasear</module>
+    <module>jvm</module>
+    <module>jvm-spring</module>
   </modules>
 
   <profiles>
     <profile>
-      <id>jdk6</id>
-      <activation>
-        <jdk>1.6</jdk>
-      </activation>
+      <id>mule</id>
       <modules>
-        <module>jvm</module>
-        <module>jvm-spring</module>
+        <!-- Mule only for Java 7+ (test won't compile on java 6 -->
+        <module>mule</module>
       </modules>
-    </profile>
-    <profile>
-      <id>jdk7</id>
       <activation>
-        <jdk>1.7</jdk>
+        <jdk>[1.7,)</jdk>
       </activation>
-      <modules>
-        <module>jvm</module>
-        <module>jvm-spring</module>
-      </modules>
     </profile>
   </profiles>
 </project>

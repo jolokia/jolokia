@@ -1,5 +1,6 @@
 package org.jolokia.converter.json;
 
+import java.beans.Transient;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.*;
@@ -150,7 +151,7 @@ public class BeanExtractor implements Extractor {
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
             List<String> attributes = extractBeanAttributes(pValue);
-            if (attributes != null && attributes.size() > 0) {
+            if (attributes.size() > 0) {
                 return extractBeanValues(pConverter, pValue, pPathParts, attributes);
             } else {
                 // No further attributes, return string representation
@@ -206,7 +207,8 @@ public class BeanExtractor implements Extractor {
         for (Method method : pValue.getClass().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers()) &&
                 !IGNORE_METHODS.contains(method.getName()) &&
-                !isIgnoredType(method.getReturnType())) {
+                !isIgnoredType(method.getReturnType()) &&
+                !method.isAnnotationPresent(Transient.class)) {
                 addAttributes(attrs, method);
             }
         }

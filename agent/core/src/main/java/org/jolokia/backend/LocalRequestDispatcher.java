@@ -34,6 +34,7 @@ import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.DebugStore;
 import org.jolokia.util.LogHandler;
+import org.jolokia.util.NetworkUtil;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -71,7 +72,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
         mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         log = pLogHandler;
-        agentId = pConfig.get(ConfigKey.AGENT_ID);
+        agentId = NetworkUtil.replaceExpression(pConfig.get(ConfigKey.AGENT_ID));
 
         // Request handling manager 
         requestHandlerManager =

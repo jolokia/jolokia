@@ -139,18 +139,18 @@ public class DebugStore {
     }
 
     // add a message along with a time stamp
-    private void add(long pTime,String message) {
+    private synchronized void add(long pTime,String message) {
         debugEntries.addFirst(new Entry(pTime,message));
         trim();
     }
 
-    private void add(long pTimestamp, String pMessage, Throwable pThrowable) {
+    private synchronized void add(long pTimestamp, String pMessage, Throwable pThrowable) {
         debugEntries.addFirst(new Entry(pTimestamp,pMessage,pThrowable));
         trim();
     }
 
     // trim list of debug entries
-    private void trim() {
+    private synchronized void trim() {
         while (debugEntries.size() > maxDebugEntries) {
             debugEntries.removeLast();
         }

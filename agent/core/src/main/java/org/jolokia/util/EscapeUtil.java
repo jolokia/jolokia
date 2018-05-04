@@ -140,9 +140,9 @@ public final class EscapeUtil {
      * @param pArg argument to split
      * @param pEscape escape pattern as it can be used in a regular expression.
      * @param pDelimiter delimiter to use
-     * @return the splitted string as list or an empty array if the argument was null
+     * @return the split string as list or an empty array if the argument was null
      */
-    public static List<String> split(String pArg,String pEscape, String pDelimiter) {
+    public static List<String> split(String pArg, String pEscape, String pDelimiter) {
         if (pArg != null) {
             ArrayList<String> ret = new ArrayList<String>();
             Pattern[] pattern = SPLIT_PATTERNS.get(pEscape + pDelimiter);
@@ -180,6 +180,18 @@ public final class EscapeUtil {
         }
     }
 
+    /**
+     * Escape the delimiter in an argument with the given escape char.
+     *
+     * @param pArg string to add escapes to
+     * @param pEscape the escape character (e.g. '\')
+     * @param pDelimiter the delimiter to escape (e.g. ',')
+     * @return the escaped char
+     */
+    public static String escape(String pArg, String pEscape, String pDelimiter) {
+        return pArg.replaceAll(pEscape, pEscape + pEscape).replaceAll(pDelimiter, pEscape + pDelimiter);
+    }
+
     // ===================================================================================
 
     // Create a split pattern for a given delimiter
@@ -189,14 +201,14 @@ public final class EscapeUtil {
                 Pattern.compile("(.*?)" + // Any chars
                                 "(?:" +
                                    // The delimiter not preceded by an escape (but pairs of escape & value can be in
-                                   // are allowed before nevertheless). I negative-look-before (?<!) is used for this
+                                   // are allowed before nevertheless). A negative-look-before (?<!) is used for this
                                    // purpose
                                    "(?<!" + pEscape  + ")((?:" + pEscape + ".)*)" + pDel + "|" +
                                    "$" +    // or end-of-line
-                                 ")"),
+                                 ")",Pattern.DOTALL),
 
                 // Unescape, group must match unescaped value
-                Pattern.compile(pEscape + "(.)")
+                Pattern.compile(pEscape + "(.)",Pattern.DOTALL)
         };
     }
 

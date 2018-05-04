@@ -2,9 +2,13 @@ package org.jolokia.restrictor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
-import org.jolokia.util.ClassUtil;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+import org.jolokia.util.*;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -33,6 +37,67 @@ public final class RestrictorFactory {
 
     private RestrictorFactory() { }
 
+    public static Restrictor createRestrictor(Configuration pConfig, LogHandler logHandler) {
+
+        Restrictor customRestrictor = createCustomRestrictor(pConfig);
+        if (customRestrictor != null) {
+            logHandler.info("Using restrictor " + customRestrictor.getClass().getCanonicalName());
+            return customRestrictor;
+        }
+
+        String location = NetworkUtil.replaceExpression(pConfig.get(ConfigKey.POLICY_LOCATION));
+        try {
+            Restrictor ret = RestrictorFactory.lookupPolicyRestrictor(location);
+            if (ret != null) {
+                logHandler.info("Using policy access restrictor " + location);
+                return ret;
+            } else {
+                logHandler.info("No access restrictor found, access to any MBean is allowed");
+                return new AllowAllRestrictor();
+            }
+        } catch (IOException e) {
+            logHandler.error("Error while accessing access restrictor at " + location +
+                             ". Denying all access to MBeans for security reasons. Exception: " + e, e);
+            return new DenyAllRestrictor();
+        }
+    }
+
+    private static Restrictor createCustomRestrictor(Configuration pConfig) {
+        String restrictorClassName = pConfig.get(ConfigKey.RESTRICTOR_CLASS);
+        if (restrictorClassName == null) {
+            return null;
+        }
+        Class restrictorClass = ClassUtil.classForName(restrictorClassName);
+        if (restrictorClass == null) {
+            throw new IllegalArgumentException("No custom restrictor class " + restrictorClassName + " found");
+        }
+        return lookupRestrictor(pConfig, restrictorClass);
+    }
+
+    private static Restrictor lookupRestrictor(Configuration pConfig, Class restrictorClass) {
+        try {
+            try {
+                // Prefer constructor that takes configuration
+                Constructor ctr = restrictorClass.getConstructor(Configuration.class);
+                return (Restrictor) ctr.newInstance(pConfig);
+            } catch (NoSuchMethodException exp) {
+                // Fallback to default constructor
+                Constructor defaultConstructor = restrictorClass.getConstructor();
+                return (Restrictor) defaultConstructor.newInstance();
+            }
+        } catch (NoSuchMethodException exp) {
+            throw new IllegalArgumentException("Cannot create custom restrictor for class " + restrictorClass + " " +
+                                               "because neither a constructor with 'Configuration' as only element " +
+                                               "nor a default constructor is available");
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
+        }
+    }
+
     /**
      * Lookup a restrictor based on an URL
      *
@@ -42,7 +107,7 @@ public final class RestrictorFactory {
      * @throws IOException if reading of the policy stream failed
      */
     public static PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
-        InputStream is = null;
+        InputStream is;
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
             is = ClassUtil.getResourceAsStream(path);

@@ -162,7 +162,7 @@ public class HttpRequestHandler {
             // Fix for CORS with authentication (#104)
             ret.put("Access-Control-Allow-Credentials","true");
             // Allow for one year. Changes in access.xml are reflected directly in the  cors request itself
-            ret.put("Access-Control-Allow-Max-Age","" + 3600 * 24 * 365);
+            ret.put("Access-Control-Max-Age","" + 3600 * 24 * 365);
         }
         return ret;
     }
@@ -280,7 +280,7 @@ public class HttpRequestHandler {
      * @param pOrigin (optional) origin header to check also.
      */
     public void checkAccess(String pHost, String pAddress, String pOrigin) {
-        if (!backendManager.isRemoteAccessAllowed(pHost,pAddress)) {
+        if (!backendManager.isRemoteAccessAllowed(pHost, pAddress)) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
         if (pOrigin != null && !backendManager.isOriginAllowed(pOrigin,true)) {
@@ -310,16 +310,18 @@ public class HttpRequestHandler {
     }
 
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JmxRequest pJmxReq) {
-        String includeStackTrace = pJmxReq != null ?
-                pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
-        if (includeStackTrace.equalsIgnoreCase("true") ||
-            (includeStackTrace.equalsIgnoreCase("runtime") && pExp instanceof RuntimeException)) {
-            StringWriter writer = new StringWriter();
-            pExp.printStackTrace(new PrintWriter(writer));
-            pErrorResp.put("stacktrace",writer.toString());
-        }
-        if (pJmxReq != null && pJmxReq.getParameterAsBool(ConfigKey.SERIALIZE_EXCEPTION)) {
-            pErrorResp.put("error_value",backendManager.convertExceptionToJson(pExp,pJmxReq));
+        if (config.getAsBoolean(ConfigKey.ALLOW_ERROR_DETAILS)) {
+            String includeStackTrace = pJmxReq != null ?
+                    pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
+            if (includeStackTrace.equalsIgnoreCase("true") ||
+                (includeStackTrace.equalsIgnoreCase("runtime") && pExp instanceof RuntimeException)) {
+                StringWriter writer = new StringWriter();
+                pExp.printStackTrace(new PrintWriter(writer));
+                pErrorResp.put("stacktrace", writer.toString());
+            }
+            if (pJmxReq != null && pJmxReq.getParameterAsBool(ConfigKey.SERIALIZE_EXCEPTION)) {
+                pErrorResp.put("error_value", backendManager.convertExceptionToJson(pExp, pJmxReq));
+            }
         }
     }
 

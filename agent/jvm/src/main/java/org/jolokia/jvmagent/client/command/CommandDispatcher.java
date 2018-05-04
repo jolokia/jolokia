@@ -43,6 +43,7 @@ public class CommandDispatcher {
                 new ToggleCommand(),
                 new StatusCommand(),
                 new ListCommand(),
+                new EncryptCommand(),
                 new HelpCommand(),
                 new VersionCommand()
         }) {

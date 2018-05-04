@@ -19,15 +19,18 @@ package org.jolokia.jvmagent.spring.config;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.xml.parsers.*;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.jolokia.jvmagent.spring.SpringJolokiaAgent;
 import org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import static org.testng.Assert.*;
@@ -38,6 +41,17 @@ import static org.testng.Assert.*;
  */
 public class SpringConfigTest {
 
+
+    private DefaultListableBeanFactory beanFactory;
+    private XmlBeanDefinitionReader reader;
+
+
+    @BeforeTest
+	public void setUp() {
+		this.beanFactory = new DefaultListableBeanFactory();
+        this.reader = new XmlBeanDefinitionReader(this.beanFactory);
+	}
+
     @Test
     public void nameSpaceHandler() {
         JolokiaNamespaceHandler handler = new JolokiaNamespaceHandler();
@@ -46,10 +60,10 @@ public class SpringConfigTest {
 
     @Test
     public void simpleServer() throws ParserConfigurationException, IOException, SAXException {
-        Element element = getElement("/simple-server.xml");
-        AgentBeanDefinitionParser parser = new AgentBeanDefinitionParser();
-        assertTrue(parser.shouldGenerateIdAsFallback());
-        BeanDefinition bd = parser.parseInternal(element, null);
+
+        reader.loadBeanDefinitions(new ClassPathResource("/simple-server.xml"));
+
+        BeanDefinition bd = beanFactory.getBeanDefinition("jolokiaServer");
         assertEquals(bd.getBeanClassName(), SpringJolokiaAgent.class.getName());
         MutablePropertyValues props = bd.getPropertyValues();
         assertEquals(props.size(),2);
@@ -57,15 +71,15 @@ public class SpringConfigTest {
         BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();;
         assertEquals(cBd.getBeanClassName(),SpringJolokiaConfigHolder.class.getName());
         MutablePropertyValues cProps = cBd.getPropertyValues();
-        assertEquals(cProps.size(),1);
+        assertEquals(cProps.size(), 1);
         verifyConfig(cProps);
     }
 
     @Test
     public void simpleConfig() throws Exception {
-        Element element = getElement("/simple-config.xml");
-        ConfigBeanDefinitionParser parser = new ConfigBeanDefinitionParser();
-        BeanDefinition bd = parser.parseInternal(element, null);
+        reader.loadBeanDefinitions(new ClassPathResource("/simple-config.xml"));
+
+        BeanDefinition bd = beanFactory.getBeanDefinition("config");
         assertEquals(bd.getBeanClassName(),SpringJolokiaConfigHolder.class.getName());
         MutablePropertyValues cProps = bd.getPropertyValues();
         assertEquals(cProps.size(),2);
@@ -74,18 +88,11 @@ public class SpringConfigTest {
     }
 
 
-    private Element getElement(String pXmlPath) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(getClass().getResourceAsStream(pXmlPath));
-        return doc.getDocumentElement();
-    }
-
     private void verifyConfig(MutablePropertyValues pCProps) {
         Map vals = (Map) pCProps.getPropertyValue("config").getValue();
         assertEquals(vals.size(),3);
         for (String k : new String[] { "host", "port", "autoStart" }) {
-            assertTrue(vals.containsKey(k));
+            assertTrue(vals.containsKey(new TypedStringValue(k,String.class)));
         }
     }
 

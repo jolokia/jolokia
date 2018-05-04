@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>JMX Proxy</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -34,7 +34,7 @@
         political reasons or an already established JSR-160 export on
         the instrumented servers. In these environments, Jolokia can
         operate as a <strong>JMX Proxy</strong>. In this setup, the
-        agent is deployed on a dedicated proxy JEE server (or other
+        agent is deployed on a dedicated proxy Java EE server (or other
         supported agent platform). The proxy bridges between Jolokia
         JSON request and responses to remote JSR-160 calls to the
         target server. The following diagrams gives an illustration of
@@ -66,7 +66,7 @@ http://jolokia-proxy:8080/jolokia</pre>
     "type":"READ"
     "mbean":"java.lang:type=Threading",
     "attribute":"ThreadCount",
-    "target": { 
+    "target": {
                 "url":"service:jmx:rmi:///jndi/rmi://jboss-as:8686/jmxrmi",
                 "password":"admin",
                 "user":"s!cr!t"
@@ -91,14 +91,14 @@ http://jolokia-proxy:8080/jolokia</pre>
             requests, so that a Jolokia bulk request arriving at the
             proxy gets dispatched into multiple JSR-160 requests for the
             target. The JSR-160 remote connection has to be
-            established only once, though.             
+            established only once, though.
           </li>
           <li>
             The JMX target URL addresses the MBeanServer directly, so
             MBeanServer merging as it happens for direct operation is
             not available. Also, certain workarounds for bugs in the
             server's JMX implementation are not available. (e.g. see
-            this <a href="http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx/">blog post</a> for a JBoss bug when  
+            this <a href="http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx/">blog post</a> for a JBoss bug when
             accessing MXBeans in the PlatformMBeanServer)
           </li>
           <li>
@@ -106,7 +106,7 @@ http://jolokia-proxy:8080/jolokia</pre>
             or attribute read calls, these types must be available on
             the proxy, too. Using the Jolokia agent directly, complex
             data types are serialized deeply into a JSON
-            representation automatically. 
+            representation automatically.
           </li>
           <li>
             For each Jolokia request, a new JMX connection (likely
@@ -130,6 +130,6 @@ http://jolokia-proxy:8080/jolokia</pre>
         </ul>
       </subsection>
     </section>
-  </body>    
+  </body>
 </document>
 

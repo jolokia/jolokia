@@ -74,7 +74,8 @@ public class DiscoveryMulticastResponder {
             // We start a thread for every address found
             for (InetAddress addr : addresses) {
                 try {
-                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr,
+                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread("JolokiaDiscoveryListenerThread-" + addr.getHostAddress(),
+                                                                                            addr,
                                                                                              detailsHolder,
                                                                                              restrictor,
                                                                                              logHandler);

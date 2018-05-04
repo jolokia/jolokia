@@ -45,7 +45,4 @@ public class Jetty9MuleAgentHttpServer extends EclipseMuleAgentHttpServer {
         return ClassUtil.newInstance(SERVER_CONNECTOR_CLASS,pServer);
     }
 
-    public static boolean detect() {
-        return ClassUtil.checkForClass(SERVER_CONNECTOR_CLASS);
-    }
 }

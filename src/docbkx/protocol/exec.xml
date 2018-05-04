@@ -51,7 +51,7 @@
           Name of the operation to execute. If this is an overloaded method,
           it is mandatory to provide a method signature as
           well. A signature consist the fully qualified argument class
-          names or native types, separated by columns and enclosed with
+          names or native types, separated by commas and enclosed with
           parentheses. For calling a non-argument overloaded method use <literal>()</literal>
           as signature.
         </td>
@@ -64,7 +64,7 @@
         <td>
           String representation for the arguments required to execute this
           operation. Only certain data types can be used here as
-          desribed in <xref linkend="serialization-request"/>.
+          described in <xref linkend="serialization-request"/>.
         </td>
         <td><literal>"true","true"</literal></td>
       </tr>

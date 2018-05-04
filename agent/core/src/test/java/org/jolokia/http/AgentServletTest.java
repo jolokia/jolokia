@@ -28,10 +28,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.discovery.JolokiaDiscovery;
-import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.*;
 import org.jolokia.test.util.HttpTestUtil;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
+import org.jolokia.util.QuietLogHandler;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
@@ -112,7 +113,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void initWithcustomAccessRestrictor() throws ServletException {
+    public void initWithCustomAccessRestrictor() throws ServletException {
         prepareStandardInitialisation();
         servlet.destroy();
     }
@@ -144,7 +145,7 @@ public class AgentServletTest {
         // Wait listening thread to warm up
         Thread.sleep(1000);
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test",LogHandler.QUIET);
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test", new QuietLogHandler());
             List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
             for (JSONObject json : in) {
                 if (json.get("url") != null && json.get("url").equals(url)) {
@@ -162,7 +163,7 @@ public class AgentServletTest {
         checkMulticastAvailable();
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test",LogHandler.QUIET);
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test", new QuietLogHandler());
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
             // At least one doesnt have an URL (remove this part if a way could be found for getting
@@ -189,24 +190,17 @@ public class AgentServletTest {
         checkMulticastAvailable();
         prepareStandardInitialisation(ConfigKey.DISCOVERY_ENABLED.getKeyValue(), "true");
         try {
-            StringWriter sw = initRequestResponseMocks();
-            expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
-            expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
             String url = "http://10.9.11.1:9876/jolokia";
-            StringBuffer buf = new StringBuffer();
-            buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
-            expect(request.getRequestURL()).andReturn(buf);
-            expect(request.getRequestURI()).andReturn(buf.toString());
-            expect(request.getContextPath()).andReturn("/jolokia");
-            expect(request.getAuthType()).andReturn("BASIC");
-            expect(request.getAttribute("subject")).andReturn(null);
+            ByteArrayOutputStream sw = initRequestResponseMocks(
+                    getDiscoveryRequestSetup(url),
+                    getStandardResponseSetup());
             replay(request, response);
 
             servlet.doGet(request, response);
 
             assertTrue(sw.toString().contains("used"));
 
-            JolokiaDiscovery discovery = new JolokiaDiscovery("test",LogHandler.QUIET);
+            JolokiaDiscovery discovery = new JolokiaDiscovery("test",new QuietLogHandler());
             List<JSONObject> in = discovery.lookupAgents();
             assertTrue(in.size() > 0);
             for (JSONObject json : in) {
@@ -220,6 +214,7 @@ public class AgentServletTest {
             servlet.destroy();
         }
     }
+
 
     public static class CustomLogHandler implements LogHandler {
 
@@ -244,7 +239,7 @@ public class AgentServletTest {
     public void simpleGet() throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks();
+        ByteArrayOutputStream sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -257,9 +252,101 @@ public class AgentServletTest {
     }
 
     @Test
+    public void simpleGetWithWrongMimeType() throws ServletException, IOException {
+        checkMimeTypes("text/html", "text/plain");
+    }
+
+    @Test
+    public void simpleGetWithTextPlainMimeType() throws ServletException, IOException {
+        checkMimeTypes("text/plain", "text/plain");
+    }
+
+    @Test
+    public void simpleGetWithApplicationJsonMimeType() throws ServletException, IOException {
+        checkMimeTypes("application/json", "application/json");
+    }
+
+    private void checkMimeTypes(String given, final String expected) throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        initRequestResponseMocks(
+            getStandardRequestSetup(),
+            new Runnable() {
+                public void run() {
+                    response.setCharacterEncoding("utf-8");
+                    // The default content type
+                    response.setContentType(expected);
+                    response.setStatus(200);
+                }
+            });
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(given);
+        replay(request, response);
+
+        servlet.doGet(request, response);
+
+        verifyMocks();
+        servlet.destroy();
+    }
+
+    @Test
+    public void simpleGetWithNoReverseDnsLookupFalse() throws ServletException, IOException {
+        checkNoReverseDns(false,"127.0.0.1");
+    }
+
+    @Test
+    public void simpleGetWithNoReverseDnsLookupTrue() throws ServletException, IOException {
+        checkNoReverseDns(true,"localhost","127.0.0.1");
+    }
+
+    private void checkNoReverseDns(boolean enabled, String ... expectedHosts) throws ServletException, IOException {
+        prepareStandardInitialisation(
+                (Restrictor) null,
+                ConfigKey.RESTRICTOR_CLASS.getKeyValue(),NoDnsLookupRestrictorChecker.class.getName(),
+                ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(),Boolean.toString(enabled));
+        NoDnsLookupRestrictorChecker.expectedHosts = expectedHosts;
+        ByteArrayOutputStream sw = initRequestResponseMocks();
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
+        replay(request, response);
+
+        servlet.doGet(request, response);
+
+        assertFalse(sw.toString().contains("error"));
+        servlet.destroy();
+    }
+
+
+    // Check whether restrictor is called with the proper args
+    public static class NoDnsLookupRestrictorChecker extends AbstractConstantRestrictor {
+
+        static String[] expectedHosts;
+
+        public NoDnsLookupRestrictorChecker() {
+            super(true);
+        }
+
+        @Override
+        public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
+            if (expectedHosts.length != pHostOrAddress.length) {
+                return false;
+            }
+            for (int i = 0; i < expectedHosts.length; i++) {
+                if (!expectedHosts[i].equals(pHostOrAddress[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
+    }
+
+    @Test
     public void simpleGetWithUnsupportedGetParameterMapCall() throws ServletException, IOException {
         prepareStandardInitialisation();
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
                         expect(request.getHeader("Origin")).andStubReturn(null);
@@ -267,6 +354,7 @@ public class AgentServletTest {
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                         expect(request.getRequestURI()).andReturn("/jolokia/");
+                        setupAgentDetailsInitExpectations();
                         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
                         expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
                         expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
@@ -275,6 +363,8 @@ public class AgentServletTest {
                         expect(request.getParameterNames()).andReturn(params.elements());
                         expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
                         expect(request.getAttribute("subject")).andReturn(null);
+                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
                     }
                 },
                 getStandardResponseSetup());
@@ -290,7 +380,7 @@ public class AgentServletTest {
     public void simplePost() throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter responseWriter = initRequestResponseMocks();
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -309,7 +399,7 @@ public class AgentServletTest {
     public void unknownMethodWhenSettingContentType() throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 getStandardRequestSetup(),
                 new Runnable() {
                     public void run() {
@@ -349,7 +439,7 @@ public class AgentServletTest {
         expect(request.getHeader("Origin")).andReturn(in);
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
 
-        response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
+        response.setHeader(eq("Access-Control-Max-Age"), (String) anyObject());
         response.setHeader("Access-Control-Allow-Origin", out);
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
@@ -373,13 +463,17 @@ public class AgentServletTest {
     private void checkCorsGetOrigin(final String in, final String out) throws ServletException, IOException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
+                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
                         expect(request.getHeader("Origin")).andStubReturn(in);
                         expect(request.getRemoteHost()).andReturn("localhost");
                         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                        expect(request.getRequestURI()).andReturn("/jolokia/");
+                        expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
+                        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
+                        expect(request.getContextPath()).andReturn("/jolokia");
+                        expect(request.getAuthType()).andReturn(null);
                         expect(request.getParameterMap()).andReturn(null);
                         expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
                         expect(request.getAttribute("subject")).andReturn(null);
@@ -416,7 +510,7 @@ public class AgentServletTest {
     public void withCallback() throws IOException, ServletException {
         prepareStandardInitialisation();
 
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 "myCallback",
                 getStandardRequestSetup(),
                 new Runnable() {
@@ -428,6 +522,7 @@ public class AgentServletTest {
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
 
         replay(request, response);
 
@@ -438,12 +533,36 @@ public class AgentServletTest {
     }
 
     @Test
+    public void withInvalidCallback() throws IOException, ServletException {
+        servlet = new AgentServlet(new AllowAllRestrictor());
+        initConfigMocks(null, null,"Error 400", IllegalArgumentException.class);
+        replay(config, context);
+        servlet.init(config);
+        ByteArrayOutputStream sw = initRequestResponseMocks(
+            "doSomethingEvil(); myCallback",
+            getStandardRequestSetup(),
+            getStandardResponseSetup());
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+        expect(request.getAttribute("subject")).andReturn(null);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
+
+        replay(request, response);
+
+        servlet.doGet(request, response);
+        String resp = sw.toString();
+        assertTrue(resp.contains("error_type"));
+        assertTrue(resp.contains("IllegalArgumentException"));
+        assertTrue(resp.matches(".*status.*400.*"));
+        servlet.destroy();
+    }
+
+    @Test
     public void withException() throws ServletException, IOException {
         servlet = new AgentServlet(new AllowAllRestrictor());
         initConfigMocks(null, null,"Error 500", IllegalStateException.class);
         replay(config, context);
         servlet.init(config);
-        StringWriter sw = initRequestResponseMocks(
+        ByteArrayOutputStream sw = initRequestResponseMocks(
                 new Runnable() {
                     public void run() {
                         expect(request.getHeader("Origin")).andReturn(null);
@@ -452,6 +571,7 @@ public class AgentServletTest {
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
 
         replay(request, response);
 
@@ -480,7 +600,7 @@ public class AgentServletTest {
 
         servlet.init(config);
 
-        StringWriter sw = initRequestResponseMocks();
+        ByteArrayOutputStream sw = initRequestResponseMocks();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
@@ -497,7 +617,7 @@ public class AgentServletTest {
     void resetTestDetector() {
         TestDetector.reset();
     }
-    
+
     //@AfterMethod
     public void verifyMocks() {
         verify(config, context, request, response);
@@ -534,29 +654,41 @@ public class AgentServletTest {
         expectLastCall().anyTimes();
     }
 
-    private StringWriter initRequestResponseMocks() throws IOException {
+    private ByteArrayOutputStream initRequestResponseMocks() throws IOException {
         return initRequestResponseMocks(
                 getStandardRequestSetup(),
                 getStandardResponseSetup());
     }
 
-    private StringWriter initRequestResponseMocks(Runnable requestSetup,Runnable responseSetup) throws IOException {
+    private ByteArrayOutputStream initRequestResponseMocks(Runnable requestSetup,Runnable responseSetup) throws IOException {
         return initRequestResponseMocks(null,requestSetup,responseSetup);
     }
 
-    private StringWriter initRequestResponseMocks(String callback,Runnable requestSetup,Runnable responseSetup) throws IOException {
+    private ByteArrayOutputStream initRequestResponseMocks(String callback,Runnable requestSetup,Runnable responseSetup) throws IOException {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
         setNoCacheHeaders(response);
 
-        expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(callback);
+        expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(callback).anyTimes();
         requestSetup.run();
         responseSetup.run();
 
-        StringWriter sw = new StringWriter();
-        PrintWriter writer = new PrintWriter(sw);
-        expect(response.getWriter()).andReturn(writer);
-        return sw;
+        class MyServletOutputStream extends ServletOutputStream {
+            ByteArrayOutputStream baos;
+            public void write(int b) throws IOException {
+                baos.write(b);
+            }
+
+            public void setBaos(ByteArrayOutputStream baos){
+                this.baos = baos;
+            }
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        MyServletOutputStream sos = new MyServletOutputStream();
+        sos.setBaos(baos);
+        expect(response.getOutputStream()).andReturn(sos);
+
+        return baos;
     }
 
     private void preparePostRequest(String pReq) throws IOException {
@@ -564,17 +696,22 @@ public class AgentServletTest {
         expect(request.getInputStream()).andReturn(is);
     }
 
-    private void prepareStandardInitialisation(String ... params) throws ServletException {
-        servlet = new AgentServlet(new AllowAllRestrictor());
+    private void prepareStandardInitialisation(Restrictor restrictor, String ... params) throws ServletException {
+        servlet = new AgentServlet(restrictor);
         initConfigMocks(params.length > 0 ? params : null, null,"custom access", null);
         replay(config, context);
         servlet.init(config);
+    }
+
+    private void prepareStandardInitialisation(String ... params) throws ServletException {
+        prepareStandardInitialisation(new AllowAllRestrictor(),params);
     }
 
     private Runnable getStandardResponseSetup() {
         return new Runnable() {
             public void run() {
                 response.setCharacterEncoding("utf-8");
+                // The default content type
                 response.setContentType("text/plain");
                 response.setStatus(200);
             }
@@ -586,11 +723,47 @@ public class AgentServletTest {
             public void run() {
                 expect(request.getHeader("Origin")).andStubReturn(null);
                 expect(request.getHeader("Referer")).andStubReturn(null);
+                expect(request.getRemoteHost()).andStubReturn("localhost");
+                expect(request.getRemoteAddr()).andStubReturn("127.0.0.1");
+                expect(request.getRequestURI()).andReturn("/jolokia/");
+                setupAgentDetailsInitExpectations();
+                expect(request.getParameterMap()).andReturn(null);
+                expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
+            }
+        };
+    }
+
+    private void setupAgentDetailsInitExpectations() {
+        expect(request.getRequestURI()).andReturn("/jolokia/");
+        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
+        expect(request.getContextPath()).andReturn("/jolokia/");
+        expect(request.getAuthType()).andReturn(null);
+    }
+
+    private Runnable getDiscoveryRequestSetup(final String url) {
+        return new Runnable() {
+            public void run() {
+                expect(request.getHeader("Origin")).andStubReturn(null);
+                expect(request.getHeader("Referer")).andStubReturn(null);
                 expect(request.getRemoteHost()).andReturn("localhost");
                 expect(request.getRemoteAddr()).andReturn("127.0.0.1");
                 expect(request.getRequestURI()).andReturn("/jolokia/");
                 expect(request.getParameterMap()).andReturn(null);
                 expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+
+                expect(request.getPathInfo()).andReturn(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+                expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain").anyTimes();
+                StringBuffer buf = new StringBuffer();
+                buf.append(url).append(HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+                expect(request.getRequestURL()).andReturn(buf);
+                expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.HEAP_MEMORY_GET_REQUEST);
+                expect(request.getContextPath()).andReturn("/jolokia");
+                expect(request.getAuthType()).andReturn("BASIC");
+                expect(request.getAttribute("subject")).andReturn(null);
+                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+
             }
         };
     }

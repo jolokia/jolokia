@@ -69,11 +69,11 @@ public class JmxRequestTest {
     @Test
     public void readRequest() {
         for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used", procParams),
-                (JmxReadRequest) JmxRequestFactory.createPostRequest(
-                        createMap("type", "read", "mbean", "java.lang:type=Memory",
-                                  "attribute","HeapMemoryUsage",
-                                  "path","used"),procParams)
+            JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used", procParams),
+            JmxRequestFactory.createPostRequest(
+                createMap("type", "read", "mbean", "java.lang:type=Memory",
+                          "attribute","HeapMemoryUsage",
+                          "path","used"),procParams)
         }) {
             assertEquals(req.getType(), RequestType.READ);
             assertEquals(req.getObjectNameAsString(),"java.lang:type=Memory");
@@ -102,15 +102,21 @@ public class JmxRequestTest {
                         "path", "used/*"), procParams);
     }
 
-
+    @Test
+    public void testToStringFix() {
+        JmxReadRequest req = JmxRequestFactory.createPostRequest(
+            createMap("type", "read", "mbean", "java.lang:type=Memory",
+                      "attribute",Arrays.asList("NonHeapMemoryUsage")),procParams);
+        assertTrue(req.toString().contains("NonHeapMemoryUsage"));
+    }
 
     @Test
     public void readRequestMultiAttributes() {
         for (JmxReadRequest req : new JmxReadRequest[] {
-                (JmxReadRequest) JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/Heap!/Memory!/Usage,NonHeapMemoryUsage", procParams),
-                (JmxReadRequest) JmxRequestFactory.createPostRequest(
-                        createMap("type", "read", "mbean", "java.lang:type=Memory",
-                                  "attribute",Arrays.asList("Heap/Memory/Usage","NonHeapMemoryUsage")),procParams)
+            JmxRequestFactory.createGetRequest("read/java.lang:type=Memory/Heap!/Memory!/Usage,NonHeapMemoryUsage", procParams),
+            JmxRequestFactory.createPostRequest(
+                    createMap("type", "read", "mbean", "java.lang:type=Memory",
+                              "attribute",Arrays.asList("Heap/Memory/Usage","NonHeapMemoryUsage")),procParams)
         }) {
             assertTrue(req.isMultiAttributeMode());
 

@@ -16,17 +16,17 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.regex.Matcher;
-
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.UserPasswordAuthenticator;
 import org.jolokia.util.EscapeUtil;
 import org.testng.annotations.Test;
+
+import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.regex.Matcher;
 
 import static org.testng.Assert.*;
 
@@ -39,9 +39,18 @@ public class JvmAgentConfigTest {
     @Test
     public void simple() {
         JvmAgentConfig config = new JvmAgentConfig("port=4711,mode=stop");
-        assertEquals(config.getPort(),4711);
+        assertEquals(config.getPort(), 4711);
         assertTrue(config.isModeStop());
         assertEquals(config.getBacklog(), 10);
+    }
+
+    @Test
+    public void withMultipleEquals() {
+        JvmAgentConfig config = new JvmAgentConfig("clientPrincipal=O=jolokia.org\\,DN=Roland Huss,protocol=https");
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,DN=Roland Huss");
+        assertEquals(config.getProtocol(),"https");
+        assertEquals(config.getBacklog(), 10);
+
     }
 
     @Test
@@ -49,7 +58,15 @@ public class JvmAgentConfigTest {
         JvmAgentConfig config = new JvmAgentConfig("bootAmx=true");
         Configuration jConfig = config.getJolokiaConfig();
         String detectorOpts = jConfig.get(ConfigKey.DETECTOR_OPTIONS);
-        assertEquals(detectorOpts.replaceAll("\\s*",""),"{\"glassfish\":{\"bootAmx\":true}}");
+        assertEquals(detectorOpts.replaceAll("\\s*", ""), "{\"glassfish\":{\"bootAmx\":true}}");
+    }
+
+    @Test
+    public void listArgs() {
+        JvmAgentConfig config = new JvmAgentConfig("clientPrincipal=O=jolokia.org\\,CN=Roland Huss,clientPrincipal.1=O=redhat.com\\,CN=jolokia,clientPrincipal.3=bla");
+        assertEquals(config.getClientPrincipals().size(),2);
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,CN=Roland Huss");
+        assertEquals(config.getClientPrincipals().get(1),"O=redhat.com,CN=jolokia");
     }
 
     @Test
@@ -60,10 +77,10 @@ public class JvmAgentConfigTest {
         assertEquals(config.getProtocol(), "http");
         assertEquals(config.getPort(), 8778);
         assertNull(config.getAuthenticator());
-        assertEquals(config.getBacklog(),10);
-        assertEquals(config.getContextPath(),"/jolokia/");
-        assertEquals(config.getExecutor(),"single");
-        assertEquals(config.getThreadNr(),5);
+        assertEquals(config.getBacklog(), 10);
+        assertEquals(config.getContextPath(), "/jolokia/");
+        assertEquals(config.getExecutor(), "single");
+        assertEquals(config.getThreadNr(), 5);
         assertFalse(config.useSslClientAuthentication());
         assertNull(config.getKeystore());
         assertEquals(config.getKeystorePassword().length, 0);
@@ -72,7 +89,7 @@ public class JvmAgentConfigTest {
     @Test
     public void context() {
         JvmAgentConfig config = new JvmAgentConfig("agentContext=/bla");
-        assertEquals(config.getContextPath(),"/bla/");
+        assertEquals(config.getContextPath(), "/bla/");
     }
 
     @Test
@@ -80,7 +97,7 @@ public class JvmAgentConfigTest {
         JvmAgentConfig config = new JvmAgentConfig("maxDepth=42");
 
         Configuration jolokiaConfig = config.getJolokiaConfig();
-        assertEquals(jolokiaConfig.get(ConfigKey.MAX_DEPTH),"42");
+        assertEquals(jolokiaConfig.get(ConfigKey.MAX_DEPTH), "42");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -95,8 +112,9 @@ public class JvmAgentConfigTest {
         assertEquals(config.getProtocol(), "https");
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
+        assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,OU=JVM");
         assertTrue(authenticator instanceof UserPasswordAuthenticator);
-        assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
+        assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland", "s!cr!t"));
     }
 
     @Test
@@ -107,17 +125,12 @@ public class JvmAgentConfigTest {
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
         assertTrue(authenticator instanceof Dummy);
-        assertSame(((Dummy)authenticator).getConfig(), config.getJolokiaConfig());
+        assertSame(((Dummy) authenticator).getConfig(), config.getJolokiaConfig());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla\\.txt.*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*bla\\.txt.*")
     public void configNotFound() {
         new JvmAgentConfig("config=/bla.txt");
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void noKeystore() {
-        new JvmAgentConfig("protocol=https");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -135,18 +148,31 @@ public class JvmAgentConfigTest {
         new JvmAgentConfig("port=bla");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*blub.*")
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*blub.*")
     public void invalidMode() {
         new JvmAgentConfig("mode=blub");
     }
+
+    @Test
+    public void keystorePassword() throws UnknownHostException {
+        JvmAgentConfig config = new JvmAgentConfig("keystorePassword=passwd");
+        assertEquals(config.getKeystorePassword(), "passwd".toCharArray());
+    }
+
+    @Test
+    public void keystorePasswordEncrypted() throws UnknownHostException {
+        JvmAgentConfig config = new JvmAgentConfig("keystorePassword=[[b4m+ADwT8u8HAoVvv3n6WLAEfFFceJHSu6rsNT1/CsHiWFzUseNMS4C2d1AtxJNC]]");
+        assertEquals(config.getKeystorePassword(), "1234567890123456".toCharArray());
+    }
+
 
     // =======================================================================================
 
     private String copyResourceToTemp(String pResource) throws IOException {
         InputStream is = this.getClass().getResourceAsStream(pResource);
-        assertNotNull(is,"Cannot find " + pResource);
-        File out = File.createTempFile("prop",".properties");
-        copy(is,new FileOutputStream(out));
+        assertNotNull(is, "Cannot find " + pResource);
+        File out = File.createTempFile("prop", ".properties");
+        copy(is, new FileOutputStream(out));
         String path = out.getAbsolutePath();
 
         if (EscapeUtil.CSV_ESCAPE.equals("\\\\") && (File.separator.equals("\\"))) {
@@ -160,7 +186,7 @@ public class JvmAgentConfigTest {
         return path;
     }
 
-    private void copy(InputStream in, OutputStream out) throws IOException   {
+    private void copy(InputStream in, OutputStream out) throws IOException {
         try {
             byte[] buffer = new byte[8192];
             int bytesRead;
@@ -168,8 +194,7 @@ public class JvmAgentConfigTest {
                 out.write(buffer, 0, bytesRead);
             }
             out.flush();
-        }
-        finally {
+        } finally {
             if (in != null) {
                 in.close();
             }

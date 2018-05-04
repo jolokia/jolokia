@@ -91,5 +91,18 @@ public class DateUtilTest {
             Date date =  DateUtil.fromISO8601(toParse);
             assertEquals(date, testDate);
         }
+        
+        checkRoundTripConsideringIgnoredMilliseconds();
     }
+
+	/**
+	 * Milliseconds are not part of ISO8601
+	 */
+	private void checkRoundTripConsideringIgnoredMilliseconds() {
+		Date currentDate = new Date(1303195711111L);
+		Date expectedDateIsWithoutMilliSeconds = new Date();
+		expectedDateIsWithoutMilliSeconds.setTime((currentDate.getTime() / 1000) * 1000);
+		Date roundtripValue = DateUtil.fromISO8601(DateUtil.toISO8601(currentDate));
+		assertEquals(roundtripValue, expectedDateIsWithoutMilliSeconds);
+	}
 }

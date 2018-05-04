@@ -20,7 +20,7 @@
   <para>
     JMX (Java Management Extensions) is <emphasis>the</emphasis>
     standard management solution in the Java world. Since JDK 1.5 it
-    is available in every Java Virtual Machine and especially JEE
+    is available in every Java Virtual Machine and especially Java EE
     application servers use JMX for their management business.
   </para>
   <para>
@@ -45,7 +45,7 @@
     remotely. Unfortunately, the underlying transport protocol (RMI)
     and programing model is very Java centric and is not usable
     outside the Java world.
-  </para>  
+  </para>
   <para>
     This is where Jolokia steps in. It is an agent based approach,
     living side by side with JSR-160, but uses the much more open HTTP

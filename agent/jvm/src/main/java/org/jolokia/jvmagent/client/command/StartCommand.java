@@ -40,15 +40,26 @@ public class StartCommand extends AbstractBaseCommand {
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String agentUrl;
         agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOpts.isQuiet();
         if (agentUrl == null) {
             loadAgent(pVm, pOpts);
+            agentUrl = checkAgentUrl(pVm);
+            if (agentUrl == null) {
+                // Wait a bit and try again
+                agentUrl = checkAgentUrl(pVm, 500);
+                if (agentUrl == null) {
+                    System.err.println("Couldn't start agent for " + getProcessDescription(pOpts, pHandler));
+                    System.err.println("Possible reason could be that port '" + pOpts.getPort() + "' is already occupied.");
+                    System.err.println("Please check the standard output of the target process for a detailed error message.");
+                    return 1;
+                }
+            }
             if (!quiet) {
                 System.out.println("Started Jolokia for " + getProcessDescription(pOpts,pHandler));
-                System.out.println(checkAgentUrl(pVm));
+                System.out.println(agentUrl);
             }
             return 0;
         } else {

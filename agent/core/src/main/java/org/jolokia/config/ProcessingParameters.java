@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class encapsulating parametrs used during processing
+ * Class encapsulating parameters used during processing
  *
  * @author roland
  * @since 07.02.13

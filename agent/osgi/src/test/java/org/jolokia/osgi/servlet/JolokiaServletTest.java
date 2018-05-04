@@ -16,6 +16,7 @@ package org.jolokia.osgi.servlet;
  *  limitations under the License.
  */
 
+import java.lang.instrument.Instrumentation;
 import java.util.Set;
 
 import javax.management.MBeanServerConnection;
@@ -143,6 +144,8 @@ public class JolokiaServletTest {
 
         public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
         }
+
+        public void jvmAgentStartup(Instrumentation instrumentation) {}
     }
 
 }

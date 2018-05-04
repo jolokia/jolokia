@@ -1,5 +1,6 @@
 package org.jolokia.backend;
 
+import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.util.*;
 
@@ -121,6 +122,10 @@ public class MBeanServersTest implements NotificationListener {
             public void addMBeanServers(Set<MBeanServerConnection> pMBeanServers) {
                 pMBeanServers.add(ownServer);
             }
+
+            public void jvmAgentStartup(Instrumentation instrumentation) {
+            }
+
         });
         return ret;
     }

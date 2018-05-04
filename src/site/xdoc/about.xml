@@ -18,19 +18,19 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>The Jolokia Story</title>
     <author email="roland@jolokia.org">Roland Huss</author>
   </properties>
-  
+
   <body>
     <section name="The Story">
       <p style="text-align: left;">
         <img src="images/jolokia_home.png" style="float: right; margin: 0 0 10px 20px;" alt="Jolokia, homegrown"/>
         All started up early 2009 when my colleague Gerhard Lausser,
         our local Nagios guru, came up in my office and complained
-        heavily about how damned hard it is to monitor JEE servers
+        heavily about how damned hard it is to monitor Java EE servers
         with <a href="http://www.nagios.org">Nagios</a>. As you might
         know, Nagios uses a plethora of plugins for doing the hard
         monitoring stuff. These are running locally on a central
@@ -77,7 +77,7 @@
         administrator at university in my former life), my initial goal
         was to use pure Perl for accessing remote JMX information without
         the need of a local Java integration.  In turned out that an agent
-        based approach was the simplest way. The first agent, a JEE
+        based approach was the simplest way. The first agent, a Java EE
         webapplication, which on the frontside translates HTTP requests with
         a JSON payload to local JMX calls (and vice versa for the response),
         was really lightweight. It knew how to read and set attributes and
@@ -118,7 +118,7 @@
         a chili head and grow chilis since 2006. I love chilis as much
         as JMX. That's the main reason.
       </p>
-      <p>        
+      <p>
         The other reason is, that a chili is a good metaphore for a
         hot, new approach for JMX remoting. Especially when it is the
         hottest one ;-)
@@ -150,7 +150,7 @@
           <a
               href="http://www.wanderinghorse.net/home/stephan/">Stephan
           Beal</a> for ironing out my dump english and proofreading the
-          documentation. 
+          documentation.
         </li>
       </ul>
     </section>
@@ -198,7 +198,7 @@
         distribution, or any form of commercialization of such
         material beyond the scope of the copyright law shall require
         the prior written consent of its respective author or
-        creator. 
+        creator.
       </p>
       <p>
         <strong>Data Protection</strong>

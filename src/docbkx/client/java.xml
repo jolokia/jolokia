@@ -19,7 +19,7 @@
   <title>Java Client Library</title>
   <para>
     The Java client library provides an easy access to the Jolokia
-    agent from within Java. Since JSR-160 connectors themselved
+    agent from within Java. Since JSR-160 connectors themselves
     provide Java based remote access to MBeans one might wonder about
     the benefits of  a Jolokia Java binding. There are several,
     though: 
@@ -34,7 +34,7 @@
     <listitem>
       Jolokia can be used in setups where JSR-160 connectors can not
       be used. I.e. in firewall secured environments it is much easier
-      to get through to a Jolokia Agent than to an JSR-160 connetor
+      to get through to a Jolokia Agent than to an JSR-160 connector
       using RMI as transport protocol.
     </listitem>
     <listitem>
@@ -254,6 +254,15 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <td>20</td>
       </tr>
       <tr>
+        <td><constant>defaultMaxConnectionsPerRoute</constant></td>
+        <td>
+          Defines the number of total connections per route. It
+          is only used when <constant>pooledConnection</constant> is
+          used.
+        </td>
+        <td>20</td>
+      </tr>
+      <tr>
         <td><constant>maxConnectionPoolTimeout</constant></td>
         <td>
           Defines the timeout for waiting to obtain a connection
@@ -290,8 +299,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           to determine if the origin server is willing to accept the
           request (based on the request headers) before the client
           sends the request body.  The use of the <literal>Expect:
-          100-continue</literal> handshake can result in noticable
-          peformance improvement for entity enclosing requests that
+          100-continue</literal> handshake can result in noticeable
+          performance improvement for entity enclosing requests that
           require the target server's authentication.
         </td>
         <td>true</td>
@@ -352,7 +361,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           <classname>ValidatingResponseExtractor</classname> can be
           used, which instead of throwing an exception returns a
           <code>null</code> object when the response has a status of
-          404. An extractor can be speficied as extra argument to the
+          404. An extractor can be specified as extra argument to the
           execute method, too.
         </td>
         <td></td>
@@ -362,9 +371,9 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
       The <classname>J4pClient</classname> provides various variants
       of a <methodname>execute()</methodname> method, which takes
       either one single request or a list of requests. For a single
-      request, the preffered HTTP method (GET or POST) can be
+      request, the preferred HTTP method (GET or POST) can be
       specified optionally. The <classname>List&lt;R&gt;</classname>
-      argument can be used type only for a homogenous bulk request,
+      argument can be used type only for a homogeneous bulk request,
       i.e. for multiple requests of the same time. Otherwise an
       untyped list must be used. 
     </para>
@@ -588,10 +597,10 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             The <classname>J4pVersionResponse</classname> returns the
             agent's version (<varname>agentVersion</varname>), the
             protocol version (<varname>protocolVersion</varname>), the
-            applicaton server product name
+            application server product name
             (<varname>product</varname>), the vendor name
             (<varname>vendor</varname>) and any extra info
-            (<varname>extraInfo</varname>) specific to the plattform
+            (<varname>extraInfo</varname>) specific to the platform
             the Jolokia is running on.
           </para>
         </listitem>
@@ -631,7 +640,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <term><classname>J4pRemoteException</classname></term>
         <listitem>
           <para>
-            Generic exception thrown when an exception occured on the
+            Generic exception thrown when an exception occurred on the
             remote side. This is the case when the JSON response
             obtained is an error response as described in <xref
             linkend="responses"/>. The error type, error value, the 
@@ -646,13 +655,13 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           <para>
             Exception thrown when a bulk request fails on the remote
             side. This contains a mixed list which contains the
-            <classname>J4pRemoteException</classname> occured as well
+            <classname>J4pRemoteException</classname> occurred as well
             as the <classname>J4pResponse</classname> objects for the
-            requests, which suceeded. The list obtained by
+            requests, which succeeded. The list obtained by
             <methodname>getResults()</methodname> contains these
             objects in the same order as the list of requests given to
-            <methodname>execute</methodname>. All responses und remote
-            exceptions can also be obtained seperately in homogenous
+            <methodname>execute</methodname>. All responses and remote
+            exceptions can also be obtained separately in homogeneous
             lists. 
           </para>
         </listitem>

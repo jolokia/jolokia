@@ -88,11 +88,11 @@ public class Configuration {
      *         was given.
      */
     public String get(ConfigKey pKey) {
-            String value = globalConfig.get(pKey);
-            if (value == null) {
-                value = pKey.getDefaultValue();
-            }
-            return value;
+        String value = globalConfig.get(pKey);
+        if (value == null) {
+            value = pKey.getDefaultValue();
+        }
+        return value;
     }
 
     /**

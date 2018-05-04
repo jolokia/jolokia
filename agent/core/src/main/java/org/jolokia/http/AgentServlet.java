@@ -13,10 +13,13 @@ import javax.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;
+import org.jolokia.discovery.AgentDetails;
 import org.jolokia.discovery.DiscoveryMulticastResponder;
 import org.jolokia.restrictor.*;
 import org.jolokia.util.*;
 import org.json.simple.JSONAware;
+import org.json.simple.JSONStreamAware;
+
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -44,7 +47,7 @@ import org.json.simple.JSONAware;
  * request. See the <a href="http://www.jolokia.org/reference/index.html">reference documentation</a>
  * for a detailed description of this servlet's features.
  * </p>
- * 
+ *
  * @author roland@jolokia.org
  * @since Apr 18, 2009
  */
@@ -66,15 +69,18 @@ public class AgentServlet extends HttpServlet {
 
     // Restrictor to use as given in the constructor
     private Restrictor restrictor;
-    
+
     // Mime type used for returning the answer
     private String configMimeType;
 
     // Listen for discovery request (if switched on)
     private DiscoveryMulticastResponder discoveryMulticastResponder;
 
-    // If discovery multicast is enabled and URL should be initialized by request
-    private boolean initAgentUrlFromRequest = false;
+    // whether to allow reverse DNS lookup for checking the remote host
+    private boolean allowDnsReverseLookup;
+
+    // whether to allow streaming mode for response
+    private boolean streamingEnabled;
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -88,7 +94,7 @@ public class AgentServlet extends HttpServlet {
      * Constructor taking a restrictor to use
      *
      * @param pRestrictor restrictor to use or <code>null</code> if the restrictor
-     *        should be created in the default way ({@link #createRestrictor(String)})
+     *        should be created in the default way ({@link RestrictorFactory#createRestrictor(Configuration,LogHandler)})
      */
     public AgentServlet(Restrictor pRestrictor) {
         restrictor = pRestrictor;
@@ -104,36 +110,8 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
-     * Create a restrictor restrictor to use. By default, a policy file
-     * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
-     * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
-     * used by default. This method is called during the {@link #init(ServletConfig)} when initializing
-     * the subsystems and can be overridden for custom restrictor creation.
-     *
-     * @param pLocation location to lookup the restrictor
-     * @return the restrictor to use.
-     */
-    protected Restrictor createRestrictor(String pLocation) {
-        LogHandler log = getLogHandler();
-        try {
-            Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
-            if (newRestrictor != null) {
-                log.info("Using access restrictor " + pLocation);
-                return newRestrictor;
-            } else {
-                log.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
-                return new AllowAllRestrictor();
-            }
-        } catch (IOException e) {
-            log.error("Error while accessing access restrictor at " + pLocation +
-                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
-            return new DenyAllRestrictor();
-        }
-    }
-
-    /**
      * Initialize the backend systems, the log handler and the restrictor. A subclass can tune
-     * this step by overriding {@link #createRestrictor(String)} and {@link #createLogHandler(ServletConfig, boolean)}
+     * this step by overriding {@link #createRestrictor(Configuration)}} and {@link #createLogHandler(ServletConfig, boolean)}
      *
      * @param pServletConfig servlet configuration
      */
@@ -154,26 +132,73 @@ public class AgentServlet extends HttpServlet {
         httpPostHandler = newPostHttpRequestHandler();
 
         if (restrictor == null) {
-            restrictor = createRestrictor(NetworkUtil.replaceExpression(config.get(ConfigKey.POLICY_LOCATION)));
+            restrictor = createRestrictor(config);
         } else {
             logHandler.info("Using custom access restriction provided by " + restrictor);
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
-        backendManager = new BackendManager(config,logHandler, restrictor);
-        requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
+
+        addJsr160DispatcherIfExternallyConfigured(config);
+        backendManager = new BackendManager(config, logHandler, restrictor);
+
+        requestHandler = new HttpRequestHandler(config, backendManager, logHandler);
+        allowDnsReverseLookup = config.getAsBoolean(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP);
+        streamingEnabled = config.getAsBoolean(ConfigKey.STREAMING);
 
         initDiscoveryMulticast(config);
+    }
+
+
+    /**
+     * Add the JsrRequestDispatcher if configured via a system property or env variable.
+     * The JSR160 dispatcher is disabled by default, but this allows to enable it again
+     * without reconfiguring the servlet
+     *
+     * @param pConfig configuration to update
+     */
+    private void addJsr160DispatcherIfExternallyConfigured(Configuration pConfig) {
+        String dispatchers = pConfig.get(ConfigKey.DISPATCHER_CLASSES);
+        String jsr160DispatcherClass = "org.jolokia.jsr160.Jsr160RequestDispatcher";
+
+        if (dispatchers == null || !dispatchers.contains(jsr160DispatcherClass)) {
+            for (String param : new String[]{
+                System.getProperty("org.jolokia.jsr160ProxyEnabled"),
+                System.getenv("JOLOKIA_JSR160_PROXY_ENABLED")
+            }) {
+                if (param != null && (param.isEmpty() || Boolean.parseBoolean(param))) {
+                    {
+                        pConfig.updateGlobalConfiguration(
+                            Collections.singletonMap(
+                                ConfigKey.DISPATCHER_CLASSES.getKeyValue(),
+                                (dispatchers != null ? dispatchers + "," : "") + jsr160DispatcherClass));
+                    }
+                    return;
+                }
+            }
+            if (dispatchers == null) {
+                // We add a breaking dispatcher to avoid silently ignoring a JSR160 proxy request
+                // when it is now enabled
+                pConfig.updateGlobalConfiguration(Collections.singletonMap(
+                    ConfigKey.DISPATCHER_CLASSES.getKeyValue(),
+                    Jsr160ProxyNotEnabledByDefaultAnymoreDispatcher.class.getCanonicalName()));
+            }
+        }
+    }
+
+    /**
+     * Hook for creating an own restrictor
+     *
+     * @param config configuration as given to the servlet
+     * @return return restrictor or null if no restrictor is needed.
+     */
+    protected Restrictor createRestrictor(Configuration config) {
+        return RestrictorFactory.createRestrictor(config, logHandler);
     }
 
     private void initDiscoveryMulticast(Configuration pConfig) {
         String url = findAgentUrl(pConfig);
         if (url != null || listenForDiscoveryMcRequests(pConfig)) {
-            if (url == null) {
-                initAgentUrlFromRequest = true;
-            } else {
-                initAgentUrlFromRequest = false;
-                backendManager.getAgentDetails().updateAgentParameters(url, null);
-            }
+            backendManager.getAgentDetails().setUrl(url);
             try {
                 discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
                 discoveryMulticastResponder.start();
@@ -206,7 +231,7 @@ public class AgentServlet extends HttpServlet {
     }
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
-     * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
+     * to provide a custom log handler. This method is called before {@link RestrictorFactory#createRestrictor(Configuration,LogHandler)} so the log handler
      * can already be used when building up the restrictor.
      *
      * @return a default log handler
@@ -249,7 +274,7 @@ public class AgentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        handle(httpGetHandler,req, resp);
+        handle(httpGetHandler, req, resp);
     }
 
     /** {@inheritDoc} */
@@ -279,34 +304,39 @@ public class AgentServlet extends HttpServlet {
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     private void handle(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONAware json = null;
+
         try {
             // Check access policy
-            requestHandler.checkAccess(pReq.getRemoteHost(), pReq.getRemoteAddr(),
+            requestHandler.checkAccess(allowDnsReverseLookup ? pReq.getRemoteHost() : null,
+                                       pReq.getRemoteAddr(),
                                        getOriginOrReferer(pReq));
 
+            // If a callback is given, check this is a valid javascript function name
+            validateCallbackIfGiven(pReq);
+
             // Remember the agent URL upon the first request. Needed for discovery
-            updateAgentUrlIfNeeded(pReq);
+            updateAgentDetailsIfNeeded(pReq);
 
             // Dispatch for the proper HTTP request method
             json = handleSecurely(pReqHandler, pReq, pResp);
         } catch (Throwable exp) {
-            json = requestHandler.handleThrowable(
+            try {
+                json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
+            } catch (Throwable exp2) {
+                exp2.printStackTrace();
+            }
         } finally {
             setCorsHeader(pReq, pResp);
 
-            String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
-            String answer = json != null ?
-                    json.toJSONString() :
-                    requestHandler.handleThrowable(new Exception("Internal error while handling an exception")).toJSONString();
-            if (callback != null) {
-                // Send a JSONP response
-                sendResponse(pResp, "text/javascript", callback + "(" + answer + ");");
-            } else {
-                sendResponse(pResp, getMimeType(pReq),answer);
+            if (json == null) {
+                json = requestHandler.handleThrowable(new Exception("Internal error while handling an exception"));
             }
+
+            sendResponse(pResp, pReq, json);
         }
     }
+
 
     private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp) throws IOException, PrivilegedActionException {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
@@ -331,22 +361,28 @@ public class AgentServlet extends HttpServlet {
 
 
     // Update the agent URL in the agent details if not already done
-    private void updateAgentUrlIfNeeded(HttpServletRequest pReq) {
+    private void updateAgentDetailsIfNeeded(HttpServletRequest pReq) {
         // Lookup the Agent URL if needed
-        if (initAgentUrlFromRequest) {
-            updateAgentUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()), extractServletPath(pReq),pReq.getAuthType() != null);
-            initAgentUrlFromRequest = false;
+        AgentDetails details = backendManager.getAgentDetails();
+        if (details.isInitRequired()) {
+            synchronized (details) {
+                if (details.isInitRequired()) {
+                    if (details.isUrlMissing()) {
+                        String url = getBaseUrl(NetworkUtil.sanitizeLocalUrl(pReq.getRequestURL().toString()),
+                                extractServletPath(pReq));
+                        details.setUrl(url);
+                    }
+                    if (details.isSecuredMissing()) {
+                        details.setSecured(pReq.getAuthType() != null);
+                    }
+                    details.seal();
+                }
+            }
         }
     }
 
     private String extractServletPath(HttpServletRequest pReq) {
         return pReq.getRequestURI().substring(0,pReq.getContextPath().length());
-    }
-
-    // Update the URL in the AgentDetails
-    private void updateAgentUrl(String pRequestUrl, String pServletPath, boolean pIsAuthenticated) {
-        String url = getBaseUrl(pRequestUrl, pServletPath);
-        backendManager.getAgentDetails().updateAgentParameters(url,pIsAuthenticated);
     }
 
     // Strip off everything unneeded
@@ -393,13 +429,12 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    // Extract mime type for response (if not JSONP)
-    private String getMimeType(HttpServletRequest pReq) {
-        String requestMimeType = pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue());
-        if (requestMimeType != null) {
-            return requestMimeType;
+    private boolean isStreamingEnabled(HttpServletRequest pReq) {
+        String streamingFromReq = pReq.getParameter(ConfigKey.STREAMING.getKeyValue());
+        if (streamingFromReq != null) {
+            return Boolean.parseBoolean(streamingFromReq);
         }
-        return configMimeType;
+        return streamingEnabled;
     }
 
     private interface ServletRequestHandler {
@@ -426,7 +461,7 @@ public class AgentServlet extends HttpServlet {
              }
         };
     }
-    
+
     // factory method for GET request handler
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
@@ -473,12 +508,55 @@ public class AgentServlet extends HttpServlet {
         return config;
     }
 
-    private void sendResponse(HttpServletResponse pResp, String pContentType, String pJsonTxt) throws IOException {
-        setContentType(pResp, pContentType);
-        pResp.setStatus(200);
+    private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONAware pJson) throws IOException {
+        String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+
+        setContentType(pResp,
+                       MimeTypeUtil.getResponseMimeType(
+                           pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
+                           configMimeType, callback));
+        pResp.setStatus(HttpServletResponse.SC_OK);
         setNoCacheHeaders(pResp);
-        PrintWriter writer = pResp.getWriter();
-        writer.write(pJsonTxt);
+        if (pJson == null) {
+            pResp.setContentLength(-1);
+        } else {
+            if (isStreamingEnabled(pReq)) {
+                sendStreamingResponse(pResp, callback, (JSONStreamAware) pJson);
+            } else {
+                // Fallback, send as one object
+                // TODO: Remove for 2.0 where should support only streaming
+                sendAllJSON(pResp, callback, pJson);
+            }
+        }
+    }
+
+    private void validateCallbackIfGiven(HttpServletRequest pReq) {
+        String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        if (callback != null && !MimeTypeUtil.isValidCallback(callback)) {
+            throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
+        }
+    }
+    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
+        Writer writer = new OutputStreamWriter(pResp.getOutputStream(), "UTF-8");
+        IoUtil.streamResponseAndClose(writer, pJson, pCallback);
+    }
+
+    private void sendAllJSON(HttpServletResponse pResp, String callback, JSONAware pJson) throws IOException {
+        OutputStream out = null;
+        try {
+            String json = pJson.toJSONString();
+            String content = callback == null ? json : callback + "(" + json + ");";
+            byte[] response = content.getBytes("UTF8");
+            pResp.setContentLength(response.length);
+            out = pResp.getOutputStream();
+            out.write(response);
+        } finally {
+            if (out != null) {
+                // Always close in order to finish the request.
+                // Otherwise the thread blocks.
+                out.close();
+            }
+        }
     }
 
     private void setNoCacheHeaders(HttpServletResponse pResp) {

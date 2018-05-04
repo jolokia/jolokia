@@ -34,10 +34,11 @@ public class MulticastSocketListenerThreadTest {
         url = new URL(JOLOKIA_URL);
         id = UUID.randomUUID().toString();
         final AgentDetails details = new AgentDetails(id);
-        details.updateAgentParameters(JOLOKIA_URL, false);
+        details.setUrl(JOLOKIA_URL);
+        details.setSecured(false);
         details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
-        MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread(null,
+        MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread("ListenerThread", null,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
                                                new LogHandler.StdoutLogHandler(true));

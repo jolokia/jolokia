@@ -158,7 +158,4 @@ public class MortbayMuleAgentHttpServer implements MuleAgentHttpServer {
         return ret;
     }
 
-    public static boolean detect() {
-        return ClassUtil.checkForClass("org.mortbay.jetty.Server");
-    }
 }

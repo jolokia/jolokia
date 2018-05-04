@@ -37,7 +37,7 @@
       url="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
       Agent interface</ulink> for linking into any JVM. Under the
       hood it uses an HTTP-Server, which is available on every
-      Oracle/Sun JVM from verison 1.6 upwards.
+      Oracle/Sun JVM from version 1.6 upwards.
     </para>
     <sidebar>
       The JDK embedded HTTP-Server is not the fastest one (it is used
@@ -56,7 +56,10 @@
 java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <para>
         <filename>agent.jar</filename> is the filename of the Jolokia
-        JVM agent. Options can be appended as a comma separated
+        JVM agent. The agent can be downloaded like the others from the <ulink url="https://jolokia.org/download.html">download page</ulink>.
+        When downloading from a Maven repository you need to check for the classifier <literal>agent</literal> (i.e. the
+        jar to download looks like <filename>jolokia-jvm-1.3.1-agent.jar</filename>, not <filename>jolokia-jvm-1.1.5.jar</filename>).
+        Options can be appended as a comma separated
         list. The available options are the same as described in <xref
         linkend="agent-war-init-params"/> plus the one described in
         table <xref linkend="agent-jvm-config"/>. If an options
@@ -90,7 +93,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
             calculated. If provided it should be ensured that this id is
             unique among all agent reachable via multicast requests used
             by the discovery mechanism. It is recommended not to set
-            this value. 
+            this value. Within the <literal>agentId</literal> specification you
+            can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
           </td>        
           <td>
             <constant>my-unique-agent-id</constant>
@@ -100,7 +104,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>agentDescription</constant></td>
           <td>
             An optional description which can be used for clients to
-            present a humand readable label for this agent.
+            present a human readable label for this agent.
           </td>        
           <td>
             <constant>Intranet Timebooking Server</constant>
@@ -157,17 +161,18 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>authMode</constant></td>
           <td>
-            Can be either <literal>basic</literal> (the default) or <literal>jaas</literal>. If
-            <literal>jaas</literal> is used, the user and password given in the <literal>Authorization:</literal>
-            header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-            This has only an effect, if user is set.
+            Can be either <constant>basic</constant> (the default), <constant>jaas</constant> or <constant>delegate</constant>. If
+            <constant>jaas</constant> is used, the user and password given in the <constant>Authorization:</constant>
+            header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+            This has only an effect, if user is set. For authentication mode <constant>delegate</constant>, the authentication
+            decision is delegated to a service specified by <constant>authUrl</constant> (see below for details).
           </td>
           <td>
             basic
           </td>
         </tr>
         <tr>
-          <td><constant>authenticatorClass</constant></td>
+          <td><constant>authClass</constant></td>
           <td>
             Fully qualified name of an authenticator class. Class must be on classpath and must extend
             <constant>com.sun.net.httpserver.Authenticator</constant>. Class can declare a constructor
@@ -180,12 +185,65 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>authUrl</constant></td>
+          <td>
+            URL of a service used for checking the authentication. This configuration option is only effective if
+            <constant>authMode</constant> is set to <constant>delegate</constant>. This URL can have a HTTP or HTTPS scheme.
+            The initially provided <constant>Authorization:</constant> header is copied over to the request against this
+            URL.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>authPrincipalSpec</constant></td>
+          <td>
+            Expression used for extracting a principal name from the response of a delegate authentication service. This
+            parameter is only in use when the <constant>authMode</constant> is set to <constant>delegate</constant>. The
+            following expressions are supported:
+            <variablelist>
+              <varlistentry>
+                <term><literal>json:path</literal></term>
+                <listitem>
+                  <para>
+                    a path into a JSON response which points to the principal.
+                    E.g. a principal spec <literal>jason:metadata/name</literal> will select the "name" property within the JSON
+                  object specified by the "metadata" property. For navigate into arrays, numeric indexes can be used.
+                  </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><literal>empty:</literal></term>
+                <listitem>
+                  <para>
+                    Always extracts an empty ("") principal.
+                  </para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+            If this option is not specified, not principal is extracted.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <td><constant>authIgnoreCerts</constant></td>
+          <td>
+            If given, the <constant>authMode</constant> is set to <constant>delegate</constant> and the delegate URL is
+            as HTTPS-URL then the server certificate as well as the server's DNS name will not be verified. This useful
+            in order to avoid (or introduce) complex keymanagement issues, but is of course less secure. By default
+            certs a verified with the local keystore.
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
           <td><constant>protocol</constant></td>
           <td>
             HTTP protocol to use. Should be either <literal>http</literal>
             or <literal>https</literal>. For the SSL stack there are various
             additional configuration options. 
-          </td>        
+          </td>
           <td>
             <constant>http</constant>
           </td>
@@ -258,7 +316,9 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <tr>
           <td><constant>keystorePassword</constant></td>
           <td>
-            Keystore password (https only)
+            Keystore password (https only). If the password is given embedded in brackets <constant>[[...]]</constant>,
+            then it is treated as an encrypted password which was encrypted with <code>java -jar jvm-agent.jar
+            encrypt</code>. See below for details.
           </td>        
           <td>
           </td>
@@ -267,7 +327,8 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>useSslClientAuthentication</constant></td>
           <td>
             Whether client certificates should be used for
-            authentication (https only). (<constant>true</constant> or
+            authentication. The presented certificate is validated that it is signed by
+            a known CA which must be in the keystore (https only). (<constant>true</constant> or
             <constant>false</constant>). 
           </td>        
           <td>
@@ -295,6 +356,59 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td><constant>SunX509</constant></td>
         </tr>
         <tr>
+          <td><constant>caCert</constant></td>
+          <td>
+            If HTTPs is to be used and no <constant>keystore</constant> is given, then <constant>caCert</constant>
+            can be used to point to a PEM encoded CA certification file. This is use to verify
+            client certificates when <constant>useSslClientAuthentication</constant> is switched on (https only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>serverCert</constant></td>
+          <td>
+            For SSL (and when no <constant>keyStore</constant> is used) then this path must point to server
+            certificate which is presented to clients (https only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>serverKey</constant></td>
+          <td>Path to the PEM encoded key file for signing the server cert during TLS handshake. This is only
+            used when no <constant>keyStore</constant> is used. For decrypting the key the password given with
+            <constant>keystorePassword</constant> is used (https only).</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>serverKeyAlgorithm</constant></td>
+          <td>Encryption algorithm to use for decrypting the key given with <constant>serverKey</constant>
+            (https only)</td>
+          <td><constant>RSA</constant></td>
+        </tr>
+        <tr>
+          <td><constant>clientPrincipal</constant></td>
+          <td>
+            The principal which must be given in a client certificate to allow access to the agent. This can be one or
+            or more relative distinguished names (RDN), separated by commas. The subject of a given client certificate
+            must match on all configured RDNs. For example, when the configuration is "O=jolokia.org,OU=Dev" then a
+            client certificate's subject must contain "O=jolokia.org" and "OU=Dev" to allow the request. Multiple alternative
+            principals can be configured by using additional options with consecutive index suffix like in
+            <code>clientPrincipal.1</code>, <code>clientPrincipal.2</code>, ... Please remember that a <code>,</code>
+            separating RDNs must be escaped with a backslash (<code>\,</code>) when used on the commandline as agent arguments.
+            (https and useSslAuthentication only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>extraClientCheck</constant></td>
+          <td>
+            If switched on the agent performs an extra check for client authentication that the presented client
+            cert contains a client flag in the extended key usage section which must be present.
+            (https and useSslAuthentication only)
+          </td>
+          <td></td>
+        </tr>
+        <tr>
           <td><constant>bootAmx</constant></td>
           <td>
             If set to <constant>true</constant> and if the agent is
@@ -316,8 +430,7 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
             pairs (except for the <constant>config</constant> property
             of course :)
           </td>        
-          <td>
-        </td>
+          <td></td>
         </tr>
         <tr>
           <td><constant>discoveryEnabled</constant></td>
@@ -335,20 +448,50 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           <td>
             Sets the URL to respond for multicast discovery requests. If
             given, <constant>discoveryEnabled</constant> is set
-            implicetly to true. Within the value you can use the
+            implicitly to true. Within the value you can use the
             placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
             by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
-            <literal>${sys:property}</literal> envirnoment and system properties can be referenced, respectively.
+            <literal>${sys:property}</literal> environment and system properties can be referenced, respectively.
           </td>
           <td>          
             <constant>http://10.9.11.87:8778/jolokia</constant>
           </td>
         </tr>
-      </table>      
+        <tr>
+          <td><constant>sslProtocol</constant></td>
+          <td>
+            The list of SSL / TLS protocols enabled. Valid options are available in the documentation
+            on SunJSSEProvider for your JDK version. Using only <constant>TLSv1.1</constant> and
+            <constant>TLSv1.2</constant> is recommended in Java 1.7 and Java 1.8. Using only
+            <constant>TLSv1</constant> is recommended in Java 1.6. Multiple protocols can be configured
+            by using additional options with consecutive index suffixes like in
+            <code>sslProtocol.1</code>, <code>sslProtocol.2</code>, ...
+          </td>
+          <td><code>TLSv1.2</code></td>
+        </tr>
+        <tr>
+          <td><constant>sslCipherSuite</constant></td>
+          <td>
+            The list of SSL / TLS cipher suites to enable. The table of available cipher suites is
+            available under the "Default Enabled Cipher Suites" at the SunJSSEProvider documentation
+            <ulink url="http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJSSEProvider">here</ulink>.
+            Multiple cipher suites can be configured by using additional options with consecutive index
+            suffixes like in <code>sslCipherSuite.1</code>, <code>sslCipherSuite.2</code>, ...
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><constant>policyLocation</constant></td>
+          <td>
+            Path to the XML policy file
+          </td>
+          <td></td>
+        </tr>
+      </table>
       <para>
         Upon successful startup the agent will print out a success
         message with the full URL which can be used by clients for
-        contacting the agent. 
+        contacting the agent.
       </para>
     </section>
   </section>
@@ -371,12 +514,12 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
       <literal>--help</literal> to get a short usage information:
     </para>
     <programlisting><![CDATA[
-$ java -jar jolokia-jvm-1.2.0-agent.jar --help
+$ java -jar jolokia-jvm-1.3.4-agent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.2.0-agent.jar [options] <command> <pid/regexp>
+Usage: java -jar jolokia-jvm-1.3.4-agent.jar [options] <command> <pid/regexp>
 
 where <command> is one of
     start     -- Start a Jolokia agent for the process specified
@@ -384,55 +527,74 @@ where <command> is one of
     status    -- Show status of an (potentially) attached agent
     toggle    -- Toggle between start/stop (default when no command is given)
     list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
 
 [options] are used for providing runtime information for attaching the agent:
 
-    --host <host>                  Hostname or IP address to which to bind on
-                                   (default: InetAddress.getLocalHost())
-    --port <port>                  Port to listen on (default: 8778)
-    --agentContext <context>       HTTP Context under which the agent is reachable (default: /jolokia)
-    --agentId <agent-id>           VM unique identifier used by this agent (default: autogenerated)
-    --agentDescription <desc>      Agent description
-    --user <user>                  User used for Basic-Authentication
-    --password <password>          Password used for Basic-Authentication
-    --quiet                        No output. "status" will exit with code 0 if the agent is running, 
-                                   1 otherwise
-    --verbose                      Verbose output
-    --executor <executor>          Executor policy for HTTP Threads to use (default: single)
-                                    "fixed"  -- Thread pool with a fixed number of threads (default: 5)
-                                    "cached" -- Cached Thread Pool, creates threads on demand
-                                    "single" -- Single Thread
-    --threadNr <nr threads>        Number of fixed threads if "fixed" is used as executor
-    --backlog <backlog>            How many request to keep in the backlog (default: 10)
-    --protocol <http|https>        Protocol which must be either "http" or "https" (default: http)
-    --keystore <keystore>          Path to keystore (https only)
-    --keystorePassword <pwd>       Password to the keystore (https only)
-    --useSslClientAuthentication   Use client certificate authentication (https only)
-    --secureSocketProtocol <name>  Secure protocol (https only, default: TLS)
-    --keyStoreType <name>          Keystore type (https only, default: JKS)
-    --keyManagerAlgorithm <name>   Key manager algorithm (https only, default: SunX509)
-    --trustManagerAlgorithm <name> Trust manager algorithm (https only, default: SunX509)
-    --discoveryEnabled <t|f>       Enable/Disable discovery multicast responses (default: true)
-    --discoveryAgentUrl <url>      The URL to use for answering discovery requests. Will be autodetected 
-                                   if not given.
-    --debug                        Switch on agent debugging
-    --debugMaxEntries <nr>         Number of debug entries to keep in memory which can be fetched from the 
-                                   Jolokia MBean
-    --maxDepth <depth>             Maximum number of levels for serialization of beans (default: null)
-    --maxCollectionSize <size>     Maximum number of element in collections to keep when serializing the 
-                                   response (default: null)
-    --maxObjects <nr>              Maximum number of objects to consider for serialization 
-                                   (default: maxObjects)
-    --policyLocation <url>         Location of a Jolokia policy file
-    --mbeanQualifier <qualifier>   Qualifier to use when registering Jolokia internal MBeans
-    --canonicalNaming <t|f>        whether to use canonicalName for ObjectNames in 'list' or 'search' 
-                                   (default: true)
-    --includeStackTrace <t|f>      whether to include StackTraces for error messages (default: true)
-    --serializeException <t|f>     whether to add a serialized version of the exception in the Jolokia 
-                                   response (default: false)
-    --config <configfile>          Path to a property file from where to read the configuration
-    --help                         This help documentation
-    --version                      Version of this agent
+    --host <host>                   Hostname or IP address to which to bind on
+                                    (default: InetAddress.getLocalHost())
+    --port <port>                   Port to listen on (default: 8778)
+    --agentContext <context>        HTTP Context under which the agent is reachable (default: /jolokia)
+    --agentId <agent-id>            VM unique identifier used by this agent (default: autogenerated)
+    --agentDescription <desc>       Agent description
+    --authMode <mode>               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
+    --authClass <class>             Classname of an custom Authenticator which must be loadable from
+                                    the classpath
+    --authUrl <url>                 URL used for a dispatcher authentication (authMode == delegate)
+    --authPrincipalSpec <spec>      Extractor specification for getting the principal
+                                    (authMode == delegate)
+    --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication
+                                    (authMode == delegate)
+    --user <user>                   User used for Basic-Authentication
+    --password <password>           Password used for Basic-Authentication
+    --quiet                         No output. "status" will exit with code 0 if the agent is running,
+                                    1 otherwise
+    --verbose                       Verbose output
+    --executor <executor>           Executor policy for HTTP Threads to use (default: single)
+                                     "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                     "cached" -- Cached Thread Pool, creates threads on demand
+                                     "single" -- Single Thread
+    --threadNr <nr threads>         Number of fixed threads if "fixed" is used as executor
+    --backlog <backlog>             How many request to keep in the backlog (default: 10)
+    --protocol <http|https>         Protocol which must be either "http" or "https" (default: http)
+    --keystore <keystore>           Path to keystore (https only)
+    --keystorePassword <pwd>        Password to the keystore (https only)
+    --useSslClientAuthentication    Use client certificate authentication (https only)
+    --secureSocketProtocol <name>   Secure protocol (https only, default: TLS)
+    --keyStoreType <name>           Keystore type (https only, default: JKS)
+    --keyManagerAlgorithm <name>    Key manager algorithm (https only, default: SunX509)
+    --trustManagerAlgorithm <name>  Trust manager algorithm (https only, default: SunX509)
+    --caCert <path>                 Path to a PEM encoded CA cert file (https & sslClientAuth only)
+    --serverCert <path>             Path to a PEM encoded server cert file (https only)
+    --serverKey <path>              Path to a PEM encoded server key file (https only)
+    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA)
+    --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)
+                                    If supplied multiple times, any one of the clientPrincipals must match
+    --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage
+                                    (https & sslClientAuth only)
+    --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: true)
+    --discoveryAgentUrl <url>       The URL to use for answering discovery requests. Will be autodetected
+                                     if not given.
+    --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times
+    --sslCipherSuite <suite>        SSL / TLS cipher suite to enable, can be provided multiple times
+    --debug                         Switch on agent debugging
+    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the
+                                    Jolokia MBean
+    --maxDepth <depth>              Maximum number of levels for serialization of beans
+    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the
+                                    response
+    --maxObjects <nr>               Maximum number of objects to consider for serialization
+    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath
+    --policyLocation <url>          Location of a Jolokia policy file
+    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans
+    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search'
+                                    (default: true)
+    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: true)
+    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia
+                                    response (default: false)
+    --config <configfile>           Path to a property file from where to read the configuration
+    --help                          This help documentation
+    --version                       Version of this agent (it's 1.3.4 btw :)
 
 <pid/regexp> can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -444,7 +606,7 @@ If neither <command> nor <pid> is given, a list of Java processes along with the
 is printed
 
 There are several possible reasons, why attaching to a process can fail:
-   * The UID of this launcher must be the very *same*as the process to attach too. It not sufficient 
+   * The UID of this launcher must be the very *same* as the process to attach too. It not sufficient
      to be root.
    * The JVM must have HotSpot enabled and be a JVM 1.6 or larger.
    * It must be a Java process ;-)
@@ -501,10 +663,10 @@ For more documentation please visit www.jolokia.org
         <listitem>
           <para>
             Starts or stops an dynamically attached agent,
-            dependening on its current state. The Java process ID is
+            depending on its current state. The Java process ID is
             required as an additional argument. If an agent is
             running, <literal>toggle</literal> will stop it (and
-            vice versa). The launcer returns with an exit code of 0
+            vice versa). The launcher returns with an exit code of 0
             except when the operation fails. When the agent is
             started, the full agent's URL is printed to standard
             out. <literal>toggle</literal> is the default command
@@ -519,8 +681,8 @@ For more documentation please visit www.jolokia.org
         <listitem>
           <para>
             Command for showing the current agent status for a given
-            process. The process id or a regular expresssion is
-            required. The launcer will return with 0 when the agent is
+            process. The process id or a regular expression is
+            required. The launcher will return with 0 when the agent is
             running, otherwise with 1.
           </para>
         </listitem>
@@ -536,7 +698,19 @@ For more documentation please visit www.jolokia.org
             operation and with 1 otherwise.
           </para>
         </listitem>
-      </varlistentry>    
+      </varlistentry>
+      <varlistentry>
+        <term><literal>encrypt</literal></term>
+        <listitem>
+          <para>
+            Encrypt the keystore password. You can add the password to encrypt
+            as an additional argument or, if not given, it is read from standard input.
+            The output of this command is the encrypted password in the format <code>[[....]]</code>,
+            which should be used literally (excluding the final newline) for the keystore password
+            when using the option <constant>keystorePassword</constant> in the agent configuration.
+          </para>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <para>
       The launcher is especially suited for

@@ -43,32 +43,32 @@ public abstract class AbstractConstantRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
-    public final boolean isHttpMethodAllowed(HttpMethod pMethod) {
+    public boolean isHttpMethodAllowed(HttpMethod pMethod) {
         return isAllowed;
     }
 
     /** {@inheritDoc} */
-    public final boolean isTypeAllowed(RequestType pType) {
+    public boolean isTypeAllowed(RequestType pType) {
         return isAllowed;
     }
 
     /** {@inheritDoc} */
-    public final boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
+    public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
         return isAllowed;
     }
 
     /** {@inheritDoc} */
-    public final boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
+    public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
         return isAllowed;
     }
 
     /** {@inheritDoc} */
-    public final boolean isOperationAllowed(ObjectName pName, String pOperation) {
+    public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         return isAllowed;
     }
 
     /** {@inheritDoc} */
-    public final boolean isRemoteAccessAllowed(String... pHostOrAddress) {
+    public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
         return isAllowed;
     }
 

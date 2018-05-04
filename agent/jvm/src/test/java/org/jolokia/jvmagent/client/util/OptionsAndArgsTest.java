@@ -16,11 +16,11 @@ package org.jolokia.jvmagent.client.util;
  * limitations under the License.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
+import org.jolokia.util.EscapeUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -75,9 +75,22 @@ public class OptionsAndArgsTest {
         assertNotNull(o.getJarFilePath(),"");
     }
 
+    @Test
+    public void listArgs() {
+        String DN1 = "CN=adminuser, C=XX, O=Default Company Ltd";
+        String DN2 = "CN=Max Mustermann, C=DE, O=Volkswagen";
+        OptionsAndArgs o = opts("--clientPrincipal",DN1,"--clientPrincipal",DN2);
+        assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN1,EscapeUtil.CSV_ESCAPE,",")));
+        assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN2,EscapeUtil.CSV_ESCAPE,",")));
+        assertTrue(o.toAgentArg().contains("clientPrincipal"));
+        assertTrue(o.toAgentArg().contains("clientPrincipal.1"));
+        assertFalse(o.toAgentArg().contains("clientPrincipal.0"));
+        assertFalse(o.toAgentArg().contains("clientPrincipal.2"));
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown option.*")
     public void unknownOption() {
-        opts("--blubber","bla");
+        opts("--blubber", "bla");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*short option.*")
@@ -100,7 +113,7 @@ public class OptionsAndArgsTest {
         OptionsAndArgs o = opts();
         assertEquals(o.getCommand(),"list");
         o = opts("12");
-        assertEquals(o.getCommand(),"toggle");
+        assertEquals(o.getCommand(), "toggle");
     }
 
     @Test
@@ -114,6 +127,15 @@ public class OptionsAndArgsTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Invalid pattern.*")
     public void invalidPattern() {
-        opts("start","i+*");
+        OptionsAndArgs o = opts("start", "i+*");
+        o.getProcessPattern();
+    }
+
+    @Test
+    public void encrypt() {
+        OptionsAndArgs o = opts("encrypt", "passwd");
+        assertEquals(o.getCommand(), "encrypt");
+        assertEquals(o.getExtraArgs(), Arrays.asList("passwd"));
+
     }
 }

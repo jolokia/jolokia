@@ -16,10 +16,11 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.*;
 
 import javax.net.ssl.*;
@@ -27,6 +28,8 @@ import javax.net.ssl.*;
 import com.sun.net.httpserver.*;
 import com.sun.net.httpserver.Authenticator;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
+import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.util.NetworkUtil;
 
 /**
@@ -165,7 +168,7 @@ public class JolokiaServer {
     protected final void init(JolokiaServerConfig pConfig, boolean pLazy) throws IOException {
         // We manage it on our own
         httpServer = createHttpServer(pConfig);
-        init(httpServer,pConfig,pLazy);
+        init(httpServer, pConfig, pLazy);
     }
 
     /**
@@ -184,7 +187,6 @@ public class JolokiaServer {
         final String contextPath = pConfig.getContextPath();
         jolokiaHttpHandler = new JolokiaHttpHandler(pConfig.getJolokiaConfig());
         HttpContext context = pServer.createContext(contextPath, jolokiaHttpHandler);
-
         // Add authentication if configured
         final Authenticator authenticator = pConfig.getAuthenticator();
         if (authenticator != null) {
@@ -207,7 +209,7 @@ public class JolokiaServer {
                     try {
                         realAddress = InetAddress.getLocalHost();
                     } catch (UnknownHostException e1) {
-                        // Ok, ok. We take the orginal one
+                        // Ok, ok. We take the original one
                         realAddress = serverAddress.getAddress();
                     }
                 }
@@ -232,14 +234,11 @@ public class JolokiaServer {
     private HttpServer createHttpServer(JolokiaServerConfig pConfig) throws IOException {
         int port = pConfig.getPort();
         InetAddress address = pConfig.getAddress();
-        String protocol = pConfig.getProtocol();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
-        HttpServer server =
-                protocol.equalsIgnoreCase("https") ?
+        HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
-
         // Prepare executor pool
         Executor executor;
         String mode = pConfig.getExecutor();
@@ -255,44 +254,119 @@ public class JolokiaServer {
         return server;
     }
 
-
     // =========================================================================================================
     // HTTPS handling
-
-    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress,JolokiaServerConfig pConfig) {
+    private HttpServer createHttpsServer(InetSocketAddress pSocketAddress, JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
         try {
             HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
             SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
             // initialise the keystore
-            char[] password = pConfig.getKeystorePassword();
-            KeyStore ks = KeyStore.getInstance(pConfig.getKeyStoreType());
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(pConfig.getKeystore());
-                ks.load(fis, password);
-            } finally {
-                if (fis != null) {
-                    fis.close();
-                }
-            }
+            KeyStore ks = getKeyStore(pConfig);
+
             // setup the key manager factory
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(pConfig.getKeyManagerAlgorithm());
-            kmf.init(ks, password);
+            KeyManagerFactory kmf = getKeyManagerFactory(pConfig);
+            kmf.init(ks, pConfig.getKeystorePassword());
 
             // setup the trust manager factory
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(pConfig.getTrustManagerAlgorithm());
+            TrustManagerFactory tmf = getTrustManagerFactory(pConfig);
             tmf.init(ks);
 
             // setup the HTTPS context and parameters
-            sslContext.init(kmf.getKeyManagers(),tmf.getTrustManagers(), null);
-            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig.useSslClientAuthentication()));
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+            // Update the config to filter out bad protocols or ciphers
+            pConfig.updateHTTPSSettingsFromContext(sslContext);
+
+            server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig));
             return server;
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
+        }
+    }
+
+    private TrustManagerFactory getTrustManagerFactory(JolokiaServerConfig pConfig) throws NoSuchAlgorithmException {
+        String algo = pConfig.getTrustManagerAlgorithm();
+        return TrustManagerFactory.getInstance(algo != null ? algo : TrustManagerFactory.getDefaultAlgorithm());
+    }
+
+    private KeyManagerFactory getKeyManagerFactory(JolokiaServerConfig pConfig) throws NoSuchAlgorithmException {
+        String algo = pConfig.getKeyManagerAlgorithm();
+        return KeyManagerFactory.getInstance(algo != null ? algo : KeyManagerFactory.getDefaultAlgorithm());
+    }
+
+    private KeyStore getKeyStore(JolokiaServerConfig pConfig) throws KeyStoreException, IOException,
+                                                                     NoSuchAlgorithmException, CertificateException,
+                                                                     InvalidKeySpecException, InvalidKeyException,
+                                                                     NoSuchProviderException, SignatureException {
+        char[] password = pConfig.getKeystorePassword();
+        String keystoreFile = pConfig.getKeystore();
+        KeyStore keystore = KeyStore.getInstance(pConfig.getKeyStoreType());
+        if (keystoreFile != null) {
+            // Load everything from a keystore which must include CA (if useClientSslAuthenticatin is used) and
+            // server cert/key
+            loadKeyStoreFromFile(keystore, keystoreFile, password);
+        } else {
+            // Load keys from PEM files
+            keystore.load(null);
+            updateKeyStoreFromPEM(keystore,pConfig);
+
+            // If no server cert is configured, then use a self-signed server certificate
+            if (pConfig.getServerCert() == null) {
+                KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
+            }
+        }
+        return keystore;
+    }
+
+    private void updateKeyStoreFromPEM(KeyStore keystore, JolokiaServerConfig pConfig)
+            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+                   InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, SignatureException {
+
+        if (pConfig.getCaCert() != null) {
+            File caCert = getAndValidateFile(pConfig.getCaCert(),"CA cert");
+            KeyStoreUtil.updateWithCaPem(keystore, caCert);
+        } else if (pConfig.useSslClientAuthentication()) {
+            throw new IllegalArgumentException("Cannot use client cert authentication if no CA is given with 'caCert'");
+        }
+
+        if (pConfig.getServerCert() != null) {
+            // Use the provided server key
+            File serverCert = getAndValidateFile(pConfig.getServerCert(),"server cert");
+            if (pConfig.getServerKey() == null) {
+                throw new IllegalArgumentException("Cannot use server cert from " + pConfig.getServerCert() +
+                                                   " without a provided a key given with 'serverKey'");
+            }
+            File serverKey = getAndValidateFile(pConfig.getServerKey(),"server key");
+            KeyStoreUtil.updateWithServerPems(keystore, serverCert, serverKey,
+                                              pConfig.getServerKeyAlgorithm(), pConfig.getKeystorePassword());
+        }
+    }
+
+    private File getAndValidateFile(String pFile, String pWhat) throws IOException {
+        File ret = new File(pFile);
+        if (!ret.exists()) {
+            throw new FileNotFoundException("No such " + pWhat + " " + pFile);
+        }
+        if (!ret.canRead()) {
+            throw new IOException(pWhat.substring(0,1).toUpperCase() + pWhat.substring(1) + " " + pFile + " is not readable");
+        }
+        return ret;
+    }
+
+    private void loadKeyStoreFromFile(KeyStore pKeyStore, String pFile, char[] pPassword)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(getAndValidateFile(pFile, "keystore"));
+            pKeyStore.load(fis, pPassword);
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
         }
     }
 
@@ -320,29 +394,35 @@ public class JolokiaServer {
 
     // HTTPS configurator
     private static final class JolokiaHttpsConfigurator extends HttpsConfigurator {
-        private boolean useClientAuthentication;
+        private JolokiaServerConfig serverConfig;
         private SSLContext context;
 
-        private JolokiaHttpsConfigurator(SSLContext pSSLContext,boolean pUseClientAuthentication) {
+        private JolokiaHttpsConfigurator(SSLContext pSSLContext, JolokiaServerConfig pConfig) {
             super(pSSLContext);
             this.context = pSSLContext;
-            useClientAuthentication = pUseClientAuthentication;
+            this.serverConfig = pConfig;
         }
 
         /** {@inheritDoc} */
         public void configure(HttpsParameters params) {
-
             // initialise the SSL context
             SSLEngine engine = context.createSSLEngine();
-            params.setNeedClientAuth(useClientAuthentication);
-            params.setCipherSuites(engine.getEnabledCipherSuites());
-            params.setProtocols(engine.getEnabledProtocols());
-
             // get the default parameters
             SSLParameters defaultSSLParameters = context.getDefaultSSLParameters();
-            defaultSSLParameters.setNeedClientAuth(useClientAuthentication);
-            params.setSSLParameters(defaultSSLParameters);
 
+            // Cert authentication is delayed later to the ClientCertAuthenticator
+            params.setWantClientAuth(serverConfig.useSslClientAuthentication());
+            defaultSSLParameters.setWantClientAuth(serverConfig.useSslClientAuthentication());
+
+            // Cipher Suites
+            params.setCipherSuites(serverConfig.getSSLCipherSuites());
+            defaultSSLParameters.setCipherSuites(serverConfig.getSSLCipherSuites());
+
+            // Protocols
+            params.setProtocols(serverConfig.getSSLProtocols());
+            defaultSSLParameters.setProtocols(serverConfig.getSSLProtocols());
+
+            params.setSSLParameters(defaultSSLParameters);
         }
     }
 }

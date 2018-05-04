@@ -63,7 +63,7 @@
       are available for exporting its protocol via HTTP. The most
       prominent being to put the agent into a servlet container. This
       can be a lightweight one like Tomcat or Jetty or a full-blown
-      JEE Server. Since it acts like a usual web application the
+      Java EE Server. Since it acts like a usual web application the
       deployment of the agent is well understood and should pose no
       entry barrier for any developer who has ever dealt with Java web
       applications.
@@ -88,18 +88,18 @@
     </para>
     <para>
       Jolokia can be also integrated
-      into one's own applications very easily. The <literal>joloki-core</literal>
+      into one's own applications very easily. The <literal>jolokia-core</literal>
       library (which comes bundled as a jar), includes a servlet
       which can be easily added to a custom application. <xref
       linkend="agent-war-programmatic"/> contains more information
       about this.
     </para>
   </section>
-    
+
   <section id="proxy-mode">
     <title>Proxy Mode</title>
     <para>
-      Proxy mode is a solution for when when it is impossible to deploy
+      Proxy mode is a solution for when it is impossible to deploy
       the Jolokia agent on the target platform. For this mode, the
       only prerequisite for accessing the target server is a JSR-160
       connection. Most of the time this happens for political reasons,
@@ -115,7 +115,7 @@
       <literal>jolokia.war</literal>, which by default supports both
       the <emphasis>agent mode</emphasis> and the <emphasis>proxy
       mode</emphasis>. A lightweight container like Tomcat or Jetty is
-      a perfect choice for this kind of setup. 
+      a perfect choice for this kind of setup.
     </para>
     <para>
       Figure <xref linkend="fig-architecture-proxy"/> describes  a typical setup for the proxy mode. A
@@ -123,7 +123,7 @@
       for specifying the target which should be queried. All routing
       information is contained in the request itself so that the proxy
       can act universally without the need of a specific
-      configuration. 
+      configuration.
     </para>
 
     <figure id="fig-architecture-proxy">
@@ -138,14 +138,14 @@
 
     <para>
       Having said all that, the proxy mode has some limitations which are
-      listed in <xref linkend="proxy"/>. 
-    </para>      
+      listed in <xref linkend="proxy"/>.
+    </para>
     <para>
       To summarize, the proxy mode should be used only when
       required. The agent servlet on its own is more powerful than the
       proxy mode since it eliminates an additional layer adding to the
       overall complexity and performance. Also, some features like
       merging of MBeanServers are not available in the proxy mode.
-    </para>    
-  </section>    
+    </para>
+  </section>
 </chapter>

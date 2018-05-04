@@ -17,6 +17,9 @@ package org.jolokia.util;
  */
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Simple log handler for dispatching logging to e.g. a {@link javax.servlet.http.HttpServlet}
  * @author roland
@@ -45,21 +48,6 @@ public interface LogHandler {
     void error(String message, Throwable t);
 
     // =============================================================================================================
-
-    /**
-     * Loghandler which doesn not output anything
-     */
-    LogHandler QUIET = new LogHandler() {
-
-        /** {@inheritDoc} */
-        public void debug(String message) { }
-
-        /** {@inheritDoc} */
-        public void info(String message) { }
-
-        /** {@inheritDoc} */
-        public void error(String message, Throwable t) { }
-    };
 
     // ====================================================================
 
@@ -94,4 +82,7 @@ public interface LogHandler {
             System.out.println(message); //NOSONAR
         }
     }
+
+
+    ;
 }

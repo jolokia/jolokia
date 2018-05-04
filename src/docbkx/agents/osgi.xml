@@ -31,7 +31,7 @@
     <filename>jolokia-osgi.jar</filename> declaring all its package
     dependencies as imports in its Manifest and an all-in-one bundle
     <filename>jolokia-osgi-bundle.jar</filename> with minimal
-    dependecies. The pure bundle fits best with the OSGi philosophy and is
+    dependencies. The pure bundle fits best with the OSGi philosophy and is
     hence the recommended bundle. The all-in-one monster is good for a
     quick start since normally no additional bundles are required.
   </para>
@@ -72,7 +72,7 @@
           <td>SB</td>
           <td>Package</td>
           <td>SB</td>
-        </tr>          
+        </tr>
       </thead>
       <tr>
         <td>org.osgi.framework</td>
@@ -138,7 +138,7 @@
       <literal>org.jolokia</literal> and are listed in <xref
       linkend="table-agents-osgi-properties"/>. They are mostly the
       same as the <literal>init-param</literal> options for
-      a Jolokia servlet when used in a JEE WAR artifact.
+      a Jolokia servlet when used in a Java EE WAR artifact.
     </para>
     <table id="table-agents-osgi-properties">
       <title>Jolokia Bundle Properties</title>
@@ -174,8 +174,9 @@
           calculated. If provided it should be ensured that this id is
           unique among all agent reachable via multicast requests used
           by the discovery mechanism. It is recommended not to set
-          this value. 
-        </td>        
+          this value. Within the <literal>agentId</literal> specification you
+          can use the same placeholders as in <literal>discoveryAgentUrl</literal>.
+        </td>
       </tr>
       <tr>
         <td>org.jolokia.agentDescription</td>
@@ -183,7 +184,7 @@
         <td>
           An optional description which can be used for clients to
           present a humand readable label for this agent.
-        </td>        
+        </td>
       </tr>
       <tr>
         <td>org.jolokia.dispatcherClasses</td>
@@ -194,6 +195,11 @@
           of
           <classname>org.jolokia.jsr160.Jsr160RequestDispatcher</classname>
           allows the agent to play the role of a JSR-160 proxy.
+          By default no extract dispatchers are enabled.
+          You can use the system property <literal>org.jolokia.jsr160ProxyEnabled</literal> or the
+          environment variable <literal>JOLOKIA_JSR160_PROXY_ENABLED</literal> to enable the the JSR-160 proxy.
+          In that case you should be sure that you enable authentication for the web application to protect access
+          to the proxy.
         </td>
       </tr>
       <tr>
@@ -256,7 +262,7 @@
         <td>
           If <literal>true</literal> the bundle listens for an OSGi
           <literal>HttpService</literal> and if available registers an
-          agent servlet to it. 
+          agent servlet to it.
         </td>
       </tr>
       <tr>
@@ -329,8 +335,9 @@
         <td></td>
         <td>
           An optional JSON representation for application specific
-          options used by detectors for post-initialization steps. See
-          <xref linkend="agent-war-init-params"/> for details. 
+          options used by detectors for post-initialization steps. See the description of
+          <literal>detectorOptions</literal> in
+          <xref linkend="agent-war-init-params"/> for details.
         </td>
       </tr>
       <tr>
@@ -340,8 +347,8 @@
           Is set to <literal>true</literal> then this servlet will
           listen for multicast request (multicastgroup 239.192.48.84,
           port 24884). By default this option is disabled in order to
-          avoid conflicts with an JEE standards (though this should't
-          harm anyways). This option can also be switched on with an 
+          avoid conflicts with an Java EE standards (though this should't
+          harm anyways). This option can also be switched on with an
           environment variable
           <literal>JOLOKIA_DISCOVERY</literal> or the system
           property <literal>jolokia.discoveryEnabled</literal> set to
@@ -357,7 +364,10 @@
           implicetly to true. This URL can also be provied by an
           environment variable
           <literal>JOLOKIA_DISCOVERY_URL</literal> or the system
-          property <literal>jolokia.discoveryUrl</literal>
+          property <literal>jolokia.discoveryUrl</literal>. Within the value you can use the
+          placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
+          by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
+          <literal>${sys:property}</literal> environment and system properties can be referenced, respectively.
         </td>
       </tr>
       <tr>
@@ -374,10 +384,16 @@
          <td>org.jolokia.authMode</td>
          <td>basic</td>
          <td>
-           Can be either <literal>basic</literal> (the default) or <literal>jaas</literal>. If
+           Can be either <literal>basic</literal> (the default), <literal>jaas</literal>,
+           <literal>service-all</literal> or <literal>service-any</literal>. If
            <literal>jaas</literal> is used, the user and password given in the <literal>Authorization:</literal>
-           header are used for loging in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-           This has only an effect, if user is set.
+           header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+           This has only an effect, if a user is set.
+           When no user is set and the <literal>authMode</literal> is either <literal>service-all</literal> or
+           <literal>service-any</literal> then a <litera>org.jolokia.osgi.security.Authenticator</litera> service is looked up in the
+           OSGi service registry. If more then one of such service is registered, <literal>service-all</literal> requires
+           that all authenticators succeed, for <literal>service-any</literal> it is sufficient that one authenticator
+           successfully authenticates.
          </td>
         </tr>
     </table>
@@ -390,7 +406,7 @@
       <classname>org.osgi.service.http.HttpContext</classname>, which
       is used for authentication. Note that this service is only
       available when the agent servlet is active (i.e. when an
-      HttpService is registered). 
+      HttpService is registered).
     </para>
   </section>
   <section id="running-on-glassfish">
@@ -398,7 +414,7 @@
      <para>
         You have a couple of choices when running jolokia on
         Glassfish v3 and up, since Glassfish is a both a fully
-        fledged JEE container and an OSGi container. If you
+        fledged Java EE container and an OSGi container. If you
         choose to run the <xref linkend="agents-war"/> then it
         is completely straight forward just deploy the war
         in the normal way. If you choose to deploy
@@ -502,7 +518,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       want. Alternatively, the bundle property
       <literal>org.jolokia.listenForHttpService</literal> can be set
       to <literal>false</literal> in which case there will be never an
-      automatic servlet registration to an HttpService. 
+      automatic servlet registration to an HttpService.
     </para>
   </section>
   <section>
@@ -523,7 +539,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       restrictor service is available, access is ony granted if all of
       them individually grant access. A sample restrictor service as a
       maven project can be found in the Jolokia source at
-      <filename>agent/osgi/restrictor-sample</filename>. 
+      <filename>agent/osgi/restrictor-sample</filename>.
     </para>
   </section>
 </section>

@@ -16,8 +16,7 @@ package org.jolokia.util;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
@@ -40,7 +39,7 @@ public final class ClassUtil {
      * @return the class found or null if no class could be found.
      */
     public static <T> Class<T> classForName(String pClassName, ClassLoader ... pClassLoaders) {
-        return classForName(pClassName,true,pClassLoaders);
+        return classForName(pClassName, true, pClassLoaders);
     }
 
     /**
@@ -53,7 +52,7 @@ public final class ClassUtil {
      * @param pClassLoaders optional class loaders which are tried as well
      * @return the class class found or null if no class could be loaded
      */
-    public static Class classForName(String pClassName,boolean pInitialize,ClassLoader ... pClassLoaders) {
+    public static <T> Class<T> classForName(String pClassName,boolean pInitialize,ClassLoader ... pClassLoaders) {
         Set<ClassLoader> tried = new HashSet<ClassLoader>();
         for (ClassLoader loader : findClassLoaders(pClassLoaders)) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
@@ -61,7 +60,7 @@ public final class ClassUtil {
             while (loader != null) {
                 try {
                     if (!tried.contains(loader)) {
-                        return Class.forName(pClassName,pInitialize, loader);
+                        return (Class<T>) Class.forName(pClassName, pInitialize, loader);
                     }
                 } catch (ClassNotFoundException ignored) {}
                 tried.add(loader);
@@ -119,27 +118,45 @@ public final class ClassUtil {
     }
 
     /**
-     * Instantiate an instance of the given class with its default constructor
+     * Instantiate an instance of the given class with its default constructor. The context class loader is used
+     * to lookup the class
      *
-     * @param pClass name of class to instantiate
+     * @param pClassName name of class to instantiate
      * @param pArguments optional constructor arguments. Works only for objects with the same class as declared in
      *                   the constructor types (no subclasses)
      * @param <T> type object type
-     * @return instantiated class
+     * @return instantiated object
      * @throws IllegalArgumentException if the class could not be found or instantiated
      */
-    public static <T> T newInstance(String pClass, Object ... pArguments) {
+    public static <T> T newInstance(String pClassName, Object ... pArguments) {
+        Class<T> clazz = classForName(pClassName);
+        if (clazz == null) {
+            throw new IllegalArgumentException("Cannot find " + pClassName);
+        }
+        return newInstance(clazz, pArguments);
+    }
+
+    /**
+     * Instantiate an instance of the given class with its default constructor
+     *
+     * @param pClass class to instantiate
+     * @param pArguments optional constructor arguments. Works only for objects with the same class as declared in
+     *                   the constructor types (no subclasses)
+     * @param <T> type object type
+     * @return instantiated object
+     * @throws IllegalArgumentException if the class could not be found or instantiated
+     */
+    public static <T> T newInstance(Class<T> pClass, Object ... pArguments) {
         try {
-            Class<T> clazz = classForName(pClass);
-            if (clazz != null) {
+            if (pClass != null) {
                 if (pArguments.length == 0) {
-                    return clazz.newInstance();
+                    return pClass.newInstance();
                 } else {
-                    Constructor<T> ctr = lookupConstructor(clazz, pArguments);
+                    Constructor<T> ctr = lookupConstructor(pClass, pArguments);
                     return ctr.newInstance(pArguments);
                 }
             } else {
-                throw new IllegalArgumentException("Cannot find " + pClass);
+                throw new IllegalArgumentException("Given class must not be null");
             }
         } catch (InstantiationException e) {
             throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
