@@ -11,6 +11,9 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
+
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.DateUtil;
 import org.json.simple.JSONArray;
@@ -130,12 +133,12 @@ public class StringToObjectConverterTest {
      	URL url = null;
     	try {
     		url = new URL("http://google.com");
-    	} catch (MalformedURLException e) {}     	
+    	} catch (MalformedURLException e) {}
         Object object = converter.convertFromString(URL.class.getCanonicalName(),"http://google.com");
         assertEquals("URL conversion", url, object);
     }
-    
-    
+
+
     @Test
     public void enumConversion() {
         ConfigKey key = (ConfigKey) converter.prepareValue(ConfigKey.class.getName(), "MAX_DEPTH");
@@ -164,6 +167,77 @@ public class StringToObjectConverterTest {
     	ObjectName objName = new ObjectName(name);
     	ObjectName testName = (ObjectName)converter.convertFromString(ObjectName.class.getName(), name);
     	assertEquals(objName, testName);
+    }
+
+    @Test
+    public void attributeListConversion() throws MalformedObjectNameException {
+        String personJson = "{\"_value_\": {\"name\": {\"lastname\": \"Chen\", \"firstname\": \"JinFen\"}, \"age\": 38, \"configkey\": \"MAX_DEPTH\", \"go_list\": [2 3]}, \"_spec_\": {}}";
+        String personJsonWithSpec = "{\"_value_\": {\"name\": {\"lastname\": \"Chen\", \"firstname\": \"JinFen\"}, \"age\": 38, \"configkey\": \"MAX_DEPTH\", \"go_list\": [2 3]}, \"_spec_\": {\"age\": \"java.lang.Integer\", \"go_list\": \"java.lang.Integer\", \"configkey\": \"org.jolokia.config.ConfigKey\"}}";
+
+        AttributeList convertedPerson = (AttributeList)converter.convertFromString(AttributeList.class.getName(), personJson);
+        AttributeList convertedPersonWithSpec = (AttributeList)converter.convertFromString(AttributeList.class.getName(), personJsonWithSpec);
+
+        for (Object o: convertedPerson) {
+            assertEquals("javax.management.Attribute", o.getClass().getCanonicalName());
+            if (((Attribute)o).getName().toString().equals("age")) {
+                assertEquals("java.lang.Long", ((Attribute)o).getValue().getClass().getCanonicalName());
+                assertEquals(38L, ((Attribute)o).getValue());
+            } else if (((Attribute)o).getName().toString().equals("configkey")) {
+                assertEquals("java.lang.String", ((Attribute)o).getValue().getClass().getCanonicalName());
+                assertEquals("MAX_DEPTH", ((Attribute)o).getValue());
+            } else if (((Attribute)o).getName().toString().equals("go_list")) {
+                assertEquals("org.json.simple.JSONArray",((Attribute)o).getValue().getClass().getCanonicalName());
+                assertEquals(2L, ((org.json.simple.JSONArray)((Attribute)o).getValue()).get(0));
+                assertEquals(3L, ((org.json.simple.JSONArray)((Attribute)o).getValue()).get(1));
+            } else if (((Attribute)o).getName().toString().equals("name")) {
+                assertEquals("javax.management.AttributeList", ((Attribute)o).getValue().getClass().getCanonicalName());
+                AttributeList nameList = (AttributeList)((Attribute)o).getValue();
+                for (Object oo: nameList) {
+                    assertEquals("javax.management.Attribute", oo.getClass().getCanonicalName());
+                    if (((Attribute)oo).getName().toString().equals("firstname")) {
+                        assertEquals("java.lang.String", ((Attribute)oo).getValue().getClass().getCanonicalName());
+                        assertEquals("JinFen", ((Attribute)oo).getValue());
+                    } else if (((Attribute)oo).getName().toString().equals("lastname")) {
+                        assertEquals("java.lang.String", ((Attribute)oo).getValue().getClass().getCanonicalName());
+                        assertEquals("Chen", ((Attribute)oo).getValue());
+                    }
+                }
+            } else {
+
+            }
+        }
+
+        for (Object o: convertedPersonWithSpec) {
+            assertEquals("javax.management.Attribute", o.getClass().getCanonicalName());
+            if (((Attribute)o).getName().toString().equals("age")) {
+                assertEquals("java.lang.Integer", ((Attribute)o).getValue().getClass().getCanonicalName());
+                assertEquals(38, ((Attribute)o).getValue());
+            } else if (((Attribute)o).getName().toString().equals("configkey")) {
+                assertTrue(((Attribute)o).getValue().getClass().isEnum());
+                assertEquals("org.jolokia.config.ConfigKey", ((Attribute)o).getValue().getClass().getCanonicalName());
+                assertEquals(ConfigKey.MAX_DEPTH, ((Attribute)o).getValue());
+            } else if (((Attribute)o).getName().toString().equals("go_list")) {
+                assertTrue(((Attribute)o).getValue().getClass().isArray());
+                assertEquals("java.lang.Integer", ((Attribute)o).getValue().getClass().getComponentType().getCanonicalName());
+                assertEquals(2, (int)((java.lang.Integer[])((Attribute)o).getValue())[0]);
+                assertEquals(3, (int)((java.lang.Integer[])((Attribute)o).getValue())[1]);
+            } else if (((Attribute)o).getName().toString().equals("name")) {
+                assertEquals("javax.management.AttributeList", ((Attribute)o).getValue().getClass().getCanonicalName());
+                AttributeList nameList = (AttributeList)((Attribute)o).getValue();
+                for (Object oo: nameList) {
+                    assertEquals("javax.management.Attribute", oo.getClass().getCanonicalName());
+                    if (((Attribute)oo).getName().toString().equals("firstname")) {
+                        assertEquals("java.lang.String", ((Attribute)oo).getValue().getClass().getCanonicalName());
+                        assertEquals("JinFen", ((Attribute)oo).getValue());
+                    } else if (((Attribute)oo).getName().toString().equals("lastname")) {
+                        assertEquals("java.lang.String", ((Attribute)oo).getValue().getClass().getCanonicalName());
+                        assertEquals("Chen", ((Attribute)oo).getValue());
+                    }
+                }
+            } else {
+
+            }
+        }
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
@@ -271,44 +345,44 @@ public class StringToObjectConverterTest {
         list.add(null);
         converter.prepareValue("[I",list);
     }
-    
+
     public static class Example {
     	private String value;
     	private List<String> list;
-    	
+
     	public Example(String value) { this.value = value; }
     	public Example(List<String> list) { this.list = list; }
-    	
+
     	public String getValue() { return value; }
     	public List<String> getList() { return list; }
     }
-    
+
     public static class PrivateExample {
     	private String value;
     	private PrivateExample(String value) { this.value = value; }
     	public String getValue() { return value; }
     }
-    
+
     public static class MultipleConstructorExample {
     	private String value;
     	private List<String> list;
-    	
-    	public MultipleConstructorExample(String value, List<String> list) { 
+
+    	public MultipleConstructorExample(String value, List<String> list) {
     		this.value = value;
     		this.list = list;
     	}
-    	
+
     	public String getValue() { return value; }
     	public List<String> getList() { return list; }
     }
-    
+
     @Test
     public void prepareValueWithConstructor() {
     	Object o = converter.prepareValue(this.getClass().getCanonicalName() + "$Example", "test");
     	assertTrue(o instanceof Example);
     	assertEquals("test", ((Example)o).getValue());
     }
-    
+
     @Test
     public void prepareValueWithConstructorList() {
     	Object o = converter.prepareValue(this.getClass().getCanonicalName() + "$Example", Arrays.asList("test"));
@@ -316,8 +390,8 @@ public class StringToObjectConverterTest {
     	assertNull(((Example)o).getList());
     	assertEquals("[test]", ((Example)o).getValue());
     }
-    
-    @Test(expectedExceptions = IllegalArgumentException.class, 
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
     	  expectedExceptionsMessageRegExp = "Cannot convert string test to type "
       	  		+ "org.jolokia.converter.object.StringToObjectConverterTest\\$PrivateExample "
       	  		+ "because no converter could be found")
@@ -332,17 +406,17 @@ public class StringToObjectConverterTest {
     public void prepareValueWithMultipleConstructors() {
     	converter.prepareValue(this.getClass().getCanonicalName() + "$MultipleConstructorExample", "test");
     }
-    
+
     @Test
     public void dateConversionNotByConstructor() throws ParseException {
     	final String dateStr = "2015-11-20T00:00:00+00:00";
-    	
+
     	try {
     		new Date(dateStr);
     		fail("Should have throw IllegalArgumentException");
     	} catch (IllegalArgumentException ignore) {}
-    	
-    	// new Date(dateStr) will throw IllegalArgumentException but our convert does not. 
+
+    	// new Date(dateStr) will throw IllegalArgumentException but our convert does not.
     	// so it does not use Constructor to convert date
     	Object obj = converter.convertFromString(Date.class.getCanonicalName(), dateStr);
     	assertNotNull(obj);

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE application PUBLIC "-//Sun Microsystems, Inc.//DTD J2EE Application 1.3//EN" "http://java.sun.com/dtd/application_1_3.dtd">
 
-<application>
+<application id="Application_ID">
     <display-name>jolokia</display-name>
     <description>Jolokia WAR agent</description>
     <module id="WebModule_1">
         <web>
-            <web-uri>jolokia-war-1.2.4-SNAPSHOT.war</web-uri>
+            <web-uri>jolokia-war-1.5.0.war</web-uri>
             <context-root>/jolokia</context-root>
         </web>
     </module>

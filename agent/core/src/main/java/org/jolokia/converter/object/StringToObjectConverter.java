@@ -46,7 +46,6 @@ public class StringToObjectConverter {
 
     private static final Map<String,Parser> PARSER_MAP = new HashMap<String,Parser>();
     private static final Map<String,Class> TYPE_SIGNATURE_MAP = new HashMap<String, Class>();
-    private static final Map<String,Class> AL_TYPE_SIGNATURE_MAP = new HashMap<String, Class>();
 
     static {
         PARSER_MAP.put(Byte.class.getName(),new ByteParser());
@@ -90,24 +89,6 @@ public class StringToObjectConverter {
         TYPE_SIGNATURE_MAP.put("F",float.class);
         TYPE_SIGNATURE_MAP.put("D",double.class);
 
-        AL_TYPE_SIGNATURE_MAP.put("B",Boolean.class);
-        AL_TYPE_SIGNATURE_MAP.put("Y",Byte.class);
-        AL_TYPE_SIGNATURE_MAP.put("C",Character.class);
-        AL_TYPE_SIGNATURE_MAP.put("T",Short.class);
-        AL_TYPE_SIGNATURE_MAP.put("I",Integer.class);
-        AL_TYPE_SIGNATURE_MAP.put("L",Long.class);
-        AL_TYPE_SIGNATURE_MAP.put("F",Float.class);
-        AL_TYPE_SIGNATURE_MAP.put("D",Double.class);
-        AL_TYPE_SIGNATURE_MAP.put("S",String.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoB",Boolean.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoY",Byte.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoC",Character.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoT",Short.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoI",Integer.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoL",Long.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoF",Float.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoD",Double.class);
-        AL_TYPE_SIGNATURE_MAP.put("AoS",String.class);
     }
 
     /**
@@ -407,58 +388,119 @@ public class StringToObjectConverter {
             }
         }
     }
+
     private static class AttributeListParser implements Parser {
+
+        public Object convertByValueOf(String targetClassName, Object tempValue) {
+            Class expectedClass = ClassUtil.classForName(targetClassName);
+            if (expectedClass != null) {
+                Class[] params = new Class[] {String.class};
+                Object[] paramsObj = new Object[] {tempValue.toString()};
+                try {
+                    java.lang.reflect.Method valueOfMethod = expectedClass.getDeclaredMethod("valueOf", params);
+                    if (valueOfMethod == null)
+                        throw new IllegalArgumentException("Cannot convert to target class by valueOf: " + targetClassName);
+                    else
+                        return valueOfMethod.invoke(expectedClass, paramsObj);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Cannot convert to target class: " + targetClassName);
+                }
+            } else
+                throw new IllegalArgumentException("Cannot find the target class: " + targetClassName);
+        }
+
+        /** {@inheritDoc} */
+        public AttributeList parseJSONObject(JSONObject value) {
+            try {
+                Map valueMap = (Map) value;
+                Iterator iter = valueMap.entrySet().iterator();
+                AttributeList atrList = new AttributeList();
+                while (iter.hasNext())
+                    { Map.Entry entry = (Map.Entry)iter.next();
+                        atrList.add(parseJSONEntry(entry));
+                    }
+                return atrList;
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Cannot parse JSONObject "+ value +": " +e, e);
+            }
+        }
+
+        /** {@inheritDoc} */
+        public AttributeList parseJSONObject(JSONObject value, JSONObject spec) {
+            try {
+                Map valueMap = (Map) value;
+                Map specMap = (Map) spec;
+                Iterator iter = value.entrySet().iterator();
+                AttributeList atrList = new AttributeList();
+                while (iter.hasNext())
+                    { Map.Entry valueEntry = (Map.Entry)iter.next();
+                        String keyName = valueEntry.getKey().toString();
+
+                        if (specMap.get(keyName) == null)
+                            atrList.add(parseJSONEntry(valueEntry));
+                        else
+                            atrList.add(parseJSONEntry(valueEntry, new AbstractMap.SimpleEntry(keyName, specMap.get(keyName))));
+                    }
+                return atrList;
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Cannot parse JSONObject "+ value +": " +e, e);
+            }
+        }
+
+        /** {@inheritDoc} */
+        public Attribute parseJSONEntry(Map.Entry entry) {
+            try {
+                Object entryV = entry.getValue();
+
+                if (entryV instanceof JSONObject) {
+                    entryV = parseJSONObject((JSONObject) entryV);
+                }
+
+                Attribute attr = new Attribute(entry.getKey().toString(),entryV);
+                return attr;
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Cannot parse JSON entry "+ entry +": " +e, e);
+            }
+        }
+
+        /** {@inheritDoc} */
+        public Attribute parseJSONEntry(Map.Entry valueEntry, Map.Entry specEntry) {
+            try {
+                Object tempValue = valueEntry.getValue();
+                Object value;
+                if (tempValue instanceof JSONObject) {
+                    value = parseJSONObject((JSONObject) tempValue, (JSONObject)specEntry.getValue());
+                }
+                else if (tempValue instanceof JSONArray) {
+                    value = Array.newInstance(ClassUtil.classForName(specEntry.getValue().toString()), ((JSONArray)tempValue).size());
+                    int i = 0;
+                    for (Object o: (JSONArray)tempValue) {
+                        Array.set(value, i++, convertByValueOf(specEntry.getValue().toString(), o));
+                    }
+                } else {
+                    value = convertByValueOf(specEntry.getValue().toString(), tempValue);
+                }
+
+                Attribute attr = new Attribute(valueEntry.getKey().toString(),value);
+                return attr;
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Cannot parse JSON entry "+ valueEntry +": " +e, e);
+            }
+        }
 
         /** {@inheritDoc} */
         public Object extract(String pValue) {
-            if (pValue == null)
-                return null;
-
-            // The string must be in following format:
-            //  attribute-name1=attribute-type1:attribute-value1,attribute-name2=attribute-type2:attribute-value2...
-
-            // Escape rules for the special characters within the attribute value:
-            // 1.for "," and "=",put three PATH_ESCAPE characters before it
-            // 2.for ":",put four PATH_ESCAPE characters before it
-
             try {
-                String[] values = EscapeUtil.splitAsArray(pValue, EscapeUtil.PATH_ESCAPE, ",");
-                AttributeList ret = new AttributeList(values.length);
-                for (String value : values) {
-                    String[] attr = EscapeUtil.splitAsArray(value, EscapeUtil.PATH_ESCAPE, "=");
-                    // We need the type info because Attribute must match the type the mbean required.
-                    if (attr.length == 2) {
-                        String[] tvPair = EscapeUtil.splitAsArray(attr[1],EscapeUtil.PATH_ESCAPE, ":");
-
-                        if (tvPair.length == 2) {
-                            if (AL_TYPE_SIGNATURE_MAP.containsKey(tvPair[0])) {
-                                Class [] plist = new Class [] {java.lang.String.class};
-                                if (tvPair[0].startsWith("Ao")) {
-                                    String [] escapedArray = EscapeUtil.splitAsArray(tvPair[1],EscapeUtil.PATH_ESCAPE," ");
-                                    if ("AoS".equals(tvPair[0])) {
-                                        ret.add(new Attribute(attr[0],new ArrayList(Arrays.asList(escapedArray))));
-                                    } else {
-                                        Object convertedArray = Array.newInstance(AL_TYPE_SIGNATURE_MAP.get(tvPair[0]), escapedArray.length);
-                                        int i = 0;
-                                        for (String v : escapedArray) {
-                                            Array.set(convertedArray,i++,AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(v));
-                                        }
-                                        ret.add(new Attribute(attr[0],new ArrayList(Arrays.asList(convertedArray))));
-                                    }
-                                } else {
-                                    ret.add (new Attribute(attr[0],AL_TYPE_SIGNATURE_MAP.get(tvPair[0]).getConstructor(plist).newInstance(tvPair[1])));
-                                }
-                            } else {
-                                throw new IllegalArgumentException("Type in the t:v format must be one of " + AL_TYPE_SIGNATURE_MAP.keySet());
-                            }
-                        } else {
-                            throw new IllegalArgumentException("Cannot parse Attributelist " + pValue + ": " + attr[1] + " not in type:value format.");
-                        }
-                    } else { // value is empty
-                        ret.add(new Attribute(attr[0],null));
-                    }
-                }
-                return ret;
+                JSONObject json = (JSONObject) new org.json.simple.parser.JSONParser().parse(pValue);
+                Object value = json.get("_value_");
+                Object spec = json.get("_spec_");
+                if (value instanceof JSONObject)
+                    if (spec == null)
+                        return parseJSONObject((JSONObject)value);
+                    else
+                        return parseJSONObject((JSONObject)value, (JSONObject)spec);
+                else
+                    throw new IllegalArgumentException("The value must be a JSONObject: " + pValue);
             } catch(Exception e) {
                 throw new IllegalArgumentException("Cannot parse AttributeList "+ pValue +": " +e, e);
             }

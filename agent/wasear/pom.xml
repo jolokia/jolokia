@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-wasear</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.5.0</version>
   <name>jolokia-wasear</name>
   <packaging>ear</packaging>
   <description>agent as ear application for WebSphere</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.5.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -45,7 +45,7 @@
     <plugins>
     </plugins>
   </build>
-  
+
   <reporting>
     <plugins>
       <plugin>
