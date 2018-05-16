@@ -171,8 +171,8 @@ public class StringToObjectConverterTest {
 
     @Test
     public void attributeListConversion() throws MalformedObjectNameException {
-        String personJson = "{\"_value_\": {\"name\": {\"lastname\": \"Chen\", \"firstname\": \"JinFen\"}, \"age\": 38, \"configkey\": \"MAX_DEPTH\", \"go_list\": [2 3]}, \"_spec_\": {}}";
-        String personJsonWithSpec = "{\"_value_\": {\"name\": {\"lastname\": \"Chen\", \"firstname\": \"JinFen\"}, \"age\": 38, \"configkey\": \"MAX_DEPTH\", \"go_list\": [2 3]}, \"_spec_\": {\"age\": \"java.lang.Integer\", \"go_list\": \"java.lang.Integer\", \"configkey\": \"org.jolokia.config.ConfigKey\"}}";
+        String personJson = "{\"_value_\": {\"name\": {\"lastname\": \"Chen\", \"firstname\": \"JinFen\", \"number_of_alias\": 2}, \"married\": true, \"age\": 38, \"configkey\": \"MAX_DEPTH\", \"go_list\": [2 3]}, \"_spec_\": {}}";
+        String personJsonWithSpec = "{\"_value_\": {\"name\": {\"lastname\": \"Chen\", \"firstname\": \"JinFen\", \"number_of_alias\": 2}, \"married\": true, \"age\": 38, \"configkey\": \"MAX_DEPTH\", \"go_list\": [2 3]}, \"_spec_\": {\"name\": {\"number_of_alias\": \"java.lang.Integer\"}, \"age\": \"java.lang.Integer\", \"go_list\": \"java.lang.Integer\", \"configkey\": \"org.jolokia.config.ConfigKey\"}}";
 
         AttributeList convertedPerson = (AttributeList)converter.convertFromString(AttributeList.class.getName(), personJson);
         AttributeList convertedPersonWithSpec = (AttributeList)converter.convertFromString(AttributeList.class.getName(), personJsonWithSpec);
@@ -185,6 +185,9 @@ public class StringToObjectConverterTest {
             } else if (((Attribute)o).getName().toString().equals("configkey")) {
                 assertEquals("java.lang.String", ((Attribute)o).getValue().getClass().getCanonicalName());
                 assertEquals("MAX_DEPTH", ((Attribute)o).getValue());
+            } else if (((Attribute)o).getName().toString().equals("married")) {
+                assertEquals("java.lang.Boolean", ((Attribute)o).getValue().getClass().getCanonicalName());
+                assertTrue((Boolean)((Attribute)o).getValue());
             } else if (((Attribute)o).getName().toString().equals("go_list")) {
                 assertEquals("org.json.simple.JSONArray",((Attribute)o).getValue().getClass().getCanonicalName());
                 assertEquals(2L, ((org.json.simple.JSONArray)((Attribute)o).getValue()).get(0));
@@ -200,6 +203,9 @@ public class StringToObjectConverterTest {
                     } else if (((Attribute)oo).getName().toString().equals("lastname")) {
                         assertEquals("java.lang.String", ((Attribute)oo).getValue().getClass().getCanonicalName());
                         assertEquals("Chen", ((Attribute)oo).getValue());
+                    } else if (((Attribute)oo).getName().toString().equals("number_of_alias")) {
+                        assertEquals("java.lang.Long", ((Attribute)oo).getValue().getClass().getCanonicalName());
+                        assertEquals(2L, ((Attribute)oo).getValue());
                     }
                 }
             } else {
@@ -216,6 +222,9 @@ public class StringToObjectConverterTest {
                 assertTrue(((Attribute)o).getValue().getClass().isEnum());
                 assertEquals("org.jolokia.config.ConfigKey", ((Attribute)o).getValue().getClass().getCanonicalName());
                 assertEquals(ConfigKey.MAX_DEPTH, ((Attribute)o).getValue());
+            } else if (((Attribute)o).getName().toString().equals("married")) {
+                assertEquals("java.lang.Boolean", ((Attribute)o).getValue().getClass().getCanonicalName());
+                assertTrue((Boolean)((Attribute)o).getValue());
             } else if (((Attribute)o).getName().toString().equals("go_list")) {
                 assertTrue(((Attribute)o).getValue().getClass().isArray());
                 assertEquals("java.lang.Integer", ((Attribute)o).getValue().getClass().getComponentType().getCanonicalName());
@@ -232,6 +241,9 @@ public class StringToObjectConverterTest {
                     } else if (((Attribute)oo).getName().toString().equals("lastname")) {
                         assertEquals("java.lang.String", ((Attribute)oo).getValue().getClass().getCanonicalName());
                         assertEquals("Chen", ((Attribute)oo).getValue());
+                    } else if (((Attribute)oo).getName().toString().equals("number_of_alias")) {
+                        assertEquals("java.lang.Integer", ((Attribute)oo).getValue().getClass().getCanonicalName());
+                        assertEquals(2, ((Attribute)oo).getValue());
                     }
                 }
             } else {
