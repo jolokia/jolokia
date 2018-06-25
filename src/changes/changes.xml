@@ -23,6 +23,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.6.0" description="Release 1.6.0" date="2018-06-25">
+      <action dev="rhuss" type="update">
+        Enable authentication with role "jolokia" for the war agent by default.
+      </action>
+      <action dev="rhuss" type="add">
+        Add new "jolokia-unsecured.war" which unsecured as "jolokia.war" in version 1.5.0 and below.
+      </action>
+    </release>
     <release version="1.5.0" description="Release 1.5.0" date="2018-02-08">
       <action dev="rhuss" type="fix">
         Restrict allowed mime types to "text/plain" and "application/json" for the response.

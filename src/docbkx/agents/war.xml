@@ -389,7 +389,7 @@
           present a human readable label for this agent.
         </td>
         <td>
-          <constant>Intranet Timebooking Server</constant>
+          <constant>Monitoring agent</constant>
         </td>
       </tr>
     </table>
@@ -428,8 +428,27 @@
   <section id="agent-war-security">
     <title>Security Setup</title>
     <para>
-      In order use Java EE security within the war, some extra
-      configuration steps are required within
+      The WAR agent comes in two flavors:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><emphasis role="bold">jolokia.war</emphasis></term>
+        <listitem>
+          The standard agent which is secured with the role "jolokia". You have to setup your servlet container
+          to connect this role to the authentication.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis role="bold">jolokia-unsecured.war</emphasis></term>
+        <listitem>
+          A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
+          highly recommended that use the security enabled agent <emphasis>jolokia.war</emphasis>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para>
+      Java EE security is enabled by default by adding the required information within the
       <filename>web.xml</filename>.<sidebar>
       <title>Using jmx4perl's <literal>jolokia</literal> tool</title>
       <ulink url="http://www.jmx4perl.org">jmx4perl</ulink> comes
@@ -439,13 +458,13 @@
       <filename>jolokia.war</filename>. See <xref linkend="tools-jmx4perl"/> for
       more details.
     </sidebar>
-    There is a commented section which can serve as an example. All
+    All
     current client libraries are able to use BASIC HTTP authentication
     with user and password. The
     <literal>&lt;login-config&gt;</literal> should be set
     accordingly. The <literal>&lt;security-constraint&gt;</literal>
     specifies the URL pattern (which is in the default setup specify
-    all resources provided by the Jolokia servlet) and a role name
+    all resources provided by the Jolokia servlet) and a role name "jolokia"
     which is used to find the proper authentication credentials.  This
     role must be referenced outside the agent WAR within the servlet
     container, e.g. for Tomcat the role definition can be found in

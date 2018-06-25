@@ -22,7 +22,7 @@
       <inlinegraphic align="right" fileref="jolokia_logo.png"/>
       Jolokia - Reference Documentation
     </title>
-    <releaseinfo>1.5.0</releaseinfo>
+    <releaseinfo>1.6.0</releaseinfo>
     <authorgroup>
       <author>
         <firstname>Roland</firstname>
@@ -30,7 +30,7 @@
       </author>
     </authorgroup>
     <copyright>
-      <year>2010 - 2014</year>
+      <year>2010 - 2018</year>
       <holder>Roland Huﬂ</holder>
     </copyright>
   </bookinfo>

@@ -153,8 +153,9 @@
   </servlet-mapping>
 
   <!--
-  Security enabled by default. Please update to match you specific security setup (e.g. the auth-method)
-  -->
+  Example Configuration for switching on BASIC security. The role 'Jolokia'
+  must be mapped to real users with passwords on the Appserver side:
+
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>jolokia</realm-name>
@@ -171,8 +172,9 @@
   </security-constraint>
 
   <security-role>
-    <role-name>jolokia</role-name>
+    <role-name>Jolokia</role-name>
   </security-role>
+  -->
 </web-app>
 
 <!--

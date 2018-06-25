@@ -75,7 +75,24 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
-<subsection name="Security fixes with 1.5.0">
+      <subsection name="WAR-Agent secured by default in 1.6.0">
+        <div class="news-date">2018-06-25</div>
+        <p>
+          As <a href="https://matmannion.com/jolokiapwn/">reported</a> by security consultant Mat Mannion, there is a massive set of
+          Jolokia agents reachable unsecured from the Internet. While its obviously not recommended to run Jolokia unsecured or even expose it publicly,
+          authentication is enabled now by default in <code>jolokia.war</code>. So in order to continue to the <a href="https://jolokia.org/agent/war.html">WAR-agent</a> you have to setup
+          your servlet's container authentication to associate enabled users with the role "jolokia" (like by adding it to <code>tomcat-users.xml</code>).
+        </p>
+        <p>
+          For quick experiments or when you insist somehow to avoid authentication, then you can use the newly added <a href="http://repo1.maven.org/maven2/org/jolokia/jolokia-war-unsecured/1.6.0/">jolokia-unsecured.war</a>.
+          Of course you are still free to mangle the <code>web.xml</code> within either war agent.
+        </p>
+        <p>
+          That said, I still recommend the <a href="https://jolokia.org/reference/html/agents.html#agents-jvm">JAR agent</a> over the WAR agent for most cases, as it has much more flexible security options, included HTTPS encryption with client certificate authentication.
+          See the <a href="https://jolokia.org/reference/html/agents.html#agents-jvm">reference manual</a> for all security options.
+        </p>
+      </subsection>
+      <subsection name="Security fixes with 1.5.0">
        <div class="news-date">2018-02-08</div>
         <p>
           Two security issues for Jolokia have recently been discovered by Olga Barinova of

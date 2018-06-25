@@ -19,11 +19,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-war</artifactId>
+  <artifactId>jolokia-war-unsecured</artifactId>
   <version>1.5.1-SNAPSHOT</version>
-  <name>jolokia-war</name>
+  <name>jolokia-war-unsecured</name>
   <packaging>war</packaging>
-  <description>agent as web application</description>
+  <description>agent as web application (unsecured)</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
