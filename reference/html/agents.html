@@ -381,7 +381,7 @@
           present a human readable label for this agent.
         </td>
         <td>
-          <code class="constant">Intranet Timebooking Server</code>
+          <code class="constant">Monitoring agent</code>
         </td>
       </tr></table></div></div><p>
       Jolokia has various detectors which can detect the brand and
@@ -407,21 +407,27 @@
         MBeans for monitoring Glassfish is booted.
         </td>
       </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agent-war-security"></a>3.1.2.&nbsp;Security Setup</h3></div></div></div><p>
-      In order use Java EE security within the war, some extra
-      configuration steps are required within
+      The WAR agent comes in two flavors:
+    </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>jolokia.war</strong></span></span></dt><dd>
+          The standard agent which is secured with the role "jolokia". You have to setup your servlet container
+          to connect this role to the authentication.
+        </dd><dt><span class="term"><span class="bold"><strong>jolokia-unsecured.war</strong></span></span></dt><dd>
+          A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
+          highly recommended that use the security enabled agent <span class="emphasis"><em>jolokia.war</em></span></dd></dl></div><p>
+      Java EE security is enabled by default by adding the required information within the
       <code class="filename">web.xml</code>.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Using jmx4perl's <code class="literal">jolokia</code> tool</b></p><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jmx4perl.org" target="_top">jmx4perl</a> comes
       with a nice command line utility called <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia" target="_top">jolokia</a>
       which allows for an easy setup of security within a given
       <code class="filename">jolokia.war</code>. See <a href="tools.html#tools-jmx4perl">Section&nbsp;10.1, &#8220;Jmx4Perl&#8221;</a> for
       more details.
     </div></div><p>
-    There is a commented section which can serve as an example. All
+    All
     current client libraries are able to use BASIC HTTP authentication
     with user and password. The
     <code class="literal">&lt;login-config&gt;</code> should be set
     accordingly. The <code class="literal">&lt;security-constraint&gt;</code>
     specifies the URL pattern (which is in the default setup specify
-    all resources provided by the Jolokia servlet) and a role name
+    all resources provided by the Jolokia servlet) and a role name "jolokia"
     which is used to find the proper authentication credentials.  This
     role must be referenced outside the agent WAR within the servlet
     container, e.g. for Tomcat the role definition can be found in
@@ -467,7 +473,7 @@
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<sup>[<a name="d0e888" href="#ftn.d0e888">5</a>]</sup>
+      for details.<sup>[<a name="d0e905" href="#ftn.d0e905">5</a>]</sup>
     </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
@@ -902,7 +908,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1660"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1677"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -1686,7 +1692,7 @@ java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
           You could even instrument a Java EE application server this way,
           however this is not recommended.
-        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e888" href="#d0e888">5</a>] </sup>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e905" href="#d0e905">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use
