@@ -4,7 +4,7 @@ Webarchive (WAR) Agent
   as a usual web archive. The specific deployment procedure depends on
   the Java EE server in used. E.g. for Tomcat, its not more than a copy of
   <<jolokia.war>> into the the <<<webapps/>>> directory. <<Please note that this unauthenticated
-  access should be ony used for development purposes. Check out {{{https://jolokia.org/reference/html/agents.html#agent-war-security}reference manual}} for details how to enenable security.>> 
+  access should be ony used for development purposes. Check out {{{https://jolokia.org/reference/html/agents.html#agent-war-security}reference manual}} for details how to enable security.>> 
 
   As soon as it is deployed, the agents offers its services under the
   URL of the deployed web application. For Tomcat running with its
