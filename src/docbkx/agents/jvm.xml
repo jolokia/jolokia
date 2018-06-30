@@ -296,6 +296,15 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>threadNamePrefix</constant></td>
+          <td>
+            Thread name prefix that executor will use while creating new thread(s).
+          </td>
+          <td>
+            <constant>jolokia-</constant>
+          </td>
+        </tr>
+        <tr>
           <td><constant>threadNr</constant></td>
           <td>
             Number of threads to be used when the

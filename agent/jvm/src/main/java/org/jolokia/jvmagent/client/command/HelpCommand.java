@@ -85,6 +85,8 @@ public class HelpCommand extends AbstractBaseCommand {
 "                                     \"fixed\"  -- Thread pool with a fixed number of threads (default: 5)\n" +
 "                                     \"cached\" -- Cached Thread Pool, creates threads on demand\n" +
 "                                     \"single\" -- Single Thread\n" +
+"    --threadNamePrefix <prefix>     Thread name prefix that executor will use while creating new thread(s)\n" +
+"                                    (default: jolokia-)\n" +
 "    --threadNr <nr threads>         Number of fixed threads if \"fixed\" is used as executor\n" +
 "    --backlog <backlog>             How many request to keep in the backlog (default: 10)\n" +
 "    --protocol <http|https>         Protocol which must be either \"http\" or \"https\" (default: http)\n" +

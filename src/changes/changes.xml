@@ -23,6 +23,12 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.6.1-SNAPSHOT" description="Release 1.6.1-SNAPSHOT" date="yyyy-mm-dd">
+      <action dev="nevenr" type="add" issue="67">
+        Add configuration option threadNamePrefix which will be used by jolokia http server executor
+        Default: "jolokia-"
+      </action>
+    </release>
     <release version="1.6.0" description="Release 1.6.0" date="2018-06-25">
       <action dev="rhuss" type="update">
         Enable authentication with role "jolokia" for the war agent by default.
