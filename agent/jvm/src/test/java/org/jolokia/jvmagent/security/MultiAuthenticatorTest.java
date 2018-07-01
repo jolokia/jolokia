@@ -83,4 +83,36 @@ public class MultiAuthenticatorTest {
                                                  NEGATIVE_AUTHENTICATOR));
         assertTrue(authenticator.authenticate(null) instanceof Authenticator.Failure);
     }
+
+    @Test
+    public void multiAuthenticatorModeFromString(){
+        assertTrue(MultiAuthenticator.Mode.fromString("any") == MultiAuthenticator.Mode.ANY );
+        assertTrue(MultiAuthenticator.Mode.fromString("ANY") == MultiAuthenticator.Mode.ANY );
+        assertTrue(MultiAuthenticator.Mode.fromString("Any") == MultiAuthenticator.Mode.ANY );
+        assertTrue(MultiAuthenticator.Mode.fromString("aNy") == MultiAuthenticator.Mode.ANY );
+
+        assertTrue(MultiAuthenticator.Mode.fromString("all") == MultiAuthenticator.Mode.ALL );
+        assertTrue(MultiAuthenticator.Mode.fromString("ALL") == MultiAuthenticator.Mode.ALL );
+        assertTrue(MultiAuthenticator.Mode.fromString("All") == MultiAuthenticator.Mode.ALL );
+
+        assertTrue(MultiAuthenticator.Mode.fromString("every") == MultiAuthenticator.Mode.ALL );
+        assertTrue(MultiAuthenticator.Mode.fromString("EVERY") == MultiAuthenticator.Mode.ALL );
+
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void multiAuthenticatorModeFromStringNull() {
+        MultiAuthenticator.Mode.fromString(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void multiAuthenticatorModeFromStringEmpty() {
+        MultiAuthenticator.Mode.fromString("");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void multiAuthenticatorModeFromStringUnknown() {
+        MultiAuthenticator.Mode.fromString("something unknown !@#$%^");
+    }
+
 }
