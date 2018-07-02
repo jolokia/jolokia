@@ -24,9 +24,8 @@
   </properties>
   <body>
     <release version="1.6.1-SNAPSHOT" description="Release 1.6.1-SNAPSHOT" date="yyyy-mm-dd">
-      <action dev="nevenr" type="add">
-        Add configuration option authPass which explains how to combine multiple authenticators if MultiAuthenticator is used.
-        GitHub issue: JVM agent authentication is hardcoded to Mode.ANY #344
+      <action dev="nevenr" type="add" issue="344">
+        Add configuration option authMatch which explains how to combine multiple authenticators if MultiAuthenticator is used.
       </action>
     </release>
     <release version="1.6.0" description="Release 1.6.0" date="2018-06-25">

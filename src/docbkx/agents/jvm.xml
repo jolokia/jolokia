@@ -172,11 +172,11 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
-          <td><constant>authPass</constant></td>
+          <td><constant>authMatch</constant></td>
           <td>
             If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
-            Supported values: <constant>any</constant> at least one authenticator must match, <constant>every</constant>
-             or <constant>all</constant> all authenticators must match.
+            Supported values: <constant>any</constant> at least one authenticator must match, <constant>all</constant>
+            all authenticators must match.
           </td>
           <td>
             any

@@ -291,18 +291,16 @@
       </xs:simpleType>
     </xs:attribute>
 
-    <xs:attribute name="authPass">
+    <xs:attribute name="authMatch">
       <xs:annotation>
         <xs:documentation>
           If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
-          Supported values: "any" at least one authenticator must match,
-          "every" or "all" all authenticators must match.
+          Supported values: "any" at least one authenticator must match, "all" all authenticators must match.
         </xs:documentation>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
           <xs:enumeration value="any"/>
-          <xs:enumeration value="every"/>
           <xs:enumeration value="all"/>
         </xs:restriction>
       </xs:simpleType>

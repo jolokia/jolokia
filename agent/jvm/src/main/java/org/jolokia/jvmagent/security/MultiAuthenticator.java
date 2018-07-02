@@ -55,11 +55,10 @@ public class MultiAuthenticator extends Authenticator {
             if (inStr == null || inStr.isEmpty()) {
                 throw new IllegalArgumentException("String representation of MultiAuthenticator.Mode can not be null nor empty.");
             }
-            inStr = inStr.toLowerCase();
-            if (inStr.equals("any")){
+            if (inStr.equalsIgnoreCase("any")){
                 return ANY;
             }
-            if (inStr.equals("all") || inStr.equals("every")){
+            if (inStr.equalsIgnoreCase("all")){
                 return ALL;
             }
             throw new IllegalArgumentException("Unknown string representation [" + inStr + "] for MultiAuthenticator.Mode");

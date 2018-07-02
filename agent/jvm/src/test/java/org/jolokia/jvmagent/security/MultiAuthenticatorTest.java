@@ -94,10 +94,7 @@ public class MultiAuthenticatorTest {
         assertTrue(MultiAuthenticator.Mode.fromString("all") == MultiAuthenticator.Mode.ALL );
         assertTrue(MultiAuthenticator.Mode.fromString("ALL") == MultiAuthenticator.Mode.ALL );
         assertTrue(MultiAuthenticator.Mode.fromString("All") == MultiAuthenticator.Mode.ALL );
-
-        assertTrue(MultiAuthenticator.Mode.fromString("every") == MultiAuthenticator.Mode.ALL );
-        assertTrue(MultiAuthenticator.Mode.fromString("EVERY") == MultiAuthenticator.Mode.ALL );
-
+        assertTrue(MultiAuthenticator.Mode.fromString("aLl") == MultiAuthenticator.Mode.ALL );
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

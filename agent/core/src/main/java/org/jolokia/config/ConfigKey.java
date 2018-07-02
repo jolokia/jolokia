@@ -225,9 +225,9 @@ public enum ConfigKey {
 
     /**
      * If MultiAuthenticator is used, this config item explains how to combine multiple authenticators
-     * Supported values: "any" at least one authenticator must match, "every" or "all" all authenticators must match
+     * Supported values: "any" at least one authenticator must match, "all" all authenticators must match
      */
-    AUTH_PASS("authPass",true, false, "any"),
+    AUTH_MATCH("authMatch",true, false, "any"),
 
     /**
      * Custom authenticator to be used instead of default user/password one (JVM agent)
