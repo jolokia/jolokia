@@ -33,6 +33,7 @@ import java.util.List;
  * </ul>
  *
  * @author roland
+ * @author nevenr
  * @since 26.05.14
  */
 public class MultiAuthenticator extends Authenticator {
@@ -48,8 +49,21 @@ public class MultiAuthenticator extends Authenticator {
         // All authenticators must match
         ALL,
         // At least one authenticator must match
-        ANY
-    };
+        ANY;
+
+        public static Mode fromString(String inStr) {
+            if (inStr == null || inStr.isEmpty()) {
+                throw new IllegalArgumentException("String representation of MultiAuthenticator.Mode can not be null nor empty.");
+            }
+            if (inStr.equalsIgnoreCase("any")){
+                return ANY;
+            }
+            if (inStr.equalsIgnoreCase("all")){
+                return ALL;
+            }
+            throw new IllegalArgumentException("Unknown string representation [" + inStr + "] for MultiAuthenticator.Mode");
+        }
+    }
 
     public MultiAuthenticator(Mode mode, List<Authenticator> authenticators) {
         if (authenticators == null) {
