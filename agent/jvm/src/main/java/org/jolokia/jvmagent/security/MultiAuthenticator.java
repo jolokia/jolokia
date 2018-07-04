@@ -53,7 +53,7 @@ public class MultiAuthenticator extends Authenticator {
 
         public static Mode fromString(String inStr) {
             if (inStr == null || inStr.isEmpty()) {
-                throw new IllegalArgumentException("String representation of MultiAuthenticator.Mode can not be null nor empty.");
+                return ANY; // Default mode
             }
             if (inStr.equalsIgnoreCase("any")){
                 return ANY;
@@ -61,7 +61,7 @@ public class MultiAuthenticator extends Authenticator {
             if (inStr.equalsIgnoreCase("all")){
                 return ALL;
             }
-            throw new IllegalArgumentException("Unknown string representation [" + inStr + "] for MultiAuthenticator.Mode");
+            throw new IllegalArgumentException(String.format("Unknown multi authenticator mode %s. Must be either 'any' or 'all'", inStr));
         }
     }
 
@@ -92,7 +92,7 @@ public class MultiAuthenticator extends Authenticator {
                 return result;
             }
         }
-        // Return last resul, which is either SUCCESS for mode.ALL or FAILURE for mode.ANY
+        // Return last result, which is either SUCCESS for mode.ALL or FAILURE for mode.ANY
         return result;
     }
 }
