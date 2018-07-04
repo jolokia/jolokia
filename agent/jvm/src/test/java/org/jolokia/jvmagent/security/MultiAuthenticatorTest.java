@@ -1,6 +1,6 @@
 package org.jolokia.jvmagent.security;
 /*
- * 
+ *
  * Copyright 2016 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -86,25 +87,22 @@ public class MultiAuthenticatorTest {
 
     @Test
     public void multiAuthenticatorModeFromString(){
-        assertTrue(MultiAuthenticator.Mode.fromString("any") == MultiAuthenticator.Mode.ANY );
-        assertTrue(MultiAuthenticator.Mode.fromString("ANY") == MultiAuthenticator.Mode.ANY );
-        assertTrue(MultiAuthenticator.Mode.fromString("Any") == MultiAuthenticator.Mode.ANY );
-        assertTrue(MultiAuthenticator.Mode.fromString("aNy") == MultiAuthenticator.Mode.ANY );
-
-        assertTrue(MultiAuthenticator.Mode.fromString("all") == MultiAuthenticator.Mode.ALL );
-        assertTrue(MultiAuthenticator.Mode.fromString("ALL") == MultiAuthenticator.Mode.ALL );
-        assertTrue(MultiAuthenticator.Mode.fromString("All") == MultiAuthenticator.Mode.ALL );
-        assertTrue(MultiAuthenticator.Mode.fromString("aLl") == MultiAuthenticator.Mode.ALL );
+        for (String any : new String[] {"any", "ANY", "Any", "aNy"}) {
+            assertSame(MultiAuthenticator.Mode.fromString(any), MultiAuthenticator.Mode.ANY);
+        }
+        for (String all : new String[] {"all", "ALL", "All", "aLl"}) {
+            assertSame(MultiAuthenticator.Mode.fromString(all), MultiAuthenticator.Mode.ALL);
+        }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void multiAuthenticatorModeFromStringNull() {
-        MultiAuthenticator.Mode.fromString(null);
+        assertSame(MultiAuthenticator.Mode.fromString(null), MultiAuthenticator.Mode.ANY);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void multiAuthenticatorModeFromStringEmpty() {
-        MultiAuthenticator.Mode.fromString("");
+        assertSame(MultiAuthenticator.Mode.fromString(""), MultiAuthenticator.Mode.ANY);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
