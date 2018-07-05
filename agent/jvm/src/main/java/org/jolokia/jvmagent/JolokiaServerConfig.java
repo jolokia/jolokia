@@ -461,7 +461,7 @@ public class JolokiaServerConfig {
         } else {
             // Multiple auth strategies were configured, pass auth if any of them
             // succeed.
-            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.ANY, authenticators);
+            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.fromString(jolokiaConfig.get(ConfigKey.AUTH_MATCH)), authenticators);
         }
     }
 
