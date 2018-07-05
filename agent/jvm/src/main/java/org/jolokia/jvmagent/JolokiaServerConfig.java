@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent;
 
 /*
- * Copyright 2009-2014 Roland Huss
+ * Copyright 2009-2018 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -451,7 +451,7 @@ public class JolokiaServerConfig {
         } else {
             // Multiple auth strategies were configured, pass auth if any of them
             // succeed.
-            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.ANY, authenticators);
+            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.fromString(jolokiaConfig.get(ConfigKey.AUTH_MATCH)), authenticators);
         }
     }
 

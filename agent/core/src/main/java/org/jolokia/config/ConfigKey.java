@@ -1,7 +1,7 @@
 package org.jolokia.config;
 
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2018 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.jolokia.backend.plugin.MBeanPlugin;
  * as processing parameters (e.g. as query params).
  *
  * @author roland
+ * @author nevenr
  * @since Jan 1, 2010
  */
 public enum ConfigKey {
@@ -221,6 +222,12 @@ public enum ConfigKey {
      * provided via an OSGi service registry.
      */
     AUTH_MODE("authMode", true, false, "basic"),
+
+    /**
+     * If MultiAuthenticator is used, this config item explains how to combine multiple authenticators
+     * Supported values: "any" at least one authenticator must match, "all" all authenticators must match
+     */
+    AUTH_MATCH("authMatch",true, false, "any"),
 
     /**
      * Custom authenticator to be used instead of default user/password one (JVM agent)
