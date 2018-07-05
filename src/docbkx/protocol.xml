@@ -712,6 +712,11 @@
               <literal>name</literal>, <literal>value</literal> and
               <literal>hasChildNodes</literal>.
             </listitem>
+            <listitem>
+              <classname>java.math.BigInteger</classname> becomes a JSON
+              object with the key <literal>bigint</literal> containing
+              the big integer value as String.
+            </listitem>
           </itemizedlist>
         </para>
         <para>

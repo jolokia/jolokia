@@ -27,6 +27,9 @@
       <action dev="nevenr" type="add" issue="344">
         Add configuration option authMatch which explains how to combine multiple authenticators if MultiAuthenticator is used.
       </action>
+      <action dev="nevenr" type="add" issue="334">
+        Add BigInteger simplifier. BigInteger becomes a JSON object with the key "bigint" containing the big integer value as String.
+      </action>
       <action dev="nevenr" type="add" issue="367">
         Add configuration option threadNamePrefix which will be used by jolokia http server executor
         Default: "jolokia-"
