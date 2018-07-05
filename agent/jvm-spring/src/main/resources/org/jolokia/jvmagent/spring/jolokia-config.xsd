@@ -178,6 +178,15 @@
       </xs:simpleType>
     </xs:attribute>
 
+    <xs:attribute name="threadNamePrefix" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Thread name prefix that executor will use while creating new thread(s)
+          (default: jolokia-)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
     <xs:attribute name="threadNr" type="xs:positiveInteger">
       <xs:annotation>
         <xs:documentation>

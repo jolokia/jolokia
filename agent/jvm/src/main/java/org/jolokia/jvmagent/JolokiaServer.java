@@ -64,9 +64,6 @@ public class JolokiaServer {
     // Handler for jolokia requests
     private JolokiaHttpHandler jolokiaHttpHandler;
 
-    // Thread factory which creates only daemon threads
-    private ThreadFactory daemonThreadFactory = new DaemonThreadFactory();
-
     /**
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests.
      *
@@ -239,6 +236,9 @@ public class JolokiaServer {
         HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
+
+        // Thread factory which creates only daemon threads
+        ThreadFactory daemonThreadFactory = new DaemonThreadFactory(pConfig.getThreadNamePrefix());
         // Prepare executor pool
         Executor executor;
         String mode = pConfig.getExecutor();
@@ -383,10 +383,21 @@ public class JolokiaServer {
     // Thread factory for creating daemon threads only
     private static class DaemonThreadFactory implements ThreadFactory {
 
+        private int threadInitNumber;
+        private final String threadNamePrefix;
+
+        public DaemonThreadFactory(String threadNamePrefix) {
+            this.threadNamePrefix = threadNamePrefix;
+        }
+
+        private synchronized int nextThreadNum() {
+            return threadInitNumber++;
+        }
+
         @Override
         /** {@inheritDoc} */
         public Thread newThread(Runnable r) {
-            Thread t = new Thread(r);
+            Thread t = new Thread(r, threadNamePrefix + nextThreadNum());
             t.setDaemon(true);
             return t;
         }

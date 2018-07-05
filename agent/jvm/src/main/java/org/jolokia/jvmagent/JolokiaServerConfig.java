@@ -54,6 +54,7 @@ public class JolokiaServerConfig {
     private int           backlog;
     private InetAddress   address;
     private String        executor;
+    private String        threadNamePrefix;
     private int           threadNr;
     private String        keystore;
     private String        context;
@@ -205,6 +206,14 @@ public class JolokiaServerConfig {
     }
 
     /**
+     * Thread name prefix that executor will use while creating new thread(s).
+     * @return the thread(s) name prefix
+     */
+    public String getThreadNamePrefix() {
+        return threadNamePrefix;
+    }
+
+    /**
      * Thread number to use when executor model is "fixed"
      * @return number of fixed threads
      */
@@ -349,6 +358,7 @@ public class JolokiaServerConfig {
         port = Integer.parseInt(agentConfig.get("port"));
         backlog = Integer.parseInt(agentConfig.get("backlog"));
         initExecutor(agentConfig);
+        initThreadNamePrefix(agentConfig);
         initThreadNr(agentConfig);
         initHttpsRelatedSettings(agentConfig);
         initAuthenticator();
@@ -550,6 +560,13 @@ public class JolokiaServerConfig {
                 !"cached".equalsIgnoreCase(executor)) {
             throw new IllegalArgumentException("Executor model can be '" + executor +
                                                "' but most be either 'single', 'fixed' or 'cached'");
+        }
+    }
+
+    private void initThreadNamePrefix(Map<String, String> agentConfig) {
+        threadNamePrefix = agentConfig.get("threadNamePrefix");
+        if (threadNamePrefix == null || threadNamePrefix.isEmpty()) {
+            threadNamePrefix = "jolokia-";
         }
     }
 
