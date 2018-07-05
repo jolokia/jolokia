@@ -41,7 +41,7 @@ public final class OptionsAndArgs {
     private static final Set<String> OPTIONS = new HashSet<String>(Arrays.asList(
             // JVM Agent options:
             "host", "port", "agentContext", "user", "password",
-            "quiet!", "verbose!", "version!", "executor", "threadNr",
+            "quiet!", "verbose!", "version!", "executor", "threadNamePrefix", "threadNr",
             "backlog", "hide!", "protocol","authMode","authClass",
             "authUrl", "authPrincipalSpec", "authIgnoreCerts!",
             //https options:

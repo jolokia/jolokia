@@ -50,7 +50,11 @@ public class JolokiaServerTest {
                 null,
                 "executor=fixed,threadNr=5",
                 "executor=cached",
-                "executor=single"
+                "executor=single",
+                "executor=fixed,threadNr=5,threadNamePrefix=JolokiaServerTestExecutorFixed",
+                "executor=cached,threadNamePrefix=JolokiaServerTestExecutorFixedCached",
+                "executor=single,threadNamePrefix=JolokiaServerTestExecutorFixedSingle",
+                "executor=fixed,threadNamePrefix=jolokia-,threadNr=5",
         };
 
         for (String c : configs) {

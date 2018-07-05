@@ -30,6 +30,10 @@
       <action dev="nevenr" type="add" issue="334">
         Add BigInteger simplifier. BigInteger becomes a JSON object with the key "bigint" containing the big integer value as String.
       </action>
+      <action dev="nevenr" type="add" issue="367">
+        Add configuration option threadNamePrefix which will be used by jolokia http server executor
+        Default: "jolokia-"
+      </action>
     </release>
     <release version="1.6.0" description="Release 1.6.0" date="2018-06-25">
       <action dev="rhuss" type="update">
