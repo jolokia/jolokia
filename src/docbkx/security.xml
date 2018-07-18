@@ -231,7 +231,14 @@
           If neither <literal>Origin:</literal> nor <literal>Referer:</literal> is given and strict checking is enabled, then the access is denied. This useful for protecting against Cross-Site Request Forgery.
         </para>
         <para>
-          Please note that <literal>&lt;strict-checking/&gt;</literal> might not be good enough because of potential browser bugs which could allow to forge the origin header. Examples of these issues are <ulink url="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html">arbitrary header injection</ulink> or <ulink url="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/">referer and origin spoofing</ulink>. User facing application which uses Jolokia has backend should consider to implement additional measures like using the <ulink url="https://tools.ietf.org/html/draft-west-first-party-cookies-07">same-site</ulink> flag on the session cookie.
+          Please note that <literal>&lt;strict-checking/&gt;</literal> might not be good enough because of potential
+          browser bugs which could allow to forge the origin header. Examples of these issues are
+          <ulink url="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html">arbitrary header injection</ulink>
+          or <ulink url="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/">referer and origin
+          spoofing</ulink>. User facing application which uses Jolokia has backend should consider to implement
+          additional measures like using the
+          <ulink url="https://tools.ietf.org/html/draft-west-first-party-cookies-07">same-site</ulink> flag
+          on the session cookie.
         </para>
       </section>
       <section>
