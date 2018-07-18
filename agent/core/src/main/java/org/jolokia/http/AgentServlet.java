@@ -294,7 +294,7 @@ public class AgentServlet extends HttpServlet {
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String,String> responseHeaders =
                 requestHandler.handleCorsPreflightRequest(
-                        req.getHeader("Origin"),
+                        getOriginOrReferer(req),
                         req.getHeader("Access-Control-Request-Headers"));
         for (Map.Entry<String,String> entry : responseHeaders.entrySet()) {
             resp.setHeader(entry.getKey(),entry.getValue());

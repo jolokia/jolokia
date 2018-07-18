@@ -226,6 +226,7 @@ public class PolicyBasedRestrictorTest {
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
         for (boolean strict : new boolean[] {true, false}) {
+            assertFalse(restrictor.isOriginAllowed(null, strict));
             assertTrue(restrictor.isOriginAllowed("http://bla.com", strict));
             assertFalse(restrictor.isOriginAllowed("http://www.jolokia.org", strict));
             assertTrue(restrictor.isOriginAllowed("https://www.consol.de", strict));
@@ -238,6 +239,7 @@ public class PolicyBasedRestrictorTest {
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
         // Allways true since we want a strict check but strict checking is off.
+        assertTrue(restrictor.isOriginAllowed(null, true));
         assertTrue(restrictor.isOriginAllowed("http://bla.com", true));
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", true));
         assertTrue(restrictor.isOriginAllowed("https://www.consol.de", true));
@@ -248,6 +250,7 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/allow-origin2.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
+        assertTrue(restrictor.isOriginAllowed(null, false));
         assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
         assertTrue(restrictor.isOriginAllowed("http://www.consol.de", false));
@@ -258,6 +261,7 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/allow-origin3.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
+        assertTrue(restrictor.isOriginAllowed(null, false));
         assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
         assertTrue(restrictor.isOriginAllowed("http://www.consol.de", false));

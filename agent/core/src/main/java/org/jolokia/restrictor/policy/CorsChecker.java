@@ -79,16 +79,23 @@ public class CorsChecker extends AbstractChecker<String> {
         return check(pArg,false);
     }
 
-    public boolean check(String pOrigin, boolean pIsStrictCheck) {
+    public boolean check(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
         // Method called during strict checking but we have not configured that
         // So the check passes always.
-        if (pIsStrictCheck && !strictChecking) {
+        if (pOnlyWhenStrictCheckingIsEnabled && !strictChecking) {
             return true;
         }
 
-        if (patterns == null || patterns.size() == 0) {
+        // If strict checking is enabled but Origin is null, the don't allow. This can
+        // be the case when both Referer: and Origin: are set to null
+        if (pOrigin == null && strictChecking) {
+            return false;
+        }
+
+        if (patterns == null || patterns.size() == 0 || pOrigin == null) {
             return true;
         }
+
         for (Pattern pattern : patterns) {
             if (pattern.matcher(pOrigin).matches()) {
                 return true;

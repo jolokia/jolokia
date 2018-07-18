@@ -63,6 +63,7 @@ public class HttpRequestHandlerTest {
     @Test
     public void accessAllowed() {
         expect(backend.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
+        expect(backend.isOriginAllowed((String) isNull(), eq(true))).andReturn(true);
         replay(backend);
 
         handler.checkAccess("localhost", "127.0.0.1",null);

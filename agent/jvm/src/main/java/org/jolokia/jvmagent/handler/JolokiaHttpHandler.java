@@ -293,7 +293,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     private void performCorsPreflightCheck(HttpExchange pExchange) {
         Headers requestHeaders = pExchange.getRequestHeaders();
         Map<String,String> respHeaders =
-                requestHandler.handleCorsPreflightRequest(requestHeaders.getFirst("Origin"),
+                requestHandler.handleCorsPreflightRequest(extractOriginOrReferer(pExchange),
                                                           requestHeaders.getFirst("Access-Control-Request-Headers"));
         Headers responseHeaders = pExchange.getResponseHeaders();
         for (Map.Entry<String,String> entry : respHeaders.entrySet()) {

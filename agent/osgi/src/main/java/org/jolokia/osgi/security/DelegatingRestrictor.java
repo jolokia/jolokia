@@ -171,8 +171,8 @@ public class DelegatingRestrictor implements Restrictor {
     };
 
     /** {@inheritDoc} */
-    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
-        return checkRestrictorService(CORS_CHECK,pOrigin,pIsStrictCheck);
+    public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
+        return checkRestrictorService(CORS_CHECK, pOrigin, pOnlyWhenStrictCheckingIsEnabled);
     }
 
     // =======================================================================================================

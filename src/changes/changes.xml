@@ -34,6 +34,9 @@
         Add configuration option threadNamePrefix which will be used by jolokia http server executor
         Default: "jolokia-"
       </action>
+      <action dev="rhuss" type="fix">
+        When strict-checking is enabled for a CORS policy, then reject a request also when no Origin or Referer header is given.
+      </action>
     </release>
     <release version="1.6.0" description="Release 1.6.0" date="2018-06-25">
       <action dev="rhuss" type="update">

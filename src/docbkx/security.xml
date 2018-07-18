@@ -33,7 +33,7 @@
       <para>
         Access to MBean and to the Jolokia agents in general can be
         restricted with an XML policy file. This policy can be configured
-        for various parameters and is divided into several sections. 
+        for various parameters and is divided into several sections.
       </para>
       <section>
         <title>IP based restrictions</title>
@@ -55,7 +55,7 @@
   <host>localhost</host>
   <host>10.0.0.0/16</host>
 </remote>
-]]></programlisting>        
+]]></programlisting>
       </section>
       <section>
         <title>Commands</title>
@@ -68,57 +68,57 @@
           selectively enabled for certain MBeans in the
           <literal>&lt;allow&gt;</literal> section. If the
           <literal>&lt;commands&gt;</literal> section is missing
-          completely, access to all commands is allowed. 
+          completely, access to all commands is allowed.
         </para>
         <para>
           All Jolokia commands described in <xref
-          linkend="protocol"/> can be used in this section: 
+          linkend="protocol"/> can be used in this section:
         </para>
         <variablelist>
           <varlistentry>
             <term>read</term>
             <listitem>
               Reading of MBean attributes
-            </listitem>        
+            </listitem>
           </varlistentry>
           <varlistentry>
             <term>write</term>
             <listitem>
              Setting of MBean attributes
-            </listitem>        
-          </varlistentry>   
+            </listitem>
+          </varlistentry>
           <varlistentry>
             <term>exec</term>
             <listitem>
               Execution of JMX operations
-            </listitem>        
+            </listitem>
           </varlistentry>
           <varlistentry>
             <term>list</term>
             <listitem>
               List the available MBeans along with their supported
-              attributes and operations. 
-            </listitem>        
+              attributes and operations.
+            </listitem>
           </varlistentry>
           <varlistentry>
             <term>search</term>
             <listitem>
               Searching for MBeans
-            </listitem>        
+            </listitem>
           </varlistentry>
           <varlistentry>
             <term>version</term>
             <listitem>
               Getting version and server information
-            </listitem>        
-          </varlistentry>          
+            </listitem>
+          </varlistentry>
         </variablelist>
         <para>
           In the following example, access is granted to the
           <literal>read</literal>, <literal>list</literal>,
           <literal>search</literal> and <literal>version</literal> command, but
           not to <literal>write</literal> and <literal>exec</literal>
-          operations. 
+          operations.
         </para>
         <programlisting language="xml"><![CDATA[
 <commands>
@@ -148,7 +148,7 @@
   <attribute>*Memory*</attribute>
   <attribute mode="read">Verbose</attribute>
   <operation>gc</operation>
-</mbean>        
+</mbean>
 ]]></programlisting>
         <para>
           Within the <literal>&lt;name&gt;</literal> section the name
@@ -182,7 +182,7 @@
         <programlisting><![CDATA[
 <http>
   <method>post</method>
-</http>        
+</http>
 ]]></programlisting>
         <para>
           It the <literal>&lt;http&gt;</literal> section is missing
@@ -210,7 +210,7 @@
           <literal>&lt;cors&gt;</literal> sections. This tags can
           contain the origin URL provided by browsers with the
           <literal>Origin:</literal> header literally or a
-          wildcard specification with <literal>*</literal>.          
+          wildcard specification with <literal>*</literal>.
         </para>
         <programlisting language="xml"><![CDATA[
 <cors>
@@ -228,18 +228,21 @@
           If the option <literal>&lt;strict-checking/&gt;</literal> is given in this section, too, then the given patterns
           are not only used for CORS checking but also every request is checked on the server side whether the
           <literal>Origin:</literal> or <literal>Referer:</literal> header matches one of the given patterns.
-          This useful for protecting against Cross-Site Request Forgery.
+          If neither <literal>Origin:</literal> nor <literal>Referer:</literal> is given and strict checking is enabled, then the access is denied. This useful for protecting against Cross-Site Request Forgery.
+        </para>
+        <para>
+          Please note that <literal>&lt;strict-checking/&gt;</literal> might not be good enough because of potential browser bugs which could allow to forge the origin header. Examples of these issues are <ulink url="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html">arbitrary header injection</ulink> or <ulink url="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/">referer and origin spoofing</ulink>. User facing application which uses Jolokia has backend should consider to implement additional measures like using the <ulink url="https://tools.ietf.org/html/draft-west-first-party-cookies-07">same-site</ulink> flag on the session cookie.
         </para>
       </section>
       <section>
         <title>Example for a security policy</title>
         <para>
           The following complete example applies various access
-          restrictions: 
+          restrictions:
         </para>
         <itemizedlist>
           <listitem>
-            Access is only allowed for clients coming from localhost            
+            Access is only allowed for clients coming from localhost
           </listitem>
           <listitem>
             Only HTTP Post requests are allowed
@@ -255,7 +258,7 @@
           <listitem>
             Read access to the C3P0 connection pool is restricted to
             forbid fetching the pool's properties, which in fact
-            contains the DB password as clear text. 
+            contains the DB password as clear text.
           </listitem>
         </itemizedlist>
         <programlisting><![CDATA[
@@ -362,14 +365,14 @@
         <classname>org.jolokia.restrictor.Restrictor</classname> and
         comes with several implementations. The most prominent one is
         the <classname>PolicyRestrictor</classname> which is described
-        in <xref linkend="security-policy"/>. This is also the 
+        in <xref linkend="security-policy"/>. This is also the
         restrictor which is active by default. For special needs, it is
         possible to provide a custom implementation of this
         interface for the WAR and OSGi agents. It is recommended to
         subclass either
         <classname>org.jolokia.restrictor.AllowAllRestrictor</classname>
         or
-        <classname>org.jolokia.restrictor.DenyAllRestrictor</classname>. 
+        <classname>org.jolokia.restrictor.DenyAllRestrictor</classname>.
       </para>
       <para>
         For the WAR agent (<xref linkend="agents-war"/>), a subclass
@@ -379,12 +382,12 @@
       </para>
       <programlisting language="java"><![CDATA[
 public class RestrictedAgentServlet extends AgentServlet {
-    
+
     @Override
     protected Restrictor createRestrictor(String policyLocation) {
         return new MyOwnRestrictor();
     }
-}]]></programlisting>        
+}]]></programlisting>
       <para>
         <literal>policyLocation</literal> is a URL pointing to the
         policy file, which is either the default value
@@ -410,7 +413,7 @@ public class RestrictedAgentServlet extends AgentServlet {
         exported and can be referenced from other
         bundles. Additionally, the OSGi agent can also pick up a
         restrictor as an OSGi service. See <xref
-        linkend="agents-osgi"/> for details. 
+        linkend="agents-osgi"/> for details.
       </para>
 
     </section>

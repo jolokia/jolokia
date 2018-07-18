@@ -34,7 +34,7 @@ public class TestRestrictor implements Restrictor {
         return false;
     }
 
-    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
+    public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
         return false;
     }
 }

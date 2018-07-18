@@ -120,13 +120,13 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
-    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
-        return corsChecker.check(pOrigin,pIsStrictCheck);
+    public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
+        return corsChecker.check(pOrigin, pOnlyWhenStrictCheckingIsEnabled);
     }
 
     /** {@inheritDoc} */
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return check(RequestType.READ,pName,pAttribute);
+        return check(RequestType.READ, pName, pAttribute);
     }
 
     /** {@inheritDoc} */

@@ -49,7 +49,7 @@ public class TestRestrictorWithConfig implements  Restrictor {
     }
 
     @Override
-    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
+    public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
         return res;
     }
 }
