@@ -5,7 +5,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.security.*;
 import java.util.Random;
 
@@ -52,7 +52,7 @@ public class JolokiaCipher {
      * @return the encoded password
      */
     public String encrypt(final String pText) throws GeneralSecurityException {
-        byte[] clearBytes = pText.getBytes(StandardCharsets.UTF_8);
+        byte[] clearBytes = pText.getBytes(Charset.forName("UTF-8"));
         byte[] salt = getSalt(SALT_SIZE);
 
         Cipher cipher = createCipher(salt, Cipher.ENCRYPT_MODE);
@@ -91,7 +91,7 @@ public class JolokiaCipher {
         Cipher cipher = createCipher(salt, Cipher.DECRYPT_MODE);
         byte[] clearBytes = cipher.doFinal(encryptedBytes);
 
-        return new String(clearBytes, StandardCharsets.UTF_8);
+        return new String(clearBytes, Charset.forName("UTF-8"));
     }
 
     // =================================================================
@@ -149,7 +149,7 @@ public class JolokiaCipher {
     public interface KeyHolder { String getKey(); };
 
     private byte[] getKeyAsBytes() {
-        return keyHolder.getKey().getBytes(StandardCharsets.UTF_8);
+        return keyHolder.getKey().getBytes(Charset.forName("UTF-8"));
     }
 
     private static class KeyHolderImpl implements KeyHolder {

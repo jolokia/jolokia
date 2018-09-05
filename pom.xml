@@ -750,6 +750,7 @@
         </pluginManagement>
       </build>
     </profile>
+
     <profile>
       <id>disable-javadoc-lint</id>
       <activation>
