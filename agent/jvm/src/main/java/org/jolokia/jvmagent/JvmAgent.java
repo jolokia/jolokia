@@ -123,8 +123,7 @@ public final class JvmAgent {
         for (ServerDetector detector : detectors) {
             detector.jvmAgentStartup(instrumentation);
         }
-    };
-
+    }
 
     private static void stopAgent() {
         try {
