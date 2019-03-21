@@ -688,6 +688,7 @@
             <artifactId>site-maven-plugin</artifactId>
             <configuration>
               <message>Creating site for Jolokia ${project.version}</message>
+              <server>jolokia</server>
             </configuration>
             <executions>
               <execution>
