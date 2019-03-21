@@ -1228,6 +1228,16 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             basic
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">authMatch</code></td>
+          <td>
+            If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
+            Supported values: <code class="constant">any</code> at least one authenticator must match, <code class="constant">all</code>
+            all authenticators must match.
+          </td>
+          <td>
+            any
+          </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authClass</code></td>
           <td>
             Fully qualified name of an authenticator class. Class must be on classpath and must extend
@@ -1311,6 +1321,14 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           </td>        
           <td>
             <code class="constant">single</code>
+          </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">threadNamePrefix</code></td>
+          <td>
+            Thread name prefix that executor will use while creating new thread(s).
+          </td>
+          <td>
+            <code class="constant">jolokia-</code>
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">threadNr</code></td>

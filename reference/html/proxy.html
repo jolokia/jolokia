@@ -39,8 +39,8 @@
         Repackaging the <code class="literal">jolokia.war</code> and adapt <code class="literal">web.xml</code> to
         include the init option <code class="literal">dispatcherClasses</code> with a value <code class="literal">org.jolokia.jsr160.Jsr160RequestDispatcher</code>.
       </li><li>
-        Set the system property <code class="literal">org.jolokia.jsr160ProxyEnabled</code></li><li>
-        Set the environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ENABLED</code></li></ul></div><p>
+        Set the system property <code class="literal">org.jolokia.jsr160ProxyEnabled</code> to <code class="literal">true</code></li><li>
+        Set the environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ENABLED</code> to <code class="literal">true</code></li></ul></div><p>
       The first option requires you to repackage the <code class="literal">jolokia.war</code> and add the following section to
       the <code class="literal">web.xml</code> descriptor:
     </p><pre class="programlisting">
@@ -81,7 +81,7 @@ service:jmx:rmi:///jndi/ldap:.*
     </p><p>
       All client libraries (jmx4perl, Java and Javascript) support the
       usage of proxy mode in its API.
-    </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="d0e3324"></a>5.1.&nbsp;Limitations of proxy mode</h2></div></div></div><p>
+    </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="d0e3383"></a>5.1.&nbsp;Limitations of proxy mode</h2></div></div></div><p>
         The proxy mode has some limitations compared to the direct
         agent mode, so it is recommended to use a
         direct agent deployment if possible. The limitations are:

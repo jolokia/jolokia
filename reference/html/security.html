@@ -27,8 +27,8 @@
     </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="security-policy"></a>4.1.&nbsp;Policy based security</h2></div></div></div><p>
         Access to MBean and to the Jolokia agents in general can be
         restricted with an XML policy file. This policy can be configured
-        for various parameters and is divided into several sections. 
-      </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e2872"></a>4.1.1.&nbsp;IP based restrictions</h3></div></div></div><p>
+        for various parameters and is divided into several sections.
+      </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e2905"></a>4.1.1.&nbsp;IP based restrictions</h3></div></div></div><p>
           Overall access can be granted based on the IP address of an
           HTTP client. These restrictions are
           specified within a <code class="literal">&lt;remote&gt;</code> section,
@@ -45,7 +45,7 @@
   &lt;host&gt;localhost&lt;/host&gt;
   &lt;host&gt;10.0.0.0/16&lt;/host&gt;
 &lt;/remote&gt;
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e2888"></a>4.1.2.&nbsp;Commands</h3></div></div></div><p>
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e2921"></a>4.1.2.&nbsp;Commands</h3></div></div></div><p>
           This section specifies the Jolokia commands for which access
           is generally granted. For each command in the list, access can
           be further restricted within the
@@ -54,9 +54,9 @@
           selectively enabled for certain MBeans in the
           <code class="literal">&lt;allow&gt;</code> section. If the
           <code class="literal">&lt;commands&gt;</code> section is missing
-          completely, access to all commands is allowed. 
+          completely, access to all commands is allowed.
         </p><p>
-          All Jolokia commands described in <a href="protocol.html">Chapter&nbsp;6, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia Protocol</i></a> can be used in this section: 
+          All Jolokia commands described in <a href="protocol.html">Chapter&nbsp;6, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia Protocol</i></a> can be used in this section:
         </p><div class="variablelist"><dl><dt><span class="term">read</span></dt><dd>
               Reading of MBean attributes
             </dd><dt><span class="term">write</span></dt><dd>
@@ -65,7 +65,7 @@
               Execution of JMX operations
             </dd><dt><span class="term">list</span></dt><dd>
               List the available MBeans along with their supported
-              attributes and operations. 
+              attributes and operations.
             </dd><dt><span class="term">search</span></dt><dd>
               Searching for MBeans
             </dd><dt><span class="term">version</span></dt><dd>
@@ -75,7 +75,7 @@
           <code class="literal">read</code>, <code class="literal">list</code>,
           <code class="literal">search</code> and <code class="literal">version</code> command, but
           not to <code class="literal">write</code> and <code class="literal">exec</code>
-          operations. 
+          operations.
         </p><pre class="programlisting">
 &lt;commands&gt;
   &lt;command&gt;read&lt;/command&gt;
@@ -83,7 +83,7 @@
   &lt;command&gt;version&lt;/command&gt;
   &lt;command&gt;search&lt;/command&gt;
 &lt;/commands&gt;
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e2959"></a>4.1.3.&nbsp;Allow and deny access to certain MBeans</h3></div></div></div><p>
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e2992"></a>4.1.3.&nbsp;Allow and deny access to certain MBeans</h3></div></div></div><p>
           Within an <code class="literal">&lt;allow&gt;</code> section, access
           to MBeans can be granted regardless of the
           operations specified in the
@@ -98,7 +98,7 @@
   &lt;attribute&gt;*Memory*&lt;/attribute&gt;
   &lt;attribute mode="read"&gt;Verbose&lt;/attribute&gt;
   &lt;operation&gt;gc&lt;/operation&gt;
-&lt;/mbean&gt;        
+&lt;/mbean&gt;
 </pre><p>
           Within the <code class="literal">&lt;name&gt;</code> section the name
           of the MBean is specified. This can bei either a complete
@@ -115,7 +115,7 @@
           <code class="literal">&lt;attribute&gt;</code> element the XML
           attribute <code class="literal">mode="read"</code> is given, then this
           attribute can be accessed only read-only.
-        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3010"></a>4.1.4.&nbsp;HTTP method restrictions</h3></div></div></div><p>
+        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3043"></a>4.1.4.&nbsp;HTTP method restrictions</h3></div></div></div><p>
           Finally, access can be restricted based on the HTTP method
           with which an Jolokia request was received with the
           <code class="literal">&lt;http&gt;</code> element. Method allowed
@@ -126,11 +126,11 @@
         </p><pre class="programlisting">
 &lt;http&gt;
   &lt;method&gt;post&lt;/method&gt;
-&lt;/http&gt;        
+&lt;/http&gt;
 </pre><p>
           It the <code class="literal">&lt;http&gt;</code> section is missing
           completely, any HTTP method can be used.
-        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3034"></a>4.1.5.&nbsp;Cross-Origin Resource Sharing (CORS) restrictions</h3></div></div></div><p>
+        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3067"></a>4.1.5.&nbsp;Cross-Origin Resource Sharing (CORS) restrictions</h3></div></div></div><p>
           Jolokia (since version 1.0.3) supports the W3C specification
           for <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.w3.org/TR/cors/" target="_top">Cross-Origin
           Resource Sharing</a> (also known as "CORS") which allows
@@ -146,7 +146,7 @@
           <code class="literal">&lt;cors&gt;</code> sections. This tags can
           contain the origin URL provided by browsers with the
           <code class="literal">Origin:</code> header literally or a
-          wildcard specification with <code class="literal">*</code>.          
+          wildcard specification with <code class="literal">*</code>.
         </p><pre class="programlisting">
 &lt;cors&gt;
    &lt;!-- Allow cross origin access from www.jolokia.org ... --&gt;
@@ -162,12 +162,21 @@
           If the option <code class="literal">&lt;strict-checking/&gt;</code> is given in this section, too, then the given patterns
           are not only used for CORS checking but also every request is checked on the server side whether the
           <code class="literal">Origin:</code> or <code class="literal">Referer:</code> header matches one of the given patterns.
-          This useful for protecting against Cross-Site Request Forgery.
-        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3075"></a>4.1.6.&nbsp;Example for a security policy</h3></div></div></div><p>
+          If neither <code class="literal">Origin:</code> nor <code class="literal">Referer:</code> is given and strict checking is enabled, then the access is denied. This useful for protecting against Cross-Site Request Forgery.
+        </p><p>
+          Please note that <code class="literal">&lt;strict-checking/&gt;</code> might not be good enough because of potential
+          browser bugs which could allow to forge the origin header. Examples of these issues are
+          <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html" target="_top">arbitrary header injection</a>
+          or <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/" target="_top">referer and origin
+          spoofing</a>. User facing application which uses Jolokia has backend should consider to implement
+          additional measures like using the
+          <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://tools.ietf.org/html/draft-west-first-party-cookies-07" target="_top">same-site</a> flag
+          on the session cookie.
+        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e3128"></a>4.1.6.&nbsp;Example for a security policy</h3></div></div></div><p>
           The following complete example applies various access
-          restrictions: 
+          restrictions:
         </p><div class="itemizedlist"><ul><li>
-            Access is only allowed for clients coming from localhost            
+            Access is only allowed for clients coming from localhost
           </li><li>
             Only HTTP Post requests are allowed
           </li><li>
@@ -179,7 +188,7 @@
           </li><li>
             Read access to the C3P0 connection pool is restricted to
             forbid fetching the pool's properties, which in fact
-            contains the DB password as clear text. 
+            contains the DB password as clear text.
           </li></ul></div><pre class="programlisting">
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 
@@ -253,14 +262,14 @@
         <code class="classname">org.jolokia.restrictor.Restrictor</code> and
         comes with several implementations. The most prominent one is
         the <code class="classname">PolicyRestrictor</code> which is described
-        in <a href="security.html#security-policy">Section&nbsp;4.1, &#8220;Policy based security&#8221;</a>. This is also the 
+        in <a href="security.html#security-policy">Section&nbsp;4.1, &#8220;Policy based security&#8221;</a>. This is also the
         restrictor which is active by default. For special needs, it is
         possible to provide a custom implementation of this
         interface for the WAR and OSGi agents. It is recommended to
         subclass either
         <code class="classname">org.jolokia.restrictor.AllowAllRestrictor</code>
         or
-        <code class="classname">org.jolokia.restrictor.DenyAllRestrictor</code>. 
+        <code class="classname">org.jolokia.restrictor.DenyAllRestrictor</code>.
       </p><p>
         For the WAR agent (<a href="agents.html#agents-war">Section&nbsp;3.1, &#8220;Java EE Agent (WAR)&#8221;</a>), a subclass
         of <code class="classname">org.jolokia.http.AgentServlet</code> should
@@ -268,7 +277,7 @@
         <code class="methodname">createRestrictor()</code>
       </p><pre class="programlisting">
 public class RestrictedAgentServlet extends AgentServlet {
-    
+
     @Override
     protected Restrictor createRestrictor(String policyLocation) {
         return new MyOwnRestrictor();
@@ -295,5 +304,5 @@ public class RestrictedAgentServlet extends AgentServlet {
         <code class="classname">AgentServlet</code> this class is also OSGi
         exported and can be referenced from other
         bundles. Additionally, the OSGi agent can also pick up a
-        restrictor as an OSGi service. See <a href="agents.html#agents-osgi">Section&nbsp;3.2, &#8220;OSGi Agents&#8221;</a> for details. 
+        restrictor as an OSGi service. See <a href="agents.html#agents-osgi">Section&nbsp;3.2, &#8220;OSGi Agents&#8221;</a> for details.
       </p></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Next</a></div></div></div></body></html>
