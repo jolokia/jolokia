@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.6.1-SNAPSHOT" description="Release 1.6.1-SNAPSHOT" date="yyyy-mm-dd">
+    <release version="1.6.1" description="Release 1.6.1" date="2019-05-01">
       <action dev="nevenr" type="add" issue="344">
         Add configuration option authMatch which explains how to combine multiple authenticators if MultiAuthenticator is used.
       </action>

@@ -203,7 +203,7 @@ public class JolokiaServer {
                 try {
                     realAddress = NetworkUtil.getLocalAddress();
                 } catch (IOException e) {
-                    try {
+              index      try {
                         realAddress = InetAddress.getLocalHost();
                     } catch (UnknownHostException e1) {
                         // Ok, ok. We take the original one
