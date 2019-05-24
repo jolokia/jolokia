@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2009-2013 Roland Huss
+  ~ Copyright 2009-2019 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.6.2-SNAPSHOT" description="Release 1.6.2-SNAPSHOT">
+      <action dev="dsimansk" type="update" issue="403">
+        Add support to load multiple CA certs from store
+      </action>
+    </release>
     <release version="1.6.1" description="Release 1.6.1" date="2019-05-01">
       <action dev="nevenr" type="add" issue="344">
         Add configuration option authMatch which explains how to combine multiple authenticators if MultiAuthenticator is used.
