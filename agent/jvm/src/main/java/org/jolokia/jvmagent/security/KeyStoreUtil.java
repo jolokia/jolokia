@@ -22,6 +22,7 @@ import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.security.spec.*;
+import java.util.Collection;
 import java.util.Date;
 
 import org.jolokia.Version;
@@ -57,10 +58,13 @@ public class KeyStoreUtil {
         InputStream is = new FileInputStream(pCaCert);
         try {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
-            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
+            Collection<? extends Certificate> certificates = certFactory.generateCertificates(is);
 
-            String alias = cert.getSubjectX500Principal().getName();
-            pTrustStore.setCertificateEntry(alias, cert);
+            for (Certificate c : certificates) {
+                X509Certificate cert = (X509Certificate) c;
+                String alias = cert.getSubjectX500Principal().getName();
+                pTrustStore.setCertificateEntry(alias, cert);
+            }
         } finally {
             is.close();
         }

@@ -60,6 +60,33 @@ public class KeyStoreUtilTest {
     }
 
     @Test
+    public void testTrustStoreWithMultipeEntries() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+        File caPem = getTempFile("ca/cert-multi.pem");
+        KeyStore keystore = createKeyStore();
+
+        KeyStoreUtil.updateWithCaPem(keystore, caPem);
+
+        Enumeration<String> aliases = keystore.aliases();
+        String alias = aliases.nextElement();
+        assertTrue(aliases.hasMoreElements());
+        assertTrue(alias.contains("another.test.jolokia.org"));
+        X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
+        cert.checkValidity();
+        assertTrue(cert.getSubjectDN().getName().contains("CN=another.test.jolokia.org"));
+        RSAPublicKey key = (RSAPublicKey) cert.getPublicKey();
+        assertEquals(key.getAlgorithm(),"RSA");
+
+        alias = aliases.nextElement();
+        assertFalse(aliases.hasMoreElements());
+        assertTrue(alias.contains("ca.test.jolokia.org"));
+        cert = (X509Certificate) keystore.getCertificate(alias);
+        cert.checkValidity();
+        assertTrue(cert.getSubjectDN().getName().contains(CA_CERT_SUBJECT_DN_CN));
+        key = (RSAPublicKey) cert.getPublicKey();
+        assertEquals(key.getAlgorithm(),"RSA");
+    }
+
+    @Test
     public void testKeyStore() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, InvalidKeySpecException, UnrecoverableKeyException {
         File serverPem = getTempFile("server/cert.pem");
         File keyPem = getTempFile("server/key.pem");
