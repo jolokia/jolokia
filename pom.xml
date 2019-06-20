@@ -596,8 +596,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>1.6.1</currentStableVersion>
-    <currentSnapshotVersion>1.6.2-SNAPSHOT</currentSnapshotVersion>
+    <currentStableVersion>1.6.2</currentStableVersion>
+    <currentSnapshotVersion>1.6.3-SNAPSHOT</currentSnapshotVersion>
     <github.global.server>github</github.global.server>
   </properties>
 

@@ -75,6 +75,12 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+      <subsection name="1.6.2 with support for multiple CAs">
+        <div class="news-date">2019-06-20</div>
+        <p>
+          This summer version 1.6.2 comes with support for multiple CAs when running the Jolokia agent in SSL mode. This is especially useful when used together with newer versions of OpenShift.
+        </p>
+      </subsection>
       <subsection name="Minor updates coming with 1.6.1">
         <div class="news-date">2019-05-01</div>
         <p>

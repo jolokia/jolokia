@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.6.2-SNAPSHOT" description="Release 1.6.2-SNAPSHOT">
+    <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
       <action dev="dsimansk" type="update" issue="403">
         Add support to load multiple CA certs from store
       </action>
