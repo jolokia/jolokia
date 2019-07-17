@@ -199,7 +199,8 @@ public class VirtualMachineHandler {
         } catch (ClassNotFoundException exp) {
             throw new ProcessingException(
                     "Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
-                    "essential classes for attaching to a running JVM could locate the necessary jar file.\n" +
+                    "essential classes (i.e. com.sun.tools.attach.VirtualMachine) for attaching to a running JVM\n" +
+                    " ould not locate the necessary jar file.\n" +
                     "\n" +
                     "Please call this launcher with a qualified classpath on the command line like\n" +
                     "\n" +
