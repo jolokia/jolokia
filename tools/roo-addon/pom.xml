@@ -20,19 +20,19 @@
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-roo</artifactId>
   <packaging>bundle</packaging>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.3-jdk11-SNAPSHOT</version>
   <name>jolokia-roo</name>
   <description>jolokia roo addon</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-jdk11-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <properties>
-    <roo.version>1.2.5.RELEASE</roo.version>
+    <roo.version>2.0.0.RELEASE</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jolokia.version>${project.version}</jolokia.version>
   </properties>
@@ -146,10 +146,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>

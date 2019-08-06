@@ -19,13 +19,13 @@
   <parent>
     <artifactId>jolokia-agent-parent</artifactId>
     <groupId>org.jolokia</groupId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-jdk11-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-jmx</artifactId>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.3-jdk11-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>jolokia-jmx</name>
 
@@ -62,6 +62,7 @@
         <extensions>true</extensions>
 
         <configuration>
+          <classifier>bundle</classifier>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.jmx</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX Addons</Bundle-Description>

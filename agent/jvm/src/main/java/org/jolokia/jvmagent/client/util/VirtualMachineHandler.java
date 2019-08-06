@@ -16,9 +16,8 @@ package org.jolokia.jvmagent.client.util;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -27,7 +26,8 @@ import java.util.regex.Pattern;
 
 /**
  * A handler for dealing with <code>VirtualMachine</code> without directly referencing internally
- * the class type. All lookup is done via reflection.
+ * the class type. Reflection has been removed due to illegal access in jdk 9+ but this class remains useful to force a
+ * good lookup of the com.sun.tools.attach.* classes before referencing / accessing them.
  *
  * @author roland
  * @since 12.08.11
@@ -47,7 +47,7 @@ public class VirtualMachineHandler {
     }
 
     /**
-     * Lookup and create a {@link com.sun.tools.attach.VirtualMachine} via reflection. First, a direct
+     * Lookup and create a {@link com.sun.tools.attach.VirtualMachine} directly or via reflection. First, a direct
      * lookup via {@link Class#forName(String)} is done, which will succeed for JVM on OS X, since tools.jar
      * is bundled there together with classes.zip. Next, tools.jar is tried to be found (by examine <code>java.home</code>)
      * and an own classloader is created for looking up the VirtualMachine.
@@ -63,17 +63,11 @@ public class VirtualMachineHandler {
         Class vmClass = lookupVirtualMachineClass();
         String pid = null;
         try {
-            Method method = vmClass.getMethod("attach",String.class);
             pid = getProcessId(options);
-            return method.invoke(null, pid);
-        } catch (NoSuchMethodException e) {
-            throw new ProcessingException("Internal: No method 'attach' found on " + vmClass,e,options);
-        } catch (InvocationTargetException e) {
-            throw new ProcessingException(getPidErrorMesssage(pid,"InvocationTarget",vmClass),e,options);
-        } catch (IllegalAccessException e) {
-            throw new ProcessingException(getPidErrorMesssage(pid, "IllegalAccessException", vmClass),e,options);
-        } catch (IllegalArgumentException e) {
-            throw new ProcessingException("Illegal Argument",e,options);
+            // Class is now properly loaded, but we can't use reflection due to illegal access in separate modules
+            return com.sun.tools.attach.VirtualMachine.attach(pid);
+        } catch (IOException | com.sun.tools.attach.AttachNotSupportedException | IllegalArgumentException e) {
+            throw new ProcessingException(getPidErrorMesssage(pid, e.getClass().getSimpleName(), vmClass), e, options);
         }
     }
 
@@ -91,17 +85,10 @@ public class VirtualMachineHandler {
      */
     public void detachAgent(Object pVm) {
         try {
-            if (pVm != null) {
-                Class clazz = pVm.getClass();
-                Method method = clazz.getMethod("detach");
-                method.setAccessible(true); // on J9 you get IllegalAccessException otherwise.
-                method.invoke(pVm);
+            if (pVm instanceof com.sun.tools.attach.VirtualMachine) {
+                ((com.sun.tools.attach.VirtualMachine) pVm).detach();
             }
-        } catch (InvocationTargetException e) {
-            throw new ProcessingException("Error while detaching",e, options);
-        } catch (NoSuchMethodException e) {
-            throw new ProcessingException("Error while detaching",e, options);
-        } catch (IllegalAccessException e) {
+        } catch (IOException e) {
             throw new ProcessingException("Error while detaching",e, options);
         }
     }
@@ -109,20 +96,16 @@ public class VirtualMachineHandler {
     /**
      * Return a list of all Java processes
      * @return list of java processes
-     * @throws NoSuchMethodException reflection error
-     * @throws InvocationTargetException reflection error
-     * @throws IllegalAccessException reflection error
      */
-    public List<ProcessDescription> listProcesses() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public List<ProcessDescription> listProcesses() {
         List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
-        Class vmClass = lookupVirtualMachineClass();
-        Method method = vmClass.getMethod("list");
-        List vmDescriptors = (List) method.invoke(null);
-        for (Object descriptor : vmDescriptors) {
-            Method idMethod = descriptor.getClass().getMethod("id");
-            String id = (String) idMethod.invoke(descriptor);
-            Method displayMethod = descriptor.getClass().getMethod("displayName");
-            String display = (String) displayMethod.invoke(descriptor);
+        lookupVirtualMachineClass();
+
+        // Class is now properly loaded, but we can't use reflection due to illegal access in separate modules
+
+        for (com.sun.tools.attach.VirtualMachineDescriptor descriptor : com.sun.tools.attach.VirtualMachine.list()) {
+            String id = descriptor.id();
+            String display = descriptor.displayName();
             ret.add(new ProcessDescription(id, display));
         }
         return ret;
@@ -137,8 +120,7 @@ public class VirtualMachineHandler {
      * @return a process description of the one process found but never null
      * @throws IllegalArgumentException if more than one or no process has been found.
      */
-    public ProcessDescription findProcess(Pattern pPattern)
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public ProcessDescription findProcess(Pattern pPattern) {
         List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
         String ownId = getOwnProcessId();
 
@@ -173,7 +155,7 @@ public class VirtualMachineHandler {
      * @return the numeric id as string
      * @throws IllegalArgumentException if a pattern is used and no or more than one process name matches.
      */
-    private String getProcessId(OptionsAndArgs pOpts) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private String getProcessId(OptionsAndArgs pOpts) {
         if (pOpts.getPid() != null) {
             return pOpts.getPid();
         } else if (pOpts.getProcessPattern() != null) {

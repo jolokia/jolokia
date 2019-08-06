@@ -16,8 +16,10 @@ package org.jolokia.jvmagent.client;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.jolokia.jvmagent.client.command.AgentException;
 import org.jolokia.jvmagent.client.util.*;
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
 
@@ -60,12 +62,8 @@ public final class AgentLauncher {
             int exitCode = 0;
             try {
                 exitCode = dispatcher.dispatchCommand(vm,vmHandler);
-            } catch (InvocationTargetException e) {
-                throw new ProcessingException("InvocationTargetException",e,options);
-            } catch (NoSuchMethodException e) {
-                throw new ProcessingException("Internal: NoSuchMethod",e,options);
-            } catch (IllegalAccessException e) {
-                throw new ProcessingException("IllegalAccess",e,options);
+            } catch (AgentException e) {
+                throw new ProcessingException("AgentExceptin",e,options);
             } finally {
                 if (vm != null) {
                     vmHandler.detachAgent(vm);

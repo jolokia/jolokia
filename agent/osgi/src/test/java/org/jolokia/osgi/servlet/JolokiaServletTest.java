@@ -119,7 +119,7 @@ public class JolokiaServletTest {
 
     private void prepareLogServiceLookup() throws InvalidSyntaxException {
         expect(servletContext.getAttribute("osgi-bundlecontext")).andReturn(bundleContext).times(3);
-        expect(bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)")).andReturn(createMock(Filter.class)).times(2);
+        expect(bundleContext.createFilter("(objectClass=org.osgi.service.log.LogService)")).andReturn(EasyMock.<Filter>createMock(Filter.class)).times(2);
         bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=org.osgi.service.log.LogService)"));
         expectLastCall().times(2);
         expect(bundleContext.getServiceReferences(LogService.class.getName(),null)).andReturn(null).times(2);

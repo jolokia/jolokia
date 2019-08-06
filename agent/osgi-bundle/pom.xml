@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-osgi-bundle</artifactId>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.3-jdk11-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>jolokia-osgi-bundle</name>
   <description>osgi bundle agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-jdk11-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -72,7 +72,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.jetty</artifactId>
-      <version>2.2.0</version>
+      <version>4.0.10</version>
       <exclusions>
         <exclusion>
           <groupId>javax.servlet</groupId>
@@ -85,6 +85,7 @@
   <properties>
     <jolokia.version>${project.version}</jolokia.version>
   </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -93,6 +94,7 @@
         <extensions>true</extensions>
 
         <configuration>
+          <classifier>bundle</classifier>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.osgi.bundle</Bundle-SymbolicName>
             <Bundle-Description>

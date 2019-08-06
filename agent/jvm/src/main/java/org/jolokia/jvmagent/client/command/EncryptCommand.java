@@ -2,10 +2,12 @@ package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
-import org.jolokia.util.*;
+import org.jolokia.util.JolokiaCipher;
 
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
@@ -34,8 +36,7 @@ public class EncryptCommand extends AbstractBaseCommand {
     }
 
     @Override
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws AgentException {
         try {
             List<String> args = pOpts.getExtraArgs();
             String password = args.size() == 0 ?
@@ -48,7 +49,7 @@ public class EncryptCommand extends AbstractBaseCommand {
             System.out.printf("[[%s]]%n", encrypted);
             return 0;
         } catch (GeneralSecurityException exp) {
-            throw new InvocationTargetException(exp,"Can not encrypt password");
+            throw new AgentException("Can not encrypt password", exp);
         }
     }
 

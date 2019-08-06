@@ -16,12 +16,12 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
+import org.jolokia.jvmagent.client.util.OptionsAndArgs;
+import org.jolokia.jvmagent.client.util.ProcessDescription;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+
 import java.util.Formatter;
 import java.util.List;
-
-import org.jolokia.jvmagent.client.util.*;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 
 /**
  * List all available Java processes
@@ -40,7 +40,7 @@ public class ListCommand extends AbstractBaseCommand {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) {
         List<ProcessDescription> vmDescriptors = pHandler.listProcesses();
         for (ProcessDescription descriptor : vmDescriptors) {
             Formatter formatter = new Formatter().format("%7.7s   %-100.100s",

@@ -16,8 +16,6 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 
@@ -42,7 +40,8 @@ public class ToggleCommand extends AbstractBaseCommand {
 
     /** {@inheritDoc} */
     @Override
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
+    throws AgentException {
         return checkAgentUrl(pVm) == null ?
                 startCommand.execute(pOpts, pVm, pHandler) :
                 stopCommand.execute(pOpts,pVm,pHandler);

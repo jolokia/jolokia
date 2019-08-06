@@ -16,8 +16,6 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 
@@ -39,8 +37,7 @@ public class StartCommand extends AbstractBaseCommand {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
-        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws AgentException {
         String agentUrl;
         agentUrl = checkAgentUrl(pVm);
         boolean quiet = pOpts.isQuiet();

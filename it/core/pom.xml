@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-it-core</artifactId>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.3-jdk11-SNAPSHOT</version>
   <name>jolokia-it-core</name>
   <packaging>bundle</packaging>
   <description>Core classes for integration tests</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-it-parent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-jdk11-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -51,10 +51,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-          </configuration>
       </plugin>
 
       <plugin>
@@ -63,6 +59,7 @@
         <extensions>true</extensions>
 
         <configuration>
+          <classifier>bundle</classifier>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.it</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>

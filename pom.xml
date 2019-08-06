@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia</artifactId>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.3-jdk11-SNAPSHOT</version>
   <name>jolokia-parent</name>
   <description>jolokia parent pom</description>
 
@@ -40,8 +40,6 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
           <meminitial>128m</meminitial>
           <maxmem>512m</maxmem>
         </configuration>
@@ -154,7 +152,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.3.7</version>
+          <version>4.2.0</version>
           <configuration>
             <groupId>${project.groupId}</groupId>
             <artifactId>${project.artifactId}</artifactId>
@@ -226,6 +224,9 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
+	  <configuration>
+		  <argLine> -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar </argLine>
+	  </configuration>
         </plugin>
 
         <plugin>
@@ -574,14 +575,14 @@
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.0</version>
+        <version>4.0.2</version>
         <scope>test</scope>
       </dependency>
 
       <dependency>
         <groupId>org.jmockit</groupId>
         <artifactId>jmockit</artifactId>
-        <version>1.8</version>
+        <version>${jmockit.version}</version>
         <scope>test</scope>
       </dependency>
 
@@ -599,6 +600,10 @@
     <currentStableVersion>1.6.2</currentStableVersion>
     <currentSnapshotVersion>1.6.3-SNAPSHOT</currentSnapshotVersion>
     <github.global.server>github</github.global.server>
+    <jmockit.version>1.47</jmockit.version>
+    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
   <repositories>
@@ -614,6 +619,18 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+    </repository>
+    <repository>
+      <id>mulesoft-releases</id>
+      <name>MuleSoft Releases Repository</name>
+      <url>http://repository.mulesoft.org/releases/</url>
+      <layout>default</layout>
+    </repository>
+    <repository>
+      <id>mulesoft-snapshots</id>
+      <name>MuleSoft Snapshots Repository</name>
+      <url>http://repository.mulesoft.org/snapshots/</url>
+      <layout>default</layout>
     </repository>
   </repositories>
 

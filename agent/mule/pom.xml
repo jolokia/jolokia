@@ -20,14 +20,14 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-mule</artifactId>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.3-jdk11-SNAPSHOT</version>
   <name>jolokia-mule</name>
   <description>mule agent</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-jdk11-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -45,11 +45,27 @@
     </dependency>
 
     <dependency>
+      <groupId>org.mule.runtime</groupId>
+      <artifactId>mule-extensions-api</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mule.common</groupId>
+      <artifactId>mule-common</artifactId>
+      <version>3.5.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.mule</groupId>
       <artifactId>mule-core</artifactId>
-      <version>3.6.0</version>
+      <version>3.9.0</version>
       <scope>provided</scope>
       <exclusions>
+        <exclusion>
+          <groupId>org.mule.extensions</groupId>
+          <artifactId>mule-extensions-api</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.safehaus.jug</groupId>
           <artifactId>jug</artifactId>

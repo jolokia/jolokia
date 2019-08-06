@@ -16,11 +16,13 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Dispatch for various attach commands
@@ -69,7 +71,7 @@ public class CommandDispatcher {
      * @param pHandler  handler for listing processes
      * @return the return code (0 or 1)
      */
-    public int dispatchCommand(Object pVm,VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public int dispatchCommand(Object pVm,VirtualMachineHandler pHandler) throws AgentException {
         String commandName = options.getCommand();
         AbstractBaseCommand command = COMMANDS.get(commandName);
         if (command == null) {

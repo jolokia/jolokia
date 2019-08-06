@@ -103,8 +103,10 @@ public final class JvmAgent {
                     System.out.println("Jolokia: Agent started with URL " + server.getUrl());
                 } catch (RuntimeException exp) {
                     System.err.println("Could not start Jolokia agent: " + exp);
+                    exp.printStackTrace();
                 } catch (IOException exp) {
                     System.err.println("Could not start Jolokia agent: " + exp);
+                    exp.printStackTrace();
                 }
             }
         };

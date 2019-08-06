@@ -43,25 +43,25 @@ public class CommandDispatcherTest {
     private ByteArrayOutputStream outStream,errStream;
 
     @Test
-    public void start() throws IOException, AgentInitializationException, AgentLoadException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void start() throws IOException, AgentInitializationException, AgentLoadException, AgentException {
         testCommand("start", false, 0);
         testCommand("start", true, 1);
     }
 
     @Test
-    public void stop() throws AgentInitializationException, IOException, AgentLoadException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void stop() throws AgentInitializationException, IOException, AgentLoadException, AgentException {
         testCommand("stop", false, 1);
         testCommand("stop", true, 0);
     }
 
     @Test
-    public void toggle() throws AgentInitializationException, IOException, AgentLoadException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void toggle() throws AgentInitializationException, IOException, AgentLoadException, AgentException {
         testCommand("toggle", false, 0);
         testCommand("toggle", true, 0);
     }
 
     @Test
-    public void help() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void help() throws AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("--help"));
         assertEquals(d.dispatchCommand(null, null), 0);
         CommandDispatcher.printHelp();
@@ -69,7 +69,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void version() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void version() throws AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("--version"));
         assertEquals(d.dispatchCommand(null, null), 0);
         assertTrue(outStream.toString().contains(Version.getAgentVersion()));
@@ -77,7 +77,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void versionVerbose() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void versionVerbose() throws AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("--version","--verbose"));
         assertEquals(d.dispatchCommand(null, null), 0);
         assertTrue(outStream.toString().contains(Version.getAgentVersion()));
@@ -85,7 +85,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void list() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void list() throws AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("list"));
 
         VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
@@ -100,7 +100,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void descriptionWithPattern() throws AgentInitializationException, InvocationTargetException, IOException, NoSuchMethodException, AgentLoadException, IllegalAccessException {
+    public void descriptionWithPattern() throws AgentInitializationException, IOException, AgentLoadException, AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("start","blub"));
 
         VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
@@ -133,13 +133,13 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void status() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void status() throws IOException, AgentException {
         testStatus(true,0);
         testStatus(false,1);
     }
 
-    @Test(expectedExceptions = InvocationTargetException.class)
-    public void throwException() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    @Test(expectedExceptions = AgentException.class)
+    public void throwException() throws IOException, AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("start", "42"));
 
         VirtualMachine vm = createMock(VirtualMachine.class);
@@ -150,7 +150,7 @@ public class CommandDispatcherTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown.*")
-    public void unknownCommand() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void unknownCommand() throws AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("blub", "42"));
 
         d.dispatchCommand(null,null);
@@ -158,7 +158,7 @@ public class CommandDispatcherTest {
 
     // ======================================================================================================
 
-    private void testCommand(String pCommand, boolean pActive, int pRc, String... pProcess) throws IOException, AgentLoadException, AgentInitializationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private void testCommand(String pCommand, boolean pActive, int pRc, String... pProcess) throws IOException, AgentLoadException, AgentInitializationException, AgentException {
         String p = pProcess.length > 0 ? pProcess[0] : "42";
         CommandDispatcher d = new CommandDispatcher(opts(pCommand,p));
 
@@ -180,7 +180,7 @@ public class CommandDispatcherTest {
         verify(vm,vmh);
     }
 
-    private void testStatus(boolean pActive,int pRc) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private void testStatus(boolean pActive,int pRc) throws IOException, AgentException {
         CommandDispatcher d = new CommandDispatcher(opts("status", "18"));
 
         VirtualMachine vm = createMock(VirtualMachine.class);

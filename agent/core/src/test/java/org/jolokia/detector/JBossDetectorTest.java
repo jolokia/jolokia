@@ -23,6 +23,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestBuilder;
@@ -171,7 +172,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void verifyIsClassLoadedArgumentChecks2NullClassname() {
-        detector.isClassLoaded(null, createMock(Instrumentation.class));
+        detector.isClassLoaded(null, EasyMock.<Instrumentation>createMock(Instrumentation.class));
     }
 
     @Test

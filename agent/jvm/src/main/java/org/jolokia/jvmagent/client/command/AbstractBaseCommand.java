@@ -16,13 +16,17 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Properties;
-
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.VirtualMachine;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Properties;
 
 /**
  * Stateless Base command providing helper functions
@@ -46,30 +50,41 @@ public abstract class AbstractBaseCommand {
      * @param pHandler the handler holding VM operation
      * @return 0 in case of a success, 1 otherwise
      *
-     * @throws IllegalAccessException if call via reflection fails
-     * @throws NoSuchMethodException should not happen since we use well known methods
-     * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
+     * @throws AgentException if call via reflection fails, or an exception occurred during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
       */
-    abstract int execute(OptionsAndArgs pOpts, Object pVm,VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException;
+    abstract int execute(OptionsAndArgs pOpts, Object pVm,VirtualMachineHandler pHandler) throws AgentException;
 
     // =======================================================================================================
 
     /**
-     * Execute {@link com.sun.tools.attach.VirtualMachine#loadAgent(String, String)} via reflection
+     * Execute {@link com.sun.tools.attach.VirtualMachine#loadAgent(String, String)} directly or via reflection
      *
      * @param pVm the VirtualMachine object, typeless
      * @param pOpts options from where to extract the agent path and options
      * @param pAdditionalOpts optional additional options to be appended to the agent options. Must be a CSV string.
      */
-    protected void loadAgent(Object pVm, OptionsAndArgs pOpts,String ... pAdditionalOpts) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("loadAgent",String.class, String.class);
-        String args = pOpts.toAgentArg();
+    protected void loadAgent(Object pVm, OptionsAndArgs pOpts,String ... pAdditionalOpts) throws AgentException {
+        String agent = pOpts.getJarFilePath();
+        String options = pOpts.toAgentArg();
         if (pAdditionalOpts.length > 0) {
-            args = args.length() != 0 ? args + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
+            options = options.length() != 0 ? options + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
         }
-        method.invoke(pVm, pOpts.getJarFilePath(),args.length() > 0 ? args : null);
+        if ("".equals(options)) {
+            options = null;
+        }
+
+        try {
+            if (pVm instanceof VirtualMachine) {
+                ((VirtualMachine) pVm).loadAgent(agent, options);
+            } else {
+                Class clazz = pVm.getClass();
+                Method method = clazz.getMethod("loadAgent",String.class, String.class);
+                method.invoke(pVm, agent, options);
+            }
+        } catch (AgentLoadException | AgentInitializationException | IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new AgentException("Failed to load agent", e);
+        }
     }
 
     /**
@@ -80,7 +95,7 @@ public abstract class AbstractBaseCommand {
      * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless
      * @return the agent URL if it is was set by a previous 'start' command.
      */
-    protected String checkAgentUrl(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    protected String checkAgentUrl(Object pVm) throws AgentException {
         return checkAgentUrl(pVm, 0);
     }
 
@@ -93,7 +108,7 @@ public abstract class AbstractBaseCommand {
      * @param delayInMs wait that many ms before fetching the properties
      ** @return the agent URL if it is was set by a previous 'start' command.
      */
-    protected String checkAgentUrl(Object pVm, int delayInMs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    protected String checkAgentUrl(Object pVm, int delayInMs) throws AgentException {
         if (delayInMs != 0) {
             try {
                 Thread.sleep(delayInMs);
@@ -106,14 +121,26 @@ public abstract class AbstractBaseCommand {
     }
 
     /**
-     * Execute {@link com.sun.tools.attach.VirtualMachine#getSystemProperties()} via reflection
+     * Execute {@link com.sun.tools.attach.VirtualMachine#getSystemProperties()} directly or via reflection
      * @param pVm the VirtualMachine object, typeless
      * @return the system properties
      */
-    protected Properties getAgentSystemProperties(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("getSystemProperties");
-        return (Properties) method.invoke(pVm);
+    protected Properties getAgentSystemProperties(Object pVm) throws AgentException {
+        Properties systemProperties;
+
+        try {
+            if (pVm instanceof VirtualMachine) {
+                systemProperties = ((VirtualMachine) pVm).getSystemProperties();
+            } else {
+                Class clazz = pVm.getClass();
+                Method method = clazz.getMethod("getSystemProperties");
+                systemProperties = (Properties) method.invoke(pVm);
+            }
+        } catch (IOException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new AgentException("Failed to get agent system properties", e);
+        }
+
+        return systemProperties;
     }
 
     /**
@@ -131,17 +158,9 @@ public abstract class AbstractBaseCommand {
             StringBuffer desc = new StringBuffer("process matching \"")
                     .append(pOpts.getProcessPattern().pattern())
                     .append("\"");
-            try {
-                desc.append(" (PID: ")
-                        .append(pHandler.findProcess(pOpts.getProcessPattern()).getId())
-                        .append(")");
-            } catch (InvocationTargetException e) {
-                // ignored
-            } catch (NoSuchMethodException e) {
-                // ignored
-            } catch (IllegalAccessException e) {
-                // ignored
-            }
+            desc.append(" (PID: ")
+                    .append(pHandler.findProcess(pOpts.getProcessPattern()).getId())
+                    .append(")");
             return desc.toString();
         } else {
             return "(null)";

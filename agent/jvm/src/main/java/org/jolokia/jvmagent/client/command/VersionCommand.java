@@ -16,11 +16,11 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.jolokia.Version;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Print out the version of the agent
@@ -36,7 +36,7 @@ public class VersionCommand extends AbstractBaseCommand {
 
     @Override
     @SuppressWarnings({"PMD.SystemPrintln"})
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) {
         StringBuilder version = new StringBuilder("Jolokia JVM Agent ").append(Version.getAgentVersion());
         if (pOpts.isVerbose()) {
             version.append(" (Protocol: ").append(Version.getProtocolVersion()).append(")");
