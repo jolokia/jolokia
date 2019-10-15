@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -100,6 +101,13 @@ public class PolicyRestrictor implements Restrictor {
                 // Silently ignore as the feature might not be available for the
                 // given parser
             }
+        }
+        // Also set secure processing to true
+        try {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException exp) {
+            // Silently ignore as the feature might not be available for the
+            // given parser
         }
         return factory.newDocumentBuilder().parse(pInput);
     }
