@@ -3,6 +3,7 @@ package org.jolokia.discovery;
 import java.io.IOException;
 import java.util.List;
 
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONArray;
 
@@ -32,11 +33,16 @@ public class JolokiaDiscovery implements JolokiaDiscoveryMBean {
 
     /** {@inheritDoc} */
     public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
+        return lookupAgentsWithTimeoutAndMulticastAddress(1000, ConfigKey.MULTICAST_GROUP.getDefaultValue(), Integer.parseInt(ConfigKey.MULTICAST_PORT.getDefaultValue()));
+    }
+
+    /** {@inheritDoc} */
+    public List lookupAgentsWithTimeoutAndMulticastAddress(int pTimeout, String pMulticastGroup, int pMulticastPort) throws IOException {
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                         .agentId(agentId)
                         .build();
-        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, logHandler);
+        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, pMulticastGroup, pMulticastPort, logHandler);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
             ret.add(in.getAgentDetails().toJSONObject());

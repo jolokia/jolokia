@@ -27,6 +27,9 @@ class MulticastSocketListenerThread extends Thread {
     // Restrictor checking for remote address
     private final Restrictor restrictor;
 
+    private final String multicastGroup;
+    private final int multicastPort;
+
     private final LogHandler logHandler;
 
     // Address to listen to
@@ -41,23 +44,29 @@ class MulticastSocketListenerThread extends Thread {
     /**
      * Constructor, used internally.
      *
+     * @param name the name of the new thread
      * @param pHostAddress host address for creating a socket to listen to
      * @param pAgentDetailsHolder the holder which has the agent details
      * @param pRestrictor restrictor to check whether an incoming package should be answered which
      *                    is done only when {@link Restrictor#isRemoteAccessAllowed(String...)} returns true for
      *                    the address from which the packet was received.
+     * @param pMulticastGroup multicast IPv4 address
+     * @param pMulticastPort multicast port
      * @param pLogHandler log handler used for logging
+     * @throws IOException if join multicast group fails
      */
-    MulticastSocketListenerThread(String name, InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, LogHandler pLogHandler) throws IOException {
+    MulticastSocketListenerThread(String name, InetAddress pHostAddress, AgentDetailsHolder pAgentDetailsHolder, Restrictor pRestrictor, String pMulticastGroup, int pMulticastPort, LogHandler pLogHandler) throws IOException {
         super(name);
         address = pHostAddress != null ? pHostAddress : NetworkUtil.getLocalAddressWithMulticast();
         agentDetailsHolder = pAgentDetailsHolder;
         restrictor = pRestrictor;
+        multicastGroup = pMulticastGroup;
+        multicastPort = pMulticastPort;
         logHandler = pLogHandler;
         // For debugging, uncomment:
         //logHandler = new LogHandler.StdoutLogHandler(true);
 
-        socket = MulticastUtil.newMulticastSocket(address,logHandler);
+        socket = MulticastUtil.newMulticastSocket(address,multicastGroup,multicastPort,logHandler);
         logHandler.debug(address + "<-- Listening for queries");
         setDaemon(true);
     }
@@ -127,7 +136,7 @@ class MulticastSocketListenerThread extends Thread {
         if (socket.isClosed()) {
             logHandler.info(address + "<-- Socket closed, reopening it");
             try {
-                socket = MulticastUtil.newMulticastSocket(address, logHandler);
+                socket = MulticastUtil.newMulticastSocket(address, multicastGroup, multicastPort, logHandler);
             } catch (IOException exp) {
                 logHandler.error("Cannot reopen socket. Exiting multicast listener thread ...",exp);
                 throw new SocketVerificationFailedException(exp);

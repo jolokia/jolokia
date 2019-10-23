@@ -197,6 +197,16 @@ public enum ConfigKey {
      */
     DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
 
+    /**
+     * IPv4 Address for Jolokia's Multicast group.
+     */
+    MULTICAST_GROUP("multicastGroup",true,false,"239.192.48.84"),
+
+    /**
+     * Multicast port where to listen for queries.
+     */
+    MULTICAST_PORT("multicastPort",true,false,"24884"),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 

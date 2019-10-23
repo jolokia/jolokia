@@ -369,6 +369,16 @@
         </td>
       </tr>
       <tr>
+        <td><constant>multicastGroup</constant></td>
+        <td>The multicast group IPv4 address.</td>
+        <td><constant>239.192.48.84</constant></td>
+      </tr>
+      <tr>
+        <td><constant>multicastPort</constant></td>
+        <td>The multicast port.</td>
+        <td><constant>24884</constant></td>
+      </tr>
+      <tr>
         <td><constant>agentId</constant></td>
         <td>
           A unique ID for this agent. By default a unique id is
