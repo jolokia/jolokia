@@ -260,14 +260,14 @@ options used by detectors for post-initialization steps. See the description of
 
 |`org.jolokia.discoveryEnabled`
 |`false`
-|Is set to `true` then this servlet will
+|If set to `true` then this servlet will
 listen for multicast request (multicast-group `239.192.48.84`,
 port `24884` by default, but can be configured).
 By default this option is disabled in order to
-avoid conflicts with an Java EE standards (though this should't
+avoid conflicts with an Jakarta EE standards (though this shouldn't
 harm anyways). This option can also be switched on with an
 environment variable
-`JOLOKIA_DISCOVERY` or the system
+`JOLOKIA_DISCOVERY_ENABLED` or the system
 property `jolokia.discoveryEnabled` set to
 `true`.
 

@@ -103,6 +103,11 @@
        Fix the usage of JRE 1.8 classes that does not work with Java 6
       </action>
     </release>
+    <release version="1.6.3" description="Release 1.6.3" date="">
+      <action dev="graben" type="add" issue="421">
+        Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
+      </action>
+    </release>
     <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
       <action dev="dsimansk" type="update" issue="403">
         Add support to load multiple CA certs from store

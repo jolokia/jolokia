@@ -179,7 +179,7 @@ public enum ConfigKey {
      * Whether to enable listening and responding to discovery multicast requests
      * for discovering agent details.
      */
-    DISCOVERY_ENABLED("discoveryEnabled",true,false),
+    DISCOVERY_ENABLED("discoveryEnabled",true,false, Constants.FALSE),
 
     /**
      * Specify the agent URL to return for an discovery multicast request. If this option

@@ -24,6 +24,9 @@ class MulticastSocketListenerThread extends Thread {
     // Jolokia services
     private final JolokiaContext context;
 
+    private final String multicastGroup;
+    private final int multicastPort;
+
     // Address to listen to
     private final InetAddress address;
 

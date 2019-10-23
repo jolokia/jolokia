@@ -91,7 +91,8 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         requestHandler = new HttpRequestHandler(jolokiaContext);
     }
-     /**
+
+    /**
      * Handler a request. If the handler is not yet started, an exception is thrown
      *
      * @param pHttpExchange the request/response object

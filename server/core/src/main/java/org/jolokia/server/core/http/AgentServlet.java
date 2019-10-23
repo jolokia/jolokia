@@ -187,27 +187,10 @@ public class AgentServlet extends HttpServlet {
         config.update(new ServletConfigFacade(pServletConfig));
         // ... and ServletContext
         config.update(new ServletContextFacade(getServletContext()));
-        // Add any environment parameters found
-        config.update(configFromEnvironment());
+
         return config;
     }
 
-    private Configuration configFromEnvironment() {
-        Map<String,String> envConfig = new HashMap<>();
-        for (ConfigKey key : new ConfigKey[] {
-                // Todo: Might be even more generic as part of the key
-                ConfigKey.DISCOVERY_AGENT_URL,
-                ConfigKey.DISCOVERY_ENABLED }) {
-            String value = System.getProperty(key.asSystemProperty());
-            if (value == null) {
-                value = System.getenv(key.asEnvVariable());
-            }
-            if (value != null) {
-                envConfig.put(key.getKeyValue(), value);
-            }
-        }
-        return new StaticConfiguration(envConfig);
-    }
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
      * to provide a custom log handler.

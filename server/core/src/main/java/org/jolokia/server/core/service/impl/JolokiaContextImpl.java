@@ -59,6 +59,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
+    public String getConfig(ConfigKey pOption, boolean checkSysOrEnv) {
+        return getConfiguration().getConfig(pOption, checkSysOrEnv);
+    }
+
+    /** {@inheritDoc} */
     public Set<ConfigKey> getConfigKeys() {
         return getConfiguration().getConfigKeys();
     }

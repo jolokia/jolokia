@@ -26,8 +26,8 @@ public final class MulticastUtil {
 
     static MulticastSocket newMulticastSocket(InetAddress pAddress, JolokiaContext pContext) throws IOException {
         // TODO: IpV6 (not supported yet)
-        String multicastGroup = pContext.getConfig(ConfigKey.MULTICAST_GROUP);
-        int multicastPort = Integer.parseInt(pContext.getConfig(ConfigKey.MULTICAST_PORT));
+        String multicastGroup = pContext.getConfig(ConfigKey.MULTICAST_GROUP, true);
+        int multicastPort = Integer.parseInt(pContext.getConfig(ConfigKey.MULTICAST_PORT, true));
 
         InetSocketAddress socketAddress =
                 new InetSocketAddress(multicastGroup, multicastPort);

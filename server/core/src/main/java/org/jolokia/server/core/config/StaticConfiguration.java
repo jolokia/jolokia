@@ -88,8 +88,28 @@ public class StaticConfiguration implements Configuration {
 
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
+        return getConfig(pKey, false);
+    }
+
+    /** {@inheritDoc} */
+    public String getConfig(ConfigKey pKey, boolean checkSysOrEnv) {
+        if (checkSysOrEnv) {
+            // 1. As system property
+            String property = System.getProperty(pKey.asSystemProperty());
+            if (property != null) {
+                return property;
+            }
+
+            // 2. As environment variable
+            property = System.getenv(pKey.asEnvVariable());
+            if (property != null) {
+                return property;
+            }
+        }
+        // 3. As configured valued
         String value = configMap.get(pKey);
         if (value == null) {
+            // 4. Default value
             value = pKey.getDefaultValue();
         }
         return value;

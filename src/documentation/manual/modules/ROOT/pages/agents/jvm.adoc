@@ -280,12 +280,12 @@ of course :)
 |
 
 |`discoveryEnabled`
-|Is set to `false` then this agent will
+|If set to `false` then this agent will
 not listen for multicast request (multicast-group 239.192.48.84,
 port 24884 by default, but can configured individually).
 By default this option is enabled. This option can also be switched on with an
 environment variable
-`JOLOKIA_DISCOVERY` or the system
+`JOLOKIA_DISCOVERY_ENABLED` or the system
 property `jolokia.discoveryEnabled` set to
 `true`.
 |Default: `true`
