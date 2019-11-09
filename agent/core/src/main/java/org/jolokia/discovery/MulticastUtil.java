@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
+import org.jolokia.config.ConfigKey;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
 import org.jolokia.util.QuietLogHandler;
@@ -17,22 +18,16 @@ import org.jolokia.util.QuietLogHandler;
  */
 public final class MulticastUtil {
 
-    // IPv4 Address for Jolokia's Multicast group
-    public static final String JOLOKIA_MULTICAST_GROUP = "239.192.48.84";
-
-    // Multicast port where to listen for queries
-    public static final int JOLOKIA_MULTICAST_PORT = 24884;
-
     // Utility class
     private MulticastUtil() {
     }
 
-    static MulticastSocket newMulticastSocket(InetAddress pAddress, LogHandler pLogHandler) throws IOException {
+    static MulticastSocket newMulticastSocket(InetAddress pAddress, String pMulticastGroup, int pMulticastPort, LogHandler pLogHandler) throws IOException {
         // TODO: IpV6 (not supported yet)
         InetSocketAddress socketAddress =
-                new InetSocketAddress(JOLOKIA_MULTICAST_GROUP, JOLOKIA_MULTICAST_PORT);
+                new InetSocketAddress(pMulticastGroup, pMulticastPort);
 
-        MulticastSocket socket = new MulticastSocket(JOLOKIA_MULTICAST_PORT);
+        MulticastSocket socket = new MulticastSocket(pMulticastPort);
         socket.setReuseAddress(true);
         setOutgoingInterfaceForMulticastRequest(pAddress, socket);
         socket.setTimeToLive(255);
@@ -51,8 +46,8 @@ public final class MulticastUtil {
      * @return list of received answers, never null
      * @throws IOException if something fails during the discovery request
      */
-    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout) throws IOException {
-        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, new QuietLogHandler());
+    public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout, String pMulticastGroup, int pMulticastPort) throws IOException {
+        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, pMulticastGroup, pMulticastPort, new QuietLogHandler());
     }
 
     /**
@@ -66,8 +61,10 @@ public final class MulticastUtil {
      */
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg,
                                                                             int pTimeout,
+                                                                            String pMulticastGroup,
+                                                                            int pMulticastPort,
                                                                             LogHandler pLogHandler) throws IOException {
-        final List<Future<List<DiscoveryIncomingMessage>>> futures = sendDiscoveryRequests(pOutMsg, pTimeout, pLogHandler);
+        final List<Future<List<DiscoveryIncomingMessage>>> futures = sendDiscoveryRequests(pOutMsg, pTimeout, pMulticastGroup, pMulticastPort, pLogHandler);
         return collectIncomingMessages(pTimeout, futures, pLogHandler);
     }
 
@@ -75,6 +72,8 @@ public final class MulticastUtil {
     // Send requests in parallel threads, return the futures for getting the result
     private static List<Future<List<DiscoveryIncomingMessage>>> sendDiscoveryRequests(DiscoveryOutgoingMessage pOutMsg,
                                                                                       int pTimeout,
+                                                                                      String pMulticastGroup,
+                                                                                      int pMulticastPort,
                                                                                       LogHandler pLogHandler) throws SocketException, UnknownHostException {
         // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
         // should be sent, on each interface respectively. Currently, only IpV4 is supported.
@@ -83,7 +82,7 @@ public final class MulticastUtil {
         final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<Future<List<DiscoveryIncomingMessage>>>(addresses.size());
         for (InetAddress address : addresses) {
             // Discover UDP packet send to multicast address
-            DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(JOLOKIA_MULTICAST_GROUP), JOLOKIA_MULTICAST_PORT);
+            DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(pMulticastGroup), pMulticastPort);
             Callable<List<DiscoveryIncomingMessage>> findAgentsCallable = new FindAgentsCallable(address, out, pTimeout, pLogHandler);
             futures.add(executor.submit(findAgentsCallable));
         }

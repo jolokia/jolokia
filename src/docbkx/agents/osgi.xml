@@ -371,6 +371,16 @@
         </td>
       </tr>
       <tr>
+        <td><constant>org.jolokia.multicastGroup</constant></td>
+        <td><constant>239.192.48.84</constant></td>
+        <td>The multicast group IPv4 address.</td>
+      </tr>
+      <tr>
+        <td><constant>org.jolokia.multicastPort</constant></td>
+        <td><constant>24884</constant></td>
+        <td>The multicast port.</td>
+      </tr>
+      <tr>
         <td>org.jolokia.realm</td>
         <td>jolokia</td>
         <td>

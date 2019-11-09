@@ -478,6 +478,16 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
           </td>
         </tr>
         <tr>
+          <td><constant>multicastGroup</constant></td>
+          <td>The multicast group IPv4 address.</td>
+          <td><constant>239.192.48.84</constant></td>
+        </tr>
+        <tr>
+          <td><constant>multicastPort</constant></td>
+          <td>The multicast port.</td>
+          <td><constant>24884</constant></td>
+        </tr>
+        <tr>
           <td><constant>sslProtocol</constant></td>
           <td>
             The list of SSL / TLS protocols enabled. Valid options are available in the documentation

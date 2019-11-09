@@ -199,12 +199,32 @@ public class AgentServlet extends HttpServlet {
         String url = findAgentUrl(pConfig);
         if (url != null || listenForDiscoveryMcRequests(pConfig)) {
             backendManager.getAgentDetails().setUrl(url);
+            String multicastGroup = getOrDefault(ConfigKey.MULTICAST_GROUP, "JOLOKIA_MULTICAST_GROUP", pConfig, String.class);
+            int multicastPort = getOrDefault(ConfigKey.MULTICAST_PORT, "JOLOKIA_MULTICAST_PORT", pConfig, Integer.class);
             try {
-                discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,logHandler);
+                discoveryMulticastResponder = new DiscoveryMulticastResponder(backendManager,restrictor,multicastGroup,multicastPort,logHandler);
                 discoveryMulticastResponder.start();
             } catch (IOException e) {
                 logHandler.error("Cannot start discovery multicast handler: " + e,e);
             }
+        }
+    }
+
+    private <T> T getOrDefault(ConfigKey configKey, String sysEnvKey, Configuration pConfig, Class<T> clazz) {
+        String property = System.getProperty("jolokia." + configKey.getKeyValue());
+        if (property == null) {
+            property = System.getenv(sysEnvKey);
+            if (property == null) {
+                property = pConfig.get(configKey);
+                if (property == null) {
+                    property = configKey.getDefaultValue();
+                }
+            }
+        }
+        if (clazz == Integer.class) {
+           return (T) Integer.valueOf(property);
+        } else {
+            return (T) property;
         }
     }
 
