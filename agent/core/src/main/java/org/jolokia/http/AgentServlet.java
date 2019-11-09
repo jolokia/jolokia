@@ -210,45 +210,58 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private <T> T getOrDefault(ConfigKey configKey, String sysEnvKey, Configuration pConfig, Class<T> clazz) {
-        String property = System.getProperty("jolokia." + configKey.getKeyValue());
-        if (property == null) {
-            property = System.getenv(sysEnvKey);
-            if (property == null) {
-                property = pConfig.get(configKey);
-                if (property == null) {
-                    property = configKey.getDefaultValue();
-                }
-            }
-        }
-        if (clazz == Integer.class) {
-           return (T) Integer.valueOf(property);
-        } else {
-            return (T) property;
-        }
-    }
 
     // Try to find an URL for system props or config
     private String findAgentUrl(Configuration pConfig) {
-        // System property has precedence
-        String url = System.getProperty("jolokia." + ConfigKey.DISCOVERY_AGENT_URL.getKeyValue());
-        if (url == null) {
-            url = System.getenv("JOLOKIA_DISCOVERY_AGENT_URL");
-            if (url == null) {
-                url = pConfig.get(ConfigKey.DISCOVERY_AGENT_URL);
-            }
-        }
+        String url = getOrDefault(ConfigKey.DISCOVERY_AGENT_URL,
+                                  "JOLOKIA_DISCOVERY_AGENT_URL",
+                                  pConfig,
+                                  String.class);
         return NetworkUtil.replaceExpression(url);
     }
 
     // For war agent needs to be switched on
     private boolean listenForDiscoveryMcRequests(Configuration pConfig) {
-        // Check for system props, system env and agent config
-        boolean sysProp = System.getProperty("jolokia." + ConfigKey.DISCOVERY_ENABLED.getKeyValue()) != null;
-        boolean env     = System.getenv("JOLOKIA_DISCOVERY") != null;
-        boolean config  = pConfig.getAsBoolean(ConfigKey.DISCOVERY_ENABLED);
-        return sysProp || env || config;
+        return getOrDefault(ConfigKey.DISCOVERY_ENABLED,
+                            "JOLOKIA_DISCOVERY",
+                            pConfig,
+                            Boolean.class);
     }
+
+        private <T> T getOrDefault(ConfigKey configKey, String sysEnvKey, Configuration pConfig, Class<T> clazz) {
+
+        // 1. As system property
+        String property = System.getProperty("jolokia." + configKey.getKeyValue());
+        if (property != null) {
+            return getAsType(property, clazz);
+        }
+
+        // 2. As environment variable
+        property = System.getenv(sysEnvKey);
+        if (property != null) {
+            return getAsType(property, clazz);
+        }
+
+        // 3. As configured valued
+        property = pConfig.get(configKey);
+        if (property != null) {
+            return getAsType(property, clazz);
+        }
+
+        // 4. Default value
+        return getAsType(configKey.getDefaultValue(), clazz);
+    }
+
+    private <T> T getAsType(String property, Class<T> clazz) {
+        if (clazz == Integer.class) {
+           return (T) Integer.valueOf(property);
+        } else if (clazz == Boolean.class) {
+            return (T) Boolean.valueOf(property);
+        } else {
+            return (T) property;
+        }
+    }
+
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
      * to provide a custom log handler. This method is called before {@link RestrictorFactory#createRestrictor(Configuration,LogHandler)} so the log handler

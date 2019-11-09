@@ -24,8 +24,8 @@
   </properties>
   <body>
     <release version="1.6.3" description="Release 1.6.3" date="">
-      <action dev="graben" type="update" issue="421">
-        Make multicast discovery address configurable
+      <action dev="graben" type="add" issue="421">
+        Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
       </action>
     </release>
     <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
