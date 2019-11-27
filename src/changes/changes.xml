@@ -27,6 +27,9 @@
       <action dev="graben" type="add" issue="421">
         Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
       </action>
+      <action dev="coheigea" type="fix" issue="427">
+        Configure TLS settings per-connection and not globally
+      </action>
     </release>
     <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
       <action dev="dsimansk" type="update" issue="403">
