@@ -1,17 +1,16 @@
 package org.jolokia.converter.json;
 
-import mockit.Mock;
-import mockit.MockUp;
-import org.jolokia.converter.json.simplifier.BigIntegerSimplifier;
-import org.jolokia.converter.json.simplifier.UrlSimplifier;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.management.AttributeNotFoundException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Stack;
+
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.converter.json.simplifier.BigIntegerSimplifier;
+import org.jolokia.converter.json.simplifier.UrlSimplifier;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
@@ -31,15 +30,9 @@ public class SimplifiersTest {
         bigIntegerSimplifier = new BigIntegerSimplifier();
         urlSimplifier = new UrlSimplifier();
 
-        new MockUp<ObjectToJsonConverter>() {
-            @Mock
-            public ValueFaultHandler getValueFaultHandler() {
-                return new PathAttributeFilterValueFaultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER);
-            }
-        };
         // Needed for subclassing final object
         converter = new ObjectToJsonConverter(null, null);
-        converter.setupContext();
+        converter.setupContext(new JsonConvertOptions.Builder().faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER).build());
     }
 
     @Test

@@ -244,7 +244,7 @@ public class JolokiaServerTest {
                        "admin:wrong");
     }
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    @Test(expectedExceptions = IOException.class)
     public void t_264_with_basic_auth_and_wrong_client_cert() throws Exception {
         httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
                        + getFullCertSetup(),

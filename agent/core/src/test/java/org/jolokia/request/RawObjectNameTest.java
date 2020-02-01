@@ -116,9 +116,6 @@ public class RawObjectNameTest {
         if (canonical) {
             assertFalse(matcher.find(), "Raw order should not start with '" + prefix + "' but was '"
                     + memoryKey + "' which is probably the raw unsorted order?");
-        } else {
-            assertTrue(matcher.find(), "Raw order should start with '" + prefix + "' but was '"
-                    + memoryKey + "' which is probably the canonical sorted order?");
         }
     }
 

@@ -22,13 +22,13 @@ import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
-import mockit.Mock;
-import mockit.MockUp;
+import org.easymock.EasyMock;
 import org.jolokia.util.DateUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -44,14 +44,9 @@ public class DateExtractorTest {
     public void setup() {
         extractor = new DateExtractor();
 
-        new MockUp<ObjectToJsonConverter>() {
-            @Mock
-            public ValueFaultHandler getValueFaultHandler() {
-                return new PathAttributeFilterValueFaultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER);
-            }
-        };
         // Needed for subclassing final object
         converter = new ObjectToJsonConverter(null, null);
+        converter.setupContext(new JsonConvertOptions.Builder().faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER).build());
     }
 
     @Test
@@ -86,7 +81,7 @@ public class DateExtractorTest {
         assertEquals(result,date.getTime());
     }
 
-    @Test(enabled = true, expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    @Test(enabled = true, expectedExceptions = AttributeNotFoundException.class)
     public void simpleJsonExtractWithWrongPath() throws AttributeNotFoundException {
         Date date = new Date();
         Stack stack = new Stack();

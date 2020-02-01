@@ -44,12 +44,16 @@ public class JaasAuthenticator extends BasicAuthenticator {
     public boolean checkCredentials(String pUser, String pPassword) {
         try {
             final CallbackHandler handler = new UserPasswordCallbackHandler(pUser, pPassword);
-            LoginContext loginContext = new LoginContext(realm, handler);
+            LoginContext loginContext = createLoginContext(realm, handler);
             loginContext.login();
             subjectThreadLocal.set(loginContext.getSubject());
             return true;
         } catch (LoginException e) {
             return false;
         }
+    }
+
+    protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
+        return new LoginContext(realm, handler);
     }
 }
