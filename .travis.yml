@@ -1,5 +1,5 @@
 language: java
-dist: bionic
+dist: xenial
 before_install:
   - echo "127.0.0.1 "`hostname` | sudo tee /etc/hosts
 after_script:
@@ -8,8 +8,4 @@ after_script:
 jdk:
   - openjdk7
   - openjdk8
-  - oraclejdk9
-  - oraclejdk11
-# Currently broken on Travis:
-#  - oraclejdk7
-  - oraclejdk8
+  - openjdk11
