@@ -16,9 +16,12 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.util.Collections;
 import java.util.List;
 import javax.management.MBeanInfo;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 import org.json.simple.JSONObject;
 
 /**
@@ -40,6 +43,10 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
 
     public List<MBeanInfo> getMbeanInfoList() {
         throw new UnsupportedOperationException();
+    }
+
+    public String getClassName() {
+        return (String) ((JSONObject)getValue()).get("class");
     }
 
 }
