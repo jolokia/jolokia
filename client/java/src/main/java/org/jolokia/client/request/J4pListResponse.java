@@ -16,6 +16,9 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.util.List;
+import javax.management.MBeanInfo;
+import javax.management.ObjectInstance;
 import org.json.simple.JSONObject;
 
 /**
@@ -31,10 +34,12 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
         super(pRequest, pJsonResponse);
     }
 
-    /*
-     * TODO: Provided typed access to the Meta-Data, including meta data info
-     * (a la MBeanInfo, maybe use MBeanInfo directly, too)
-     *
-     * Currently, only access to the plain return JSON Object is available.
-     */
+    public List<ObjectInstance> getObjectInstances() {
+        throw new UnsupportedOperationException();
+    }
+
+    public List<MBeanInfo> getMbeanInfoList() {
+        throw new UnsupportedOperationException();
+    }
+
 }
