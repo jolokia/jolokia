@@ -42,8 +42,8 @@ import org.jolokia.client.request.J4pSearchResponse;
 import org.jolokia.client.request.J4pWriteRequest;
 
 /**
- * I emulate a subset of the functionality of a native MBeanServerConnector
- * but over a Jolokia connection to the VM
+ * I emulate a subset of the functionality of a native MBeanServerConnector but over a Jolokia
+ * connection to the VM
  */
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
@@ -91,10 +91,19 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     return new ObjectInstance(name, listResponse.getClassName());
   }
 
-  private List<ObjectInstance> listObjectInstances(ObjectName name) throws IOException {
+  private List<ObjectInstance> listObjectInstances(ObjectName name)
+      throws IOException {
+    J4pListRequest listRequest = new J4pListRequest((String) null);
+    if (name != null) {
+      listRequest = new J4pListRequest(name);
+    }
     final J4pListResponse listResponse = this
-        .unwrappExecute(new J4pListRequest(name));
-    return listResponse.getObjectInstances();
+        .unwrappExecute(listRequest);
+    try {
+      return listResponse.getObjectInstances(name);
+    } catch (MalformedObjectNameException e) {
+      throw new UncheckedJmxAdapterException(e);
+    }
   }
 
 
@@ -115,9 +124,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
     final HashSet<ObjectName> result = new HashSet<ObjectName>();
     //if name is null, use list instead of search
-    if(name == null) {
+    if (name == null) {
       try {
-        name=ObjectName.getInstance("");
+        name = ObjectName.getInstance("");
       } catch (MalformedObjectNameException ignore) {
       }
     }
@@ -125,7 +134,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest(name);
     J4pSearchResponse response = unwrappExecute(j4pSearchRequest);
     final List<ObjectName> names = response.getObjectNames();
-
 
     for (ObjectName objectName : names) {
       if (query == null || applyQuery(query, objectName)) {
@@ -138,7 +146,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   private boolean applyQuery(QueryExp query, ObjectName objectName) {
-    if(QueryEval.getMBeanServer() == null) {
+    if (QueryEval.getMBeanServer() == null) {
       query.setMBeanServer(this.createStandinMbeanServerProxyForQueryEvaluation());
     }
     try {
@@ -152,21 +160,23 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   /**
    * Query envaluation requires an MBeanServer but only to figure out objectInstance
+   *
    * @return a dynamic proxy dispatching getObjectInstance back to myself
    */
   private MBeanServer createStandinMbeanServerProxyForQueryEvaluation() {
-    return (MBeanServer) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{MBeanServer.class},
-        new InvocationHandler() {
-          @Override
-          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if(method.getName().contains("getObjectInstance") && args.length == 1) {
-              return getObjectInstance((ObjectName) args[0]);
-            }
-            else {
-              throw new UnsupportedOperationException("This MBeanServer proxy does not support " + method);
-            }
-          }
-        });
+    return (MBeanServer) Proxy
+        .newProxyInstance(this.getClass().getClassLoader(), new Class[]{MBeanServer.class},
+            new InvocationHandler() {
+              @Override
+              public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().contains("getObjectInstance") && args.length == 1) {
+                  return getObjectInstance((ObjectName) args[0]);
+                } else {
+                  throw new UnsupportedOperationException(
+                      "This MBeanServer proxy does not support " + method);
+                }
+              }
+            });
   }
 
   @SuppressWarnings("unchecked")
@@ -179,7 +189,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
   }
 
-  private J4pResponse unwrapException (
+  private J4pResponse unwrapException(
       J4pException e) throws IOException {
     if (e.getCause() instanceof IOException) {
       throw (IOException) e.getCause();
@@ -229,8 +239,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public AttributeList setAttributes(ObjectName name, AttributeList attributes)
       throws InstanceNotFoundException, ReflectionException, IOException {
 
-    List<J4pWriteRequest> attributeWrites=new ArrayList<J4pWriteRequest>(attributes.size());
-    for(Attribute attribute: attributes.asList()) {
+    List<J4pWriteRequest> attributeWrites = new ArrayList<J4pWriteRequest>(attributes.size());
+    for (Attribute attribute : attributes.asList()) {
       attributeWrites.add(new J4pWriteRequest(name, attribute.getName(), attribute.getValue()));
     }
     try {
@@ -258,9 +268,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public String[] getDomains() throws IOException {
-    List<String> domains=new LinkedList<String>();
-    for(final ObjectName name : this.queryNames(null, null)) {
-      if(!domains.contains(name.getDomain())) {//use list to preserve ordering, if relevant
+    List<String> domains = new LinkedList<String>();
+    for (final ObjectName name : this.queryNames(null, null)) {
+      if (!domains.contains(name.getDomain())) {//use list to preserve ordering, if relevant
         domains.add(name.getDomain());
       }
     }
@@ -286,7 +296,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public void removeNotificationListener(ObjectName name, ObjectName listener)
       throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-		throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
 
   }
 
@@ -294,14 +304,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public void removeNotificationListener(ObjectName name, ObjectName listener,
       NotificationFilter filter,
       Object handback) throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-		throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
 
   }
 
   @Override
   public void removeNotificationListener(ObjectName name, NotificationListener listener)
       throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-		throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
 
   }
 
@@ -309,7 +319,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public void removeNotificationListener(ObjectName name, NotificationListener listener,
       NotificationFilter filter,
       Object handback) throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-		throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
 
   }
 
@@ -319,7 +329,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     final J4pListResponse response = this
         .unwrappExecute(new J4pListRequest(name));
     final List<MBeanInfo> list = response.getMbeanInfoList();
-    if(list.isEmpty()) {
+    if (list.isEmpty()) {
       throw new InstanceNotFoundException(name.getCanonicalName());
     }
     return list.get(0);
@@ -329,7 +339,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public boolean isInstanceOf(ObjectName name, String className)
       throws InstanceNotFoundException, IOException {
     try {
-      return Class.forName(className).isAssignableFrom(Class.forName(getObjectInstance(name).getClassName()));
+      return Class.forName(className)
+          .isAssignableFrom(Class.forName(getObjectInstance(name).getClassName()));
     } catch (ClassNotFoundException e) {
       return false;
     }
