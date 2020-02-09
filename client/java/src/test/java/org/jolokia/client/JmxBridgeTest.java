@@ -222,7 +222,27 @@ public class JmxBridgeTest {
       Assert.fail("Operation should not be supported by adapter");
     } catch ( UnsupportedOperationException ignore) {
     }
+  }
 
+  @Test
+  public void testOverallOperations() throws IOException {
+    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    Assert.assertEquals(
+        this.adapter.getMBeanCount(),
+        nativeServer.getMBeanCount(),
+        "Number of MBeans are the same");
+
+    Assert.assertEquals(
+        this.adapter.getDomains(),
+        nativeServer.getDomains(),
+        "Domain list is the same"
+    );
+
+    Assert.assertEquals(
+        this.adapter.getDefaultDomain(),
+        nativeServer.getDefaultDomain(),
+        "Default domain"
+    );
 
   }
 

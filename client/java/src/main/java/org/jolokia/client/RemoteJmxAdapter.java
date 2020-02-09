@@ -262,17 +262,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public String getDefaultDomain() throws IOException {
-    // Just pick the first
-    return getDomains()[0];
+    return "DefaultDomain";
   }
 
   @Override
   public String[] getDomains() throws IOException {
-    List<String> domains = new LinkedList<String>();
+    Set<String> domains = new HashSet<String>();
     for (final ObjectName name : this.queryNames(null, null)) {
-      if (!domains.contains(name.getDomain())) {//use list to preserve ordering, if relevant
         domains.add(name.getDomain());
-      }
     }
     return domains.toArray(new String[domains.size()]);
   }
