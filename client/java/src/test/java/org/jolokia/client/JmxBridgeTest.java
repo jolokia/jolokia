@@ -27,6 +27,10 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+/**
+ * I test the Jolokia Jmx adapter by comparing results with a traditional
+ * MBeanConnection
+ */
 public class JmxBridgeTest {
 
   private int agentPort;
@@ -52,9 +56,8 @@ public class JmxBridgeTest {
         {null, QUERY},
         {RUNTIME, QUERY}
     };
-
-
   }
+  
 
   @BeforeClass
   public void startAgent()
