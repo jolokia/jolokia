@@ -69,7 +69,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>sonatype-oss</id>
-      <url>http://oss.sonatype.org/content/groups/public</url>
+      <url>https://oss.sonatype.org/content/groups/public</url>
     </pluginRepository>
   </pluginRepositories>
 </project>

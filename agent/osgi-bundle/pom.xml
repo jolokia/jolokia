@@ -161,7 +161,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>ops4j.releases</id>
-      <url>http://repository.ops4j.org/maven2</url>
+      <url>https://repository.ops4j.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
