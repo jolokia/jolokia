@@ -45,6 +45,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+      <version>1.6.3-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient-osgi</artifactId>
       <version>4.5.3</version>
@@ -77,12 +83,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>

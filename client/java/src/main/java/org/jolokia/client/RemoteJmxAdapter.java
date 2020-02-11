@@ -6,14 +6,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanException;
@@ -28,6 +27,7 @@ import javax.management.ObjectName;
 import javax.management.QueryEval;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
+import javax.management.openmbean.OpenDataException;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.J4pExecRequest;
@@ -40,6 +40,7 @@ import org.jolokia.client.request.J4pResponse;
 import org.jolokia.client.request.J4pSearchRequest;
 import org.jolokia.client.request.J4pSearchResponse;
 import org.jolokia.client.request.J4pWriteRequest;
+import org.json.simple.JSONObject;
 
 /**
  * I emulate a subset of the functionality of a native MBeanServerConnector but over a Jolokia
@@ -126,8 +127,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     //if name is null, use list instead of search
     if (name == null) {
       try {
-        name = ObjectName.getInstance("");
-      } catch (MalformedObjectNameException ignore) {
+        name = getObjectName("");
+      } catch (UncheckedJmxAdapterException ignore) {
       }
     }
 
@@ -214,8 +215,36 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   @Override
-  public Object getAttribute(ObjectName name, String attribute) throws IOException {
-    return unwrappExecute(new J4pReadRequest(name, attribute)).getValue();
+  public Object getAttribute(ObjectName name, String attribute) throws AttributeNotFoundException,
+      InstanceNotFoundException,
+      IOException {
+    final Object rawValue = unwrappExecute(new J4pReadRequest(name, attribute)).getValue();
+    if(this.isPrimitive(rawValue)) {
+      return rawValue;
+    }
+    //special case, if the attribute is ObjectName
+    if(rawValue instanceof JSONObject && ((JSONObject) rawValue).size() == 1 && ((JSONObject) rawValue).containsKey("objectName")) {
+      return getObjectName("" + ((JSONObject) rawValue).get("objectName"));
+    }
+    try {
+      return ToOpenTypeConverter.returnOpenTypedValue(name + "." + attribute, rawValue);
+    } catch (OpenDataException e) {
+      return rawValue;
+    }
+  }
+
+
+  private boolean isPrimitive(Object rawValue) {
+    return rawValue == null || rawValue instanceof Number || rawValue instanceof Boolean
+        || rawValue instanceof String || rawValue instanceof Character;
+  }
+
+  static ObjectName getObjectName(String objectName) {
+    try {
+      return ObjectName.getInstance(objectName);
+    } catch (MalformedObjectNameException e) {
+      throw new UncheckedJmxAdapterException(e);
+    }
   }
 
   @Override
@@ -322,7 +351,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public MBeanInfo getMBeanInfo(ObjectName name)
-      throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+      throws InstanceNotFoundException, IOException {
     final J4pListResponse response = this
         .unwrappExecute(new J4pListRequest(name));
     final List<MBeanInfo> list = response.getMbeanInfoList();

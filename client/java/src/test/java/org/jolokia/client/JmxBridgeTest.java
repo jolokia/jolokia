@@ -6,13 +6,17 @@ import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ThrowingRunnable;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.ListenerNotFoundException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
-import javax.management.MBeanServer;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotificationListener;
@@ -32,29 +36,44 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * I test the Jolokia Jmx adapter by comparing results with a traditional
- * MBeanConnection
+ * I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection
  */
 public class JmxBridgeTest {
 
-  private int agentPort;
   private RemoteJmxAdapter adapter;
 
-  private final static ObjectName RUNTIME = getObjectName("java.lang:type=Runtime");
-  private final static QueryExp QUERY = Query.or(Query.anySubString(Query.classattr(), Query.value("Object")), Query.anySubString(Query.classattr(), Query.value("String")));
+  private final static ObjectName RUNTIME = RemoteJmxAdapter
+      .getObjectName("java.lang:type=Runtime");
+  private final static QueryExp QUERY = Query
+      .or(Query.anySubString(Query.classattr(), Query.value("Object")),
+          Query.anySubString(Query.classattr(), Query.value("String")));
 
-  private static ObjectName getObjectName(String s) {
-    try {
-      return ObjectName.getInstance(s);
-    } catch (MalformedObjectNameException e) {
-      Assert.fail("Invalid object name " + s);
-      return null;
-    }
-  }
+
+  //attributes that for some reason (typically live data) cannot be used for 1:1 testing between native and jolokia
+  private static Collection<String> ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON = new HashSet<String>(
+      Arrays.asList("java.lang:type=Threading.CurrentThreadUserTime",
+          "java.lang:type=OperatingSystem.ProcessCpuLoad",
+          "java.lang:type=Threading.CurrentThreadCpuTime",
+          "java.lang:type=Runtime.FreePhysicalMemorySize",
+          "java.lang:type=OperatingSystem.ProcessCpuTime",
+          "java.lang:type=MemoryPool,name=Metaspace.PeakUsage",
+          "java.lang:type=MemoryPool,name=PS Eden Space.Usage",
+          "java.lang:type=MemoryPool,name=Metaspace.Usage",
+          "java.lang:type=Memory.NonHeapMemoryUsage",
+          "java.lang:type=MemoryPool,name=Code Cache.PeakUsage",
+          "java.lang:type=Compilation.TotalCompilationTime",
+          "java.lang:type=Memory.HeapMemoryUsage",
+          "java.lang:type=MemoryPool,name=Code Cache.Usage",
+          "java.lang:type=OperatingSystem.FreePhysicalMemorySize"));
+
+  private static Collection<String> UNSAFE_ATTRIBUTES = new HashSet<String>(Arrays
+      .asList("CollectionUsageThreshold", "CollectionUsageThresholdCount",
+          "CollectionUsageThresholdExceeded", "UsageThreshold", "UsageThresholdCount",
+          "UsageThresholdExceeded"));
 
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
-    return new Object[][] {
+    return new Object[][]{
         {null, null},
         {RUNTIME, null},
         {null, QUERY},
@@ -67,8 +86,8 @@ public class JmxBridgeTest {
     final Set<ObjectName> names = ManagementFactory.getPlatformMBeanServer()
         .queryNames(null, null);
     final Object[][] result = new Object[names.size()][1];
-    int index=0;
-    for(ObjectName name : names) {
+    int index = 0;
+    for (ObjectName name : names) {
       result[index++][0] = name;
     }
     return result;
@@ -81,10 +100,11 @@ public class JmxBridgeTest {
         .getAttribute(new ObjectName("java.lang:type=Runtime"), "Name");
     final String pid = vmName.substring(0, vmName.indexOf('@'));
 
-    JvmAgent.agentmain("port=" + (this.agentPort = EnvTestUtil.getFreePort()), null);
+    int agentPort;
+    JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
 
     final J4pClient connector = new J4pClientBuilder()
-        .url("http://localhost:" + this.agentPort + "/jolokia")
+        .url("http://localhost:" + agentPort + "/jolokia")
         .build();
 
     //wait for agent to be running
@@ -136,15 +156,19 @@ public class JmxBridgeTest {
     try {
       final Class<?> klass = Class.forName(jolokiaInstance.getClassName());
       //check that inheritance works the same for both interfaces
-      if(klass.getSuperclass() != null) {
+      if (klass.getSuperclass() != null) {
         Assert.assertEquals(
-            nativeServer.isInstanceOf(jolokiaInstance.getObjectName(), klass.getSuperclass().toString()),
-            this.adapter.isInstanceOf(jolokiaInstance.getObjectName(), klass.getSuperclass().toString())
+            nativeServer
+                .isInstanceOf(jolokiaInstance.getObjectName(), klass.getSuperclass().toString()),
+            this.adapter
+                .isInstanceOf(jolokiaInstance.getObjectName(), klass.getSuperclass().toString())
         );
-        if(klass.getInterfaces().length > 0) {
+        if (klass.getInterfaces().length > 0) {
           Assert.assertEquals(
-              nativeServer.isInstanceOf(jolokiaInstance.getObjectName(), klass.getInterfaces()[0].toString()),
-              this.adapter.isInstanceOf(jolokiaInstance.getObjectName(), klass.getInterfaces()[0].toString())
+              nativeServer.isInstanceOf(jolokiaInstance.getObjectName(),
+                  klass.getInterfaces()[0].toString()),
+              this.adapter.isInstanceOf(jolokiaInstance.getObjectName(),
+                  klass.getInterfaces()[0].toString())
           );
 
         }
@@ -154,13 +178,48 @@ public class JmxBridgeTest {
 
   }
 
-//  @Test(dataProvider = "allNames")
+  @Test(dataProvider = "allNames")
   public void testMBeanInfo(ObjectName name)
-      throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException {
+      throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException, AttributeNotFoundException, MBeanException {
     final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanInfo jolokiaMBeanInfo = this.adapter.getMBeanInfo(name);
+    final MBeanInfo nativeMBeanInfo = nativeServer.getMBeanInfo(name);
     Assert.assertEquals(
-        this.adapter.getMBeanInfo(name),
-        nativeServer.getMBeanInfo(name));
+        jolokiaMBeanInfo.getDescription(),
+        nativeMBeanInfo.getDescription());
+    Assert.assertEquals(
+        jolokiaMBeanInfo.getClassName(),
+        nativeMBeanInfo.getClassName()
+    );
+    Assert.assertEquals(jolokiaMBeanInfo.getAttributes().length,
+        nativeMBeanInfo.getAttributes().length);
+    Assert.assertEquals(jolokiaMBeanInfo.getOperations().length,
+        nativeMBeanInfo.getOperations().length);
+
+    for (MBeanAttributeInfo attribute : jolokiaMBeanInfo.getAttributes()) {
+      final String qualifiedName = name + "." + attribute.getName();
+      if (UNSAFE_ATTRIBUTES.contains(attribute.getName())) {//skip known failing attributes
+        continue;
+      }
+      if (ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON.contains(qualifiedName)) {
+        this.adapter.getAttribute(name, attribute.getName());
+        continue;
+      }
+      final Object jolokiaAttributeValue = this.adapter.getAttribute(name, attribute.getName());
+      final Object nativeAttributeValue = nativeServer.getAttribute(name, attribute.getName());
+      //data type probably not so important, as long as value is close enough, less than 10 percent deviation should be ok?
+      if (jolokiaAttributeValue instanceof Number) {
+        Assert.assertEquals(((Number) jolokiaAttributeValue).doubleValue(),
+            ((Number) nativeAttributeValue).doubleValue(), 0.1,
+            "Attribute mismatch: " + qualifiedName);
+      } else {
+        Assert.assertEquals(
+            jolokiaAttributeValue,
+            nativeAttributeValue,
+            "Attribute mismatch: " + qualifiedName
+        );
+      }
+    }
   }
 
   @Test
@@ -170,57 +229,57 @@ public class JmxBridgeTest {
     try {
       this.adapter.createMBean("java.lang.Object", RUNTIME);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.createMBean("java.lang.Object", RUNTIME, RUNTIME);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.createMBean("java.lang.Object", RUNTIME, new Object[0], new String[0]);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.createMBean("java.lang.Object", RUNTIME, RUNTIME, new Object[0], new String[0]);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.unregisterMBean(RUNTIME);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
-      this.adapter.addNotificationListener(RUNTIME, (NotificationListener)null, null, null);
+      this.adapter.addNotificationListener(RUNTIME, (NotificationListener) null, null, null);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.addNotificationListener(RUNTIME, RUNTIME, null, null);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.removeNotificationListener(RUNTIME, RUNTIME);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
       this.adapter.removeNotificationListener(RUNTIME, RUNTIME, null, null);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
-      this.adapter.removeNotificationListener(RUNTIME, (NotificationListener)null);
+      this.adapter.removeNotificationListener(RUNTIME, (NotificationListener) null);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
     try {
-      this.adapter.removeNotificationListener(RUNTIME, (NotificationListener)null, null, null);
+      this.adapter.removeNotificationListener(RUNTIME, (NotificationListener) null, null, null);
       Assert.fail("Operation should not be supported by adapter");
-    } catch ( UnsupportedOperationException ignore) {
+    } catch (UnsupportedOperationException ignore) {
     }
   }
 
