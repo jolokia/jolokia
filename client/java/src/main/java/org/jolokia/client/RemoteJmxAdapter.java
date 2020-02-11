@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -257,7 +256,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public void setAttribute(ObjectName name, Attribute attribute)
       throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException {
     try {
-      this.unwrappExecute(new J4pWriteRequest(name, attribute.getName(), attribute.getValue()));
+      final J4pWriteRequest request = new J4pWriteRequest(name, attribute.getName(),attribute.getValue());
+      request.setPreferredHttpMethod("POST");
+      this.unwrappExecute(request);
     } catch (IOException e) {
       throw new UncheckedJmxAdapterException(e);
     }

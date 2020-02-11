@@ -8,11 +8,16 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import javax.management.Attribute;
+import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
+import javax.management.InvalidAttributeValueException;
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
@@ -64,12 +69,27 @@ public class JmxBridgeTest {
           "java.lang:type=Compilation.TotalCompilationTime",
           "java.lang:type=Memory.HeapMemoryUsage",
           "java.lang:type=MemoryPool,name=Code Cache.Usage",
-          "java.lang:type=OperatingSystem.FreePhysicalMemorySize"));
+          "java.lang:type=OperatingSystem.FreePhysicalMemorySize",
+          "java.lang:type=OperatingSystem.SystemCpuLoad",
+          "java.lang:type=OperatingSystem.CommittedVirtualMemorySize",
+          "java.lang:type=MemoryPool,name=Compressed Class Space.PeakUsage",
+          "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo",
+          "java.lang:type=Runtime.Uptime",
+          //tabular format is too complex for direct comparison
+          "java.lang:type=Runtime.SystemProperties"));
 
   private static Collection<String> UNSAFE_ATTRIBUTES = new HashSet<String>(Arrays
       .asList("CollectionUsageThreshold", "CollectionUsageThresholdCount",
           "CollectionUsageThresholdExceeded", "UsageThreshold", "UsageThresholdCount",
           "UsageThresholdExceeded"));
+
+  private static Map<String, Object> ATTRIBUTE_REPLACEMENTS = new HashMap<String, Object>() {{
+    put("jolokia:type=Config.Debug", true);
+    put("jolokia:type=Config.HistoryMaxEntries", 20);
+    put("jolokia:type=Config.MaxDebugEntries", 50);
+    put("java.lang:type=ClassLoading.Verbose", true);
+    put("java.lang:type=Threading.ThreadContentionMonitoringEnabled", true);
+  }};
 
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
@@ -180,7 +200,7 @@ public class JmxBridgeTest {
 
   @Test(dataProvider = "allNames")
   public void testMBeanInfo(ObjectName name)
-      throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException, AttributeNotFoundException, MBeanException {
+      throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException, AttributeNotFoundException, MBeanException, InvalidAttributeValueException {
     final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
     final MBeanInfo jolokiaMBeanInfo = this.adapter.getMBeanInfo(name);
     final MBeanInfo nativeMBeanInfo = nativeServer.getMBeanInfo(name);
@@ -196,6 +216,9 @@ public class JmxBridgeTest {
     Assert.assertEquals(jolokiaMBeanInfo.getOperations().length,
         nativeMBeanInfo.getOperations().length);
 
+    final AttributeList replacementValues=new AttributeList();
+    final AttributeList originalValues=new AttributeList();
+
     for (MBeanAttributeInfo attribute : jolokiaMBeanInfo.getAttributes()) {
       final String qualifiedName = name + "." + attribute.getName();
       if (UNSAFE_ATTRIBUTES.contains(attribute.getName())) {//skip known failing attributes
@@ -207,7 +230,7 @@ public class JmxBridgeTest {
       }
       final Object jolokiaAttributeValue = this.adapter.getAttribute(name, attribute.getName());
       final Object nativeAttributeValue = nativeServer.getAttribute(name, attribute.getName());
-      //data type probably not so important, as long as value is close enough, less than 10 percent deviation should be ok?
+      //data type probably not so important (ie. long vs integer), as long as value is close enough
       if (jolokiaAttributeValue instanceof Number) {
         Assert.assertEquals(((Number) jolokiaAttributeValue).doubleValue(),
             ((Number) nativeAttributeValue).doubleValue(), 0.1,
@@ -218,6 +241,26 @@ public class JmxBridgeTest {
             nativeAttributeValue,
             "Attribute mismatch: " + qualifiedName
         );
+      }
+      if (attribute.isWritable()) {
+        final Object newValue = ATTRIBUTE_REPLACEMENTS.get(qualifiedName);
+
+        if (newValue != null) {
+          final Attribute newAttribute = new Attribute(attribute.getName(), newValue);
+          replacementValues.add(newAttribute);
+          this.adapter.setAttribute(name, newAttribute);
+          //use native connection and verify that attribute is now new value
+          Assert.assertEquals(nativeServer.getAttribute(name, attribute.getName()), newValue);
+          //restore original value
+          final Attribute restoreAttribute = new Attribute(attribute.getName(), nativeAttributeValue);
+          this.adapter.setAttribute(name, restoreAttribute);
+          originalValues.add(restoreAttribute);
+          //now do multi argument setting
+          this.adapter.setAttributes(name, replacementValues);
+          Assert.assertEquals(nativeServer.getAttribute(name, attribute.getName()), newValue);
+          //and restore
+          this.adapter.setAttributes(name, originalValues);
+        }
       }
     }
   }
