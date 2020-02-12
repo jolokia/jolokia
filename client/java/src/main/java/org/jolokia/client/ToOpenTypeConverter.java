@@ -150,6 +150,9 @@ public class ToOpenTypeConverter {
       OVERRIDDEN_COMPLEX_TYPES
           .put("com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions.item",
               "com.sun.management.VMOption");
+      OVERRIDDEN_COMPLEX_TYPES
+          .put("com.sun.management:type=HotSpotDiagnostic.getVMOption",
+              "com.sun.management.VMOption");
 
     }
     final String overridden = OVERRIDDEN_COMPLEX_TYPES.get(name);

@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,8 +27,10 @@ import javax.management.ObjectName;
 import javax.management.QueryEval;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.OpenDataException;
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.J4pExecRequest;
 import org.jolokia.client.request.J4pExecResponse;
@@ -39,6 +42,7 @@ import org.jolokia.client.request.J4pResponse;
 import org.jolokia.client.request.J4pSearchRequest;
 import org.jolokia.client.request.J4pSearchResponse;
 import org.jolokia.client.request.J4pWriteRequest;
+import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 
 /**
@@ -97,12 +101,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     if (name != null) {
       listRequest = new J4pListRequest(name);
     }
-    final J4pListResponse listResponse = this
-        .unwrappExecute(listRequest);
     try {
+      final J4pListResponse listResponse = this
+          .unwrappExecute(listRequest);
       return listResponse.getObjectInstances(name);
     } catch (MalformedObjectNameException e) {
       throw new UncheckedJmxAdapterException(e);
+    } catch (InstanceNotFoundException e) {
+      return Collections.emptyList();
     }
   }
 
@@ -132,7 +138,12 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
 
     final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest(name);
-    J4pSearchResponse response = unwrappExecute(j4pSearchRequest);
+    J4pSearchResponse response = null;
+    try {
+      response = unwrappExecute(j4pSearchRequest);
+    } catch (InstanceNotFoundException e) {
+      return Collections.emptySet();
+    }
     final List<ObjectName> names = response.getObjectNames();
 
     for (ObjectName objectName : names) {
@@ -181,22 +192,33 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @SuppressWarnings("unchecked")
   private <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP unwrappExecute(REQ pRequest)
-      throws IOException {
+      throws IOException, InstanceNotFoundException {
     try {
+      pRequest.setPreferredHttpMethod("POST");
       return this.connector.execute(pRequest);
     } catch (J4pException e) {
       return (RESP) unwrapException(e);
     }
   }
 
+  private static Set<String> UNCHECKED_REMOTE_EXCEPTIONS = Collections
+      .singleton("java.lang.UnsupportedOperationException");
+
   private J4pResponse unwrapException(
-      J4pException e) throws IOException {
+      J4pException e) throws IOException, InstanceNotFoundException {
     if (e.getCause() instanceof IOException) {
       throw (IOException) e.getCause();
     } else if (e.getCause() instanceof RuntimeException) {
       throw (RuntimeException) e.getCause();
     } else if (e.getCause() instanceof Error) {
       throw (Error) e.getCause();
+    } else if ("Error: java.lang.IllegalArgumentException : No MBean '.+' found"
+        .matches(e.getMessage())) {
+      throw new InstanceNotFoundException();
+    } else if (e instanceof J4pRemoteException && UNCHECKED_REMOTE_EXCEPTIONS
+        .contains(((J4pRemoteException) e).getErrorType())) {
+      throw new RuntimeMBeanException((RuntimeException) ClassUtil
+          .newInstance(((J4pRemoteException) e).getErrorType(), e.getMessage()));
     } else {
       throw new UncheckedJmxAdapterException(e);
     }
@@ -218,11 +240,17 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       InstanceNotFoundException,
       IOException {
     final Object rawValue = unwrappExecute(new J4pReadRequest(name, attribute)).getValue();
-    if(this.isPrimitive(rawValue)) {
+    return adaptJsonToOptimalResponseValue(name, attribute, rawValue);
+  }
+
+  private Object adaptJsonToOptimalResponseValue(ObjectName name, String attribute,
+      Object rawValue) {
+    if (this.isPrimitive(rawValue)) {
       return rawValue;
     }
     //special case, if the attribute is ObjectName
-    if(rawValue instanceof JSONObject && ((JSONObject) rawValue).size() == 1 && ((JSONObject) rawValue).containsKey("objectName")) {
+    if (rawValue instanceof JSONObject && ((JSONObject) rawValue).size() == 1
+        && ((JSONObject) rawValue).containsKey("objectName")) {
       return getObjectName("" + ((JSONObject) rawValue).get("objectName"));
     }
     try {
@@ -256,8 +284,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public void setAttribute(ObjectName name, Attribute attribute)
       throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException {
     try {
-      final J4pWriteRequest request = new J4pWriteRequest(name, attribute.getName(),attribute.getValue());
-      request.setPreferredHttpMethod("POST");
+      final J4pWriteRequest request = new J4pWriteRequest(name, attribute.getName(),
+          attribute.getValue());
       this.unwrappExecute(request);
     } catch (IOException e) {
       throw new UncheckedJmxAdapterException(e);
@@ -287,7 +315,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
     final J4pExecResponse response = unwrappExecute(
         new J4pExecRequest(name, operationName, params));
-    return response.getValue();
+    return adaptJsonToOptimalResponseValue(name, operationName, response.getValue());
   }
 
   @Override
@@ -299,7 +327,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public String[] getDomains() throws IOException {
     Set<String> domains = new HashSet<String>();
     for (final ObjectName name : this.queryNames(null, null)) {
-        domains.add(name.getDomain());
+      domains.add(name.getDomain());
     }
     return domains.toArray(new String[domains.size()]);
   }

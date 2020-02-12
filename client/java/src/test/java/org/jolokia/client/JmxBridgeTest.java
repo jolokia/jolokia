@@ -22,7 +22,9 @@ import javax.management.ListenerNotFoundException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotificationListener;
 import javax.management.ObjectInstance;
@@ -30,6 +32,7 @@ import javax.management.ObjectName;
 import javax.management.Query;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
@@ -49,6 +52,7 @@ public class JmxBridgeTest {
 
   private final static ObjectName RUNTIME = RemoteJmxAdapter
       .getObjectName("java.lang:type=Runtime");
+
   private final static QueryExp QUERY = Query
       .or(Query.anySubString(Query.classattr(), Query.value("Object")),
           Query.anySubString(Query.classattr(), Query.value("String")));
@@ -83,6 +87,7 @@ public class JmxBridgeTest {
           "CollectionUsageThresholdExceeded", "UsageThreshold", "UsageThresholdCount",
           "UsageThresholdExceeded"));
 
+  //Safe values for testing setting attributes
   private static Map<String, Object> ATTRIBUTE_REPLACEMENTS = new HashMap<String, Object>() {{
     put("jolokia:type=Config.Debug", true);
     put("jolokia:type=Config.HistoryMaxEntries", 20);
@@ -91,6 +96,8 @@ public class JmxBridgeTest {
     put("java.lang:type=Threading.ThreadContentionMonitoringEnabled", true);
   }};
 
+
+
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
     return new Object[][]{
@@ -98,6 +105,18 @@ public class JmxBridgeTest {
         {RUNTIME, null},
         {null, QUERY},
         {RUNTIME, QUERY}
+    };
+  }
+
+  @DataProvider
+  public static Object[][] safeOperationsToCall() {
+    return new Object[][] {
+        {RemoteJmxAdapter
+            .getObjectName("java.lang:type=Threading"), "findDeadlockedThreads", new Object[0]},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", new Object[0]},
+        {RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"), "vmCommandLine", new Object[0]},
+        {RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"), "getVMOption", new Object[]{"MinHeapFreeRatio"}},
+        {RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"), "setVMOption", new Object[]{"HeapDumpOnOutOfMemoryError", "true"}}
     };
   }
 
@@ -124,7 +143,7 @@ public class JmxBridgeTest {
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
 
     final J4pClient connector = new J4pClientBuilder()
-        .url("http://localhost:" + agentPort + "/jolokia")
+        .url("http://localhost:" + agentPort + "/jolokia/")
         .build();
 
     //wait for agent to be running
@@ -152,6 +171,48 @@ public class JmxBridgeTest {
     Assert.assertEquals(
         nativeServer.queryMBeans(name, query),
         this.adapter.queryMBeans(name, query));
+  }
+
+  @Test(expectedExceptions = InstanceNotFoundException.class)
+  public void testNonExistantMBeanInstance()
+      throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+    this.adapter.getObjectInstance(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
+  }
+
+  @Test(expectedExceptions = InstanceNotFoundException.class)
+  public void testNonExistantMBeanInfo()
+      throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+    this.adapter.getMBeanInfo(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
+  }
+
+  @Test(expectedExceptions = RuntimeMBeanException.class)
+  public void testFeatureNotSupportedOnServerSide()
+      throws IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    this.adapter.getAttribute(RemoteJmxAdapter.getObjectName("java.lang:name=PS Old Gen,type=MemoryPool"), "CollectionUsageThresholdCount");
+  }
+
+  @Test(expectedExceptions = IOException.class)
+  public void ensureThatIOExceptionIsChanneledOut() throws IOException {
+    new RemoteJmxAdapter(new J4pClientBuilder().url("http://localhost:10/jolokia").build()).queryMBeans(null, null);
+  }
+
+  @Test(dataProvider = "safeOperationsToCall")
+  public void testInvoke(ObjectName name, String operation, Object[] arguments)
+      throws IOException, InstanceNotFoundException, ReflectionException, MBeanException {
+    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    for(MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
+      if(operationInfo.getName().equals(operation) && operationInfo.getSignature().length == arguments.length) {
+        String[] signature=new String[operationInfo.getSignature().length];
+        for(int i=0; i < signature.length; i++) {
+          signature[i]=operationInfo.getSignature()[i].getType();
+        }
+        Assert.assertEquals(
+            this.adapter.invoke(name, operation, arguments, signature),
+            nativeServer.invoke(name, operation, arguments, signature));
+
+      }
+    }
+
   }
 
   @Test(dataProvider = "allNames")
