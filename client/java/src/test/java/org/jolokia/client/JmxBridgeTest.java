@@ -1,9 +1,19 @@
 package org.jolokia.client;
 
-import static com.jayway.awaitility.Awaitility.await;
-
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ThrowingRunnable;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.request.J4pVersionRequest;
+import org.jolokia.jmx.JolokiaMBeanServerUtil;
+import org.jolokia.jvmagent.JvmAgent;
+import org.jolokia.test.util.EnvTestUtil;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import javax.management.*;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
@@ -12,36 +22,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.ListenerNotFoundException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerFactory;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotificationListener;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.Query;
-import javax.management.QueryExp;
-import javax.management.ReflectionException;
-import javax.management.RuntimeMBeanException;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.request.J4pVersionRequest;
-import org.jolokia.jvmagent.JvmAgent;
-import org.jolokia.test.util.EnvTestUtil;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+
+import static com.jayway.awaitility.Awaitility.await;
 
 /**
  * I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection
@@ -79,8 +61,17 @@ public class JmxBridgeTest {
           "java.lang:type=MemoryPool,name=Compressed Class Space.PeakUsage",
           "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo",
           "java.lang:type=Runtime.Uptime",
+          "java.lang:type=GarbageCollector,name=PS MarkSweep.LastGcInfo",
           //tabular format is too complex for direct comparison
-          "java.lang:type=Runtime.SystemProperties"));
+          "java.lang:type=Runtime.SystemProperties",
+          //jolokia mbean server is returned as an actual complex object
+          //have no intention of supporting that
+          "jolokia:type=MBeanServer.JolokiaMBeanServer",
+          //appears to contain a timestamp that differ when running in surefire
+          //could be something with several of the tests starting agents etc.
+          "JMImplementation:type=MBeanServerDelegate.MBeanServerId"
+
+      ));
 
   private static Collection<String> UNSAFE_ATTRIBUTES = new HashSet<String>(Arrays
       .asList("CollectionUsageThreshold", "CollectionUsageThresholdCount",
@@ -136,18 +127,17 @@ public class JmxBridgeTest {
 
   @BeforeClass
   public void startAgent()
-      throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, IOException {
-    final String vmName = (String) ManagementFactory.getPlatformMBeanServer()
-        .getAttribute(new ObjectName("java.lang:type=Runtime"), "Name");
-    final String pid = vmName.substring(0, vmName.indexOf('@'));
+          throws MBeanException, ReflectionException, IOException, InstanceAlreadyExistsException, NotCompliantMBeanException {
 
+    MBeanServer nativeServer = ManagementFactory.getPlatformMBeanServer();
+    //ADD potentially problematic MBeans here (if errors are discovered to uncover other cases that should be managed)
+    nativeServer.createMBean(MBeanExample.class.getName(), RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
     int agentPort;
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
 
     final J4pClient connector = new J4pClientBuilder()
         .url("http://localhost:" + agentPort + "/jolokia/")
         .build();
-
     //wait for agent to be running
     await().until(Awaitility.matches(new ThrowingRunnable() {
       @Override
@@ -177,24 +167,33 @@ public class JmxBridgeTest {
 
   @Test(expectedExceptions = InstanceNotFoundException.class)
   public void testNonExistantMBeanInstance()
-      throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+      throws IOException, InstanceNotFoundException {
     this.adapter
         .getObjectInstance(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
   }
 
   @Test(expectedExceptions = InstanceNotFoundException.class)
   public void testNonExistantMBeanInfo()
-      throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+      throws IOException, InstanceNotFoundException {
     this.adapter.getMBeanInfo(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
   }
 
   @Test(expectedExceptions = RuntimeMBeanException.class)
   public void testFeatureNotSupportedOnServerSide()
-      throws IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+      throws IOException, InstanceNotFoundException, MBeanException {
     this.adapter
-        .getAttribute(RemoteJmxAdapter.getObjectName("java.lang:name=PS Old Gen,type=MemoryPool"),
-            "CollectionUsageThresholdCount");
+            .invoke(RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+                    "unsupportedOperation", new Object[0], new String[0]);
   }
+
+  @Test(expectedExceptions = MBeanException.class)
+  public void testUnexpectedlyFailingOperation()
+          throws IOException, InstanceNotFoundException, MBeanException {
+    this.adapter
+            .invoke(RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+                    "unexpectedFailureMethod", new Object[0], new String[0]);
+  }
+
 
   @Test(expectedExceptions = IOException.class)
   public void ensureThatIOExceptionIsChanneledOut() throws IOException {
@@ -213,15 +212,15 @@ public class JmxBridgeTest {
     this.adapter.setAttribute(RUNTIME, new Attribute("DoesNotExist", false));
   }
 
-  @Test
+  @Test(expectedExceptions = InvalidAttributeValueException.class)
   public void testSetInvalidAttrbuteValue()
       throws IOException, AttributeNotFoundException, InstanceNotFoundException, InvalidAttributeValueException {
-    this.adapter.setAttribute(RemoteJmxAdapter.getObjectName("jolokia:type=Config"), new Attribute("HistoryMaxEntries", false));
+    this.adapter.setAttribute(RemoteJmxAdapter.getObjectName("jolokia:type=Config"), new Attribute("HistoryMaxEntries", null));
   }
 
   @Test
   public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature()
-      throws IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+      throws IOException, InstanceNotFoundException, MBeanException {
     //Invoke method that has both primitive and boxed Long as possible input
     this.adapter.invoke(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"), "getThreadUserTime", new Object[]{1L}, new String[]{"long"});
     this.adapter.invoke(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"), "getThreadUserTime", new Object[]{new long[]{1L}}, new String[]{"[J"});
@@ -360,8 +359,7 @@ public class JmxBridgeTest {
   }
 
   @Test
-  public void verifyUnsupportedFunctions()
-      throws IOException, InstanceNotFoundException, ListenerNotFoundException {
+  public void verifyUnsupportedFunctions() {
     //ensure that methods give the expected exception and nothing else
     try {
       this.adapter.createMBean("java.lang.Object", RUNTIME);

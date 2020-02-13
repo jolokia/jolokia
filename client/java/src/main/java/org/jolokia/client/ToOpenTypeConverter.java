@@ -1,23 +1,9 @@
 package org.jolokia.client;
 
-import static javax.management.openmbean.SimpleType.BIGDECIMAL;
-import static javax.management.openmbean.SimpleType.BIGINTEGER;
-import static javax.management.openmbean.SimpleType.BOOLEAN;
-import static javax.management.openmbean.SimpleType.BYTE;
-import static javax.management.openmbean.SimpleType.CHARACTER;
-import static javax.management.openmbean.SimpleType.DATE;
-import static javax.management.openmbean.SimpleType.DOUBLE;
-import static javax.management.openmbean.SimpleType.FLOAT;
-import static javax.management.openmbean.SimpleType.INTEGER;
-import static javax.management.openmbean.SimpleType.LONG;
-import static javax.management.openmbean.SimpleType.OBJECTNAME;
-import static javax.management.openmbean.SimpleType.SHORT;
-import static javax.management.openmbean.SimpleType.STRING;
-import static javax.management.openmbean.SimpleType.VOID;
+import org.jolokia.converter.Converters;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.lang.model.type.PrimitiveType;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeType;
@@ -25,9 +11,11 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularType;
-import org.jolokia.converter.Converters;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static javax.management.openmbean.SimpleType.*;
 
 /**
  * Attempt to produce openmbean results to emulate a native JMX connection by reverse engineering

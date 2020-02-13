@@ -23,15 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanConstructorInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanNotificationInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
+import javax.management.*;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -66,12 +59,12 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
     return result;
   }
 
-  public List<MBeanInfo> getMbeanInfoList() {
+  public MBeanInfo getMbeanInfoList() throws InstanceNotFoundException {
     JSONObject value = getValue();
     if (value.containsKey("class")) {
-      return Collections.singletonList(mBeanInfoFrom(value));
+      return mBeanInfoFrom(value);
     }
-    throw new UnsupportedOperationException();
+    throw new InstanceNotFoundException();
   }
 
   @SuppressWarnings("unchecked")
