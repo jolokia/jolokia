@@ -97,7 +97,6 @@ public class JmxBridgeTest {
   }};
 
 
-
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
     return new Object[][]{
@@ -110,13 +109,16 @@ public class JmxBridgeTest {
 
   @DataProvider
   public static Object[][] safeOperationsToCall() {
-    return new Object[][] {
+    return new Object[][]{
         {RemoteJmxAdapter
             .getObjectName("java.lang:type=Threading"), "findDeadlockedThreads", new Object[0]},
         {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", new Object[0]},
-        {RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"), "vmCommandLine", new Object[0]},
-        {RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"), "getVMOption", new Object[]{"MinHeapFreeRatio"}},
-        {RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"), "setVMOption", new Object[]{"HeapDumpOnOutOfMemoryError", "true"}}
+        {RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"),
+            "vmCommandLine", new Object[0]},
+        {RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"), "getVMOption",
+            new Object[]{"MinHeapFreeRatio"}},
+        {RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"), "setVMOption",
+            new Object[]{"HeapDumpOnOutOfMemoryError", "true"}}
     };
   }
 
@@ -176,7 +178,8 @@ public class JmxBridgeTest {
   @Test(expectedExceptions = InstanceNotFoundException.class)
   public void testNonExistantMBeanInstance()
       throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
-    this.adapter.getObjectInstance(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
+    this.adapter
+        .getObjectInstance(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
   }
 
   @Test(expectedExceptions = InstanceNotFoundException.class)
@@ -188,23 +191,52 @@ public class JmxBridgeTest {
   @Test(expectedExceptions = RuntimeMBeanException.class)
   public void testFeatureNotSupportedOnServerSide()
       throws IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
-    this.adapter.getAttribute(RemoteJmxAdapter.getObjectName("java.lang:name=PS Old Gen,type=MemoryPool"), "CollectionUsageThresholdCount");
+    this.adapter
+        .getAttribute(RemoteJmxAdapter.getObjectName("java.lang:name=PS Old Gen,type=MemoryPool"),
+            "CollectionUsageThresholdCount");
   }
 
   @Test(expectedExceptions = IOException.class)
   public void ensureThatIOExceptionIsChanneledOut() throws IOException {
-    new RemoteJmxAdapter(new J4pClientBuilder().url("http://localhost:10/jolokia").build()).queryMBeans(null, null);
+    new RemoteJmxAdapter(new J4pClientBuilder().url("http://localhost:10/jolokia").build())
+        .queryMBeans(null, null);
+  }
+
+  @Test(expectedExceptions = AttributeNotFoundException.class)
+  public void testGetNonExistantAttribute()
+      throws IOException, AttributeNotFoundException, InstanceNotFoundException {
+    this.adapter.getAttribute(RUNTIME, "DoesNotExist");
+  }
+  @Test(expectedExceptions = AttributeNotFoundException.class)
+  public void testSetNonExistantAttribute()
+      throws IOException, AttributeNotFoundException, InstanceNotFoundException, InvalidAttributeValueException {
+    this.adapter.setAttribute(RUNTIME, new Attribute("DoesNotExist", false));
+  }
+
+  @Test
+  public void testSetInvalidAttrbuteValue()
+      throws IOException, AttributeNotFoundException, InstanceNotFoundException, InvalidAttributeValueException {
+    this.adapter.setAttribute(RemoteJmxAdapter.getObjectName("jolokia:type=Config"), new Attribute("HistoryMaxEntries", false));
+  }
+
+  @Test
+  public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature()
+      throws IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    //Invoke method that has both primitive and boxed Long as possible input
+    this.adapter.invoke(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"), "getThreadUserTime", new Object[]{1L}, new String[]{"long"});
+    this.adapter.invoke(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"), "getThreadUserTime", new Object[]{new long[]{1L}}, new String[]{"[J"});
   }
 
   @Test(dataProvider = "safeOperationsToCall")
   public void testInvoke(ObjectName name, String operation, Object[] arguments)
       throws IOException, InstanceNotFoundException, ReflectionException, MBeanException {
     final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
-    for(MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
-      if(operationInfo.getName().equals(operation) && operationInfo.getSignature().length == arguments.length) {
-        String[] signature=new String[operationInfo.getSignature().length];
-        for(int i=0; i < signature.length; i++) {
-          signature[i]=operationInfo.getSignature()[i].getType();
+    for (MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
+      if (operationInfo.getName().equals(operation)
+          && operationInfo.getSignature().length == arguments.length) {
+        String[] signature = new String[operationInfo.getSignature().length];
+        for (int i = 0; i < signature.length; i++) {
+          signature[i] = operationInfo.getSignature()[i].getType();
         }
         Assert.assertEquals(
             this.adapter.invoke(name, operation, arguments, signature),
@@ -277,8 +309,8 @@ public class JmxBridgeTest {
     Assert.assertEquals(jolokiaMBeanInfo.getOperations().length,
         nativeMBeanInfo.getOperations().length);
 
-    final AttributeList replacementValues=new AttributeList();
-    final AttributeList originalValues=new AttributeList();
+    final AttributeList replacementValues = new AttributeList();
+    final AttributeList originalValues = new AttributeList();
 
     for (MBeanAttributeInfo attribute : jolokiaMBeanInfo.getAttributes()) {
       final String qualifiedName = name + "." + attribute.getName();
@@ -313,7 +345,8 @@ public class JmxBridgeTest {
           //use native connection and verify that attribute is now new value
           Assert.assertEquals(nativeServer.getAttribute(name, attribute.getName()), newValue);
           //restore original value
-          final Attribute restoreAttribute = new Attribute(attribute.getName(), nativeAttributeValue);
+          final Attribute restoreAttribute = new Attribute(attribute.getName(),
+              nativeAttributeValue);
           this.adapter.setAttribute(name, restoreAttribute);
           originalValues.add(restoreAttribute);
           //now do multi argument setting

@@ -239,8 +239,18 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public Object getAttribute(ObjectName name, String attribute) throws AttributeNotFoundException,
       InstanceNotFoundException,
       IOException {
-    final Object rawValue = unwrappExecute(new J4pReadRequest(name, attribute)).getValue();
-    return adaptJsonToOptimalResponseValue(name, attribute, rawValue);
+    try {
+      final Object rawValue = unwrappExecute(new J4pReadRequest(name, attribute)).getValue();
+      return adaptJsonToOptimalResponseValue(name, attribute, rawValue);
+    } catch (UncheckedJmxAdapterException e) {
+      if (e.getCause() instanceof J4pRemoteException
+          && "javax.management.AttributeNotFoundException"
+          .equals(((J4pRemoteException) e.getCause()).getErrorType())) {
+        throw new AttributeNotFoundException((e.getCause().getMessage()));
+      } else {
+        throw e;
+      }
+    }
   }
 
   private Object adaptJsonToOptimalResponseValue(ObjectName name, String attribute,
@@ -282,15 +292,20 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public void setAttribute(ObjectName name, Attribute attribute)
-      throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException {
+      throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, IOException {
+    final J4pWriteRequest request = new J4pWriteRequest(name, attribute.getName(),
+        attribute.getValue());
     try {
-      final J4pWriteRequest request = new J4pWriteRequest(name, attribute.getName(),
-          attribute.getValue());
       this.unwrappExecute(request);
-    } catch (IOException e) {
-      throw new UncheckedJmxAdapterException(e);
+    } catch (UncheckedJmxAdapterException e) {
+      if (e.getCause() instanceof J4pRemoteException
+          && "javax.management.AttributeNotFoundException"
+          .equals(((J4pRemoteException) e.getCause()).getErrorType())) {
+        throw new AttributeNotFoundException((e.getCause().getMessage()));
+      } else {
+        throw e;
+      }
     }
-
   }
 
   @Override
