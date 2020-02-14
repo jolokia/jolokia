@@ -4,6 +4,7 @@ import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.*;
+import org.jolokia.config.Configuration;
 import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 
@@ -15,8 +16,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,6 +33,8 @@ import java.util.Set;
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
   private final J4pClient connector;
+  private HashMap<J4pQueryParameter, String> defaultProcessingOptions;
+  private Map<ObjectName, MBeanInfo> mbeanInfoCache=new HashMap<ObjectName, MBeanInfo>();
 
   public RemoteJmxAdapter(final J4pClient connector) {
     this.connector = connector;
@@ -38,7 +43,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public RemoteJmxAdapter(final String url) {
     this(new J4pClientBuilder().url(url).build());
   }
-
 
 
   @Override
@@ -178,10 +182,19 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       throws IOException, InstanceNotFoundException {
     try {
       pRequest.setPreferredHttpMethod("POST");
-      return this.connector.execute(pRequest);
+      return this.connector.execute(pRequest, defaultProcessingOptions());
     } catch (J4pException e) {
       return (RESP) unwrapException(e);
     }
+  }
+
+  private Map<J4pQueryParameter, String> defaultProcessingOptions() {
+    if (this.defaultProcessingOptions == null) {
+      this.defaultProcessingOptions = new HashMap<J4pQueryParameter, String>();
+      defaultProcessingOptions.put(J4pQueryParameter.MAX_DEPTH, "10"); // in case of stack overflow
+      defaultProcessingOptions.put(J4pQueryParameter.SERIALIZE_EXCEPTION, "true");
+    }
+    return defaultProcessingOptions;
   }
 
   private static Set<String> UNCHECKED_REMOTE_EXCEPTIONS =
@@ -396,8 +409,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IOException {
-    final J4pListResponse response = this.unwrappExecute(new J4pListRequest(name));
-    return response.getMbeanInfoList();
+    MBeanInfo result=this.mbeanInfoCache.get(name);
+    //cache in case client queries a lot for MBean info
+    if(result == null) {
+      final J4pListResponse response = this.unwrappExecute(new J4pListRequest(name));
+      result= response.getMbeanInfo();
+      this.mbeanInfoCache.put(name, result);
+    }
+    return result;
   }
 
   @Override

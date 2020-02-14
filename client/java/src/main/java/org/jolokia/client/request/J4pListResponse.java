@@ -59,7 +59,7 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
     return result;
   }
 
-  public MBeanInfo getMbeanInfoList() throws InstanceNotFoundException {
+  public MBeanInfo getMbeanInfo() throws InstanceNotFoundException {
     JSONObject value = getValue();
     if (value.containsKey("class")) {
       return mBeanInfoFrom(value);
