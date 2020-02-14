@@ -447,13 +447,14 @@ public class JmxBridgeTest {
         nativeServer.getMBeanCount(),
         "Number of MBeans are the same");
 
+    final String[] jolokiaDomains = this.adapter.getDomains();
+    Arrays.sort(jolokiaDomains);
+    String[] nativeDomains = nativeServer.getDomains();
+    Arrays.sort(nativeDomains);
     Assert.assertEquals(
-        this.adapter.getDomains(),
-        nativeServer.getDomains(),
-        "Domain list is the same actual: "
-            + Arrays.toString(this.adapter.getDomains())
-            + " expected: "
-            + Arrays.toString(nativeServer.getDomains()));
+            jolokiaDomains,
+            nativeDomains,
+        "Domain list is the same");
 
     Assert.assertEquals(
         this.adapter.getDefaultDomain(), nativeServer.getDefaultDomain(), "Default domain");

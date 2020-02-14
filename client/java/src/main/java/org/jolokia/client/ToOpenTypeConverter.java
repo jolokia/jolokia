@@ -168,6 +168,11 @@ public class ToOpenTypeConverter {
       OVERRIDDEN_COMPLEX_TYPES.put(
           "java.lang:type=MemoryPool,name=PS Perm Gen.CollectionUsage",
           "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+              "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage",
+              "java.lang.management.MemoryUsage");
+
+
     }
     final String overridden = OVERRIDDEN_COMPLEX_TYPES.get(name);
     return overridden != null ? overridden : "complex";
