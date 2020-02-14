@@ -25,8 +25,20 @@ import static javax.management.openmbean.SimpleType.*;
 public class ToOpenTypeConverter {
 
   private static final SimpleType<?>[] typeArray = {
-      VOID, BOOLEAN, CHARACTER, BYTE, SHORT, INTEGER, LONG, FLOAT,
-      DOUBLE, STRING, BIGDECIMAL, BIGINTEGER, DATE, OBJECTNAME,
+    VOID,
+    BOOLEAN,
+    CHARACTER,
+    BYTE,
+    SHORT,
+    INTEGER,
+    LONG,
+    FLOAT,
+    DOUBLE,
+    STRING,
+    BIGDECIMAL,
+    BIGINTEGER,
+    DATE,
+    OBJECTNAME,
   };
   private static Map<String, String> TABULAR_CONTENT_TYPE;
 
@@ -34,11 +46,10 @@ public class ToOpenTypeConverter {
 
   public static Object returnOpenTypedValue(String name, Object rawValue) throws OpenDataException {
     final OpenType<?> type = recursivelyBuildOpenType(name, rawValue);
-    if(type == null) {
+    if (type == null) {
       return rawValue;
     } else {
-      return new Converters().getToOpenTypeConverter()
-          .convertToObject(type, rawValue);
+      return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
     }
   }
 
@@ -58,17 +69,23 @@ public class ToOpenTypeConverter {
         } else {
           return ArrayType.getArrayType(elementType);
         }
-
       }
     } else if (tabularContentType(name) != null) {
       final JSONObject structure = (JSONObject) rawValue;
       final String typeName = "Map<java.lang.String," + tabularContentType(name) + ">";
-      return new TabularType(typeName, typeName,
-          new CompositeType(typeName, typeName, new String[]{"key", "value"},
-              new String[]{"key", "value"}, new OpenType<?>[]{
-              STRING,
-              recursivelyBuildOpenType(name + ".value", structure.values().iterator().next())
-          }), new String[]{"key"});
+      return new TabularType(
+          typeName,
+          typeName,
+          new CompositeType(
+              typeName,
+              typeName,
+              new String[] {"key", "value"},
+              new String[] {"key", "value"},
+              new OpenType<?>[] {
+                STRING,
+                recursivelyBuildOpenType(name + ".value", structure.values().iterator().next())
+              }),
+          new String[] {"key"});
 
     } else if (rawValue instanceof JSONObject) {
       final JSONObject structure = (JSONObject) rawValue;
@@ -83,51 +100,59 @@ public class ToOpenTypeConverter {
       }
       return new CompositeType(detectTypeName(name), detectTypeName(name), keys, keys, types);
     }
-    //should probably never happen, to signify type could not be found
+    // should probably never happen, to signify type could not be found
     return null;
-
   }
 
   private static String detectTypeName(final String name) {
     if (OVERRIDDEN_COMPLEX_TYPES == null) {
       OVERRIDDEN_COMPLEX_TYPES = new HashMap<String, String>();
-      OVERRIDDEN_COMPLEX_TYPES
-          .put("java.lang:type=Memory.NonHeapMemoryUsage", "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=Metaspace.PeakUsage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=Memory.NonHeapMemoryUsage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=Metaspace.PeakUsage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=Code Cache.PeakUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=Code Cache.PeakUsage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=Code Cache.Usage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Old Gen.CollectionUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=Code Cache.Usage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Old Gen.PeakUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Old Gen.CollectionUsage",
-          "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Old Gen.PeakUsage",
-          "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Old Gen.Usage",
-          "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Old Gen.Usage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo",
           "sun.management.PS Scavenge.GcInfoCompositeType");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Eden Space.CollectionUsage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Eden Space.CollectionUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Eden Space.PeakUsage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Eden Space.PeakUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Eden Space.Usage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Eden Space.Usage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=Compressed Class Space.PeakUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES
-          .put("java.lang:type=MemoryPool,name=Compressed Class Space.PeakUsage",
-              "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=Compressed Class Space.Usage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=Compressed Class Space.Usage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=Metaspace.Usage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=Metaspace.Usage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=Memory.HeapMemoryUsage", "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Survivor Space.CollectionUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES
-          .put("java.lang:type=Memory.HeapMemoryUsage", "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES
-          .put("java.lang:type=MemoryPool,name=PS Survivor Space.CollectionUsage",
-              "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Survivor Space.PeakUsage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Survivor Space.PeakUsage",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES.put("java.lang:type=MemoryPool,name=PS Survivor Space.Usage",
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Survivor Space.Usage",
           "java.lang.management.MemoryUsage");
       OVERRIDDEN_COMPLEX_TYPES.put(
           "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageAfterGc.value",
@@ -135,13 +160,14 @@ public class ToOpenTypeConverter {
       OVERRIDDEN_COMPLEX_TYPES.put(
           "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageBeforeGc.value",
           "java.lang.management.MemoryUsage");
-      OVERRIDDEN_COMPLEX_TYPES
-          .put("com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions.item",
-              "com.sun.management.VMOption");
-      OVERRIDDEN_COMPLEX_TYPES
-          .put("com.sun.management:type=HotSpotDiagnostic.getVMOption",
-              "com.sun.management.VMOption");
-
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions.item",
+          "com.sun.management.VMOption");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "com.sun.management:type=HotSpotDiagnostic.getVMOption", "com.sun.management.VMOption");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+          "java.lang:type=MemoryPool,name=PS Perm Gen.CollectionUsage",
+          "java.lang.management.MemoryUsage");
     }
     final String overridden = OVERRIDDEN_COMPLEX_TYPES.get(name);
     return overridden != null ? overridden : "complex";
@@ -151,12 +177,12 @@ public class ToOpenTypeConverter {
     if (TABULAR_CONTENT_TYPE == null) {
       TABULAR_CONTENT_TYPE = new HashMap<String, String>();
       TABULAR_CONTENT_TYPE.put("java.lang:type=Runtime.SystemProperties", "java.lang.String");
-      TABULAR_CONTENT_TYPE
-          .put("java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageAfterGc",
-              "java.lang.management.MemoryUsage");
-      TABULAR_CONTENT_TYPE
-          .put("java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageBeforeGc",
-              "java.lang.management.MemoryUsage");
+      TABULAR_CONTENT_TYPE.put(
+          "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageAfterGc",
+          "java.lang.management.MemoryUsage");
+      TABULAR_CONTENT_TYPE.put(
+          "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageBeforeGc",
+          "java.lang.management.MemoryUsage");
     }
     return TABULAR_CONTENT_TYPE.get(attribute);
   }
