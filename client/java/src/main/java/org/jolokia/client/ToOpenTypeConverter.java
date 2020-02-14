@@ -171,6 +171,9 @@ public class ToOpenTypeConverter {
       OVERRIDDEN_COMPLEX_TYPES.put(
               "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage",
               "java.lang.management.MemoryUsage");
+      OVERRIDDEN_COMPLEX_TYPES.put(
+              "java.lang:type=MemoryPool,name=PS Perm Gen.Usage",
+              "java.lang.management.MemoryUsage");
 
 
     }
