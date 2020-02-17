@@ -1,4 +1,4 @@
-package org.jolokia.client;
+package org.jolokia.client.jmxadapter;
 
 import org.jolokia.converter.Converters;
 import org.json.simple.JSONArray;

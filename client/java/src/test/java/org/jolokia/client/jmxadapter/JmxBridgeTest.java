@@ -1,10 +1,13 @@
-package org.jolokia.client;
+package org.jolokia.client.jmxadapter;
 
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ThrowingRunnable;
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.MBeanExample;
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 import org.jolokia.client.request.J4pVersionRequest;
-import org.jolokia.jmx.JolokiaMBeanServerUtil;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.Assert;
@@ -14,14 +17,22 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.management.*;
+import javax.management.remote.JMXConnectionNotification;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
 
@@ -96,6 +107,7 @@ public class JmxBridgeTest {
           put("java.lang:type=Threading.ThreadContentionMonitoringEnabled", true);
         }
       };
+  private int agentPort;
 
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
@@ -156,11 +168,10 @@ public class JmxBridgeTest {
     nativeServer.createMBean(
         MBeanExample.class.getName(),
         RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
-    int agentPort;
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
 
     final J4pClient connector =
-        new J4pClientBuilder().url("http://localhost:" + agentPort + "/jolokia/").build();
+        new J4pClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
     // wait for agent to be running
     await()
         .until(
@@ -460,7 +471,44 @@ public class JmxBridgeTest {
 
     Assert.assertEquals(
         this.adapter.getDefaultDomain(), nativeServer.getDefaultDomain(), "Default domain");
+
+    Assert.assertEquals(this.adapter.agentVersion, "1.6.2");
+    Assert.assertEquals(this.adapter.protocolVersion, "7.2");
+    Assert.assertTrue(this.adapter.getId().endsWith("-jvm"));
+
   }
+
+  @Test
+  public void testConnector() throws IOException {
+    JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
+            new JMXServiceURL("jolokia", "localhost", agentPort, "/jolokia/"),
+            Collections.<String, Object>emptyMap());
+    final List<JMXConnectionNotification> receivedNotifications=new LinkedList<JMXConnectionNotification>();
+    final Object handback="foobar";
+    connector.addConnectionNotificationListener(new NotificationListener() {
+      @Override
+      public void handleNotification(Notification notification, Object handback) {
+        Assert.assertTrue(notification instanceof JMXConnectionNotification);
+        receivedNotifications.add((JMXConnectionNotification) notification);
+      }
+    }, null, handback);
+    connector.connect();
+    Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
+    Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.OPENED);
+    receivedNotifications.clear();
+    Assert.assertEquals(
+            connector.getMBeanServerConnection(),
+            this.adapter);
+    connector.close();
+    Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
+    Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.CLOSED);
+    connector.connect(Collections.<String, Object>emptyMap());
+    Assert.assertEquals(
+            connector.getMBeanServerConnection(null),
+            this.adapter);
+
+  }
+
 
   @AfterClass
   public void stopAgent() {

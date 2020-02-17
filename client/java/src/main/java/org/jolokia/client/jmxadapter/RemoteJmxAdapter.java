@@ -1,10 +1,11 @@
-package org.jolokia.client;
+package org.jolokia.client.jmxadapter;
 
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.*;
-import org.jolokia.config.Configuration;
 import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 
@@ -33,14 +34,35 @@ import java.util.Set;
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
   private final J4pClient connector;
+  private String agentId;
   private HashMap<J4pQueryParameter, String> defaultProcessingOptions;
   private Map<ObjectName, MBeanInfo> mbeanInfoCache=new HashMap<ObjectName, MBeanInfo>();
+  String agentVersion;
+  String protocolVersion;
 
-  public RemoteJmxAdapter(final J4pClient connector) {
+  public RemoteJmxAdapter(final J4pClient connector) throws IOException {
     this.connector = connector;
+    try {
+      J4pVersionResponse response = this.unwrappExecute(new J4pVersionRequest());
+      this.agentVersion=response.getAgentVersion();
+      this.protocolVersion=response.getProtocolVersion();
+      JSONObject value= response.getValue();
+      JSONObject config=(JSONObject)value.get("config");
+      this.agentId=String.valueOf(config.get("agentId"));
+    } catch (InstanceNotFoundException ignore) {
+    }
   }
 
-  public RemoteJmxAdapter(final String url) {
+  public int hashCode() {
+    this.connector.getUri().hashCode();
+  }
+
+  public boolean equals(Object o) {
+    //as long as we refer to the same agent, we may be seen as equivalent
+    return o instanceof RemoteJmxAdapter && this.connector.getUri().equals(((RemoteJmxAdapter) o).connector.getUri());
+  }
+
+  public RemoteJmxAdapter(final String url) throws IOException {
     this(new J4pClientBuilder().url(url).build());
   }
 
@@ -428,5 +450,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     } catch (ClassNotFoundException e) {
       return false;
     }
+  }
+
+  String getId() {
+    return this.agentId;
   }
 }
