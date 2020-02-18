@@ -33,7 +33,13 @@ import java.util.Set;
 
 import static com.jayway.awaitility.Awaitility.await;
 
-/** I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection */
+/** I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection
+ * To test in IDE ensure the same command line options as when running in mvn are in place
+ *
+ * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888
+ *                         -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+ *                         -Djava.rmi.server.hostname=localhost
+ */
 public class JmxBridgeTest {
 
   private RemoteJmxAdapter adapter;
@@ -105,6 +111,7 @@ public class JmxBridgeTest {
         }
       };
   private int agentPort;
+  private MBeanServerConnection alternativeConnection;
 
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
@@ -159,10 +166,10 @@ public class JmxBridgeTest {
       throws MBeanException, ReflectionException, IOException, InstanceAlreadyExistsException,
           NotCompliantMBeanException {
 
-    MBeanServer nativeServer = ManagementFactory.getPlatformMBeanServer();
+    MBeanServer localServer = ManagementFactory.getPlatformMBeanServer();
     // ADD potentially problematic MBeans here (if errors are discovered to uncover other cases that
     // should be managed)
-    nativeServer.createMBean(
+    localServer.createMBean(
         MBeanExample.class.getName(),
         RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
@@ -180,15 +187,23 @@ public class JmxBridgeTest {
                   }
                 }));
     this.adapter = new RemoteJmxAdapter(connector);
+
+    JMXConnector rmiConnector = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi"));
+    rmiConnector.connect();
+    this.alternativeConnection = rmiConnector.getMBeanServerConnection();
+  }
+
+  private MBeanServerConnection getNativeConnection() {
+    return this.alternativeConnection;
   }
 
   @Test
   public void testThreadingDetails() throws ReflectionException, MBeanException, InstanceNotFoundException, IOException, AttributeNotFoundException {
     ObjectName name=RemoteJmxAdapter.getObjectName("java.lang:type=Threading");
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     long[] ids= (long[]) nativeServer.getAttribute(name, "AllThreadIds");
-    for(int i=0;i<ids.length;i++) {
-         this.adapter.invoke(name, "getThreadInfo", new Object[]{ids[i]}, new String[]{"long"});
+    for (long id : ids) {
+      this.adapter.invoke(name, "getThreadInfo", new Object[]{id}, new String[]{"long"});
     }
     this.adapter.invoke(name, "findDeadlockedThreads", new Object[0], new String[0]);
 
@@ -196,13 +211,13 @@ public class JmxBridgeTest {
 
   @Test(dataProvider = "nameAndQueryCombinations")
   public void testNames(ObjectName name, QueryExp query) throws IOException {
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     Assert.assertEquals(nativeServer.queryNames(name, query), this.adapter.queryNames(name, query));
   }
 
   @Test(dataProvider = "nameAndQueryCombinations")
   public void testInstances(ObjectName name, QueryExp query) throws IOException {
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     Assert.assertEquals(
         nativeServer.queryMBeans(name, query), this.adapter.queryMBeans(name, query));
   }
@@ -285,7 +300,7 @@ public class JmxBridgeTest {
   @Test(dataProvider = "safeOperationsToCall")
   public void testInvoke(ObjectName name, String operation, Object[] arguments)
       throws IOException, ReflectionException, MBeanException {
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     try {
       for (MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
         if (operationInfo.getName().equals(operation)
@@ -306,7 +321,7 @@ public class JmxBridgeTest {
 
   @Test(dataProvider = "allNames")
   public void testInstances(ObjectName name) throws InstanceNotFoundException, IOException {
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     final ObjectInstance nativeInstance = nativeServer.getObjectInstance(name);
     final ObjectInstance jolokiaInstance = this.adapter.getObjectInstance(name);
     Assert.assertEquals(jolokiaInstance, nativeInstance);
@@ -342,7 +357,7 @@ public class JmxBridgeTest {
   public void testMBeanInfo(ObjectName name)
       throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException,
           AttributeNotFoundException, MBeanException, InvalidAttributeValueException {
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     final MBeanInfo jolokiaMBeanInfo = this.adapter.getMBeanInfo(name);
     final MBeanInfo nativeMBeanInfo = nativeServer.getMBeanInfo(name);
     Assert.assertEquals(jolokiaMBeanInfo.getDescription(), nativeMBeanInfo.getDescription());
@@ -463,7 +478,7 @@ public class JmxBridgeTest {
 
   @Test
   public void testOverallOperations() throws IOException {
-    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    final MBeanServerConnection nativeServer = getNativeConnection();
     Assert.assertEquals(
         this.adapter.getMBeanCount(),
         nativeServer.getMBeanCount(),

@@ -12,6 +12,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class JolokiaJmxConnector implements JMXConnector {
   @Override
   public void connect(Map<String, ?> env) throws IOException {
     if(!"jolokia".equals(this.serviceUrl.getProtocol())) {
-      throw new IllegalArgumentException("I only handle Jolokia service urls");
+      throw new MalformedURLException("I only handle Jolokia service urls");
     }
 
     String internalProdocol="http";

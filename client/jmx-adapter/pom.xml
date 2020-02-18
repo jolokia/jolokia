@@ -199,7 +199,6 @@
                         -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
                         -Djava.rmi.server.hostname=localhost
                     </argLine>
-                    <!--<argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000</argLine>-->
                     <forkMode>once</forkMode>
                 </configuration>
             </plugin>
