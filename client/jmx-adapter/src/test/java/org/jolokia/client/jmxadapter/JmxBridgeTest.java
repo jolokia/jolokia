@@ -4,9 +4,7 @@ import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ThrowingRunnable;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.MBeanExample;
 import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
@@ -19,10 +17,10 @@ import org.testng.annotations.Test;
 import javax.management.*;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
 
@@ -183,6 +180,18 @@ public class JmxBridgeTest {
                   }
                 }));
     this.adapter = new RemoteJmxAdapter(connector);
+  }
+
+  @Test
+  public void testThreadingDetails() throws ReflectionException, MBeanException, InstanceNotFoundException, IOException, AttributeNotFoundException {
+    ObjectName name=RemoteJmxAdapter.getObjectName("java.lang:type=Threading");
+    final MBeanServerConnection nativeServer = ManagementFactory.getPlatformMBeanServer();
+    long[] ids= (long[]) nativeServer.getAttribute(name, "AllThreadIds");
+    for(int i=0;i<ids.length;i++) {
+         this.adapter.invoke(name, "getThreadInfo", new Object[]{ids[i]}, new String[]{"long"});
+    }
+    this.adapter.invoke(name, "findDeadlockedThreads", new Object[0], new String[0]);
+
   }
 
   @Test(dataProvider = "nameAndQueryCombinations")
@@ -480,8 +489,9 @@ public class JmxBridgeTest {
 
   @Test
   public void testConnector() throws IOException {
+    JMXServiceURL serviceURL = new JMXServiceURL("jolokia", "localhost", agentPort, "/jolokia/");
     JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
-            new JMXServiceURL("jolokia", "localhost", agentPort, "/jolokia/"),
+            serviceURL,
             Collections.<String, Object>emptyMap());
     final List<JMXConnectionNotification> receivedNotifications=new LinkedList<JMXConnectionNotification>();
     final Object handback="foobar";
@@ -506,6 +516,10 @@ public class JmxBridgeTest {
     Assert.assertEquals(
             connector.getMBeanServerConnection(null),
             this.adapter);
+
+//    JMXConnector serviceLoadedConnector = JMXConnectorFactory.connect(serviceURL);
+//    serviceLoadedConnector.connect();
+//    Assert.assertEquals(serviceLoadedConnector.getMBeanServerConnection(), this.adapter);
 
   }
 

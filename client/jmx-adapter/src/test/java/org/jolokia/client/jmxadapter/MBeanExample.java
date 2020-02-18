@@ -1,4 +1,4 @@
-package org.jolokia.client;
+package org.jolokia.client.jmxadapter;
 
 public class MBeanExample implements MBeanExampleMXBean {
 

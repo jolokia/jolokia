@@ -12,6 +12,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -33,22 +34,7 @@ public class JolokiaJmxConnector implements JMXConnector {
 
   @Override
   public void connect() throws IOException {
-    if(!"jolokia".equals(this.serviceUrl.getProtocol())) {
-      throw new IllegalArgumentException("I only handle Jolokia service urls");
-    }
-
-    String internalProdocol="http";
-    if(String.valueOf(this.serviceUrl.getPort()).endsWith("443")) {
-      internalProdocol="https";
-    }
-    this.adapter=new RemoteJmxAdapter(new J4pClientBuilder().url(internalProdocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort() +  prefixWithSlashIfNone(this.serviceUrl.getURLPath())).build());
-    this.connectionId=this.adapter.getId();
-    this.broadcasterSupport.sendNotification(new JMXConnectionNotification(JMXConnectionNotification.OPENED,
-            this,
-            this.connectionId,
-            this.clientNotifSeqNo++,
-            "Successful connection",
-            null));
+    connect(Collections.<String, Object>emptyMap());
   }
 
   private String prefixWithSlashIfNone(String urlPath) {
@@ -61,8 +47,28 @@ public class JolokiaJmxConnector implements JMXConnector {
 
   @Override
   public void connect(Map<String, ?> env) throws IOException {
-    //TODO: Figure out how to use env variables
-    connect();
+    if(!"jolokia".equals(this.serviceUrl.getProtocol())) {
+      throw new IllegalArgumentException("I only handle Jolokia service urls");
+    }
+
+    String internalProdocol="http";
+    if(String.valueOf(this.serviceUrl.getPort()).endsWith("443")) {
+      internalProdocol="https";
+    }
+    final J4pClientBuilder clientBuilder = new J4pClientBuilder().url(internalProdocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort() + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
+    if(env.containsKey(CREDENTIALS)) {
+      String[] credentials= (String[]) env.get(CREDENTIALS);
+      clientBuilder.user(credentials[0]);
+      clientBuilder.password(credentials[1]);
+    }
+    this.adapter=new RemoteJmxAdapter(clientBuilder.build());
+    this.connectionId=this.adapter.getId();
+    this.broadcasterSupport.sendNotification(new JMXConnectionNotification(JMXConnectionNotification.OPENED,
+            this,
+            this.connectionId,
+            this.clientNotifSeqNo++,
+            "Successful connection",
+            null));
   }
 
   @Override

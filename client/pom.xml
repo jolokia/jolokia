@@ -20,6 +20,7 @@
   <modules>
     <module>java</module>
     <module>javascript</module>
+    <module>jmx-adapter</module>
   </modules>
 
   <profiles>

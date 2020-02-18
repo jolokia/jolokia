@@ -54,7 +54,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   public int hashCode() {
-    this.connector.getUri().hashCode();
+    return this.connector.getUri().hashCode();
   }
 
   public boolean equals(Object o) {
@@ -308,7 +308,23 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public AttributeList getAttributes(ObjectName name, String[] attributes)
       throws InstanceNotFoundException, IOException {
-    return unwrappExecute(new J4pReadRequest(name, attributes)).getValue();
+    //optimization for single attribute
+    if(attributes.length == 1) {
+      try {
+        return new AttributeList(Collections.singletonList(new Attribute(attributes[0], getAttribute(name, attributes[0]))));
+      } catch (AttributeNotFoundException e) {
+        return new AttributeList();
+      }
+    }
+    return toAttributeList(name, (JSONObject) unwrappExecute(new J4pReadRequest(name, attributes)).getValue());
+  }
+
+  private AttributeList toAttributeList(ObjectName name, Map<String,Object> value) {
+    AttributeList result = new AttributeList();
+    for(Map.Entry<String,Object> item : value.entrySet()) {
+      result.add(new Attribute(item.getKey(), this.adaptJsonToOptimalResponseValue(name, item.getKey(), item.getValue())));
+    }
+    return result;
   }
 
   @Override
@@ -357,6 +373,10 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
       throws InstanceNotFoundException, MBeanException, IOException {
+    //jvisualvm may send null for no parameters
+    if(params == null && signature.length==0) {
+      params = new Object[0];
+    }
     try {
     final J4pExecResponse response =
         unwrappExecute(new J4pExecRequest(name, operationName + makeSignature(signature), params));
