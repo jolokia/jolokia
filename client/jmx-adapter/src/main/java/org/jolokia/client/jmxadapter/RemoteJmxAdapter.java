@@ -268,6 +268,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       } else {
         throw e;
       }
+    } catch(UnsupportedOperationException e) {
+      //JConsole does not seem to like unsupported operation while looking up attributes
+      throw new AttributeNotFoundException();
     }
   }
 
@@ -418,7 +421,13 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public void addNotificationListener(
       ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
-    throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
+    if(!isRunningInJConsole()) {//just ignore in JConsole as it wrecks the MBean page
+      throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
+    }
+  }
+
+  private boolean isRunningInJConsole() {
+    return System.getProperty("jconsole.showOutputViewer") != null;
   }
 
   @Override

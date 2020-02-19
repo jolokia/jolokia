@@ -53,7 +53,7 @@ public class JolokiaJmxConnector implements JMXConnector {
     }
 
     String internalProdocol="http";
-    if(String.valueOf(this.serviceUrl.getPort()).endsWith("443")) {
+    if(String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true".equals(env.get("jmx.remote.x.check.stub"))) {
       internalProdocol="https";
     }
     final J4pClientBuilder clientBuilder = new J4pClientBuilder().url(internalProdocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort() + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
