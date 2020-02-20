@@ -1,11 +1,13 @@
 package org.jolokia.client.jmxadapter;
 
+import javax.management.openmbean.OpenType;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.*;
+import org.jolokia.converter.Converters;
 import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONObject;
 
@@ -25,10 +27,9 @@ import java.util.Set;
 
 /**
  * I emulate a subset of the functionality of a native MBeanServerConnector but over a Jolokia
- * connection to the VM , the response types and thrown exceptions
- * attempts to mimic as close as possible the ones from a native
- * Java MBeanServerConnection
- *
+ * connection to the VM , the response types and thrown exceptions attempts to mimic as close as
+ * possible the ones from a native Java MBeanServerConnection
+ * <p>
  * Operations that are not supported will throw an #UnsupportedOperationException
  */
 public class RemoteJmxAdapter implements MBeanServerConnection {
@@ -36,7 +37,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   private final J4pClient connector;
   private String agentId;
   private HashMap<J4pQueryParameter, String> defaultProcessingOptions;
-  private Map<ObjectName, MBeanInfo> mbeanInfoCache=new HashMap<ObjectName, MBeanInfo>();
+  private Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<ObjectName, MBeanInfo>();
   String agentVersion;
   String protocolVersion;
 
@@ -44,11 +45,11 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     this.connector = connector;
     try {
       J4pVersionResponse response = this.unwrappExecute(new J4pVersionRequest());
-      this.agentVersion=response.getAgentVersion();
-      this.protocolVersion=response.getProtocolVersion();
-      JSONObject value= response.getValue();
-      JSONObject config=(JSONObject)value.get("config");
-      this.agentId=String.valueOf(config.get("agentId"));
+      this.agentVersion = response.getAgentVersion();
+      this.protocolVersion = response.getProtocolVersion();
+      JSONObject value = response.getValue();
+      JSONObject config = (JSONObject) value.get("config");
+      this.agentId = String.valueOf(config.get("agentId"));
     } catch (InstanceNotFoundException ignore) {
     }
   }
@@ -59,7 +60,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   public boolean equals(Object o) {
     //as long as we refer to the same agent, we may be seen as equivalent
-    return o instanceof RemoteJmxAdapter && this.connector.getUri().equals(((RemoteJmxAdapter) o).connector.getUri());
+    return o instanceof RemoteJmxAdapter && this.connector.getUri()
+        .equals(((RemoteJmxAdapter) o).connector.getUri());
   }
 
   public RemoteJmxAdapter(final String url) throws IOException {
@@ -185,7 +187,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     return (MBeanServer)
         Proxy.newProxyInstance(
             this.getClass().getClassLoader(),
-            new Class[] {MBeanServer.class},
+            new Class[]{MBeanServer.class},
             new InvocationHandler() {
               @Override
               public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -263,22 +265,41 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     } catch (UncheckedJmxAdapterException e) {
       if (e.getCause() instanceof J4pRemoteException
           && "javax.management.AttributeNotFoundException"
-              .equals(((J4pRemoteException) e.getCause()).getErrorType())) {
+          .equals(((J4pRemoteException) e.getCause()).getErrorType())) {
         throw new AttributeNotFoundException((e.getCause().getMessage()));
       } else {
         throw e;
       }
-    } catch(UnsupportedOperationException e) {
+    } catch (UnsupportedOperationException e) {
       //JConsole does not seem to like unsupported operation while looking up attributes
       throw new AttributeNotFoundException();
     }
   }
 
   private Object adaptJsonToOptimalResponseValue(
-      ObjectName name, String attribute, Object rawValue) {
-    if (this.isPrimitive(rawValue)) {
-      return rawValue;
-    }
+      ObjectName name, String attribute, Object rawValue)
+      throws IOException, InstanceNotFoundException {
+    final String qualifiedName = name + "." + attribute;
+
+    //cache MBeanInfo (and thereby attribute types) if it is not yet cached
+    getMBeanInfo(name);
+
+      //adjust numeric types, to avoid ClassCastException e.g. in JConsole proxies
+      if (this.isPrimitive(rawValue)) {
+        OpenType<?> attributeType=null;
+        try {
+          attributeType = ToOpenTypeConverter.cachedType(qualifiedName);
+        } catch (OpenDataException ignore) {
+        }
+
+        if (rawValue instanceof Number && attributeType != null) {
+          return new Converters().getToOpenTypeConverter()
+              .convertToObject(attributeType, rawValue);
+        } else {
+          return rawValue;
+        }
+      }
+
     // special case, if the attribute is ObjectName
     if (rawValue instanceof JSONObject
         && ((JSONObject) rawValue).size() == 1
@@ -286,10 +307,17 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       return getObjectName("" + ((JSONObject) rawValue).get("objectName"));
     }
     try {
-      return ToOpenTypeConverter.returnOpenTypedValue(name + "." + attribute, rawValue);
+      return ToOpenTypeConverter.returnOpenTypedValue(qualifiedName, rawValue);
     } catch (OpenDataException e) {
       return rawValue;
     }
+  }
+
+  private OpenType<?> findTypeFor(ObjectName name, String attribute)
+      throws IOException, InstanceNotFoundException, OpenDataException {
+    //trigger caching, if it is not yet cached
+    getMBeanInfo(name);
+    return ToOpenTypeConverter.cachedType(name + "." + attribute);
   }
 
   private boolean isPrimitive(Object rawValue) {
@@ -312,20 +340,32 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public AttributeList getAttributes(ObjectName name, String[] attributes)
       throws InstanceNotFoundException, IOException {
     //optimization for single attribute
-    if(attributes.length == 1) {
+    if (attributes.length == 1) {
       try {
-        return new AttributeList(Collections.singletonList(new Attribute(attributes[0], getAttribute(name, attributes[0]))));
+        return new AttributeList(Collections
+            .singletonList(new Attribute(attributes[0], getAttribute(name, attributes[0]))));
       } catch (AttributeNotFoundException e) {
         return new AttributeList();
       }
     }
-    return toAttributeList(name, (JSONObject) unwrappExecute(new J4pReadRequest(name, attributes)).getValue());
+    try {
+      return toAttributeList(name,
+          (JSONObject) unwrappExecute(new J4pReadRequest(name, attributes)).getValue());
+    } catch (UnsupportedOperationException e) {
+      if (isRunningInJConsole()) {
+        throw new InstanceNotFoundException();
+      } else {
+        throw e;
+      }
+    }
   }
 
-  private AttributeList toAttributeList(ObjectName name, Map<String,Object> value) {
+  private AttributeList toAttributeList(ObjectName name, Map<String, Object> value)
+      throws IOException, InstanceNotFoundException {
     AttributeList result = new AttributeList();
-    for(Map.Entry<String,Object> item : value.entrySet()) {
-      result.add(new Attribute(item.getKey(), this.adaptJsonToOptimalResponseValue(name, item.getKey(), item.getValue())));
+    for (Map.Entry<String, Object> item : value.entrySet()) {
+      result.add(new Attribute(item.getKey(),
+          this.adaptJsonToOptimalResponseValue(name, item.getKey(), item.getValue())));
     }
     return result;
   }
@@ -333,7 +373,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public void setAttribute(ObjectName name, Attribute attribute)
       throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException,
-          IOException {
+      IOException {
     final J4pWriteRequest request =
         new J4pWriteRequest(name, attribute.getName(), attribute.getValue());
     try {
@@ -346,9 +386,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         }
         if ("java.lang.IllegalArgumentException".equals(remote.getErrorType())
             && remote
-                .getMessage()
-                .matches(
-                    "Error: java.lang.IllegalArgumentException : Invalid value .+ for attribute .+")) {
+            .getMessage()
+            .matches(
+                "Error: java.lang.IllegalArgumentException : Invalid value .+ for attribute .+")) {
           throw new InvalidAttributeValueException(remote.getMessage());
         }
       }
@@ -377,15 +417,16 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
       throws InstanceNotFoundException, MBeanException, IOException {
     //jvisualvm may send null for no parameters
-    if(params == null && signature.length==0) {
+    if (params == null && signature.length == 0) {
       params = new Object[0];
     }
     try {
-    final J4pExecResponse response =
-        unwrappExecute(new J4pExecRequest(name, operationName + makeSignature(signature), params));
-    return adaptJsonToOptimalResponseValue(name, operationName, response.getValue());
+      final J4pExecResponse response =
+          unwrappExecute(
+              new J4pExecRequest(name, operationName + makeSignature(signature), params));
+      return adaptJsonToOptimalResponseValue(name, operationName, response.getValue());
     } catch (UncheckedJmxAdapterException e) {
-      if(e.getCause() instanceof J4pRemoteException) {
+      if (e.getCause() instanceof J4pRemoteException) {
         throw new MBeanException((Exception) e.getCause());
       }
       throw e;
@@ -393,9 +434,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   private String makeSignature(String[] signature) {
-    StringBuilder builder=new StringBuilder("(");
-    for(int i=0;i<signature.length;i++) {
-      if(i>0) {
+    StringBuilder builder = new StringBuilder("(");
+    for (int i = 0; i < signature.length; i++) {
+      if (i > 0) {
         builder.append(',');
       }
       builder.append(signature[i]);
@@ -421,7 +462,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public void addNotificationListener(
       ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
-    if(!isRunningInJConsole()) {//just ignore in JConsole as it wrecks the MBean page
+    if (!isRunningInJConsole()) {//just ignore in JConsole as it wrecks the MBean page
       throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
     }
   }
@@ -460,12 +501,22 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IOException {
-    MBeanInfo result=this.mbeanInfoCache.get(name);
+    MBeanInfo result = this.mbeanInfoCache.get(name);
     //cache in case client queries a lot for MBean info
-    if(result == null) {
+    if (result == null) {
       final J4pListResponse response = this.unwrappExecute(new J4pListRequest(name));
-      result= response.getMbeanInfo();
+      result = response.getMbeanInfo();
       this.mbeanInfoCache.put(name, result);
+      for (MBeanAttributeInfo attr : result.getAttributes()) {
+        final String qualifiedName = name + "." + attr.getName();
+        try {
+          if (ToOpenTypeConverter.cachedType(qualifiedName) == null ) {
+            ToOpenTypeConverter
+                .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
+          }
+        } catch (OpenDataException ignore) {
+        }
+      }
     }
     return result;
   }

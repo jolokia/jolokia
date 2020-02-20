@@ -36,9 +36,9 @@ import static com.jayway.awaitility.Awaitility.await;
 /** I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection
  * To test in IDE ensure the same command line options as when running in mvn are in place
  *
- * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888
- *                         -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
- *                         -Djava.rmi.server.hostname=localhost
+ * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost
+ *
+ *
  */
 public class JmxBridgeTest {
 
@@ -80,6 +80,7 @@ public class JmxBridgeTest {
               "java.lang:type=MemoryPool,name=PS Eden Space.PeakUsage",
               "java.lang:type=MemoryPool,name=Compressed Class Space.Usage",
               "java.lang:type=MemoryPool,name=PS Perm Gen.Usage",
+              "java.lang:type=OperatingSystem.FreeSwapSpaceSize",
               // tabular format is too complex for direct comparison
               "java.lang:type=Runtime.SystemProperties",
               // jolokia mbean server is returned as an actual complex object
@@ -147,6 +148,32 @@ public class JmxBridgeTest {
         "setVMOption",
         new Object[] {"HeapDumpOnOutOfMemoryError", "true"}
       }
+    };
+  }
+
+  @DataProvider
+  public static Object[][] threadOperationsToCompare() {
+    return new Object[][]{
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+            "getThreadInfo",
+            new Object[] {1L},
+            new String[] {"long"}},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+            "getThreadInfo",
+            new Object[] {1L, 10},
+            new String[] {"long", "int"}},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+        "getThreadInfo",
+        new Object[] {new long[]{1L}},
+        new String[] {"[J"}},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+            "getThreadInfo",
+            new Object[] {new long[]{1L}, 10},
+            new String[] {"[J", "int"}},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+            "getThreadInfo",
+            new Object[] {new long[]{1L}, true, true},
+            new String[] {"[J", "boolean", "boolean"}}
     };
   }
 
@@ -297,6 +324,15 @@ public class JmxBridgeTest {
         new String[] {"[J"});
   }
 
+  @Test(dataProvider = "threadOperationsToCompare")
+  public void testCompareThreadMethods(ObjectName name, String operation, Object[] arguments, String[] signature)
+      throws MBeanException, InstanceNotFoundException, IOException, ReflectionException {
+    Assert.assertEquals(
+        this.adapter.invoke(name, operation, arguments, signature).getClass(),
+        getNativeConnection().invoke(name, operation,arguments, signature).getClass()
+    );
+  }
+
   @Test(dataProvider = "safeOperationsToCall")
   public void testInvoke(ObjectName name, String operation, Object[] arguments)
       throws IOException, ReflectionException, MBeanException {
@@ -382,7 +418,7 @@ public class JmxBridgeTest {
       final Object jolokiaAttributeValue = this.adapter.getAttribute(name, attribute.getName());
       final Object nativeAttributeValue = nativeServer.getAttribute(name, attribute.getName());
       // data type probably not so important (ie. long vs integer), as long as value is close enough
-      if (jolokiaAttributeValue instanceof Number) {
+      if (jolokiaAttributeValue instanceof Double) {
         Assert.assertEquals(
             ((Number) jolokiaAttributeValue).doubleValue(),
             ((Number) nativeAttributeValue).doubleValue(),
