@@ -1,23 +1,24 @@
 package org.jolokia.client.jmxadapter;
 
-import com.sun.management.VMOption;
-import java.lang.reflect.Array;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.TabularData;
-import org.jolokia.converter.Converters;
-import org.jolokia.util.ClassUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import static javax.management.openmbean.SimpleType.BIGDECIMAL;
+import static javax.management.openmbean.SimpleType.BIGINTEGER;
+import static javax.management.openmbean.SimpleType.BOOLEAN;
+import static javax.management.openmbean.SimpleType.BYTE;
+import static javax.management.openmbean.SimpleType.CHARACTER;
+import static javax.management.openmbean.SimpleType.DATE;
+import static javax.management.openmbean.SimpleType.DOUBLE;
+import static javax.management.openmbean.SimpleType.FLOAT;
+import static javax.management.openmbean.SimpleType.INTEGER;
+import static javax.management.openmbean.SimpleType.LONG;
+import static javax.management.openmbean.SimpleType.OBJECTNAME;
+import static javax.management.openmbean.SimpleType.SHORT;
+import static javax.management.openmbean.SimpleType.STRING;
+import static javax.management.openmbean.SimpleType.VOID;
 
-import javax.lang.model.type.PrimitiveType;
-import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularType;
+import com.sun.management.VMOption;
 import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadInfo;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -25,8 +26,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import static javax.management.openmbean.SimpleType.*;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularType;
+import org.jolokia.converter.Converters;
+import org.jolokia.util.ClassUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  * Attempt to produce openmbean results to emulate a native JMX connection by reverse engineering
@@ -59,48 +70,58 @@ public class ToOpenTypeConverter {
     final OpenType<?> type = recursivelyBuildOpenType(name, rawValue);
     if (type == null) {
       return rawValue;
-    } else if (type.isArray() && ((ArrayType<?>)type).isPrimitiveArray()){
-      return toPrimitiveArray((ArrayType<?>)type, (JSONArray) rawValue);
+    } else if (type.isArray() && ((ArrayType<?>) type).isPrimitiveArray()) {
+      return toPrimitiveArray((ArrayType<?>) type, (JSONArray) rawValue);
     } else {
       return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
     }
   }
 
+  /**
+   * This only cover known cases. Might consider making it complete and
+   * include in jolokia core ArrayTypeConverter
+   *
+   * @param type Array type representing a primitive array
+   * @param rawValue JSONArray with the values (boxed types)
+   * @return A primitive array
+   */
   private static Object toPrimitiveArray(ArrayType<?> type, JSONArray rawValue) {
-    if(LONG.equals(type.getElementOpenType())) {
-      long[] longArray=new long[rawValue.size()];
-      for(int i=0;i<rawValue.size();i++) {
-        longArray[i]=((Number)rawValue.get(i)).longValue();
+    if (LONG.equals(type.getElementOpenType())) {
+      long[] longArray = new long[rawValue.size()];
+      for (int i = 0; i < rawValue.size(); i++) {
+        longArray[i] = ((Number) rawValue.get(i)).longValue();
       }
       return longArray;
-    } else if(INTEGER.equals(type.getElementOpenType())) {
-      int[] intArray=new int[rawValue.size()];
-      for(int i=0;i<rawValue.size();i++) {
-        intArray[i]=((Number)rawValue.get(i)).intValue();
+    } else if (INTEGER.equals(type.getElementOpenType())) {
+      int[] intArray = new int[rawValue.size()];
+      for (int i = 0; i < rawValue.size(); i++) {
+        intArray[i] = ((Number) rawValue.get(i)).intValue();
       }
       return intArray;
-    } else if(DOUBLE.equals(type.getElementOpenType())) {
-      double[] doubleArray=new double[rawValue.size()];
-      for(int i=0;i<rawValue.size();i++) {
-        doubleArray[i]=((Number)rawValue.get(i)).doubleValue();
+    } else if (DOUBLE.equals(type.getElementOpenType())) {
+      double[] doubleArray = new double[rawValue.size()];
+      for (int i = 0; i < rawValue.size(); i++) {
+        doubleArray[i] = ((Number) rawValue.get(i)).doubleValue();
       }
       return doubleArray;
-    } else if(BOOLEAN.equals(type.getElementOpenType())) {
-      boolean[] booleanArray=new boolean[rawValue.size()];
-      for(int i=0;i<rawValue.size();i++) {
-        booleanArray[i]=rawValue.get(i) == Boolean.TRUE;
+    } else if (BOOLEAN.equals(type.getElementOpenType())) {
+      boolean[] booleanArray = new boolean[rawValue.size()];
+      for (int i = 0; i < rawValue.size(); i++) {
+        booleanArray[i] = rawValue.get(i) == Boolean.TRUE;
       }
       return booleanArray;
     }
     return rawValue.toArray(
-        (Object[]) Array.newInstance(ClassUtil.classForName(type.getElementOpenType().getClassName()), rawValue.size()));
+        (Object[]) Array
+            .newInstance(ClassUtil.classForName(type.getElementOpenType().getClassName()),
+                rawValue.size()));
   }
 
   public static OpenType<?> recursivelyBuildOpenType(String name, Object rawValue)
       throws OpenDataException {
     for (SimpleType<?> type : typeArray) {
       if (type.isValue(rawValue)
-          || (type.getClassName() != null && type.getClassName().equals(cachedType(name)))) {
+          || (type.getClassName() != null && type.equals(cachedType(name)))) {
         return type;
       }
     }
@@ -115,7 +136,6 @@ public class ToOpenTypeConverter {
         }
       }
     } else if (tabularContentType(name) != null) {
-      final JSONObject structure = (JSONObject) rawValue;
       final String typeName =
           "Map<java.lang.String," + tabularContentType(name).getClassName() + ">";
       return new TabularType(
@@ -185,8 +205,10 @@ public class ToOpenTypeConverter {
       cacheType(
           introspectComplexTypeFrom(ThreadInfo.class),
           "java.lang:type=Threading.getThreadInfo.item", "java.lang:type=Threading.getThreadInfo");
-      cacheType(ArrayType.getPrimitiveArrayType(long[].class), "java.lang:type=Threading.AllThreadIds");
-      cacheType(introspectComplexTypeFrom(ThreadInfo.class), "java.lang:type=Threading.dumpAllThreads.item");
+      cacheType(ArrayType.getPrimitiveArrayType(long[].class),
+          "java.lang:type=Threading.AllThreadIds");
+      cacheType(introspectComplexTypeFrom(ThreadInfo.class),
+          "java.lang:type=Threading.dumpAllThreads.item");
     }
     return TYPE_SPECIFICATIONS.get(name);
   }
@@ -225,25 +247,32 @@ public class ToOpenTypeConverter {
 
     if (klass.isArray()) {
       OpenType<?> componentType = introspectComplexTypeFrom(klass.getComponentType());
-      return new ArrayType(1, componentType);
+      return new ArrayType<OpenType<?>>(1, componentType);
     }
 
     List<String> names = new LinkedList<String>();
     List<OpenType<?>> types = new LinkedList<OpenType<?>>();
-    for (Method method : klass.getDeclaredMethods()) {
-      // only introspect instance fields
-      if ((method.getModifiers() & Modifier.STATIC) == 0
-          && (method.getModifiers() & Modifier.PUBLIC) != 0
-          && method.getParameterTypes().length == 0) {
-        if (method.getName().startsWith("get")) {
-          names.add(method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4));
-          types.add(introspectComplexTypeFrom(method.getReturnType()));
-        } else if (method.getName().startsWith("is")) {
-          names.add(method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3));
-          types.add(introspectComplexTypeFrom(method.getReturnType()));
+    Class<?> classToIntrospect = klass;
+    while (classToIntrospect != null && !classToIntrospect.equals(Object.class)) {
+      for (Method method : classToIntrospect.getDeclaredMethods()) {
+        // only introspect instance fields
+        if ((method.getModifiers() & Modifier.STATIC) == 0
+            && (method.getModifiers() & Modifier.PUBLIC) != 0
+            && method.getParameterTypes().length == 0) {
+          if (method.getName().startsWith("get")) {
+            names.add(
+                method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4));
+            types.add(introspectComplexTypeFrom(method.getReturnType()));
+          } else if (method.getName().startsWith("is")) {
+            names.add(
+                method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3));
+            types.add(introspectComplexTypeFrom(method.getReturnType()));
+          }
         }
       }
+      classToIntrospect = classToIntrospect.getSuperclass();
     }
+
     return new CompositeType(
         klass.getName(),
         klass.getName(),

@@ -1,18 +1,5 @@
 package org.jolokia.client.jmxadapter;
 
-import javax.management.openmbean.OpenType;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
-import org.jolokia.client.exception.UncheckedJmxAdapterException;
-import org.jolokia.client.request.*;
-import org.jolokia.converter.Converters;
-import org.jolokia.util.ClassUtil;
-import org.json.simple.JSONObject;
-
-import javax.management.*;
-import javax.management.openmbean.OpenDataException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -24,6 +11,47 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.QueryEval;
+import javax.management.QueryExp;
+import javax.management.RuntimeMBeanException;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.UncheckedJmxAdapterException;
+import org.jolokia.client.request.J4pExecRequest;
+import org.jolokia.client.request.J4pExecResponse;
+import org.jolokia.client.request.J4pListRequest;
+import org.jolokia.client.request.J4pListResponse;
+import org.jolokia.client.request.J4pQueryParameter;
+import org.jolokia.client.request.J4pReadRequest;
+import org.jolokia.client.request.J4pRequest;
+import org.jolokia.client.request.J4pResponse;
+import org.jolokia.client.request.J4pSearchRequest;
+import org.jolokia.client.request.J4pSearchResponse;
+import org.jolokia.client.request.J4pVersionRequest;
+import org.jolokia.client.request.J4pVersionResponse;
+import org.jolokia.client.request.J4pWriteRequest;
+import org.jolokia.converter.Converters;
+import org.jolokia.util.ClassUtil;
+import org.json.simple.JSONObject;
 
 /**
  * I emulate a subset of the functionality of a native MBeanServerConnector but over a Jolokia
@@ -64,6 +92,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         .equals(((RemoteJmxAdapter) o).connector.getUri());
   }
 
+  @SuppressWarnings("unused")
   public RemoteJmxAdapter(final String url) throws IOException {
     this(new J4pClientBuilder().url(url).build());
   }
@@ -224,6 +253,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   private static Set<String> UNCHECKED_REMOTE_EXCEPTIONS =
       Collections.singleton("java.lang.UnsupportedOperationException");
 
+  @SuppressWarnings("rawtypes")
   private J4pResponse unwrapException(J4pException e)
       throws IOException, InstanceNotFoundException {
     if (e.getCause() instanceof IOException) {
@@ -313,13 +343,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
   }
 
-  private OpenType<?> findTypeFor(ObjectName name, String attribute)
-      throws IOException, InstanceNotFoundException, OpenDataException {
-    //trigger caching, if it is not yet cached
-    getMBeanInfo(name);
-    return ToOpenTypeConverter.cachedType(name + "." + attribute);
-  }
-
   private boolean isPrimitive(Object rawValue) {
     return rawValue == null
         || rawValue instanceof Number
@@ -339,33 +362,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public AttributeList getAttributes(ObjectName name, String[] attributes)
       throws InstanceNotFoundException, IOException {
-    //optimization for single attribute
-    if (attributes.length == 1) {
+    AttributeList result=new AttributeList();
+    //send the requests one and one, as the spec allows for responding only a subset, even though bundling will reduce latency
+    for(final String attribute : attributes) {
       try {
-        return new AttributeList(Collections
-            .singletonList(new Attribute(attributes[0], getAttribute(name, attributes[0]))));
-      } catch (AttributeNotFoundException e) {
-        return new AttributeList();
+        result.add(new Attribute(attribute, getAttribute(name, attribute)));
+      } catch (AttributeNotFoundException ignore) {
+      } catch (RuntimeException ignore) {
       }
-    }
-    try {
-      return toAttributeList(name,
-          (JSONObject) unwrappExecute(new J4pReadRequest(name, attributes)).getValue());
-    } catch (UnsupportedOperationException e) {
-      if (isRunningInJConsole()) {
-        throw new InstanceNotFoundException();
-      } else {
-        throw e;
-      }
-    }
-  }
-
-  private AttributeList toAttributeList(ObjectName name, Map<String, Object> value)
-      throws IOException, InstanceNotFoundException {
-    AttributeList result = new AttributeList();
-    for (Map.Entry<String, Object> item : value.entrySet()) {
-      result.add(new Attribute(item.getKey(),
-          this.adaptJsonToOptimalResponseValue(name, item.getKey(), item.getValue())));
     }
     return result;
   }
