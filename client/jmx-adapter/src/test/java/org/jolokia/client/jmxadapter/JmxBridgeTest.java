@@ -82,6 +82,7 @@ public class JmxBridgeTest {
               "java.lang:type=MemoryPool,name=Compressed Class Space.Usage",
               "java.lang:type=MemoryPool,name=PS Perm Gen.Usage",
               "java.lang:type=OperatingSystem.FreeSwapSpaceSize",
+              "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage",
               // tabular format is too complex for direct comparison
               "java.lang:type=Runtime.SystemProperties",
               // jolokia mbean server is returned as an actual complex object
