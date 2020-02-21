@@ -38,7 +38,8 @@ import static com.jayway.awaitility.Awaitility.await;
  *
  * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost
  *
- *
+ * It is very possible that some comparison tests may fail on certain JVMs
+ * If you experience this, please report on github.
  */
 public class JmxBridgeTest {
 
@@ -214,7 +215,7 @@ public class JmxBridgeTest {
                   }
                 }));
     this.adapter = new RemoteJmxAdapter(connector);
-
+    //see javadoc above if this line fails while running tests
     JMXConnector rmiConnector = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi"));
     rmiConnector.connect();
     this.alternativeConnection = rmiConnector.getMBeanServerConnection();
@@ -405,6 +406,7 @@ public class JmxBridgeTest {
 
     final AttributeList replacementValues = new AttributeList();
     final AttributeList originalValues = new AttributeList();
+    final List<String> attributeNames = new LinkedList<String>();
 
     for (MBeanAttributeInfo attribute : jolokiaMBeanInfo.getAttributes()) {
       final String qualifiedName = name + "." + attribute.getName();
@@ -442,11 +444,13 @@ public class JmxBridgeTest {
               new Attribute(attribute.getName(), nativeAttributeValue);
           this.adapter.setAttribute(name, restoreAttribute);
           originalValues.add(restoreAttribute);
+          attributeNames.add(attribute.getName());
           // now do multi argument setting
           this.adapter.setAttributes(name, replacementValues);
           Assert.assertEquals(nativeServer.getAttribute(name, attribute.getName()), newValue);
           // and restore
           this.adapter.setAttributes(name, originalValues);
+          this.adapter.getAttributes(name, attributeNames.toArray(new String[0]));
         }
       }
     }
