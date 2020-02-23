@@ -595,7 +595,7 @@ public class JmxBridgeTest {
     Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.CLOSED);
     connector.connect(Collections.<String, Object>emptyMap());
     Assert.assertEquals(
-        connector.getMBeanServerConnection(null),
+        connector.getMBeanServerConnection(),
         this.adapter);
   }
 
