@@ -5,9 +5,11 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +35,7 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.exception.J4pBulkRemoteException;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
@@ -42,6 +45,7 @@ import org.jolokia.client.request.J4pListRequest;
 import org.jolokia.client.request.J4pListResponse;
 import org.jolokia.client.request.J4pQueryParameter;
 import org.jolokia.client.request.J4pReadRequest;
+import org.jolokia.client.request.J4pReadResponse;
 import org.jolokia.client.request.J4pRequest;
 import org.jolokia.client.request.J4pResponse;
 import org.jolokia.client.request.J4pSearchRequest;
@@ -314,21 +318,21 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     //cache MBeanInfo (and thereby attribute types) if it is not yet cached
     getMBeanInfo(name);
 
-      //adjust numeric types, to avoid ClassCastException e.g. in JConsole proxies
-      if (this.isPrimitive(rawValue)) {
-        OpenType<?> attributeType=null;
-        try {
-          attributeType = ToOpenTypeConverter.cachedType(qualifiedName);
-        } catch (OpenDataException ignore) {
-        }
-
-        if (rawValue instanceof Number && attributeType != null) {
-          return new Converters().getToOpenTypeConverter()
-              .convertToObject(attributeType, rawValue);
-        } else {
-          return rawValue;
-        }
+    //adjust numeric types, to avoid ClassCastException e.g. in JConsole proxies
+    if (this.isPrimitive(rawValue)) {
+      OpenType<?> attributeType = null;
+      try {
+        attributeType = ToOpenTypeConverter.cachedType(qualifiedName);
+      } catch (OpenDataException ignore) {
       }
+
+      if (rawValue instanceof Number && attributeType != null) {
+        return new Converters().getToOpenTypeConverter()
+            .convertToObject(attributeType, rawValue);
+      } else {
+        return rawValue;
+      }
+    }
 
     // special case, if the attribute is ObjectName
     if (rawValue instanceof JSONObject
@@ -360,15 +364,31 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public AttributeList getAttributes(ObjectName name, String[] attributes)
       throws InstanceNotFoundException, IOException {
-    AttributeList result=new AttributeList();
-    //send the requests one and one, as the spec allows for responding only a subset, even though bundling will reduce latency
-    for(final String attribute : attributes) {
-      try {
-        result.add(new Attribute(attribute, getAttribute(name, attribute)));
-      } catch (AttributeNotFoundException ignore) {
-      } catch (RuntimeException ignore) {
+    AttributeList result = new AttributeList();
+
+    List<J4pReadRequest> requests = new ArrayList<J4pReadRequest>(attributes.length);
+
+    for (String attribute : attributes) {
+      requests.add(new J4pReadRequest(name, attribute));
+    }
+    List<?> responses = Collections.emptyList();
+    try {
+      responses = this.connector.execute(requests);
+
+    } catch (J4pBulkRemoteException e) {
+      responses = e.getResults();
+    } catch (J4pException ignore) {
+      //will result in empty return
+    }
+    for (Object item : responses) {
+      if(item instanceof J4pReadResponse) {
+        J4pReadResponse value= (J4pReadResponse) item;
+        final String attribute = value.getRequest().getAttribute();
+        result.add(new Attribute(attribute,
+            adaptJsonToOptimalResponseValue(name, attribute, value.getValue())));
       }
     }
     return result;
@@ -466,9 +486,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public void addNotificationListener(
       ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
-    if (!isRunningInJConsole()) {//just ignore in JConsole as it wrecks the MBean page
+    if (!isRunningInJConsole()
+        && !isRunningInJVisualVm()) {//just ignore in JConsole/JvisualVM as it wrecks the MBean page
       throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
     }
+  }
+
+  private boolean isRunningInJVisualVm() {
+    return "Java VisualVM".equals(System.getProperty("netbeans.productversion"));
   }
 
   private boolean isRunningInJConsole() {
@@ -514,7 +539,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       for (MBeanAttributeInfo attr : result.getAttributes()) {
         final String qualifiedName = name + "." + attr.getName();
         try {
-          if (ToOpenTypeConverter.cachedType(qualifiedName) == null ) {
+          if (ToOpenTypeConverter.cachedType(qualifiedName) == null) {
             ToOpenTypeConverter
                 .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
           }

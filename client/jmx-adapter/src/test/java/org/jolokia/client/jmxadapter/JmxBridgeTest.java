@@ -33,13 +33,16 @@ import java.util.Set;
 
 import static com.jayway.awaitility.Awaitility.await;
 
-/** I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection
- * To test in IDE ensure the same command line options as when running in mvn are in place
- *
- * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost
- *
- * It is very possible that some comparison tests may fail on certain JVMs
- * If you experience this, please report on github.
+/**
+ * I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection To test in
+ * IDE ensure the same command line options as when running in mvn are in place
+ * <p>
+ * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888
+ * -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+ * -Djava.rmi.server.hostname=localhost
+ * <p>
+ * It is very possible that some comparison tests may fail on certain JVMs If you experience this,
+ * please report on github.
  */
 public class JmxBridgeTest {
 
@@ -83,6 +86,7 @@ public class JmxBridgeTest {
               "java.lang:type=MemoryPool,name=PS Perm Gen.Usage",
               "java.lang:type=OperatingSystem.FreeSwapSpaceSize",
               "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage",
+              "java.lang:type=ClassLoading.TotalLoadedClassCount",
               // tabular format is too complex for direct comparison
               "java.lang:type=Runtime.SystemProperties",
               // jolokia mbean server is returned as an actual complex object
@@ -118,38 +122,38 @@ public class JmxBridgeTest {
 
   @DataProvider
   public static Object[][] nameAndQueryCombinations() {
-    return new Object[][] {
-      {null, null},
-      {RUNTIME, null},
-      {null, QUERY},
-      {RUNTIME, QUERY}
+    return new Object[][]{
+        {null, null},
+        {RUNTIME, null},
+        {null, QUERY},
+        {RUNTIME, QUERY}
     };
   }
 
   @DataProvider
   public static Object[][] safeOperationsToCall() {
-    return new Object[][] {
-      {
-        RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-        "findDeadlockedThreads",
-        new Object[0]
-      },
-      {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", new Object[0]},
-      {
-        RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"),
-        "vmCommandLine",
-        new Object[0]
-      },
-      {
-        RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
-        "getVMOption",
-        new Object[] {"MinHeapFreeRatio"}
-      },
-      {
-        RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
-        "setVMOption",
-        new Object[] {"HeapDumpOnOutOfMemoryError", "true"}
-      }
+    return new Object[][]{
+        {
+            RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+            "findDeadlockedThreads",
+            new Object[0]
+        },
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", new Object[0]},
+        {
+            RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"),
+            "vmCommandLine",
+            new Object[0]
+        },
+        {
+            RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
+            "getVMOption",
+            new Object[]{"MinHeapFreeRatio"}
+        },
+        {
+            RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
+            "setVMOption",
+            new Object[]{"HeapDumpOnOutOfMemoryError", "true"}
+        }
     };
   }
 
@@ -158,24 +162,24 @@ public class JmxBridgeTest {
     return new Object[][]{
         {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
             "getThreadInfo",
-            new Object[] {1L},
-            new String[] {"long"}},
+            new Object[]{1L},
+            new String[]{"long"}},
         {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
             "getThreadInfo",
-            new Object[] {1L, 10},
-            new String[] {"long", "int"}},
-        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-        "getThreadInfo",
-        new Object[] {new long[]{1L}},
-        new String[] {"[J"}},
+            new Object[]{1L, 10},
+            new String[]{"long", "int"}},
         {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
             "getThreadInfo",
-            new Object[] {new long[]{1L}, 10},
-            new String[] {"[J", "int"}},
+            new Object[]{new long[]{1L}},
+            new String[]{"[J"}},
         {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
             "getThreadInfo",
-            new Object[] {new long[]{1L}, true, true},
-            new String[] {"[J", "boolean", "boolean"}}
+            new Object[]{new long[]{1L}, 10},
+            new String[]{"[J", "int"}},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+            "getThreadInfo",
+            new Object[]{new long[]{1L}, true, true},
+            new String[]{"[J", "boolean", "boolean"}}
     };
   }
 
@@ -193,7 +197,7 @@ public class JmxBridgeTest {
   @BeforeClass
   public void startAgent()
       throws MBeanException, ReflectionException, IOException, InstanceAlreadyExistsException,
-          NotCompliantMBeanException {
+      NotCompliantMBeanException {
 
     MBeanServer localServer = ManagementFactory.getPlatformMBeanServer();
     // ADD potentially problematic MBeans here (if errors are discovered to uncover other cases that
@@ -217,7 +221,8 @@ public class JmxBridgeTest {
                 }));
     this.adapter = new RemoteJmxAdapter(connector);
     //see javadoc above if this line fails while running tests
-    JMXConnector rmiConnector = JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi"));
+    JMXConnector rmiConnector = JMXConnectorFactory
+        .connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi"));
     rmiConnector.connect();
     this.alternativeConnection = rmiConnector.getMBeanServerConnection();
   }
@@ -227,10 +232,11 @@ public class JmxBridgeTest {
   }
 
   @Test
-  public void testThreadingDetails() throws ReflectionException, MBeanException, InstanceNotFoundException, IOException, AttributeNotFoundException {
-    ObjectName name=RemoteJmxAdapter.getObjectName("java.lang:type=Threading");
+  public void testThreadingDetails()
+      throws ReflectionException, MBeanException, InstanceNotFoundException, IOException, AttributeNotFoundException {
+    ObjectName name = RemoteJmxAdapter.getObjectName("java.lang:type=Threading");
     final MBeanServerConnection nativeServer = getNativeConnection();
-    long[] ids= (long[]) nativeServer.getAttribute(name, "AllThreadIds");
+    long[] ids = (long[]) nativeServer.getAttribute(name, "AllThreadIds");
     for (long id : ids) {
       this.adapter.invoke(name, "getThreadInfo", new Object[]{id}, new String[]{"long"});
     }
@@ -297,14 +303,14 @@ public class JmxBridgeTest {
   @Test(expectedExceptions = AttributeNotFoundException.class)
   public void testSetNonExistantAttribute()
       throws IOException, AttributeNotFoundException, InstanceNotFoundException,
-          InvalidAttributeValueException {
+      InvalidAttributeValueException {
     this.adapter.setAttribute(RUNTIME, new Attribute("DoesNotExist", false));
   }
 
   @Test(expectedExceptions = InvalidAttributeValueException.class)
   public void testSetInvalidAttrbuteValue()
       throws IOException, AttributeNotFoundException, InstanceNotFoundException,
-          InvalidAttributeValueException {
+      InvalidAttributeValueException {
     this.adapter.setAttribute(
         RemoteJmxAdapter.getObjectName("jolokia:type=Config"),
         new Attribute("HistoryMaxEntries", null));
@@ -317,21 +323,22 @@ public class JmxBridgeTest {
     this.adapter.invoke(
         RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
         "getThreadUserTime",
-        new Object[] {1L},
-        new String[] {"long"});
+        new Object[]{1L},
+        new String[]{"long"});
     this.adapter.invoke(
         RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
         "getThreadUserTime",
-        new Object[] {new long[] {1L}},
-        new String[] {"[J"});
+        new Object[]{new long[]{1L}},
+        new String[]{"[J"});
   }
 
   @Test(dataProvider = "threadOperationsToCompare")
-  public void testCompareThreadMethods(ObjectName name, String operation, Object[] arguments, String[] signature)
+  public void testCompareThreadMethods(ObjectName name, String operation, Object[] arguments,
+      String[] signature)
       throws MBeanException, InstanceNotFoundException, IOException, ReflectionException {
     Assert.assertEquals(
         this.adapter.invoke(name, operation, arguments, signature).getClass(),
-        getNativeConnection().invoke(name, operation,arguments, signature).getClass()
+        getNativeConnection().invoke(name, operation, arguments, signature).getClass()
     );
   }
 
@@ -342,18 +349,20 @@ public class JmxBridgeTest {
     try {
       for (MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
         if (operationInfo.getName().equals(operation)
-                && operationInfo.getSignature().length == arguments.length) {
+            && operationInfo.getSignature().length == arguments.length) {
           String[] signature = new String[operationInfo.getSignature().length];
           for (int i = 0; i < signature.length; i++) {
             signature[i] = operationInfo.getSignature()[i].getType();
           }
           Assert.assertEquals(
-                  this.adapter.invoke(name, operation, arguments, signature),
-                  nativeServer.invoke(name, operation, arguments, signature));
+              this.adapter.invoke(name, operation, arguments, signature),
+              nativeServer.invoke(name, operation, arguments, signature));
         }
       }
     } catch (InstanceNotFoundException e) {
-      System.out.println(name + " not found in JVM " + System.getProperty("java.runtime.name") + " " + System.getProperty("java.runtime.version") +" skipping");
+      System.out.println(
+          name + " not found in JVM " + System.getProperty("java.runtime.name") + " " + System
+              .getProperty("java.runtime.version") + " skipping");
     }
   }
 
@@ -394,7 +403,7 @@ public class JmxBridgeTest {
   @Test(dataProvider = "allNames")
   public void testMBeanInfo(ObjectName name)
       throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException,
-          AttributeNotFoundException, MBeanException, InvalidAttributeValueException {
+      AttributeNotFoundException, MBeanException, InvalidAttributeValueException {
     final MBeanServerConnection nativeServer = getNativeConnection();
     final MBeanInfo jolokiaMBeanInfo = this.adapter.getMBeanInfo(name);
     final MBeanInfo nativeMBeanInfo = nativeServer.getMBeanInfo(name);
@@ -525,13 +534,9 @@ public class JmxBridgeTest {
         nativeServer.getMBeanCount(),
         "Number of MBeans are the same");
 
-    final String[] jolokiaDomains = this.adapter.getDomains();
-    Arrays.sort(jolokiaDomains);
-    String[] nativeDomains = nativeServer.getDomains();
-    Arrays.sort(nativeDomains);
-    Assert.assertEquals(
-            jolokiaDomains,
-            nativeDomains,
+    Assert.assertEqualsNoOrder(
+        this.adapter.getDomains(),
+        nativeServer.getDomains(),
         "Domain list is the same");
 
     Assert.assertEquals(
@@ -547,10 +552,10 @@ public class JmxBridgeTest {
   public void testConnector() throws IOException {
     JMXServiceURL serviceURL = new JMXServiceURL("jolokia", "localhost", agentPort, "/jolokia/");
     JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
-            serviceURL,
-            Collections.<String, Object>emptyMap());
-    final List<JMXConnectionNotification> receivedNotifications=new LinkedList<JMXConnectionNotification>();
-    final Object handback="foobar";
+        serviceURL,
+        Collections.<String, Object>emptyMap());
+    final List<JMXConnectionNotification> receivedNotifications = new LinkedList<JMXConnectionNotification>();
+    final Object handback = "foobar";
     connector.addConnectionNotificationListener(new NotificationListener() {
       @Override
       public void handleNotification(Notification notification, Object handback) {
@@ -563,20 +568,33 @@ public class JmxBridgeTest {
     Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.OPENED);
     receivedNotifications.clear();
     Assert.assertEquals(
-            connector.getMBeanServerConnection(),
-            this.adapter);
+        connector.getMBeanServerConnection(),
+        this.adapter);
     connector.close();
     Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
     Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.CLOSED);
     connector.connect(Collections.<String, Object>emptyMap());
     Assert.assertEquals(
-            connector.getMBeanServerConnection(null),
-            this.adapter);
+        connector.getMBeanServerConnection(null),
+        this.adapter);
+  }
 
-//    JMXConnector serviceLoadedConnector = JMXConnectorFactory.connect(serviceURL);
-//    serviceLoadedConnector.connect();
-//    Assert.assertEquals(serviceLoadedConnector.getMBeanServerConnection(), this.adapter);
-
+  @Test
+  public void testGetAttributes()
+      throws IOException, InstanceNotFoundException, ReflectionException {
+    ObjectName name = RUNTIME;
+    final String[] bothValidAndInvalid = new String[]{"Name", "Starttime", "StartTime"};
+    Assert.assertEquals(this.adapter.getAttributes(name, bothValidAndInvalid),
+        getNativeConnection().getAttributes(name, bothValidAndInvalid));
+    final String[] onlyInvalid = new String[]{"Starttime"};
+    Assert.assertEquals(this.adapter.getAttributes(name, onlyInvalid),
+        getNativeConnection().getAttributes(name, onlyInvalid));
+    final String[] singleValid = new String[]{"StartTime"};
+    Assert.assertEquals(this.adapter.getAttributes(name, onlyInvalid),
+        getNativeConnection().getAttributes(name, onlyInvalid));
+    final String[] multipleValid = new String[]{"Name", "StartTime"};
+    Assert.assertEquals(this.adapter.getAttributes(name, multipleValid),
+        getNativeConnection().getAttributes(name, multipleValid));
   }
 
 
