@@ -19,7 +19,6 @@ import java.util.Map;
 
 /**
  * Handle MBeanServerConnection using the jolokia protocol
- * IN PROGRESS: Figuring out how to best handle connection strings in a JMC setup
  */
 public class JolokiaJmxConnector implements JMXConnector {
   private final JMXServiceURL serviceUrl;
@@ -87,7 +86,7 @@ public class JolokiaJmxConnector implements JMXConnector {
 
   @Override
   public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) {
-    return this.adapter;
+    throw new UnsupportedOperationException("Jolokia currently do not support connections using a subject, if you have a use case please let us know");
   }
 
   @Override

@@ -279,9 +279,9 @@ public class ToOpenTypeConverter {
     Class<?> classToIntrospect = klass;
     while (classToIntrospect != null && !classToIntrospect.equals(Object.class)) {
       for (Method method : classToIntrospect.getDeclaredMethods()) {
-        // only introspect instance fields
-        if ((method.getModifiers() & Modifier.STATIC) == 0
-            && (method.getModifiers() & Modifier.PUBLIC) != 0
+        // only introspect public instance methods
+        if (!Modifier.isStatic(method.getModifiers())
+            && Modifier.isPublic(method.getModifiers())
             && method.getParameterTypes().length == 0) {
           if (method.getName().startsWith("get")) {
             names.add(

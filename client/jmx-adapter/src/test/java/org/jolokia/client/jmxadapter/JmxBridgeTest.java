@@ -1,24 +1,9 @@
 package org.jolokia.client.jmxadapter;
 
+import static com.jayway.awaitility.Awaitility.await;
+
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ThrowingRunnable;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.request.J4pVersionRequest;
-import org.jolokia.jvmagent.JvmAgent;
-import org.jolokia.test.util.EnvTestUtil;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.management.*;
-import javax.management.remote.JMXConnectionNotification;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
@@ -30,8 +15,43 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static com.jayway.awaitility.Awaitility.await;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.NotCompliantMBeanException;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.Query;
+import javax.management.QueryExp;
+import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
+import javax.management.remote.JMXConnectionNotification;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.request.J4pVersionRequest;
+import org.jolokia.jvmagent.JvmAgent;
+import org.jolokia.test.util.EnvTestUtil;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection To test in
