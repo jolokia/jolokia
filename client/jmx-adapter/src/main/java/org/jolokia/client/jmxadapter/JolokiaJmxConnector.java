@@ -1,5 +1,6 @@
 package org.jolokia.client.jmxadapter;
 
+import java.util.HashMap;
 import org.jolokia.client.J4pClientBuilder;
 
 import javax.management.ListenerNotFoundException;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public class JolokiaJmxConnector implements JMXConnector {
   private final JMXServiceURL serviceUrl;
-  private Map<String, ?> environment;
+  private final Map<String, ?> environment;
   private RemoteJmxAdapter adapter;
   private final NotificationBroadcasterSupport broadcasterSupport=new NotificationBroadcasterSupport();
   private long clientNotifSeqNo=1L;
@@ -47,18 +48,25 @@ public class JolokiaJmxConnector implements JMXConnector {
   }
 
   @Override
+  @SuppressWarnings({"raw"})
   public void connect(Map<String, ?> env) throws IOException {
     if(!"jolokia".equals(this.serviceUrl.getProtocol())) {
       throw new MalformedURLException("I only handle Jolokia service urls");
     }
-
-    String internalProdocol="http";
-    if(String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true".equals(env.get("jmx.remote.x.check.stub"))) {
-      internalProdocol="https";
+    Map<String,Object> mergedEnv=new HashMap<String,Object>();
+    if(this.environment != null) {
+      mergedEnv.putAll(this.environment);
     }
-    final J4pClientBuilder clientBuilder = new J4pClientBuilder().url(internalProdocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort() + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
-    if(env.containsKey(CREDENTIALS)) {
-      String[] credentials= (String[]) env.get(CREDENTIALS);
+    if(env != null) {
+      mergedEnv.putAll(env);
+    }
+    String internalProtocol="http";
+    if(String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true".equals(mergedEnv.get("jmx.remote.x.check.stub"))) {
+      internalProtocol="https";
+    }
+    final J4pClientBuilder clientBuilder = new J4pClientBuilder().url(internalProtocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort() + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
+    if(mergedEnv.containsKey(CREDENTIALS)) {
+      String[] credentials= (String[]) mergedEnv.get(CREDENTIALS);
       clientBuilder.user(credentials[0]);
       clientBuilder.password(credentials[1]);
     }
@@ -111,7 +119,7 @@ public class JolokiaJmxConnector implements JMXConnector {
   }
 
   @Override
-  public String getConnectionId() throws IOException {
+  public String getConnectionId() {
     return this.connectionId;
   }
 }

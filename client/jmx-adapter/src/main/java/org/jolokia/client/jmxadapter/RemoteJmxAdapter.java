@@ -5,11 +5,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,14 +67,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   private final J4pClient connector;
   private String agentId;
   private HashMap<J4pQueryParameter, String> defaultProcessingOptions;
-  private Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<ObjectName, MBeanInfo>();
+  private final Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<ObjectName, MBeanInfo>();
   String agentVersion;
   String protocolVersion;
 
   public RemoteJmxAdapter(final J4pClient connector) throws IOException {
     this.connector = connector;
     try {
-      J4pVersionResponse response = this.unwrappExecute(new J4pVersionRequest());
+      J4pVersionResponse response = this.unwrapExecute(new J4pVersionRequest());
       this.agentVersion = response.getAgentVersion();
       this.protocolVersion = response.getProtocolVersion();
       JSONObject value = response.getValue();
@@ -137,7 +135,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public ObjectInstance getObjectInstance(ObjectName name)
       throws InstanceNotFoundException, IOException {
 
-    J4pListResponse listResponse = this.unwrappExecute(new J4pListRequest(name));
+    J4pListResponse listResponse = this.unwrapExecute(new J4pListRequest(name));
     return new ObjectInstance(name, listResponse.getClassName());
   }
 
@@ -147,7 +145,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       listRequest = new J4pListRequest(name);
     }
     try {
-      final J4pListResponse listResponse = this.unwrappExecute(listRequest);
+      final J4pListResponse listResponse = this.unwrapExecute(listRequest);
       return listResponse.getObjectInstances(name);
     } catch (MalformedObjectNameException e) {
       throw new UncheckedJmxAdapterException(e);
@@ -183,7 +181,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest(name);
     J4pSearchResponse response;
     try {
-      response = unwrappExecute(j4pSearchRequest);
+      response = unwrapExecute(j4pSearchRequest);
     } catch (InstanceNotFoundException e) {
       return Collections.emptySet();
     }
@@ -200,7 +198,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   private boolean applyQuery(QueryExp query, ObjectName objectName) {
     if (QueryEval.getMBeanServer() == null) {
-      query.setMBeanServer(this.createStandinMbeanServerProxyForQueryEvaluation());
+      query.setMBeanServer(this.createStandInMbeanServerProxyForQueryEvaluation());
     }
     try {
       return query.apply(objectName);
@@ -212,11 +210,11 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   /**
-   * Query envaluation requires an MBeanServer but only to figure out objectInstance
+   * Query evaluation requires an MBeanServer but only to figure out objectInstance
    *
    * @return a dynamic proxy dispatching getObjectInstance back to myself
    */
-  private MBeanServer createStandinMbeanServerProxyForQueryEvaluation() {
+  private MBeanServer createStandInMbeanServerProxyForQueryEvaluation() {
     return (MBeanServer)
         Proxy.newProxyInstance(
             this.getClass().getClassLoader(),
@@ -235,7 +233,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   @SuppressWarnings("unchecked")
-  private <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP unwrappExecute(REQ pRequest)
+  private <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP unwrapExecute(REQ pRequest)
       throws IOException, InstanceNotFoundException {
     try {
       pRequest.setPreferredHttpMethod("POST");
@@ -254,7 +252,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     return defaultProcessingOptions;
   }
 
-  private static Set<String> UNCHECKED_REMOTE_EXCEPTIONS =
+  private static final Set<String> UNCHECKED_REMOTE_EXCEPTIONS =
       Collections.singleton("java.lang.UnsupportedOperationException");
 
   @SuppressWarnings("rawtypes")
@@ -294,7 +292,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public Object getAttribute(ObjectName name, String attribute)
       throws AttributeNotFoundException, InstanceNotFoundException, IOException {
     try {
-      final Object rawValue = unwrappExecute(new J4pReadRequest(name, attribute)).getValue();
+      final Object rawValue = unwrapExecute(new J4pReadRequest(name, attribute)).getValue();
       return adaptJsonToOptimalResponseValue(name, attribute, rawValue);
     } catch (UncheckedJmxAdapterException e) {
       if (e.getCause() instanceof J4pRemoteException
@@ -364,7 +362,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public AttributeList getAttributes(ObjectName name, String[] attributes)
       throws InstanceNotFoundException, IOException {
     AttributeList result = new AttributeList();
@@ -401,7 +398,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     final J4pWriteRequest request =
         new J4pWriteRequest(name, attribute.getName(), attribute.getValue());
     try {
-      this.unwrappExecute(request);
+      this.unwrapExecute(request);
     } catch (UncheckedJmxAdapterException e) {
       if (e.getCause() instanceof J4pRemoteException) {
         J4pRemoteException remote = (J4pRemoteException) e.getCause();
@@ -446,7 +443,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
     try {
       final J4pExecResponse response =
-          unwrappExecute(
+          unwrapExecute(
               new J4pExecRequest(name, operationName + makeSignature(signature), params));
       return adaptJsonToOptimalResponseValue(name, operationName, response.getValue());
     } catch (UncheckedJmxAdapterException e) {
@@ -533,7 +530,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     MBeanInfo result = this.mbeanInfoCache.get(name);
     //cache in case client queries a lot for MBean info
     if (result == null) {
-      final J4pListResponse response = this.unwrappExecute(new J4pListRequest(name));
+      final J4pListResponse response = this.unwrapExecute(new J4pListRequest(name));
       result = response.getMbeanInfo();
       this.mbeanInfoCache.put(name, result);
       for (MBeanAttributeInfo attr : result.getAttributes()) {

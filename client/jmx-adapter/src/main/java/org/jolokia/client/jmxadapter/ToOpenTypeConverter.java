@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.InvalidOpenTypeException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
@@ -117,6 +118,15 @@ public class ToOpenTypeConverter {
                 rawValue.size()));
   }
 
+  /**
+   * Try to figure out open type, order of preference
+   * 1. handle simple objects, respect type introspected from MBeanInfo if any
+   * 2. Handle arrays (comes before cached types due to issues specifiying multiple return values for all the Threading overloaded methods)
+   * 3. Handle hard coded tabular return types (important for visual presentation in certain tools)
+   * 4. Use cached type for attribute/item : either hardcoded to please JConsole / JVisualVM or introspected from MBeanInfo
+   * 5. Dynamically build structured type from contents (will struggle with null values for unknown entities)
+   * 6. Fail
+   */
   public static OpenType<?> recursivelyBuildOpenType(String name, Object rawValue)
       throws OpenDataException {
     for (SimpleType<?> type : typeArray) {
@@ -162,16 +172,21 @@ public class ToOpenTypeConverter {
         keys[index] = entry.getKey();
         types[index++] = recursivelyBuildOpenType(name + "." + entry.getKey(), entry.getValue());
       }
-      return new CompositeType("complex", "complex", keys, keys, types);
+      if(types.length==0) {
+        throw new InvalidOpenTypeException("No subtypes for " + name);
+      } else {
+        return new CompositeType("complex", "complex", keys, keys, types);
+      }
     }
     // should probably never happen, to signify type could not be found
-    return null;
+    throw new InvalidOpenTypeException("Unable to figure out type for " + rawValue);
   }
 
   static OpenType<?> cachedType(final String name) throws OpenDataException {
     if (TYPE_SPECIFICATIONS == null) {
       TYPE_SPECIFICATIONS = new HashMap<String, OpenType<?>>();
       //Specifically override types of some central Java types to suit JConsole and jvisualvm tools
+      //overrides follow QName.attribute.innerAttribute recursively
       cacheType(
           introspectComplexTypeFrom(MemoryUsage.class),
           "java.lang:type=Memory.NonHeapMemoryUsage",
@@ -199,7 +214,7 @@ public class ToOpenTypeConverter {
           "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions.item",
           "com.sun.management:type=HotSpotDiagnostic.getVMOption");
       cacheType(
-          new ArrayType<OpenType<?>>(1, introspectComplexTypeFrom(VMOption.class)),
+          new ArrayType<OpenType<?>>(1, introspectComplexTypeRequireNonNull(VMOption.class)),
           "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions"
       );
       cacheType(
@@ -217,6 +232,15 @@ public class ToOpenTypeConverter {
     for (String name : names) {
       TYPE_SPECIFICATIONS.put(name, type);
     }
+  }
+
+  private static OpenType<?> introspectComplexTypeRequireNonNull(Class<?> klass)
+      throws OpenDataException {
+    final OpenType<?> type = introspectComplexTypeFrom(klass);
+    if(type == null) {
+      throw new InvalidOpenTypeException("Unable to detect opentype for " + klass);
+    }
+    return type;
   }
 
   private static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
@@ -246,8 +270,8 @@ public class ToOpenTypeConverter {
     }
 
     if (klass.isArray()) {
-      OpenType<?> componentType = introspectComplexTypeFrom(klass.getComponentType());
-      return new ArrayType<OpenType<?>>(1, componentType);
+      return new ArrayType<OpenType<?>>(1,
+          introspectComplexTypeRequireNonNull(klass.getComponentType()));
     }
 
     List<String> names = new LinkedList<String>();
@@ -272,7 +296,9 @@ public class ToOpenTypeConverter {
       }
       classToIntrospect = classToIntrospect.getSuperclass();
     }
-
+    if(types.isEmpty()) {
+      throw new InvalidOpenTypeException("Found no fields to build composite type for class " + klass);
+    }
     return new CompositeType(
         klass.getName(),
         klass.getName(),

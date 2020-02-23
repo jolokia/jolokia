@@ -58,7 +58,7 @@ public class JmxBridgeTest {
 
   // attributes that for some reason (typically live data) cannot be used for 1:1 testing between
   // native and jolokia
-  private static Collection<String> ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON =
+  private static final Collection<String> ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON =
       new HashSet<String>(
           Arrays.asList(
               "java.lang:type=Threading.CurrentThreadUserTime",
@@ -96,7 +96,7 @@ public class JmxBridgeTest {
               // could be something with several of the tests starting agents etc.
               "JMImplementation:type=MBeanServerDelegate.MBeanServerId"));
 
-  private static Collection<String> UNSAFE_ATTRIBUTES =
+  private static final Collection<String> UNSAFE_ATTRIBUTES =
       new HashSet<String>(
           Arrays.asList(
               "CollectionUsageThreshold",
@@ -107,7 +107,7 @@ public class JmxBridgeTest {
               "UsageThresholdExceeded"));
 
   // Safe values for testing setting attributes
-  private static Map<String, Object> ATTRIBUTE_REPLACEMENTS =
+  private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
       new HashMap<String, Object>() {
         {
           put("jolokia:type=Config.Debug", true);
@@ -258,13 +258,13 @@ public class JmxBridgeTest {
   }
 
   @Test(expectedExceptions = InstanceNotFoundException.class)
-  public void testNonExistantMBeanInstance() throws IOException, InstanceNotFoundException {
+  public void testNonExistentMBeanInstance() throws IOException, InstanceNotFoundException {
     this.adapter.getObjectInstance(
         RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
   }
 
   @Test(expectedExceptions = InstanceNotFoundException.class)
-  public void testNonExistantMBeanInfo() throws IOException, InstanceNotFoundException {
+  public void testNonExistentMBeanInfo() throws IOException, InstanceNotFoundException {
     this.adapter.getMBeanInfo(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
   }
 
@@ -295,7 +295,7 @@ public class JmxBridgeTest {
   }
 
   @Test(expectedExceptions = AttributeNotFoundException.class)
-  public void testGetNonExistantAttribute()
+  public void testGetNonExistentAttribute()
       throws IOException, AttributeNotFoundException, InstanceNotFoundException {
     this.adapter.getAttribute(RUNTIME, "DoesNotExist");
   }
@@ -308,7 +308,7 @@ public class JmxBridgeTest {
   }
 
   @Test(expectedExceptions = InvalidAttributeValueException.class)
-  public void testSetInvalidAttrbuteValue()
+  public void testSetInvalidAttributeValue()
       throws IOException, AttributeNotFoundException, InstanceNotFoundException,
       InvalidAttributeValueException {
     this.adapter.setAttribute(
@@ -590,8 +590,8 @@ public class JmxBridgeTest {
     Assert.assertEquals(this.adapter.getAttributes(name, onlyInvalid),
         getNativeConnection().getAttributes(name, onlyInvalid));
     final String[] singleValid = new String[]{"StartTime"};
-    Assert.assertEquals(this.adapter.getAttributes(name, onlyInvalid),
-        getNativeConnection().getAttributes(name, onlyInvalid));
+    Assert.assertEquals(this.adapter.getAttributes(name, singleValid),
+        getNativeConnection().getAttributes(name, singleValid));
     final String[] multipleValid = new String[]{"Name", "StartTime"};
     Assert.assertEquals(this.adapter.getAttributes(name, multipleValid),
         getNativeConnection().getAttributes(name, multipleValid));
