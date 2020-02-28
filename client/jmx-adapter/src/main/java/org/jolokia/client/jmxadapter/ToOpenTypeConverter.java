@@ -16,8 +16,14 @@ import static javax.management.openmbean.SimpleType.STRING;
 import static javax.management.openmbean.SimpleType.VOID;
 
 import com.sun.management.VMOption;
+import java.lang.management.ClassLoadingMXBean;
+import java.lang.management.CompilationMXBean;
+import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,6 +42,7 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularType;
 import org.jolokia.converter.Converters;
+import org.jolokia.converter.object.StringToOpenTypeConverter;
 import org.jolokia.util.ClassUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -63,18 +70,28 @@ public class ToOpenTypeConverter {
       DATE,
       OBJECTNAME,
   };
+  static final StringToOpenTypeConverter CONVERTER = new Converters().getToOpenTypeConverter().makeForgiving();
   private static HashMap<String, OpenType<?>> TABULAR_CONTENT_TYPE;
 
   private static Map<String, OpenType<?>> TYPE_SPECIFICATIONS;
 
   public static Object returnOpenTypedValue(String name, Object rawValue) throws OpenDataException {
+    //special case, empty array with no type information, return object (empty list) itself
+    if(rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
+      final OpenType<?> type = cachedType(name);
+      if(type!=null) {
+        return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
+      } else {
+        return rawValue;
+      }
+    }
     final OpenType<?> type = recursivelyBuildOpenType(name, rawValue);
     if (type == null) {
       return rawValue;
     } else if (type.isArray() && ((ArrayType<?>) type).isPrimitiveArray()) {
       return toPrimitiveArray((ArrayType<?>) type, (JSONArray) rawValue);
     } else {
-      return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
+      return CONVERTER.convertToObject(type, rawValue);
     }
   }
 
@@ -224,6 +241,13 @@ public class ToOpenTypeConverter {
           "java.lang:type=Threading.AllThreadIds");
       cacheType(introspectComplexTypeFrom(ThreadInfo.class),
           "java.lang:type=Threading.dumpAllThreads.item");
+      cacheType(introspectComplexTypeFrom(ClassLoadingMXBean.class), "java.lang:type=ClassLoading");
+      cacheType(introspectComplexTypeFrom(CompilationMXBean.class), "java.lang:type=Compilation");
+      cacheType(introspectComplexTypeFrom(MemoryMXBean.class), "java.lang:type=Memory");
+      cacheType(introspectComplexTypeFrom(OperatingSystemMXBean.class), "java.lang:type=OperatingSystem");
+      cacheType(introspectComplexTypeFrom(RuntimeMXBean.class), "java.lang:type=Runtime");
+      cacheType(introspectComplexTypeFrom(ThreadMXBean.class), "java.lang:type=Threading");
+
     }
     return TYPE_SPECIFICATIONS.get(name);
   }
@@ -243,7 +267,7 @@ public class ToOpenTypeConverter {
     return type;
   }
 
-  private static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
+  static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
     if (CompositeData.class.equals(klass) || TabularData.class.equals(klass)) {
       //do not attempt to read from these classes, will have to be created from the "real" class runtime
       return null;

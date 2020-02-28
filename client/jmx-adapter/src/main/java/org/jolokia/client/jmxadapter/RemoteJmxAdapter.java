@@ -381,8 +381,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       //will result in empty return
     }
     for (Object item : responses) {
-      if(item instanceof J4pReadResponse) {
-        J4pReadResponse value= (J4pReadResponse) item;
+      if (item instanceof J4pReadResponse) {
+        J4pReadResponse value = (J4pReadResponse) item;
         final String attribute = value.getRequest().getAttribute();
         result.add(new Attribute(attribute,
             adaptJsonToOptimalResponseValue(name, attribute, value.getValue())));
@@ -484,7 +484,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public void addNotificationListener(
       ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
     if (!isRunningInJConsole()
-        && !isRunningInJVisualVm()) {//just ignore in JConsole/JvisualVM as it wrecks the MBean page
+        && !isRunningInJVisualVm()
+        && !isRunningInJmc()) {//just ignore in JConsole/JvisualVM as it wrecks the MBean page
       throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
     }
   }
@@ -495,6 +496,10 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   private boolean isRunningInJConsole() {
     return System.getProperty("jconsole.showOutputViewer") != null;
+  }
+
+  private boolean isRunningInJmc() {
+    return System.getProperty("running.in.jmc") != null;
   }
 
   @Override
@@ -550,10 +555,22 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public boolean isInstanceOf(ObjectName name, String className)
       throws InstanceNotFoundException, IOException {
+    final ObjectInstance objectInstance = getObjectInstance(name);
     try {
+      //try to use classes available in this VM to check compatibility
       return Class.forName(className)
-          .isAssignableFrom(Class.forName(getObjectInstance(name).getClassName()));
+          .isAssignableFrom(Class.forName(objectInstance.getClassName()));
     } catch (ClassNotFoundException e) {
+      if(className.equals(objectInstance.getClassName())) {
+        return true;
+      } else {
+        try {
+          if(ToOpenTypeConverter.cachedType(name.toString())!= null) {//the proprietary Oracle VMs used to have classnames not available in newer openjdk, check for overrides
+            return ToOpenTypeConverter.cachedType(name.toString()).getTypeName().equals(className);
+          }
+        } catch (OpenDataException ignore) {
+        }
+      }
       return false;
     }
   }

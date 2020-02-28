@@ -5,7 +5,16 @@ import static com.jayway.awaitility.Awaitility.await;
 import com.jayway.awaitility.Awaitility;
 import com.jayway.awaitility.core.ThrowingRunnable;
 import java.io.IOException;
+import java.lang.management.ClassLoadingMXBean;
+import java.lang.management.CompilationMXBean;
+import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryManagerMXBean;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +46,7 @@ import javax.management.Query;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
+import javax.management.openmbean.OpenDataException;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -114,7 +124,9 @@ public class JmxBridgeTest {
               "jolokia:type=MBeanServer.JolokiaMBeanServer",
               // appears to contain a timestamp that differ when running in surefire
               // could be something with several of the tests starting agents etc.
-              "JMImplementation:type=MBeanServerDelegate.MBeanServerId"));
+              "JMImplementation:type=MBeanServerDelegate.MBeanServerId",
+              //Not really concerned that the actual composite types are not 100% identical for a constructed test class
+              "jolokia.test:name=MBeanExample.Field"));
 
   private static final Collection<String> UNSAFE_ATTRIBUTES =
       new HashSet<String>(
@@ -147,6 +159,21 @@ public class JmxBridgeTest {
         {RUNTIME, null},
         {null, QUERY},
         {RUNTIME, QUERY}
+    };
+  }
+
+  @DataProvider
+  public static Object[][] instanceChecks() {
+    return new Object[][]{
+        {"java.lang:type=ClassLoading", ClassLoadingMXBean.class},
+        {"java.lang:type=Compilation", CompilationMXBean.class},
+        {"java.lang:type=Memory", MemoryMXBean.class},
+        {"java.lang:type=OperatingSystem", OperatingSystemMXBean.class},
+        {"java.lang:type=Runtime", RuntimeMXBean.class},
+        {"java.lang:type=Threading", ThreadMXBean.class} /*,
+            {"java.lang:type=GarbageCollector", GarbageCollectorMXBean.class},
+            {"java.lang:type=MemoryManager", MemoryManagerMXBean.class},
+            {"java.lang:type=MemoryPool", MemoryPoolMXBean.class}*/
     };
   }
 
@@ -217,7 +244,7 @@ public class JmxBridgeTest {
   @BeforeClass
   public void startAgent()
       throws MBeanException, ReflectionException, IOException, InstanceAlreadyExistsException,
-      NotCompliantMBeanException {
+      NotCompliantMBeanException, OpenDataException {
 
     MBeanServer localServer = ManagementFactory.getPlatformMBeanServer();
     // ADD potentially problematic MBeans here (if errors are discovered to uncover other cases that
@@ -245,10 +272,25 @@ public class JmxBridgeTest {
         .connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi"));
     rmiConnector.connect();
     this.alternativeConnection = rmiConnector.getMBeanServerConnection();
+    //simulate a time with a more basic interface that what is used in this JVM
+    //lazy initialize
+    ToOpenTypeConverter.cachedType("ignore");
+    ToOpenTypeConverter.cacheType(ToOpenTypeConverter.introspectComplexTypeFrom(FieldWithMoreElementsThanTheType.class), "jolokia.test:name=MBeanExample.Field");
   }
 
   private MBeanServerConnection getNativeConnection() {
     return this.alternativeConnection;
+  }
+
+  @Test(dataProvider = "instanceChecks")
+  public void testInstanceOf(final String mBean, final Class<?> klass)
+      throws IOException, InstanceNotFoundException {
+    final ObjectName objectName = RemoteJmxAdapter.getObjectName(mBean);
+    final String className = klass.getName();
+    Assert.assertEquals(getNativeConnection().isInstanceOf(objectName, className),
+        this.adapter.isInstanceOf(objectName, className), mBean + " instanceof " + klass);
+
+
   }
 
   @Test

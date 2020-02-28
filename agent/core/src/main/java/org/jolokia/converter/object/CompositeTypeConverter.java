@@ -78,8 +78,14 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
             Object value = entry.getValue();
 
             if (!pType.containsKey(key)) {
-                throw new IllegalArgumentException(
+                //Some Oracle JVM return Objects with more fields than the overridden/official type (Example ThreadInfo)
+                //in that case skip additional fields
+                if(isForgiving()) {
+                    continue;
+                } else {
+                    throw new IllegalArgumentException(
                         "Conversion to CompositeType failed because " + key + " is not known as composite attribute key.");
+                }
             }
             if (value != null) {
                 Object convertedValue = getDispatcher().convertToObject(pType.getType(key),value);
