@@ -29,6 +29,7 @@ import javax.management.ObjectName;
 import javax.management.QueryEval;
 import javax.management.QueryExp;
 import javax.management.RuntimeMBeanException;
+import javax.management.openmbean.InvalidOpenTypeException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import org.jolokia.client.J4pClient;
@@ -67,7 +68,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   private final J4pClient connector;
   private String agentId;
   private HashMap<J4pQueryParameter, String> defaultProcessingOptions;
-  private final Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<ObjectName, MBeanInfo>();
+  protected final Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<ObjectName, MBeanInfo>();
   String agentVersion;
   String protocolVersion;
 
@@ -521,7 +522,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public void removeNotificationListener(ObjectName name, NotificationListener listener) {
-    throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    if(!isRunningInJmc() && !isRunningInJConsole() && !isRunningInJVisualVm()) {
+      throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    }
   }
 
   @Override
@@ -546,6 +549,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
           }
         } catch (OpenDataException ignore) {
+        } catch (InvalidOpenTypeException ignore) {
         }
       }
     }
