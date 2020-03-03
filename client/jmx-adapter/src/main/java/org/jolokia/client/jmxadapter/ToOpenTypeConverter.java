@@ -308,13 +308,13 @@ public class ToOpenTypeConverter {
             && Modifier.isPublic(method.getModifiers())
             && method.getParameterTypes().length == 0) {
           if (method.getName().startsWith("get")) {
-            names.add(
-                method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4));
-            types.add(introspectComplexTypeFrom(method.getReturnType()));
+            final String nameWithoutPrefix =
+                method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+            recursivelyBuildSubtype(klass, names, types, method.getReturnType(), nameWithoutPrefix);
           } else if (method.getName().startsWith("is")) {
-            names.add(
-                method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3));
-            types.add(introspectComplexTypeFrom(method.getReturnType()));
+            final String nameWithoutPrefix =
+                method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3);
+            recursivelyBuildSubtype(klass, names, types, method.getReturnType(), nameWithoutPrefix);
           }
         }
       }
@@ -329,6 +329,16 @@ public class ToOpenTypeConverter {
         names.toArray(new String[0]),
         names.toArray(new String[0]),
         types.toArray(new OpenType[0]));
+  }
+
+  private static void recursivelyBuildSubtype(Class<?> klass, List<String> names,
+      List<OpenType<?>> types, Class<?> subType, String nameWithoutPrefix) throws OpenDataException {
+    if (klass.equals(subType)) {
+      throw new OpenDataException("Unable to support recursive types, abort and allow default handling to take place");
+    }
+    names.add(
+        nameWithoutPrefix);
+    types.add(introspectComplexTypeFrom(subType));
   }
 
   private static OpenType<?> tabularContentType(final String attribute) throws OpenDataException {
@@ -357,7 +367,7 @@ public class ToOpenTypeConverter {
       } else if (attributeType.equals("double")) {
         klass = Double.class;
       } else {
-        System.err.println("Unrecognized attribute type " + attributeType);
+        //this just means that the klass is not present in the connecting vm, fall back to default handling
         return null;
       }
     }
