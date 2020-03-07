@@ -22,9 +22,9 @@ import java.util.Map;
  */
 public class JolokiaJmxConnector implements JMXConnector {
 
-  private final JMXServiceURL serviceUrl;
+  protected final JMXServiceURL serviceUrl;
   private final Map<String, ?> environment;
-  private RemoteJmxAdapter adapter;
+  protected RemoteJmxAdapter adapter;
   private final NotificationBroadcasterSupport broadcasterSupport = new NotificationBroadcasterSupport();
   private long clientNotifSeqNo = 1L;
   private String connectionId;
@@ -53,13 +53,7 @@ public class JolokiaJmxConnector implements JMXConnector {
     if (!"jolokia".equals(this.serviceUrl.getProtocol())) {
       throw new MalformedURLException("I only handle Jolokia service urls");
     }
-    Map<String, Object> mergedEnv = new HashMap<String, Object>();
-    if (this.environment != null) {
-      mergedEnv.putAll(this.environment);
-    }
-    if (env != null) {
-      mergedEnv.putAll(env);
-    }
+    Map<String, Object> mergedEnv = mergedEnvironment(env);
     String internalProtocol = "http";
     if (String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true"
         .equals(mergedEnv.get("jmx.remote.x.check.stub"))) {
@@ -73,7 +67,11 @@ public class JolokiaJmxConnector implements JMXConnector {
       clientBuilder.user(credentials[0]);
       clientBuilder.password(credentials[1]);
     }
-    this.adapter = instantiateAdapter(clientBuilder);
+    this.adapter = instantiateAdapter(clientBuilder, mergedEnv);
+    postCreateAdapter();
+  }
+
+  protected void postCreateAdapter() {
     this.connectionId = this.adapter.getId();
     this.broadcasterSupport
         .sendNotification(new JMXConnectionNotification(JMXConnectionNotification.OPENED,
@@ -84,7 +82,19 @@ public class JolokiaJmxConnector implements JMXConnector {
             null));
   }
 
-  protected RemoteJmxAdapter instantiateAdapter(J4pClientBuilder clientBuilder) throws IOException {
+  protected Map<String, Object> mergedEnvironment(Map<String, ?> env) {
+    Map<String, Object> mergedEnv = new HashMap<String, Object>();
+    if (this.environment != null) {
+      mergedEnv.putAll(this.environment);
+    }
+    if (env != null) {
+      mergedEnv.putAll(env);
+    }
+    return mergedEnv;
+  }
+
+  protected RemoteJmxAdapter instantiateAdapter(J4pClientBuilder clientBuilder,
+      Map<String, Object> mergedEnv) throws IOException {
     return new RemoteJmxAdapter(clientBuilder.build());
   }
 
