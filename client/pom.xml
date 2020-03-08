@@ -21,6 +21,7 @@
     <module>java</module>
     <module>javascript</module>
     <module>jmx-adapter</module>
+    <module>kubernetes</module>
   </modules>
 
   <profiles>
@@ -34,8 +35,8 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <!-- Exclude special tests target for the Java 6 platform -->
-              <excludedGroups>java6</excludedGroups>
+              <!-- Exclude special tests target for the Java 6 platform and manual tests -->
+              <excludedGroups>manual,java6</excludedGroups>
             </configuration>
           </plugin>
         </plugins>
