@@ -492,7 +492,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   private boolean isRunningInJVisualVm() {
-    return "Java VisualVM".equals(System.getProperty("netbeans.productversion"));
+    final String version = System.getProperty("netbeans.productversion");
+    return version != null && version.contains("VisualVM");
   }
 
   private boolean isRunningInJConsole() {
