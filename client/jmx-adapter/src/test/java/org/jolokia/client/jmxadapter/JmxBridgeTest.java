@@ -7,14 +7,13 @@ import com.jayway.awaitility.core.ThrowingRunnable;
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.CompilationMXBean;
-import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryManagerMXBean;
-import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +56,7 @@ import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
+import org.jolokia.util.ClassUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -162,20 +162,40 @@ public class JmxBridgeTest {
     };
   }
 
+  /**
+   * This relies on java 1.7 classes, and will test on such a vm, if building on 1.6 it will come
+   * out with a predefined list
+   */
+  @SuppressWarnings("unchecked")
   @DataProvider
-  public static Object[][] instanceChecks() {
-    return new Object[][]{
-        {"java.lang:type=ClassLoading", ClassLoadingMXBean.class},
-        {"java.lang:type=Compilation", CompilationMXBean.class},
-        {"java.lang:type=Memory", MemoryMXBean.class},
-        {"java.lang:type=OperatingSystem", OperatingSystemMXBean.class},
-        {"java.lang:type=Runtime", RuntimeMXBean.class},
-        {"java.lang:type=Threading", ThreadMXBean.class} /*,
-            {"java.lang:type=GarbageCollector", GarbageCollectorMXBean.class},
-            {"java.lang:type=MemoryManager", MemoryManagerMXBean.class},
-            {"java.lang:type=MemoryPool", MemoryPoolMXBean.class}*/
-    };
+  public static Object[][] platformMBeans() {
+    try {
+      final Collection<Class<?>> list = (Collection<Class<?>>) ManagementFactory.class
+          .getDeclaredMethod("getPlatformManagementInterfaces").invoke(null);
+      final Method objectNameMethod = ClassUtil
+          .classForName("java.lang.management.PlatformManagedObject")
+          .getDeclaredMethod("getObjectName");
+      final Method getMbeans = ManagementFactory.class
+          .getDeclaredMethod("getPlatformMXBeans", Class.class);
+      List<Object> testData = new LinkedList<Object>();
+      for (Class<?> klass : list) {
+        for (Object mbean : (Collection<?>) getMbeans.invoke(null, klass)) {
+          testData.add(new Object[]{objectNameMethod.invoke(mbean), klass});
+        }
+      }
+      return testData.toArray(new Object[0][0]);
+    } catch (Exception ignore) {
+      return new Object[][]{
+          {ManagementFactory.CLASS_LOADING_MXBEAN_NAME, ClassLoadingMXBean.class},
+          {ManagementFactory.COMPILATION_MXBEAN_NAME, CompilationMXBean.class},
+          {ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class},
+          {ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class},
+          {ManagementFactory.RUNTIME_MXBEAN_NAME, RuntimeMXBean.class},
+          {ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class},
+      };
+    }
   }
+
 
   @DataProvider
   public static Object[][] safeOperationsToCall() {
@@ -275,20 +295,39 @@ public class JmxBridgeTest {
     //simulate a time with a more basic interface that what is used in this JVM
     //lazy initialize
     ToOpenTypeConverter.cachedType("ignore");
-    ToOpenTypeConverter.cacheType(ToOpenTypeConverter.introspectComplexTypeFrom(FieldWithMoreElementsThanTheType.class), "jolokia.test:name=MBeanExample.Field");
+    ToOpenTypeConverter.cacheType(
+        ToOpenTypeConverter.introspectComplexTypeFrom(FieldWithMoreElementsThanTheType.class),
+        "jolokia.test:name=MBeanExample.Field");
   }
 
   private MBeanServerConnection getNativeConnection() {
     return this.alternativeConnection;
   }
 
-  @Test(dataProvider = "instanceChecks")
-  public void testInstanceOf(final String mBean, final Class<?> klass)
-      throws IOException, InstanceNotFoundException {
-    final ObjectName objectName = RemoteJmxAdapter.getObjectName(mBean);
+  @Test(dataProvider = "platformMBeans")
+  public void testInstanceOf(final ObjectName objectName, final Class<?> klass)
+      throws IOException, InstanceNotFoundException, InvocationTargetException, IllegalAccessException {
     final String className = klass.getName();
     Assert.assertEquals(getNativeConnection().isInstanceOf(objectName, className),
-        this.adapter.isInstanceOf(objectName, className), mBean + " instanceof " + klass);
+        this.adapter.isInstanceOf(objectName, className),
+        objectName.getCanonicalName() + " instanceof " + klass);
+    final Object proxy = klass.cast(ManagementFactory
+        .newPlatformMXBeanProxy(this.adapter, objectName.getCanonicalName(), klass));
+    //test at least one method through the proxy to ensure it works
+    for (final Method method : klass.getDeclaredMethods()) {
+      if ((method.getName().startsWith("get") || method.getName().startsWith("is"))
+          && method.getParameterTypes().length == 0 ) {
+        try {
+          method.invoke(proxy);
+        } catch (InvocationTargetException e) {
+          if (!(e
+              .getCause() instanceof UnsupportedOperationException)) {//some MBeans have unsupported methods, ignore
+            System.err.println("Failed calling" + method + " on " + objectName);
+            throw e;
+          }
+        }
+      }
+    }
 
 
   }

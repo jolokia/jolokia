@@ -70,16 +70,17 @@ public class ToOpenTypeConverter {
       DATE,
       OBJECTNAME,
   };
-  static final StringToOpenTypeConverter CONVERTER = new Converters().getToOpenTypeConverter().makeForgiving();
+  static final StringToOpenTypeConverter CONVERTER = new Converters().getToOpenTypeConverter()
+      .makeForgiving();
   private static HashMap<String, OpenType<?>> TABULAR_CONTENT_TYPE;
 
   private static Map<String, OpenType<?>> TYPE_SPECIFICATIONS;
 
   public static Object returnOpenTypedValue(String name, Object rawValue) throws OpenDataException {
     //special case, empty array with no type information, return object (empty list) itself
-    if(rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
+    if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
       final OpenType<?> type = cachedType(name);
-      if(type!=null) {
+      if (type != null) {
         return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
       } else {
         return rawValue;
@@ -96,10 +97,10 @@ public class ToOpenTypeConverter {
   }
 
   /**
-   * This only cover known cases. Might consider making it complete and
-   * include in jolokia core ArrayTypeConverter
+   * This only cover known cases. Might consider making it complete and include in jolokia core
+   * ArrayTypeConverter
    *
-   * @param type Array type representing a primitive array
+   * @param type     Array type representing a primitive array
    * @param rawValue JSONArray with the values (boxed types)
    * @return A primitive array
    */
@@ -136,13 +137,13 @@ public class ToOpenTypeConverter {
   }
 
   /**
-   * Try to figure out open type, order of preference
-   * 1. handle simple objects, respect type introspected from MBeanInfo if any
-   * 2. Handle arrays (comes before cached types due to issues specifiying multiple return values for all the Threading overloaded methods)
-   * 3. Handle hard coded tabular return types (important for visual presentation in certain tools)
-   * 4. Use cached type for attribute/item : either hardcoded to please JConsole / JVisualVM or introspected from MBeanInfo
-   * 5. Dynamically build structured type from contents (will struggle with null values for unknown entities)
-   * 6. Fail
+   * Try to figure out open type, order of preference 1. handle simple objects, respect type
+   * introspected from MBeanInfo if any 2. Handle arrays (comes before cached types due to issues
+   * specifiying multiple return values for all the Threading overloaded methods) 3. Handle hard
+   * coded tabular return types (important for visual presentation in certain tools) 4. Use cached
+   * type for attribute/item : either hardcoded to please JConsole / JVisualVM or introspected from
+   * MBeanInfo 5. Dynamically build structured type from contents (will struggle with null values
+   * for unknown entities) 6. Fail
    */
   public static OpenType<?> recursivelyBuildOpenType(String name, Object rawValue)
       throws OpenDataException {
@@ -189,7 +190,7 @@ public class ToOpenTypeConverter {
         keys[index] = entry.getKey();
         types[index++] = recursivelyBuildOpenType(name + "." + entry.getKey(), entry.getValue());
       }
-      if(types.length==0) {
+      if (types.length == 0) {
         throw new InvalidOpenTypeException("No subtypes for " + name);
       } else {
         return new CompositeType("complex", "complex", keys, keys, types);
@@ -244,7 +245,8 @@ public class ToOpenTypeConverter {
       cacheType(introspectComplexTypeFrom(ClassLoadingMXBean.class), "java.lang:type=ClassLoading");
       cacheType(introspectComplexTypeFrom(CompilationMXBean.class), "java.lang:type=Compilation");
       cacheType(introspectComplexTypeFrom(MemoryMXBean.class), "java.lang:type=Memory");
-      cacheType(introspectComplexTypeFrom(OperatingSystemMXBean.class), "java.lang:type=OperatingSystem");
+      cacheType(introspectComplexTypeFrom(OperatingSystemMXBean.class),
+          "java.lang:type=OperatingSystem");
       cacheType(introspectComplexTypeFrom(RuntimeMXBean.class), "java.lang:type=Runtime");
       cacheType(introspectComplexTypeFrom(ThreadMXBean.class), "java.lang:type=Threading");
 
@@ -261,7 +263,7 @@ public class ToOpenTypeConverter {
   private static OpenType<?> introspectComplexTypeRequireNonNull(Class<?> klass)
       throws OpenDataException {
     final OpenType<?> type = introspectComplexTypeFrom(klass);
-    if(type == null) {
+    if (type == null) {
       throw new InvalidOpenTypeException("Unable to detect opentype for " + klass);
     }
     return type;
@@ -320,8 +322,9 @@ public class ToOpenTypeConverter {
       }
       classToIntrospect = classToIntrospect.getSuperclass();
     }
-    if(types.isEmpty()) {
-      throw new InvalidOpenTypeException("Found no fields to build composite type for class " + klass);
+    if (types.isEmpty()) {
+      throw new InvalidOpenTypeException(
+          "Found no fields to build composite type for class " + klass);
     }
     return new CompositeType(
         klass.getName(),
@@ -332,9 +335,11 @@ public class ToOpenTypeConverter {
   }
 
   private static void recursivelyBuildSubtype(Class<?> klass, List<String> names,
-      List<OpenType<?>> types, Class<?> subType, String nameWithoutPrefix) throws OpenDataException {
+      List<OpenType<?>> types, Class<?> subType, String nameWithoutPrefix)
+      throws OpenDataException {
     if (klass.equals(subType)) {
-      throw new OpenDataException("Unable to support recursive types, abort and allow default handling to take place");
+      throw new OpenDataException(
+          "Unable to support recursive types, abort and allow default handling to take place");
     }
     names.add(
         nameWithoutPrefix);
@@ -346,10 +351,16 @@ public class ToOpenTypeConverter {
       TABULAR_CONTENT_TYPE = new HashMap<String, OpenType<?>>();
       TABULAR_CONTENT_TYPE.put("java.lang:type=Runtime.SystemProperties", STRING);
       TABULAR_CONTENT_TYPE.put(
-          "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageAfterGc",
+          "java.lang:name=PS Scavenge,type=GarbageCollector.LastGcInfo.memoryUsageAfterGc",
           introspectComplexTypeFrom(MemoryUsage.class));
       TABULAR_CONTENT_TYPE.put(
-          "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo.memoryUsageBeforeGc",
+          "java.lang:name=PS Scavenge,type=GarbageCollector.LastGcInfo.memoryUsageBeforeGc",
+          introspectComplexTypeFrom(MemoryUsage.class));
+      TABULAR_CONTENT_TYPE.put(
+          "java.lang:name=PS MarkSweep,type=GarbageCollector.LastGcInfo.memoryUsageAfterGc",
+          introspectComplexTypeFrom(MemoryUsage.class));
+      TABULAR_CONTENT_TYPE.put(
+          "java.lang:name=PS MarkSweep,type=GarbageCollector.LastGcInfo.memoryUsageBeforeGc",
           introspectComplexTypeFrom(MemoryUsage.class));
     }
     return TABULAR_CONTENT_TYPE.get(attribute);
