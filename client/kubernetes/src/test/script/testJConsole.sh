@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#for instance test with: service:jmx:jolokia://localhost:8779/jolokia/
+#for instance test with: service:jmx:kubernetes:///api/v1/namespaces/mynamespace/pods/mypodname-.*/actuator/jolokia/
 if [ "$JAVA_HOME" = "" ]
 then
   echo "JAVA_HOME must be set and valid to run $0" ; exit 1

@@ -1,5 +1,6 @@
 package org.jolokia.kubernetes.client;
 
+import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Response;
 import io.kubernetes.client.ApiClient;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.management.remote.JMXConnector;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHeaders;
@@ -34,16 +36,24 @@ import org.apache.http.protocol.HttpContext;
 
 /**
  * I implement a minimum support of the HttpClient interface
- * based on what is used by J4PClient
+ * based on what is used by J4PClient hence I need to adapt
+ * One HTTP client to another HTTP client API
  */
 public class MinimalHttpClientAdapter implements HttpClient {
 
   private final ApiClient client;
   private final String urlPath;
+  private String user;
+  private String password;
 
-  public MinimalHttpClientAdapter(ApiClient client, String urlPath) {
+  public MinimalHttpClientAdapter(ApiClient client, String urlPath, Map<String,Object> env) {
     this.client = client;
     this.urlPath = urlPath;
+    String[] credentials= (String[]) env.get(JMXConnector.CREDENTIALS);
+    if(credentials != null) {
+      this.user=credentials[0];
+      this.password=credentials[1];
+    }
   }
 
   @Override
@@ -58,8 +68,8 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
   @Override
   public HttpResponse execute(HttpUriRequest httpUriRequest)
-      throws IOException, ClientProtocolException {
-    Map<String,String> headers= new HashMap<String, String>();
+      throws IOException {
+    Map<String,String> headers= createHeaders();
     try {
       final Response response = performRequest(client, urlPath,
           extractBody(httpUriRequest, headers), extractQueryParameters(httpUriRequest),
@@ -70,6 +80,14 @@ public class MinimalHttpClientAdapter implements HttpClient {
       throw new ClientProtocolException(e);
     }
 
+  }
+
+  public HashMap<String, String> createHeaders() {
+    final HashMap<String, String> headers = new HashMap<String, String>();
+    if(this.user != null) {
+      headers.put("Authorization", Credentials.basic(this.user, this.password));
+    }
+    return headers;
   }
 
   public static Response performRequest(ApiClient client, String urlPath, Object body,

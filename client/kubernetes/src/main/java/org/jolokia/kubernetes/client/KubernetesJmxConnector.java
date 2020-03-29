@@ -1,5 +1,6 @@
 package org.jolokia.kubernetes.client;
 
+import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.Response;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -19,8 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilderFactory;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
@@ -30,6 +33,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
       .compile("/api/v1/namespaces/([^/]+)/pods/([^/]+)/proxy/(.+)");
   private static Pattern SERVICE_PATTERN = Pattern
       .compile("/api/v1/namespaces/([^/]+)/services/([^/]+)/proxy/(.+)");
+  private static ApiClient apiClient;
 
   public KubernetesJmxConnector(JMXServiceURL serviceURL,
       Map<String, ?> environment) {
@@ -39,37 +43,47 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   @Override
   public void connect(Map<String, ?> env) throws IOException {
     if (!"kubernetes".equals(this.serviceUrl.getProtocol())) {
-      throw new MalformedURLException("Only Kubernetes urls are supported");
+      throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"kubernetes\" is supported (not %s)",  serviceUrl, serviceUrl.getProtocol()));
     }
-    ApiClient client = getApiClient(env);
+    final Map<String, Object> mergedEnvironment = this.mergedEnvironment(env);
+    ApiClient client = getApiClient(mergedEnvironment);
 
-    this.adapter = createAdapter(client);
+    this.adapter = createAdapter(expandAndProbeUrl(client, mergedEnvironment));
     this.postCreateAdapter();
   }
 
-  protected RemoteJmxAdapter createAdapter(ApiClient client) throws IOException {
-    return new RemoteJmxAdapter(expandAndProbeUrl(client));
+  protected RemoteJmxAdapter createAdapter(J4pClient client) throws IOException {
+    return new RemoteJmxAdapter(client);
   }
 
-  protected ApiClient getApiClient(Map<String, ?> env) throws IOException {
+  public static ApiClient getApiClient(Map<String, ?> env) throws IOException {
+    if(apiClient != null){
+      return apiClient;
+    }
+    return buildApiClient(env);
+  }
+
+  public static ApiClient buildApiClient(Map<String, ?> env) throws IOException {
     // file path to your KubeConfig
     final Object configPath = env != null ? env.get("kube.config.path") : null;
     String kubeConfigPath = configPath != null ? configPath.toString()
         : String.format("%s/.kube/config", System.getProperty("user.home"));
 
     // loading the out-of-cluster config, a kubeconfig from file-system
-    return ClientBuilder
+    return apiClient = ClientBuilder
         .kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath))).build();
   }
 
   /**
    * @return a connection if successful
    */
-  protected J4pClient expandAndProbeUrl(ApiClient client) throws MalformedURLException {
+  protected J4pClient expandAndProbeUrl(ApiClient client,
+      Map<String, Object> env) throws MalformedURLException {
     Configuration.setDefaultApiClient(client);
 
     CoreV1Api api = new CoreV1Api();
     String proxyPath = this.serviceUrl.getURLPath();
+    final HashMap<String, String> headersForProbe = createHeadersForProbe(env);
     try {
       if (SERVICE_PATTERN.matcher(proxyPath).matches()) {
         final Matcher matcher = SERVICE_PATTERN.matcher(proxyPath);
@@ -100,10 +114,12 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
           }
           //probe a request to this URL via proxy
           try {
-            final Response response = probeProxyPath(client, proxyPath);
+            final Response response = probeProxyPath(client, proxyPath,
+                headersForProbe);
+            response.body().close();
             if (response.isSuccessful()) {
               return new J4pClient(
-                  proxyPath, new MinimalHttpClientAdapter(client, proxyPath));
+                  proxyPath, new MinimalHttpClientAdapter(client, proxyPath, env));
             }
           } catch (IOException ignore) {
           }
@@ -123,7 +139,6 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
           String podPattern = matcher.group(2);
           String actualNamespace = null;
           String actualPodName = null;
-          V1Pod actualPod = null;
           for (final V1Pod pod : api
               .listPodForAllNamespaces(null, null, false, null, null, null, null, 5, null)
               .getItems()) {
@@ -132,7 +147,6 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                 .getName().matches(podPattern)) {
               actualNamespace = pod.getMetadata().getNamespace();
               actualPodName = pod.getMetadata().getName();
-              actualPod = pod;
               break;
             }
           }
@@ -148,26 +162,14 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
           }
           //probe a request to this URL via proxy
           try {
-            final Response response = probeProxyPath(client, proxyPath);
+            final Response response = probeProxyPath(client, proxyPath,
+                headersForProbe);
+            response.body().close();
             if (response.isSuccessful()) {
               return new J4pClient(
-                  proxyPath, new MinimalHttpClientAdapter(client, proxyPath));
+                  proxyPath, new MinimalHttpClientAdapter(client, proxyPath, env));
             }
-/*          port forward stragegy
-            else if (response.code() == 403 ) {//could be proxy is not allowed try a port forward workaround instead
-              String path = matcher.group(3);
-              final Integer port = actualPod.getSpec().getContainers().get(0).getPorts()
-                  .get(0).getContainerPort();
-              final String scheme = "http";
-              final Response forwardResponse = api
-                  .connectGetNamespacedPodPortforwardCall(actualPodName, actualNamespace,
-                      port, null, null).execute();
-              if (forwardResponse.isSuccessful()) {
-                //test both http and https
-                return new RemoteJmxAdapter(
-                    new J4pClient(String.format("%s://localhost:%d/%s", scheme, port, path)));
-              }
-            }*/
+
           } catch (IOException ignore) {
           }
         }
@@ -176,10 +178,17 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
     } catch (ApiException ignore) {
     }
-    throw new
+    throw new MalformedURLException("Unable to connect to proxypath " + proxyPath);
+  }
 
-        MalformedURLException("Unable to connect to proxypath " + proxyPath);
-
+  private HashMap<String, String> createHeadersForProbe(
+      Map<String, Object> env) {
+    final HashMap<String, String> headers = new HashMap<String, String>();
+    String[] credentials= (String[]) env.get(JMXConnector.CREDENTIALS);
+    if(credentials != null) {
+      headers.put("Authorization", Credentials.basic(credentials[0], credentials[1]));
+    }
+    return headers;
   }
 
   /**
@@ -210,10 +219,11 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
   /**
    */
-  public static Response probeProxyPath(ApiClient client, String proxyPath)
+  public static Response probeProxyPath(ApiClient client, String proxyPath,
+      HashMap<String, String> headers)
       throws IOException, ApiException {
     return MinimalHttpClientAdapter
         .performRequest(client, proxyPath, Collections.singletonMap("type", "version"),
-            Collections.<Pair>emptyList(), "POST", new HashMap<String, String>());
+            Collections.<Pair>emptyList(), "POST", headers);
   }
 }

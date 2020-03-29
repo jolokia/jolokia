@@ -9,22 +9,29 @@ import javax.management.remote.JMXServiceURL;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 
 /**
- * I provide support for handling JMX urls for the Jolokia protocol
- * Syntax service:jmx:jolokia://host:port/path/to/jolokia/with/slash/suffix/
+ * I provide support for handling JMX urls over the Jolokia protocol to JVMs running in kubernetes pods
+ * Syntax examples
+ * <ul>
+ *   <li>service:jmx:kubernetes:///api/v1/namespaces/mynamespace/pods/mypodname-.+/actuator/jolokia/</li>
+ *   <li>service:jmx:kubernetes:///api/v1/namespaces/mynamespace/services/myservice-.+/actuator/jolokia/</li>
+ * </ul>
+ *
+ * Regular expressions in service url is supported so you can have working URLs across deploys.
+ * Regular expression URLs will connect to the first pod/service that matches expession.
+ * Prerequesite: You should have <code>kubectl</code> installed and have valid credentiatls for k8s cluster
+ * readily stored under $HOME/.kube/config
  * My Jar contains a service loader, so that Jolokia JMX protocol is supported
  * as long as my jar (jmx-adapter-version-standalone.jar) is on the classpath
  *
- * <code>
+ * <pre>
  *   Example:
- *   //NB: include trailing slash
- *   https will be used if port number fits the pattern *443 or connect env map contains "jmx.remote.x.check.stub"->"true"
+ *   //NB: include trailing slash to jolokia endpoint
  *   JMXConnector connector = JMXConnectorFactory
- *             .connect(new JMXServiceURL("service:jmx:kubernetes://host:port/jolokia/"), Collections.singletonMap(JMXConnector.CREDENTIALS, Arrays
- *             .asList("user", "password")));
+ *             .connect(new JMXServiceURL("service:jmx:kubernetes:///api/v1/namespaces/mynamespace/pods/mypodname-.+/actuator/jolokia/")));
  *         connector.connect();
  *         connector.getMBeanServerConnection();
  *
- * </code>
+ * </pre>
  */
 public class KubernetesJmxConnectionProvider implements JMXConnectorProvider {
     @Override
@@ -32,7 +39,7 @@ public class KubernetesJmxConnectionProvider implements JMXConnectorProvider {
         //the exception will be handled by JMXConnectorFactory so that other handlers are allowed to handle
         //other protocols
         if(!"kubernetes".equals(serviceURL.getProtocol())) {
-            throw new MalformedURLException("I only serve Kubernetes connections");
+            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"kubernetes\" is supported (not %s)",  serviceURL, serviceURL.getProtocol()));
         }
         return new KubernetesJmxConnector(serviceURL, environment);
     }
