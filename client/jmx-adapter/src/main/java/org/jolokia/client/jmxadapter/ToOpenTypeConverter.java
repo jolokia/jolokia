@@ -249,6 +249,22 @@ public class ToOpenTypeConverter {
           "java.lang:type=OperatingSystem");
       cacheType(introspectComplexTypeFrom(RuntimeMXBean.class), "java.lang:type=Runtime");
       cacheType(introspectComplexTypeFrom(ThreadMXBean.class), "java.lang:type=Threading");
+      final Class<?> recordingClass = ClassUtil.classForName("jdk.management.jfr.RecordingInfo");
+      if (recordingClass != null) {
+        cacheType(ArrayType.getArrayType(introspectComplexTypeFrom(recordingClass)),
+            "jdk.management.jfr:type=FlightRecorder.Recordings", "jdk.jfr.management:type=FlightRecorder.Recordings");
+      }
+      final Class<?> configurationClass = ClassUtil
+          .classForName("jdk.management.jfr.ConfigurationInfo");
+      if (configurationClass != null) {
+        cacheType(ArrayType.getArrayType(introspectComplexTypeFrom(configurationClass)),
+            "jdk.management.jfr:type=FlightRecorder.Configurations", "jdk.jfr.management:type=FlightRecorder.Configurations");
+      }
+      final Class<?> eventTypesClass = ClassUtil.classForName("jdk.management.jfr.EventTypeInfo");
+      if (eventTypesClass != null) {
+        cacheType(ArrayType.getArrayType(introspectComplexTypeFrom(eventTypesClass)),
+            "jdk.management.jfr:type=FlightRecorder.EventTypes", "jdk.jfr.management:type=FlightRecorder.EventTypes");
+      }
 
     }
     return TYPE_SPECIFICATIONS.get(name);
@@ -350,6 +366,10 @@ public class ToOpenTypeConverter {
     if (TABULAR_CONTENT_TYPE == null) {
       TABULAR_CONTENT_TYPE = new HashMap<String, OpenType<?>>();
       TABULAR_CONTENT_TYPE.put("java.lang:type=Runtime.SystemProperties", STRING);
+      TABULAR_CONTENT_TYPE.put("jdk.management.jfr:type=FlightRecorder.Recordings.item.Settings", STRING);
+      TABULAR_CONTENT_TYPE.put("jdk.jfr.management:type=FlightRecorder.Recordings.item.Settings", STRING);
+      TABULAR_CONTENT_TYPE.put("jdk.management.jfr:type=FlightRecorder.Configurations.item.Settings", STRING);
+      TABULAR_CONTENT_TYPE.put("jdk.jfr.management:type=FlightRecorder.Configurations.item.Settings", STRING);
       TABULAR_CONTENT_TYPE.put(
           "java.lang:name=PS Scavenge,type=GarbageCollector.LastGcInfo.memoryUsageAfterGc",
           introspectComplexTypeFrom(MemoryUsage.class));
