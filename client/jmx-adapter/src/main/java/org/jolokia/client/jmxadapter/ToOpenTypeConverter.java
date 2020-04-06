@@ -251,8 +251,12 @@ public class ToOpenTypeConverter {
       cacheType(introspectComplexTypeFrom(ThreadMXBean.class), "java.lang:type=Threading");
       final Class<?> recordingClass = ClassUtil.classForName("jdk.management.jfr.RecordingInfo");
       if (recordingClass != null) {
+        //the array type is needed for the JFR Proxy in JMC
         cacheType(ArrayType.getArrayType(introspectComplexTypeFrom(recordingClass)),
             "jdk.management.jfr:type=FlightRecorder.Recordings", "jdk.jfr.management:type=FlightRecorder.Recordings");
+        //the item type is needed for interpreting return values
+        cacheType(introspectComplexTypeFrom(recordingClass),
+            "jdk.management.jfr:type=FlightRecorder.Recordings.item", "jdk.jfr.management:type=FlightRecorder.Recordings.item");
       }
       final Class<?> configurationClass = ClassUtil
           .classForName("jdk.management.jfr.ConfigurationInfo");
