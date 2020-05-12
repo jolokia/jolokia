@@ -1,6 +1,6 @@
 package org.jolokia.jvmagent.security;
 /*
- * 
+ *
  * Copyright 2016 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -83,4 +84,30 @@ public class MultiAuthenticatorTest {
                                                  NEGATIVE_AUTHENTICATOR));
         assertTrue(authenticator.authenticate(null) instanceof Authenticator.Failure);
     }
+
+    @Test
+    public void multiAuthenticatorModeFromString(){
+        for (String any : new String[] {"any", "ANY", "Any", "aNy"}) {
+            assertSame(MultiAuthenticator.Mode.fromString(any), MultiAuthenticator.Mode.ANY);
+        }
+        for (String all : new String[] {"all", "ALL", "All", "aLl"}) {
+            assertSame(MultiAuthenticator.Mode.fromString(all), MultiAuthenticator.Mode.ALL);
+        }
+    }
+
+    @Test
+    public void multiAuthenticatorModeFromStringNull() {
+        assertSame(MultiAuthenticator.Mode.fromString(null), MultiAuthenticator.Mode.ANY);
+    }
+
+    @Test
+    public void multiAuthenticatorModeFromStringEmpty() {
+        assertSame(MultiAuthenticator.Mode.fromString(""), MultiAuthenticator.Mode.ANY);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void multiAuthenticatorModeFromStringUnknown() {
+        MultiAuthenticator.Mode.fromString("something unknown !@#$%^");
+    }
+
 }

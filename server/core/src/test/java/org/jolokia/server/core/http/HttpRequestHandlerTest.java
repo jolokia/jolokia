@@ -52,6 +52,7 @@ public class HttpRequestHandlerTest {
     public void accessAllowed() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed((String) isNull(), eq(true))).andReturn(true);
         replay(restrictor);
         init(restrictor);
         handler.checkAccess("localhost", "127.0.0.1", null);

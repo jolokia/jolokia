@@ -9,7 +9,7 @@ Agents
   Various agents are available for providing Jolokia
   services in different environments:
 
-  * <<WAR Agent>> for deployment as web application in a JEE Server.
+  * <<WAR Agent>> for deployment as web application in a Java EE Server.
 
   * <<OSGi Agent>> for deployment in an OSGi container. This
     agent is packaged as a bundle and comes in two flavors (minimal,
@@ -23,7 +23,7 @@ Agents
 * WAR Agent
 
   The WAR agent <<<jolokia.war>>> deploys as a regular web archive
-  (WAR) in a JEE server. Deployment is simple (often only a copy in a
+  (WAR) in a Java EE server. Deployment is simple (often only a copy in a
   certain directory) and the agent can be tuned like a normal web
   application. Setting it up the agent servlet for secure
   communication is a well known business (but specific to every
@@ -78,7 +78,7 @@ Agents
   Pax Web HTTP-Service. This bundle is useful for quick installations,
   where no HTTP-Service is already existent. However, for best fitting
   the OSGi philosophy, the usage of the minimal bundle is
-  recommended. 
+  recommended.
 
   The OSGi agent has been tested with the following containers:
 
@@ -122,7 +122,7 @@ Agents
 
   * HornetQ 2.2.14
 
-  [] 
+  []
 
   Read more about the
   {{{./agent/jvm.html}JVM agent}} and its installation.
@@ -130,6 +130,6 @@ Agents
 * Mule Agent
 
   The {{{http://www.mulesoft.org}Mule Standalone ESB}} offers a dedicated JMX agent
-  interface, into which this agents plugs in seemlessly. 
+  interface, into which this agents plugs in seemlessly.
 
   This agent has been tested for Mule 2 and Mule 3 (3.1.1 and 3.2.0).

@@ -3,13 +3,23 @@ package org.jolokia.jvmagent.security;
 import java.lang.reflect.Field;
 
 import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
-import com.sun.net.httpserver.*;
-import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.test.util.MockLoginContext;
-import org.testng.annotations.*;
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpPrincipal;
+import org.easymock.EasyMock;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.easymock.EasyMock.expect;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
 
@@ -53,11 +63,21 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     @Test
     public void testAuthenticateSuccess() throws Exception {
         Headers respHeader = new Headers();
-        HttpExchange ex = createHttpExchange(respHeader, MockLoginContext.SUBJECT, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
+        final Subject subject = new Subject();
+        HttpExchange ex = createHttpExchange(respHeader, subject, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
 
-        new MockLoginContext("jolokia",true);
+        JaasHttpAuthenticator successAuth = new JaasHttpAuthenticator("jolokia") {
+            @Override
+            protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
+                LoginContext mockLogin = EasyMock.mock(LoginContext.class);
+                mockLogin.login();
+                expect(mockLogin.getSubject()).andReturn(subject);
+                EasyMock.replay(mockLogin);
+                return mockLogin;
+            }
+        };
 
-        Authenticator.Result result = auth.authenticate(ex);
+        Authenticator.Result result = successAuth.authenticate(ex);
         HttpPrincipal principal = ((Authenticator.Success) result).getPrincipal();
         assertEquals(principal.getRealm(),"jolokia");
         assertEquals(principal.getUsername(),"roland");

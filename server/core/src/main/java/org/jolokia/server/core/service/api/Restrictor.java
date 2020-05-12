@@ -91,8 +91,8 @@ public interface Restrictor {
      * for details
      *
      * @param pOrigin the "Origin:" header provided within the request
-     * @param pIsStrictCheck whether doing a strict check
+     * @param pOnlyWhenStrictCheckingIsEnabled whether by-pass check when strict checking is disabled
      * @return true if this cross browser request allowed, false otherwise
      */
-    boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck);
+    boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled);
 }

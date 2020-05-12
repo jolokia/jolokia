@@ -16,14 +16,24 @@ package org.jolokia.service.jsr160;
  * limitations under the License.
  */
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
@@ -43,6 +53,13 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     // request handler for specific request types
     private CommandHandlerManager commandHandlerManager;
 
+    // White and blacklist for patterns to match the JMX Service URL against
+    private Set<String> whiteList;
+    private Set<String> blackList;
+
+    public static final String ALLOWED_TARGETS_SYSPROP = "org.jolokia.jsr160ProxyAllowedTargets";
+    public static final String ALLOWED_TARGETS_ENV = "JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS";
+
     /**
      * Create this request handler as service
      *
@@ -59,6 +76,8 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      */
     public void init(JolokiaContext pContext) {
         commandHandlerManager = new CommandHandlerManager(pContext, getProvider());
+        whiteList = extractWhiteList(pContext);
+        blackList = extractBlackList(pContext);
     }
 
     /**
@@ -98,6 +117,10 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     private JMXConnector createConnector(JolokiaRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = new ProxyTargetConfig((Map<String, String>) pJmxReq.getOption("target"));
         String urlS = targetConfig.getUrl();
+        if (!acceptTargetUrl(urlS)) {
+            throw new SecurityException(String.format("Target URL %s is not allowed by configuration", urlS));
+        }
+
         JMXServiceURL url = new JMXServiceURL(urlS);
 
         Map<String,Object> env = prepareEnv(targetConfig.getEnv());
@@ -152,5 +175,80 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     /** {@inheritDoc} */
     public void destroy() throws JMException {
         commandHandlerManager.destroy();
+    }
+
+    // Whether a given JMX Service URL is acceptable
+    private boolean acceptTargetUrl(String urlS) {
+        // Whitelist has precedence. Only patterns on the white list are allowed
+        if (whiteList != null) {
+            return checkPattern(whiteList, urlS, true);
+        }
+
+        // Then blacklist: Everything on this list is forbidden
+        if (blackList != null) {
+            return checkPattern(blackList, urlS, false);
+        }
+
+        // If no list is configured, then everything is allowed
+        return true;
+    }
+
+    private boolean checkPattern(Set<String> patterns, String urlS, boolean isPositive) {
+        for (String pattern : patterns) {
+            if (Pattern.compile(pattern).matcher(urlS).matches()) {
+                return isPositive;
+            }
+        }
+        return !isPositive;
+    }
+
+    private Set<String> extractWhiteList(JolokiaContext pContext) {
+        return extractFrom(pContext != null ? pContext.getConfig(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS) : null,
+                           System.getProperty(ALLOWED_TARGETS_SYSPROP),
+                           System.getenv(ALLOWED_TARGETS_ENV));
+    }
+
+    private Set<String> extractFrom(String ... paths) {
+        Set<String> ret = new HashSet<String>();
+        for (String path : paths) {
+            if (path != null) {
+                ret.addAll(readPatterns(path));
+            }
+        }
+        return ret.size() > 0 ? ret : null;
+    }
+
+    private List<? extends String> readPatterns(String pPath) {
+        BufferedReader reader = null;
+        List<String> ret = new ArrayList<String>();
+        Pattern commentPattern = Pattern.compile("^\\s*#.*$");
+        try {
+            reader = new BufferedReader(new FileReader(pPath));
+            String line = reader.readLine();
+            while (line != null) {
+                if (!commentPattern.matcher(line).matches()) {
+                    ret.add(line);
+                }
+                line = reader.readLine();
+            }
+            return ret;
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException(String.format("No such pattern file %s", pPath ));
+        } catch (IOException e) {
+            throw new IllegalStateException(String.format("Error while reading pattern file %s: %s", pPath, e.getMessage() ));
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                // we tried
+            }
+        }
+    }
+
+    private Set<String> extractBlackList(JolokiaContext pContext) {
+        // Bad, bad ....
+        return Collections.singleton("service:jmx:rmi:///jndi/ldap:.*");
     }
 }

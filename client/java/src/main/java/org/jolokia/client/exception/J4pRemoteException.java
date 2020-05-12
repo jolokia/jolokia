@@ -20,7 +20,7 @@ import org.jolokia.client.request.J4pRequest;
 import org.json.simple.JSONObject;
 
 /**
- * Exception occured on the remote side (i.e the server).
+ * Exception occurred on the remote side (i.e the server).
  *
  * @author roland
  * @since Jun 9, 2010
@@ -42,6 +42,9 @@ public class J4pRemoteException extends J4pException {
     // JSONObject containing value of the remote error
     private JSONObject errorValue;
 
+    // String containing the entire response
+    private JSONObject response;
+
     /**
      * Constructor for a remote exception
      *
@@ -60,16 +63,26 @@ public class J4pRemoteException extends J4pException {
     }
 
     public J4pRemoteException(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
-        super(pJsonRespObject.get("error") != null ?
-                      (String) pJsonRespObject.get("error") :
-                      "Invalid response received: " + pJsonRespObject.toJSONString()
-             );
-        Long statusL = (Long) pJsonRespObject.get("status");
+        super(generateErrorMessage(pJ4pRequest, pJsonRespObject));
+	Object statusO = pJsonRespObject.get("status");
+        Long statusL = statusO instanceof Long ? (Long) statusO : null;
         status = statusL != null ? statusL.intValue() : 500;
         request = pJ4pRequest;
+	response = pJsonRespObject;
         errorType = (String) pJsonRespObject.get("error_type");
         remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
         errorValue = (JSONObject) pJsonRespObject.get("error_value");
+    }
+
+    private static String generateErrorMessage(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
+	if( pJsonRespObject.get("error") != null ) {
+		return "Error: " + (String) pJsonRespObject.get("error");
+	}
+	Object o = pJsonRespObject.get("status");
+	if( o != null && !(o instanceof Long)) {
+		return "Invalid status of type " + o.getClass().getName() + "('" + o.toString() + "') received";
+	}
+	return "Invalid response received";
     }
 
     /**
@@ -115,8 +128,17 @@ public class J4pRemoteException extends J4pException {
      * 
      * @return value of the remote error as JSON
      */
-	public JSONObject getErrorValue() {
-		return errorValue;
-	}
-    
+    public JSONObject getErrorValue() {
+        return errorValue;
+    }
+
+
+    /**
+     * Get the response string, or null if unavailable
+     *
+     * @return value of the json response string
+     */
+    public JSONObject getResponse() {
+        return response;
+    }
 }

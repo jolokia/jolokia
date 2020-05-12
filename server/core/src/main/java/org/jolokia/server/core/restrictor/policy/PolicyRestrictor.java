@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -65,8 +66,7 @@ public class PolicyRestrictor implements Restrictor {
             throw new SecurityException("No policy file given");
         }
         try {
-            Document doc =
-                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pInput);
+            Document doc = createDocument(pInput);
             requestTypeChecker = new RequestTypeChecker(doc);
             httpChecker = new HttpMethodChecker(doc);
             networkChecker = new NetworkChecker(doc);
@@ -81,6 +81,31 @@ public class PolicyRestrictor implements Restrictor {
         if (exp != null) {
             throw new SecurityException("Cannot parse policy file: " + exp,exp);
         }
+    }
+
+    private Document createDocument(InputStream pInput) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        String[] features = new String[] {
+            "http://xml.org/sax/features/external-general-entities",
+            "http://xml.org/sax/features/external-parameter-entities",
+            "http://apache.org/xml/features/nonvalidating/load-external-dtd"
+        };
+        for (String feature : features) {
+            try {
+                factory.setFeature(feature, false);
+            } catch (ParserConfigurationException exp) {
+                // Silently ignore as the feature might not be available for the
+                // given parser
+            }
+        }
+        // Also set secure processing to true
+        try {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException exp) {
+            // Silently ignore as the feature might not be available for the
+            // given parser
+        }
+        return factory.newDocumentBuilder().parse(pInput);
     }
 
     /** {@inheritDoc} */
@@ -99,13 +124,13 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
-    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
-        return corsChecker.check(pOrigin,pIsStrictCheck);
+    public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
+        return corsChecker.check(pOrigin, pOnlyWhenStrictCheckingIsEnabled);
     }
 
     /** {@inheritDoc} */
     public boolean isAttributeReadAllowed(ObjectName pName, String pAttribute) {
-        return check(RequestType.READ,pName,pAttribute);
+        return check(RequestType.READ, pName, pAttribute);
     }
 
     /** {@inheritDoc} */

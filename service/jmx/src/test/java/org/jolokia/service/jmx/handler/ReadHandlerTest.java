@@ -153,7 +153,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
     // ======================================================================================================
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoMatch() throws Exception {
         ObjectName patternMBean = new ObjectName("bla:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -168,7 +168,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         } catch (InstanceNotFoundException exp) {}
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternSingleAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -189,7 +189,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest[] requests = new JolokiaReadRequest[2];
@@ -232,7 +232,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         }
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoAttributesFound() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -258,7 +258,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
 
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternNoMatchingAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -279,7 +279,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         verify(server);
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternMultiAttributes1() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -303,7 +303,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     }
 
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternMultiAttributes3() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -325,7 +325,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         }
     }
 
-    @Test(groups = "java6")
+    @Test
     public void searchPatternMultiAttributes4() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -433,7 +433,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     // ==============================================================================================================
 
     private MBeanAttributeInfo[] prepareMBeanInfos(MBeanServerConnection pConnection, ObjectName pObjectName, String pAttrs[])
-            throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException, IntrospectionException {
+        throws InstanceNotFoundException, ReflectionException, IOException, IntrospectionException {
         MBeanInfo mBeanInfo = createMock(MBeanInfo.class);
         expect(pConnection.isRegistered(pObjectName)).andStubReturn(true);
         expect(pConnection.getMBeanInfo(pObjectName)).andReturn(mBeanInfo);
@@ -445,8 +445,8 @@ public class ReadHandlerTest extends BaseHandlerTest {
         }
         expect(mBeanInfo.getAttributes()).andReturn(infos);
         replay(mBeanInfo);
-        for (int j=0;j<infos.length;j++) {
-            replay(infos[j]);
+        for (MBeanAttributeInfo info : infos) {
+            replay(info);
         }
 
         return infos;

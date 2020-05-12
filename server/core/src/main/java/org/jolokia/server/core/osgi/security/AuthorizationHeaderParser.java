@@ -21,9 +21,8 @@ import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jolokia.server.core.util.Base64Util;
-import org.jolokia.server.core.util.EscapeUtil;
 
-public class AuthorizationHeaderParser {
+public final class AuthorizationHeaderParser {
 
     private AuthorizationHeaderParser() { }
 
@@ -59,7 +58,7 @@ public class AuthorizationHeaderParser {
         return new Result(method,user,password,valid);
     }
 
-    // ============================================================================================================
+        // ============================================================================================================
 
     public static class Result {
         private final String method;
@@ -67,7 +66,7 @@ public class AuthorizationHeaderParser {
         private final String password;
         private final boolean valid;
 
-        Result(String pMethod, String pUser, String pPassword, boolean pValid) {
+        public Result(String pMethod, String pUser, String pPassword, boolean pValid) {
             method = pMethod;
             user = pUser;
             password = pPassword;
@@ -77,9 +76,11 @@ public class AuthorizationHeaderParser {
         public String getUser() {
             return user;
         }
+
         public String getPassword() {
             return password;
         }
+
         public boolean isValid() {
             return valid;
         }

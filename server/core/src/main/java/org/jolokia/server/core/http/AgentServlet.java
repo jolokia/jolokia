@@ -20,6 +20,8 @@ import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.server.core.util.ChunkedWriter;
 import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.server.core.util.IoUtil;
+import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONStreamAware;
@@ -74,13 +76,16 @@ public class AgentServlet extends HttpServlet {
     // context for this servlet
     private JolokiaContext jolokiaContext;
 
+    // Mime type used for returning the answer
+    private String configMimeType;
+
     // Service manager for creating/destroying the Jolokia context
     private JolokiaServiceManager serviceManager;
 
     // whether to allow reverse DNS lookup for checking the remote host
     private boolean allowDnsReverseLookup;
 
-    // wheter to allow streaming mode for response
+    // whether to allow streaming mode for response
     private boolean streamingEnabled;
 
     /**
@@ -135,6 +140,8 @@ public class AgentServlet extends HttpServlet {
         httpPostHandler = newPostHttpRequestHandler();
 
         initAgentUrl();
+
+        configMimeType = config.getConfig(ConfigKey.MIME_TYPE);
         streamingEnabled = Boolean.parseBoolean(config.getConfig(ConfigKey.STREAMING));
     }
 
@@ -151,6 +158,7 @@ public class AgentServlet extends HttpServlet {
     protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
         pServiceManager.addServices(new ClasspathServiceCreator("services"));
     }
+
 
     /**
      * Hook for allowing a custome detector lookup
@@ -200,7 +208,6 @@ public class AgentServlet extends HttpServlet {
         }
         return new StaticConfiguration(envConfig);
     }
-
     /**
      * Create a log handler using this servlet's logging facility for logging. This method can be overridden
      * to provide a custom log handler.
@@ -298,7 +305,7 @@ public class AgentServlet extends HttpServlet {
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String,String> responseHeaders =
                 requestHandler.handleCorsPreflightRequest(
-                        req.getHeader("Origin"),
+                        getOriginOrReferer(req),
                         req.getHeader("Access-Control-Request-Headers"));
         for (Map.Entry<String,String> entry : responseHeaders.entrySet()) {
             resp.setHeader(entry.getKey(),entry.getValue());
@@ -308,11 +315,15 @@ public class AgentServlet extends HttpServlet {
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     private void handle(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONAware json = null;
+
         try {
             // Check access policy
             requestHandler.checkAccess(allowDnsReverseLookup ? pReq.getRemoteHost() : null,
                                        pReq.getRemoteAddr(),
                                        getOriginOrReferer(pReq));
+
+            // If a callback is given, check this is a valid javascript function name
+            validateCallbackIfGiven(pReq);
 
             // Remember the agent URL upon the first request. Needed for discovery
             updateAgentDetailsIfNeeded(pReq);
@@ -326,8 +337,12 @@ public class AgentServlet extends HttpServlet {
             // Nothing needs to be done
             return;
         } catch (Throwable exp) {
-            json = requestHandler.handleThrowable(
+            try {
+                json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
+            } catch (Throwable exp2) {
+                exp2.printStackTrace();
+            }
         } finally {
             releaseBackChannel();
             setCorsHeader(pReq, pResp);
@@ -347,6 +362,7 @@ public class AgentServlet extends HttpServlet {
     private void prepareBackChannel(HttpServletRequest pReq) {
         BackChannelHolder.set(new ServletBackChannel(pReq));
     }
+
 
     private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
             throws IOException, PrivilegedActionException, EmptyResponseException {
@@ -461,15 +477,6 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    // Extract mime type for response (if not JSONP)
-    private String getMimeType(HttpServletRequest pReq) {
-        String requestMimeType = pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue());
-        if (requestMimeType != null) {
-            return requestMimeType;
-        }
-        return jolokiaContext.getConfig(ConfigKey.MIME_TYPE);
-    }
-
     private boolean isStreamingEnabled(HttpServletRequest pReq) {
         String streamingFromReq = pReq.getParameter(ConfigKey.STREAMING.getKeyValue());
         if (streamingFromReq != null) {
@@ -536,8 +543,11 @@ public class AgentServlet extends HttpServlet {
 
     private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONAware pJson) throws IOException {
         String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
-        setContentType(pResp, callback != null ? "text/javascript" : getMimeType(pReq));
 
+        setContentType(pResp,
+                       MimeTypeUtil.getResponseMimeType(
+                           pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
+                           configMimeType, callback));
         pResp.setStatus(HttpServletResponse.SC_OK);
         setNoCacheHeaders(pResp);
         if (pJson == null) {
@@ -553,26 +563,15 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private void sendStreamingResponse(HttpServletResponse pResp, String callback, JSONStreamAware pJson) throws IOException {
-        ChunkedWriter writer = null;
-        try {
-            writer = new ChunkedWriter(pResp.getOutputStream(), "UTF-8");
-            if (callback == null) {
-                pJson.writeJSONString(writer);
-            } else {
-                writer.write(callback);
-                writer.write("(");
-                pJson.writeJSONString(writer);
-                writer.write(");");
-            }
-        } finally {
-            if (writer != null) {
-                // Always close in order to finish the request.
-                // Otherwise the thread blocks.
-                writer.flush();
-                writer.close();
-            }
+    private void validateCallbackIfGiven(HttpServletRequest pReq) {
+        String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        if (callback != null && !MimeTypeUtil.isValidCallback(callback)) {
+            throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
         }
+    }
+    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
+        Writer writer = new OutputStreamWriter(pResp.getOutputStream(), "UTF-8");
+        IoUtil.streamResponseAndClose(writer, pJson, pCallback);
     }
 
     private void sendAllJSON(HttpServletResponse pResp, String callback, JSONAware pJson) throws IOException {

@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Secure</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -32,7 +32,7 @@
       <p>
         Security in Jolokia is provided on two levels: The transport
         channel (HTTP) is secured the standard way as it is defined in
-        the JEE specifications. The agent itself can be configured to
+        the Java EE specifications. The agent itself can be configured to
         use a very fine grained policy which can restrict access on
         the MBean level for various parameters.
       </p>
@@ -47,7 +47,7 @@
       <p>
         The security definitions support a wildcard notation and
         allow/deny sections similar to the security setup of an Apache
-        HTTP-Server. 
+        HTTP-Server.
       </p>
       <subsection name="Example">
         <p>
@@ -61,7 +61,7 @@
     <host>localhost</host>
     <host>10.0.0.0/16</host>
   </remote>
-  
+
   <cors>
     <allow-origin>http://www.jmx4perl.org</allow-origin>
     <allow-origin>*.jolokia.org</allow-origin>
@@ -133,6 +133,6 @@
         </ul>
       </subsection>
     </section>
-  </body>    
+  </body>
 </document>
 

@@ -2,7 +2,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Download</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -30,7 +30,7 @@
       </ul>
       <p>
         The agents and the client library can be downloaded directly
-        from our maven repository, too:        
+        from our maven repository, too:
       </p>
       <table>
         <tbody>
@@ -41,6 +41,10 @@
           <tr>
             <td>WAR-Agent</td>
             <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-${currentStableVersion}.war">jolokia-war-${currentStableVersion}.war</a></td>
+          </tr>
+          <tr>
+            <td>WAR-Agent (unsecured)</td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-war-unsecured/${currentStableVersion}/jolokia-war-unsecured-${currentStableVersion}.war">jolokia-war-unsecured-${currentStableVersion}.war</a></td>
           </tr>
           <tr>
             <td>Osgi-Agent</td>

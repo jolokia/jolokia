@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.HttpServer;
@@ -52,7 +51,11 @@ public class JolokiaServerTest {
                 null,
                 "executor=fixed,threadNr=5",
                 "executor=cached",
-                "executor=single"
+                "executor=single",
+                "executor=fixed,threadNr=5,threadNamePrefix=JolokiaServerTestExecutorFixed",
+                "executor=cached,threadNamePrefix=JolokiaServerTestExecutorFixedCached",
+                "executor=single,threadNamePrefix=JolokiaServerTestExecutorFixedSingle",
+                "executor=fixed,threadNamePrefix=jolokia-,threadNr=5",
         };
 
         for (String c : configs) {
@@ -242,7 +245,7 @@ public class JolokiaServerTest {
                        "admin:wrong");
     }
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    @Test(expectedExceptions = IOException.class)
     public void t_264_with_basic_auth_and_wrong_client_cert() throws Exception {
         httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
                        + getFullCertSetup(),
@@ -285,7 +288,16 @@ public class JolokiaServerTest {
         List<String> cipherSuites = Arrays.asList(config.getSSLCipherSuites());
         List<String> protocols = Arrays.asList(config.getSSLProtocols());
 
-        for (String protocol : new String[]{"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"}) {
+        final String[] protocolCandidates;
+        if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
+            /* IBM's VM is technically capable to use SSL but due to POODLE it has been disabled by default for quite a while and throws
+             an exception if an attempt is made to use it. Take note that this can lead to a bit of confusion as the cipher suites all
+             are prefixed with SSL_ on J9 (compared to TLS_ on OpenJDK/Oracle). */
+            protocolCandidates = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
+        } else {
+            protocolCandidates = new String[]{"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"};
+        }
+        for (String protocol : protocolCandidates) {
             // Make sure at least one connection for this protocol succeeds (if expected to)
             boolean connectionSucceeded = false;
 
@@ -493,7 +505,12 @@ public class JolokiaServerTest {
                     KeyStore ks = KeyStore.getInstance("PKCS12");
                     InputStream fis = getClass().getResourceAsStream("/certs/" + pClientCert + "/cert.p12");
                     ks.load(fis, "1234".toCharArray());
-                    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                    KeyManagerFactory kmf;
+                    if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
+                        kmf = KeyManagerFactory.getInstance("IBMX509");
+                    } else {
+                        kmf = KeyManagerFactory.getInstance("SunX509");
+                    }
                     kmf.init(ks, "1234".toCharArray());
                     kms = kmf.getKeyManagers() ;
                 }

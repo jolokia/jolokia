@@ -7,6 +7,7 @@ package org.jolokia.service.discovery;
 import java.io.IOException;
 import java.net.*;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.NetworkUtil;
 
@@ -44,7 +45,7 @@ class MulticastSocketListenerThread extends Thread {
         // For debugging, uncomment:
         //logHandler = new LogHandler.StdoutLogHandler(true);
 
-        socket = MulticastUtil.newMulticastSocket(address,pContext);
+        socket = MulticastUtil.newMulticastSocket(address, pContext);
         pContext.debug(address + "<-- Listening for queries");
         setDaemon(true);
     }

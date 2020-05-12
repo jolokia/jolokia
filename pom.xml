@@ -62,8 +62,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
 
@@ -619,7 +619,7 @@
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.0</version>
+        <version>4.2</version>
         <scope>test</scope>
       </dependency>
 
@@ -788,25 +788,6 @@
             </executions>
           </plugin>
         </plugins>
-      </build>
-    </profile>
-    <!-- Profile for running only Java 5 compliant tests-->
-    <profile>
-      <id>java5</id>
-      <activation>
-        <jdk>1.5</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <configuration>
-                <excludedGroups>java6</excludedGroups>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
       </build>
     </profile>
     <profile>

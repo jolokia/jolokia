@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2009-2013 Roland Huss
+  ~ Copyright 2009-2019 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -32,6 +32,92 @@
     <release version="2.0.0-M2" description="Release 2.0.0-M2" date="2016-07-07">
       <action dev="roland" type="add" date="2015-01-06">
         Second milestone, rebased with latest 1.x branch
+      </action>
+    </release>
+
+    <release version="1.6.3" description="Release 1.6.3" date="">
+      <action dev="graben" type="add" issue="421">
+        Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
+      </action>
+      <action dev="coheigea" type="fix" issue="427">
+        Configure TLS settings per-connection and not globally
+      </action>
+    </release>
+    <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
+      <action dev="dsimansk" type="update" issue="403">
+        Add support to load multiple CA certs from store
+      </action>
+    </release>
+    <release version="1.6.1" description="Release 1.6.1" date="2019-05-01">
+      <action dev="nevenr" type="add" issue="344">
+        Add configuration option authMatch which explains how to combine multiple authenticators if MultiAuthenticator is used.
+      </action>
+      <action dev="nevenr" type="add" issue="334">
+        Add BigInteger simplifier. BigInteger becomes a JSON object with the key "bigint" containing the big integer value as String.
+      </action>
+      <action dev="nevenr" type="add" issue="367">
+        Add configuration option threadNamePrefix which will be used by jolokia http server executor
+        Default: "jolokia-"
+      </action>
+      <action dev="rhuss" type="fix">
+        When strict-checking is enabled for a CORS policy, then reject a request also when no Origin or Referer header is given.
+      </action>
+    </release>
+    <release version="1.6.0" description="Release 1.6.0" date="2018-06-25">
+      <action dev="rhuss" type="update">
+        Enable authentication with role "jolokia" for the war agent by default.
+      </action>
+      <action dev="rhuss" type="add">
+        Add new "jolokia-unsecured.war" which unsecured as "jolokia.war" in version 1.5.0 and below.
+      </action>
+    </release>
+    <release version="1.5.0" description="Release 1.5.0" date="2018-02-08">
+      <action dev="rhuss" type="fix">
+        Restrict allowed mime types to "text/plain" and "application/json" for the response.
+      </action>
+      <action dev="rhuss" type="add">
+        Because of security reasion, the JSR-160 proxy mode is disabled by default int the Java EE agent.
+        It can be enabled via web.xml configuration, a system property or an environment variable. In addition
+        it is now possible to configure a whitelist with patterns which are allowed as targets in the
+        proxy mode. See the reference manual section on "Proxy mode" for details.
+      </action>
+      <action dev="ryandgoulding" type="add" issue="358">
+        New authMode "service-any" and "service-all" to allow to lookup an
+        org.jolokia.osgi.security.Authenticator used for authentication. Note that this class has
+        been changed from an abstract base class to an interface for ease of customization.
+      </action>
+    </release>
+    <release version="1.4.0" description="Release 1.4.0" date="2018-01-23">
+      <action dev="rhuss" type="fix" issue="366">
+        Removed ChunkedWriter to avoid references and inclusion of parts of StreamEncoder
+        which is a Java internal class
+      </action>
+      <action dev="seryckd-jda" type="fix" issue="338">
+        Fix incorrect CORS header
+      </action>
+      <action dev="bcubk" type="fix" issue="309">
+        Support "max connection per route" setting for J4pClientBuilder to prevent a ConnectionPoolTimeoutException
+      </action>
+      <action dev="pgier" type="update" issue="323">
+        Update to httpcore 4.4.7 for the Java client
+      </action>
+      <action dev="xiu" type="add" issue="307">
+        Add debian package generation to the JVM agent
+      </action>
+      <action dev="rhuss" type="add">
+        Print all configuration value for the /version  command: When not set explicitly then print the
+        default value (if any).
+      </action>
+      <action dev="danpfe" type="add" issue="343">
+        Modifications to make JVM Agent work on IBM JVM 8.
+      </action>
+    </release>
+    <release version="1.3.7" description="Release 1.3.7" date="2017-07-06">
+      <action dev="rhuss" type="fix" date="2017-05-17" issue="198">
+        Support attaching to running JVM even when -XX:+PerfDisableSharedMem is given
+      </action>
+      <action dev="robstryker" type="fix" date="2017-05-31" issue="326">
+        Better error message for Java client
       </action>
     </release>
     <release version="1.3.6" description="Release 1.3.6" date="2017-04-03">

@@ -21,8 +21,8 @@ import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
- * Detector for the Geronimo JEE Server
- * 
+ * Detector for the Geronimo Java EE Server
+ *
  * @author roland
  * @since 05.12.10
  */

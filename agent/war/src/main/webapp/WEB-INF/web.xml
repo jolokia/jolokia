@@ -50,7 +50,7 @@
     </init-param>
     <init-param>
       <description>
-        Maximum number of entries to keed in the local
+        Maximum number of entries to keep in the local
         debug history if switched on. Can be change via
         the config MBean during runtime.
       </description>
@@ -155,19 +155,18 @@
     <load-on-startup>1</load-on-startup>
     <async-supported>true</async-supported>
   </servlet>
-  
+
   <servlet-mapping>
     <servlet-name>jolokia-agent</servlet-name>
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
   <!--
-  Example Configuration for switching on BASIC security. The role 'Jolokia'
-  must be mapped to real users with passwords on the Appserver side:
-
+  Security enabled by default. Please update to match you specific security setup (e.g. the auth-method)
+  -->
   <login-config>
     <auth-method>BASIC</auth-method>
-    <realm-name>Jolokia</realm-name>
+    <realm-name>jolokia</realm-name>
   </login-config>
 
   <security-constraint>
@@ -176,14 +175,13 @@
       <url-pattern>/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>Jolokia</role-name>
+      <role-name>jolokia</role-name>
     </auth-constraint>
   </security-constraint>
 
   <security-role>
-    <role-name>Jolokia</role-name>
+    <role-name>jolokia</role-name>
   </security-role>
-  -->
 </web-app>
 
 <!--

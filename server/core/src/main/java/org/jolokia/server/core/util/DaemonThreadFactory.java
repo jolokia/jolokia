@@ -10,9 +10,21 @@ import java.util.concurrent.ThreadFactory;
  */
 public class DaemonThreadFactory implements ThreadFactory {
 
+    private int threadInitNumber;
+    private final String threadNamePrefix;
+
+    public DaemonThreadFactory(String threadNamePrefix) {
+        this.threadNamePrefix = threadNamePrefix;
+    }
+
+    private synchronized int nextThreadNum() {
+        return threadInitNumber++;
+    }
+
+
     /** {@inheritDoc} */
     public Thread newThread(Runnable r) {
-        Thread t = new Thread(r);
+        Thread t = new Thread(r, threadNamePrefix + nextThreadNum());
         t.setDaemon(true);
         return t;
     }

@@ -5,6 +5,8 @@
 [![Coverage](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=coverage)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
 [![Technical Debt](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
 [![Gitter](https://badges.gitter.im/Join+Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/rhuss/jolokia.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rhuss/jolokia/context:java)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/rhuss/jolokia.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rhuss/jolokia/alerts)
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
 different from JSR-160 connectors in that it is an agent-based
@@ -13,7 +15,7 @@ REST-stylish way.
 
 Multiple agents are provided for different environments:
 
-* **WAR Agent** for deployment as web application in a JEE Server. 
+* **WAR Agent** for deployment as web application in a Java EE Server. 
 * **OSGi Agent** for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).
@@ -147,7 +149,7 @@ If you set your `user.name` and `user.email` git configs, you can sign your
 commit automatically with `git commit -s`.
 
 If you fix some documentation (typos, formatting, ...) you are not required to sign-off. 
-It is possible to sign you commits in retrospective, [too](http://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
+It is possible to sign your commits in retrospective, [too](http://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
 if you forgot it the first time. 
 
  [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"

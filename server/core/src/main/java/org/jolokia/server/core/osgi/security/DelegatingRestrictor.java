@@ -53,21 +53,16 @@ public class DelegatingRestrictor implements Restrictor {
         try {
             ServiceReference[] serviceRefs = bundleContext.getServiceReferences(Restrictor.class.getName(),null);
             if (serviceRefs != null) {
+                boolean ret = true;
                 boolean found = false;
                 for (ServiceReference serviceRef : serviceRefs) {
                     Restrictor restrictor = (Restrictor) bundleContext.getService(serviceRef);
-                    try {
-                        if (restrictor != null) {
-                            if (!pCheck.check(restrictor,args)) {
-                                return false;
-                            }
-                            found = true;
-                        }
-                    } finally {
-                        bundleContext.ungetService(serviceRef);
+                    if (restrictor != null) {
+                        ret = ret && pCheck.check(restrictor,args);
+                        found = true;
                     }
                 }
-                return found;
+                return found && ret;
             } else {
                 return false;
             }
@@ -162,7 +157,7 @@ public class DelegatingRestrictor implements Restrictor {
 
     /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return checkRestrictorService(REMOTE_CHECK, pHostOrAddress);
+        return checkRestrictorService(REMOTE_CHECK,pHostOrAddress);
     }
 
 
@@ -176,8 +171,8 @@ public class DelegatingRestrictor implements Restrictor {
     };
 
     /** {@inheritDoc} */
-    public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
-        return checkRestrictorService(CORS_CHECK,pOrigin,pIsStrictCheck);
+    public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
+        return checkRestrictorService(CORS_CHECK, pOrigin, pOnlyWhenStrictCheckingIsEnabled);
     }
 
     // =======================================================================================================

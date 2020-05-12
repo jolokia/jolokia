@@ -18,7 +18,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-  
+
   <properties>
     <title>Bulk Requests</title>
     <author email="roland@jolokia.org">Roland Huss</author>
@@ -35,13 +35,13 @@
         database connection pool utilisation, HTTP request response
         for various web application are examples for valuable metrics
         to monitor. Typically, 10-20 monitored attributes are a good
-        setup for a single JEE server.
+        setup for a single Java EE server.
       </p>
       <p>
         With the traditional approach using JSR-160 JMX connectors,
         a connection is opened, and for each attribute queried a
         separate RMI (or optional JMXMP) request needs to be send to
-        the server resulting in several client-server turnarounds. 
+        the server resulting in several client-server turnarounds.
         Wouldn't it be nice to use a single request for querying all
         those parameters ?
       </p>
@@ -78,7 +78,7 @@
         <pre class="prettyprint"><![CDATA[
    [{ "operation":"gc",
       "mbean":"java.lang:type=Memory",
-      "type":"EXEC" 
+      "type":"EXEC"
     },
     {
       "mbean":"java.lang:type=Memory",
@@ -87,7 +87,7 @@
     }]]]></pre>
         <p>
           The answer returned is also represented in JSON and looks like
-          this:      
+          this:
         </p>
         <pre class="prettyprint"><![CDATA[
    [{ "timestamp":1285442161,
@@ -107,13 +107,13 @@
                 "committed":"85000192",
                 "init":"0",
                 "used":"3660720" }
-     }]]]></pre>      
+     }]]]></pre>
         <p>
           Another example how bulk requests can be used is the <a
-          href="http://www.nagios.org/">Nagios</a> 
+          href="http://www.nagios.org/">Nagios</a>
           Plugin <a
           href="http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl">check_jmx4perl</a>,
-          which uses bulk requests 
+          which uses bulk requests
           for its <em>multi check</em> features, which allows for a
           single Nagios check monitor as many JMX attributes and
           operations as required.
@@ -133,6 +133,6 @@
         </ul>
       </subsection>
     </section>
-  </body>    
+  </body>
 </document>
 

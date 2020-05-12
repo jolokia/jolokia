@@ -16,32 +16,50 @@ package org.jolokia.server.core.osgi;
  *  limitations under the License.
  */
 
-import java.lang.reflect.*;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.server.core.config.ConfigKey;
-import org.osgi.framework.*;
+import org.jolokia.server.core.osgi.security.Authenticator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.http.*;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.service.log.LogService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.find;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reportMatcher;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -50,8 +68,10 @@ import static org.testng.Assert.assertNotNull;
  */
 public class OsgiAgentActivatorTest {
 
-    public static final String HTTP_SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
-    public static final String CONFIG_SERVICE_FILTER = "(objectClass=org.osgi.service.cm.ConfigurationAdmin)";
+    private static final String HTTP_SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
+    private static final String CONFIG_SERVICE_FILTER = "(objectClass=org.osgi.service.cm.ConfigurationAdmin)";
+    private static final String AUTHENTICATOR_SERVICE_FILTER =
+        "(objectClass=" + Authenticator.class.getName() + ")";
 
     private BundleContext context;
     private OsgiAgentActivator activator;
@@ -65,6 +85,8 @@ public class OsgiAgentActivatorTest {
 
     private ServiceReference configAdminRef;
     private ServiceListener configAdminServiceListener;
+
+    private ServiceListener authenticationServiceListener;
 
     @BeforeMethod
     public void setup() {
@@ -190,6 +212,40 @@ public class OsgiAgentActivatorTest {
         verify(httpService);
     }
 
+    @Test
+    public void testServiceAuthModeFromConfigAdmin() throws Exception {
+        final Dictionary<String, String> dict = new Hashtable<String, String>();
+        dict.put("org.jolokia.authMode", "service-all");
+        startActivator(true, AUTHENTICATOR_SERVICE_FILTER, dict);
+        startupHttpServiceWithConfigAdminProps(true);
+        unregisterJolokiaServlet();
+        stopActivator(true);
+        verify(httpService);
+    }
+
+    @Test
+    public void testNoServiceAvailable() throws Exception {
+        final HttpServletRequest request = createMock(HttpServletRequest.class);
+        final HttpServletResponse response = createNiceMock(HttpServletResponse.class);
+        final Dictionary<String, String> dict = new Hashtable<String, String>();
+        dict.put("org.jolokia.authMode", "service-all");
+        startActivator(true, AUTHENTICATOR_SERVICE_FILTER, dict);
+        startupHttpServiceWithConfigAdminProps(true);
+
+        expect(request.getHeader("Authorization")).andReturn("Basic cm9sYW5kOnMhY3IhdA==");
+        request.setAttribute(HttpContext.AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
+        request.setAttribute(HttpContext.REMOTE_USER, "roland");
+        replay(request, response);
+
+        // w/o an Authenticator Service registered, requests should always be denied.
+
+        final HttpContext httpContext = activator.getHttpContext();
+        assertFalse(httpContext.handleSecurity(request, response));
+
+        unregisterJolokiaServlet();
+        stopActivator(true);
+    }
+
     // ========================================================================================================
 
     private void prepareErrorLog(Exception exp,String msg) {
@@ -247,6 +303,7 @@ public class OsgiAgentActivatorTest {
                         i++ % 2 == 0 ? key.getDefaultValue() : null);
             }
         }
+
         httpService.registerServlet(eq(ConfigKey.AGENT_CONTEXT.getDefaultValue()),
                                     isA(OsgiAgentServlet.class),
                                     EasyMock.<Dictionary>anyObject(),
@@ -260,20 +317,37 @@ public class OsgiAgentActivatorTest {
         httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, httpServiceReference));
     }
 
-    private void startupHttpServiceWithConfigAdminProps() throws ServletException, NamespaceException {
+    private void startupHttpServiceWithConfigAdminProps()
+            throws ServletException, NamespaceException, InvalidSyntaxException {
+
+        this.startupHttpServiceWithConfigAdminProps(false);
+    }
+
+    private void startupHttpServiceWithConfigAdminProps(boolean serviceAuthentication)
+            throws ServletException, NamespaceException, InvalidSyntaxException {
+
         httpServiceReference = createMock(ServiceReference.class);
         httpService = createMock(HttpService.class);
 
         expect(context.getService(httpServiceReference)).andReturn(httpService);
         int i = 0;
         for (ConfigKey key : ConfigKey.values()) {
-            if (key == ConfigKey.USER || key == ConfigKey.PASSWORD || key == ConfigKey.AUTH_MODE) {
+            if (!serviceAuthentication && (key == ConfigKey.USER || key == ConfigKey.PASSWORD || key == ConfigKey.AUTH_MODE)) {
+                //ignore these, they will be provided from config admin service
+            } else if (serviceAuthentication && (key == ConfigKey.AUTH_MODE)) {
                 //ignore these, they will be provided from config admin service
             } else {
                 expect(context.getProperty("org.jolokia." + key.getKeyValue())).andStubReturn(
                         i++ % 2 == 0 ? key.getDefaultValue() : null);
             }
         }
+
+        final Filter filter = createFilterMockWithToString(AUTHENTICATOR_SERVICE_FILTER, null);
+        expect(context.createFilter(filter.toString())).andStubReturn(filter);
+        expect(context.getServiceReferences(Authenticator.class.getName(), null)).andStubReturn(null);
+        context.addServiceListener(authenticationServiceListener(), eq(filter.toString()));
+
+
         httpService.registerServlet(eq(ConfigKey.AGENT_CONTEXT.getDefaultValue()),
                 isA(OsgiAgentServlet.class),
                 EasyMock.<Dictionary>anyObject(),
@@ -299,6 +373,7 @@ public class OsgiAgentActivatorTest {
 
         expect(context.ungetService(anyObject(ServiceReference.class))).andReturn(true).anyTimes();
         context.removeServiceListener(configAdminServiceListener);
+        context.removeServiceListener(authenticationServiceListener);
 
         replay(context);
         if (withHttpListener) {
@@ -357,7 +432,11 @@ public class OsgiAgentActivatorTest {
     // Easymock work around given the fact you can not mock toString() using easymock (because it easymock uses toString()
     // of mocked objects internally)
     private Filter createFilterMockWithToString(final String filter, final String additionalFilter) {
-        return (Filter) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
+        return createFilterMockWithToString(this.getClass(), filter, additionalFilter);
+    }
+
+    private static Filter createFilterMockWithToString(final Class clazz, final String filter, final String additionalFilter) {
+        return (Filter) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (method.getName().equals("toString")) {
                     if (additionalFilter == null) {
@@ -370,6 +449,7 @@ public class OsgiAgentActivatorTest {
             }
         });
     }
+
 
     private ServiceListener httpRememberListener() {
         reportMatcher(new IArgumentMatcher() {
@@ -392,6 +472,19 @@ public class OsgiAgentActivatorTest {
             }
 
             public void appendTo(StringBuffer buffer) {
+            }
+        });
+        return null;
+    }
+
+    private ServiceListener authenticationServiceListener() {
+        reportMatcher(new IArgumentMatcher() {
+            public boolean matches(Object argument) {
+                authenticationServiceListener = (ServiceListener) argument;
+                return true;
+            }
+
+            public void appendTo(StringBuffer stringBuffer) {
             }
         });
         return null;

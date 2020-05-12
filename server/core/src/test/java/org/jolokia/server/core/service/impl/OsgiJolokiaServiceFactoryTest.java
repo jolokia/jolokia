@@ -33,7 +33,7 @@ public class OsgiJolokiaServiceFactoryTest {
 
     private void addServiceLookup(Class pServiceClass) throws InvalidSyntaxException {
         expect(bundleContext.createFilter("(objectClass=" + pServiceClass.getName()+ ")"))
-                .andStubReturn(createMock(Filter.class));
+                .andStubReturn((Filter) createMock(Filter.class));
         bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=" + pServiceClass.getName() + ")"));
         expectLastCall().asStub();
         expect(bundleContext.getServiceReferences(pServiceClass.getName(), null)).andStubReturn(null);

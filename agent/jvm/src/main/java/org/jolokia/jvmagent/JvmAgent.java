@@ -67,7 +67,7 @@ public final class JvmAgent {
 
     /**
      * Entry point for the agent, using command line attach
-     * (that is via -javagent command line argument)
+     * (that is via -javaagent command line argument)
      *
      * @param agentArgs arguments as given on the command line
      */
@@ -99,9 +99,10 @@ public final class JvmAgent {
                     awaitServerInitialization(instrumentation);
 
                     server = new JolokiaServer(pConfig);
-
-                    server.start(pLazy);
-                    setStateMarker();
+                    synchronized (server) {
+                        server.start(pLazy);
+                        setStateMarker();
+                    }
 
                     System.out.println("Jolokia: Agent started with URL " + server.getUrl());
                 } catch (RuntimeException exp) {
@@ -128,13 +129,17 @@ public final class JvmAgent {
         }
     }
 
-
     private static void stopAgent() {
         try {
-            server.stop();
-            clearStateMarker();
+            if (server != null) {
+                synchronized (server) {
+                    server.stop();
+                    clearStateMarker();
+                }
+            }
         } catch (RuntimeException exp) {
             System.err.println("Could not stop Jolokia agent: " + exp);
+            exp.printStackTrace();
         }
     }
 

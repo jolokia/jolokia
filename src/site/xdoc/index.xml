@@ -63,7 +63,7 @@
         </li>
         <li>
           <a href="agent.html">Agents</a> exist for many
-          platforms (JEE, OSGi, Mule, JVM).
+          platforms (Java EE, OSGi, Mule, JVM).
         </li>
         <li>
           <a href="support.html">Support</a> is available through various channels.
@@ -75,6 +75,144 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+      <subsection name="1.6.2 with support for multiple CAs">
+        <div class="news-date">2019-06-20</div>
+        <p>
+          This summer version 1.6.2 comes with support for multiple CAs when running the Jolokia agent in SSL mode. This is especially useful when used together with newer versions of OpenShift.
+        </p>
+      </subsection>
+      <subsection name="Minor updates coming with 1.6.1">
+        <div class="news-date">2019-05-01</div>
+        <p>
+          1.6.1 is coming quite late although many of its features are available since quite some time. Apologies for that, it was a busy time for me (but not so much for Jolokia).
+        </p>
+        <p>
+          This release contains one relevant security check which hardens the CORS handling a bit further. Additional some minor goodies are added, please check the <a href="changes-report.html">changelog</a> for details.
+        </p>
+        <p>
+          So, what's next? Jolokia is currently not close to the top of my priority list at the moment. It won't be, and I will work on security fixes promptly when reported. However, the most important update to Java 9 as well the release of Jolokia 2.0 with JMX notification support is currently put on ice.
+        </p>
+        <p>
+          Said that it's currently a perfect moment to jump in to boost Jolokia development. We've got the <a href="https://github.com/jolokia/">jolokia</a> donated, so one of the next larger moves would move this personal pet project to a more solid foundation. If you are interested in helping shaping Jolokia 2.0 which is then ready for Java 9 and support for monitoring platforms like Prometheus, then let's talk.
+        </p>
+        <p>
+          In any case, enjoy the summer. Happy hacking ;-)
+        </p>
+      </subsection>
+      <subsection name="WAR-Agent secured by default in 1.6.0">
+        <div class="news-date">2018-06-25</div>
+        <p>
+          As <a href="https://matmannion.com/jolokiapwn/">reported</a> by security consultant Mat Mannion, there is a massive set of
+          Jolokia agents reachable unsecured from the Internet. While its obviously not recommended to run Jolokia unsecured or even expose it publicly,
+          authentication is enabled now by default in <code>jolokia.war</code>. So in order to continue to the <a href="https://jolokia.org/agent/war.html">WAR-agent</a> you have to setup
+          your servlet's container authentication to associate enabled users with the role "jolokia" (like by adding it to <code>tomcat-users.xml</code>).
+        </p>
+        <p>
+          For quick experiments or when you insist somehow to avoid authentication, then you can use the newly added <a href="http://repo1.maven.org/maven2/org/jolokia/jolokia-war-unsecured/1.6.0/">jolokia-unsecured.war</a>.
+          Of course you are still free to mangle the <code>web.xml</code> within either war agent.
+        </p>
+        <p>
+          That said, I still recommend the <a href="https://jolokia.org/reference/html/agents.html#agents-jvm">JAR agent</a> over the WAR agent for most cases, as it has much more flexible security options, included HTTPS encryption with client certificate authentication.
+          See the <a href="https://jolokia.org/reference/html/agents.html#agents-jvm">reference manual</a> for all security options.
+        </p>
+      </subsection>
+      <subsection name="Security fixes with 1.5.0">
+       <div class="news-date">2018-02-08</div>
+        <p>
+          Two security issues for Jolokia have recently been discovered by Olga Barinova of
+          <a href="https://www.gdssecurity.com/">Gotham Digital Science</a>:
+        </p>
+        <ul>
+          <li>The Jolokia <a href="https://jolokia.org/reference/html/proxy.html">JMX proxy mode</a> is vulnerable
+            to remote code execution in a specific scenario. Note that this
+          only affects the <a href="https://jolokia.org/reference/html/agents.html#agents-war">WAR agent</a>, which has the proxy mode enabled by default.
+            The <a href="https://jolokia.org/reference/html/agents.html#agents-jvm">JVM agent</a> is not affected as it does not support the JMX proxy mode</li>
+          <li>An XSS attack can be performed by manipulating the <code>mimeType</code> query parameter to coerce the Web browser to
+            display the JSON response directly. However, we consider the impact quite low, as Jolokia responses are <em>not</em>
+            shown directly in the browser but used by a JavaScript library, which has to perform its own escaping of user
+            provided response data. Jolokia 1.5.0 fixes this hole nevertheless.
+          </li>
+        </ul>
+        <p>
+          Jolokia 1.5.0 now fixes these issue in the following way:
+        </p>
+        <p>
+          As a first measure, the JMX proxy mode is <strong>disabled by default</strong> for the WAR agent.
+          You can switch it on if you need as usual by adding the relevant configuration to <code>web.xml</code>.
+          But you can now also enable the proxy mode without touching <code>jolokia.war</code>:
+          By setting a Java system property or an environment variable, the proxy mode
+          can be switched on again, too.
+          These parameters can be easily added to the startup script of your servlet container.
+        </p>
+        <p>
+          Also, you can now configure a whitelist with allowed patterns for the JMX service URL used as
+          the target URL of the proxy.
+          These patterns are supposed to be contained in a plain text file, line by line.
+          This file then can be referenced by a system property, an env variable or directly configured in <code>web.xml</code>
+          in the war file.
+        </p>
+        <p>
+          For the configuration options of the Jolokia proxy please refer to
+          the <a href="https://jolokia.org/reference/html/proxy.html">Proxy Mode</a> section of the reference manual.
+        </p>
+        <p>
+          Finally, we always recommend using a dedicated server when using the JMX proxy mode, e.g. a Jetty or Tomcat servlet container.
+          These servers should be protected by requiring some authentication. The authentication setup is specific to the
+          Java EE server but you have to edit the Jolokia WAR agent to enable authentication as described in the <a href="https://jolokia.org/reference/html/agents.html#agent-war-security">Security Setup</a> chapter in the reference manual.
+        </p>
+        <p>
+          For closing the XSS vulnerability, nothing extra needs to be configured.
+          Jolokia now just verifies that only <code>text/plain</code> and <code>application/json</code> is allowed as the
+          value of the query parameter <code>mimeType</code> and falls back to plain <code>text/plain</code> if something
+          different is provided.
+        </p>
+        <p>
+          It is <strong>highly recommended</strong> to upgrade to Jolokia 1.5.0 if you are relying on the <strong>JMX JSR-160 proxy</strong> feature and to
+          revisit your security setup around the proxy server.
+        </p>
+        <p>
+          Big Kudos go out to GDS (and especially to Olga Barinova and Martin Hopkins) for openly reporting these issues in deep
+          detail to me and being very cooperative in helping to fix these. Also to R3, for whom GDS was working when these issues
+          were discovered, who encouraged GDS to report them. Highly appreciated!
+        </p>
+      </subsection>
+      <subsection name="2018 Kick-Off with Jolokia 1.4.0">
+        <div class="news-date">2018-01-23</div>
+        <p>
+          Jolokia 1.4.0 is the first release in 2018 (happy new year to everyone btw ;-) and brings some small new
+          features and fixes (you find the full list in the <a href="changes-report.html">changelog</a>)
+        </p>
+        <ul>
+          <li>CORS header 'Access-Control-Max-Age' fixed</li>
+          <li>Update of HTTP client libraries for the Java client</li>
+          <li>Add debian package generation for the agent</li>
+          <li>JVM Agent supports now IBM JVM 8</li>
+          <li>
+            Removed internal class <code>ChunkedWriter</code> which accidentally includes parts of the internal Java class
+            <code>StreamEncoder</code>
+          </li>
+        </ul>
+        <p>
+          Even when the minor bug fixes or feature changes might not make you considering an upgrade, the last point
+          is important. The Jolokia version from 1.3.4 to 1.3.7 included a class <code>ChunkedWriter</code> which in
+          turn included some parts of the Java internal class <code>StreamEncoder</code>, which is released under the
+          GPL. As you might know Jolokia is released under the APL which is not compatible to the GPL. The affected
+          class has been removed so everything is clean again (to the best of my knowledge).
+        </p>
+        <p>
+          Sorry for any inconvenience. If you any questions to this version or implication, please create an
+          issue at the <a href="https://github.com/rhuss/jolokia">GitHub</a> project.
+        </p>
+      </subsection>
+      <subsection name="Small 1.3.7">
+        <div class="news-date">2017-07-06</div>
+        <p>
+          As a small sign of life, here's is 1.3.7 with some very minor fixes for the Java client and the JVM agent.
+        </p>
+        <p>
+          Not much more to tell for now. Enjoy summer ;-) !
+        </p>
+      </subsection>
       <subsection name="Let's kickoff 2017 with 1.3.6">
         <div class="news-date">2017-04-03</div>
         <p>
@@ -491,11 +629,11 @@ java -javaagent:jolokia.jar=\
           request</a> from <a href="https://github.com/mplonka">Marcin
           Płonka</a> (Thanks a lot and sorry for the long, long delay,
           BTW). It's all about simplifying access to JSR-77 enabled
-          JEE-Servers. You should know that <a
+          Java EE-Servers. You should know that <a
           href="https://jcp.org/en/jsr/detail?id=77">JSR 77: J2EE
           Management</a> was a cool attempt to standardize naming and
-          JMX exposed metrics for JEE. Unfortunately it was abandoned,
-          but still lives in quite a bunch of JEE servers. Not at its
+          JMX exposed metrics for Java EE. Unfortunately it was abandoned,
+          but still lives in quite a bunch of Java EE servers. Not at its
           full beauty, but still valuable enough to be
           supported. Astonishingly, WebSphere, even the latest 8.5
           versions, has the best support for it. Using JSR-77 conform
@@ -878,4 +1016,3 @@ java -javaagent:jolokia.jar=\
 </body>
 
 </document>
-

@@ -24,11 +24,8 @@ import org.testng.annotations.Test;
  * @author roland
  * @since 28.09.11
  */
-@Test(groups = "java6")
 public class AgentLauncherTest {
 
-
-    
     @Test(enabled = false)
     public void simple() {
         forbidSystemExitCall();

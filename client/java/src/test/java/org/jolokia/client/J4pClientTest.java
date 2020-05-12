@@ -28,6 +28,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.easymock.EasyMock;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
@@ -116,8 +117,8 @@ public class J4pClientTest {
         expect(client.execute(EasyMock.<HttpUriRequest>anyObject())).andReturn(response);
         expect(response.getEntity()).andReturn(entity);
         expect(entity.getContentEncoding()).andReturn(null);
+        expect(entity.isStreaming()).andReturn(false);
         expect(entity.getContent()).andThrow(new IOException());
-        entity.consumeContent();
         replay(client, entity, response);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
@@ -178,12 +179,12 @@ public class J4pClientTest {
         HttpEntity entity = createMock(HttpEntity.class);
         expect(client.execute(EasyMock.<HttpUriRequest>anyObject())).andReturn(response);
         expect(response.getEntity()).andReturn(entity);
+        expect(entity.isStreaming()).andReturn(false);
         expect(entity.getContentEncoding()).andReturn(encoding != null ? new BasicHeader("Content-Encoding",encoding) : null);
 
         final ByteArrayInputStream bis =
                 new ByteArrayInputStream(jsonResp.getBytes());
         expect(entity.getContent()).andReturn(bis);
-        entity.consumeContent();
         replay(client, response, entity);
         return client;
     }

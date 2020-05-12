@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.management.ObjectName;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.*;
 import org.json.simple.JSONArray;
 
@@ -57,12 +58,17 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
 
     /** {@inheritDoc} */
     public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
+        return lookupAgentsWithTimeoutAndMulticastAddress(1000, ConfigKey.MULTICAST_GROUP.getDefaultValue(), Integer.parseInt(ConfigKey.MULTICAST_PORT.getDefaultValue()));
+    }
+
+    /** {@inheritDoc} */
+    public List lookupAgentsWithTimeoutAndMulticastAddress(int pTimeout, String pMulticastGroup, int pMulticastPort) throws IOException {
         JolokiaContext ctx = getJolokiaContext();
         DiscoveryOutgoingMessage out =
                 new DiscoveryOutgoingMessage.Builder(QUERY)
                         .agentId(ctx.getAgentDetails().getAgentId())
                         .build();
-        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, ctx);
+        List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, pMulticastGroup, pMulticastPort, ctx);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
             ret.add(in.getAgentDetails().toJSONObject());

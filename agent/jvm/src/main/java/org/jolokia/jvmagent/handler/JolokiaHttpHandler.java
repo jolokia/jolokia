@@ -19,6 +19,8 @@ package org.jolokia.jvmagent.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.PrivilegedActionException;
@@ -44,6 +46,8 @@ import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.ChunkedWriter;
+import org.jolokia.server.core.util.IoUtil;
+import org.jolokia.server.core.util.MimeTypeUtil;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONStreamAware;
 import com.sun.net.httpserver.Headers;
@@ -157,6 +161,9 @@ public class JolokiaHttpHandler implements HttpHandler {
                                        extractOriginOrReferer(pExchange));
             String method = pExchange.getRequestMethod();
 
+            // If a callback is given, check this is a valid javascript function name
+            validateCallbackIfGiven(parsedUri);
+
             // Dispatch for the proper HTTP request method
             if ("GET".equalsIgnoreCase(method)) {
                 setHeaders(pExchange);
@@ -192,6 +199,14 @@ public class JolokiaHttpHandler implements HttpHandler {
         BackChannelHolder.remove();
     }
 
+
+
+    private void validateCallbackIfGiven(ParsedUri pUri) {
+        String callback = pUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        if (callback != null && !MimeTypeUtil.isValidCallback(callback)) {
+            throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
+        }
+    }
 
     // ========================================================================
 
@@ -231,7 +246,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     private void performCorsPreflightCheck(HttpExchange pExchange) {
         Headers requestHeaders = pExchange.getRequestHeaders();
         Map<String,String> respHeaders =
-                requestHandler.handleCorsPreflightRequest(requestHeaders.getFirst("Origin"),
+                requestHandler.handleCorsPreflightRequest(extractOriginOrReferer(pExchange),
                                                           requestHeaders.getFirst("Access-Control-Request-Headers"));
         Headers responseHeaders = pExchange.getResponseHeaders();
         for (Map.Entry<String,String> entry : respHeaders.entrySet()) {
@@ -288,33 +303,17 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStreamAware pJson) throws IOException {
-        ChunkedWriter writer = null;
-        try {
-            Headers headers = pExchange.getResponseHeaders();
-            if (pJson != null) {
-                headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
-                String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
-                pExchange.sendResponseHeaders(200, 0);
-                writer = new ChunkedWriter(pExchange.getResponseBody(), "UTF-8");
-                if (callback == null) {
-                    pJson.writeJSONString(writer);
-                } else {
-                    writer.write(callback);
-                    writer.write("(");
-                    pJson.writeJSONString(writer);
-                    writer.write(");");
-                }
-            } else {
-                headers.set("Content-Type", "text/plain");
-                pExchange.sendResponseHeaders(200,-1);
-            }
-        } finally {
-            if (writer != null) {
-                // Always close in order to finish the request.
-                // Otherwise the thread blocks.
-                writer.flush();
-                writer.close();
-            }
+        Headers headers = pExchange.getResponseHeaders();
+        if (pJson != null) {
+            headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+            pExchange.sendResponseHeaders(200, 0);
+            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), "UTF-8");
+
+            String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
+            IoUtil.streamResponseAndClose(writer, pJson, callback != null && MimeTypeUtil.isValidCallback(callback) ? callback : null);
+        } else {
+            headers.set("Content-Type", "text/plain");
+            pExchange.sendResponseHeaders(200,-1);
         }
     }
 
@@ -326,7 +325,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
                 String json = pJson.toJSONString();
                 String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
-                String content = callback == null ? json : callback + "(" + json + ");";
+                String content = callback != null && MimeTypeUtil.isValidCallback(callback) ? callback + "(" + json + ");" : json;
                 byte[] response = content.getBytes("UTF8");
                 pExchange.sendResponseHeaders(200,response.length);
                 out = pExchange.getResponseBody();
@@ -346,16 +345,10 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // Get the proper mime type according to configuration
     private String getMimeType(ParsedUri pParsedUri) {
-        if (pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue()) != null) {
-            return "text/javascript";
-        } else {
-            String mimeType = pParsedUri.getParameter(ConfigKey.MIME_TYPE.getKeyValue());
-            if (mimeType != null) {
-                return mimeType;
-            }
-            mimeType = jolokiaContext.getConfig(ConfigKey.MIME_TYPE);
-            return mimeType != null ? mimeType : ConfigKey.MIME_TYPE.getDefaultValue();
-        }
+        return MimeTypeUtil.getResponseMimeType(
+            pParsedUri.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
+            jolokiaContext.getConfig(ConfigKey.MIME_TYPE),
+            pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue()));
     }
 
 

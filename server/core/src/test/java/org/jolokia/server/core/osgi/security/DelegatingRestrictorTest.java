@@ -133,7 +133,7 @@ public class DelegatingRestrictorTest {
             return remote;
         }
 
-        public boolean isOriginAllowed(String pOrigin, boolean pIsStrictCheck) {
+        public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
             return cors;
         }
     }

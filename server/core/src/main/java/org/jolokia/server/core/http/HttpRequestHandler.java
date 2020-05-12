@@ -152,16 +152,16 @@ public class HttpRequestHandler {
      */
     public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
         Map<String,String> ret = new HashMap<String, String>();
-        if (pOrigin != null && jolokiaCtx.isOriginAllowed(pOrigin,false)) {
+        if (jolokiaCtx.isOriginAllowed(pOrigin,false)) {
             // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
-            ret.put("Access-Control-Allow-Origin","null".equals(pOrigin) ? "*" : pOrigin);
+            ret.put("Access-Control-Allow-Origin",pOrigin == null || "null".equals(pOrigin) ? "*" : pOrigin);
             if (pRequestHeaders != null) {
                 ret.put("Access-Control-Allow-Headers",pRequestHeaders);
             }
             // Fix for CORS with authentication (#104)
             ret.put("Access-Control-Allow-Credentials","true");
-            // Allow for one year. Changes in access.xml are reflected directly in the  cors request itself
-            ret.put("Access-Control-Allow-Max-Age","" + 3600 * 24 * 365);
+            // Allow for one year. Changes in access.xml are reflected directly in the CORS request itself
+            ret.put("Access-Control-Max-Age","" + 3600 * 24 * 365);
         }
         return ret;
     }
@@ -284,7 +284,7 @@ public class HttpRequestHandler {
         if (!jolokiaCtx.isRemoteAccessAllowed(pHost != null ? new String[] { pHost, pAddress } : new String[] { pAddress })) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
-        if (pOrigin != null && !jolokiaCtx.isOriginAllowed(pOrigin,true)) {
+        if (!jolokiaCtx.isOriginAllowed(pOrigin,true)) {
             throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
         }
     }

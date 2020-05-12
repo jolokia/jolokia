@@ -61,20 +61,28 @@ public class VirtualMachineHandler {
             return null;
         }
         Class vmClass = lookupVirtualMachineClass();
+        String pid = null;
         try {
             Method method = vmClass.getMethod("attach",String.class);
-            return method.invoke(null, getProcessId(options));
+            pid = getProcessId(options);
+            return method.invoke(null, pid);
         } catch (NoSuchMethodException e) {
             throw new ProcessingException("Internal: No method 'attach' found on " + vmClass,e,options);
         } catch (InvocationTargetException e) {
-            throw new ProcessingException("InvocationTarget " + vmClass,e,options);
+            throw new ProcessingException(getPidErrorMesssage(pid,"InvocationTarget",vmClass),e,options);
         } catch (IllegalAccessException e) {
-            throw new ProcessingException("IllegalAccess to " + vmClass,e,options);
+            throw new ProcessingException(getPidErrorMesssage(pid, "IllegalAccessException", vmClass),e,options);
         } catch (IllegalArgumentException e) {
             throw new ProcessingException("Illegal Argument",e,options);
         }
     }
 
+    private String getPidErrorMesssage(String pid, String label, Class vmClass) {
+        return pid != null ?
+            String.format("Cannot attach to process-ID %s (%s %s).\nSee --help for possible reasons.",
+                          pid, label, vmClass.getName()) :
+            String.format("%s %s",label, vmClass.getName());
+    }
 
     /**
      * Detach from the virtual machine
@@ -86,6 +94,7 @@ public class VirtualMachineHandler {
             if (pVm != null) {
                 Class clazz = pVm.getClass();
                 Method method = clazz.getMethod("detach");
+                method.setAccessible(true); // on J9 you get IllegalAccessException otherwise.
                 method.invoke(pVm);
             }
         } catch (InvocationTargetException e) {
@@ -166,26 +175,12 @@ public class VirtualMachineHandler {
      */
     private String getProcessId(OptionsAndArgs pOpts) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         if (pOpts.getPid() != null) {
-            String pid = pOpts.getPid();
-            if (!isAttachable(pid)) {
-                throw new IllegalArgumentException("Cannot attach to process-ID " + pid + ".\nSee --help for possible reasons.");
-            }
-            return pid;
+            return pOpts.getPid();
         } else if (pOpts.getProcessPattern() != null) {
             return findProcess(pOpts.getProcessPattern()).getId();
         } else {
             throw new IllegalArgumentException("No process ID and no process name pattern given");
         }
-    }
-
-    // Check whether the given pid is in the list of attachable JVMs
-    private boolean isAttachable(String pPid) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        for (ProcessDescription desc : listProcesses()) {
-            if (desc.getId().equals(pPid)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Try to find out own process id. This is platform dependent and works on Sun/Oracl/OpeneJDKs like the
@@ -204,7 +199,8 @@ public class VirtualMachineHandler {
         } catch (ClassNotFoundException exp) {
             throw new ProcessingException(
                     "Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
-                    "essential classes for attaching to a running JVM could locate the necessary jar file.\n" +
+                    "essential classes (i.e. com.sun.tools.attach.VirtualMachine) for attaching to a running JVM\n" +
+                    " ould not locate the necessary jar file.\n" +
                     "\n" +
                     "Please call this launcher with a qualified classpath on the command line like\n" +
                     "\n" +

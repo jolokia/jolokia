@@ -16,13 +16,13 @@
   -->
 
 <section id="agents-war">
-  <title>JEE Agent (WAR)</title>
+  <title>Java EE Agent (WAR)</title>
 
   <section id="war-agent-installation">
     <title>Installation and Configuration</title>
     <para>
       The WAR agent is the most popular variant, and can be deployed
-      in a servlet container just like any other JEE web application.<sidebar>
+      in a servlet container just like any other Java EE web application.<sidebar>
       <title>Tomcat example</title>
       A simple example for deploying the agent on Tomcat can be found
       in the Jolokia <ulink
@@ -70,7 +70,7 @@
   </variablelist>
   <para>
     The configuration options <literal>discoveryEnabled</literal> and
-    <literal>discoveryAgentUrl</literal> can be provied via environent
+    <literal>discoveryAgentUrl</literal> can be provided via environment
     variables or system properties, too. See the below for details.
   </para>
   <table id="agent-war-init-params">
@@ -89,11 +89,25 @@
           to the
           <constant>LocalRequestDispatcher</constant>. Dispatchers are
           a technique used by the JSR-160 proxy to dispatch (or
-          'route') a request to a different destination.
+          'route') a request to a different destination. By default no extract dispatchers are enabled (changed in 1.5.0)
+          You can use the system property <literal>org.jolokia.jsr160ProxyEnabled</literal> or the
+          environment variable <literal>JOLOKIA_JSR160_PROXY_ENABLED</literal> to enable the the JSR-160 proxy.
+          In that case you should be sure that you enable authentication for the web application to protect access
+          to the proxy.
         </td>
         <td>
           <literal>org.jolokia.service.jsr160.Jsr160RequestHandler</literal>
           (this is the dispatcher for the JSR-160 proxy)
+        </td>
+      </tr>
+      <tr>
+        <td><constant>jsr160ProxyAllowedTargets</constant></td>
+        <td>
+          Path to a white list of patterns which are matched against possible
+          JMX service URL for incoming requests
+        </td>
+        <td>
+          <literal>/opt/jolokia/jsr160-proxy-allowed-patterns.txt</literal>
         </td>
       </tr>
       <tr>
@@ -244,7 +258,9 @@
       <tr>
         <td><constant>mimeType</constant></td>
         <td>
-          MIME to use for the JSON responses
+          MIME to use for the JSON responses. Only <constant>application/json</constant> and
+          <constant>text/plain</constant> are allowed.
+          If any other type is given, Jolokia falls back to <constant>text/plain</constant>.
         </td>
         <td>
           Default: <constant>text/plain</constant>
@@ -322,9 +338,9 @@
         <td><constant>discoveryEnabled</constant></td>
         <td>
           Is set to <literal>true</literal> then this servlet will
-          listen for multicast request (multicastgroup 239.192.48.84,
-          port 24884). By default this option is disabled in order to
-          avoid conflicts with an JEE standards (though this should't
+          listen for multicast request (multicast-group 239.192.48.84,
+          port 24884 by default, but can be changed). By default this option is disabled in order to
+          avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
           <literal>JOLOKIA_DISCOVERY</literal> or the system
@@ -342,7 +358,7 @@
           given, <constant>discoveryEnabled</constant> is set
           implicetly to true. This URL can also be provied by an
           environment variable
-          <literal>JOLOKIA_DISCOVERY_URL</literal> or the system
+          <literal>JOLOKIA_DISCOVERY_AGENT_URL</literal> or the system
           property <literal>jolokia.discoveryUrl</literal>. Within the value you can use the
           placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
           by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
@@ -351,6 +367,16 @@
         <td>
           <constant>http://10.9.11.87:8080/jolokia</constant>
         </td>
+      </tr>
+      <tr>
+        <td><constant>multicastGroup</constant></td>
+        <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <literal>JOLOKIA_MULTICAST_GROUP</literal> or a system property <literal>jolokia.multicastGroup</literal></td>
+        <td><constant>239.192.48.84</constant></td>
+      </tr>
+      <tr>
+        <td>The multicast port. This port can be also given as an environment variable <literal>JOLOKIA_MULTICAST_PORT</literal> or a system property <literal>jolokia.multicastPort</literal></td>
+        <td>The multicast port.</td>
+        <td><constant>24884</constant></td>
       </tr>
       <tr>
         <td><constant>agentId</constant></td>
@@ -373,7 +399,7 @@
           present a human readable label for this agent.
         </td>
         <td>
-          <constant>Intranet Timebooking Server</constant>
+          <constant>Monitoring agent</constant>
         </td>
       </tr>
     </table>
@@ -412,8 +438,27 @@
   <section id="agent-war-security">
     <title>Security Setup</title>
     <para>
-      In order use JEE security within the war, some extrat
-      configuration steps are required within
+      The WAR agent comes in two flavors:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><emphasis role="bold">jolokia.war</emphasis></term>
+        <listitem>
+          The standard agent which is secured with the role "jolokia". You have to setup your servlet container
+          to connect this role to the authentication.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><emphasis role="bold">jolokia-unsecured.war</emphasis></term>
+        <listitem>
+          A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
+          highly recommended that use the security enabled agent <emphasis>jolokia.war</emphasis>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para>
+      Java EE security is enabled by default by adding the required information within the
       <filename>web.xml</filename>.<sidebar>
       <title>Using jmx4perl's <literal>jolokia</literal> tool</title>
       <ulink url="http://www.jmx4perl.org">jmx4perl</ulink> comes
@@ -423,13 +468,13 @@
       <filename>jolokia.war</filename>. See <xref linkend="tools-jmx4perl"/> for
       more details.
     </sidebar>
-    There is a commented section which can serve as an example. All
+    All
     current client libraries are able to use BASIC HTTP authentication
     with user and password. The
     <literal>&lt;login-config&gt;</literal> should be set
     accordingly. The <literal>&lt;security-constraint&gt;</literal>
     specifies the URL pattern (which is in the default setup specify
-    all resources provided by the Jolokia servlet) and a role name
+    all resources provided by the Jolokia servlet) and a role name "jolokia"
     which is used to find the proper authentication credentials.  This
     role must be referenced outside the agent WAR within the servlet
     container, e.g. for Tomcat the role definition can be found in
@@ -506,7 +551,7 @@
       distinguish multiple Jolokia MBeans by adding an extra
       propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
-      the same JEE server.
+      the same Java EE server.
     </para>
   </section>
 </section>

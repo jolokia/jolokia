@@ -64,9 +64,6 @@ public class JolokiaServer {
     // Agent URL
     private String url;
 
-    // Thread factory which creates only daemon threads
-    private ThreadFactory daemonThreadFactory = new DaemonThreadFactory();
-
     // Service Manager in use
     private JolokiaServiceManager serviceManager;
 
@@ -341,6 +338,9 @@ public class JolokiaServer {
         HttpServer server = pConfig.useHttps() ?
                         createHttpsServer(socketAddress, pConfig) :
                         HttpServer.create(socketAddress, pConfig.getBacklog());
+
+        // Thread factory which creates only daemon threads
+        ThreadFactory daemonThreadFactory = new DaemonThreadFactory(pConfig.getThreadNamePrefix());
         // Prepare executor pool
         Executor executor;
         String mode = pConfig.getExecutor();
@@ -408,7 +408,7 @@ public class JolokiaServer {
         String keystoreFile = pConfig.getKeystore();
         KeyStore keystore = KeyStore.getInstance(pConfig.getKeyStoreType());
         if (keystoreFile != null) {
-            // Load everything from a keystore which must include CA (if useClientSslAuthenticatin is used) and
+            // Load everything from a keystore which must include CA (if useClientSslAuthentication is used) and
             // server cert/key
             loadKeyStoreFromFile(keystore, keystoreFile, password);
         } else {

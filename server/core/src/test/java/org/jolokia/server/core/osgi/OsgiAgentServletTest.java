@@ -127,7 +127,7 @@ public class OsgiAgentServletTest {
 
     private void addServiceLookup(Class pLogServiceClass) throws InvalidSyntaxException {
         expect(bundleContext.createFilter("(objectClass=" + pLogServiceClass.getName()+ ")"))
-                .andStubReturn(createMock(Filter.class));
+                .andStubReturn((Filter) createMock(Filter.class));
         bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=" + pLogServiceClass.getName() + ")"));
         expectLastCall().asStub();
         expect(bundleContext.getServiceReferences(pLogServiceClass.getName(),null)).andStubReturn(null);

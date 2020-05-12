@@ -1,8 +1,7 @@
 package org.jolokia.server.core.osgi.security;
 
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
+import javax.security.auth.callback.*;
+import javax.security.auth.login.*;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jolokia.server.core.config.ConfigKey;
@@ -13,7 +12,7 @@ import org.osgi.service.http.HttpContext;
  * @author roland
  * @since 26.05.14
  */
-public class JaasAuthenticator extends Authenticator {
+public class JaasAuthenticator extends BaseAuthenticator {
 
     private final String realm;
 
@@ -28,17 +27,21 @@ public class JaasAuthenticator extends Authenticator {
             String password = pAuthInfo.getPassword();
 
             final CallbackHandler handler = new UserPasswordCallbackHandler(user, password);
-            LoginContext loginContext = new LoginContext(realm, handler);
+            LoginContext loginContext = createLoginContext(realm, handler);
             loginContext.login();
 
             pRequest.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
             pRequest.setAttribute(HttpContext.REMOTE_USER, user);
-            pRequest.setAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE,loginContext.getSubject());
+            pRequest.setAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE, loginContext.getSubject());
 
             return true;
         } catch (LoginException e) {
             return false;
         }
+    }
+
+    protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
+        return new LoginContext(realm, handler);
     }
 
 }

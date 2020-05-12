@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.server.core.Version;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.NetworkUtil;
@@ -51,7 +52,11 @@ public class MulticastSocketListenerThreadTest {
                     new DiscoveryOutgoingMessage.Builder(QUERY)
                             .agentId(id)
                             .build();
-            List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new StdoutLogHandler(true));
+            List<DiscoveryIncomingMessage> discovered =
+                sendQueryAndCollectAnswers(out, 500,
+                                           ConfigKey.MULTICAST_GROUP.getDefaultValue(),
+                                           Integer.parseInt(ConfigKey.MULTICAST_PORT.getDefaultValue()),
+                                           new StdoutLogHandler(true));
             int idCount = 0;
             int urlCount = 0;
             for (DiscoveryIncomingMessage in : discovered) {

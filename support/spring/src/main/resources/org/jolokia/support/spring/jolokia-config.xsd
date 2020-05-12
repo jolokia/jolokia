@@ -241,6 +241,15 @@
       </xs:simpleType>
     </xs:attribute>
 
+    <xs:attribute name="threadNamePrefix" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Thread name prefix that executor will use while creating new thread(s)
+          (default: jolokia-)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
     <xs:attribute name="threadNr" type="xs:positiveInteger">
       <xs:annotation>
         <xs:documentation>
@@ -350,6 +359,21 @@
         <xs:restriction base="xs:string">
           <xs:enumeration value="basic"/>
           <xs:enumeration value="jaas"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+
+    <xs:attribute name="authMatch">
+      <xs:annotation>
+        <xs:documentation>
+          If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
+          Supported values: "any" at least one authenticator must match, "all" all authenticators must match.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="any"/>
+          <xs:enumeration value="all"/>
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>

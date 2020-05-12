@@ -114,7 +114,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void initWithcustomAccessRestrictor() throws ServletException {
+    public void initWithCustomAccessRestrictor() throws ServletException {
         prepareStandardInitialisation();
         servlet.destroy();
     }
@@ -234,6 +234,44 @@ public class AgentServletTest {
         servlet.doGet(request, response);
 
         assertTrue(sw.toString().contains(Version.getAgentVersion()));
+        servlet.destroy();
+    }
+
+    @Test
+    public void simpleGetWithWrongMimeType() throws ServletException, IOException {
+        checkMimeTypes("text/html", "text/plain");
+    }
+
+    @Test
+    public void simpleGetWithTextPlainMimeType() throws ServletException, IOException {
+        checkMimeTypes("text/plain", "text/plain");
+    }
+
+    @Test
+    public void simpleGetWithApplicationJsonMimeType() throws ServletException, IOException {
+        checkMimeTypes("application/json", "application/json");
+    }
+
+    private void checkMimeTypes(String given, final String expected) throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        initRequestResponseMocks(
+            getStandardRequestSetup(),
+            new Runnable() {
+                public void run() {
+                    response.setCharacterEncoding("utf-8");
+                    // The default content type
+                    response.setContentType(expected);
+                    response.setStatus(200);
+                }
+            });
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(given);
+        replay(request, response);
+
+        servlet.doGet(request, response);
+
+        verifyMocks();
         servlet.destroy();
     }
 
@@ -387,7 +425,7 @@ public class AgentServletTest {
         expect(request.getHeader("Origin")).andReturn(in);
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
 
-        response.setHeader(eq("Access-Control-Allow-Max-Age"), (String) anyObject());
+        response.setHeader(eq("Access-Control-Max-Age"), (String) anyObject());
         response.setHeader("Access-Control-Allow-Origin", out);
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
@@ -470,12 +508,37 @@ public class AgentServletTest {
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
 
         replay(request, response);
 
         servlet.doGet(request, response);
 
         assertTrue(sw.toString().matches("^myCallback\\(.*\\);$"));
+        servlet.destroy();
+    }
+
+    @Test
+    public void withInvalidCallback() throws IOException, ServletException {
+        servlet = new AgentServlet(new AllowAllRestrictor());
+        initConfigMocks(null, null,"Error 400", IllegalArgumentException.class);
+        replay(config, context);
+        servlet.init(config);
+        ByteArrayOutputStream sw = initRequestResponseMocks(
+            "doSomethingEvil(); myCallback",
+            getStandardRequestSetup(),
+            getStandardResponseSetup());
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+        expect(request.getAttribute("subject")).andReturn(null);
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
+
+        replay(request, response);
+
+        servlet.doGet(request, response);
+        String resp = sw.toString();
+        assertTrue(resp.contains("error_type"));
+        assertTrue(resp.contains("IllegalArgumentException"));
+        assertTrue(resp.matches(".*status.*400.*"));
         servlet.destroy();
     }
 
@@ -603,7 +666,7 @@ public class AgentServletTest {
         response = createMock(HttpServletResponse.class);
         setNoCacheHeaders(response);
 
-        expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(callback);
+        expect(request.getParameter(ConfigKey.CALLBACK.getKeyValue())).andReturn(callback).anyTimes();
         requestSetup.run();
         responseSetup.run();
 
@@ -645,6 +708,7 @@ public class AgentServletTest {
         return new Runnable() {
             public void run() {
                 response.setCharacterEncoding("utf-8");
+                // The default content type
                 response.setContentType("text/plain");
                 response.setStatus(200);
             }
@@ -687,7 +751,7 @@ public class AgentServletTest {
                 expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
 
                 expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
-                expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+                expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain").anyTimes();
                 StringBuffer buf = new StringBuffer();
                 buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
                 expect(request.getRequestURL()).andReturn(buf);

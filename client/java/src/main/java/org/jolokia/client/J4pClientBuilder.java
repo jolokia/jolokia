@@ -55,6 +55,7 @@ public class J4pClientBuilder {
     private int connectionTimeout;
     private int socketTimeout;
     private int maxTotalConnections;
+    private int defaultMaxConnectionsPerRoute;
     private int maxConnectionPoolTimeout;
     private Charset contentCharset;
     private boolean expectContinue;
@@ -105,6 +106,7 @@ public class J4pClientBuilder {
         connectionTimeout(20 * 1000);
         socketTimeout(-1);
         maxTotalConnections(20);
+        defaultMaxConnectionsPerRoute(20);
         maxConnectionPoolTimeout(500);
         contentCharset(HTTP.DEF_CONTENT_CHARSET.name());
         expectContinue(true);
@@ -190,7 +192,7 @@ public class J4pClientBuilder {
 
     /**
      * Use a pooled connection manager for connecting to the agent, which
-     * uses a pool of connections (see {@link #maxTotalConnections(int) and {@link #maxConnectionPoolTimeout(int)} for
+     * uses a pool of connections (see {@link #maxTotalConnections(int), {@link #maxConnectionPoolTimeout(int) {@link #defaultMaxConnectionsPerRoute}} for
      * tuning the pool}
      */
     public final J4pClientBuilder pooledConnections() {
@@ -228,6 +230,15 @@ public class J4pClientBuilder {
      */
     public final J4pClientBuilder maxTotalConnections(int pConnections) {
         maxTotalConnections = pConnections;
+        return this;
+    }
+
+    /**
+     * Sets the maximum number of connections per route allowed when using {@link #pooledConnections()}
+     * @param pDefaultMaxConnectionsPerRoute number of max connections per route.
+     */
+    public final J4pClientBuilder defaultMaxConnectionsPerRoute(int pDefaultMaxConnectionsPerRoute) {
+        defaultMaxConnectionsPerRoute = pDefaultMaxConnectionsPerRoute;
         return this;
     }
 
@@ -494,7 +505,9 @@ public class J4pClientBuilder {
         connManager.setDefaultConnectionConfig(createConnectionConfig());
         if (maxTotalConnections != 0) {
             connManager.setMaxTotal(maxTotalConnections);
+            connManager.setDefaultMaxPerRoute(defaultMaxConnectionsPerRoute);
         }
+
         return connManager;
     }
 

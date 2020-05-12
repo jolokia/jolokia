@@ -36,7 +36,6 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 12.08.11
  */
-@Test(groups = "java6")
 public class CommandDispatcherTest {
 
     private PrintStream outBack, errBack;

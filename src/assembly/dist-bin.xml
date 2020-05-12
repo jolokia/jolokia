@@ -35,6 +35,16 @@
     </moduleSet>
     <moduleSet>
       <includes>
+        <include>org.jolokia:jolokia-war-unsecured</include>
+      </includes>
+      <binaries>
+        <outputFileNameMapping>jolokia-unsecured.war</outputFileNameMapping>
+        <outputDirectory>agents</outputDirectory>
+        <unpack>false</unpack>
+      </binaries>
+    </moduleSet>
+    <moduleSet>
+      <includes>
         <include>org.jolokia:jolokia-mule</include>
       </includes>
       <binaries>
@@ -48,7 +58,7 @@
       <includes>
         <include>org.jolokia:jolokia-osgi</include>
       </includes>
-      <binaries>        
+      <binaries>
         <outputFileNameMapping>jolokia-osgi.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>

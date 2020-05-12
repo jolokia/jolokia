@@ -54,10 +54,14 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP extract(REQ pRequest,
                                                                       JSONObject pJsonResp)
             throws J4pRemoteException {
-
-        int status = pJsonResp.containsKey("status") ?
-                ((Long) pJsonResp.get("status")).intValue() :
-                0;
+	
+	int status = 0;
+	if( pJsonResp.containsKey("status")) {
+		Object o = pJsonResp.get("status");
+		if( o instanceof Long ) {
+			status = ((Long)o).intValue();
+		} 
+	}
 
         if (!allowedCodes.contains(status)) {
             throw new J4pRemoteException(pRequest, pJsonResp);

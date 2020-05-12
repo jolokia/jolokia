@@ -15,20 +15,37 @@ package org.jolokia.jvmagent.security;/*
  * limitations under the License.
  */
 
-import java.io.*;
-import java.security.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author roland
@@ -49,15 +66,42 @@ public class KeyStoreUtilTest {
 
         KeyStoreUtil.updateWithCaPem(keystore, caPem);
 
-        Enumeration<String> aliases = keystore.aliases();
-        String alias = aliases.nextElement();
-        assertFalse(aliases.hasMoreElements());
+        List<String> aliases = asList(keystore.aliases());
+        assertEquals(aliases.size(), 1);
+        String alias = aliases.get(0);
         assertTrue(alias.contains("ca.test.jolokia.org"));
         X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-        cert.checkValidity();
         assertTrue(cert.getSubjectDN().getName().contains(CA_CERT_SUBJECT_DN_CN));
         RSAPublicKey key = (RSAPublicKey) cert.getPublicKey();
         assertEquals(key.getAlgorithm(),"RSA");
+    }
+
+    @Test
+    public void testTrustStoreWithMultipleEntries() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+        File caPem = getTempFile("ca/cert-multi.pem");
+        KeyStore keystore = createKeyStore();
+
+        KeyStoreUtil.updateWithCaPem(keystore, caPem);
+
+        List<String> aliases = asList(keystore.aliases());
+        assertEquals(aliases.size(), 2);
+        Map<String, String> expectedAliases = new HashMap<String, String>();
+        expectedAliases.put("ca.test.jolokia.org",CA_CERT_SUBJECT_DN_CN);
+        expectedAliases.put("another.test.jolokia.org","CN=another.test.jolokia.org");
+
+        for (String alias : aliases) {
+
+            String key = findMatchingKeyAsSubstring(expectedAliases, alias);
+            assertNotNull(key);
+            String expectedSubjectDN = expectedAliases.remove(key);
+            assertNotNull(expectedSubjectDN);
+
+            X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
+            assertTrue(cert.getSubjectDN().getName().contains(expectedSubjectDN));
+            RSAPublicKey certPublicKey = (RSAPublicKey) cert.getPublicKey();
+            assertEquals(certPublicKey.getAlgorithm(),"RSA");
+        }
+        assertEquals(expectedAliases.size(),0);
     }
 
     @Test
@@ -68,19 +112,17 @@ public class KeyStoreUtilTest {
 
         KeyStoreUtil.updateWithServerPems(keystore, serverPem, keyPem, "RSA", new char[0]);
 
-        Enumeration<String> aliases = keystore.aliases();
-        String alias = aliases.nextElement();
-        assertFalse(aliases.hasMoreElements());
-
+        List<String> aliases = asList(keystore.aliases());
+        assertEquals(aliases.size(), 1);
+        String alias = aliases.get(0);
         assertTrue(alias.contains("server"));
 
         X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-        cert.checkValidity();
         assertEquals(cert.getSubjectDN().getName(), SERVER_CERT_SUBJECT_DN);
         RSAPrivateCrtKey key = (RSAPrivateCrtKey) keystore.getKey(alias, new char[0]);
-        assertEquals("RSA",key.getAlgorithm());
+        assertEquals("RSA", key.getAlgorithm());
         RSAPublicKey pubKey = (RSAPublicKey) cert.getPublicKey();
-        assertEquals("RSA",pubKey.getAlgorithm());
+        assertEquals("RSA", pubKey.getAlgorithm());
     }
 
     @Test
@@ -160,4 +202,22 @@ public class KeyStoreUtilTest {
             reader.close();
         }
     }
+
+    private List<String> asList(Enumeration<String> enumeration) {
+        List<String> ret = new ArrayList<String>();
+        while (enumeration.hasMoreElements()) {
+            ret.add(enumeration.nextElement());
+        }
+        return ret;
+    }
+
+    private String findMatchingKeyAsSubstring(Map<String, String> map, String fullValue) {
+        for (String key : map.keySet()) {
+            if (fullValue.contains(key)) {
+                return key;
+            }
+        }
+        return null;
+    }
+
 }

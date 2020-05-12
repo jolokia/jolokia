@@ -1,8 +1,8 @@
 package org.jolokia.service.serializer.json;
 
-import java.beans.Transient;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -210,11 +210,20 @@ public class BeanExtractor implements Extractor {
             if (!Modifier.isStatic(method.getModifiers()) &&
                 !IGNORE_METHODS.contains(method.getName()) &&
                 !isIgnoredType(method.getReturnType()) &&
-                !method.isAnnotationPresent(Transient.class)) {
+                !hasAnnotation(method, "java.beans.Transient")) {
                 addAttributes(attrs, method);
             }
         }
         return attrs;
+    }
+
+    private boolean hasAnnotation(Method method, String annotation) {
+        for (Annotation anno : method.getAnnotations()) {
+            if (anno.annotationType().getName().equals(annotation)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Add attributes, which are taken from get methods to the given list

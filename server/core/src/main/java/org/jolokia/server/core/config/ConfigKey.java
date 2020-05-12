@@ -1,7 +1,7 @@
 package org.jolokia.server.core.config;
 
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2018 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
  * as processing parameters (e.g. as query params).
  *
  * @author roland
+ * @author nevenr
  * @since Jan 1, 2010
  */
 public enum ConfigKey {
@@ -48,6 +49,12 @@ public enum ConfigKey {
      * Request Dispatcher to use in addition to the local dispatcher.
      */
     DISPATCHER_CLASSES("dispatcherClasses", true, false),
+
+    /**
+     * Path to a white list of patterns which are matched against possible
+     * JMX service URL for incoming requests
+     */
+    JSR160_PROXY_ALLOWED_TARGETS("jsr160ProxyAllowedTargets", true, false),
 
     /**
      * Log handler class to use, which must have an empty constructor.
@@ -194,6 +201,16 @@ public enum ConfigKey {
      */
     DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
 
+    /**
+     * IPv4 Address for Jolokia's Multicast group.
+     */
+    MULTICAST_GROUP("multicastGroup",true,false,"239.192.48.84"),
+
+    /**
+     * Multicast port where to listen for queries.
+     */
+    MULTICAST_PORT("multicastPort",true,false,"24884"),
+
     // ================================================================================
     // Configuration relevant for OSGI container
 
@@ -214,9 +231,17 @@ public enum ConfigKey {
 
     /**
      * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
-     * JaaS authentication.
+     * JaaS authentication, "delegate" for delegating to another HTTP service.
+     * For OSGi agent there are the additional modes "service-all" and "service-any" to use Authenticator services
+     * provided via an OSGi service registry.
      */
     AUTH_MODE("authMode", true, false, "basic"),
+
+    /**
+     * If MultiAuthenticator is used, this config item explains how to combine multiple authenticators
+     * Supported values: "any" at least one authenticator must match, "all" all authenticators must match
+     */
+    AUTH_MATCH("authMatch",true, false, "any"),
 
     /**
      * Custom authenticator to be used instead of default user/password one (JVM agent)

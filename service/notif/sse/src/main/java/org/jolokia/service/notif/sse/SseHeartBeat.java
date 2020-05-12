@@ -1,5 +1,5 @@
 package org.jolokia.service.notif.sse;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ class SseHeartBeat implements Runnable {
     private Future<?> heartBeat;
 
     public SseHeartBeat(BackChannel pBackChannel) {
-        this.scheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("jolokia-sse-hearbeat"));
         this.backChannel = pBackChannel;
     }
 
