@@ -580,14 +580,7 @@
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.0</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jmockit</groupId>
-        <artifactId>jmockit</artifactId>
-        <version>1.8</version>
+        <version>4.2</version>
         <scope>test</scope>
       </dependency>
 

@@ -80,12 +80,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jmockit</groupId>
-      <artifactId>jmockit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-test-util</artifactId>
       <version>${project.version}</version>
