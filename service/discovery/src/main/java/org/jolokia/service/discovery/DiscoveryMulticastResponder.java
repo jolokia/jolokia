@@ -43,7 +43,7 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
             }
             for (InetAddress addr : addresses) {
                 try {
-                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread(addr, pContext);
+                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread("JolokiaDiscoveryListenerThread-" + addr.getHostAddress(), addr, pContext);
                     thread.start();
                     listenerThreads.add(thread);
                     // One thread might be enough ?

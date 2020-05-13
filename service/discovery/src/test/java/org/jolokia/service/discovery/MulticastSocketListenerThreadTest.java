@@ -34,7 +34,7 @@ public class MulticastSocketListenerThreadTest {
         //details.setServerInfo("jolokia", "jolokia-test", "1.0");
 
         JolokiaContext context = new TestJolokiaContext.Builder().agentDetails(details).build();
-        MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread(null,context);
+        MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread("ListenerThread", null,context);
         listenerThread.start();
         Thread.sleep(500);
         return listenerThread;

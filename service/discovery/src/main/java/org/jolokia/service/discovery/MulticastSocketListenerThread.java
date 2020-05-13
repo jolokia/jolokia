@@ -36,10 +36,12 @@ class MulticastSocketListenerThread extends Thread {
     /**
      * Constructor, used internally.
      *
+     * @param pName name to use for the thread
      * @param pHostAddress host address for creating a socket to listen to
      * @param pContext context for accessing Jolokia Services
      */
-    MulticastSocketListenerThread(InetAddress pHostAddress, JolokiaContext pContext) throws IOException {
+    MulticastSocketListenerThread(String pName, InetAddress pHostAddress, JolokiaContext pContext) throws IOException {
+        super(pName);
         address = pHostAddress != null ? pHostAddress : NetworkUtil.getLocalAddressWithMulticast();
         context = pContext;
         // For debugging, uncomment:
