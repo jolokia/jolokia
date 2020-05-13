@@ -8,3 +8,4 @@ org.jolokia.server.detector.jee.JettyDetector
 org.jolokia.server.detector.jee.GlassfishDetector
 org.jolokia.server.detector.jee.WeblogicDetector
 org.jolokia.server.detector.jee.WebsphereDetector
+org.jolokia.server.detector.misc.LightstreamerDetector
