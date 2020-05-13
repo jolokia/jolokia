@@ -133,6 +133,17 @@
               <finalName>jolokia-agent</finalName>
               <shadedClassifierName>agent</shadedClassifierName>
               <createDependencyReducedPom>false</createDependencyReducedPom>
+              <relocations>
+                <relocation>
+                  <shadedPattern>org.jolokia.shaded.</shadedPattern>
+                  <includes>
+                    <include>org.json.simple.**</include>
+                  </includes>
+                  <excludes>
+                    <exclude>org.jolokia.shaded.**</exclude>
+                  </excludes>
+                </relocation>
+              </relocations>
               <artifactSet>
                 <includes>
                   <include>org.jolokia:jolokia-server-core</include>
