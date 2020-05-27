@@ -145,7 +145,7 @@ public class ToOpenTypeConverter {
   /**
    * Try to figure out open type, order of preference 1. handle simple objects, respect type
    * introspected from MBeanInfo if any 2. Handle arrays (comes before cached types due to issues
-   * specifiying multiple return values for all the Threading overloaded methods) 3. Handle hard
+   * specifying multiple return values for all the Threading overloaded methods) 3. Handle hard
    * coded tabular return types (important for visual presentation in certain tools) 4. Use cached
    * type for attribute/item : either hardcoded to please JConsole / JVisualVM or introspected from
    * MBeanInfo 5. Dynamically build structured type from contents (will struggle with null values
