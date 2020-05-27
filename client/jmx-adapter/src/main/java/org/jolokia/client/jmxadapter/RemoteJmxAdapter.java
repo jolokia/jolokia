@@ -531,7 +531,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   @Override
   public void removeNotificationListener(
       ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
-    throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
   }
 
   @Override
