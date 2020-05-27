@@ -103,7 +103,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   @Override
   public ObjectInstance createMBean(String className, ObjectName name) {
-    throw new UnsupportedOperationException("createMBean not supported over Jolokia");
+    throw new UnsupportedOperationException("createMBean not supported by Jolokia");
   }
 
   @Override
