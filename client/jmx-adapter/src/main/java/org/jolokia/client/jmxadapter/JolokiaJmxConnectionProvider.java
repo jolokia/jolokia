@@ -31,7 +31,7 @@ public class JolokiaJmxConnectionProvider implements JMXConnectorProvider {
         //the exception will be handled by JMXConnectorFactory so that other handlers are allowed to handle
         //other protocols
         if(!"jolokia".equals(serviceURL.getProtocol())) {
-            throw new MalformedURLException("I only serve Jolokia connections");
+            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)",  serviceURL, serviceURL.getProtocol()));
         }
         return new JolokiaJmxConnector(serviceURL, environment);
     }

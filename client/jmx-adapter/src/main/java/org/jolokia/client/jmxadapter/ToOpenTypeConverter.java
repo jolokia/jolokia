@@ -15,7 +15,6 @@ import static javax.management.openmbean.SimpleType.SHORT;
 import static javax.management.openmbean.SimpleType.STRING;
 import static javax.management.openmbean.SimpleType.VOID;
 
-import com.sun.management.VMOption;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.CompilationMXBean;
 import java.lang.management.MemoryMXBean;
@@ -232,15 +231,53 @@ public class ToOpenTypeConverter {
           "java.lang:type=MemoryPool,name=PS Perm Gen.CollectionUsage",
           "java.lang:type=MemoryPool,name=PS Perm Gen.Usage",
           "java.lang:type=MemoryPool,name=PS Survivor Space.Usage",
-          "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage");
-      cacheType(
-          introspectComplexTypeFrom(VMOption.class),
-          "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions.item",
-          "com.sun.management:type=HotSpotDiagnostic.getVMOption");
-      cacheType(
-          new ArrayType<OpenType<?>>(1, introspectComplexTypeRequireNonNull(VMOption.class)),
-          "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions"
-      );
+          "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage",
+          //openj9 follows
+          "java.lang:type=MemoryPool,name=tenured-LOA.CollectionUsage",
+          "java.lang:type=MemoryPool,name=class storage.PeakUsage",
+          "java.lang:type=MemoryPool,name=miscellaneous non-heap storage.PeakUsage",
+          "java.lang:type=MemoryPool,name=nursery-survivor.CollectionUsage",
+          "java.lang:type=MemoryPool,name=JIT code cache.PeakUsage",
+          "java.lang:type=GarbageCollector,name=global.LastGcInfo",
+          "java.lang:type=MemoryPool,name=JIT data cache.PeakUsage",
+          "java.lang:type=MemoryPool,name=tenured-SOA.CollectionUsage",
+          "java.lang:type=MemoryPool,name=nursery-allocate.CollectionUsage",
+          "java.lang:type=MemoryPool,name=tenured-LOA.PeakUsage",
+          "java.lang:type=MemoryPool,name=class storage.Usage",
+          "java.lang:type=MemoryPool,name=miscellaneous non-heap storage.Usage",
+          "java.lang:type=MemoryPool,name=nursery-survivor.PeakUsage",
+          "java.lang:type=MemoryPool,name=JIT code cache.PeakUsage",
+          "java.lang:type=MemoryPool,name=JIT data cache.Usage",
+          "java.lang:type=MemoryPool,name=tenured-SOA.PeakUsage",
+          "java.lang:type=MemoryPool,name=tenured-LOA.PreCollectionUsage",
+          "java.lang:type=MemoryPool,name=nursery-survivor.PreCollectionUsage",
+          "java.lang:type=MemoryPool,name=JIT code cache.Usage",
+          "java.lang:type=MemoryPool,name=tenured-SOA.PreCollectionUsage",
+          "java.lang:type=MemoryPool,name=nursery-allocate.PeakUsage",
+          "java.lang:type=MemoryPool,name=tenured-LOA.Usage",
+          "java.lang:type=MemoryPool,name=nursery-survivor.Usage",
+          "java.lang:type=MemoryPool,name=tenured-SOA.Usage",
+          "java.lang:type=MemoryPool,name=nursery-allocate.PreCollectionUsage",
+          "java.lang:type=MemoryPool,name=nursery-allocate.Usage");
+      //may not exist on non Oracle/Openjdk jvms
+      final Class<?> vmOptionClass = ClassUtil
+          .classForName("com.sun.management.VMOption");
+      if(vmOptionClass != null) {
+        cacheType(
+            introspectComplexTypeFrom(vmOptionClass),
+            "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions.item",
+            "com.sun.management:type=HotSpotDiagnostic.getVMOption");
+        cacheType(
+            new ArrayType<OpenType<?>>(1, introspectComplexTypeRequireNonNull(vmOptionClass)),
+            "com.sun.management:type=HotSpotDiagnostic.DiagnosticOptions"
+        );
+      }
+
+      //may not exist on all vms
+      final Class<?> gcInfo=ClassUtil.classForName("com.sun.management.GcInfo");
+      if(gcInfo != null) {
+        cacheType(introspectComplexTypeFrom(gcInfo), "java.lang:type=GarbageCollector,name=scavenge.LastGcInfo", "java.lang:type=GarbageCollector,name=global.LastGcInfo" );
+      }
       cacheType(
           introspectComplexTypeFrom(ThreadInfo.class),
           "java.lang:type=Threading.getThreadInfo.item", "java.lang:type=Threading.getThreadInfo");
@@ -286,6 +323,8 @@ public class ToOpenTypeConverter {
           "jdk.jfr.management:type=FlightRecorder.readStream");
 
     }
+    //may be null on Java 10
+    cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.EventTypes.item.description");
     return TYPE_SPECIFICATIONS.get(name);
   }
 

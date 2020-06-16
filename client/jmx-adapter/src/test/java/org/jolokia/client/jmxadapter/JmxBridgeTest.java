@@ -126,8 +126,53 @@ public class JmxBridgeTest {
               // could be something with several of the tests starting agents etc.
               "JMImplementation:type=MBeanServerDelegate.MBeanServerId",
               //Not really concerned that the actual composite types are not 100% identical for a constructed test class
-              "jolokia.test:name=MBeanExample.Field"));
+              "jolokia.test:name=MBeanExample.Field",
+              //Various more dynamic fields discovered while running a script to test all Oracle and openjdk versions 7-14
+              "java.lang:name=G1 Old Gen,type=MemoryPool.CollectionUsage",
+              "java.lang:name=G1 Old Generation,type=GarbageCollector.LastGcInfo",
+              "java.lang:name=G1 Survivor Space,type=MemoryPool.CollectionUsage",
+              "java.lang:name=Metaspace,type=MemoryPool.PeakUsage",
+              "java.lang:name=Metaspace,type=MemoryPool.Usage",
+              "java.lang:name=CodeHeap 'profiled nmethods',type=MemoryPool.PeakUsage",
+              "java.lang:name=CodeHeap 'profiled nmethods',type=MemoryPool.Usage",
+              "java.lang:name=CodeHeap 'non-nmethods',type=MemoryPool.PeakUsage",
+              "java.lang:name=CodeHeap 'non-nmethods',type=MemoryPool.Usage",
+              "java.lang:name=Compressed Class Space,type=MemoryPool.PeakUsage",
+              "java.lang:name=G1 Eden Space,type=MemoryPool.CollectionUsage",
+              "java.lang:name=G1 Eden Space,type=MemoryPool.PeakUsage",
+              "java.lang:name=G1 Eden Space,type=MemoryPool.Usage",
+              "java.lang:type=Threading.CurrentThreadAllocatedBytes",
+              "java.lang:type=OperatingSystem.CpuLoad",
+              "java.lang:name=G1 Young Generation,type=GarbageCollector.CollectionTime",
+              "java.lang:name=G1 Young Generation,type=GarbageCollector.LastGcInfo",
+              "java.lang:name=G1 Old Gen,type=MemoryPool.PeakUsage",
+              "java.lang:name=G1 Old Gen,type=MemoryPool.Usage",
+              "java.lang:name=G1 Survivor Space,type=MemoryPool.PeakUsage",
+              "java.lang:name=G1 Survivor Space,type=MemoryPool.Usage",
+              "java.lang:name=Compressed Class Space,type=MemoryPool.Usage",
+              "java.lang:name=CodeHeap 'non-profiled nmethods',type=MemoryPool.PeakUsage",
+              "java.lang:name=CodeHeap 'non-profiled nmethods',type=MemoryPool.Usage",
+              "java.lang:type=OperatingSystem.FreeMemorySize",
+              //we are not able to make this composite type (not value) 100% equals compatible
+              "jdk.management.jfr:type=FlightRecorder.Configurations",
+              "jdk.management.jfr:type=FlightRecorder.EventTypes",
+              //openj9 follows
+              "com.ibm.lang.management:type=JvmCpuMonitor.ThreadsCpuUsage",
+              "java.lang:type=GarbageCollector,name=scavenge.CollectionTime",
+              "java.lang:type=GarbageCollector,name=scavenge.LastCollectionStartTime",
+              "java.lang:type=MemoryPool,name=nursery-allocate.CollectionUsage",
+              "java.lang:type=MemoryPool,name=miscellaneous non-heap storage.Usage",
+              "java.lang:type=GarbageCollector,name=scavenge.CollectionCount",
+              "java.lang:type=MemoryPool,name=nursery-allocate.PreCollectionUsage",
+              "java.lang:type=MemoryPool,name=nursery-allocate.Usage",
+              "java.lang:type=GarbageCollector,name=scavenge.LastGcInfo",
+              "java.lang:type=GarbageCollector,name=global.LastGcInfo",
+              "java.lang:type=OperatingSystem.ProcessCpuTimeByNS",
+              "java.lang:type=OperatingSystem.ProcessPhysicalMemorySize",
+              "java.lang:type=Memory.GCMasterThreadCpuUsed"
+              ));
 
+  //Attributes that give runtime exception on some JVM versions and therefore not suitable for brute force tests
   private static final Collection<String> UNSAFE_ATTRIBUTES =
       new HashSet<String>(
           Arrays.asList(
@@ -136,7 +181,11 @@ public class JmxBridgeTest {
               "CollectionUsageThresholdExceeded",
               "UsageThreshold",
               "UsageThresholdCount",
-              "UsageThresholdExceeded"));
+              "UsageThresholdExceeded",
+              "BootClassPath",
+              "DumpOptions",
+              "HardwareEmulated",
+              "HardwareModel"));
 
   // Safe values for testing setting attributes
   private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
@@ -322,8 +371,16 @@ public class JmxBridgeTest {
         } catch (InvocationTargetException e) {
           if (!(e
               .getCause() instanceof UnsupportedOperationException)) {//some MBeans have unsupported methods, ignore
-            System.err.println("Failed calling" + method + " on " + objectName);
-            throw e;
+            //try to call the same on on platform mbean server and see if we get the same error there
+            final Object nativeProxy = ManagementFactory
+                .newPlatformMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
+                    objectName.getCanonicalName(), klass);
+            try {
+              method.invoke(nativeProxy);
+              System.err.println("Failed calling" + method + " on " + objectName + " but succeeds with native proxy ");
+              throw e;
+            } catch (InvocationTargetException ignore){
+            }
           }
         }
       }
@@ -420,15 +477,17 @@ public class JmxBridgeTest {
   @Test
   public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature()
       throws IOException, InstanceNotFoundException, MBeanException {
+    final MBeanInfo mbean = this.adapter
+        .getMBeanInfo(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"));
     // Invoke method that has both primitive and boxed Long as possible input
     this.adapter.invoke(
         RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-        "getThreadUserTime",
+        "getThreadInfo",
         new Object[]{1L},
         new String[]{"long"});
     this.adapter.invoke(
         RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-        "getThreadUserTime",
+        "getThreadInfo",
         new Object[]{new long[]{1L}},
         new String[]{"[J"});
   }

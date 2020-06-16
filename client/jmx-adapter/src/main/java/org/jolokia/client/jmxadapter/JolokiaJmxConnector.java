@@ -51,7 +51,7 @@ public class JolokiaJmxConnector implements JMXConnector {
   @SuppressWarnings({"raw"})
   public void connect(Map<String, ?> env) throws IOException {
     if (!"jolokia".equals(this.serviceUrl.getProtocol())) {
-      throw new MalformedURLException("I only handle Jolokia service urls");
+      throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)",  this.serviceUrl, this.serviceUrl.getProtocol()));
     }
     Map<String, Object> mergedEnv = mergedEnvironment(env);
     String internalProtocol = "http";
@@ -106,7 +106,7 @@ public class JolokiaJmxConnector implements JMXConnector {
   @Override
   public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) {
     throw new UnsupportedOperationException(
-        "Jolokia currently do not support connections using a subject, if you have a use case please let us know");
+        "Jolokia currently do not support connections using a subject, if you have a use case, raise an issue in Jolokias github repo");
   }
 
   @Override
