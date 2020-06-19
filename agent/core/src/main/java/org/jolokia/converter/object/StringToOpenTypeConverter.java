@@ -85,4 +85,8 @@ public class StringToOpenTypeConverter extends OpenTypeConverter {
     }
 
 
+    public StringToOpenTypeConverter makeForgiving() {
+        this.forgiving = true;
+        return this;
+    }
 }
