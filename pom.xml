@@ -49,6 +49,7 @@
 
     <module>client/java</module>
     <module>client/javascript</module>
+    <module>client/jmx-adapter</module>
 
     <module>support/jmx</module>
     <module>support/spring</module>

@@ -30,7 +30,6 @@ import org.json.simple.parser.ParseException;
  */
 abstract class OpenTypeConverter<T extends OpenType> {
 
-    protected boolean forgiving=false;
     // parent converter
     private OpenTypeDeserializer dispatcher;
 
@@ -91,13 +90,5 @@ abstract class OpenTypeConverter<T extends OpenType> {
      */
     protected OpenTypeDeserializer getDispatcher() {
         return dispatcher;
-    }
-
-    /**
-     *
-     * @return whether I accept (and ignore) values that are not in the target type
-     */
-    protected boolean isForgiving() {
-        return this.forgiving || (this.dispatcher != null && this.dispatcher.isForgiving());
     }
 }

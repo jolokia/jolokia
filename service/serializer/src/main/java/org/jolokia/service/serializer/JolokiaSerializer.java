@@ -52,14 +52,32 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
     }
 
     /**
+     * Default constructor enabling fuzzy mode
+     * @param pFuzzy set to true if certain inconsistencies in MBean registrations can be tolerated
+     */
+    public JolokiaSerializer(boolean pFuzzy) {
+        this(100, pFuzzy);
+    }
+
+    /**
      * Create converters (string-to-object, string-to-openType and object-to-json)
      *
      * @param pOrder order to use
      */
     public JolokiaSerializer(int pOrder) {
+        this(pOrder, false);
+    }
+
+    /**
+     * Create serializer
+     *
+     * @param pOrder order to use
+     * @param pFuzzy set to true if certain inconsistencies in MBean registrations can be tolerated
+     */
+    public JolokiaSerializer(int pOrder, boolean pFuzzy) {
         super(Serializer.class,pOrder);
         toObjectConverter = new StringToObjectConverter();
-        toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter);
+        toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter, pFuzzy);
         toJsonConverter = new ObjectToJsonConverter(toObjectConverter);
     }
 

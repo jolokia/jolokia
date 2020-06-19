@@ -40,9 +40,10 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularType;
-import org.jolokia.converter.Converters;
-import org.jolokia.converter.object.StringToOpenTypeConverter;
-import org.jolokia.util.ClassUtil;
+
+import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.service.serializer.JolokiaSerializer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -69,8 +70,7 @@ public class ToOpenTypeConverter {
       DATE,
       OBJECTNAME,
   };
-  static final StringToOpenTypeConverter CONVERTER = new Converters().getToOpenTypeConverter()
-      .makeForgiving();
+
   private static HashMap<String, OpenType<?>> TABULAR_CONTENT_TYPE;
 
   private static Map<String, OpenType<?>> TYPE_SPECIFICATIONS;
@@ -80,7 +80,7 @@ public class ToOpenTypeConverter {
     if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
       final OpenType<?> type = cachedType(name);
       if (type != null) {
-        return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
+        return new JolokiaSerializer().deserializeOpenType(type, rawValue);
       } else {
         return rawValue;
       }
@@ -91,7 +91,7 @@ public class ToOpenTypeConverter {
     } else if (type.isArray() && ((ArrayType<?>) type).isPrimitiveArray()) {
       return toPrimitiveArray((ArrayType<?>) type, (JSONArray) rawValue);
     } else {
-      return CONVERTER.convertToObject(type, rawValue);
+      return new JolokiaSerializer(true).deserializeOpenType(type, rawValue);
     }
   }
 
@@ -138,7 +138,7 @@ public class ToOpenTypeConverter {
     return rawValue.toArray(
         (Object[]) Array
             .newInstance(ClassUtil.classForName(type.getElementOpenType().getClassName()),
-                rawValue.size()));
+                         rawValue.size()));
   }
 
   /**

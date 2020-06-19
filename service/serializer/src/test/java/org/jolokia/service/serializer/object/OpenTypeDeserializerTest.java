@@ -48,7 +48,7 @@ public class OpenTypeDeserializerTest {
     public void setup() {
 
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
-        converter = new OpenTypeDeserializer(stringToObjectConverter);
+        converter = new OpenTypeDeserializer(stringToObjectConverter, false);
     }
 
     @Test

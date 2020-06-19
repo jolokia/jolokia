@@ -36,6 +36,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
 import javax.management.NotificationListener;
@@ -55,8 +56,8 @@ import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
+import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.test.util.EnvTestUtil;
-import org.jolokia.util.ClassUtil;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -323,6 +324,7 @@ public class JmxBridgeTest {
         RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
 
+
     final J4pClient connector =
         new J4pClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
     // wait for agent to be running
@@ -468,9 +470,10 @@ public class JmxBridgeTest {
   @Test(expectedExceptions = InvalidAttributeValueException.class)
   public void testSetInvalidAttributeValue()
       throws IOException, AttributeNotFoundException, InstanceNotFoundException,
-      InvalidAttributeValueException {
+             InvalidAttributeValueException, MalformedObjectNameException {
+    Set<ObjectName> names = this.adapter.queryNames(new ObjectName("jolokia:type=Config,*"), null);
     this.adapter.setAttribute(
-        RemoteJmxAdapter.getObjectName("jolokia:type=Config"),
+        names.iterator().next(),
         new Attribute("HistoryMaxEntries", null));
   }
 
@@ -702,8 +705,8 @@ public class JmxBridgeTest {
     Assert.assertEquals(
         this.adapter.getDefaultDomain(), nativeServer.getDefaultDomain(), "Default domain");
 
-    Assert.assertEquals(this.adapter.agentVersion, "1.6.2");
-    Assert.assertEquals(this.adapter.protocolVersion, "7.2");
+    Assert.assertNotNull(this.adapter.agentVersion);
+    Assert.assertNotNull(this.adapter.protocolVersion);
     Assert.assertTrue(this.adapter.getId().endsWith("-jvm"));
 
   }
