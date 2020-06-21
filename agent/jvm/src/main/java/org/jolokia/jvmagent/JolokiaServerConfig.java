@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
+import org.jolokia.config.address.DelegatingAddressConfigService;
 import org.jolokia.jvmagent.security.*;
 import org.jolokia.util.JolokiaCipher;
 import org.jolokia.util.NetworkUtil;
@@ -571,18 +573,12 @@ public class JolokiaServerConfig {
     }
 
     private void initAddress(Map<String, String> agentConfig) {
-        String host = agentConfig.get("host");
-        try {
-            if ("*".equals(host) || "0.0.0.0".equals(host)) {
-                address = null; // null is the wildcard
-            } else if (host != null) {
-                address = InetAddress.getByName(host); // some specific host
-            } else {
-                address = InetAddress.getByName(null); // secure alternative -- if no host, use *loopback*
-            }
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "loopback interface") + ": " + e,e);
-        }
+        DelegatingAddressConfigService service = new DelegatingAddressConfigService();
+        AtomicReference<InetAddress> ref = service.optain(agentConfig);
+        
+        if ( null != ref) {
+            this.address = ref.get();
+        }        
     }
 
     protected Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {

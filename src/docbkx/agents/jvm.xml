@@ -114,12 +114,37 @@ java -javaagent:agent.jar=port=7777,host=localhost]]></programlisting>
         <td><constant>host</constant></td>
         <td>
           Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
-          given, the servers binds to every network interface.
+          given, the servers binds to every network interface. This setting is mutually exclusive to <em>ipmatch</em> and <em>nicmatch</em>. 
+          Do not combine this settings. Bad configuration or errors resolving network informations will fallback to loopback interface for security reasons.
         </td>
         <td>
           <constant>localhost</constant>
         </td>
         </tr>
+        <tr>
+        <td><constant>ipmatch</constant></td>
+        <td>
+          Indirect configuration of Hostaddress to which the HTTP server should bind to. 
+          The IP address string in textual presentation of all available network interfaces will be 
+          checked against this Java regular expression. The first matching IP will be used to bind the HTTP server.
+		  Bad configuration or errors resolving network informations will fallback to loopback interface for security reasons.
+        </td>
+        <td>
+          <constant>192\.168\.1\..*</constant>
+        </td>
+        </tr>        
+        <tr>
+        <td><constant>nicmatch</constant></td>
+        <td>
+          Indirect configuration of Hostaddress to which the HTTP server should bind to. 
+          The name of all available network interfaces will be checked against this Java regular expression.
+          If the pattern matches the first IP of that interface will be used to bind the HTTP server.
+		  Bad configuration or errors resolving network informations will fallback to loopback interface for security reasons.
+        </td>
+        <td>
+          <constant>ethMonitoring</constant>
+        </td>
+        </tr> 
         <tr>
           <td><constant>port</constant></td>
           <td>
