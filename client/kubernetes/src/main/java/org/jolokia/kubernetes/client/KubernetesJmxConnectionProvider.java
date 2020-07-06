@@ -9,7 +9,7 @@ import javax.management.remote.JMXServiceURL;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 
 /**
- * I provide support for handling JMX urls over the Jolokia protocol to JVMs running in kubernetes pods
+ * This provides support for handling JMX urls over the Jolokia protocol to JVMs running in kubernetes pods
  * Syntax examples
  * <ul>
  *   <li>service:jmx:kubernetes:///api/v1/namespaces/mynamespace/pods/mypodname-.+/actuator/jolokia/</li>
@@ -18,9 +18,9 @@ import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
  *
  * Regular expressions in service url is supported so you can have working URLs across deploys.
  * Regular expression URLs will connect to the first pod/service that matches expession.
- * Prerequesite: You should have <code>kubectl</code> installed and have valid credentiatls for k8s cluster
- * readily stored under $HOME/.kube/config
- * My Jar contains a service loader, so that Jolokia JMX protocol is supported
+ * Prerequesite: You should have configuration and valid credentiatls for k8s cluster
+ * readily in place, so you have access to the kubernetes api. You can validate this independently with a tool such as kubectl.
+ * This jar file contains a service loader, so that Jolokia JMX protocol is supported
  * as long as my jar (jmx-adapter-version-standalone.jar) is on the classpath
  *
  * <pre>

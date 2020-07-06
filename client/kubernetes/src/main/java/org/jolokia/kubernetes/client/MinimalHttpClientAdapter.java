@@ -35,8 +35,8 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
 /**
- * I implement a minimum support of the HttpClient interface
- * based on what is used by J4PClient hence I need to adapt
+ * This is a minimum implementation of the HttpClient interface
+ * based on what is used by J4PClient hence the need to adapt
  * One HTTP client to another HTTP client API
  */
 public class MinimalHttpClientAdapter implements HttpClient {
