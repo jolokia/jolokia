@@ -11,7 +11,7 @@ public class ManualTestConnection {
   @Test(groups = "manual")
   public void testConnect() throws IOException {
     final JMXServiceURL jmxServiceURL = new JMXServiceURL(
-        "service:jmx:kubernetes:///api/v1/namespaces/che/pods/workspace.+tools-.+-.+/proxy/manage/jolokia/"
+        "service:jmx:kubernetes:///namespaces/che/pods/workspace.+tools-.+-.+/manage/jolokia/"
         );
     jmxServiceURL.getProtocol();
 
