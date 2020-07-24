@@ -11,8 +11,8 @@ import javax.management.remote.JMXServiceURL;
  * This provides support for handling JMX urls over the Jolokia protocol to JVMs running in kubernetes pods
  * Syntax examples
  * <ul>
- *   <li>service:jmx:kubernetes:///namespaces/mynamespace/pods/mypodname-abcd-efgh/actuator/jolokia/</li>
- *   <li>service:jmx:kubernetes:///namespaces/mynamespace/pods/mypodname-.+/actuator/jolokia/</li>
+ *   <li>service:jmx:kubernetes:///mynamespace/mypodname-abcd-efgh/actuator/jolokia/</li>
+ *   <li>service:jmx:kubernetes:///mynamespace/mypodname-.+/actuator/jolokia/</li>
  * </ul>
  *
  * Regular expressions in service url is supported so you can have working URLs across deploys.
@@ -26,7 +26,7 @@ import javax.management.remote.JMXServiceURL;
  *   Example:
  *   //NB: include trailing slash to jolokia endpoint
  *   JMXConnector connector = JMXConnectorFactory
- *             .connect(new JMXServiceURL("service:jmx:kubernetes:///namespaces/mynamespace/pods/mypodname-.+/actuator/jolokia/")));
+ *             .connect(new JMXServiceURL("service:jmx:kubernetes:///mynamespace/mypodname-.+/actuator/jolokia/")));
  *         connector.connect();
  *         connector.getMBeanServerConnection();
  *

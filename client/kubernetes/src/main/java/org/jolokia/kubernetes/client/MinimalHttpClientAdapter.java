@@ -1,21 +1,26 @@
 package org.jolokia.kubernetes.client;
 
-import com.squareup.okhttp.Credentials;
-import com.squareup.okhttp.Protocol;
-import com.squareup.okhttp.Response;
-import io.kubernetes.client.ApiClient;
-import io.kubernetes.client.ApiException;
-import io.kubernetes.client.Pair;
+import io.fabric8.kubernetes.client.BaseClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.dsl.base.OperationSupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URL;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import javax.management.remote.JMXConnector;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Request.Builder;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHeaders;
@@ -33,35 +38,47 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.jolokia.util.Base64Util;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
- * This is a minimum implementation of the HttpClient interface
- * based on what is used by J4PClient hence the need to adapt
- * One HTTP client to another HTTP client API
+ * This is a minimum implementation of the HttpClient interface based on what is used by J4PClient
+ * hence the need to adapt One HTTP client to another HTTP client API
  */
 public class MinimalHttpClientAdapter implements HttpClient {
 
-  private final ApiClient client;
+  private final BaseClient client;
   private final String urlPath;
   private String user;
   private String password;
 
-  public MinimalHttpClientAdapter(ApiClient client, String urlPath, Map<String,Object> env) {
+  public MinimalHttpClientAdapter(BaseClient client, String urlPath, Map<String, Object> env) {
     this.client = client;
     this.urlPath = urlPath;
-    String[] credentials= (String[]) env.get(JMXConnector.CREDENTIALS);
-    if(credentials != null) {
-      this.user=credentials[0];
-      this.password=credentials[1];
+    String[] credentials = (String[]) env.get(JMXConnector.CREDENTIALS);
+    if (credentials != null) {
+      this.user = credentials[0];
+      this.password = credentials[1];
+    }
+  }
+
+  static void authenticate(Map<String, String> headers, String username, String password) {
+    if (username != null) {
+      headers.put("X-Jolokia-Authorization", Base64Util
+          .encode(("Basic " + username + ":" + password).getBytes()));
     }
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public HttpParams getParams() {
     throw new UnsupportedOperationException();
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public ClientConnectionManager getConnectionManager() {
     throw new UnsupportedOperationException();
   }
@@ -69,126 +86,150 @@ public class MinimalHttpClientAdapter implements HttpClient {
   @Override
   public HttpResponse execute(HttpUriRequest httpUriRequest)
       throws IOException {
-    Map<String,String> headers= createHeaders();
     try {
       final Response response = performRequest(client, urlPath,
-          extractBody(httpUriRequest, headers), extractQueryParameters(httpUriRequest),
-          httpUriRequest.getMethod(), headers
+          extractBody(httpUriRequest), httpUriRequest.getURI().getQuery(),
+          allHeaders(httpUriRequest)
       );
       return convertResponse(response);
-    } catch (ApiException e) {
+    } catch (KubernetesClientException e) {
       throw new ClientProtocolException(e);
     }
 
   }
 
-  public HashMap<String, String> createHeaders() {
-    final HashMap<String, String> headers = new HashMap<String, String>();
-    if(this.user != null) {
-      headers.put("Authorization", Credentials.basic(this.user, this.password));
+  private Map<String, String> allHeaders(HttpUriRequest httpUriRequest) {
+    Map<String, String> headers = new HashMap<String, String>();
+    for (Header header : httpUriRequest.getAllHeaders()) {
+      headers.put(header.getName(), header.getValue());
     }
+    authenticate(headers, this.user, this.password);
+
     return headers;
+
   }
 
-  public static Response performRequest(ApiClient client, String urlPath, Object body,
-      List<Pair> queryParams, String method, Map<String, String> headers) throws IOException, ApiException {
-    return client
-              .buildCall(urlPath, method,
-                  queryParams, Collections.<Pair>emptyList(),
-                  body,
-                  headers, Collections.<String, Object>emptyMap(),  new String[]{"BearerToken"}, null)
-              .execute();
+
+  public static Response performRequest(BaseClient client, String path, byte[] body,
+      String query, Map<String, String> headers) throws IOException {
+    final Builder requestBuilder = new Builder()
+        .post(RequestBody.create(MediaType.parse("application/json"), body)).url(
+            buildHttpUri(client, path, query));
+    for (Map.Entry<String, String> header : headers.entrySet()) {
+      requestBuilder.addHeader(header.getKey(), header.getValue());
+    }
+    return client.getHttpClient().newCall(
+        requestBuilder.build()
+    ).execute();
+  }
+
+  private static URL buildHttpUri(BaseClient client, String resourcePath,
+      String query) {
+    final URL masterUrl = client.getMasterUrl();
+    final HttpUrl.Builder builder = new HttpUrl.Builder().scheme(masterUrl.getProtocol())
+        .host(masterUrl.getHost()).port(masterUrl.getPort()).query(query);
+    final StringTokenizer splitter = new StringTokenizer(resourcePath, "/");
+    while (splitter.hasMoreElements()) {
+      builder.addPathSegment(splitter.nextElement().toString());
+    }
+    return builder.build().url();
   }
 
   protected HttpResponse convertResponse(Response response) throws IOException {
+    final int responseCode = response.code();
     final BasicHttpResponse convertedResponse = new BasicHttpResponse(
-        new BasicStatusLine(convertProtocol(response.protocol()), response.code(), response.message()));
-    final BasicHttpEntity responseEntity = new BasicHttpEntity();
-    final byte[] responseBytes = response.body().bytes();
-    responseEntity.setContentLength(responseBytes.length);
-    responseEntity.setContent(new ByteArrayInputStream(responseBytes));
-    responseEntity.setContentType(response.header(HttpHeaders.CONTENT_TYPE));
-    convertedResponse.setEntity(responseEntity);
-    for(String header : response.headers().names()) {
+        new BasicStatusLine(convertProtocol(response.protocol()), responseCode,
+            response.message()));
+    for (String header : response.headers().names()) {
       convertedResponse.setHeader(header, response.header(header));
+    }
+
+    if (response.body() != null) {
+      final BasicHttpEntity responseEntity = new BasicHttpEntity();
+      byte[] responseBytes=null;
+      if (responseCode >= 400) {
+        final JSONObject errorResponse = new JSONObject();
+        Throwable syntethicException = new ClientProtocolException("Failure calling Jolokia in kubernetes");
+        errorResponse.put("status", responseCode);
+        try {//the payload would be a kubernetes error response
+          syntethicException=new KubernetesClientException(OperationSupport.createStatus(response));
+        } catch (Exception e) {
+        }
+        errorResponse.put("error_type", syntethicException.getClass().getName());
+        errorResponse.put("error", syntethicException.getMessage());
+        final StringWriter stacktrace = new StringWriter();
+        syntethicException.printStackTrace(new PrintWriter(
+            stacktrace));
+        errorResponse.put("stacktrace", stacktrace.getBuffer().toString());
+        responseBytes = errorResponse.toJSONString().getBytes();
+
+      } else {
+        responseBytes = response.body().bytes();
+      }
+      responseEntity.setContentLength(responseBytes.length);
+      responseEntity.setContent(new ByteArrayInputStream(responseBytes));
+      responseEntity.setContentType(response.header(HttpHeaders.CONTENT_TYPE));
+      convertedResponse.setEntity(responseEntity);
+      convertedResponse.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBytes.length));
+
     }
     return convertedResponse;
   }
 
-  protected byte[] extractBody(HttpRequest httpUriRequest,
-      Map<String, String> headers) throws IOException {
-    if(httpUriRequest instanceof HttpEntityEnclosingRequest) {
+  protected byte[] extractBody(HttpRequest httpUriRequest) throws IOException {
+    if (httpUriRequest instanceof HttpEntityEnclosingRequest) {
       HttpEntity entity = ((HttpEntityEnclosingRequest) httpUriRequest).getEntity();
       final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
       entity.writeTo(buffer);
-      headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(entity.getContentLength()));
-      headers.put(HttpHeaders.CONTENT_TYPE, String.valueOf(entity.getContentType()));
       return buffer.toByteArray();
     } else {
       return null;
     }
   }
 
-  protected List<Pair> extractQueryParameters(HttpUriRequest httpUriRequest) {
-    List<Pair> queryParams=new LinkedList<Pair>();
-    if(httpUriRequest.getURI().getQuery() != null) {
-      final StringTokenizer tok = new StringTokenizer(
-          httpUriRequest.getURI().getQuery(), "&=", false);
-      while (tok.hasMoreElements()) {
-        String key = tok.nextToken();
-        if (tok.hasMoreElements()) {
-          queryParams.add(new Pair(key, tok.nextToken()));
-        }
-      }
-    }
-    return queryParams;
-  }
 
   private ProtocolVersion convertProtocol(Protocol protocol) {
     final StringTokenizer parser = new StringTokenizer(protocol.name(), "_", false);
-    return new ProtocolVersion(parser.nextToken(), Integer.parseInt(parser.nextToken()), parser.hasMoreTokens() ? Integer.parseInt(parser.nextToken()): 0);
+    return new ProtocolVersion(parser.nextToken(), Integer.parseInt(parser.nextToken()),
+        parser.hasMoreTokens() ? Integer.parseInt(parser.nextToken()) : 0);
   }
 
   @Override
-  public HttpResponse execute(HttpUriRequest httpUriRequest, HttpContext httpContext)
-      throws IOException, ClientProtocolException {
+  public HttpResponse execute(HttpUriRequest httpUriRequest, HttpContext httpContext) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public HttpResponse execute(HttpHost httpHost, HttpRequest httpRequest)
-      throws IOException, ClientProtocolException {
+  public HttpResponse execute(HttpHost httpHost, HttpRequest httpRequest) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public HttpResponse execute(HttpHost httpHost, HttpRequest httpRequest, HttpContext httpContext)
-      throws IOException, ClientProtocolException {
+  public HttpResponse execute(HttpHost httpHost, HttpRequest httpRequest, HttpContext httpContext) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<? extends T> responseHandler)
-      throws IOException, ClientProtocolException {
+  public <T> T execute(HttpUriRequest httpUriRequest,
+      ResponseHandler<? extends T> responseHandler) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<? extends T> responseHandler,
-      HttpContext httpContext) throws IOException, ClientProtocolException {
+      HttpContext httpContext) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public <T> T execute(HttpHost httpHost, HttpRequest httpRequest,
-      ResponseHandler<? extends T> responseHandler) throws IOException, ClientProtocolException {
+      ResponseHandler<? extends T> responseHandler) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public <T> T execute(HttpHost httpHost, HttpRequest httpRequest,
-      ResponseHandler<? extends T> responseHandler, HttpContext httpContext)
-      throws IOException, ClientProtocolException {
+      ResponseHandler<? extends T> responseHandler, HttpContext httpContext) {
     throw new UnsupportedOperationException();
   }
 }
