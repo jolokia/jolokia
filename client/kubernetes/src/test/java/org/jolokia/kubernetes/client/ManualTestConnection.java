@@ -1,6 +1,7 @@
 package org.jolokia.kubernetes.client;
 
 import java.io.IOException;
+import java.util.Collections;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -16,7 +17,8 @@ public class ManualTestConnection {
         );
     jmxServiceURL.getProtocol();
 
-    final JMXConnector connector = JMXConnectorFactory.connect(jmxServiceURL);
+    final JMXConnector connector = JMXConnectorFactory.connect(jmxServiceURL,
+        Collections.singletonMap(JMXConnector.CREDENTIALS, new String[]{"user", "password"}));
     connector.getConnectionId();
     connector.connect();
     connector.getMBeanServerConnection().getMBeanCount();

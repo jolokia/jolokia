@@ -66,8 +66,8 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
   static void authenticate(Map<String, String> headers, String username, String password) {
     if (username != null) {
-      headers.put("X-Jolokia-Authorization", Base64Util
-          .encode(("Basic " + username + ":" + password).getBytes()));
+      headers.put("Authorization","Basic " + Base64Util
+          .encode(( username + ":" + password).getBytes()));
     }
   }
 

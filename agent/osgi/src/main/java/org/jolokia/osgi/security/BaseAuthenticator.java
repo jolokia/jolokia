@@ -17,10 +17,6 @@ public abstract class BaseAuthenticator implements Authenticator {
      */
     public boolean authenticate(HttpServletRequest pRequest) {
         String auth = pRequest.getHeader("Authorization");
-        //Alternate header when traffic is via another layer of authentication e.g. kubernetes proxy
-        if(auth == null) {
-            auth=pRequest.getHeader("X-Jolokia-Authorization");
-        }
         if (auth == null) {
             return false;
         }
