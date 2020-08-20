@@ -156,7 +156,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
             ret.put("jmx.remote.credentials",new String[] { user, password });
         }
         // Prevents error "java.rmi.ConnectIOException: non-JRMP server at remote endpoint"
-        if (!System.getProperty("javax.net.ssl.trustStore", "NULL").equals("NULL")) {
+        if (System.getProperties().containsKey("javax.net.ssl.trustStore")) {
             ret.put("com.sun.jndi.rmi.factory.socket", new SslRMIClientSocketFactory());
         }
         return ret;
