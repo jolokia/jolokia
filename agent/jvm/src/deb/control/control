@@ -3,7 +3,7 @@ Version: [[version]]
 Section: misc
 Priority: optional
 Architecture: all
-Depends: java-runtime
+Depends: java-runtime | java2-runtime | java-runtime-headless | java2-runtime-headless
 Maintainer: Roland Huss <roland@jolokia.org>
 Description: Jolokia is a JMX-HTTP bridge giving an alternative to JSR-160 connectors.
 Distribution: development
