@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

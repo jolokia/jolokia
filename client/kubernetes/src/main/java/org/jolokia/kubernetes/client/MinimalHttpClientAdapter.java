@@ -66,7 +66,8 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
   static void authenticate(Map<String, String> headers, String username, String password) {
     if (username != null) {
-      headers.put("Authorization","Basic " + Base64Util
+      //use custom header as Authorization will be stripped by kubernetes proxy
+      headers.put("X-jolokia-authorization","Basic " + Base64Util
           .encode(( username + ":" + password).getBytes()));
     }
   }
@@ -128,10 +129,7 @@ public class MinimalHttpClientAdapter implements HttpClient {
     final URL masterUrl = client.getMasterUrl();
     final HttpUrl.Builder builder = new HttpUrl.Builder().scheme(masterUrl.getProtocol())
         .host(masterUrl.getHost()).port(masterUrl.getPort()).query(query);
-    final StringTokenizer splitter = new StringTokenizer(resourcePath, "/");
-    while (splitter.hasMoreElements()) {
-      builder.addPathSegment(splitter.nextElement().toString());
-    }
+    builder.encodedPath(resourcePath);
     return builder.build().url();
   }
 

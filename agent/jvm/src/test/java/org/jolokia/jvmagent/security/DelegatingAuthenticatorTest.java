@@ -41,6 +41,11 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     private Server jettyServer;
     private String url;
 
+    @DataProvider
+    public static Object[][] headers() {
+        return new Object[][]{{"Authorization"}, {"X-jolokia-authorization"}};
+    }
+
     @BeforeClass
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
@@ -86,8 +91,8 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         assertEquals(((Authenticator.Failure) result).getResponseCode(), 401);
     }
 
-    @Test
-    public void withAuth() {
+    @Test(dataProvider = "headers")
+    public void withAuth(String header) {
         SSLSocketFactory sFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
         HostnameVerifier hVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
         try {
@@ -98,7 +103,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
                     null, ""
             };
             for (int i = 0; i < data.length; i += 2) {
-                HttpPrincipal principal = executeAuthCheck(data[i]);
+                HttpPrincipal principal = executeAuthCheck(data[i], header);
                 assertEquals(principal.getRealm(), "jolokia");
                 assertEquals(principal.getUsername(), data[i+1]);
             }
@@ -108,11 +113,11 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         }
     }
 
-    private HttpPrincipal executeAuthCheck(String pSpec) {
+    private HttpPrincipal executeAuthCheck(String pSpec, String header) {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, pSpec, true);
 
         Headers respHeader = new Headers();
-        HttpExchange ex = createHttpExchange(respHeader, "Authorization", "Bearer blub");
+        HttpExchange ex = createHttpExchange(respHeader, header, "Bearer blub");
 
         Authenticator.Result result = authenticator.authenticate(ex);
         assertNotNull(result);
@@ -177,10 +182,10 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         new DelegatingAuthenticator("jolokia","blub//://bla",null,false);
     }
 
-    @Test
-    public void emptySpec() {
+    @Test(dataProvider = "headers")
+    public void emptySpec(String header){
 
-        HttpPrincipal principal = executeAuthCheck("empty:");
+        HttpPrincipal principal = executeAuthCheck("empty:", header);
         assertEquals(principal.getRealm(), "jolokia");
         assertEquals(principal.getUsername(), "");
     }
