@@ -13,7 +13,7 @@ public class ManualTestConnection {
   @Test(groups = "manual")
   public void testConnect() throws IOException {
     final JMXServiceURL jmxServiceURL = new JMXServiceURL(
-        "service:jmx:kubernetes:///che/petclinic-.+-.+/actuator/jolokia/"
+        "service:jmx:kubernetes:///che/petclinic-.+-.+:8778/jolokia/"
         );
     jmxServiceURL.getProtocol();
 

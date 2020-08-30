@@ -21,7 +21,8 @@ import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
   private static Pattern POD_PATTERN = Pattern
-      .compile("/?([^/]+)/([^/]+)/(.+)");
+      .compile(
+          "/?(?<namespace>[^/]+)/(?<protocol>https?:)?(?<podPattern>[^/^:]+)(?<port>:[^/]+)?/(?<path>.+)");
   private static KubernetesClient apiClient;
 
   public KubernetesJmxConnector(JMXServiceURL serviceURL,
@@ -71,12 +72,15 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
       if (POD_PATTERN.matcher(proxyPath).matches()) {
         final Matcher matcher = POD_PATTERN.matcher(proxyPath);
         if (matcher.find()) {
-          String namespace = matcher.group(1);
-          String podPattern = matcher.group(2);
-          String path = matcher.group(3);
+          String namespace = matcher.group("namespace");
+          String podPattern = matcher.group("podPattern");
+          String path = matcher.group("path");
+          String protocol = matcher.group("protocol");
+          String port = matcher.group("port");
           final Pod exactPod = client.pods().inNamespace(namespace).withName(podPattern).get();
           //check if podname pans out directly
-          if (exactPod != null && (connection = probeProxyPath(env, client, exactPod, path,
+          if (exactPod != null
+              && (connection = probeProxyPath(env, client, buildProxyPath(exactPod, protocol, port, path),
               headersForProbe)) != null) {
             return connection;
           } else { //scan through pods in namespace if podname is a pattern
@@ -85,7 +89,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                 client.pods().inNamespace(namespace).list().getItems()) {
               if (pod.getMetadata()
                   .getName().matches(podPattern)) {
-                if ((connection = probeProxyPath(env, client, pod, path, headersForProbe)) != null) {
+                if ((connection = probeProxyPath(env, client, buildProxyPath(pod, protocol, port, path),
+                    headersForProbe)) != null) {
                   return connection;
                 }
               }
@@ -96,6 +101,27 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     } catch (KubernetesClientException ignore) {
     }
     throw new MalformedURLException("Unable to connect to proxypath " + proxyPath);
+  }
+
+  private StringBuilder buildProxyPath(Pod pod, String protocol, String port, String path) {
+    final StringBuilder url = new StringBuilder(pod.getMetadata().getSelfLink());
+    if (protocol != null && !protocol.equals("http:")) {
+      //if we need to specify protocol, inject in url
+      final int index = url.lastIndexOf(pod.getMetadata().getName());
+      if (index > -1) {
+        url.insert(index, protocol);
+      }
+    }
+    if(port!=null){
+      url.append(port);
+    }
+    url.append("/proxy");
+
+    if(!path.startsWith("/")) {
+      url.append('/');
+    }
+    url.append(path);
+    return url;
   }
 
   private static HashMap<String, String> createHeadersForProbe(
@@ -112,10 +138,10 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
    * Probe whether we find Jolokia in given namespace, pod and path
    */
   public static J4pClient probeProxyPath(Map<String, Object> env, KubernetesClient client,
-      Pod pod, String path,
+      StringBuilder url,
       HashMap<String, String> headers) {
     try {
-      final String proxyPath = pod.getMetadata().getSelfLink() + "/proxy/" + path;
+      final String proxyPath = url.toString();
       Response response = MinimalHttpClientAdapter
           .performRequest((BaseClient) client, proxyPath, "{\"type\":\"version\"}".getBytes(), null
               , headers);
