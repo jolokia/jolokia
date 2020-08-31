@@ -139,7 +139,7 @@ public class JolokiaHttpHandlerTest {
     public void testCallbackPost() throws URISyntaxException, IOException, java.text.ParseException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data",
                                                 "Content-Type","text/plain; charset=UTF-8",
-                                                "Origin",null
+                                                "Origin",""
                                                );
 
         prepareMemoryPostReadRequest(exchange);
