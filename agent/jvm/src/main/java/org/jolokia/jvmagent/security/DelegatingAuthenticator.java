@@ -13,6 +13,7 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.jolokia.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -54,7 +55,7 @@ public class DelegatingAuthenticator extends Authenticator {
                 .getFirst("Authorization");
             if(authorization == null){//In case middleware strips Authorization, allow alternate header
                 authorization = pHttpExchange.getRequestHeaders()
-                    .getFirst("X-jolokia-authorization");
+                    .getFirst(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER);
             }
             connection.addRequestProperty("Authorization",
                 authorization);

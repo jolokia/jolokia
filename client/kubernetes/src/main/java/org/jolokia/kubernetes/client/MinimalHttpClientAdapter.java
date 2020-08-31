@@ -38,6 +38,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.jolokia.util.Base64Util;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -67,7 +68,7 @@ public class MinimalHttpClientAdapter implements HttpClient {
   static void authenticate(Map<String, String> headers, String username, String password) {
     if (username != null) {
       //use custom header as Authorization will be stripped by kubernetes proxy
-      headers.put("X-jolokia-authorization","Basic " + Base64Util
+      headers.put(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER,"Basic " + Base64Util
           .encode(( username + ":" + password).getBytes()));
     }
   }

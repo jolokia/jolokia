@@ -25,6 +25,7 @@ import javax.servlet.http.*;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.test.util.EnvTestUtil;
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -43,7 +44,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
     @DataProvider
     public static Object[][] headers() {
-        return new Object[][]{{"Authorization"}, {"X-jolokia-authorization"}};
+        return new Object[][]{{"Authorization"}, {AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER}};
     }
 
     @BeforeClass

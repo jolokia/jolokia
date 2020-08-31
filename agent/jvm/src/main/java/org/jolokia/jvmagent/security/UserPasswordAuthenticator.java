@@ -1,13 +1,9 @@
 package org.jolokia.jvmagent.security;
 
-import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
-import java.util.Base64;
 import org.jolokia.util.AuthorizationHeaderParser;
-import org.jolokia.util.AuthorizationHeaderParser.Result;
-import org.jolokia.util.Base64Util;
 
 /**
  * Simple authenticator using user and password for basic authentication.
@@ -45,7 +41,7 @@ public class UserPasswordAuthenticator extends BasicAuthenticator {
     String auth = httpExchange.getRequestHeaders().getFirst("Authorization");
     if (auth == null) {//in the case where the alternate header is used
       final String alternateAuth = httpExchange.getRequestHeaders()
-          .getFirst("X-jolokia-authorization");
+          .getFirst(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER);
       if (alternateAuth != null) {
         final AuthorizationHeaderParser.Result parsed = AuthorizationHeaderParser
             .parse(alternateAuth);

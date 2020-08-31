@@ -20,7 +20,7 @@ public abstract class BaseAuthenticator implements Authenticator {
         String auth = pRequest.getHeader("Authorization");
         if(auth==null){
             //For cases where middleware may strip credentials
-            auth=pRequest.getHeader("X-jolokia-authorization");
+            auth=pRequest.getHeader(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER);
         }
         if (auth == null) {
             return false;

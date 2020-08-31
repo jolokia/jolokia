@@ -24,6 +24,8 @@ import org.jolokia.util.Base64Util;
 
 public final class AuthorizationHeaderParser {
 
+    public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER="X-jolokia-authorization";
+
     private AuthorizationHeaderParser() { }
 
     /**
