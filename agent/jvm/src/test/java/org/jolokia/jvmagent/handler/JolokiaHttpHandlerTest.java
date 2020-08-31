@@ -354,7 +354,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {
-        return prepareExchange(pUri,"Origin",null);
+        return prepareExchange(pUri,"Origin","");
     }
 
     private HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
