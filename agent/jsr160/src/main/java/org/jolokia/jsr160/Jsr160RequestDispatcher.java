@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 import org.jolokia.backend.RequestDispatcher;
 import org.jolokia.backend.executor.MBeanServerExecutor;
@@ -153,6 +154,10 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
             ret.put(Context.SECURITY_PRINCIPAL, user);
             ret.put(Context.SECURITY_CREDENTIALS, password);
             ret.put("jmx.remote.credentials",new String[] { user, password });
+        }
+        // Prevents error "java.rmi.ConnectIOException: non-JRMP server at remote endpoint"
+        if (System.getProperties().containsKey("javax.net.ssl.trustStore")) {
+            ret.put("com.sun.jndi.rmi.factory.socket", new SslRMIClientSocketFactory());
         }
         return ret;
     }
