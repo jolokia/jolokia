@@ -1,4 +1,4 @@
-package org.jolokia.osgi.security;
+package org.jolokia.util;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.jolokia.util.Base64Util;
 
 public final class AuthorizationHeaderParser {
+
+    public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER="X-jolokia-authorization";
 
     private AuthorizationHeaderParser() { }
 

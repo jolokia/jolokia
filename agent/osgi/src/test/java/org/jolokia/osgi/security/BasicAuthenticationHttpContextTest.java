@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.jolokia.config.ConfigKey;
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -60,9 +61,21 @@ public class BasicAuthenticationHttpContextTest {
     }
 
     @Test
+    public void correctAlternateAuth() throws IOException {
+        expect(request.getHeader("Authorization")).andReturn(null);
+        expect(request.getHeader(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER)).andReturn("Basic cm9sYW5kOnMhY3IhdA==");
+        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
+        request.setAttribute(HttpContext.REMOTE_USER, "roland");
+        replay(request,response);
+
+        assertTrue(context.handleSecurity(request,response));
+    }
+
+    @Test
     public void noAuth() throws IOException {
 
         expect(request.getHeader("Authorization")).andReturn(null);
+        expect(request.getHeader(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER)).andReturn(null);
         response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         replay(request, response);

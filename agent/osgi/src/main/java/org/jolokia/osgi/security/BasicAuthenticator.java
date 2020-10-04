@@ -2,6 +2,7 @@ package org.jolokia.osgi.security;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.osgi.service.http.HttpContext;
 
 /**

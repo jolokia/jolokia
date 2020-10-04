@@ -257,7 +257,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       Collections.singleton("java.lang.UnsupportedOperationException");
 
   @SuppressWarnings("rawtypes")
-  private J4pResponse unwrapException(J4pException e)
+  protected J4pResponse unwrapException(J4pException e)
       throws IOException, InstanceNotFoundException {
     if (e.getCause() instanceof IOException) {
       throw (IOException) e.getCause();
