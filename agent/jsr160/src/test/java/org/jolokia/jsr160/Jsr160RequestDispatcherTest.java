@@ -171,9 +171,9 @@ public class Jsr160RequestDispatcherTest {
                 }
             } catch (IOException exp) {
                 // That's fine if allowed to pass
-                assertTrue(exp.getCause() instanceof CommunicationException);
+                assertTrue(exp.getCause() instanceof CommunicationException || exp.getCause() instanceof NamingException);
                 if (!(Boolean) testData[i+1]) {
-                    fail("Should not come that fat " + testData[i]);
+                    fail("Should not come that far " + testData[i]);
                 }
             }
         }
