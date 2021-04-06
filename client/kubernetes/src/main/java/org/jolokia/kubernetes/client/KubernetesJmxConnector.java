@@ -2,11 +2,13 @@ package org.jolokia.kubernetes.client;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.BaseClient;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,7 +25,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   private static Pattern POD_PATTERN = Pattern
       .compile(
           "/?(?<namespace>[^/]+)/(?<protocol>https?:)?(?<podPattern>[^/^:]+)(?<port>:[^/]+)?/(?<path>.+)");
-  private static KubernetesClient apiClient;
+  private static Map<String,KubernetesClient> apiClients= Collections.synchronizedMap(new HashMap<String, KubernetesClient>());
+  public static String KUBERNETES_CLIENT_CONTEXT ="kubernetes.client.context";
 
   public KubernetesJmxConnector(JMXServiceURL serviceURL,
       Map<String, ?> environment) {
@@ -38,7 +41,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
               serviceUrl.getProtocol()));
     }
     final Map<String, Object> mergedEnvironment = this.mergedEnvironment(env);
-    KubernetesClient client = getApiClient();
+    KubernetesClient client = getApiClient((String) env.get(KUBERNETES_CLIENT_CONTEXT));
 
     this.adapter = createAdapter(expandAndProbeUrl(client, mergedEnvironment));
     this.postCreateAdapter();
@@ -48,16 +51,21 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     return new RemoteJmxAdapter(client);
   }
 
-  public static KubernetesClient getApiClient() {
-    if (apiClient != null) {
-      return apiClient;
+  /**
+   * Get a kubernetes client for the specified local context (in ~/.kube/config)
+   * @param context , specify context, null for current context
+   * @return client configured for the specified context - potentially recycled
+   * as the setup is expensive (YAML parsing is amazingly slow)
+   */
+  public static KubernetesClient getApiClient(String context) {
+    final String key = String.valueOf(context);
+    KubernetesClient client = apiClients.get(key);
+
+    if(client == null){
+      client=new DefaultKubernetesClient(Config.autoConfigure(context));
+      apiClients.put(key, client);
     }
-    return buildApiClient();
-  }
-
-  public static KubernetesClient buildApiClient() {
-
-    return apiClient = new DefaultKubernetesClient();
+    return client;
   }
 
   /**
