@@ -119,17 +119,19 @@ public class DelegatingAuthenticator extends Authenticator {
 
         @Override
         public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
-            Object payload = new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
-            Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
-            Object result = payload;
-            while (!pathElements.isEmpty()) {
-                if (result == null) {
-                    throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+            try (final InputStreamReader isr = new InputStreamReader(connection.getInputStream())) {
+                Object payload = new JSONParser().parse(isr);
+                Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
+                Object result = payload;
+                while (!pathElements.isEmpty()) {
+                    if (result == null) {
+                        throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+                    }
+                    String key = pathElements.pop();
+                    result = extractValue(result, key);
                 }
-                String key = pathElements.pop();
-                result = extractValue(result, key);
+                return new HttpPrincipal(result.toString(), realm);
             }
-            return new HttpPrincipal(result.toString(),realm);
         }
 
         private Object extractValue(Object payload, String key) {
