@@ -129,8 +129,11 @@ public class MinimalHttpClientAdapter implements HttpClient {
       String query) {
     final URL masterUrl = client.getMasterUrl();
     final HttpUrl.Builder builder = new HttpUrl.Builder().scheme(masterUrl.getProtocol())
-        .host(masterUrl.getHost()).port(masterUrl.getPort()).query(query);
+        .host(masterUrl.getHost()).query(query);
     builder.encodedPath(resourcePath);
+    if(masterUrl.getPort()!=-1) {
+    	builder.port(masterUrl.getPort());
+    }
     return builder.build().url();
   }
 
