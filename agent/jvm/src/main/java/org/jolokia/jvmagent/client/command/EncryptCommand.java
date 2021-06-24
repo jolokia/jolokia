@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 import org.jolokia.util.*;
 
 import java.io.*;
@@ -34,8 +34,8 @@ public class EncryptCommand extends AbstractBaseCommand {
     }
 
     @Override
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler)
+            throws InvocationTargetException {
         try {
             List<String> args = pOpts.getExtraArgs();
             String password = args.size() == 0 ?

@@ -88,7 +88,7 @@ public class CommandDispatcherTest {
     public void list() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         CommandDispatcher d = new CommandDispatcher(opts("list"));
 
-        VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
+        VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
         List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
         ret.add(new ProcessDescription("12","TestProcess"));
         expect(vmh.listProcesses()).andReturn(ret);
@@ -103,12 +103,12 @@ public class CommandDispatcherTest {
     public void descriptionWithPattern() throws AgentInitializationException, InvocationTargetException, IOException, NoSuchMethodException, AgentLoadException, IllegalAccessException {
         CommandDispatcher d = new CommandDispatcher(opts("start","blub"));
 
-        VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
+        VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
         VirtualMachine vm = createMock(VirtualMachine.class);
-        expect(vm.getSystemProperties()).andReturn(getProperties(false));
-        expect(vm.getSystemProperties()).andReturn(getProperties(true));
+        expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(false));
+        expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(true));
         // Agent should be loaded for successful switch
-        vm.loadAgent(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
+        vmh.loadAgent(EasyMock.eq(vm), EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
 
         expect(vmh.findProcess(patternMatcher("blub"))).andReturn(new ProcessDescription("18", "bla blub blie"));
         replay(vm, vmh);
@@ -138,15 +138,18 @@ public class CommandDispatcherTest {
         testStatus(false,1);
     }
 
-    @Test(expectedExceptions = InvocationTargetException.class)
+    @Test(expectedExceptions = ProcessingException.class)
     public void throwException() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         CommandDispatcher d = new CommandDispatcher(opts("start", "42"));
 
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
+        final VirtualMachine vm = createMock(VirtualMachine.class);
         expect(vm.getSystemProperties()).andThrow(new IOException());
-        replay(vm);
+        expect(vmh.getSystemProperties(EasyMock.eq(vm))).andThrow(new ProcessingException("", new IOException(),
+                new OptionsAndArgs(CommandDispatcher.getAvailableCommands())));
+        replay(vm, vmh);
 
-        d.dispatchCommand(vm,null);
+        d.dispatchCommand(vm,vmh);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Unknown.*")
@@ -162,15 +165,15 @@ public class CommandDispatcherTest {
         String p = pProcess.length > 0 ? pProcess[0] : "42";
         CommandDispatcher d = new CommandDispatcher(opts(pCommand,p));
 
-        VirtualMachineHandler vmh = createMock(VirtualMachineHandler.class);
+        VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
         VirtualMachine vm = createMock(VirtualMachine.class);
-        expect(vm.getSystemProperties()).andReturn(getProperties(pActive)).times(pCommand.equals("toggle") ? 2 : 1);
+        expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(pActive)).times(pCommand.equals("toggle") ? 2 : 1);
         if (!pActive && !pCommand.equals("stop")) {
-            expect(vm.getSystemProperties()).andReturn(getProperties(true));
+            expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(true));
         }
         if (pRc == 0) {
             // Agent should be loaded for successful switch
-            vm.loadAgent(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
+            vmh.loadAgent(EasyMock.eq(vm), EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
         }
         replay(vm,vmh);
 
@@ -184,10 +187,11 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("status", "18"));
 
         VirtualMachine vm = createMock(VirtualMachine.class);
-        expect(vm.getSystemProperties()).andReturn(getProperties(pActive)).anyTimes();
-        replay(vm);
+        VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
+        expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(pActive)).anyTimes();
+        replay(vm, vmh);
 
-        assertEquals(d.dispatchCommand(vm,null), pRc);
+        assertEquals(d.dispatchCommand(vm,vmh), pRc);
 
         verify(vm);
     }

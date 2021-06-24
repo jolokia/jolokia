@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.jolokia.Version;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Print out usage information
@@ -40,7 +40,7 @@ public class HelpCommand extends AbstractBaseCommand {
 
     /** {@inheritDoc} */
     @Override
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         printUsage();
         return 0;
     }

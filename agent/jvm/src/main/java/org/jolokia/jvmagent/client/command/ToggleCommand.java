@@ -19,7 +19,7 @@ package org.jolokia.jvmagent.client.command;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Toggle between "start" and "stop" depending on the existance of the system
@@ -42,8 +42,8 @@ public class ToggleCommand extends AbstractBaseCommand {
 
     /** {@inheritDoc} */
     @Override
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        return checkAgentUrl(pVm) == null ?
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        return checkAgentUrl(pVm, pHandler) == null ?
                 startCommand.execute(pOpts, pVm, pHandler) :
                 stopCommand.execute(pOpts,pVm,pHandler);
     }

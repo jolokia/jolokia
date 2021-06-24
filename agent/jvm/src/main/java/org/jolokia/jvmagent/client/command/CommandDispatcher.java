@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Dispatch for various attach commands
@@ -69,7 +69,7 @@ public class CommandDispatcher {
      * @param pHandler  handler for listing processes
      * @return the return code (0 or 1)
      */
-    public int dispatchCommand(Object pVm,VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public int dispatchCommand(Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String commandName = options.getCommand();
         AbstractBaseCommand command = COMMANDS.get(commandName);
         if (command == null) {

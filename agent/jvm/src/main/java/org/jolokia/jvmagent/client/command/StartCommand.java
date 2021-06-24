@@ -16,10 +16,8 @@ package org.jolokia.jvmagent.client.command;
  * limitations under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Load a Jolokia Agent and start it. Whether an agent is started is decided by the existence of the
@@ -30,8 +28,8 @@ import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
  */
 public class StartCommand extends AbstractBaseCommand {
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     String getName() {
         return "start";
     }
@@ -39,32 +37,31 @@ public class StartCommand extends AbstractBaseCommand {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler)
-        throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) {
         String agentUrl;
-        agentUrl = checkAgentUrl(pVm);
+        agentUrl = checkAgentUrl(pVm, pHandler);
         boolean quiet = pOpts.isQuiet();
         if (agentUrl == null) {
-            loadAgent(pVm, pOpts);
-            agentUrl = checkAgentUrl(pVm);
+            loadAgent(pVm, pHandler, pOpts);
+            agentUrl = checkAgentUrl(pVm, pHandler);
             if (agentUrl == null) {
                 // Wait a bit and try again
-                agentUrl = checkAgentUrl(pVm, 500);
+                agentUrl = checkAgentUrl(pVm, pHandler, 500);
                 if (agentUrl == null) {
-                    System.err.println("Couldn't start agent for " + getProcessDescription(pOpts, pHandler));
+                    System.err.println("Couldn't start agent for " + getProcessDescription(pHandler, pOpts));
                     System.err.println("Possible reason could be that port '" + pOpts.getPort() + "' is already occupied.");
                     System.err.println("Please check the standard output of the target process for a detailed error message.");
                     return 1;
                 }
             }
             if (!quiet) {
-                System.out.println("Started Jolokia for " + getProcessDescription(pOpts,pHandler));
+                System.out.println("Started Jolokia for " + getProcessDescription(pHandler, pOpts));
                 System.out.println(agentUrl);
             }
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("Jolokia is already attached to " + getProcessDescription(pOpts,pHandler));
+                System.out.println("Jolokia is already attached to " + getProcessDescription(pHandler, pOpts));
                 System.out.println(agentUrl);
             }
             return 1;
