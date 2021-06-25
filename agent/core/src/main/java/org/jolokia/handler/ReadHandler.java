@@ -200,7 +200,11 @@ public class ReadHandler extends JsonRequestHandler<JmxReadRequest> {
             } catch (IOException e) {
                 ret.put(attribute, pFaultHandler.handleException(e));
             } catch (RuntimeException e) {
-                ret.put(attribute, pFaultHandler.handleException(e));
+                if (e.getCause() instanceof UnsupportedOperationException) {
+                    ret.put(attribute, "Unsupported");
+                } else {
+                    ret.put(attribute, pFaultHandler.handleException(e));
+                }
             } catch (AttributeNotFoundException e) {
                 ret.put(attribute, pFaultHandler.handleException(e));
             }
