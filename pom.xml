@@ -768,25 +768,14 @@
               <artifactId>maven-surefire-plugin</artifactId>
               <configuration>
                 <argLine>
-                  --illegal-access=debug
-<!--                  &#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens java.management/javax.management.modelmbean=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens jdk.attach/sun.tools.attach=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens java.base/sun.security.tools.keytool=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens java.base/sun.security.x509=ALL-UNNAMED-->
-                </argLine>
-              </configuration>
-            </plugin>
-            <plugin>
-              <artifactId>maven-failsafe-plugin</artifactId>
-              <configuration>
-                <argLine>
-                  --illegal-access=debug
-<!--                  &#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens java.management/javax.management.modelmbean=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens jdk.attach/sun.tools.attach=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens java.base/sun.security.tools.keytool=ALL-UNNAMED-->
-<!--                  &#45;&#45;add-opens java.base/sun.security.x509=ALL-UNNAMED-->
+                  <!--
+                    deny all reflective access except:
+                     - java.base/java.lang for Easymock (see https://github.com/easymock/easymock/issues/235)
+                     - java.management/javax.management.modelmbean for org.jolokia.jmx.JolokiaMBeanServerTest
+                  -->
+                  --illegal-access=deny
+                  --add-opens java.base/java.lang=ALL-UNNAMED
+                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
                 </argLine>
               </configuration>
             </plugin>
